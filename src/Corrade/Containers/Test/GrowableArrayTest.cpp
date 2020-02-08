@@ -877,7 +877,7 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
 
     {
         Array<T> a;
-        arrayAppend(a, T{37});
+        T& appended = arrayAppend(a, T{37});
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 1);
         if(sizeof(std::size_t) == 8)
@@ -890,6 +890,7 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
             #endif
         }
         CORRADE_COMPARE(int(a[0]), 37);
+        CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
@@ -914,7 +915,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
             CORRADE_COMPARE(Movable::destructed, 0);
         }
 
-        arrayAppend(a, T{37});
+        T& appended = arrayAppend(a, T{37});
         CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
@@ -929,6 +930,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         }
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
@@ -953,19 +955,20 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         a[0] = 28;
-        arrayAppend(a, T{37});
+        T& appended0 = arrayAppend(a, T{37});
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
             CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
+        CORRADE_COMPARE(&appended0, &a.back());
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
         else
             CORRADE_COMPARE(arrayCapacity(a), 3);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        arrayAppend(a, T{26});
+        T& appended1 = arrayAppend(a, T{26});
         CORRADE_COMPARE(a.size(), 3);
         /* More thoroughly tested in appendFromGrowableGrowRatio() below */
         if(sizeof(std::size_t) == 8)
@@ -976,6 +979,7 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
         CORRADE_COMPARE(int(a[2]), 26);
+        CORRADE_COMPARE(&appended1, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
@@ -1008,13 +1012,14 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
         arrayResize(a, 1);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
         a[0] = 28;
-        arrayAppend(a, T{37});
+        T& appended = arrayAppend(a, T{37});
         CORRADE_VERIFY(a == prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 2);
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
@@ -1029,7 +1034,7 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
 
 void GrowableArrayTest::appendCopy() {
     Array<int> a;
-    arrayAppend(a, 2786541);
+    int& appended = arrayAppend(a, 2786541);
     CORRADE_COMPARE(a.size(), 1);
     if(sizeof(std::size_t) == 8)
         CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1041,13 +1046,14 @@ void GrowableArrayTest::appendCopy() {
         #endif
     }
     CORRADE_COMPARE(a[0], 2786541);
+    CORRADE_COMPARE(&appended, &a.back());
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
 void GrowableArrayTest::appendMove() {
     {
         Array<Movable> a;
-        arrayAppend(a, Movable{25141});
+        Movable& appended = arrayAppend(a, Movable{25141});
         CORRADE_COMPARE(a.size(), 1);
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1059,6 +1065,7 @@ void GrowableArrayTest::appendMove() {
             #endif
         }
         CORRADE_COMPARE(a[0].a, 25141);
+        CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
     }
 
@@ -1069,13 +1076,15 @@ void GrowableArrayTest::appendMove() {
 
 void GrowableArrayTest::appendList() {
     Array<int> a;
-    arrayAppend(a, {17, -22, 65, 2786541});
+    Containers::ArrayView<int> appended = arrayAppend(a, {17, -22, 65, 2786541});
     CORRADE_COMPARE(a.size(), 4);
     CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
     CORRADE_COMPARE(a[0], 17);
     CORRADE_COMPARE(a[1], -22);
     CORRADE_COMPARE(a[2], 65);
     CORRADE_COMPARE(a[3], 2786541);
+    CORRADE_COMPARE(appended.data(), a.data());
+    CORRADE_COMPARE(appended.size(), 4);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 

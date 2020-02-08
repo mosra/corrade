@@ -611,6 +611,7 @@ template<template<class> class Allocator, class T, class... Args> inline void ar
 
 /**
 @brief Copy-append an item to an array
+@return Reference to the newly appended item
 @m_since_latest
 
 If the array is not growable or the capacity is not large enough, the array capacity is grown first. Then, @p value is copy-constructed at the end of the
@@ -620,7 +621,7 @@ Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential.
 @see @ref arrayCapacity(), @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>& array, const T& value);
+template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const T& value);
 
 /**
 @overload
@@ -629,24 +630,25 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, const T& value) {
-    arrayAppend<T, Allocator<T>>(array, value);
+template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, const T& value) {
+    return arrayAppend<T, Allocator<T>>(array, value);
 }
 
 /**
 @brief In-place append an item to an array
+@return Reference to the newly appended item
 @m_since_latest
 
 Similar to @ref arrayAppend(Array<T>&, const T&) except that the new element
 is constructed using placement-new with provided @p args.
 */
-template<class T, class... Args> void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
+template<class T, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
 
 /**
 @overload
 @m_since_latest
 */
-template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
+template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
 
 /**
 @overload
@@ -655,18 +657,19 @@ template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& arr
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T, class... Args> inline void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
-    arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
+template<template<class> class Allocator, class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
+    return arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
 
 /**
 @brief Move-append an item to an array
+@return Reference to the newly appended item
 @m_since_latest
 
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 */
-template<class T, class Allocator = ArrayAllocator<T>> inline void arrayAppend(Array<T>& array, T&& value) {
-    arrayAppend<T, Allocator>(array, InPlaceInit, std::move(value));
+template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, T&& value) {
+    return arrayAppend<T, Allocator>(array, InPlaceInit, std::move(value));
 }
 
 /**
@@ -676,19 +679,20 @@ template<class T, class Allocator = ArrayAllocator<T>> inline void arrayAppend(A
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, T&& value) {
-    arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::move(value));
+template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, T&& value) {
+    return arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::move(value));
 }
 
 /**
 @brief Append a list of items to an array
+@return View on the newly appended items
 @m_since_latest
 
 Like @ref arrayAppend(Array<T>&, const T&), but inserting multiple values at
 once.
 @see @ref arrayResize(Array<T>&, NoInitT, std::size_t)
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>& array, Containers::ArrayView<const T> values);
+template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values);
 
 /**
 @overload
@@ -697,15 +701,15 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, Containers::ArrayView<const T> values) {
-    arrayAppend<T, Allocator<T>>(array, values);
+template<template<class> class Allocator, class T> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values) {
+    return arrayAppend<T, Allocator<T>>(array, values);
 }
 
 /**
 @overload
 @m_since_latest
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>& array, std::initializer_list<T> values);
+template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
 
 /**
 @overload
@@ -714,8 +718,8 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, std::initializer_list<T> values) {
-    arrayAppend<T, Allocator<T>>(array, values);
+template<template<class> class Allocator, class T> inline Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+    return arrayAppend<T, Allocator<T>>(array, values);
 }
 
 /**
@@ -1098,15 +1102,15 @@ template<class T, class Allocator> void arrayGrow(Array<T>& array, const std::si
 
 }
 
-template<class T, class Allocator> inline void arrayAppend(Array<T>& array, const T& value) {
-    arrayAppend<T, Allocator>(array, InPlaceInit, value);
+template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const T& value) {
+    return arrayAppend<T, Allocator>(array, InPlaceInit, value);
 }
 
-template<class T, class Allocator> inline void arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
-    arrayAppend(array, {values.begin(), values.size()});
+template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
+    return arrayAppend(array, {values.begin(), values.size()});
 }
 
-template<class T, class Allocator> inline void arrayAppend(Array<T>& array, const Containers::ArrayView<const T> values) {
+template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const Containers::ArrayView<const T> values) {
     /* Direct access & caching to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
     const std::size_t valueCount = values.size();
@@ -1127,9 +1131,10 @@ template<class T, class Allocator> inline void arrayAppend(Array<T>& array, cons
     #endif
     arrayGuts.size += valueCount;
     Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
+    return {it, valueCount};
 }
 
-template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
+template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
 
@@ -1150,9 +1155,10 @@ template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& arr
     ++arrayGuts.size;
     /* No helper function as there's no way we could memcpy such a thing. */
     new(it) T{std::forward<Args>(args)...};
+    return *it;
 }
 
-template<class T, class... Args> inline void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
+template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
     return arrayAppend<T, ArrayAllocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
 
