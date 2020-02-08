@@ -27,10 +27,12 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
-#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
@@ -107,6 +109,13 @@ struct DirectoryTest: TestSuite::Tester {
     void listSort();
     void listSortPrecedence();
     void listUtf8();
+
+    void fileSize();
+    void fileSizeEmpty();
+    void fileSizeNonSeekable();
+    void fileSizeEarlyEof();
+    void fileSizeNonexistent();
+    void fileSizeUtf8();
 
     void read();
     void readEmpty();
@@ -220,6 +229,13 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::listSort,
               &DirectoryTest::listSortPrecedence,
               &DirectoryTest::listUtf8,
+
+              &DirectoryTest::fileSize,
+              &DirectoryTest::fileSizeEmpty,
+              &DirectoryTest::fileSizeNonSeekable,
+              &DirectoryTest::fileSizeEarlyEof,
+              &DirectoryTest::fileSizeNonexistent,
+              &DirectoryTest::fileSizeUtf8,
 
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
@@ -985,6 +1001,59 @@ void DirectoryTest::listUtf8() {
 }
 
 constexpr const char Data[]{'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
+
+void DirectoryTest::fileSize() {
+    /* Existing file, containing  */
+    CORRADE_COMPARE(Directory::fileSize(Directory::join(_testDir, "file")),
+        Containers::arraySize(Data));
+}
+
+void DirectoryTest::fileSizeEmpty() {
+    const std::string empty = Directory::join(_testDir, "dir/dummy");
+    CORRADE_VERIFY(Directory::exists(empty));
+    CORRADE_VERIFY(!Directory::read(empty));
+}
+
+void DirectoryTest::fileSizeNonSeekable() {
+    /* macOS or BSD doesn't have /proc */
+    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
+        !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
+        !defined(__NetBSD__) && !defined(__DragonFly__)
+    /** @todo Test more thoroughly than this */
+    const auto data = Directory::read("/proc/loadavg");
+    CORRADE_VERIFY(!data.empty());
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::fileSizeEarlyEof() {
+    #ifdef __linux__
+    constexpr const char* file = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
+    if(!Directory::exists(file))
+        CORRADE_SKIP(file + std::string{"doesn't exist, can't test"});
+    Containers::Optional<std::size_t> size = Directory::fileSize(file);
+    CORRADE_VERIFY(size);
+    CORRADE_COMPARE_AS(*size, Directory::read(file).size(),
+        TestSuite::Compare::Greater);
+    #else
+    CORRADE_SKIP("Not sure how to test on this platform.");
+    #endif
+}
+
+void DirectoryTest::fileSizeNonexistent() {
+    std::ostringstream out;
+    Error err{&out};
+    CORRADE_COMPARE(Directory::fileSize("nonexistent"), Containers::NullOpt);
+    CORRADE_COMPARE(out.str(), "Utility::Directory::fileSize(): can't open nonexistent\n");
+}
+
+void DirectoryTest::fileSizeUtf8() {
+    /* Existing file, check if we are reading it as binary (CR+LF is not
+       converted to LF) and nothing after \0 gets lost */
+    CORRADE_COMPARE(Directory::fileSize(Directory::join(_testDirUtf8, "hýždě")),
+        Containers::arraySize(Data));
+}
 
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not

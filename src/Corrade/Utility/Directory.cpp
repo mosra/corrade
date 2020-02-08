@@ -86,6 +86,7 @@
 #include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ScopeGuard.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
@@ -273,6 +274,73 @@ bool exists(const std::string& filename) {
     Warning() << "Utility::Directory::exists(): not implemented on this platform";
     return false;
     #endif
+}
+
+namespace {
+
+/* Used by fileSize() and read(). Returns NullOpt if the file is not seekable
+   (as file existence is already checked when opening the FILE*). */
+Containers::Optional<std::size_t> fileSize(std::FILE* const f) {
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
+    /* If the file is not seekable, return NullOpt. On POSIX this is usually
+       -1 when the file is non-seekable: https://stackoverflow.com/q/3238788
+       It's undefined behavior on MSVC, tho (but possibly not on MinGW?):
+       https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/lseek-lseeki64 */
+    /** @todo find a reliable way on Windows */
+    if(
+        #ifndef CORRADE_TARGET_WINDOWS
+        lseek(fileno(f), 0, SEEK_END) == -1
+        #else
+        _lseek(_fileno(f), 0, SEEK_END) == -1
+        #endif
+    ) return {};
+    #else
+    /** @todo implementation for non-seekable platforms elsewhere? */
+    #endif
+
+    std::fseek(f, 0, SEEK_END);
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    const std::size_t size =
+        /* 32-bit Android ignores _LARGEFILE_SOURCE and instead makes ftello()
+           available always after API level 24 and never before that
+           https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md */
+        #if defined(CORRADE_TARGET_ANDROID) && __SIZEOF_POINTER__ == 4 && __ANDROID_API__ < 24
+        ftell(f)
+        #else
+        ftello(f)
+        #endif
+        ;
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    const std::size_t size = _ftelli64(f);
+    #else
+    const std::size_t size = std::ftell(f);
+    #endif
+
+    /* Put the file handle back to its original state */
+    std::rewind(f);
+
+    return size;
+}
+
+}
+
+Containers::Optional<std::size_t> fileSize(const std::string& filename) {
+    /* Special case for "Unicode" Windows support */
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::FILE* const f = std::fopen(filename.data(), "rb");
+    #else
+    std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
+    #endif
+    if(!f) {
+        Error{} << "Utility::Directory::fileSize(): can't open" << filename;
+        return {};
+    }
+
+    Containers::ScopeGuard exit{f, std::fclose};
+    Containers::Optional<std::size_t> size = fileSize(f);
+    if(!size)
+        Error{} << "Utility::Directory::fileSize():" << filename << "is not seekable";
+    return size;
 }
 
 bool isDirectory(const std::string& path) {
@@ -597,20 +665,10 @@ Containers::Array<char> read(const std::string& filename) {
     }
 
     Containers::ScopeGuard exit{f, std::fclose};
+    Containers::Optional<std::size_t> size = fileSize(f);
 
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
-    /* If the file is not seekable, read it in chunks. On POSIX this is usually
-       -1 when the file is non-seekable: https://stackoverflow.com/q/3238788
-       It's undefined behavior on MSVC, tho (but possibly not on MinGW?):
-       https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/lseek-lseeki64 */
-    /** @todo find a reliable way on Windows */
-    if(
-        #ifndef CORRADE_TARGET_WINDOWS
-        lseek(fileno(f), 0, SEEK_END) == -1
-        #else
-        _lseek(_fileno(f), 0, SEEK_END) == -1
-        #endif
-    ) {
+    /* If the file is not seekable, read it in chunks */
+    if(!size) {
         std::string data;
         char buffer[4096];
         std::size_t count;
@@ -623,34 +681,12 @@ Containers::Array<char> read(const std::string& filename) {
         std::copy(data.begin(), data.end(), out.begin());
         return out;
     }
-    #else
-    /** @todo implementation for non-seekable platforms elsewhere? */
-    #endif
-
-    std::fseek(f, 0, SEEK_END);
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const std::size_t size =
-        /* 32-bit Android ignores _LARGEFILE_SOURCE and instead makes ftello()
-           available always after API level 24 and never before that
-           https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md */
-        #if defined(CORRADE_TARGET_ANDROID) && __SIZEOF_POINTER__ == 4 && __ANDROID_API__ < 24
-        ftell(f)
-        #else
-        ftello(f)
-        #endif
-        ;
-    #elif defined(CORRADE_TARGET_WINDOWS)
-    const std::size_t size = _ftelli64(f);
-    #else
-    const std::size_t size = std::ftell(f);
-    #endif
-    std::rewind(f);
 
     /* Some special files report more bytes than they actually have (such as
        stuff in /sys). Clamp the returned array to what was reported. */
-    Containers::Array<char> out{size};
-    const std::size_t realSize = std::fread(out, 1, size, f);
-    CORRADE_INTERNAL_ASSERT(realSize <= size);
+    Containers::Array<char> out{*size};
+    const std::size_t realSize = std::fread(out, 1, *size, f);
+    CORRADE_INTERNAL_ASSERT(realSize <= *size);
     return Containers::Array<char>{out.release(), realSize};
 }
 

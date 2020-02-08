@@ -404,13 +404,28 @@ inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::str
 #endif
 
 /**
+@brief File size
+@m_since_latest
+
+If the file doesn't exist or is not seekable, prints a message to @ref Error
+and returns @ref Containers::NullOpt. Note that some special files on Unix
+platforms may either be non-seekable or report more bytes than they actually
+have, in which case using @ref read() is a more reliable way to get the size
+along with the contents.
+
+Expects that the filename is in UTF-8.
+*/
+CORRADE_UTILITY_EXPORT Containers::Optional<std::size_t> fileSize(const std::string& filename);
+
+/**
 @brief Read file into an array
 
-Reads the whole file as binary (i.e. without newline conversion). Returns
-@cpp nullptr @ce and prints a message to @ref Error if the file can't be read.
-Expects that the filename is in UTF-8.
+Reads the whole file in a binary mode (i.e. without newline conversion).
+Returns @cpp nullptr @ce and prints a message to @ref Error if the file can't
+be read. Supports non-seekable and other weird files as well. Expects that the
+filename is in UTF-8.
 @see @ref readString(), @ref exists(), @ref write(), @ref append(),
-    @ref copy(), @ref mapRead()
+    @ref copy(), @ref mapRead(), @ref fileSize()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
