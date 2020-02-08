@@ -423,6 +423,10 @@ will reallocate the array using provided allocator if needed.
 */
 template<class T, class Allocator = ArrayAllocator<T>> bool arrayIsGrowable(Array<T>& array);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -433,6 +437,7 @@ array type being inferred.
 template<template<class T> class Allocator, class T> inline bool arrayIsGrowable(Array<T>& array) {
     return arrayIsGrowable<T, Allocator<T>>(array);
 }
+#endif
 
 /**
 @brief Array capacity
@@ -444,6 +449,10 @@ For a growable array returns its capacity, for a non-growable array returns
 */
 template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayCapacity(Array<T>& array);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -454,6 +463,7 @@ array type being inferred.
 template<template<class T> class Allocator, class T> inline std::size_t arrayCapacity(Array<T>& array) {
     return arrayCapacity<T, Allocator<T>>(array);
 }
+#endif
 
 /**
 @brief Reserve given capacity in an array
@@ -474,6 +484,10 @@ if the reallocation can be done in-place.
 */
 template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayReserve(Array<T>& array, std::size_t capacity);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -484,6 +498,7 @@ array type being inferred.
 template<template<class T> class Allocator, class T> inline std::size_t arrayReserve(Array<T>& array, std::size_t capacity) {
     return arrayReserve<T, Allocator<T>>(array, capacity);
 }
+#endif
 
 /**
 @brief Resize an array to given size, default-initializing new elements
@@ -505,6 +520,10 @@ size.
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, DefaultInitT, std::size_t size);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -515,6 +534,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, DefaultInitT, std::size_t size) {
     arrayResize<T, Allocator<T>>(array, DefaultInit, size);
 }
+#endif
 
 /**
 @brief Resize an array to given size, value-initializing new elements
@@ -528,6 +548,10 @@ otherwise).
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, ValueInitT, std::size_t size);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -538,6 +562,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, ValueInitT, std::size_t size) {
     arrayResize<T, Allocator<T>>(array, ValueInit, size);
 }
+#endif
 
 /**
 @brief Resize an array to given size, value-initializing new elements
@@ -549,6 +574,10 @@ template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(A
     return arrayResize<T, Allocator>(array, ValueInit, size);
 }
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -559,6 +588,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, std::size_t size) {
     arrayResize<T, Allocator<T>>(array, size);
 }
+#endif
 
 /**
 @brief Resize an array to given size, keeping new elements uninitialized
@@ -571,6 +601,10 @@ uninitialized state instead.
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, NoInitT, std::size_t size);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -581,6 +615,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, NoInitT, std::size_t size) {
     arrayResize<T, Allocator<T>>(array, NoInit, size);
 }
+#endif
 
 /**
 @brief Resize an array to given size, constructing new elements using provided arguments
@@ -598,6 +633,10 @@ template<class T, class... Args> void arrayResize(Array<T>& array, DirectInitT, 
 */
 template<class T, class Allocator, class... Args> void arrayResize(Array<T>& array, DirectInitT, std::size_t size, Args&&... args);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -608,6 +647,7 @@ array type being inferred.
 template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, DirectInitT, std::size_t size, Args&&... args) {
     arrayResize<T, Allocator<T>>(array, DirectInit, size, std::forward<Args>(args)...);
 }
+#endif
 
 /**
 @brief Copy-append an item to an array
@@ -623,6 +663,10 @@ ratio is exponential.
 */
 template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const T& value);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -633,6 +677,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, const T& value) {
     return arrayAppend<T, Allocator<T>>(array, value);
 }
+#endif
 
 /**
 @brief In-place append an item to an array
@@ -644,6 +689,10 @@ is constructed using placement-new with provided @p args.
 */
 template<class T, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
 
+/* This crap tool can't distinguish between these and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -660,6 +709,7 @@ array type being inferred.
 template<template<class> class Allocator, class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
     return arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
+#endif
 
 /**
 @brief Move-append an item to an array
@@ -672,6 +722,10 @@ template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Arr
     return arrayAppend<T, Allocator>(array, InPlaceInit, std::move(value));
 }
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -682,6 +736,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, T&& value) {
     return arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::move(value));
 }
+#endif
 
 /**
 @brief Append a list of items to an array
@@ -694,6 +749,10 @@ once.
 */
 template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -704,6 +763,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
 }
+#endif
 
 /**
 @overload
@@ -711,6 +771,11 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 */
 template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
 
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -721,6 +786,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
 }
+#endif
 
 /**
 @brief Remove a suffix from the array
@@ -734,6 +800,10 @@ growable version. Otherwise, a destructor is called on removed elements and the
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -744,6 +814,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1) {
     arrayRemoveSuffix<T, Allocator<T>>(array, count);
 }
+#endif
 
 /**
 @brief Convert an array back to non-growable
@@ -760,6 +831,10 @@ Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
 @m_since_latest
@@ -770,6 +845,7 @@ array type being inferred.
 template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array) {
     arrayShrink<T, Allocator<T>>(array);
 }
+#endif
 
 /*@}*/
 
@@ -1158,9 +1234,14 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
     return *it;
 }
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
     return arrayAppend<T, ArrayAllocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
+#endif
 
 template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const std::size_t count) {
     /* Direct access to speed up debug builds */
