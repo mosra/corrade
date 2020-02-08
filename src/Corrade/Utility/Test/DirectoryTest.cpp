@@ -1289,11 +1289,11 @@ void DirectoryTest::prepareFileToBenchmarkCopy() {
     if(Directory::exists(Directory::join(_writeTestDir, "copyBenchmarkSource.dat")))
         return;
 
-    /* Append a megabyte file 100 times to create a 100MB file */
+    /* Append a megabyte file 50 times to create a 50MB file */
     Containers::Array<int> data{Containers::ValueInit, 256*1024};
     for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
 
-    for(std::size_t i = 0; i != 100; ++i)
+    for(std::size_t i = 0; i != 50; ++i)
         Directory::append(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"), data);
 }
 
