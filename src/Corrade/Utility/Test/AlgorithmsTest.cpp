@@ -43,6 +43,7 @@ struct AlgorithmsTest: TestSuite::Tester {
     template<class T> void copyStrided2D();
     template<class T> void copyStrided3D();
     template<class T> void copyStrided4D();
+    void copyZeroSizeStrided();
 
     void copyNonMatchingSizes();
     void copyDifferentViewTypes();
@@ -191,7 +192,8 @@ AlgorithmsTest::AlgorithmsTest() {
         &AlgorithmsTest::copyStrided4D<Data<32>>,
         }, Containers::arraySize(Copy4DData));
 
-    addTests({&AlgorithmsTest::copyNonMatchingSizes,
+    addTests({&AlgorithmsTest::copyZeroSizeStrided,
+              &AlgorithmsTest::copyNonMatchingSizes,
               &AlgorithmsTest::copyDifferentViewTypes});
 
     addBenchmarks({&AlgorithmsTest::copyBenchmarkFlatStdCopy,
@@ -377,6 +379,16 @@ template<class T> void AlgorithmsTest::copyStrided4D() {
         for(std::size_t j = 0; j != src.size()[1]; ++j)
             for(std::size_t k = 0; k != src.size()[2]; ++k)
                 CORRADE_COMPARE_AS(dst[i][j][k], src[i][j][k], TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyZeroSizeStrided() {
+    Containers::StridedArrayView1D<char> src{nullptr, 0, 16};
+    Containers::StridedArrayView1D<char> dst{nullptr, 0, 16};
+
+    /* Shouldn't crash -- the Duff's device expects a non-zero size, so there
+       needs to be an extra check */
+    Utility::copy(src, dst);
+    CORRADE_VERIFY(true);
 }
 
 void AlgorithmsTest::copyNonMatchingSizes() {

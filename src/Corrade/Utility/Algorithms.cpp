@@ -122,6 +122,14 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
     auto* const srcPtr = static_cast<const char*>(src.data());
     auto* const dstPtr = static_cast<char*>(dst.data());
 
+    /* If the size is zero in any direction, there's nothing to do, so no need
+       to go through all the loops below. Additionally Duff's device doesn't
+       expect a zero size, so this prevents it from accessing bad memory.
+       Ideally this check would be directly in the 1D/2D/3D "delegators" above
+       as well, but I don't think it'd be a perf issue so checking just here,
+       at the bottom of it all. */
+    for(std::size_t i = 0; i != 4; ++i) if(!size[i]) return;
+
     if(src.isContiguous() && dst.isContiguous())
         std::memcpy(dstPtr, srcPtr, size[0]*size[1]*size[2]*size[3]);
     else {
