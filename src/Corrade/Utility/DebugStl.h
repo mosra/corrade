@@ -103,9 +103,46 @@ template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...
 
 namespace Implementation {
 
+/* In order to ensure the most fitting operator<< overload gets called, we
+   can't simply check for *some* operator<< overload. As an example, for Array
+   there's both operator<<(ostream&, void*) and operator<<(Debug&, Iterable)
+   that can print it, but only the second one is desirable as the first prints
+   just a pointer. Directly checking for presence of either via
+
+    decltype(DeclareLvalueReference<std::ostream> << std::declval<T>()) and
+    decltype(DeclareLvalueReference<Debug> << std::declval<T>())
+
+   would yield "yes" in both cases, not telling us which one is better. Instead
+   we supply an object that's implicitly convertible to both as the first
+   argument, giving the overload resolution magic a chance to pick the better
+   fitting one. */
+struct OstreamOrDebug {
+    /*implicit*/ operator std::ostream&();
+    /*implicit*/ operator Debug&();
+};
+
+CORRADE_HAS_TYPE(
+    HasBestFittingOstreamOperator,
+    typename std::enable_if<std::is_same<
+        decltype(std::declval<OstreamOrDebug>() << std::declval<T>()),
+        std::add_lvalue_reference<std::ostream>::type
+    >::value>::type
+);
+
+CORRADE_HAS_TYPE(
+    HasBestFittingDebugOperator,
+    typename std::enable_if<std::is_same<
+        decltype(std::declval<OstreamOrDebug>() << std::declval<T>()),
+        std::add_lvalue_reference<Debug>::type
+    >::value>::type
+);
+
 /* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
 struct DebugOstreamFallback {
-    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
+    template<
+        class T,
+        typename = typename std::enable_if<HasBestFittingOstreamOperator<T>::value>::type
+    > /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
 
     void apply(std::ostream& s) const {
         (this->*applier)(s);
@@ -127,6 +164,26 @@ struct DebugOstreamFallback {
    implemented */
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Implementation::DebugOstreamFallback&& value);
 #endif
+
+namespace OstreamDebug {
+
+/**
+@brief Print a builtin type to an ostream
+
+Allows calls like @cpp std::cout << Magnum::Vector2{0.2, 3.14}; @ce to be
+delegated to a @ref Debug object. Creates a @ref Debug object on every call.
+*/
+template<typename T>
+typename std::enable_if<
+    Implementation::HasBestFittingDebugOperator<T>::value,
+    std::ostream
+>::type &operator<<(std::ostream &os, const T &val) {
+  Corrade::Utility::Debug debug{&os, Corrade::Utility::Debug::Flag::NoNewlineAtTheEnd};
+  debug << val;
+  return os;
+}
+
+}
 
 }}
 
