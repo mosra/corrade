@@ -39,7 +39,7 @@ namespace Implementation {
     template<class T> inline void swapInPlace(const Containers::StridedArrayView1D<T>& values) {
         /** @todo maybe we could speed this up via some SIMD? also, what about
             alignment? */
-        for(T& value: values) value = Implementation::swap(value);
+        for(T& value: values) Implementation::swapInPlace(value);
     }
 }
 
