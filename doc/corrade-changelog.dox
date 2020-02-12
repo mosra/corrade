@@ -70,6 +70,8 @@ namespace Corrade {
 -   Added @ref Containers::StridedArrayView::isContiguous() and
     @ref Containers::StridedArrayView::asContiguous() "asContiguous()" for
     checking and conversion to a tightly packed view
+-   New @ref Containers::enumCastUnderlyingType() utility functions for
+    casting an @cpp enum @ce or @ref Containers::EnumSet to its underlying type
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

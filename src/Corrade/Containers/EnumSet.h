@@ -64,7 +64,7 @@ definitions. This macro works with templated classes as well.
 
 @snippet Containers.cpp EnumSet-friend
 
-@see @ref enumSetDebugOutput()
+@see @ref enumCastUnderlyingType(), @ref enumSetDebugOutput()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)>
@@ -178,6 +178,26 @@ class EnumSet {
 
         UnderlyingType value;
 };
+
+/** @relatesalso EnumSet
+@brief Cast an enum to its underlying type
+@m_since_latest
+
+@see @ref std::underlying_type
+*/
+template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(T value) {
+    return typename std::underlying_type<T>::type(value);
+}
+
+/** @relatesalso EnumSet
+@brief Cast an enum set to its underlying type
+@m_since_latest
+
+@see @ref std::underlying_type
+*/
+template<class T, typename std::underlying_type<T>::type fullValue> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(EnumSet<T, fullValue> value) {
+    return typename std::underlying_type<T>::type(value);
+}
 
 /** @hideinitializer
 @brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet"

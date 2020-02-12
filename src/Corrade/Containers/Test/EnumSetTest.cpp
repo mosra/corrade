@@ -44,6 +44,8 @@ struct EnumSetTest: TestSuite::Tester {
     void operatorInverse();
     void compare();
 
+    void underlyingType();
+
     void templateFriendOperators();
 
     void debug();
@@ -93,6 +95,8 @@ EnumSetTest::EnumSetTest() {
               &EnumSetTest::compare,
 
               &EnumSetTest::templateFriendOperators,
+
+              &EnumSetTest::underlyingType,
 
               &EnumSetTest::debug});
 }
@@ -260,6 +264,16 @@ template<class T> struct Foo {
 void EnumSetTest::templateFriendOperators() {
     Foo<int>::Flags a = Foo<int>::Flag::A & ~Foo<int>::Flag::B;
     CORRADE_COMPARE(int(a), 1);
+}
+
+void EnumSetTest::underlyingType() {
+    CORRADE_COMPARE(enumCastUnderlyingType(Feature::Cheap), 2);
+    CORRADE_COMPARE(enumCastUnderlyingType(Feature::Cheap|Feature::Fast), 3);
+
+    constexpr int cFeatureValue = enumCastUnderlyingType(Feature::Cheap);
+    constexpr int cFeaturesValue = enumCastUnderlyingType(Feature::Cheap|Feature::Fast);
+    CORRADE_COMPARE(cFeatureValue, 2);
+    CORRADE_COMPARE(cFeaturesValue, 3);
 }
 
 void EnumSetTest::debug() {
