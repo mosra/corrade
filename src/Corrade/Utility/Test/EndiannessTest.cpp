@@ -40,6 +40,7 @@ struct EndiannessTest: TestSuite::Tester {
     void inPlace();
     void inPlaceUnaligned();
     void inPlaceList();
+    void inPlaceListUnaligned();
     void enumClass();
 };
 
@@ -49,6 +50,7 @@ EndiannessTest::EndiannessTest() {
               &EndiannessTest::inPlace,
               &EndiannessTest::inPlaceUnaligned,
               &EndiannessTest::inPlaceList,
+              &EndiannessTest::inPlaceListUnaligned,
               &EndiannessTest::enumClass});
 }
 
@@ -223,6 +225,22 @@ void EndiannessTest::inPlaceList() {
 
     #undef currentInPlace
     #undef otherInPlace
+}
+
+void EndiannessTest::inPlaceListUnaligned() {
+    CORRADE_ALIGNAS(4) char data[] = {
+        '\x11', '\x22', '\x33', '\x44', '\x55', '\x66', '\x77', '\x88', '\x99'
+    };
+
+    Endianness::swapInPlace(Containers::arrayCast<int>(Containers::arrayView(data).suffix(1)));
+    CORRADE_COMPARE(data[1], '\x55');
+    CORRADE_COMPARE(data[2], '\x44');
+    CORRADE_COMPARE(data[3], '\x33');
+    CORRADE_COMPARE(data[4], '\x22');
+    CORRADE_COMPARE(data[5], '\x99');
+    CORRADE_COMPARE(data[6], '\x88');
+    CORRADE_COMPARE(data[7], '\x77');
+    CORRADE_COMPARE(data[8], '\x66');
 }
 
 void EndiannessTest::enumClass() {
