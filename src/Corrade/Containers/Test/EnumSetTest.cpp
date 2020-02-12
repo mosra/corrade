@@ -99,10 +99,14 @@ EnumSetTest::EnumSetTest() {
 
 void EnumSetTest::construct() {
     Features noFeatures;
+    constexpr Features cNoFeatures;
     CORRADE_COMPARE(int(noFeatures), 0);
+    CORRADE_COMPARE(int(cNoFeatures), 0);
 
     Features features = Feature::Cheap;
+    constexpr Features cFeatures = Feature::Cheap;
     CORRADE_COMPARE(int(features), 2);
+    CORRADE_COMPARE(int(cFeatures), 2);
 }
 
 void EnumSetTest::constructNoInit() {
@@ -134,6 +138,13 @@ void EnumSetTest::operatorOr() {
 
     features |= Feature::Tested;
     CORRADE_COMPARE(int(features), 7);
+
+    constexpr Features cFeatures = Feature::Cheap|Feature::Fast;
+    constexpr Features cFeatures1 = cFeatures|Feature::Tested;
+    constexpr Features cFeatures2 = Feature::Tested|cFeatures;
+    CORRADE_COMPARE(int(cFeatures), 3);
+    CORRADE_COMPARE(int(cFeatures1), 7);
+    CORRADE_COMPARE(int(cFeatures2), 7);
 }
 
 void EnumSetTest::operatorAnd() {
@@ -150,6 +161,12 @@ void EnumSetTest::operatorAnd() {
 
     features &= features2;
     CORRADE_COMPARE(int(features), 9);
+
+    constexpr Features cFeatures = Feature::Popular|Feature::Fast|Feature::Cheap;
+    constexpr Features cFeatures1 = cFeatures & Feature::Popular;
+    constexpr Features cFeatures2 = Feature::Popular & cFeatures;
+    CORRADE_COMPARE(int(cFeatures1), 8);
+    CORRADE_COMPARE(int(cFeatures2), 8);
 }
 
 void EnumSetTest::operatorXor() {
@@ -167,6 +184,12 @@ void EnumSetTest::operatorXor() {
 
     features ^= features2;
     CORRADE_COMPARE(int(features), 6);
+
+    constexpr Features cFeatures = Feature::Popular|Feature::Fast|Feature::Cheap;
+    constexpr Features cFeatures1 = cFeatures ^ Feature::Tested;
+    constexpr Features cFeatures2 = Feature::Tested ^ cFeatures;
+    CORRADE_COMPARE(int(cFeatures1), 15);
+    CORRADE_COMPARE(int(cFeatures2), 15);
 }
 
 void EnumSetTest::operatorBool() {
@@ -175,12 +198,23 @@ void EnumSetTest::operatorBool() {
     Features features = Feature::Cheap|Feature::Fast;
     CORRADE_COMPARE(!!(features & Feature::Popular), false);
     CORRADE_COMPARE(!!(features & Feature::Cheap), true);
+
+    constexpr Features cFeatures = Feature::Cheap|Feature::Fast;
+    constexpr bool cFeatures1 = !!(cFeatures & Feature::Popular);
+    constexpr bool cFeatures2 = !!(cFeatures & Feature::Cheap);
+    CORRADE_VERIFY(!cFeatures1);
+    CORRADE_VERIFY(cFeatures2);
 }
 
 void EnumSetTest::operatorInverse() {
     CORRADE_COMPARE(int(~Features()), 15);
     CORRADE_COMPARE(int(~(Feature::Popular|Feature::Cheap)), 5);
     CORRADE_COMPARE(int(~Feature::Popular), 7);
+
+    constexpr Features cFeatures1 = ~Features{};
+    constexpr Features cFeatures2 = ~(Feature::Popular|Feature::Cheap);
+    CORRADE_COMPARE(int(cFeatures1), 15);
+    CORRADE_COMPARE(int(cFeatures2), 5);
 }
 
 void EnumSetTest::compare() {
@@ -201,6 +235,16 @@ void EnumSetTest::compare() {
 
     CORRADE_VERIFY(features <= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested));
     CORRADE_VERIFY(!(features >= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested)));
+
+    constexpr Features cFeatures = Feature::Popular|Feature::Fast|Feature::Cheap;
+    constexpr bool cFeaturesEqual = cFeatures == cFeatures;
+    constexpr bool cFeaturesNonEqual = cFeatures != cFeatures;
+    constexpr bool cFeaturesLessEqual = cFeatures <= cFeatures;
+    constexpr bool cFeaturesGreaterEqual = cFeatures >= cFeatures;
+    CORRADE_VERIFY(cFeaturesEqual);
+    CORRADE_VERIFY(!cFeaturesNonEqual);
+    CORRADE_VERIFY(cFeaturesLessEqual);
+    CORRADE_VERIFY(cFeaturesGreaterEqual);
 }
 
 template<class T> struct Foo {
