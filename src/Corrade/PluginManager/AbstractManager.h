@@ -494,28 +494,28 @@ of application exection. It's also safe to call this macro more than once.
 #define CORRADE_PLUGIN_VERSION 6
 
 /** @hideinitializer
-@brief Register static or dynamic lugin
-@param name          Name of static plugin (equivalent of dynamic plugin
+@brief Register a static or dynamic plugin
+@param name          Name of the static plugin (equivalent of dynamic plugin
      filename)
 @param className     Plugin class name
 @param interface     Interface name (the same as is defined by the
     @ref Corrade::PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
     member of given plugin class)
 
-If the plugin is built as **static** (using CMake command
-@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"), registers
-it, so it will be loaded automatically when PluginManager instance with
-corresponding interface is created. When building as static plugin,
+If the plugin is built as **static** (using the CMake
+@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()" command),
+registers it, so it will be loaded automatically when PluginManager instance
+with corresponding interface is created. When building as static plugin,
 `CORRADE_STATIC_PLUGIN` preprocessor directive is defined.
 
-If the plugin is built as **dynamic** (using CMake command
-@ref corrade-cmake-add-plugin "corrade_add_plugin()"), registers it, so it can
-be dynamically loaded via @ref Corrade::PluginManager::Manager by supplying a
-name of the plugin. When building as dynamic plugin, `CORRADE_DYNAMIC_PLUGIN`
-preprocessor directive is defined.
+If the plugin is built as **dynamic** (using the CMake
+@ref corrade-cmake-add-plugin "corrade_add_plugin()" command), registers it, so
+it can be dynamically loaded via @ref Corrade::PluginManager::Manager by
+supplying a name of the plugin. When building as dynamic plugin,
+`CORRADE_DYNAMIC_PLUGIN` preprocessor directive is defined.
 
 If the plugin is built as dynamic or static **library or executable** (not as
-plugin, using e.g. CMake command @cmake add_library() @ce /
+a plugin, using e.g. CMake command @cmake add_library() @ce /
 @cmake add_executable() @ce), this macro won't do anything to prevent linker
 issues when linking more plugins together. No plugin-related preprocessor
 directive is defined.

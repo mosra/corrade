@@ -48,20 +48,22 @@ compiled and managed.
 Plugin interface is a class with virtual methods, defining the way how to work
 with a particular plugin.
 
-Every plugin interface must be derived from @ref PluginManager::AbstractPlugin
-and must reimplement the
+Every plugin interface has to be derived from @ref PluginManager::AbstractPlugin
+and reimplement the
 @ref PluginManager::AbstractPlugin::AbstractPlugin(PluginManager::AbstractManager&, const std::string&)
 constructor. This is needed for instance use checks, as described above. Plugin
-classes derived from that interface must reimplement the constructor too, of
+classes derived from that interface need to reimplement the constructor too, of
 course.
 
-Additionaly, an interface string must be provided by a @cpp pluginInterface() @ce
-function to make sure loaded plugins depend on the same interface in the same
-version. The macro takes a string which uniquely names that particular
-interface. A good practice is to use "Java package name"-style syntax because
-this makes the name as unique as possible. The interface name should also
-contain version identifier to make sure the plugin will not be loaded with
-incompatible interface version.
+Additionaly, an interface string should be provided by overriding the
+@ref PluginManager::AbstractPlugin::pluginInterface() function in order to have
+an additional safety check for interface compatibility. The macro takes a
+string which uniquely names that particular interface. A good practice is to
+use "Java package name"-style syntax because this makes the name as unique as
+possible. The interface name should also contain a version identifier to make
+sure the plugin will not be loaded with incompatible interface version. If this
+function is not overriden, the default implementation returns @cpp "" @ce and
+effectively makes the interface compatibility check a no-op.
 
 To make lives of the users easier, we can define a list of paths where the
 plugins will be searched for using
@@ -80,9 +82,9 @@ would need to pass a plugin search path to the plugin manager constructor.
 @section plugin-management-plugin Plugin definition
 
 Every plugin is represented by a class derived from a particular plugin
-interface. The plugin class in then registered as a static or dynamic plugin.
-Every plugin must also have its metadata file, which contains information
-about plugin dependencies and optionally also plugin-specific data. Full
+interface. The plugin class is then registered as a static or a dynamic plugin.
+Every plugin also needs to have an associated metadata file, which contains
+information about plugin dependencies and optionally also plugin-specific data. Full
 specification of plugin metadata file syntax can be found in the
 @ref PluginManager::PluginMetadata class documentation.
 
