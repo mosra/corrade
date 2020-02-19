@@ -36,6 +36,7 @@
 #include "Corrade/configure.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Tags.h"
+#include "Corrade/Containers/constructHelpers.h"
 
 namespace Corrade { namespace Containers {
 
@@ -564,10 +565,8 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(const Stati
 }
 
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
-    for(T& i: _data) {
-        /* MSVC 2015 needs the braces around */
-        new(&i) T{std::forward<Args>(args)...};
-    }
+    for(T& i: _data)
+        Implementation::construct(i, std::forward<Args>(args)...);
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{NoInit} {

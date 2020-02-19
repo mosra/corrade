@@ -35,6 +35,7 @@
 #include <utility>
 
 #include "Corrade/Containers/Tags.h"
+#include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Utility/Assert.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
@@ -152,7 +153,7 @@ template<class T> class Optional {
          *      @ref emplace()
          */
         template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
-            new(&_value) T{std::forward<Args>(args)...};
+            Implementation::construct(_value, std::forward<Args>(args)...);
         }
 
         /**
@@ -492,7 +493,7 @@ template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
 template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args) {
     if(_set) _value.~T();
     _set = true;
-    new(&_value) T{std::forward<Args>(args)...};
+    Implementation::construct<T>(_value, std::forward<Args>(args)...);
     return _value;
 }
 

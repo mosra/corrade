@@ -43,6 +43,14 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
     template<class, class> struct PointerConverter;
+
+    /* see constructHelpers.h for more information */
+    template<class T, class First, class ...Next> T* allocate(First&& first, Next&& ...next) {
+        return new T{std::forward<First>(first), std::forward<Next>(next)...};
+    }
+    template<class T> T* allocate() {
+        return new T();
+    }
 }
 
 /**
@@ -115,7 +123,7 @@ template<class T> class Pointer {
          * Allocates a new object by passing @p args to its constructor.
          * @see @ref operator bool(), @ref operator->()
          */
-        template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{new T{std::forward<Args>(args)...}} {}
+        template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{Implementation::allocate<T>(std::forward<Args>(args)...)} {}
 
         /**
          * @brief Construct a unique pointer from another of a derived type
@@ -255,7 +263,7 @@ template<class T> class Pointer {
          */
         template<class ...Args> T& emplace(Args&&... args) {
             delete _pointer;
-            _pointer = new T{std::forward<Args>(args)...};
+            _pointer = Implementation::allocate<T>(std::forward<Args>(args)...);
             return *_pointer;
         }
 

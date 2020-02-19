@@ -1140,7 +1140,7 @@ template<class T, class Allocator, class... Args> void arrayResize(Array<T>& arr
     /* In-place construct the new elements. No helper function for this as
        there's no way we could memcpy such a thing. */
     for(T* it = array + prevSize; it < array.end(); ++it)
-        new(it) T{std::forward<Args>(args)...};
+        Implementation::construct(*it, std::forward<Args>(args)...);
 }
 
 template<class T, class... Args> inline void arrayResize(Array<T>& array, DirectInitT, const std::size_t size, Args&&... args) {
@@ -1230,7 +1230,7 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
     #endif
     ++arrayGuts.size;
     /* No helper function as there's no way we could memcpy such a thing. */
-    new(it) T{std::forward<Args>(args)...};
+    Implementation::construct(*it, std::forward<Args>(args)...);
     return *it;
 }
 

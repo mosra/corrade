@@ -28,6 +28,7 @@ set(CorradeContainers_HEADERS
     ArrayView.h
     ArrayViewStl.h
     ArrayViewStlSpan.h
+    constructHelpers.h
     Containers.h
     EnumSet.h
     EnumSet.hpp

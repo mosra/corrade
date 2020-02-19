@@ -125,6 +125,13 @@ namespace Corrade {
     deleters on null pointers
 -   The dimension-changing @ref Containers::arrayCast(const StridedArrayView<dimensions, T>&)
     utility has a new overload accepting @ref Containers::ArrayView as well
+-   In-place element construction in @ref Containers::Array,
+    @ref Containers::StaticArray, @ref Containers::Pointer,
+    @ref Containers::Optional and growable array utilities now properly handle
+    a case of default-constructing a @cpp struct @ce that contains members with
+    explicit default constructors. Previously such cases caused a `chosen
+    constructor is explicit in copy-initialization` compiler error on Clang and
+    a rarer but similar one in case of GCC as well.
 
 @subsubsection corrade-changelog-latest-changes-interconnect Interconnect library
 
