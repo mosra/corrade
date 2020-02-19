@@ -43,6 +43,9 @@ namespace Corrade {
 -   New @ref CORRADE_TARGET_BIG_ENDIAN macro. A variant of this macro called
     just @cpp CORRADE_BIG_ENDIAN @ce was used internally for a long time, now
     it's been exposed publicly.
+-   New @ref CORRADE_CONSTEXPR14 macro for marking @cpp constexpr @ce functions
+    that make use of C++14 relaxed constexpr rules but still need to work under
+    C++11 as well.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
