@@ -102,6 +102,8 @@ struct PointerTest: TestSuite::Tester {
 
     void cast();
 
+    void emplaceConstructorExplicitInCopyInitialization();
+
     void debug();
 };
 
@@ -133,6 +135,9 @@ PointerTest::PointerTest() {
               &PointerTest::release}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::cast,
+
+              &PointerTest::emplaceConstructorExplicitInCopyInitialization,
+
               &PointerTest::debug});
 }
 
@@ -503,6 +508,27 @@ void PointerTest::cast() {
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);
+}
+
+void PointerTest::emplaceConstructorExplicitInCopyInitialization() {
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Pointer<ContainingExplicitDefaultWithImplicitConstructor> b{InPlaceInit};
+    Pointer<ContainingExplicitDefaultWithImplicitConstructor> c;
+    c.emplace();
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(c);
 }
 
 void PointerTest::debug() {

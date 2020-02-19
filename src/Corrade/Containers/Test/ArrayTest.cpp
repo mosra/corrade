@@ -114,6 +114,8 @@ struct ArrayTest: TestSuite::Tester {
 
     void cast();
     void size();
+
+    void emplaceConstructorExplicitInCopyInitialization();
 };
 
 typedef Containers::Array<int> Array;
@@ -166,7 +168,9 @@ ArrayTest::ArrayTest() {
               &ArrayTest::customDeleterTypeConstruct,
 
               &ArrayTest::cast,
-              &ArrayTest::size});
+              &ArrayTest::size,
+
+              &ArrayTest::emplaceConstructorExplicitInCopyInitialization});
 }
 
 void ArrayTest::constructEmpty() {
@@ -853,6 +857,24 @@ void ArrayTest::size() {
     Array a{3};
 
     CORRADE_COMPARE(Containers::arraySize(a), 3);
+}
+
+void ArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit, 5};
+    CORRADE_COMPARE(b.size(), 5);
 }
 
 }}}}

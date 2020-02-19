@@ -119,6 +119,8 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     void explicitAllocatorParameter();
 
+    void emplaceConstructorExplicitInCopyInitialization();
+
     void benchmarkAppendVector();
     void benchmarkAppendArray();
     void benchmarkAppendReservedVector();
@@ -281,7 +283,9 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::castNonGrowable,
               &GrowableArrayTest::castInvalid,
 
-              &GrowableArrayTest::explicitAllocatorParameter});
+              &GrowableArrayTest::explicitAllocatorParameter,
+
+              &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1489,6 +1493,26 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayAppend<ArrayNewAllocator>(b, Movable{1});
     arrayAppend<ArrayNewAllocator>(b, InPlaceInit, 2);
     CORRADE_COMPARE(b.size(), 7);
+}
+
+void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b;
+    arrayResize(b, DirectInit, 1);
+    arrayAppend(b, InPlaceInit);
+    CORRADE_COMPARE(b.size(), 2);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {

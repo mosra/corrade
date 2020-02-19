@@ -148,6 +148,7 @@ struct OptionalTest: TestSuite::Tester {
 
     void debug();
 
+    void emplaceConstructorExplicitInCopyInitialization();
     void vectorOfMovableOptional();
 };
 
@@ -202,6 +203,7 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::debug,
 
+              &OptionalTest::emplaceConstructorExplicitInCopyInitialization,
               &OptionalTest::vectorOfMovableOptional});
 }
 
@@ -952,6 +954,27 @@ void OptionalTest::debug() {
     std::stringstream out;
     Debug{&out} << optional(42) << Optional<int>{} << NullOpt;
     CORRADE_COMPARE(out.str(), "42 Containers::NullOpt Containers::NullOpt\n");
+}
+
+void OptionalTest::emplaceConstructorExplicitInCopyInitialization() {
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Optional<ContainingExplicitDefaultWithImplicitConstructor> b{InPlaceInit};
+    Optional<ContainingExplicitDefaultWithImplicitConstructor> c;
+    c.emplace();
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(c);
 }
 
 void OptionalTest::vectorOfMovableOptional() {

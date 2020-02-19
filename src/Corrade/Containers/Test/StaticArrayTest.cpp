@@ -106,6 +106,8 @@ struct StaticArrayTest: TestSuite::Tester {
 
     void cast();
     void size();
+
+    void emplaceConstructorExplicitInCopyInitialization();
 };
 
 typedef Containers::StaticArray<5, int> StaticArray;
@@ -162,7 +164,9 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::sliceToStaticPointer,
 
               &StaticArrayTest::cast,
-              &StaticArrayTest::size});
+              &StaticArrayTest::size,
+
+              &StaticArrayTest::emplaceConstructorExplicitInCopyInitialization});
 }
 
 void StaticArrayTest::construct() {
@@ -946,6 +950,24 @@ void StaticArrayTest::size() {
     StaticArray a;
 
     CORRADE_COMPARE(Containers::arraySize(a), 5);
+}
+
+void StaticArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit};
+    CORRADE_COMPARE(b.size(), 3);
 }
 
 }}}}
