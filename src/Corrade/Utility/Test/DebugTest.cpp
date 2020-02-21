@@ -57,6 +57,7 @@ struct DebugTest: TestSuite::Tester {
     void flags();
     void nospace();
     void newline();
+    void space();
     void noNewlineAtTheEnd();
 
     void colors();
@@ -124,6 +125,7 @@ DebugTest::DebugTest() {
         &DebugTest::flags,
         &DebugTest::nospace,
         &DebugTest::newline,
+        &DebugTest::space,
         &DebugTest::noNewlineAtTheEnd});
 
     addInstancedTests({&DebugTest::colors}, 9);
@@ -448,6 +450,12 @@ void DebugTest::newline() {
     Debug(&out) << "Value:" << Debug::newline << 16;
 
     CORRADE_COMPARE(out.str(), "Value:\n16\n");
+}
+
+void DebugTest::space() {
+    std::ostringstream out;
+    Debug(&out) << Debug::space << Debug::space << "Value:" << Debug::space << 16;
+    CORRADE_COMPARE(out.str(), "  Value: 16\n");
 }
 
 void DebugTest::noNewlineAtTheEnd() {
@@ -955,9 +963,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":947: hello\n"
-        __FILE__ ":949: and this is from another line\n"
-        __FILE__ ":951\n"
+        __FILE__ ":955: hello\n"
+        __FILE__ ":957: and this is from another line\n"
+        __FILE__ ":959\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),

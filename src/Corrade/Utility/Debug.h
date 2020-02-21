@@ -214,7 +214,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
             /**
              * Print without spaces between values.
-             * @see @ref nospace
+             * @see @ref nospace, @ref space
              */
             NoSpace = 1 << 2,
 
@@ -249,7 +249,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Debug output modifier
          *
-         * @see @ref nospace, @ref newline, @ref operator<<(Modifier)
+         * @see @ref nospace, @ref newline, @ref space,
+         *      @ref operator<<(Modifier)
          */
         typedef void(*Modifier)(Debug&);
 
@@ -317,7 +318,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @snippet Utility.cpp Debug-nospace
          *
-         * @see @ref Flag::NoSpace, @ref newline
+         * @see @ref Flag::NoSpace, @ref space, @ref newline
          */
         static void nospace(Debug& debug) {
             debug._immediateFlags |= InternalFlag::NoSpace;
@@ -342,6 +343,30 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         static void newline(Debug& debug) {
             debug << nospace << "\n" << nospace;
+        }
+
+        /**
+         * @brief Output a space
+         * @m_since_latest
+         *
+         * Puts a space (not surrounded by additional spaces) to the output.
+         * Useful for adding an explicit leading space or for delimiting values
+         * with spaces when @ref Flag::NoSpace is set. The last two lines are
+         * equivalent:
+         *
+         * @snippet Utility.cpp Debug-space
+         *
+         * and the output is
+         *
+         * @code{.shell-session}
+         * Value:
+         *  16
+         * @endcode
+         *
+         * @see @ref nospace, @ref newline
+         */
+        static void space(Debug& debug) {
+            debug << nospace << " " << nospace;
         }
 
         /**

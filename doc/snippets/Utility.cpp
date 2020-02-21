@@ -417,6 +417,15 @@ Utility::Debug{} << "Value:" << Utility::Debug::nospace << "\n"
 }
 
 {
+/* [Debug-space] */
+Utility::Debug{} << "Value:";
+
+Utility::Debug{} << "" << 16;
+Utility::Debug{} << Utility::Debug::space << 16;
+/* [Debug-space] */
+}
+
+{
 /* [Debug-color] */
 unsigned char data[] { 0, 32, 64, 96, 128, 160, 192, 224, 255 };
 Utility::Debug{} << "41 shades of grey missing:"

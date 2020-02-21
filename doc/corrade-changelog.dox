@@ -101,6 +101,8 @@ namespace Corrade {
     @ref Utility::Endianness::bigEndianInPlace()
 -   New family of @ref Utility::copy() functions to efficiently copy
     multi-dimensional @ref Containers::StridedArrayView instances
+-   Added a @ref Utility::Debug::space modifier that's similar to
+    @ref Utility::Debug::newline and an inverse of @ref Utility::Debug::nospace
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
