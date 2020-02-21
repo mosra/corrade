@@ -112,6 +112,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+-   @ref TestSuite::Tester and the @ref CORRADE_INTERNAL_ASSERT() family of
+    macros now prints file/line info in test failures as a more compact
+    @cb{.shell-session} <file>:<line> @ce, which is consistent with
+    @ref Utility-Debug-source-location "Utility::Debug source location" and how
+    GCC or GDB print those
+
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
 -   @ref Containers::Array::Array(NoInitT, std::size_t) is now equivalent to

@@ -601,7 +601,7 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
 }
 
 void Tester::printFileLineInfo(Debug& out) {
-    out << "at" << _state->testFilename << "on line" << _state->testCaseLine << Debug::newline;
+    out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << _state->testCaseLine << Debug::newline;
 }
 
 void Tester::verifyInternal(const char* expression, bool expressionValue) {

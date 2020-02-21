@@ -68,13 +68,13 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-assert true)
     set_tests_properties(UtilityAssertTestFailInternalAssert PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed in ")
+        PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
     corrade_add_test(UtilityAssertTestFailInternalC___Assert
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-constexpr-assert true)
     set_tests_properties(UtilityAssertTestFailInternalC___Assert PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion b failed in ")
+        PASS_REGULAR_EXPRESSION "Assertion b failed at ")
     corrade_add_test(UtilityAssertTestFailAssertOutput
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
@@ -86,13 +86,13 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-assert-output true)
     set_tests_properties(UtilityAssertTestFailInternalA___Output PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed in ")
+        PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
     corrade_add_test(UtilityAssertTestFailAssertUnreachable
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-assert-unreachable true)
     set_tests_properties(UtilityAssertTestFailAssertUnreachable PROPERTIES
-        PASS_REGULAR_EXPRESSION "Reached unreachable code in ")
+        PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
 endif()
 
 # The same as above, but using CORRADE_STANDARD_ASSERT
