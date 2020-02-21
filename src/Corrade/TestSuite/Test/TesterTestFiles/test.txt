@@ -1,98 +1,105 @@
-Starting TesterTest::Test with 45 test cases...
+Starting TesterTest::Test with 47 test cases...
      ? [01] <unknown>()
     OK [02] trueExpression()
-  FAIL [03] falseExpression() at here.cpp:262
+  FAIL [03] falseExpression() at here.cpp:267
         Expression 5 != 5 failed.
     OK [04] equal()
-  FAIL [05] nonEqual() at here.cpp:272
+  FAIL [05] nonEqual() at here.cpp:277
         Values a and b are not the same, actual is
         5
         but expected
         3
- XFAIL [06] expectFail() at here.cpp:278
+ XFAIL [06] expectFail() at here.cpp:283
         The world is not mad yet. 2 + 2 and 5 failed the comparison.
- XFAIL [06] expectFail() at here.cpp:279
+ XFAIL [06] expectFail() at here.cpp:284
         The world is not mad yet. Expression false == true failed.
- XPASS [07] unexpectedPassExpression() at here.cpp:292
+ XPASS [07] unexpectedPassExpression() at here.cpp:297
         Expression true == true was expected to fail.
- XPASS [08] unexpectedPassEqual() at here.cpp:297
+ XPASS [08] unexpectedPassEqual() at here.cpp:302
         2 + 2 and 4 were expected to fail the comparison.
     OK [09] compareAs()
-  FAIL [10] compareAsFail() at here.cpp:305
+  FAIL [10] compareAsFail() at here.cpp:310
         Length of actual "meh" doesn't match length of expected "hello" with epsilon 0
     OK [11] compareWith()
-  FAIL [12] compareWithFail() at here.cpp:313
+  FAIL [12] compareWithFail() at here.cpp:318
         Length of actual "You rather GTFO" doesn't match length of expected "hello" with epsilon 9
-  FAIL [13] compareImplicitConversionFail() at here.cpp:318
+  FAIL [13] compareImplicitConversionFail() at here.cpp:323
         Values "holla" and hello are not the same, actual is
         holla
         but expected
         hello
-  WARN [14] compareWarning() at here.cpp:329
+  WARN [14] compareWarning() at here.cpp:334
         This is a warning when comparing "a.txt" and "b.txt"
-  INFO [15] compareMessage() at here.cpp:325
+  INFO [15] compareMessage() at here.cpp:330
         This is a message when comparing "a.txt" and "b.txt"
     OK [16] compareSaveDiagnostic()
   SKIP [17] skip()
         This testcase is skipped.
-    OK [18] testCaseName<15>()
-     ? [19] testCaseName<27>()
-    OK [20] testCaseTemplateName<15>()
-     ? [21] <unknown>()
-    OK [22] testCaseDescription(hello)
-       [23] setting up...
-       [23] tearing down...
-    OK [23] setupTeardown()
-       [24] setting up...
-       [24] tearing down...
-     ? [24] <unknown>()
+  FAIL [18] iteration() at here.cpp:354 (iteration JOHN, 1)
+        Expression !std::isupper(name[i]) failed.
+  FAIL [19] iterationScope() at here.cpp:371
+        Values 2 + 2 and 5 are not the same, actual is
+        4
+        but expected
+        5
+    OK [20] testCaseName<15>()
+     ? [21] testCaseName<27>()
+    OK [22] testCaseTemplateName<15>()
+     ? [23] <unknown>()
+    OK [24] testCaseDescription(hello)
        [25] setting up...
-  FAIL [25] setupTeardownFail() at here.cpp:382
-        Expression false failed.
        [25] tearing down...
+    OK [25] setupTeardown()
        [26] setting up...
-  SKIP [26] setupTeardownSkip()
-        Skipped.
        [26] tearing down...
-    OK [27] instancedTest(zero)
-    OK [28] instancedTest(1)
-  FAIL [29] instancedTest(two) at here.cpp:405
+     ? [26] <unknown>()
+       [27] setting up...
+  FAIL [27] setupTeardownFail() at here.cpp:412
+        Expression false failed.
+       [27] tearing down...
+       [28] setting up...
+  SKIP [28] setupTeardownSkip()
+        Skipped.
+       [28] tearing down...
+    OK [29] instancedTest(zero)
+    OK [30] instancedTest(1)
+  FAIL [31] instancedTest(two) at here.cpp:435
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
         122
-    OK [30] instancedTest(3)
-    OK [31] instancedTest(last)
+    OK [32] instancedTest(3)
+    OK [33] instancedTest(last)
 0
 1
 2
 3
 4
-    OK [32] repeatedTest()@5
-     ? [33] <unknown>()@50
-  FAIL [34] repeatedTestFail()@18 at here.cpp:416
+    OK [34] repeatedTest()@5
+     ? [35] <unknown>()@50
+  FAIL [36] repeatedTestFail()@18 at here.cpp:446
         Expression _i++ < 17 failed.
-  SKIP [35] repeatedTestSkip()@29
+  SKIP [37] repeatedTestSkip()@29
         Too late.
-       [36] setting up...
-       [36] tearing down...
-       [36] setting up...
-       [36] tearing down...
-    OK [36] repeatedTestSetupTeardown()@2
-       [37] setting up...
-       [37] tearing down...
-       [37] setting up...
-       [37] tearing down...
-     ? [37] <unknown>()@2
        [38] setting up...
-  FAIL [38] repeatedTestSetupTeardownFail()@1 at here.cpp:430
-        Expression false failed.
        [38] tearing down...
+       [38] setting up...
+       [38] tearing down...
+    OK [38] repeatedTestSetupTeardown()@2
        [39] setting up...
-  SKIP [39] repeatedTestSetupTeardownSkip()@1
-        Skipped.
        [39] tearing down...
- BENCH [40]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
+       [39] setting up...
+       [39] tearing down...
+     ? [39] <unknown>()@2
+       [40] setting up...
+  FAIL [40] repeatedTestSetupTeardownFail()@1 at here.cpp:460
+        Expression false failed.
+       [40] tearing down...
+       [41] setting up...
+  SKIP [41] repeatedTestSetupTeardownSkip()@1
+        Skipped.
+       [41] tearing down...
+ BENCH [42]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
 Benchmark begin
 Benchmark iteration
 Benchmark iteration
@@ -105,10 +112,10 @@ Benchmark begin
 Benchmark iteration
 Benchmark iteration
 Benchmark end: 500
- BENCH [41] 225.00 ± 35.36  ns benchmark()@2x2
- BENCH [42] 348.36          kB benchmarkOnce()@1x1
- BENCH [43] (no data)        B benchmarkZero()@1x0 (bytes in millibits)
- BENCH [44] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
-  SKIP [45] benchmarkSkip()@1
+ BENCH [43] 225.00 ± 35.36  ns benchmark()@2x2
+ BENCH [44] 348.36          kB benchmarkOnce()@1x1
+ BENCH [45] (no data)        B benchmarkZero()@1x0 (bytes in millibits)
+ BENCH [46] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
+  SKIP [47] benchmarkSkip()@1
         Can't verify the measurements anyway.
-Finished TesterTest::Test with 11 errors out of 55 checks. 6 test cases didn't contain any checks!
+Finished TesterTest::Test with 13 errors out of 61 checks. 6 test cases didn't contain any checks!

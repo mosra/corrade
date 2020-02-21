@@ -171,6 +171,26 @@ the templated tests, @ref setTestCaseDescription() allows you to set a
 human-readable description of given instance. If not called, the instances are
 just numbered in the output.
 
+@section TestSuite-Tester-iteration-annotations Testing in a loop
+
+While instanced tests are usually the go-to solution when testing on a larger
+set of data, sometimes you need to loop over a few values and check them one by
+one. When such test fails, it's often hard to know which particular value
+caused the failure. To fix that, you can use the @ref CORRADE_ITERATION() macro
+to annotate current iteration in case of a failure. It works with any type
+printable via @ref Utility::Debug and handles nested loops as well. Silly
+example:
+
+@snippet testsuite-iteration.cpp 0
+
+On failure, the iteration value(s) will be printed next to the file/line info:
+
+@include testsuite-iteration.ansi
+
+This macro isn't limited to just loops, it can be used to provide more context
+to just any check. See also @ref Compare::Container for a convenient way of
+comparing container contents.
+
 @section TestSuite-Tester-repeated Repeated tests
 
 A complementary feature to instanced tests are repeated tests using
@@ -1144,6 +1164,24 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 Tester& _instance;
         };
 
+        class CORRADE_TESTSUITE_EXPORT IterationPrinter {
+            public:
+                IterationPrinter(Tester& instance);
+
+                ~IterationPrinter();
+
+                Debug debug();
+
+            private:
+                friend Tester;
+                struct Data;
+
+                Tester& _instance;
+                /* There's a std::ostringstream inside (yes, ew); don't want
+                   that in a header */
+                Containers::Pointer<Data> _data;
+        };
+
         /* Called from all CORRADE_*() verification/skip/xfail macros through
            _CORRADE_REGISTER_TEST_CASE() */
         void registerTestCase(const char* name, int line);
@@ -1418,6 +1456,24 @@ given feature can't be tested on given platform:
     do {                                                                    \
         Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::skip(message);                                              \
+    } while(false)
+
+/** @hideinitializer
+@brief Iteration annotation
+@param ...      Value to print in a failure diagnostic
+@m_since_latest
+
+Annotates loop iterations in order to provide clearer failure diagnostics next
+to the file/line info. Doesn't print anything if there was no failure. Applies
+to all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc. checks in
+the same scope, multiple calls in the same scope (or nested scopes) are joined
+together. See @ref TestSuite-Tester-iteration-annotations for an example.
+*/
+#define CORRADE_ITERATION(...)                                              \
+    Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__){*this}; \
+    do {                                                                    \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
+        _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__).debug() << __VA_ARGS__; \
     } while(false)
 
 /** @hideinitializer

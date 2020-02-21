@@ -1,0 +1,4 @@
+[1;39mStarting NameTest with 1 test cases...[0m
+[1;31m  FAIL[0;34m [[1;36m1[0;34m][1;39m noYellingAllowed()[0m at …/NameTest.cpp:47 (iteration JOHN, 1)
+        Expression !std::isupper(name[i]) failed.
+[1;39mFinished NameTest with[1;31m 1 errors[1;39m out of 4 checks.[0m

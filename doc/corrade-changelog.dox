@@ -106,6 +106,7 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
+-   New @ref CORRADE_ITERATION() macro for annotating loops
 -   Added @ref TestSuite::Compare::Divisible and
     @ref TestSuite::Compare::NotDivisible pseudo-types for checking
     divisibility with clear diagnostic messages

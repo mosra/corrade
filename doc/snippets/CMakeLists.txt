@@ -101,6 +101,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-repeated testsuite-repeated.cpp)
     add_executable(testsuite-instanced testsuite-instanced.cpp)
     add_executable(testsuite-save-diagnostic testsuite-save-diagnostic.cpp)
+    add_executable(testsuite-iteration testsuite-iteration.cpp)
     add_executable(testsuite-benchmark testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
     set_target_properties(
@@ -109,6 +110,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
         testsuite-repeated
         testsuite-instanced
         testsuite-save-diagnostic
+        testsuite-iteration
         testsuite-benchmark
         testsuite-benchmark-custom
         PROPERTIES FOLDER "Corrade/doc/snippets")
@@ -118,6 +120,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     target_link_libraries(testsuite-repeated CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
     target_link_libraries(testsuite-instanced CorradeTestSuite)
     target_link_libraries(testsuite-save-diagnostic CorradeTestSuite)
+    target_link_libraries(testsuite-iteration CorradeTestSuite)
     target_link_libraries(testsuite-benchmark CorradeTestSuite)
     target_link_libraries(testsuite-benchmark-custom CorradeTestSuite)
 endif()

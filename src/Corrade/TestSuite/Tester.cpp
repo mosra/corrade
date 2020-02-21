@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <sstream>
 #include <utility>
 
 #include "Corrade/Containers/Array.h"
@@ -107,6 +108,11 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorF
 }
 #endif
 
+struct Tester::IterationPrinter::IterationPrinter::Data {
+    std::ostringstream out;
+    IterationPrinter* parent;
+};
+
 struct Tester::TesterState {
     explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
 
@@ -136,6 +142,7 @@ struct Tester::TesterState {
     bool isDebugBuild{};
     ExpectedFailure* expectedFailure{};
     std::string expectedFailureMessage;
+    IterationPrinter* iterationPrinter{};
     TesterConfiguration configuration;
 
     std::string saveDiagnosticPath;
@@ -601,7 +608,21 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
 }
 
 void Tester::printFileLineInfo(Debug& out) {
-    out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << _state->testCaseLine << Debug::newline;
+    out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << _state->testCaseLine;
+
+    /* If we have checks annotated with an iteration macro, print those. These
+       are linked in reverse order so we have to reverse the vector before
+       printing. */
+    if(_state->iterationPrinter) {
+        std::vector<std::string> iterations;
+        for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_data->parent) {
+            iterations.push_back(iterationPrinter->_data->out.str());
+        }
+        std::reverse(iterations.begin(), iterations.end());
+        out << "(iteration" << Utility::String::join(iterations, ", ") << Debug::nospace << ")";
+    }
+
+    out << Debug::newline;
 }
 
 void Tester::verifyInternal(const char* expression, bool expressionValue) {
@@ -849,6 +870,23 @@ Tester::ExpectedFailure::ExpectedFailure(Tester& instance, const char* message, 
 
 Tester::ExpectedFailure::~ExpectedFailure() {
     _instance._state->expectedFailure = nullptr;
+}
+
+Tester::IterationPrinter::IterationPrinter(Tester& instance): _instance(instance) {
+    /* Insert itself into the list of iteration printers */
+    _data.emplace().parent = instance._state->iterationPrinter;
+    instance._state->iterationPrinter = this;
+}
+
+Tester::IterationPrinter::~IterationPrinter() {
+    /* Remove itself from the list of iteration printers (assuming destruction
+       of those goes in inverse order) */
+    CORRADE_INTERNAL_ASSERT(_instance._state->iterationPrinter == this);
+    _instance._state->iterationPrinter = _data->parent;
+}
+
+Utility::Debug Tester::IterationPrinter::debug() {
+    return Debug{&_data->out, Debug::Flag::NoNewlineAtTheEnd};
 }
 
 Tester::BenchmarkRunner::~BenchmarkRunner() {

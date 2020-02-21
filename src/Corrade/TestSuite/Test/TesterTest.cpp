@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cctype>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -140,6 +141,8 @@ struct Test: Tester {
     void compareSaveDiagnostic();
 
     void skip();
+    void iteration();
+    void iterationScope();
 
     void testCaseName();
     void testCaseNameNoChecks();
@@ -205,6 +208,8 @@ Test::Test(std::ostream* const out, const TesterConfiguration& configuration): T
               &Test::compareSaveDiagnostic,
 
               &Test::skip,
+              &Test::iteration,
+              &Test::iterationScope,
 
               &Test::testCaseName,
               &Test::testCaseNameNoChecks,
@@ -339,6 +344,31 @@ void Test::compareSaveDiagnostic() {
 void Test::skip() {
     CORRADE_SKIP("This testcase is skipped.");
     CORRADE_VERIFY(false);
+}
+
+void Test::iteration() {
+    for(std::string name: {"Lucy", "JOHN", "Ed"}) {
+        CORRADE_ITERATION(name);
+        for(std::size_t i = 1; i != name.size(); ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_VERIFY(!std::isupper(name[i]));
+        }
+    }
+}
+
+void Test::iterationScope() {
+    {
+        CORRADE_ITERATION("ahah");
+
+        /* Second occurence of the same macro in the same scope should work
+           too, using a different variable name */
+        CORRADE_ITERATION("yay");
+
+        CORRADE_COMPARE(3 + 3, 6);
+    }
+
+    /* Shouldn't print any iteration info */
+    CORRADE_COMPARE(2 + 2, 5);
 }
 
 void Test::testCaseName() {
@@ -745,7 +775,7 @@ void TesterTest::skipAll() {
 void TesterTest::skipTests() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 42 9", "--skip-tests" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 44 9", "--skip-tests" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -766,7 +796,7 @@ void TesterTest::skipTests() {
 void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 41 9", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 43 9", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -798,7 +828,7 @@ void TesterTest::skipTestsNothingElse() {
 void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "41", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "43", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -847,7 +877,7 @@ void TesterTest::shuffleOne() {
 void TesterTest::repeatEvery() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "32 4", "--repeat-every", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "34 4", "--repeat-every", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -864,7 +894,7 @@ void TesterTest::repeatEvery() {
 void TesterTest::repeatAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "32 4", "--repeat-all", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "34 4", "--repeat-all", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1235,7 +1265,7 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "--benchmark", "wall-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "wall-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1256,7 +1286,7 @@ void TesterTest::benchmarkWallClock() {
 void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "--benchmark", "cpu-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "cpu-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1277,7 +1307,7 @@ void TesterTest::benchmarkCpuClock() {
 void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "--benchmark", "cpu-cycles" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "cpu-cycles" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1298,7 +1328,7 @@ void TesterTest::benchmarkCpuCycles() {
 void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "--benchmark-discard", "100" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark-discard", "100" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1319,7 +1349,7 @@ void TesterTest::benchmarkDiscardAll() {
 void TesterTest::benchmarkDebugBuildNote() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1342,7 +1372,7 @@ void TesterTest::benchmarkDebugBuildNote() {
 void TesterTest::benchmarkCpuScalingNoWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1362,7 +1392,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
 void TesterTest::benchmarkCpuScalingWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1382,7 +1412,7 @@ void TesterTest::benchmarkCpuScalingWarning() {
 void TesterTest::benchmarkCpuScalingWarningVerbose() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "40 42", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "42 44", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
