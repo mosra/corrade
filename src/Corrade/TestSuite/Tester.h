@@ -1212,6 +1212,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         static char** _argv;
 
         CORRADE_TESTSUITE_LOCAL void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
+        CORRADE_TESTSUITE_LOCAL void printFileLineInfo(Debug& out);
         void verifyInternal(const char* expression, bool value);
         void printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const std::string&), void* comparator);
 

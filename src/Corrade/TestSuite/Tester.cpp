@@ -600,6 +600,10 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
     out << Debug::resetColor;
 }
 
+void Tester::printFileLineInfo(Debug& out) {
+    out << "at" << _state->testFilename << "on line" << _state->testCaseLine << Debug::newline;
+}
+
 void Tester::verifyInternal(const char* expression, bool expressionValue) {
     ++_state->checkCount;
 
@@ -609,17 +613,17 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
     } else if(!expressionValue) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
-        out << "at" << _state->testFilename << "on line" << _state->testCaseLine
-            << Debug::newline << "       " << _state->expectedFailureMessage
-            << "Expression" << expression << "failed.";
+        printFileLineInfo(out);
+        out << "       " << _state->expectedFailureMessage << "Expression"
+            << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
     Error out{_state->errorOutput, _state->useColor};
     printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
-    out << "at" << _state->testFilename << "on line" << _state->testCaseLine
-        << Debug::newline << "        Expression" << expression;
+    printFileLineInfo(out);
+    out << "        Expression" << expression;
     if(!_state->expectedFailure) out << "failed.";
     else out << "was expected to fail.";
     throw Exception();
@@ -636,17 +640,17 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
     if(_state->expectedFailure && (flags & ComparisonStatusFlag::Failed)) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
-        out << "at" << _state->testFilename << "on line"
-            << _state->testCaseLine << Debug::newline << "       " << _state->expectedFailureMessage
-            << actual << "and" << expected << "failed the comparison.";
+        printFileLineInfo(out);
+        out << "       " << _state->expectedFailureMessage << actual << "and"
+            << expected << "failed the comparison.";
 
     /* Otherwise, in case of an unexpected failure or an unexpected pass, print
        an error message */
     } else if(bool(_state->expectedFailure) != bool(flags & ComparisonStatusFlag::Failed)) {
         Error out{_state->errorOutput, _state->useColor};
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
-        out << "at" << _state->testFilename << "on line"
-            << _state->testCaseLine << Debug::newline << "       ";
+        printFileLineInfo(out);
+        out << "       ";
         if(!_state->expectedFailure) printer(comparator, flags, out, actual, expected);
         else out << actual << "and" << expected << "were expected to fail the comparison.";
 
@@ -660,8 +664,8 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
             flags & ComparisonStatusFlag::Warning ? "  WARN" : "  INFO",
             flags & ComparisonStatusFlag::Warning ? Debug::Color::Yellow : Debug::Color::Default,
             Debug::Color::Default);
-        out << "at" << _state->testFilename << "on line"
-            << _state->testCaseLine << Debug::newline << "       ";
+        printFileLineInfo(out);
+        out << "       ";
         printer(comparator, flags, out, actual, expected);
     }
 
