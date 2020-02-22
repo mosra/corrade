@@ -215,7 +215,7 @@ stride equal to array type size. The following two statements are equivalent:
 @snippet Containers.cpp StridedArrayView-usage-conversion
 
 When constructing, if you don't specify the stride, the constructor assumes
-tightly packed data and calculates the stride automatically --- stride of a
+contiguous data and calculates the stride automatically --- stride of a
 dimension is stride of the next dimension times next dimension size, while last
 dimension stride is implicitly @cpp sizeof(T) @ce. This is especially useful
 for "reshaping" linear data as a multi-dimensional view. Again, the following
@@ -250,7 +250,7 @@ lower-dimensional view into a slice in a higher-dimensional view.
 Finally, since the actual view elements can be also non-scalar data, there's an
 overload of @ref arrayCast(const StridedArrayView<dimensions, T>&) that can
 "extract" an additional dimension out of these or, on the other hand, flatten
-it back if the last dimension is tightly packed.
+it back if the last dimension is contiguous.
 
 @snippet Containers.cpp StridedArrayView-usage-inflate
 
@@ -1406,7 +1406,7 @@ template<> struct ArrayCastFlattenOrInflate<-1> {
         }
         #endif
         CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
-            "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
+            "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] == sizeof(U),
             "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected" << sizeof(U) << "but got" << sizeof(T)*view._size._data[dimensions - 1], {});
         return StridedArrayView<dimensions - 1, U>{
@@ -1425,7 +1425,7 @@ template<> struct ArrayCastFlattenOrInflate<0> {
         }
         #endif
         CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
-            "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
+            "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] % sizeof(U) == 0,
             "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a" << sizeof(U) << Utility::Debug::nospace << "-byte type got" << sizeof(T)*view._size._data[dimensions - 1], {});
 
@@ -1475,19 +1475,21 @@ channels pixel data:
 @snippet Containers.cpp arrayCast-StridedArrayView-inflate
 
 If @cpp newDimensions < dimensions @ce, flattens the last dimension into a
-tightly packed new type @p U, expecting the last dimension to be tightly packed
-and its stride equal to size of @p U. The @p newDimensions template parameter
-is expected to always be one less than @p dimensions.
+contiguous new type @p U, expecting the last dimension to be contiguous and its
+stride equal to size of @p U. The @p newDimensions template parameter is
+expected to always be one less than @p dimensions.
 
 Lastly, if @cpp newDimensions == dimensions @ce, the last dimension is
-reinterpreted as @p U, expecting it to be tightly packed and its total byte
-size being divisible by the size of @p U. The resulting last dimension has a
-size that's a ratio of @p T and @p U sizes and stride equivalent to @p U.
+reinterpreted as @p U, expecting it to be contiguous and its total byte size
+being divisible by the size of @p U. The resulting last dimension has a size
+that's a ratio of @p T and @p U sizes and stride equivalent to @p U, being
+again contiguous.
 
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType) and @cpp sizeof(U) @ce is not larger than any
 @ref StridedArrayView::stride() "stride()" of the original array. Works with
 negative and zero strides as well, however note that no type compatibility
 checks can be done for zero strides, so be extra careful in that case.
+@see @ref StridedArrayView::isContiguous()
 */
 template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");

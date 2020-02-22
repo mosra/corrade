@@ -3388,10 +3388,10 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
     CORRADE_COMPARE(out.str(),
         "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected 4 but got 6\n"
         "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a 4-byte type got 6\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 2 but got 6\n"
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 2 but got 6\n"
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 2 but got -2\n"
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 2 but got -2\n"
         "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n"
         "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n");
 
@@ -3402,8 +3402,8 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
     arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 6}}.flipped<1>());
     arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 0}});
     CORRADE_COMPARE(out.str(),
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 6 but got -6\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 6 but got 0\n");
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 6 but got -6\n"
+        "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 6 but got 0\n");
 }
 
 void StridedArrayViewTest::castInflateVoid() {
