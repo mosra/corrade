@@ -3228,17 +3228,33 @@ void StridedArrayViewTest::castInflateFlatten() {
     CORRADE_COMPARE(a[1][1].r, 0x88);
     CORRADE_COMPARE(a[0][2].b, 0xee);
 
-    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a);
-    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{18, 6, 2}));
-    CORRADE_COMPARE(b[1][1][0], 0x88);
-    CORRADE_COMPARE(b[0][2][2], 0xee);
+    /* Inflate but keep the dimension count */
+    StridedArrayView2D<unsigned short> b2 = arrayCast<2, unsigned short>(a);
+    CORRADE_COMPARE(b2.size(), (Size2D{2, 9}));
+    CORRADE_COMPARE(b2.stride(), (Stride2D{18, 2}));
+    CORRADE_COMPARE(b2[1][3], 0x88);
+    CORRADE_COMPARE(b2[0][8], 0xee);
 
-    StridedArrayView2D<Rgb> c = arrayCast<2, Rgb>(b);
-    CORRADE_COMPARE(c.size(), (Size2D{2, 3}));
-    CORRADE_COMPARE(c.stride(), (Stride2D{18, 6}));
-    CORRADE_COMPARE(c[1][1].r, 0x88);
-    CORRADE_COMPARE(c[0][2].b, 0xee);
+    /* Inflate */
+    StridedArrayView3D<unsigned short> b3 = arrayCast<3, unsigned short>(a);
+    CORRADE_COMPARE(b3.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{18, 6, 2}));
+    CORRADE_COMPARE(b3[1][1][0], 0x88);
+    CORRADE_COMPARE(b3[0][2][2], 0xee);
+
+    /* Flatten but keep the dimension count */
+    StridedArrayView3D<Rgb> c3 = arrayCast<3, Rgb>(b3);
+    CORRADE_COMPARE(c3.size(), (Size3D{2, 3, 1}));
+    CORRADE_COMPARE(c3.stride(), (Stride3D{18, 6, 6}));
+    CORRADE_COMPARE(c3[1][1][0].r, 0x88);
+    CORRADE_COMPARE(c3[0][2][0].b, 0xee);
+
+    /* Flatten */
+    StridedArrayView2D<Rgb> c2 = arrayCast<2, Rgb>(b3);
+    CORRADE_COMPARE(c2.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(c2.stride(), (Stride2D{18, 6}));
+    CORRADE_COMPARE(c2[1][1].r, 0x88);
+    CORRADE_COMPARE(c2[0][2].b, 0xee);
 }
 
 void StridedArrayViewTest::castInflateFlattenZeroStride() {
@@ -3257,17 +3273,26 @@ void StridedArrayViewTest::castInflateFlattenZeroStride() {
     CORRADE_COMPARE(a[1][1].r, 0x77);
     CORRADE_COMPARE(a[0][2].b, 0x55);
 
-    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a);
-    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{6, 0, 2}));
-    CORRADE_COMPARE(b[1][1][0], 0x77);
-    CORRADE_COMPARE(b[0][2][2], 0x55);
+    /* Inflate */
+    StridedArrayView3D<unsigned short> b3 = arrayCast<3, unsigned short>(a);
+    CORRADE_COMPARE(b3.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{6, 0, 2}));
+    CORRADE_COMPARE(b3[1][1][0], 0x77);
+    CORRADE_COMPARE(b3[0][2][2], 0x55);
 
-    StridedArrayView2D<Rgb> c = arrayCast<2, Rgb>(b);
-    CORRADE_COMPARE(c.size(), (Size2D{2, 3}));
-    CORRADE_COMPARE(c.stride(), (Stride2D{6, 0}));
-    CORRADE_COMPARE(c[1][1].r, 0x77);
-    CORRADE_COMPARE(c[0][2].b, 0x55);
+    /* Flatten but keep the dimension count */
+    StridedArrayView3D<Rgb> c3 = arrayCast<3, Rgb>(b3);
+    CORRADE_COMPARE(c3.size(), (Size3D{2, 3, 1}));
+    CORRADE_COMPARE(c3.stride(), (Stride3D{6, 0, 6}));
+    CORRADE_COMPARE(c3[1][1][0].r, 0x77);
+    CORRADE_COMPARE(c3[0][2][0].b, 0x55);
+
+    /* Flatten */
+    StridedArrayView2D<Rgb> c2 = arrayCast<2, Rgb>(b3);
+    CORRADE_COMPARE(c2.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(c2.stride(), (Stride2D{6, 0}));
+    CORRADE_COMPARE(c2[1][1].r, 0x77);
+    CORRADE_COMPARE(c2[0][2].b, 0x55);
 }
 
 void StridedArrayViewTest::castInflateFlattenNegativeStride() {
@@ -3288,17 +3313,26 @@ void StridedArrayViewTest::castInflateFlattenNegativeStride() {
     CORRADE_COMPARE(a[1][1].r, 0x88);
     CORRADE_COMPARE(a[0][0].b, 0xee);
 
-    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a);
-    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{18, -6, 2}));
-    CORRADE_COMPARE(b[1][1][0], 0x88);
-    CORRADE_COMPARE(b[0][0][2], 0xee);
+    /* Inflate */
+    StridedArrayView3D<unsigned short> b3 = arrayCast<3, unsigned short>(a);
+    CORRADE_COMPARE(b3.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{18, -6, 2}));
+    CORRADE_COMPARE(b3[1][1][0], 0x88);
+    CORRADE_COMPARE(b3[0][0][2], 0xee);
 
-    StridedArrayView2D<Rgb> c = arrayCast<2, Rgb>(b);
-    CORRADE_COMPARE(c.size(), (Size2D{2, 3}));
-    CORRADE_COMPARE(c.stride(), (Stride2D{18, -6}));
-    CORRADE_COMPARE(c[1][1].r, 0x88);
-    CORRADE_COMPARE(c[0][0].b, 0xee);
+    /* Flatten, but keep the dimension count */
+    StridedArrayView3D<Rgb> c3 = arrayCast<3, Rgb>(b3);
+    CORRADE_COMPARE(c3.size(), (Size3D{2, 3, 1}));
+    CORRADE_COMPARE(c3.stride(), (Stride3D{18, -6, 6}));
+    CORRADE_COMPARE(c3[1][1][0].r, 0x88);
+    CORRADE_COMPARE(c3[0][0][0].b, 0xee);
+
+    /* Flatten */
+    StridedArrayView2D<Rgb> c2 = arrayCast<2, Rgb>(b3);
+    CORRADE_COMPARE(c2.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(c2.stride(), (Stride2D{18, -6}));
+    CORRADE_COMPARE(c2[1][1].r, 0x88);
+    CORRADE_COMPARE(c2[0][0].b, 0xee);
 }
 
 void StridedArrayViewTest::castInflateFlattenArrayView() {
@@ -3343,16 +3377,33 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
 
     std::ostringstream out;
     Error redirectError{&out};
-
     arrayCast<2, unsigned int>(a);
+    arrayCast<3, unsigned int>(a);
     arrayCast<2, Rgb>(b);
+    arrayCast<3, Rgb>(b);
     arrayCast<2, Rgb>(c);
+    arrayCast<3, Rgb>(c);
     arrayCast<2, Rgb>(d);
+    arrayCast<3, Rgb>(d);
     CORRADE_COMPARE(out.str(),
         "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected 4 but got 6\n"
+        "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a 4-byte type got 6\n"
+        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
         "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
         "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
+        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
+        "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n"
         "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n");
+
+    /* Inflating w/ keeping dimension count for zero and negative strides.
+       Negative/zero strides *could* probably work but my brainz are too low
+       right now to figure that out */
+    out.str({});
+    arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 6}}.flipped<1>());
+    arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 0}});
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 6 but got -6\n"
+        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 6 but got 0\n");
 }
 
 void StridedArrayViewTest::castInflateVoid() {

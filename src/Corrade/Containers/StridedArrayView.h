@@ -49,7 +49,7 @@ namespace Implementation {
     #endif
 
     template<unsigned, class> struct StridedElement;
-    template<bool> struct ArrayCastFlattenOrInflate;
+    template<int> struct ArrayCastFlattenOrInflate;
 
     /* Used in the assertion that data array is large enough. If any size
        element is zero, the data can be zero-sized as well. Other we have to
@@ -187,7 +187,7 @@ template<unsigned dimensions, class T> class StridedDimensions {
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedElement;
-        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
+        template<int> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_, class T_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, T_>&);
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
@@ -752,7 +752,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedElement;
-        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
+        template<int> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_, class T_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, T_>&);
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
@@ -1393,10 +1393,11 @@ namespace Implementation {
    function parameter), it's done like this to avoid default parameters in the
    arrayCast() so it can be forward-declared to break up header dependencies,
    and also to make the friend declaration inside StridedArrayView simpler */
-template<bool> struct ArrayCastFlattenOrInflate;
-template<> struct ArrayCastFlattenOrInflate<true> {
-    template<unsigned newDimensions, class U, unsigned dimensions, class T> static StridedArrayView<newDimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
-        static_assert(newDimensions + 1 == dimensions, "can flatten only into one less dimension");
+template<int dimensions> struct ArrayCastFlattenOrInflate {
+    static_assert(dimensions == 0, "can only inflate into one more dimension or flatten into the same / one less dimension");
+};
+template<> struct ArrayCastFlattenOrInflate<-1> {
+    template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions - 1, U> cast(const StridedArrayView<dimensions, T>& view) {
         #ifndef CORRADE_NO_DEBUG
         /* The last dimension is flattened, so not testing its stride */
         for(unsigned i = 0; i != dimensions - 1; ++i) {
@@ -1408,32 +1409,54 @@ template<> struct ArrayCastFlattenOrInflate<true> {
             "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] == sizeof(U),
             "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected" << sizeof(U) << "but got" << sizeof(T)*view._size._data[dimensions - 1], {});
-        return StridedArrayView<newDimensions, U>{
-            StaticArrayView<dimensions, const std::size_t>(view._size).template prefix<newDimensions>(),
-            StaticArrayView<dimensions, const std::ptrdiff_t>(view._stride).template prefix<newDimensions>(),
+        return StridedArrayView<dimensions - 1, U>{
+            StaticArrayView<dimensions, const std::size_t>(view._size).template prefix<dimensions - 1>(),
+            StaticArrayView<dimensions, const std::ptrdiff_t>(view._stride).template prefix<dimensions - 1>(),
             view._data};
     }
 };
-template<> struct ArrayCastFlattenOrInflate<false> {
-    template<unsigned newDimensions, class U, unsigned dimensions, class T> static StridedArrayView<newDimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
-        static_assert(newDimensions == dimensions + 1, "can inflate only into one more dimension");
+template<> struct ArrayCastFlattenOrInflate<0> {
+    template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
+        #ifndef CORRADE_NO_DEBUG
+        /* The last dimension is flattened, so not testing its stride */
+        for(unsigned i = 0; i != dimensions - 1; ++i) {
+            CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
+                "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
+        }
+        #endif
+        CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
+            "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
+        CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] % sizeof(U) == 0,
+            "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a" << sizeof(U) << Utility::Debug::nospace << "-byte type got" << sizeof(T)*view._size._data[dimensions - 1], {});
+
+        StridedDimensions<dimensions, std::size_t> size;
+        StridedDimensions<dimensions, std::ptrdiff_t> stride;
+        size._data[dimensions - 1] = sizeof(T)*view._size._data[dimensions - 1]/sizeof(U);
+        stride._data[dimensions - 1] = sizeof(U);
+        for(std::size_t i = 0; i != dimensions - 1; ++i) {
+            size._data[i] = view._size._data[i];
+            stride._data[i] = view._stride._data[i];
+        }
+        return StridedArrayView<dimensions, U>{size, stride, view._data};
+    }
+};
+template<> struct ArrayCastFlattenOrInflate<+1> {
+    template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions + 1, U> cast(const StridedArrayView<dimensions, T>& view) {
         constexpr std::size_t lastDimensionSize = sizeof(T)/sizeof(U);
         static_assert(sizeof(T) % lastDimensionSize == 0, "original type not a multiply of inflated type");
         /* No need to have a runtime check for the "stride fitting" like above
            as it is already checked with the above static_assert() at compile
            time -- assuming no stride was smaller than sizeof(T) before, it
            won't be smaller than sizeof(U) either since sizeof(T) > sizeof(U) */
-        std::size_t size[newDimensions];
-        std::ptrdiff_t stride[newDimensions];
-        size[dimensions] = lastDimensionSize;
-        stride[dimensions] = sizeof(U);
+        StridedDimensions<dimensions + 1, std::size_t> size;
+        StridedDimensions<dimensions + 1, std::ptrdiff_t> stride;
+        size._data[dimensions] = lastDimensionSize;
+        stride._data[dimensions] = sizeof(U);
         for(std::size_t i = 0; i != dimensions; ++i) {
-            size[i] = view._size._data[i];
-            stride[i] = view._stride._data[i];
+            size._data[i] = view._size._data[i];
+            stride._data[i] = view._stride._data[i];
         }
-        return StridedArrayView<newDimensions, U>{
-            StaticArrayView<newDimensions, const std::size_t>(size), StaticArrayView<newDimensions, const std::ptrdiff_t>(stride),
-            view._data};
+        return StridedArrayView<dimensions + 1, U>{size, stride, view._data};
     }
 };
 
@@ -1443,7 +1466,7 @@ template<> struct ArrayCastFlattenOrInflate<false> {
 @brief Reinterpret-cast and inflate or flatten a strided array view
 @m_since{2019,10}
 
-If @cpp newDimensions >= dimensions @ce, inflates the last dimension into the
+If @cpp newDimensions > dimensions @ce, inflates the last dimension into the
 new type @p U, its element count being ratio of @p T and @p U sizes. The
 @p newDimensions template parameter is expected to always be one more than
 @p dimensions. This operation can be used for example to peek into individual
@@ -1456,6 +1479,11 @@ tightly packed new type @p U, expecting the last dimension to be tightly packed
 and its stride equal to size of @p U. The @p newDimensions template parameter
 is expected to always be one less than @p dimensions.
 
+Lastly, if @cpp newDimensions == dimensions @ce, the last dimension is
+reinterpreted as @p U, expecting it to be tightly packed and its total byte
+size being divisible by the size of @p U. The resulting last dimension has a
+size that's a ratio of @p T and @p U sizes and stride equivalent to @p U.
+
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType) and @cpp sizeof(U) @ce is not larger than any
 @ref StridedArrayView::stride() "stride()" of the original array. Works with
 negative and zero strides as well, however note that no type compatibility
@@ -1464,7 +1492,7 @@ checks can be done for zero strides, so be extra careful in that case.
 template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    return Implementation::ArrayCastFlattenOrInflate<newDimensions < dimensions>::template cast<newDimensions, U>(view);
+    return Implementation::ArrayCastFlattenOrInflate<int(newDimensions) - int(dimensions)>::template cast<U>(view);
 }
 
 /**

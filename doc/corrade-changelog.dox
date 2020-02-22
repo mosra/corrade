@@ -133,7 +133,9 @@ namespace Corrade {
     false assumptions about moved-from instances or calling unsuspecting
     deleters on null pointers
 -   The dimension-changing @ref Containers::arrayCast(const StridedArrayView<dimensions, T>&)
-    utility has a new overload accepting @ref Containers::ArrayView as well
+    utility has a new overload accepting @ref Containers::ArrayView as well,
+    and got extended to support reinterpreting the last contiguous dimension
+    into a different type
 -   In-place element construction in @ref Containers::Array,
     @ref Containers::StaticArray, @ref Containers::Pointer,
     @ref Containers::Optional and growable array utilities now properly handle
