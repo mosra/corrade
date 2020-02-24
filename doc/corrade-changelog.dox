@@ -149,6 +149,12 @@ namespace Corrade {
 -   @ref Interconnect::connect() now can recognize trivially copyable lambdas
     also on GCC versions before 5 and store them more efficiently
 
+@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+
+-   The @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_BENCHMARK()
+    and other macros can now be called also from inside lambdas and helper
+    functions, not just directly from a @ref TestSuite::Tester subclass
+
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT() and

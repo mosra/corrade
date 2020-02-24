@@ -1099,11 +1099,14 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             registerArguments(argc, const_cast<char**>(argv));
         }
 
+        /* Called from all CORRADE_*() macros */
+        static Tester& instance();
+
         /* Called from CORRADE_TEST_MAIN() */
         int exec();
 
         /* Overload needed for testing */
-        int exec(std::ostream* logOutput, std::ostream* errorOutput);
+        int exec(Tester* previousTester, std::ostream* logOutput, std::ostream* errorOutput);
 
         /* Compare two identical types without explicit type specification */
         template<class T> void compare(const char* actual, const T& actualValue, const char* expected, const T& expectedValue) {
@@ -1144,30 +1147,23 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         CORRADE_NORETURN void skip(const std::string& message);
         CORRADE_NORETURN void skip(const char* message);
 
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    protected:
-    #endif
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:
-                explicit ExpectedFailure(Tester& instance, const std::string& message, bool enabled = true);
-                explicit ExpectedFailure(Tester& instance, std::string&& message, bool enabled = true);
-                explicit ExpectedFailure(Tester& instance, const char* message, bool enabled = true);
+                explicit ExpectedFailure(const std::string& message, bool enabled = true);
+                explicit ExpectedFailure(std::string&& message, bool enabled = true);
+                explicit ExpectedFailure(const char* message, bool enabled = true);
 
                 /* For types with explicit bool conversion */
-                template<class T> explicit ExpectedFailure(Tester& instance, const std::string& message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
-                template<class T> explicit ExpectedFailure(Tester& instance, std::string&& message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
-                template<class T> explicit ExpectedFailure(Tester& instance, const char* message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(const std::string& message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(std::string&& message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(const char* message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
 
                 ~ExpectedFailure();
-
-            private:
-                Tester& _instance;
         };
 
         class CORRADE_TESTSUITE_EXPORT IterationPrinter {
             public:
-                IterationPrinter(Tester& instance);
-
+                IterationPrinter();
                 ~IterationPrinter();
 
                 Debug debug();
@@ -1176,7 +1172,6 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 friend Tester;
                 struct Data;
 
-                Tester& _instance;
                 /* There's a std::ostringstream inside (yes, ew); don't want
                    that in a header */
                 Containers::Pointer<Data> _data;
@@ -1220,11 +1215,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    protected:
+    public:
     #endif
         class CORRADE_TESTSUITE_EXPORT BenchmarkRunner {
             public:
-                explicit BenchmarkRunner(Tester& instance, TestCase::BenchmarkBegin begin, TestCase::BenchmarkEnd end): _instance(instance), _end{end} {
+                explicit BenchmarkRunner(TestCase::BenchmarkBegin begin, TestCase::BenchmarkEnd end): _instance(Tester::instance()), _end{end} {
                     (_instance.*begin)();
                 }
 
@@ -1234,6 +1229,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 const char* end() const;
 
             private:
+                /* Caching the instance here to avoid potentially slow global
+                   variable access */
                 Tester& _instance;
                 TestCase::BenchmarkEnd _end;
         };
@@ -1308,7 +1305,7 @@ namespace.
 #endif
 
 /** @hideinitializer
-@brief Verify an expression in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
+@brief Verify an expression in a test case
 
 If the expression is not true, the expression is printed and execution of given
 test case is terminated. Example usage:
@@ -1321,16 +1318,25 @@ It is possible to use @ref CORRADE_VERIFY() also on objects with
 
 @snippet TestSuite.cpp CORRADE_VERIFY-explicit
 
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case,
+however note that the very first call to a `CORRADE_*()` macro captures the
+caller function name for the test output, which may not be desired when being
+in a helper function or a lambda. To circumvent that, either call a dummy
+@cpp CORRADE_VERIFY(true) @ce at the top of your test case, or explicitly call
+@ref Corrade::TestSuite::Tester::setTestCaseName() "setTestCaseName()" with
+either a hardcoded name or e.g. @ref CORRADE_FUNCTION.
 @see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_VERIFY(expression)                                          \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
-        Tester::verify(#expression, expression);                            \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().verify(#expression, expression); \
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
+@brief Compare two values in a test case
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -1342,18 +1348,22 @@ Comparison of floating-point types is by default done as a fuzzy-compare, see
 @ref Corrade::TestSuite::Comparator<double> "TestSuite::Comparator<double>" for
 details.
 
-Note that this macro is usable only if given type implements equality
-comparison operators and is printable via @ref Corrade::Utility::Debug "Utility::Debug".
-@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE_AS()
+Note that this macro is usable only if the type passed to it is printable via
+@ref Corrade::Utility::Debug "Utility::Debug" and is convertible to / usable
+with given comparator type. This macro is meant to be called in a test case in
+a @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible
+to also call it in a helper function or lambda called from inside a test case
+with some caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
-        Tester::compare(#actual, actual, #expected, expected);              \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().compare(#actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass with explicitly specified type
+@brief Compare two values in a test case with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -1365,7 +1375,10 @@ for example of more involved comparisons.
 
 Note that this macro is usable only if the type passed to it is printable via
 @ref Corrade::Utility::Debug "Utility::Debug" and is convertible to / usable
-with given comparator type.
+with given comparator type. This macro is meant to be called in a test case in
+a @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible
+to also call it in a helper function or lambda called from inside a test case
+with some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_WITH()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -1373,13 +1386,13 @@ with given comparator type.
 #else
 #define CORRADE_COMPARE_AS(actual, expected, ...)                           \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
-        Tester::compareAs<__VA_ARGS__>(#actual, actual, #expected, expected); \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().compareAs<__VA_ARGS__>(#actual, actual, #expected, expected); \
     } while(false)
 #endif
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass with explicitly specified comparator
+@brief Compare two values in a test case with explicitly specified comparator
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -1390,36 +1403,43 @@ See @ref Corrade::TestSuite::Comparator "TestSuite::Comparator" class
 documentation for more information.
 
 Note that this macro is usable only if the type passed to it is printable via
-@ref Corrade::Utility::Debug "Utility::Debug" and is usable with given
-comparator type.
+@ref Corrade::Utility::Debug "Utility::Debug" and is convertible to / usable
+with given comparator type. This macro is meant to be called in a test case in
+a @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible
+to also call it in a helper function or lambda called from inside a test case
+with some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
-        Tester::compareWith((comparatorInstance).comparator(), #actual, actual, #expected, expected); \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().compareWith((comparatorInstance).comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer
-@brief Expect failure in all following checks in the same scope
+@brief Expect failure in a test case in all following checks in the same scope
 @param message Message which will be printed into output as indication of
     expected failure
 
 Expects failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE()
 and @ref CORRADE_COMPARE_AS() checks in the same scope. In most cases it will
 be until the end of the function, but you can limit the scope by placing
-relevant checks in a separate block:
+relevant checks in a separate block. If any check following the macro in the
+same scope passes, an error will be printed to output.
 
 @snippet TestSuite.cpp CORRADE_EXPECT_FAIL
 
-If any of the following checks passes, an error will be printed to output.
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_EXPECT_FAIL_IF()
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(*this, message)
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){message}
 
 /** @hideinitializer
-@brief Conditionally expect failure in all following checks in the same scope
+@brief Conditionally expect failure in a test case in all following checks in the same scope
 @param message      Message which will be printed into output as indication of
     expected failure
 @param condition    The failure is expected only if the condition evaluates to
@@ -1438,12 +1458,17 @@ The solution is to use @cpp CORRADE_EXPECT_FAIL_IF() @ce:
 Similarly to @ref CORRADE_VERIFY(), it is possible to use
 @ref CORRADE_EXPECT_FAIL_IF() also on objects with @cpp explicit operator bool @ce
 without doing explicit conversion (e.g. using @cpp !! @ce).
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
-    Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(*this, message, condition)
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(message, condition)
 
 /** @hideinitializer
-@brief Skip test case
+@brief Skip a test case
 @param message Message which will be printed into output as indication of
     skipped test
 
@@ -1451,15 +1476,20 @@ Skips all following checks in given test case. Useful for e.g. indicating that
 given feature can't be tested on given platform:
 
 @snippet TestSuite.cpp CORRADE_SKIP
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_SKIP(message)                                               \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
-        Tester::skip(message);                                              \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().skip(message); \
     } while(false)
 
 /** @hideinitializer
-@brief Iteration annotation
+@brief Annotate an iteration in a test case
 @param ...      Value to print in a failure diagnostic
 @m_since_latest
 
@@ -1468,16 +1498,21 @@ to the file/line info. Doesn't print anything if there was no failure. Applies
 to all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc. checks in
 the same scope, multiple calls in the same scope (or nested scopes) are joined
 together. See @ref TestSuite-Tester-iteration-annotations for an example.
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_ITERATION(...)                                              \
-    Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__){*this}; \
+    Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__); \
     do {                                                                    \
-        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
         _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__).debug() << __VA_ARGS__; \
     } while(false)
 
 /** @hideinitializer
-@brief Run a benchmark
+@brief Run a benchmark in a test case
 
 Benchmarks the following block or expression by measuring @p batchSize
 iterations of given block. Use in conjunction with
@@ -1492,19 +1527,24 @@ then being used outside of the loop.
 
 The resulting measured value is divided by @p batchSize to represent cost of
 one iteration.
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #ifndef _MSC_VER
 #define CORRADE_BENCHMARK(batchSize)                                        \
-    Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);                   \
-    for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
+    Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+    for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Corrade::TestSuite::Tester::instance().createBenchmarkRunner(batchSize))
 #else
 /* MSVC warns about the benchmarkIteration variable being set but unused, no
    way around that except than disabling the warning */
 #define CORRADE_BENCHMARK(batchSize)                                        \
-    Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);                   \
+    Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
     for(                                                                    \
         __pragma(warning(push)) __pragma(warning(disable: 4189))            \
-        CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize) \
+        CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Corrade::TestSuite::Tester::instance().createBenchmarkRunner(batchSize) \
         __pragma(warning(pop))                                              \
     )
 #endif

@@ -156,6 +156,12 @@ void Tester::registerArguments(int& argc, char** const argv) {
     _argv = argv;
 }
 
+namespace {
+    /* Unlike with Debug not making this unique across static libs as I don't
+       expect any use case that would need this yet */
+    Tester* currentTester = nullptr;
+}
+
 Tester::Tester(const TesterConfiguration& configuration): _state{new TesterState{configuration}} {
     CORRADE_ASSERT(_argc, "TestSuite::Tester: command-line arguments not available", );
 }
@@ -166,9 +172,23 @@ Tester::~Tester() {
     _argv = nullptr;
 }
 
-int Tester::exec() { return exec(&std::cout, &std::cerr); }
+Tester& Tester::instance() {
+    CORRADE_ASSERT(currentTester, "TestSuite: attempting to call CORRADE_*() macros from outside a test case", *currentTester);
+    return *currentTester;
+}
 
-int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput) {
+int Tester::exec() { return exec(nullptr, &std::cout, &std::cerr); }
+
+int Tester::exec(Tester* const previousTester, std::ostream* const logOutput, std::ostream* const errorOutput) {
+    /* Set up the global pointer for the time during which tests are run, then
+       reset it back again. The `previousTester` is needed for testing where
+       there *are* two nested Tester instances. */
+    CORRADE_ASSERT(currentTester == previousTester, "TestSuite::Tester: only one Tester instance can be active at a time", {});
+    currentTester = this;
+    Containers::ScopeGuard resetCurrentTester{previousTester, [](Tester* t) {
+        currentTester = t;
+    }};
+
     Utility::Arguments args;
     for(auto&& prefix: _state->configuration.skippedArgumentPrefixes())
         args.addSkippedPrefix(prefix);
@@ -821,10 +841,10 @@ void Tester::registerTestCase(const char* name, int line) {
 Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSize) {
     CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using benchmark macros outside of test cases is not allowed",
-        (BenchmarkRunner{*this, nullptr, nullptr}));
+        (BenchmarkRunner{nullptr, nullptr}));
 
     _state->benchmarkBatchSize = batchSize;
-    return BenchmarkRunner{*this, _state->testCase->benchmarkBegin, _state->testCase->benchmarkEnd};
+    return BenchmarkRunner{_state->testCase->benchmarkBegin, _state->testCase->benchmarkEnd};
 }
 
 void Tester::wallTimeBenchmarkBegin() {
@@ -858,21 +878,23 @@ void Tester::addTestCaseInternal(const TestCase& testCase) {
     _state->testCases.push_back(testCase);
 }
 
-Tester::ExpectedFailure::ExpectedFailure(Tester& instance, std::string&& message, const bool enabled): _instance(instance) {
+Tester::ExpectedFailure::ExpectedFailure(std::string&& message, const bool enabled) {
+    Tester& instance = Tester::instance();
     if(!enabled || instance._state->expectedFailuresDisabled) return;
     instance._state->expectedFailureMessage = message;
     instance._state->expectedFailure = this;
 }
 
-Tester::ExpectedFailure::ExpectedFailure(Tester& instance, const std::string& message, const bool enabled): ExpectedFailure{instance, std::string{message}, enabled} {}
+Tester::ExpectedFailure::ExpectedFailure(const std::string& message, const bool enabled): ExpectedFailure{std::string{message}, enabled} {}
 
-Tester::ExpectedFailure::ExpectedFailure(Tester& instance, const char* message, const bool enabled): ExpectedFailure{instance, std::string{message}, enabled} {}
+Tester::ExpectedFailure::ExpectedFailure(const char* message, const bool enabled): ExpectedFailure{std::string{message}, enabled} {}
 
 Tester::ExpectedFailure::~ExpectedFailure() {
-    _instance._state->expectedFailure = nullptr;
+    instance()._state->expectedFailure = nullptr;
 }
 
-Tester::IterationPrinter::IterationPrinter(Tester& instance): _instance(instance) {
+Tester::IterationPrinter::IterationPrinter() {
+    Tester& instance = Tester::instance();
     /* Insert itself into the list of iteration printers */
     _data.emplace().parent = instance._state->iterationPrinter;
     instance._state->iterationPrinter = this;
@@ -881,8 +903,8 @@ Tester::IterationPrinter::IterationPrinter(Tester& instance): _instance(instance
 Tester::IterationPrinter::~IterationPrinter() {
     /* Remove itself from the list of iteration printers (assuming destruction
        of those goes in inverse order) */
-    CORRADE_INTERNAL_ASSERT(_instance._state->iterationPrinter == this);
-    _instance._state->iterationPrinter = _data->parent;
+    CORRADE_INTERNAL_ASSERT(instance()._state->iterationPrinter == this);
+    instance()._state->iterationPrinter = _data->parent;
 }
 
 Utility::Debug Tester::IterationPrinter::debug() {

@@ -579,6 +579,8 @@ struct TesterTest: Tester {
     void compareNonCopyable();
     void verifyExplicitBool();
     void expectFailIfExplicitBool();
+
+    void macrosInALambda();
 };
 
 class EmptyTest: public Tester {};
@@ -642,7 +644,9 @@ TesterTest::TesterTest() {
               &TesterTest::compareWithDereference,
               &TesterTest::compareNonCopyable,
               &TesterTest::verifyExplicitBool,
-              &TesterTest::expectFailIfExplicitBool});
+              &TesterTest::expectFailIfExplicitBool,
+
+              &TesterTest::macrosInALambda});
 }
 
 void TesterTest::configurationCopy() {
@@ -699,7 +703,7 @@ void TesterTest::test() {
             #endif
         };
         t.registerTest("here.cpp", "TesterTest::Test");
-        t.exec();
+        t.exec(this, Debug::defaultOutput(), Error::defaultOutput());
         Debug{} << "======================== visual color verification end =========================";
     }
 
@@ -717,7 +721,7 @@ void TesterTest::test() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 1);
     CORRADE_COMPARE_AS(out.str(),
@@ -734,7 +738,7 @@ void TesterTest::emptyTest() {
     Tester::registerArguments(argc, argv);
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::EmptyTest!\n");
@@ -749,7 +753,7 @@ void TesterTest::skipOnly() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -766,7 +770,7 @@ void TesterTest::skipAll() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
@@ -785,7 +789,7 @@ void TesterTest::skipTests() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -802,7 +806,7 @@ void TesterTest::skipBenchmarks() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -819,7 +823,7 @@ void TesterTest::skipTestsNothingElse() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE(out.str(), "No remaining benchmarks to run in TesterTest::Test.\n");
@@ -834,7 +838,7 @@ void TesterTest::skipBenchmarksNothingElse() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE(out.str(), "No remaining tests to run in TesterTest::Test.\n");
@@ -849,7 +853,7 @@ void TesterTest::skipTestsBenchmarks() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
@@ -866,7 +870,7 @@ void TesterTest::shuffleOne() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -883,7 +887,7 @@ void TesterTest::repeatEvery() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -900,7 +904,7 @@ void TesterTest::repeatAll() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -917,7 +921,7 @@ void TesterTest::abortOnFail() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 1);
     CORRADE_COMPARE_AS(out.str(),
@@ -934,7 +938,7 @@ void TesterTest::abortOnFailSkip() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 1);
     CORRADE_COMPARE_AS(out.str(),
@@ -951,7 +955,7 @@ void TesterTest::noXfail() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
@@ -970,7 +974,7 @@ void TesterTest::compareMessageVerboseDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not print any message (and not fail) */
     CORRADE_COMPARE(result, 0);
@@ -990,7 +994,7 @@ void TesterTest::compareMessageVerboseEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should print a verbose message (and not fail) */
     CORRADE_COMPARE(result, 0);
@@ -1010,7 +1014,7 @@ void TesterTest::compareMessageFailed() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not print any message, just the failure */
     CORRADE_COMPARE(result, 1);
@@ -1030,7 +1034,7 @@ void TesterTest::compareMessageXfail() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not print any message, just the XFAIL, and succeed */
     CORRADE_COMPARE(result, 0);
@@ -1050,7 +1054,7 @@ void TesterTest::saveDiagnosticVerboseDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not save any file, not fail and not print anything */
     CORRADE_COMPARE(result, 0);
@@ -1070,7 +1074,7 @@ void TesterTest::saveDiagnosticVerboseEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should save a verbose.txt file, but not fail */
     CORRADE_COMPARE(result, 0);
@@ -1090,7 +1094,7 @@ void TesterTest::saveDiagnosticFailedDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not save any file, only hint about the flag in the final wrap-up */
     CORRADE_COMPARE(result, 1);
@@ -1110,7 +1114,7 @@ void TesterTest::saveDiagnosticFailedEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should save the file and print both the error and SAVED */
     CORRADE_COMPARE(result, 1);
@@ -1130,7 +1134,7 @@ void TesterTest::saveDiagnosticXfailDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Shouldn't save any file, just print XFAIL and succeed -- no difference
        if diagnostic is enabled or not */
@@ -1151,7 +1155,7 @@ void TesterTest::saveDiagnosticXfailEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Shouldn't save any file, just print XFAIL and succeed -- no difference
        if diagnostic is enabled or not */
@@ -1172,7 +1176,7 @@ void TesterTest::saveDiagnosticXpassDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should not save any file, but print XPASS and hint about the flag in the
        final wrap-up */
@@ -1193,7 +1197,7 @@ void TesterTest::saveDiagnosticXpassEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should save the file, print both XPASS and SAVED */
     CORRADE_COMPARE(result, 1);
@@ -1213,7 +1217,7 @@ void TesterTest::saveDiagnosticSucceededDisabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Shouldn't save and shouldn't hint existence of the flag either as
        there's no error */
@@ -1234,7 +1238,7 @@ void TesterTest::saveDiagnosticSucceededEnabled() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     /* Should save the file (and print) even though there's no error */
     CORRADE_COMPARE(result, 0);
@@ -1254,7 +1258,7 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
@@ -1275,7 +1279,7 @@ void TesterTest::benchmarkWallClock() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -1296,7 +1300,7 @@ void TesterTest::benchmarkCpuClock() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -1317,7 +1321,7 @@ void TesterTest::benchmarkCpuCycles() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -1338,7 +1342,7 @@ void TesterTest::benchmarkDiscardAll() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -1359,7 +1363,7 @@ void TesterTest::benchmarkDebugBuildNote() {
         #endif
     };
     t.registerTest("here.cpp", "TesterTest::Test", /*isDebugBuild=*/true);
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
@@ -1380,7 +1384,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
         .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-performance.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
@@ -1400,7 +1404,7 @@ void TesterTest::benchmarkCpuScalingWarning() {
         .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
@@ -1420,7 +1424,7 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
         .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
@@ -1440,7 +1444,7 @@ void TesterTest::testName() {
     Test t{&out};
     t.setTestName("MyCustomTestName");
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
@@ -1535,6 +1539,26 @@ void TesterTest::expectFailIfExplicitBool() {
         CORRADE_EXPECT_FAIL_IF(ExplicitTrue{}, "");
         CORRADE_VERIFY(false);
     }
+}
+
+void TesterTest::macrosInALambda() {
+    setTestCaseName(CORRADE_FUNCTION);
+
+    []() {
+        CORRADE_COMPARE_AS(3, 3, float);
+        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+        {
+            CORRADE_EXPECT_FAIL_IF(false, "");
+            CORRADE_COMPARE(3, 3);
+        }
+        {
+            CORRADE_ITERATION("37");
+            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_EXPECT_FAIL().");
+            CORRADE_VERIFY(false);
+        }
+        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
+        CORRADE_BENCHMARK(3) std::puts("a");
+    }();
 }
 
 }}}}
