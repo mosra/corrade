@@ -240,6 +240,7 @@ bool handleUnicode = args.value<bool>("unicode");
 static_cast<void>(handleUnicode);
 }
 
+{
 /* [Arguments-delegating-ignore-unknown] */
 /* The first instance handles all arguments */
 Utility::Arguments args{"formatter"};
@@ -257,6 +258,7 @@ args.addOption("width", "80").setHelp("width", "number of columns")
         .parse(argc, argv);
 }
 /* [Arguments-delegating-ignore-unknown] */
+}
 
 }
 };
