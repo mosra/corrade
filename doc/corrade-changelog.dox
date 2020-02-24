@@ -78,6 +78,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
+-   Added @ref Utility::Arguments::setParseErrorCallback() for implementing
+    additional argument parsing logic and overriding the default behavior
 -   Ability to optionally prefix @ref Utility::Debug output with a source file
     and line on supported compilers. See @ref Utility-Debug-source-location and
     [mosra/corrade#55](https://github.com/mosra/corrade/pull/55) for more

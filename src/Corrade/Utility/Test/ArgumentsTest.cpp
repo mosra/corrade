@@ -107,6 +107,10 @@ struct ArgumentsTest: TestSuite::Tester {
     void notParsedYetOnlyHelp();
     void valueNotFound();
     void valueMismatchedBoolean();
+
+    void parseErrorCallback();
+    void parseErrorCallbackIgnoreAll();
+    void parseErrorCallbackIgnoreAll2();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -180,7 +184,11 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::notParsedYet,
               &ArgumentsTest::notParsedYetOnlyHelp,
               &ArgumentsTest::valueNotFound,
-              &ArgumentsTest::valueMismatchedBoolean});
+              &ArgumentsTest::valueMismatchedBoolean,
+
+              &ArgumentsTest::parseErrorCallback,
+              &ArgumentsTest::parseErrorCallbackIgnoreAll,
+              &ArgumentsTest::parseErrorCallbackIgnoreAll2});
 }
 
 bool hasEnv(const std::string& value) {
@@ -662,6 +670,11 @@ void ArgumentsTest::parseFinalOptionalArgumentDefault() {
 
 void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::UnknownArgument);
+        CORRADE_COMPARE(key, "error");
+        return false;
+    });
 
     const char* argv[] = { "", "--error" };
 
@@ -673,6 +686,11 @@ void ArgumentsTest::parseUnknownArgument() {
 
 void ArgumentsTest::parseUnknownShortArgument() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::UnknownShortArgument);
+        CORRADE_COMPARE(key, "e");
+        return false;
+    });
 
     const char* argv[] = { "", "-e" };
 
@@ -684,6 +702,11 @@ void ArgumentsTest::parseUnknownShortArgument() {
 
 void ArgumentsTest::parseSuperfluousArgument() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::SuperfluousArgument);
+        CORRADE_COMPARE(key, "error");
+        return false;
+    });
 
     const char* argv[] = { "", "error" };
 
@@ -707,6 +730,11 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
 
 void ArgumentsTest::parseInvalidShortArgument() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidShortArgument);
+        CORRADE_COMPARE(key, "?");
+        return false;
+    });
 
     const char* argv[] = { "", "-?" };
 
@@ -718,17 +746,27 @@ void ArgumentsTest::parseInvalidShortArgument() {
 
 void ArgumentsTest::parseInvalidLongArgument() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidArgument);
+        CORRADE_COMPARE(key, "??");
+        return false;
+    });
 
-    const char* argv[] = { "", "--?" };
+    const char* argv[] = { "", "--??" };
 
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument --?\n");
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument --??\n");
 }
 
 void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidShortArgument);
+        CORRADE_COMPARE(key, "long-argument");
+        return false;
+    });
 
     const char* argv[] = { "", "-long-argument" };
 
@@ -741,6 +779,11 @@ void ArgumentsTest::parseInvalidLongArgumentDashes() {
 void ArgumentsTest::parseMissingValue() {
     Arguments args;
     args.addOption("output");
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::MissingValue);
+        CORRADE_COMPARE(key, "output");
+        return false;
+    });
 
     const char* argv[] = { "", "--output" };
 
@@ -753,6 +796,11 @@ void ArgumentsTest::parseMissingValue() {
 void ArgumentsTest::parseMissingOption() {
     Arguments args;
     args.addNamedArgument("output");
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::MissingArgument);
+        CORRADE_COMPARE(key, "output");
+        return false;
+    });
 
     const char* argv[] = { "" };
 
@@ -765,6 +813,11 @@ void ArgumentsTest::parseMissingOption() {
 void ArgumentsTest::parseMissingArgument() {
     Arguments args;
     args.addArgument("file").setHelp("file", "", "file.dat");
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::MissingArgument);
+        CORRADE_COMPARE(key, "file");
+        return false;
+    });
 
     const char* argv[] = { "" };
 
@@ -1076,6 +1129,116 @@ void ArgumentsTest::valueMismatchedBoolean() {
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::value(): cannot use this function for boolean option boolean\n"
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value value\n");
+}
+
+void ArgumentsTest::parseErrorCallback() {
+    Utility::Arguments args;
+    args.addArgument("input")
+        .addArgument("output")
+        .addBooleanOption('i', "info")
+            .setHelp("info", "print info about the input file and exit")
+        .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
+            /* If --info is passed, we don't need the output argument */
+            if(error == Arguments::ParseError::MissingArgument &&
+            key == "output" &&
+            args.isSet("info")) return true;
+
+            /* Handle all other errors as usual */
+            return false;
+        });
+
+    /* Parsing should succeed */
+    const char* argv[] = { "", "file.in", "-i" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(args.isSet("info"));
+    CORRADE_COMPARE(args.value("input"), "file.in");
+    CORRADE_COMPARE(args.value("output"), ""); /* default-constructed */
+}
+
+void ArgumentsTest::parseErrorCallbackIgnoreAll() {
+    int count = 0;
+
+    Utility::Arguments args;
+    args.addArgument("input")
+        .addOption("output")
+        .addBooleanOption("hello")
+        .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
+            ++*reinterpret_cast<int*>(args.parseErrorCallbackState());
+
+            switch(error) {
+                case Arguments::ParseError::InvalidShortArgument:
+                    CORRADE_COMPARE(key, "?");
+                    return true;
+                case Arguments::ParseError::InvalidArgument:
+                    CORRADE_COMPARE(key, "!!");
+                    return true;
+                case Arguments::ParseError::UnknownShortArgument:
+                    CORRADE_COMPARE(key, "v");
+                    return true;
+                case Arguments::ParseError::UnknownArgument:
+                    CORRADE_COMPARE(key, "halp");
+                    return true;
+                case Arguments::ParseError::MissingValue:
+                    CORRADE_COMPARE(key, "output");
+                    return true;
+                case Arguments::ParseError::MissingArgument:
+                    CORRADE_COMPARE(key, "input");
+                    return true;
+
+                /* Not handled here (mutually exclusive with MissingArgument) */
+                case Arguments::ParseError::SuperfluousArgument:
+                    break;
+            }
+
+            CORRADE_ITERATION(error);
+            CORRADE_ITERATION(key);
+            CORRADE_VERIFY(!"this shouldn't get here");
+            return true;
+        }, &count);
+
+    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "--hello", "--output" };
+    /* The parsing should ignore the errors, not die where it shouldn't, but
+       still extracting the valid optionas */
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(count, 6);
+    CORRADE_VERIFY(args.isSet("hello"));
+}
+
+void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
+    int count = 0;
+
+    Utility::Arguments args;
+    args.addBooleanOption("hello")
+        .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
+            ++*reinterpret_cast<int*>(args.parseErrorCallbackState());
+
+            switch(error) {
+                /* All those handled above */
+                case Arguments::ParseError::InvalidShortArgument:
+                case Arguments::ParseError::InvalidArgument:
+                case Arguments::ParseError::UnknownShortArgument:
+                case Arguments::ParseError::UnknownArgument:
+                case Arguments::ParseError::MissingValue:
+                case Arguments::ParseError::MissingArgument:
+                    break;
+
+                case Arguments::ParseError::SuperfluousArgument:
+                    CORRADE_COMPARE(key, "/dev/null 3");
+                    return true;
+            }
+
+            CORRADE_ITERATION(error);
+            CORRADE_ITERATION(key);
+            CORRADE_VERIFY(!"this shouldn't get here");
+            return true;
+        }, &count);
+
+    const char* argv[] = { "", "/dev/null 3", "--hello" };
+    /* The parsing should ignore the errors, not die where it shouldn't, but
+       still extracting the valid optionas */
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(count, 1);
+    CORRADE_VERIFY(args.isSet("hello"));
 }
 
 }}}}

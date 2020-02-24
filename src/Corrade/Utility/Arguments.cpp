@@ -148,13 +148,19 @@ std::vector<std::string> Arguments::environment() {
     return list;
 }
 
-Arguments::Arguments(const std::string& prefix, Flags flags): _flags{InternalFlag(std::uint8_t(flags))}, _prefix{prefix + '-'} {
+namespace {
+    bool defaultParseErrorCallback(const Arguments&, Arguments::ParseError, const std::string&) {
+        return {};
+    }
+}
+
+Arguments::Arguments(const std::string& prefix, Flags flags): _flags{InternalFlag(std::uint8_t(flags))}, _prefix{prefix + '-'}, _parseErrorCallback{defaultParseErrorCallback} {
     /* Add help option */
     addBooleanOption("help");
     setHelp("help", "display this help message and exit");
 }
 
-Arguments::Arguments(Flags flags): _flags{InternalFlag(std::uint8_t(flags))} {
+Arguments::Arguments(Flags flags): _flags{InternalFlag(std::uint8_t(flags))}, _parseErrorCallback{defaultParseErrorCallback} {
     CORRADE_ASSERT(!(flags & Flag::IgnoreUnknownOptions),
         "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant", );
 
@@ -163,11 +169,12 @@ Arguments::Arguments(Flags flags): _flags{InternalFlag(std::uint8_t(flags))} {
     setHelp("help", "display this help message and exit");
 }
 
-Arguments::Arguments(Arguments&& other) noexcept: _flags{std::move(other._flags)}, _prefix{std::move(other._prefix)}, _command{std::move(other._command)}, _help{std::move(other._help)}, _entries{std::move(other._entries)}, _values{std::move(other._values)}, _skippedPrefixes{std::move(other._skippedPrefixes)}, _booleans{std::move(other._booleans)} {
+Arguments::Arguments(Arguments&& other) noexcept: _flags{std::move(other._flags)}, _prefix{std::move(other._prefix)}, _command{std::move(other._command)}, _help{std::move(other._help)}, _entries{std::move(other._entries)}, _values{std::move(other._values)}, _skippedPrefixes{std::move(other._skippedPrefixes)}, _booleans{std::move(other._booleans)}, _parseErrorCallback{std::move(other._parseErrorCallback)}, _parseErrorCallbackState{std::move(other._parseErrorCallbackState)} {
     other._flags &= ~InternalFlag::Parsed;
 }
 
 Arguments& Arguments::operator=(Arguments&& other) noexcept {
+    std::swap(other._flags, _flags);
     std::swap(other._prefix, _prefix);
     std::swap(other._command, _command);
     std::swap(other._help, _help);
@@ -175,7 +182,8 @@ Arguments& Arguments::operator=(Arguments&& other) noexcept {
     std::swap(other._values, _values);
     std::swap(other._skippedPrefixes, _skippedPrefixes);
     std::swap(other._booleans, _booleans);
-    std::swap(other._flags, _flags);
+    std::swap(other._parseErrorCallback, _parseErrorCallback);
+    std::swap(other._parseErrorCallbackState, _parseErrorCallbackState);
 
     return *this;
 }
@@ -393,6 +401,12 @@ Arguments& Arguments::setHelp(const std::string& key, std::string help, std::str
     return *this;
 }
 
+Arguments& Arguments::setParseErrorCallback(ParseErrorCallback callback, void* state) {
+    _parseErrorCallback = callback;
+    _parseErrorCallbackState = state;
+    return *this;
+}
+
 void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
@@ -525,6 +539,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 }
 
                 if(!verifyKey(key)) {
+                    if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, std::string{key}))
+                        continue;
+
                     Error() << "Invalid command-line argument" << std::string("-") + key;
                     return false;
                 }
@@ -532,6 +549,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 /* Find the option */
                 found = find(key);
                 if(found == _entries.end()) {
+                    if(_parseErrorCallback(*this, ParseError::UnknownShortArgument, std::string{key}))
+                        continue;
+
                     Error() << "Unknown command-line argument" << std::string("-") + key;
                     return false;
                 }
@@ -565,6 +585,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                     if(ignore) continue;
 
                     if(!verifyKey(key)) {
+                        if(_parseErrorCallback(*this, ParseError::InvalidArgument, key))
+                            continue;
+
                         Error() << "Invalid command-line argument" << std::string("--") + key;
                         return false;
                     }
@@ -582,6 +605,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                             continue;
                         }
 
+                        if(_parseErrorCallback(*this, ParseError::UnknownArgument, key))
+                            continue;
+
                         Error() << "Unknown command-line argument" << std::string("--") + key;
                         return false;
                     }
@@ -591,6 +617,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                    some long options. */
                 } else {
                     if(!_prefix.empty()) continue;
+
+                    if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, argv[i] + 1))
+                        continue;
 
                     Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
                     return false;
@@ -615,6 +644,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             /* Find next argument */
             const auto found = findNextArgument(nextArgument);
             if(found == _entries.end()) {
+                if(_parseErrorCallback(*this, ParseError::SuperfluousArgument, argv[i]))
+                    continue;
+
                 Error() << "Superfluous command-line argument" << argv[i];
                 return false;
             }
@@ -626,12 +658,15 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     }
 
     /* Expected value, but none given */
-    if(valueFor != _entries.end()) {
+    if(valueFor != _entries.end() && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
         Error() << "Missing value for command-line argument" << keyName(*valueFor);
         return false;
     }
 
+    /* Except success, set the internal flag to parsed so the MissingValue
+       callback can access the values */
     bool success = true;
+    _flags |= InternalFlag::Parsed;
 
     /* Check missing options. The _finalOptionalArgument points to one of them
        or is 0 if it's not set -- we assume that entry 0 is always --help, so
@@ -645,7 +680,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             continue;
 
         /* Argument was not parsed and it was not the final optional one */
-        if(parsedArguments[i] != true && _finalOptionalArgument != i) {
+        if(parsedArguments[i] != true && _finalOptionalArgument != i && !_parseErrorCallback(*this, ParseError::MissingArgument, _entries[i].key)) {
             Error() << "Missing command-line argument" << keyName(_entries[i]);
             success = false;
         }
@@ -930,5 +965,27 @@ auto Arguments::findNextArgument(const std::vector<Entry>::iterator start) -> st
 inline std::string Arguments::keyName(const Entry& entry) const {
     return entry.type == Type::Argument ? entry.helpKey : "--" + entry.key;
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
+    debug << "Utility::Arguments::ParseError" << Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(value) case Arguments::ParseError::value: return debug << "::" #value;
+        _c(InvalidShortArgument)
+        _c(InvalidArgument)
+        _c(UnknownShortArgument)
+        _c(UnknownArgument)
+        _c(SuperfluousArgument)
+        _c(MissingValue)
+        _c(MissingArgument)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint8_t(value)) << Debug::nospace << ")";
+}
+#endif
 
 }}

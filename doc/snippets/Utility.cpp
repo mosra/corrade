@@ -260,6 +260,28 @@ args.addOption("width", "80").setHelp("width", "number of columns")
 /* [Arguments-delegating-ignore-unknown] */
 }
 
+{
+/* [Arguments-parse-error-callback] */
+Utility::Arguments args;
+args.addOption("input")
+    .addOption("output")
+    .addBooleanOption("info")
+        .setHelp("info", "print info about the input file and exit")
+    .setParseErrorCallback([](const Utility::Arguments& args,
+                              Utility::Arguments::ParseError error,
+                              const std::string& key) {
+        /* If --info is passed, we don't need the output argument */
+        if(error == Utility::Arguments::ParseError::MissingArgument &&
+           key == "output" &&
+           args.isSet("info")) return true;
+
+        /* Handle all other errors as usual */
+        return false;
+    })
+    .parse(argc, argv);
+/* [Arguments-parse-error-callback] */
+}
+
 }
 };
 
