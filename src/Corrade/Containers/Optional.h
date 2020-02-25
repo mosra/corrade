@@ -491,6 +491,8 @@ template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
 }
 
 template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args) {
+    /* Done like this instead of std::swap() so it works for non-movable /
+       non-copyable types as well. */
     if(_set) _value.~T();
     _set = true;
     Implementation::construct<T>(_value, std::forward<Args>(args)...);
