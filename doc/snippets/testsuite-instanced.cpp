@@ -30,6 +30,8 @@ using namespace Corrade;
 
 using std::round;
 
+namespace {
+
 /** [0] */
 struct RoundTest: TestSuite::Tester {
     explicit RoundTest();
@@ -37,21 +39,19 @@ struct RoundTest: TestSuite::Tester {
     void test();
 };
 
-namespace {
-    enum: std::size_t { RoundDataCount = 5 };
+enum: std::size_t { RoundDataCount = 5 };
 
-    constexpr const struct {
-        const char* name;
-        float input;
-        float expected;
-    } RoundData[RoundDataCount] {
-        {"positive down", 3.3f, 3.0f},
-        {"positive up", 3.5f, 4.0f},
-        {"zero", 0.0f, 0.0f},
-        {"negative down", -3.5f, -4.0f},
-        {"negative up", -3.3f, -3.0f}
-    };
-}
+constexpr const struct {
+    const char* name;
+    float input;
+    float expected;
+} RoundData[RoundDataCount] {
+    {"positive down", 3.3f, 3.0f},
+    {"positive up", 3.5f, 4.0f},
+    {"zero", 0.0f, 0.0f},
+    {"negative down", -3.5f, -4.0f},
+    {"negative up", -3.3f, -3.0f}
+};
 
 RoundTest::RoundTest() {
     addInstancedTests({&RoundTest::test}, RoundDataCount);
@@ -63,6 +63,8 @@ void RoundTest::test() {
 
     CORRADE_COMPARE(round(data.input), data.expected);
 }
+/** [0] */
+
+}
 
 CORRADE_TEST_MAIN(RoundTest)
-/** [0] */

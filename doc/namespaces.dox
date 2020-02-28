@@ -182,8 +182,8 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 /** @namespace Corrade::TestSuite::Compare
 @brief Various test suite comparison helpers
 
-See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() and @ref Comparator
-for more information.
+See @ref TestSuite-Tester-advanced-comparisons, @ref CORRADE_COMPARE_AS(),
+@ref CORRADE_COMPARE_WITH() and @ref Comparator for more information.
 
 This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
 use this library with CMake, request the `TestSuite` component of the `Corrade`

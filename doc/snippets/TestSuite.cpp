@@ -147,6 +147,13 @@ CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 }
 
 {
+/* [Compare-around-just-one] */
+float a;
+CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
+/* [Compare-around-just-one] */
+}
+
+{
 /* [Compare-Divisible] */
 int a;
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);

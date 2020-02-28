@@ -28,6 +28,8 @@
 using namespace Corrade;
 
 /** [0] */
+namespace {
+
 struct MyTest: TestSuite::Tester {
     explicit MyTest();
 
@@ -48,6 +50,8 @@ void MyTest::addTwo() {
 void MyTest::subtractThree() {
     int b = 5;
     CORRADE_COMPARE(b - 3, 2);
+}
+
 }
 
 CORRADE_TEST_MAIN(MyTest)

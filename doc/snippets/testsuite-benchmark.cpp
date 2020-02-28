@@ -82,6 +82,6 @@ void InvSqrtBenchmark::fast() {
         a = fastinvsqrt(float(testCaseRepeatId()));
     CORRADE_VERIFY(a);
 }
+/** [0] */
 
 CORRADE_TEST_MAIN(InvSqrtBenchmark)
-/** [0] */

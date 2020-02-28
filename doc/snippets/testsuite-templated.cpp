@@ -47,6 +47,6 @@ template<class T> void PiTest::calculate() {
 
     CORRADE_COMPARE(calculatePi<T>(), T(3.141592653589793));
 }
+/** [0] */
 
 CORRADE_TEST_MAIN(PiTest)
-/** [0] */

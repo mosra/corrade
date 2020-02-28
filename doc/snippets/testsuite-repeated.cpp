@@ -59,6 +59,6 @@ template<class T> void RaceTest::threadedIncrement() {
 
     CORRADE_COMPARE(x, 1500);
 }
+/** [0] */
 
 CORRADE_TEST_MAIN(RaceTest)
-/** [0] */

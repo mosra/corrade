@@ -85,7 +85,6 @@ void VectorBenchmark::copyCountBegin() {
 std::uint64_t VectorBenchmark::copyCountEnd() {
     return count;
 }
-
-CORRADE_TEST_MAIN(VectorBenchmark)
 /** [0] */
 
+CORRADE_TEST_MAIN(VectorBenchmark)
