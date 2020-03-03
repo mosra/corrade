@@ -171,6 +171,8 @@ namespace Corrade {
     allocation-less (see [mosra/corrade#85](https://github.com/mosra/corrade/pull/85))
 -   @ref CORRADE_HAS_TYPE() now allows usage of template expressions containing
     commas
+-   Enabled @ref Utility::Debug::operator<<(long double) on Emscripten as well,
+    as it being unavailable was a pointless restriction hurting portability
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

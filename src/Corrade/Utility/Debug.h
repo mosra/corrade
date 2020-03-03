@@ -627,16 +627,15 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug& operator<<(double value);
 
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
         /**
          * @brief Print `long double` value to debug output
          *
-         * Prints the value with 18 significant digits.
-         * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
-         *      as JavaScript doesn't support doubles larger than 64 bits.
+         * Prints the value with 18 significant digits, however note that some
+         * platforms including Windows and Emscripten have @cpp long double @ce
+         * of the same size as @cpp double @ce and thus the output may be
+         * overly precise there.
          */
         Debug& operator<<(long double value);
-        #endif
 
         /**
          * @brief Print UTF-32 character to debug output

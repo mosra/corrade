@@ -114,9 +114,7 @@ DebugTest::DebugTest() {
         &DebugTest::ints<long long>,
         &DebugTest::floats<float>,
         &DebugTest::floats<double>,
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
         &DebugTest::floats<long double>,
-        #endif
         &DebugTest::chars,
         &DebugTest::pointer,
         &DebugTest::unicode,
@@ -274,7 +272,6 @@ template<> struct FloatsData<double> {
         #endif
     }
 };
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct FloatsData<long double> {
     static const char* name() { return "long double"; }
     static const char* expected() {
@@ -285,7 +282,6 @@ template<> struct FloatsData<long double> {
         #endif
     }
 };
-#endif
 
 void DebugTest::isTty() {
     Debug{} << "Debug output is a TTY?  " << (Debug::isTty() ? "yes" : "no");
@@ -963,9 +959,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":955: hello\n"
-        __FILE__ ":957: and this is from another line\n"
-        __FILE__ ":959\n"
+        __FILE__ ":951: hello\n"
+        __FILE__ ":953: and this is from another line\n"
+        __FILE__ ":955\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),

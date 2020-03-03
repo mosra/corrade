@@ -541,7 +541,6 @@ Debug& Debug::operator<<(double value) {
     *_output << std::setprecision(15);
     return print(value);
 }
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 Debug& Debug::operator<<(long double value) {
     if(!_output) return *this;
     /* Wikipedia says 18-digit number can be converted both ways without
@@ -550,7 +549,6 @@ Debug& Debug::operator<<(long double value) {
     *_output << std::setprecision(18);
     return print(value);
 }
-#endif
 
 Debug& Debug::operator<<(char32_t value) {
     std::ostringstream o;
