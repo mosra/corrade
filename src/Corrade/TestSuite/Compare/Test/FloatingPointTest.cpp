@@ -50,30 +50,38 @@ FloatingPointTest::FloatingPointTest() {
 }
 
 void FloatingPointTest::smallDelta() {
-    CORRADE_COMPARE(Comparator<float>()(3.202122f,
-                                        3.202123f),
+    CORRADE_COMPARE(Comparator<float>()(3.20212f,
+                                        3.20213f),
         ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<double>()(3.202122232425,
-                                         3.202122232426),
+    CORRADE_COMPARE(Comparator<double>()(3.20212223242576,
+                                         3.20212223242577),
         ComparisonStatusFlags{});
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_COMPARE(Comparator<long double>()(3.202122232425765l,
-                                              3.202122232425766l),
+    CORRADE_COMPARE(Comparator<long double>()(3.20212223242576586l,
+                                              3.20212223242576587l),
         ComparisonStatusFlags{});
     #endif
 }
 
 void FloatingPointTest::largeDelta() {
     CORRADE_COMPARE(Comparator<float>()(3.20212f,
-                                        3.20213f),
+                                        3.20219f),
         ComparisonStatusFlag::Failed);
-    CORRADE_COMPARE(Comparator<double>()(3.20212223242,
-                                         3.20212223243),
+    CORRADE_COMPARE(Comparator<double>()(3.2021222324257,
+                                         3.2021222324258),
         ComparisonStatusFlag::Failed);
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_COMPARE(Comparator<long double>()(3.20212223242572l,
-                                              3.20212223242573l),
+    /* MSVC and 32-bit Android have 64bit long doubles. Taken from Magnum's
+       TypeTraits, look there for more info. */
+    #if !defined(_MSC_VER) && (!defined(CORRADE_TARGET_ANDROID) || __LP64__)
+    CORRADE_COMPARE(Comparator<long double>()(3.2021222324257658l,
+                                              3.2021222324257659l),
         ComparisonStatusFlag::Failed);
+    #else
+    CORRADE_COMPARE(Comparator<long double>()(3.2021222324257,
+                                              3.2021222324258),
+        ComparisonStatusFlag::Failed);
+    #endif
     #endif
 }
 

@@ -131,9 +131,9 @@ void ContainerTest::output() {
 void ContainerTest::floatingPoint() {
     std::stringstream out;
 
-    std::vector<float> a{3.202122f, 3.202122f};
-    std::vector<float> b{3.202123f, 3.202123f};
-    std::vector<float> c{3.202123f, 3.202130f};
+    std::vector<float> a{3.20212f, 3.20212f};
+    std::vector<float> b{3.20212f, 3.20213f};
+    std::vector<float> c{3.20213f, 3.20219f};
 
     CORRADE_COMPARE(Comparator<Compare::Container<std::vector<float>>>{}(a, b), ComparisonStatusFlags{});
 
@@ -149,8 +149,8 @@ void ContainerTest::floatingPoint() {
     CORRADE_COMPARE(out.str(), "Containers a and c have different contents, actual:\n"
         "        {3.20212, 3.20212}\n"
         "        but expected\n"
-        "        {3.20212, 3.20213}\n"
-        "        Actual 3.20212 but 3.20213 expected on position 1.\n");
+        "        {3.20213, 3.20219}\n"
+        "        Actual 3.20212 but 3.20219 expected on position 1.\n");
 }
 
 void ContainerTest::nonCopyableArray() {

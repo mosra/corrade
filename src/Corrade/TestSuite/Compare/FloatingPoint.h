@@ -41,18 +41,26 @@ namespace Implementation {
     /** @todo What about consistency with Debug and format() output precision? */
     template<> class FloatComparatorEpsilon<float> {
         public:
-            constexpr static float epsilon() { return 1.0e-6f; }
+            constexpr static float epsilon() { return 1.0e-5f; }
     };
 
     template<> class FloatComparatorEpsilon<double> {
         public:
-            constexpr static double epsilon() { return 1.0e-12; }
+            constexpr static double epsilon() { return 1.0e-14; }
     };
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     template<> class FloatComparatorEpsilon<long double> {
         public:
-            constexpr static long double epsilon() { return 1.0e-15l; }
+            constexpr static long double epsilon() {
+                /* MSVC and 32-bit Android have 64bit long doubles. Taken from
+                   Magnum's TypeTraits, look there for more info. */
+                #if !defined(_MSC_VER) && (!defined(CORRADE_TARGET_ANDROID) || __LP64__)
+                return 1.0e-17l;
+                #else
+                return 1.0e-14;
+                #endif
+            }
     };
     #endif
 
