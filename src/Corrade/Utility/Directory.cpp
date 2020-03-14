@@ -81,6 +81,7 @@
 #endif
 #include <shlobj.h>
 #include <io.h>
+#include "Corrade/Utility/Implementation/WindowsError.h"
 #endif
 
 #include "Corrade/configure.h"
@@ -202,9 +203,6 @@ bool mkpath(const std::string& path) {
     if(path.back() == '/')
         return mkpath(path.substr(0, path.size()-1));
 
-    /* If the directory exists, done */
-    if(exists(path)) return true;
-
     /* If parent directory doesn't exist, create it */
     const std::string parentPath = Directory::path(path);
     if(!parentPath.empty() && !exists(parentPath) && !mkpath(parentPath)) return false;
@@ -214,11 +212,21 @@ bool mkpath(const std::string& path) {
     /* Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     const int ret = mkdir(path.data(), 0777);
-    return ret == 0;
+    if(ret != 0 && errno != EEXIST) {
+        Error{} << "Utility::Directory::mkpath(): error creating" << path << Debug::nospace << ":" << strerror(errno);
+        return false;
+    }
+    return true;
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    return CreateDirectoryW(widen(path).data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+    if(CreateDirectoryW(widen(path).data(), nullptr) == 0 && GetLastError() != ERROR_ALREADY_EXISTS) {
+        Error{} << "Utility::Directory::mkpath(): error creating"
+            << path << Debug::nospace << ":"
+            << Utility::Implementation::windowsErrorString(GetLastError());
+        return false;
+    }
+    return true;
 
     /* Not implemented elsewhere */
     #else

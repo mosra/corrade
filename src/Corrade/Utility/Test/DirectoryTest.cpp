@@ -28,6 +28,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
@@ -36,6 +37,8 @@
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
+
+#include <clocale>
 
 #include "configure.h"
 
@@ -585,12 +588,43 @@ void DirectoryTest::mkpathNoPermission() {
     if(Directory::exists("/nope"))
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
-    CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
+    std::ostringstream out;
+    Error err{&out};
+    {
+        /* Ensure errors are printed in English */
+        char* currentLocale = std::setlocale(LC_ALL, nullptr);
+        std::setlocale(LC_ALL, "en_US.utf8");
+        Containers::ScopeGuard restoreLocale{currentLocale, [](char* locale) {
+            std::setlocale(LC_ALL, locale);
+        }};
+
+        CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
+    }
+
+    #ifdef CORRADE_TARGET_ANDROID
+    CORRADE_COMPARE(out.str(),
+        "Utility::Directory::mkpath(): error creating /nope: Read-only file system\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Utility::Directory::mkpath(): error creating /nope: Permission denied\n");
+    #endif
+
     #else
     if(Directory::exists("W:/"))
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
+    std::ostringstream out;
+    Error err{&out};
+
     CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
+
+    /* On Windows we cannot ensure messages are printed in a certain
+     * language, as they depend on the user's installed languages */
+    const std::string output = out.str();
+    CORRADE_COMPARE(output.substr(0, 49),
+        "Utility::Directory::mkpath(): error creating W:: ");
+    /* Check that there's just one newline at the end, not two */
+    CORRADE_COMPARE(output.find('\n'), output.size() - 1);
     #endif
 }
 
