@@ -437,8 +437,8 @@ std::string libraryLocation(const void* address) {
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     HMODULE module{};
     if(!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<const char*>(address), &module)) {
-        /** @todo use FormatMessage() for a string error */
-        Error{} << "Utility::Directory::libraryLocation(): can't get library location:" << GetLastError();
+        Error{} << "Utility::Directory::libraryLocation(): can't get library location:"
+            << Utility::Implementation::windowsErrorString(GetLastError());
         return {};
     }
 
