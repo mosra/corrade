@@ -59,7 +59,7 @@ class Fatal;
 /* Endianness used only statically */
 class MurmurHash2;
 
-/* Resource doesn't need forward declaration */
+class Resource;
 class Sha1;
 class Translator;
 
