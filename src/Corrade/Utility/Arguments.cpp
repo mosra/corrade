@@ -522,7 +522,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         const std::size_t len = std::strlen(argv[i]);
 
         /* Option or named argument */
-        if(optionsAllowed && len != 0 && argv[i][0] == '-') {
+        if(optionsAllowed && len > 1 && argv[i][0] == '-') {
             std::vector<Entry>::iterator found = _entries.end();
 
             /* Short option */

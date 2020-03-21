@@ -78,6 +78,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseUnknownArgument();
     void parseUnknownShortArgument();
     void parseSuperfluousArgument();
+    void parseSingleDash();
     void parseArgumentAfterSeparator();
     void parseInvalidShortArgument();
     void parseInvalidLongArgument();
@@ -156,6 +157,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
+              &ArgumentsTest::parseSingleDash,
               &ArgumentsTest::parseArgumentAfterSeparator,
               &ArgumentsTest::parseInvalidShortArgument,
               &ArgumentsTest::parseInvalidLongArgument,
@@ -714,6 +716,22 @@ void ArgumentsTest::parseSuperfluousArgument() {
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument error\n");
+}
+
+void ArgumentsTest::parseSingleDash() {
+    Arguments args;
+    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+        CORRADE_COMPARE(error, Arguments::ParseError::SuperfluousArgument);
+        CORRADE_COMPARE(key, "-");
+        return false;
+    });
+
+    const char* argv[] = { "", "-" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Superfluous command-line argument -\n");
 }
 
 void ArgumentsTest::parseArgumentAfterSeparator() {
