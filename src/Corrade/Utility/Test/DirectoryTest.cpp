@@ -589,7 +589,6 @@ void DirectoryTest::mkpathNoPermission() {
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
     std::ostringstream out;
-    Error err{&out};
     {
         /* Ensure errors are printed in English */
         char* currentLocale = std::setlocale(LC_ALL, nullptr);
@@ -598,6 +597,7 @@ void DirectoryTest::mkpathNoPermission() {
             std::setlocale(LC_ALL, locale);
         }};
 
+        Error redirectError{&out};
         CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
     }
 
@@ -614,9 +614,10 @@ void DirectoryTest::mkpathNoPermission() {
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
     std::ostringstream out;
-    Error err{&out};
-
-    CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
+    {
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
+    }
 
     /* On Windows we cannot ensure messages are printed in a certain
      * language, as they depend on the user's installed languages */
