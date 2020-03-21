@@ -81,6 +81,7 @@
 #endif
 #include <shlobj.h>
 #include <io.h>
+
 #include "Corrade/Utility/Implementation/WindowsError.h"
 #endif
 

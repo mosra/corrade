@@ -23,9 +23,11 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 */
+
 #include "WindowsError.h"
 
 #include <string>
+
 #include "Corrade/Utility/Unicode.h"
 #include "Corrade/Containers/ScopeGuard.h"
 
@@ -48,6 +50,7 @@ std::string windowsErrorString(unsigned int errorCode) {
         LocalFree
         #endif
     };
+
     /* Convert to UTF-8 and cut off final newline that FormatMessages adds */
     return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW,
         wcslen(errorStringW)).except(1));
