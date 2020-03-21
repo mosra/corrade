@@ -178,6 +178,8 @@ namespace Corrade {
     commas
 -   Enabled @ref Utility::Debug::operator<<(long double) on Emscripten as well,
     as it being unavailable was a pointless restriction hurting portability
+-   @ref Utility::Directory::mkpath() now properly reports errors instead of
+    just arrogantly returning @cpp false @ce (see [mosra/corrade#92](https://github.com/mosra/corrade/pull/92))
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
