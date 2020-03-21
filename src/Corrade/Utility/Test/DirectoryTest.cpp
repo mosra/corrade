@@ -592,7 +592,7 @@ void DirectoryTest::mkpathNoPermission() {
     {
         /* Ensure errors are printed in English */
         char* currentLocale = std::setlocale(LC_ALL, nullptr);
-        std::setlocale(LC_ALL, "en_US.utf8");
+        std::setlocale(LC_ALL, "C");
         Containers::ScopeGuard restoreLocale{currentLocale, [](char* locale) {
             std::setlocale(LC_ALL, locale);
         }};
