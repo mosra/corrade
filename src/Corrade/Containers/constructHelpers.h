@@ -61,10 +61,10 @@ namespace Corrade { namespace Containers { namespace Implementation {
    details (Clang-specific): https://stackoverflow.com/q/17264067
 
    This might be fixed in more recent versions of the C++ standard. */
-template<class T, class First, class ...Next> void construct(T& value, First&& first, Next&& ...next) {
+template<class T, class First, class ...Next> inline void construct(T& value, First&& first, Next&& ...next) {
     new(&value) T{std::forward<First>(first), std::forward<Next>(next)...};
 }
-template<class T> void construct(T& value) {
+template<class T> inline void construct(T& value) {
     new(&value) T();
 }
 
