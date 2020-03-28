@@ -847,7 +847,11 @@ template<template<class> class Allocator, class T> inline void arrayShrink(Array
 }
 #endif
 
-/*@}*/
+/* Since 1.8.17, the original short-hand group closing doesn't work anymore.
+   FFS. */
+/**
+ * @}
+ */
 
 namespace Implementation {
 

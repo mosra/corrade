@@ -210,7 +210,11 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         void removeAllGroups(const std::string& name);
 
-        /*@}*/
+        /* Since 1.8.17, the original short-hand group closing doesn't work
+           anymore. FFS. */
+        /**
+         * @}
+         */
 
         /** @{ @name Value operations */
 
@@ -380,7 +384,11 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         void removeAllValues(const std::string& key);
 
-        /*@}*/
+        /* Since 1.8.17, the original short-hand group closing doesn't work
+           anymore. FFS. */
+        /**
+         * @}
+         */
 
         /**
          * @brief Clear group
