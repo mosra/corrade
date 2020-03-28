@@ -120,6 +120,7 @@ struct GrowableArrayTest: TestSuite::Tester {
     void explicitAllocatorParameter();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void moveConstructPlainStruct();
 
     void benchmarkAppendVector();
     void benchmarkAppendArray();
@@ -285,7 +286,8 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::explicitAllocatorParameter,
 
-              &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization});
+              &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &GrowableArrayTest::moveConstructPlainStruct});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1513,6 +1515,34 @@ void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     arrayResize(b, DirectInit, 1);
     arrayAppend(b, InPlaceInit);
     CORRADE_COMPARE(b.size(), 2);
+}
+
+void GrowableArrayTest::moveConstructPlainStruct() {
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        Array<int> b;
+    };
+
+    Array<MoveOnlyStruct> a;
+
+    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
+       to convert MoveOnlyStruct to int to intiialize the first argument and
+       fails miserably. */
+    arrayAppend(a, InPlaceInit, 3, 'a', nullptr);
+    arrayAppend(a, InPlaceInit, 4, 'b', nullptr);
+    arrayAppend(a, InPlaceInit, 5, 'c', nullptr);
+
+    /* This is another case where move constructors get called */
+    arrayResize(a, 15);
+
+    /* Here a move constructor gets called indirectly as the args are forwarded
+       to the InPlaceInit version. In this case there's a workaround for
+       the emplaceConstructorExplicitInCopyInitialization() case from above so
+       we're just reusing that to mix in the 4.8-specific variant also */
+    arrayAppend(a, MoveOnlyStruct{5, 'c', nullptr});
+
+    CORRADE_COMPARE(a.size(), 16);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {

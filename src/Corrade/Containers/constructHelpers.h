@@ -68,6 +68,18 @@ template<class T> void construct(T& value) {
     new(&value) T();
 }
 
+#if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
+/* Can't use {} because for plain structs it would attempt to initialize the
+   first member with `b` instead of calling the move constructor. See
+   GrowableArrayTest::moveConstructPlainStruct() for details. This will also
+   make it work in all cases where the above construct() overloads are used,
+   though I'm not going to test that explicitly unless I hit this again
+   elsewhere. */
+template<class T> inline void construct(T& value, T&& b) {
+    new(&value) T(std::move(b));
+}
+#endif
+
 }}}
 
 #endif

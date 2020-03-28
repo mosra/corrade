@@ -925,7 +925,12 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
     static_assert(std::is_nothrow_move_constructible<T>::value,
         "noexcept move-constructible type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
+        Implementation::construct(*dst, std::move(*src));
+        #else
         new(dst) T{std::move(*src)};
+        #endif
 }
 
 template<class T> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count, typename std::enable_if<
@@ -995,7 +1000,12 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
     static_assert(std::is_nothrow_move_constructible<T>::value,
         "noexcept move-constructibe type is required");
     for(T *src = array, *end = src + prevSize, *dst = newArray; src != end; ++src, ++dst)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
+        Implementation::construct(*dst, std::move(*src));
+        #else
         new(dst) T{std::move(*src)};
+        #endif
     for(T *it = array, *end = array + prevSize; it < end; ++it) it->~T();
     deallocate(array);
     array = newArray;
@@ -1234,6 +1244,8 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
     #endif
     ++arrayGuts.size;
     /* No helper function as there's no way we could memcpy such a thing. */
+    /* On GCC 4.8 this includes another workaround, see the 4.8-specific
+       overload docs for details */
     Implementation::construct(*it, std::forward<Args>(args)...);
     return *it;
 }
