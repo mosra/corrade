@@ -25,21 +25,22 @@
 
 #include "ConfigurationValue.h"
 
+#include <iomanip>
 #include <sstream>
+
+#include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility {
 
 namespace Implementation {
-    template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
+    template<class T> std::string IntegerConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
 
-        /* Hexadecimal / octal values, scientific notation */
+        /* Hexadecimal / octal values */
         if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
         else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Scientific)
-            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
         if(flags & ConfigurationValueFlag::Uppercase)
             stream.setf(std::istringstream::uppercase);
@@ -48,17 +49,55 @@ namespace Implementation {
         return stream.str();
     }
 
-    template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+    template<class T> T IntegerConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
         if(stringValue.empty()) return T{};
 
         std::istringstream stream{stringValue};
 
-        /* Hexadecimal / octal values, scientific notation */
+        /* Hexadecimal / octal values */
         if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
         else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Scientific)
+
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
+
+        T value;
+        stream >> value;
+        return value;
+    }
+
+    template struct IntegerConfigurationValue<short>;
+    template struct IntegerConfigurationValue<unsigned short>;
+    template struct IntegerConfigurationValue<int>;
+    template struct IntegerConfigurationValue<unsigned int>;
+    template struct IntegerConfigurationValue<long>;
+    template struct IntegerConfigurationValue<unsigned long>;
+    template struct IntegerConfigurationValue<long long>;
+    template struct IntegerConfigurationValue<unsigned long long>;
+
+    template<class T> std::string FloatConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
+        std::ostringstream stream;
+
+        /* Scientific notation */
+        if(flags & ConfigurationValueFlag::Scientific)
+            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
+
+        stream << std::setprecision(FloatPrecision<T>::Digits) << value;
+        return stream.str();
+    }
+
+    template<class T> T FloatConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+        if(stringValue.empty()) return T{};
+
+        std::istringstream stream{stringValue};
+
+        /* Scientific notation */
+        if(flags & ConfigurationValueFlag::Scientific)
             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
         if(flags & ConfigurationValueFlag::Uppercase)
@@ -69,23 +108,19 @@ namespace Implementation {
         return value;
     }
 
-    template struct BasicConfigurationValue<short>;
-    template struct BasicConfigurationValue<unsigned short>;
-    template struct BasicConfigurationValue<int>;
-    template struct BasicConfigurationValue<unsigned int>;
-    template struct BasicConfigurationValue<long>;
-    template struct BasicConfigurationValue<unsigned long>;
-    template struct BasicConfigurationValue<long long>;
-    template struct BasicConfigurationValue<unsigned long long>;
-    template struct BasicConfigurationValue<float>;
-    template struct BasicConfigurationValue<double>;
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    template struct BasicConfigurationValue<long double>;
-    #endif
-    template struct BasicConfigurationValue<std::string>;
+    template struct FloatConfigurationValue<float>;
+    template struct FloatConfigurationValue<double>;
+    template struct FloatConfigurationValue<long double>;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+std::string ConfigurationValue<std::string>::fromString(const std::string& value, ConfigurationValueFlags) {
+    return value;
+}
+std::string ConfigurationValue<std::string>::toString(const std::string& value, ConfigurationValueFlags) {
+    return value;
+}
+
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
     return value == "1" || value == "yes" || value == "y" || value == "true";
 }

@@ -200,6 +200,11 @@ namespace Corrade {
     on the command-line
 -   @ref Utility::Endianness::swapInPlace() and other in-place APIs were fixed
     to work correctly on platforms that don't allow unaligned reads and writes
+-   @ref Utility::ConfigurationValue was saving @cpp double @ce and
+    @cpp long double @ce with only 6 precision digits due to silly
+    @ref std::ostream defaults. Now it prints those with 15 and 18 digits
+    respectively, consistent with @ref Utility::Debug and @ref Utility::format()
+    output
 
 @subsection corrade-changelog-latest-documentation Documentation
 

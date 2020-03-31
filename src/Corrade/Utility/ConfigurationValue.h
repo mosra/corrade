@@ -64,15 +64,14 @@ CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 @brief Configuration value parser and writer
 
 Functions in this struct are called internally by @ref ConfigurationGroup
-and @ref Arguments to convert values from and to templated types. Reimplement
-the structure with a template specialization to allow saving and getting
-non-standard types into and from configuration files or parsing them from
-command line.
+and @ref Arguments to convert values from and to templated types. Implement a
+template specialization to allow saving and getting custom types into and from
+configuration files or parsing them from command line.
 
 @section Utility-ConfigurationValue-example Example: custom structure
 
 We have structure named `Foo` and want to store it in configuration file as a
-sequence of two integers separated by a space.
+sequence of two integers separated by a space:
 
 @snippet Utility.cpp ConfigurationValue
 
@@ -107,8 +106,14 @@ template<class T> struct ConfigurationValue {
 };
 
 namespace Implementation {
-    template<class T> struct CORRADE_UTILITY_EXPORT BasicConfigurationValue {
-        BasicConfigurationValue() = delete;
+    template<class T> struct CORRADE_UTILITY_EXPORT IntegerConfigurationValue {
+        IntegerConfigurationValue() = delete;
+
+        static std::string toString(const T& value, ConfigurationValueFlags flags);
+        static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+    };
+    template<class T> struct CORRADE_UTILITY_EXPORT FloatConfigurationValue {
+        FloatConfigurationValue() = delete;
 
         static std::string toString(const T& value, ConfigurationValueFlags flags);
         static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
@@ -116,88 +121,96 @@ namespace Implementation {
 }
 
 /**
-@brief Configuration value parser and writer for `short` type
+@brief Configuration value parser and writer for the `short` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};
+template<> struct ConfigurationValue<short>: public Implementation::IntegerConfigurationValue<short> {};
 
 /**
-@brief Configuration value parser and writer for `unsigned short` type
+@brief Configuration value parser and writer for the `unsigned short` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<unsigned short>: public Implementation::BasicConfigurationValue<unsigned short> {};
+template<> struct ConfigurationValue<unsigned short>: public Implementation::IntegerConfigurationValue<unsigned short> {};
 
 /**
-@brief Configuration value parser and writer for `int` type
+@brief Configuration value parser and writer for the `int` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<int>: public Implementation::BasicConfigurationValue<int> {};
+template<> struct ConfigurationValue<int>: public Implementation::IntegerConfigurationValue<int> {};
 
 /**
-@brief Configuration value parser and writer for `unsigned int` type
+@brief Configuration value parser and writer for the `unsigned int` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<unsigned int>: public Implementation::BasicConfigurationValue<unsigned int> {};
+template<> struct ConfigurationValue<unsigned int>: public Implementation::IntegerConfigurationValue<unsigned int> {};
 
 /**
-@brief Configuration value parser and writer for `long` type
+@brief Configuration value parser and writer for the `long` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<long>: public Implementation::BasicConfigurationValue<long> {};
+template<> struct ConfigurationValue<long>: public Implementation::IntegerConfigurationValue<long> {};
 
 /**
-@brief Configuration value parser and writer for `unsigned long` type
+@brief Configuration value parser and writer for the `unsigned long` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<unsigned long>: public Implementation::BasicConfigurationValue<unsigned long> {};
+template<> struct ConfigurationValue<unsigned long>: public Implementation::IntegerConfigurationValue<unsigned long> {};
 
 /**
-@brief Configuration value parser and writer for `long long` type
+@brief Configuration value parser and writer for the `long long` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<long long>: public Implementation::BasicConfigurationValue<long long> {};
+template<> struct ConfigurationValue<long long>: public Implementation::IntegerConfigurationValue<long long> {};
 
 /**
-@brief Configuration value parser and writer for `unsigned long long` type
+@brief Configuration value parser and writer for the `unsigned long long` type
 
 Empty value is parsed as @cpp 0 @ce.
 */
-template<> struct ConfigurationValue<unsigned long long>: public Implementation::BasicConfigurationValue<unsigned long long> {};
+template<> struct ConfigurationValue<unsigned long long>: public Implementation::IntegerConfigurationValue<unsigned long long> {};
 
 /**
-@brief Configuration value parser and writer for `float` type
+@brief Configuration value parser and writer for the `float` type
 
-Empty value is parsed as @cpp 0.0f @ce.
+Empty value is parsed as @cpp 0.0f @ce. Values are saved with 6 significant
+digits, same as how @ref Debug or @ref format() prints them.
 */
-template<> struct ConfigurationValue<float>: public Implementation::BasicConfigurationValue<float> {};
+template<> struct ConfigurationValue<float>: public Implementation::FloatConfigurationValue<float> {};
 
 /**
-@brief Configuration value parser and writer for `double` type
+@brief Configuration value parser and writer for the `double` type
 
-Empty value is parsed as @cpp 0.0 @ce.
+Empty value is parsed as @cpp 0.0 @ce. Values are saved with 15 significant
+digits, same as how @ref Debug or @ref format() prints them.
 */
-template<> struct ConfigurationValue<double>: public Implementation::BasicConfigurationValue<double> {};
+template<> struct ConfigurationValue<double>: public Implementation::FloatConfigurationValue<double> {};
 
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 /**
 @brief Configuration value parser and writer for `long double` type
 
-Empty value is parsed as @cpp 0.0l @ce.
-@partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as
-    JavaScript doesn't support doubles larger than 64 bits.
+Empty value is parsed as @cpp 0.0l @ce. Values are saved with 18 significant
+digits on platforms with 80-bit @cpp long double @ce and 15 digits on platforms
+@ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit", same as how
+@ref Debug or @ref format() prints them.
 */
-template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
-#endif
+template<> struct ConfigurationValue<long double>: public Implementation::FloatConfigurationValue<long double> {};
 
 /** @brief Configuration value parser and writer for @ref std::string type */
-template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<std::string> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static std::string fromString(const std::string& value, ConfigurationValueFlags flags);
+    static std::string toString(const std::string& value, ConfigurationValueFlags flags);
+    #endif
+};
 
 /**
 @brief Configuration value parser and writer for `bool` type
