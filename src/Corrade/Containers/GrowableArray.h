@@ -998,7 +998,7 @@ inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::siz
 template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::size_t prevSize, const std::size_t newCapacity) {
     T* newArray = allocate(newCapacity);
     static_assert(std::is_nothrow_move_constructible<T>::value,
-        "noexcept move-constructibe type is required");
+        "noexcept move-constructible type is required");
     for(T *src = array, *end = src + prevSize, *dst = newArray; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
