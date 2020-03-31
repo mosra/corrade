@@ -56,10 +56,10 @@ struct TypeTraitsTest: TestSuite::Tester {
 };
 
 TypeTraitsTest::TypeTraitsTest() {
-    addTests({&TypeTraitsTest::hasType,
-              &TypeTraitsTest::hasTypeComma,
+    addTests({&TypeTraitsTest::isTriviallyTraitsSupported,
 
-              &TypeTraitsTest::isTriviallyTraitsSupported,
+              &TypeTraitsTest::hasType,
+              &TypeTraitsTest::hasTypeComma,
 
               &TypeTraitsTest::isIterableMember,
               &TypeTraitsTest::isIterableFreeStd,
