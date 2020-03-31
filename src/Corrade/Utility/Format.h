@@ -77,7 +77,7 @@ In order to write a literal curly brace to the output, simply double it:
 | @cpp long long @ce, @cpp unsigned long long @ce | Written as an integer
 | @cpp float @ce <b></b>    | Written as a float with 6 significant digits by default
 | @cpp double @ce <b></b>   | Written as a float with 15 significant digits by default
-| @cpp long double @ce <b></b> | Written as a float with 18 significant digits by default
+| @cpp long double @ce <b></b> | Written as a float, by default with 18 significant digits on platforms with 80-bit @cpp long double @ce and 15 digits on platforms @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit"
 | @cpp char* @ce <b></b> | Written as a sequence of characters until @cpp '\0' @ce (which is not written)
 | @ref std::string | Written as a sequence of @ref std::string::size() characters \n (@cpp #include @ce @ref Corrade/Utility/FormatStl.h in addition)
 | @ref Containers::ArrayView "Containers::ArrayView<char>" | Written as a sequence of @ref Containers::ArrayView::size() characters
@@ -253,12 +253,10 @@ template<> struct Formatter<double> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, double value, int precision, FormatType type);
 };
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct Formatter<long double> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, long double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long double value, int precision, FormatType type);
 };
-#endif
 template<> struct Formatter<const char*> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const char* value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const char* value, int precision, FormatType type);

@@ -43,13 +43,13 @@ template<class T> ComparisonStatusFlags FloatComparator<T>::operator()(T actual,
 
     /* One of the numbers is zero or both are extremely close to it, relative
        error is meaningless */
-    if((actual == T{} || expected == T{} || difference < FloatComparatorEpsilon<T>::epsilon())) {
-        if(difference < FloatComparatorEpsilon<T>::epsilon())
+    if((actual == T{} || expected == T{} || difference < Utility::Implementation::FloatPrecision<T>::epsilon())) {
+        if(difference < Utility::Implementation::FloatPrecision<T>::epsilon())
             return {};
     }
 
     /* Relative error */
-    else if(difference/(absA + absB) < FloatComparatorEpsilon<T>::epsilon())
+    else if(difference/(absA + absB) < Utility::Implementation::FloatPrecision<T>::epsilon())
         return {};
 
     _actualValue = actual;
@@ -63,8 +63,6 @@ template<class T> void FloatComparator<T>::printMessage(ComparisonStatusFlags, U
 
 template class FloatComparator<float>;
 template class FloatComparator<double>;
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 template class FloatComparator<long double>;
-#endif
 
 }}}

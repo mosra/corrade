@@ -56,9 +56,13 @@ void FloatingPointTest::smallDelta() {
     CORRADE_COMPARE(Comparator<double>()(3.20212223242576,
                                          3.20212223242577),
         ComparisonStatusFlags{});
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
     CORRADE_COMPARE(Comparator<long double>()(3.20212223242576586l,
                                               3.20212223242576587l),
+        ComparisonStatusFlags{});
+    #else
+    CORRADE_COMPARE(Comparator<double>()(3.20212223242576l,
+                                         3.20212223242577l),
         ComparisonStatusFlags{});
     #endif
 }
@@ -70,18 +74,14 @@ void FloatingPointTest::largeDelta() {
     CORRADE_COMPARE(Comparator<double>()(3.2021222324257,
                                          3.2021222324258),
         ComparisonStatusFlag::Failed);
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    /* MSVC and 32-bit Android have 64bit long doubles. Taken from Magnum's
-       TypeTraits, look there for more info. */
-    #if !defined(_MSC_VER) && (!defined(CORRADE_TARGET_ANDROID) || __LP64__)
+    #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
     CORRADE_COMPARE(Comparator<long double>()(3.2021222324257658l,
                                               3.2021222324257659l),
         ComparisonStatusFlag::Failed);
     #else
-    CORRADE_COMPARE(Comparator<long double>()(3.2021222324257,
-                                              3.2021222324258),
+    CORRADE_COMPARE(Comparator<long double>()(3.2021222324257l,
+                                              3.2021222324258l),
         ComparisonStatusFlag::Failed);
-    #endif
     #endif
 }
 

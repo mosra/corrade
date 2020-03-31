@@ -226,6 +226,9 @@ namespace Corrade {
     due to the additional zero-ininitialization this isn't really breaking,
     just makes the default safer; and you still have the option to choose a
     different initialization.
+-   @ref Utility::Debug and @ref Utility::format() now prints @cpp long double @ce
+    with 15 significant digits instead of 18 on platforms where it is 64-bit
+    instead of 80-bit
 -   @ref Utility::Endianness is now a namespace, similarly to the change done
     to @ref Utility::Directory or @ref Utility::String in 2018.02. The API
     doesn't change apart from that, but code previously doing

@@ -36,34 +36,6 @@
 namespace Corrade { namespace TestSuite {
 
 namespace Implementation {
-    template<class T> class FloatComparatorEpsilon {};
-
-    /** @todo What about consistency with Debug and format() output precision? */
-    template<> class FloatComparatorEpsilon<float> {
-        public:
-            constexpr static float epsilon() { return 1.0e-5f; }
-    };
-
-    template<> class FloatComparatorEpsilon<double> {
-        public:
-            constexpr static double epsilon() { return 1.0e-14; }
-    };
-
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    template<> class FloatComparatorEpsilon<long double> {
-        public:
-            constexpr static long double epsilon() {
-                /* MSVC and 32-bit Android have 64bit long doubles. Taken from
-                   Magnum's TypeTraits, look there for more info. */
-                #if !defined(_MSC_VER) && (!defined(CORRADE_TARGET_ANDROID) || __LP64__)
-                return 1.0e-17l;
-                #else
-                return 1.0e-14;
-                #endif
-            }
-    };
-    #endif
-
     template<class T> class CORRADE_TESTSUITE_EXPORT FloatComparator {
         public:
             ComparisonStatusFlags operator()(T actual, T expected);
@@ -78,8 +50,10 @@ namespace Implementation {
 @brief Fuzzy-compare for float values
 
 Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
-with epsilon equal to @cpp 1.0e-6f @ce. Unlike the standard floating-point
-comparison, comparing two NaN values gives a @cpp true @ce result.
+with epsilon equal to @cpp 1.0e-5f @ce (which is one digit less than how
+@ref Utility::Debug or @ref Utility::format() prints them). Unlike the standard
+floating-point comparison, comparing two NaN values gives a @cpp true @ce
+result.
 @see @ref Compare::Around
 */
 template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
@@ -88,23 +62,27 @@ template<> class Comparator<float>: public Implementation::FloatComparator<float
 @brief Fuzzy-compare for double values
 
 Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
-with epsilon equal to @cpp 1.0e-12 @ce. Unlike the standard floating-point
-comparison, comparing two NaN values gives a @cpp true @ce result.
+with epsilon equal to @cpp 1.0e-14 @ce (which is one digit less than how
+@ref Utility::Debug or @ref Utility::format() prints them). Unlike the standard
+floating-point comparison, comparing two NaN values gives a @cpp true @ce
+result.
 @see @ref Compare::Around
 */
 template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 
-#ifndef CORRADE_TARGET_EMSCRIPTEN
 /**
 @brief Fuzzy-compare for long double values
 
 Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
-with epsilon equal to @cpp 1.0e-15l @ce. Unlike the standard floating-point
-comparison, comparing two NaN values gives a @cpp true @ce result.
+with epsilon equal to @cpp 1.0e-17l @ce on platforms with 80-bit
+@cpp long double @ce and @cpp 1.0e-14 @ce on platforms
+@ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit". This is always
+one digit less than how @ref Utility::Debug or @ref Utility::format() prints
+them. Unlike the standard floating-point comparison, comparing two NaN values
+gives a @cpp true @ce result.
 @see @ref Compare::Around
 */
 template<> class Comparator<long double>: public Implementation::FloatComparator<long double> {};
-#endif
 
 }}
 

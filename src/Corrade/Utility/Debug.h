@@ -634,10 +634,9 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print `long double` value to debug output
          *
-         * Prints the value with 18 significant digits, however note that some
-         * platforms including Windows and Emscripten have @cpp long double @ce
-         * of the same size as @cpp double @ce and thus the output may be
-         * overly precise there.
+         * Prints the value with 18 significant digits on platforms with 80-bit
+         * @cpp long double @ce and 15 digits on platforms
+         * @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit".
          */
         Debug& operator<<(long double value);
 

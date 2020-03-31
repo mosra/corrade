@@ -276,7 +276,11 @@ template<> struct FloatsData<long double> {
     static const char* name() { return "long double"; }
     static const char* expected() {
         #ifndef __MINGW32__
+        #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n";
+        #else
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
+        #endif
         #else
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159\n";
         #endif
@@ -959,9 +963,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":951: hello\n"
-        __FILE__ ":953: and this is from another line\n"
-        __FILE__ ":955\n"
+        __FILE__ ":955: hello\n"
+        __FILE__ ":957: and this is from another line\n"
+        __FILE__ ":959\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),

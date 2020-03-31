@@ -54,6 +54,38 @@ to how @cpp int @ce and @cpp signed int @ce behave the same but are treated as d
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif
 
+namespace Implementation {
+    /* Kept private because I don't think this needs to be exposed (for math
+       stuff there's Magnum and its TypeTraits that expose this). In each case,
+       printing precision has one digit are more than the epsilon. Used by
+       Debug, format(), TestSuite and kept in sync with Magnum's TypeTraits. */
+    template<class> struct FloatPrecision;
+    /* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
+       Wikipedia says 6-digit number can be converted back and forth without
+       loss: https://en.wikipedia.org/wiki/Single-precision_floating-point_format */
+    template<> struct FloatPrecision<float> {
+        enum: int { Digits = 6 };
+        constexpr static float epsilon() { return 1.0e-5f; }
+    };
+    /* Wikipedia says 15-digit number can be converted back and forth without
+       loss: https://en.wikipedia.org/wiki/Double-precision_floating-point_format */
+    template<> struct FloatPrecision<double> {
+        enum: int { Digits = 15 };
+        constexpr static double epsilon() { return 1.0e-14; }
+    };
+    /* Wikipedia says 18-digit number can be converted back and forth without
+       loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range */
+    template<> struct FloatPrecision<long double> {
+        #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+        enum: int { Digits = 18 };
+        constexpr static long double epsilon() { return 1.0e-17l; }
+        #else
+        enum: int { Digits = 15 };
+        constexpr static long double epsilon() { return 1.0e-14l; }
+        #endif
+    };
+}
+
 /** @hideinitializer
 @brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library
 @m_since_latest

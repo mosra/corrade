@@ -158,50 +158,38 @@ void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned
     std::fprintf(file, format, precision, value);
 }
 
-/* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
-   Wikipedia says 6-digit number can be converted back and forth without loss:
-   https://en.wikipedia.org/wiki/Single-precision_floating-point_format
-   Kept in sync with Debug. */
 std::size_t Formatter<float>::format(const Containers::ArrayView<char>& buffer, const float value, int precision, const FormatType type) {
-    if(precision == -1) precision = 6;
+    if(precision == -1) precision = Implementation::FloatPrecision<float>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, double(value));
 }
 void Formatter<float>::format(std::FILE* const file, const float value, int precision, const FormatType type) {
-    if(precision == -1) precision = 6;
+    if(precision == -1) precision = Implementation::FloatPrecision<float>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, double(value));
 }
 
-/* Wikipedia says 15-digit number can be converted back and forth without loss:
-   https://en.wikipedia.org/wiki/Double-precision_floating-point_format
-   Kept in sync with Debug. */
 std::size_t Formatter<double>::format(const Containers::ArrayView<char>& buffer, const double value, int precision, const FormatType type) {
-    if(precision == -1) precision = 15;
+    if(precision == -1) precision = Implementation::FloatPrecision<double>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
 }
 void Formatter<double>::format(std::FILE* const file, const double value, int precision, const FormatType type) {
-    if(precision == -1) precision = 15;
+    if(precision == -1) precision = Implementation::FloatPrecision<double>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 
-#ifndef CORRADE_TARGET_EMSCRIPTEN
-/* Wikipedia says 18-digit number can be converted both ways without
-   loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range
-   Kept in sync with Debug. */
 std::size_t Formatter<long double>::format(const Containers::ArrayView<char>& buffer, const long double value, int precision, const FormatType type) {
-    if(precision == -1) precision = 18;
+    if(precision == -1) precision = Implementation::FloatPrecision<long double>::Digits;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
 }
 void Formatter<long double>::format(std::FILE* const file, const long double value, int precision, const FormatType type) {
-    if(precision == -1) precision = 18;
+    if(precision == -1) precision = Implementation::FloatPrecision<long double>::Digits;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
-#endif
 
 std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char>& buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
     std::size_t size = value.size();
