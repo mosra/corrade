@@ -34,6 +34,7 @@
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -41,6 +42,7 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
 
+    void longDoubleSize();
     void isTriviallyTraitsSupported();
 
     void hasType();
@@ -56,7 +58,8 @@ struct TypeTraitsTest: TestSuite::Tester {
 };
 
 TypeTraitsTest::TypeTraitsTest() {
-    addTests({&TypeTraitsTest::isTriviallyTraitsSupported,
+    addTests({&TypeTraitsTest::longDoubleSize,
+              &TypeTraitsTest::isTriviallyTraitsSupported,
 
               &TypeTraitsTest::hasType,
               &TypeTraitsTest::hasTypeComma,
@@ -68,6 +71,17 @@ TypeTraitsTest::TypeTraitsTest() {
 
               &TypeTraitsTest::isStringLike,
               &TypeTraitsTest::isStringLikeNot});
+}
+
+void TypeTraitsTest::longDoubleSize() {
+    #ifdef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+    Debug{} << "long double has the same size as double";
+    CORRADE_COMPARE(sizeof(long double), sizeof(double));
+    #else
+    Debug{} << "long double doesn't have the same size as double";
+    CORRADE_COMPARE_AS(sizeof(long double), sizeof(double),
+        TestSuite::Compare::Greater);
+    #endif
 }
 
 void TypeTraitsTest::isTriviallyTraitsSupported() {

@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
+ * @brief Macros @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE, @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED, @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 
 #include <type_traits>
@@ -34,6 +34,25 @@
 #include "Corrade/configure.h"
 
 namespace Corrade { namespace Utility {
+
+#ifdef DOXYGEN_GENERATING_OUTPUT
+/** @hideinitializer
+@brief Whether `long double` has the same size as `double`
+@m_since_latest
+
+Defined on platforms where the @cpp long double @ce type is 64-bit instead of
+80-bit, thus same as @cpp double @ce. It's the case for
+@ref CORRADE_TARGET_MSVC "MSVC" ([source](https://docs.microsoft.com/en-us/previous-versions/9cx8xs15(v=vs.140))),
+32-bit @ref CORRADE_TARGET_ANDROID "Android" (no reliable source found,
+sorry) and some (but not all) versions of
+@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". Note that even though the type
+size and precision is the same, these are still two distinct types, similarly
+to how @cpp int @ce and @cpp signed int @ce behave the same but are treated as different types.
+*/
+/* Actual definitions is in configure.h so Magnum doesn't need to pull in this
+   whole thing in its TypeTraits just for this macro */
+#define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+#endif
 
 /** @hideinitializer
 @brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library

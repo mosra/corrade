@@ -92,6 +92,8 @@ namespace Corrade {
 -   Added a @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro into
     @ref Corrade/Utility/TypeTraits.h denoting if @ref std::is_trivially_copyable
     is available in the standard library
+-   Added a @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro for detecting
+    platforms where @cpp long double @ce and @cpp double @ce have the same size
 -   Added @ref Utility::Directory::map(const std::string&) that provides
     read-write access to mapped files without truncating them.
 -   Added @ref Utility::Directory::fileSize()
