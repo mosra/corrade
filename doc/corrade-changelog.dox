@@ -189,6 +189,8 @@ namespace Corrade {
 -   `UseCorrade.cmake` defined `NOMINMAX` and `WIN32_LEAN_AND_MEAN` by mistake
     only on MSVC, causing `windows.h` to leak unforgivable crimes when
     compiling under MinGW (see [mosra/magnum-plugins#74](https://github.com/mosra/magnum-plugins/issues/74))
+-   Fixed MSVC detection in `conanfile.py`, made it aware of the
+    `MSVC2019_COMPATIBILITY` option as well (see [mosra/corrade#93](https://github.com/mosra/corrade/issues/93))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
