@@ -485,6 +485,12 @@ Utility::Directory::write(to, Utility::Directory::mapRead(from));
 }
 #endif
 
+/* FFS, GCC. According to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431,
+   reported back in 2012, for C++ GCC does lexing before parsing #pragmas and
+   thus the -Wmultichar warning *can't* be ignored with a pragma. Because I
+   don't want to compile the whole file with -Wno-multichar, I'm disabling this
+   snippet for GCC. Note to self: check this again in 2025. */
+#if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 {
 #ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic push
@@ -503,6 +509,7 @@ static_cast<void>(b);
 #pragma GCC diagnostic pop
 #endif
 }
+#endif
 
 {
 /* [formatString] */
