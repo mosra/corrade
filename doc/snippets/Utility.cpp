@@ -35,6 +35,7 @@
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Endianness.h"
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Utility/FileWatcher.h"
 #endif
@@ -483,6 +484,25 @@ Utility::Directory::write(to, Utility::Directory::mapRead(from));
 /* [Directory-copy-mmap] */
 }
 #endif
+
+{
+#ifdef CORRADE_TARGET_CLANG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfour-char-constants"
+#elif defined(CORRADE_TARGET_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+#endif
+/* [Endianness-fourCC] */
+std::uint32_t a = 'WAVE';
+std::uint32_t b = Utility::Endianness::fourCC('W', 'A', 'V', 'E');
+/* [Endianness-fourCC] */
+static_cast<void>(a);
+static_cast<void>(b);
+#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
+#pragma GCC diagnostic pop
+#endif
+}
 
 {
 /* [formatString] */

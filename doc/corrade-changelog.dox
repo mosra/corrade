@@ -107,6 +107,8 @@ namespace Corrade {
     multi-dimensional @ref Containers::StridedArrayView instances
 -   Added a @ref Utility::Debug::space modifier that's similar to
     @ref Utility::Debug::newline and an inverse of @ref Utility::Debug::nospace
+-   Added a @ref Utility::Endianness::fourCC() utility for creating
+    endian-independent four-character codes
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 

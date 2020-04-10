@@ -222,6 +222,34 @@ template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::va
 }
 #endif
 
+/**
+@brief Create a FourCC code
+@m_since_latest
+
+Creates a [FourCC](https://en.wikipedia.org/wiki/FourCC) code from given four
+characters. The characters are always stored in a Big-Endian order. Usable as a
+portable alternative to multi-character literals:
+
+@snippet Utility.cpp Endianness-fourCC
+*/
+/* The shortest way to write FourCCs would be with an UDL (e.g. "WAVE"_4cc),
+   but since it's impossible to have a `using` clause in an enum and I
+   sometimes need to add non-character data to the FourCC, this is the best and
+   least compilcated way to go about it */
+constexpr std::uint32_t fourCC(char a, char b, char c, char d) {
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
+    return (std::uint32_t(a) << 24 |
+            std::uint32_t(b) << 16 |
+            std::uint32_t(c) <<  8 |
+            std::uint32_t(d));
+    #else
+    return (std::uint32_t(d) << 24 |
+            std::uint32_t(c) << 16 |
+            std::uint32_t(b) <<  8 |
+            std::uint32_t(a));
+    #endif
+}
+
 }
 
 }}
