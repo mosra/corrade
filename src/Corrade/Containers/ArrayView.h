@@ -489,13 +489,25 @@ template<> class ArrayView<void> {
          *
          * Size in bytes is calculated automatically.
          */
-        template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
+        template<class T, std::size_t size
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /** @brief Construct const void view on any @ref ArrayView */
-        template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
         /** @brief Construct const void view on any @ref StaticArrayView */
-        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
+        template<std::size_t size, class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type

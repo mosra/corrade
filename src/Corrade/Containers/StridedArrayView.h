@@ -879,15 +879,18 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * Enabled only on one-dimensional views. Size is set to @p size,
          * stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T, std::size_t size>
-        #else
-        template<class T, std::size_t size, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+        template<class T, std::size_t size
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
         /** @brief Construct a void view on any @ref StridedArrayView */
-        template<class T> constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
 
         /**
          * @brief Construct a void view on any @ref ArrayView
@@ -895,12 +898,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * Enabled only on one-dimensional views. Size is set to @p view's
          * size, stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T>
-        #else
-        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a void view on any @ref StaticArrayView
@@ -908,12 +910,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * Enabled only on one-dimensional views. Size is set to @p view's
          * size, stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<std::size_t size, class T>
-        #else
-        template<std::size_t size, class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
+        template<std::size_t size, class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type
