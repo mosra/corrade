@@ -47,7 +47,8 @@ possible or is unknown is equivalent to @cpp #include <array> @ce.
 
 @see @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardTuple.h,
-    @ref Corrade/Utility/StlForwardVector.h
+    @ref Corrade/Utility/StlForwardVector.h,
+    @ref Corrade/Utility/StlMath.h
 */
 
 #include "Corrade/configure.h"

@@ -52,7 +52,8 @@ equivalent to @cpp #include <string> @ce.
 
 @see @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardTuple.h,
-    @ref Corrade/Utility/StlForwardVector.h
+    @ref Corrade/Utility/StlForwardVector.h,
+    @ref Corrade/Utility/StlMath.h
 */
 
 #include "Corrade/configure.h"

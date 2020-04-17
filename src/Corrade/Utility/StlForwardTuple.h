@@ -47,7 +47,8 @@ is equivalent to @cpp #include <tuple> @ce.
 
 @see @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardString.h,
-    @ref Corrade/Utility/StlForwardVector.h
+    @ref Corrade/Utility/StlForwardVector.h,
+    @ref Corrade/Utility/StlMath.h
 */
 
 #include "Corrade/configure.h"

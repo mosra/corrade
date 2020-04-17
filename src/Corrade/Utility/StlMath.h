@@ -35,14 +35,30 @@ This is due to C++17 additions to the math library, such as
 @ref std::riemann_zeta(). Because these APIs are seldom used in
 graphics-related tasks, it doesn't make sense to have compile times inflated by
 them. If you include @ref Corrade/Utility/StlMath.h instead, it will ensure the
-new functions are not present, making the @ref cmath "&lt;cmath&gt;" roughly the same
-size as on C++11. If you *need* the additions, @cpp #include <cmath> @ce
+new functions are not present, making the @ref cmath "&lt;cmath&gt;" roughly
+the same size as on C++11. If you *need* the additions, @cpp #include <cmath> @ce
 * *before* this header.
 
-Currently, the C++17 additions are present neither on
-@ref CORRADE_TARGET_LIBCXX "libc++" 8 nor
-@ref CORRADE_TARGET_DINKUMWARE "MSVC STL" 2017, so there this header
-effectively does just a simple @cpp #include <cmath> @ce.
+The C++17 additions are present on @ref CORRADE_TARGET_DINKUMWARE "MSVC STL"
+since version 2017 15.7, however there the header is not inflated as much as
+on libstdc++, so no workaround is needed. For Clang, at the time of writing,
+@ref CORRADE_TARGET_LIBCXX "libc++" 10 doesn't have these additions yet. On
+these two this header effectively does just a simple @cpp #include <cmath> @ce.
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This header is also available as a single-header, dependency-less
+    [CorradeStlMath.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlMath.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
+@see @ref Corrade/Utility/StlForwardArray.h,
+    @ref Corrade/Utility/StlForwardString.h,
+    @ref Corrade/Utility/StlForwardTuple.h,
+    @ref Corrade/Utility/StlForwardVector.h
 */
 
 #include "Corrade/configure.h"
