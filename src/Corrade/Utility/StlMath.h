@@ -35,13 +35,14 @@ This is due to C++17 additions to the math library, such as
 @ref std::riemann_zeta(). Because these APIs are seldom used in
 graphics-related tasks, it doesn't make sense to have compile times inflated by
 them. If you include @ref Corrade/Utility/StlMath.h instead, it will ensure the
-new functions are not present, making the @ref cmath "&lt;cmath&gt;" roughly
+new functions are not present by undefining the internal
+`_GLIBCXX_USE_STD_SPEC_FUNCS` macro, making @ref cmath "&lt;cmath&gt;" roughly
 the same size as on C++11. If you *need* the additions, @cpp #include <cmath> @ce
-* *before* this header.
+before this header.
 
-The C++17 additions are present on @ref CORRADE_TARGET_DINKUMWARE "MSVC STL"
-since version 2017 15.7, however there the header is not inflated as much as
-on libstdc++, so no workaround is needed. For Clang, at the time of writing,
+The C++17 additions are also present on @ref CORRADE_TARGET_DINKUMWARE "MSVC STL"
+since version 2017 15.7, however there the additions are very lightweight, so
+no workaround is needed. For Clang, at the time of writing,
 @ref CORRADE_TARGET_LIBCXX "libc++" 10 doesn't have these additions yet. On
 these two this header effectively does just a simple @cpp #include <cmath> @ce.
 
