@@ -193,6 +193,9 @@ std::size_t Formatter<Containers::ArrayView<const char>>::format(const Container
     if(std::size_t(precision) < size) size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
         "Utility::format(): type specifier can't be used for a string value", {});
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(type);
+    #endif
     /* strncpy() would stop on \0 characters */
     if(buffer) std::memcpy(buffer, value, size);
     return size;
@@ -202,6 +205,9 @@ void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file,
     if(std::size_t(precision) < size) size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
         "Utility::format(): type specifier can't be used for a string value", );
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(type);
+    #endif
     std::fwrite(value.data(), size, 1, file);
 }
 std::size_t Formatter<const char*>::format(const Containers::ArrayView<char>& buffer, const char* value, const int precision, const FormatType type) {

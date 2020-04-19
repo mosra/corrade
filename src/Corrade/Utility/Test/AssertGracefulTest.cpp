@@ -46,6 +46,10 @@ AssertGracefulTest::AssertGracefulTest() {
 }
 
 void AssertGracefulTest::test() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -81,6 +85,10 @@ constexpr int divide(int a, int b) {
 }
 
 void AssertGracefulTest::constexprTest() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 

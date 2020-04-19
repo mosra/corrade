@@ -256,12 +256,18 @@ static_assert(std::is_pod<Implementation::StaticPlugin>::value,
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
     CORRADE_ASSERT(version == Version,
         "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(version);
+    #endif
     Containers::Implementation::forwardListInsert(globalStaticPlugins, plugin);
 }
 
 void AbstractManager::ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
     CORRADE_ASSERT(version == Version,
         "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(version);
+    #endif
     Containers::Implementation::forwardListRemove(globalStaticPlugins, plugin);
 }
 

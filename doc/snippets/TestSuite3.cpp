@@ -33,6 +33,7 @@ class FileContents;
 
 namespace Corrade { namespace TestSuite {
 
+#ifndef CORRADE_NO_ASSERT
 /* [Comparator-save-diagnostic] */
 template<> class Comparator<FileContents> {
     public:
@@ -55,6 +56,7 @@ template<> class Comparator<FileContents> {
 /* [Comparator-save-diagnostic] */
 static_assert(Implementation::CanSaveDiagnostic<Comparator<FileContents>>::value,
     "this snippet is broken");
+#endif
 
 }}
 

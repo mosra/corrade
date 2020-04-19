@@ -461,6 +461,10 @@ void StringTest::stripPrefix() {
 }
 
 void StringTest::stripPrefixInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectOutput{&out};
     String::stripPrefix("overcomplicated", "complicated");
@@ -475,6 +479,10 @@ void StringTest::stripSuffix() {
 }
 
 void StringTest::stripSuffixInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectOutput{&out};
     String::stripSuffix("overcomplicated", "over");
@@ -540,6 +548,10 @@ void StringTest::replaceAllNotFound() {
 }
 
 void StringTest::replaceAllEmptySearch() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectOutput{&out};
     String::replaceAll("this completely messed up", "", "got ");

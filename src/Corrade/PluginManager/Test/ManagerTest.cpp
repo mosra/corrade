@@ -229,6 +229,10 @@ void ManagerTest::pluginSearchPathsNotUsed() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::pluginSearchPathsNotProvided() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct SomePlugin: AbstractPlugin {
         static std::string pluginInterface() { return {}; }
     };
@@ -765,6 +769,10 @@ void ManagerTest::crossManagerDependencies() {
     /* Verify that the plugin can be instanced only through its own manager */
     CORRADE_VERIFY(manager.instantiate("Canary"));
 
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't fully test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!foodManager.instantiate("Canary"));
@@ -954,6 +962,10 @@ void ManagerTest::setPreferredPlugins() {
 }
 
 void ManagerTest::setPreferredPluginsUnknownAlias() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
@@ -963,6 +975,10 @@ void ManagerTest::setPreferredPluginsUnknownAlias() {
 }
 
 void ManagerTest::setPreferredPluginsDoesNotProvide() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;

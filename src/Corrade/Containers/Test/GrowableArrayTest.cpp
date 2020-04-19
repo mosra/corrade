@@ -1431,6 +1431,10 @@ void GrowableArrayTest::castEmpty() {
 }
 
 void GrowableArrayTest::castNonTrivial() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Array<char> a;
     arrayResize<char, ArrayNewAllocator<char>>(a, 10);
 
@@ -1442,6 +1446,10 @@ void GrowableArrayTest::castNonTrivial() {
 }
 
 void GrowableArrayTest::castNonGrowable() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Array<char> a{10};
 
     std::ostringstream out;
@@ -1452,6 +1460,10 @@ void GrowableArrayTest::castNonGrowable() {
 }
 
 void GrowableArrayTest::castInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test.");
+    #endif
+
     Array<char> a;
     arrayResize(a, 10);
 

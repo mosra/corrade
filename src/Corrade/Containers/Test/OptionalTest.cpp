@@ -925,6 +925,10 @@ void OptionalTest::accessRvalue() {
 }
 
 void OptionalTest::accessInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct Innocent {
         void foo() const {}
     };

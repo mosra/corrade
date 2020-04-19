@@ -40,6 +40,10 @@
 
 using namespace Corrade;
 
+#if defined(CORRADE_NO_ASSERT) && defined(CORRADE_TARGET_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 /* [Comparator-pseudotypes] */
 class FileContents {};
 
@@ -65,6 +69,9 @@ template<> class Comparator<FileContents> {
 
 }}
 /* [Comparator-pseudotypes] */
+#if defined(CORRADE_NO_ASSERT) && defined(CORRADE_TARGET_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 struct Foo: TestSuite::Tester {
 Foo() {

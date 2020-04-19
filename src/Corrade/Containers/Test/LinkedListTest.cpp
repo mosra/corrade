@@ -165,6 +165,10 @@ void LinkedListTest::insert() {
 }
 
 void LinkedListTest::insertFromOtherList() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::stringstream out;
     Error redirectError{&out};
 
@@ -178,6 +182,10 @@ void LinkedListTest::insertFromOtherList() {
 }
 
 void LinkedListTest::insertBeforeFromOtherList() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::stringstream out;
     Error redirectError{&out};
 
@@ -192,6 +200,10 @@ void LinkedListTest::insertBeforeFromOtherList() {
 }
 
 void LinkedListTest::cutFromOtherList() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::stringstream out;
     Error redirectError{&out};
 

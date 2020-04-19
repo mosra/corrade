@@ -383,8 +383,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
                stride is zero, `data` can have *any* size and it could be okay,
                can't reliably test that */
             CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
-            member)}, _size{size}, _stride{stride} {}
+                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
+            #ifdef CORRADE_NO_ASSERT
+            , static_cast<void>(data)
+            #endif
+            , member)}, _size{size}, _stride{stride} {}
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -857,8 +860,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
                stride is zero, `data` can have *any* size and it could be okay,
                can't reliably test that */
             CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
-            member)}, _size{size}, _stride{stride} {}
+                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
+            #ifdef CORRADE_NO_ASSERT
+            , static_cast<void>(data)
+            #endif
+            , member)}, _size{size}, _stride{stride} {}
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -1064,8 +1070,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
                stride is zero, `data` can have *any* size and it could be okay,
                can't reliably test that */
             CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
-            member)}, _size{size}, _stride{stride} {}
+                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
+            #ifdef CORRADE_NO_ASSERT
+            , static_cast<void>(data)
+            #endif
+            , member)}, _size{size}, _stride{stride} {}
 
         /* size-only constructor not provided for void overloads as there's
            little chance one would want an implicit stride of 1 */

@@ -25,7 +25,9 @@
 
 #include <sstream>
 
+#ifndef CORRADE_NO_ASSERT
 #define CORRADE_NO_ASSERT
+#endif
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Assert.h"

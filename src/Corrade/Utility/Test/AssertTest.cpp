@@ -141,6 +141,10 @@ void AssertTest::constexprTest() {
 }
 
 void AssertTest::evaluateOnce() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertion evaluation");
+    #endif
+
     int i;
 
     i = 0;

@@ -103,6 +103,10 @@ void UnicodeTest::nextUtf8Error() {
 }
 
 void UnicodeTest::nextUtf8Empty() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Unicode::nextChar("", 0);
@@ -152,6 +156,10 @@ void UnicodeTest::prevUtf8Error() {
 }
 
 void UnicodeTest::prevUtf8Empty() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Unicode::prevChar("hello", 0);

@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
@@ -240,6 +241,10 @@ void ResourceTest::compile() {
 }
 
 void ResourceTest::compileNotSorted() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::vector<std::pair<std::string, std::string>> input{
         {"predisposition.bin", {}},
         {"consequence.bin",{}}};
@@ -378,6 +383,10 @@ void ResourceTest::getEmptyFile() {
 }
 
 void ResourceTest::getNonexistent() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -401,12 +410,16 @@ void ResourceTest::getNonexistent() {
 }
 
 void ResourceTest::getNothing() {
-    std::ostringstream out;
-    Error redirectError{&out};
+    Containers::Optional<Resource> r;
+    {
+        std::ostringstream out;
+        Error redirectError{&out};
 
-    Resource r("nothing");
-    CORRADE_VERIFY(out.str().empty());
-    CORRADE_VERIFY(r.get("nonexistentFile").empty());
+        r.emplace("nothing");
+        CORRADE_VERIFY(out.str().empty());
+    }
+
+    CORRADE_COMPARE(r->list(), std::vector<std::string>{});
 }
 
 void ResourceTest::overrideGroup() {
@@ -426,6 +439,10 @@ void ResourceTest::overrideGroup() {
 }
 
 void ResourceTest::overrideGroupFallback() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Warning redirectWarning{&out};
 
@@ -439,6 +456,10 @@ void ResourceTest::overrideGroupFallback() {
 }
 
 void ResourceTest::overrideNonexistentFile() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Warning redirectWarning(&out);
@@ -455,6 +476,10 @@ void ResourceTest::overrideNonexistentFile() {
 }
 
 void ResourceTest::overrideNonexistentGroup() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 

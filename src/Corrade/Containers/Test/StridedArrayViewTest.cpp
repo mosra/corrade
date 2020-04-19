@@ -607,6 +607,10 @@ void StridedArrayViewTest::dimensionsAccess() {
 }
 
 void StridedArrayViewTest::dimensionsAccessInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Size3D a{3, 12, 76};
     const Size3D ca{3, 12, 76};
 
@@ -955,6 +959,10 @@ void StridedArrayViewTest::constructNegativeStride() {
 }
 
 void StridedArrayViewTest::constructInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct {
         int value;
         int other;
@@ -970,6 +978,10 @@ void StridedArrayViewTest::constructInvalid() {
 }
 
 void StridedArrayViewTest::constructInvalidVoid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct {
         int value;
         int other;
@@ -985,6 +997,10 @@ void StridedArrayViewTest::constructInvalidVoid() {
 }
 
 void StridedArrayViewTest::constructInvalidConstVoid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     const struct {
         int value;
         int other;
@@ -1623,6 +1639,10 @@ void StridedArrayViewTest::construct3DOneSizeZeroConstVoid() {
 }
 
 void StridedArrayViewTest::construct3DInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Plane a[2];
 
     std::ostringstream out;
@@ -1635,6 +1655,10 @@ void StridedArrayViewTest::construct3DInvalid() {
 }
 
 void StridedArrayViewTest::construct3DInvalidVoid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Plane a[2];
 
     std::ostringstream out;
@@ -1647,6 +1671,10 @@ void StridedArrayViewTest::construct3DInvalidVoid() {
 }
 
 void StridedArrayViewTest::construct3DInvalidConstVoid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     const Plane a[2]{};
 
     std::ostringstream out;
@@ -2052,6 +2080,10 @@ void StridedArrayViewTest::asContiguous() {
 }
 
 void StridedArrayViewTest::asContiguousNonContiguous() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     int a[2*3*5];
 
     std::ostringstream out;
@@ -2162,6 +2194,10 @@ void StridedArrayViewTest::accessNegativeStride() {
 }
 
 void StridedArrayViewTest::accessInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::stringstream out;
     Error redirectError{&out};
 
@@ -2295,6 +2331,10 @@ void StridedArrayViewTest::access3DZeroStride() {
 }
 
 void StridedArrayViewTest::access3DInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::stringstream out;
     Error redirectError{&out};
 
@@ -2544,6 +2584,10 @@ void StridedArrayViewTest::slice() {
 }
 
 void StridedArrayViewTest::sliceInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView1Di a = data;
 
@@ -2596,6 +2640,10 @@ void StridedArrayViewTest::slice3D() {
 }
 
 void StridedArrayViewTest::slice3DInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Plane data[2]{
         {{{{{2, 23125}, {16, 1}, {7853268, -2}}},
          {{{-100, 5}, {234810, 1}, {232342, -22222}}}}},
@@ -2655,6 +2703,10 @@ void StridedArrayViewTest::slice3DFirstDimension() {
 }
 
 void StridedArrayViewTest::slice3DFirstDimensionInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView3Di a = {data, {5, 1, 1}};
 
@@ -2707,6 +2759,10 @@ void StridedArrayViewTest::sliceDimensionUp() {
 }
 
 void StridedArrayViewTest::sliceDimensionUpInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView1Di a = data;
 
@@ -2763,6 +2819,10 @@ void StridedArrayViewTest::sliceDimensionDown() {
 }
 
 void StridedArrayViewTest::sliceDimensionDownInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Plane data[2]{
         {{{{{2, 23125}, {16, 1}, {7853268, -2}}},
          {{{-100, 5}, {234810, 1}, {232342, -22222}}}}},
@@ -2835,6 +2895,10 @@ void StridedArrayViewTest::everyNegative() {
 }
 
 void StridedArrayViewTest::everyInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -2877,6 +2941,10 @@ void StridedArrayViewTest::every2DNegative() {
 }
 
 void StridedArrayViewTest::every2DInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -3020,6 +3088,10 @@ void StridedArrayViewTest::broadcasted3D() {
 }
 
 void StridedArrayViewTest::broadcastedInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct {
         int value;
         int:32;
@@ -3164,6 +3236,10 @@ void StridedArrayViewTest::castNegativeStride() {
 }
 
 void StridedArrayViewTest::castInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
      struct CORRADE_ALIGNAS(2) {
         char a;
         char b;
@@ -3354,6 +3430,10 @@ void StridedArrayViewTest::castInflateFlattenArrayView() {
 }
 
 void StridedArrayViewTest::castInflateFlattenInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct Rgb {
         unsigned short r, g, b;
     };
@@ -3475,6 +3555,10 @@ void StridedArrayViewTest::castInflateVoidNegativeStride() {
 }
 
 void StridedArrayViewTest::castInflateVoidInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     struct Rgb {
         unsigned short r, g, b;
     };

@@ -110,6 +110,9 @@ CORRADE_ASSERT(pos < size(), "Array::operator[](): accessing element"
 /* [CORRADE_INTERNAL_ASSERT] */
 CORRADE_INTERNAL_ASSERT(pos < size());
 /* [CORRADE_INTERNAL_ASSERT] */
+#ifdef CORRADE_NO_ASSERT
+static_cast<void>(pos);
+#endif
 return {};
 }
 

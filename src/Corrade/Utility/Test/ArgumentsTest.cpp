@@ -456,6 +456,10 @@ Arguments:
 }
 
 void ArgumentsTest::duplicateKey() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -466,6 +470,10 @@ void ArgumentsTest::duplicateKey() {
 }
 
 void ArgumentsTest::duplicateShortKey() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -476,6 +484,10 @@ void ArgumentsTest::duplicateShortKey() {
 }
 
 void ArgumentsTest::disallowedCharacter() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -485,6 +497,10 @@ void ArgumentsTest::disallowedCharacter() {
 }
 
 void ArgumentsTest::disallowedCharacterShort() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -494,6 +510,10 @@ void ArgumentsTest::disallowedCharacterShort() {
 }
 
 void ArgumentsTest::disallowedIgnoreUnknown() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args{Arguments::Flag::IgnoreUnknownOptions};
@@ -501,6 +521,10 @@ void ArgumentsTest::disallowedIgnoreUnknown() {
 }
 
 void ArgumentsTest::finalOptionalArgumentTwice() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -510,6 +534,10 @@ void ArgumentsTest::finalOptionalArgumentTwice() {
 }
 
 void ArgumentsTest::finalOptionalArgumentNotLast() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -978,6 +1006,10 @@ Arguments:
 }
 
 void ArgumentsTest::prefixedDisallowedCalls() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args{"reader"};
@@ -996,6 +1028,10 @@ void ArgumentsTest::prefixedDisallowedCalls() {
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefix() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -1007,6 +1043,10 @@ void ArgumentsTest::prefixedDisallowedWithPrefix() {
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
@@ -1081,6 +1121,10 @@ void ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName() {
 }
 
 void ArgumentsTest::notParsedYet() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -1098,6 +1142,10 @@ void ArgumentsTest::notParsedYet() {
 }
 
 void ArgumentsTest::notParsedYetOnlyHelp() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -1122,6 +1170,10 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
 }
 
 void ArgumentsTest::valueNotFound() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Arguments args;
     args.parse(0, nullptr);
 
@@ -1135,6 +1187,10 @@ void ArgumentsTest::valueNotFound() {
 }
 
 void ArgumentsTest::valueMismatchedBoolean() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
     Arguments args;
     args.addOption("value")
         .addBooleanOption("boolean")
