@@ -10,7 +10,7 @@ cmake .. \
     -DBUILD_TESTS=ON \
     -DBUILD_DEPRECATED=$BUILD_DEPRECATED \
     -DBUILD_STATIC=$BUILD_STATIC \
-    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_BUILD_TYPE=$CONFIGURATION \
     -G Ninja
 ninja
 ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" TSAN_OPTIONS="color=always suppressions=$TRAVIS_BUILD_DIR/package/ci/threadsanitizer.conf" CORRADE_TEST_COLOR=ON ctest -V
@@ -24,7 +24,7 @@ cd ..
 mkdir build-examples && cd build-examples
 cmake ../src/examples \
     -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" \
-    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_BUILD_TYPE=$CONFIGURATION \
     -DCMAKE_PREFIX_PATH=$HOME/deps \
     -G Ninja
 ninja

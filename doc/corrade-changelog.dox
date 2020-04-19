@@ -196,6 +196,8 @@ namespace Corrade {
     compiling under MinGW (see [mosra/magnum-plugins#74](https://github.com/mosra/magnum-plugins/issues/74))
 -   Fixed MSVC detection in `conanfile.py`, made it aware of the
     `MSVC2019_COMPATIBILITY` option as well (see [mosra/corrade#93](https://github.com/mosra/corrade/issues/93))
+-   The library again compiles and tests cleanly with @ref CORRADE_NO_ASSERT
+    enabled, and this setup is verified on the CI to avoid further regressions
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
