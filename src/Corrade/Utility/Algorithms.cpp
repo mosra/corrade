@@ -41,7 +41,9 @@ namespace Corrade { namespace Utility {
 
 void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayView<void>& dst) {
     const std::size_t srcSize = src.size();
+    #ifndef CORRADE_NO_ASSERT
     const std::size_t dstSize = dst.size();
+    #endif
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
@@ -50,7 +52,9 @@ void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayV
 
 void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {
     const std::size_t srcSize = src.size();
+    #ifndef CORRADE_NO_ASSERT
     const std::size_t dstSize = dst.size();
+    #endif
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
@@ -64,61 +68,65 @@ void copy(const Containers::StridedArrayView1D<const char>& src, const Container
             {srcStride, srcStride, srcStride, srcStride}},
         Containers::StridedArrayView4D<char>{
             {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, 1, 1, dstSize},
+            {1, 1, 1, srcSize},
             {dstStride, dstStride, dstStride, dstStride}});
 }
 
 void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
-    const Containers::StridedDimensions<2, std::size_t> srcSize_ = src.size();
-    const Containers::StridedDimensions<2, std::size_t> dstSize_ = dst.size();
-    CORRADE_ASSERT(srcSize_ == dstSize_,
-        "Utility::Algorithms::copy(): sizes" << srcSize_ << "and" << dstSize_ << "don't match", );
+    const Containers::StridedDimensions<2, std::size_t> srcSize = src.size();
+    #ifndef CORRADE_NO_ASSERT
+    const Containers::StridedDimensions<2, std::size_t> dstSize = dst.size();
+    #endif
+    CORRADE_ASSERT(srcSize == dstSize,
+        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
-    const std::size_t* const srcSize = srcSize_.begin();
-    const std::size_t* const dstSize = dstSize_.begin();
+    const std::size_t* const size = srcSize.begin();
     const std::ptrdiff_t* const srcStride = src.stride().begin();
     const std::ptrdiff_t* const dstStride = dst.stride().begin();
     /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
        for the size assert anyway */
     return copy(Containers::StridedArrayView4D<const char>{
             {static_cast<const char*>(src.data()), ~std::size_t{}},
-            {1, 1, srcSize[0], srcSize[1]},
+            {1, 1, size[0], size[1]},
             {srcStride[0], srcStride[0], srcStride[0], srcStride[1]}},
         Containers::StridedArrayView4D<char>{
             {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, 1, dstSize[0], dstSize[1]},
+            {1, 1, size[0], size[1]},
             {dstStride[0], dstStride[0], dstStride[0], dstStride[1]}});
 }
 
 void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
-    const Containers::StridedDimensions<3, std::size_t> srcSize_ = src.size();
-    const Containers::StridedDimensions<3, std::size_t> dstSize_ = dst.size();
-    CORRADE_ASSERT(srcSize_ == dstSize_,
-        "Utility::Algorithms::copy(): sizes" << srcSize_ << "and" << dstSize_ << "don't match", );
+    const Containers::StridedDimensions<3, std::size_t> srcSize = src.size();
+    #ifndef CORRADE_NO_ASSERT
+    const Containers::StridedDimensions<3, std::size_t> dstSize = dst.size();
+    #endif
+    CORRADE_ASSERT(srcSize == dstSize,
+        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
-    const std::size_t* const srcSize = srcSize_.begin();
-    const std::size_t* const dstSize = dstSize_.begin();
+    const std::size_t* const size = srcSize.begin();
     const std::ptrdiff_t* const srcStride = src.stride().begin();
     const std::ptrdiff_t* const dstStride = dst.stride().begin();
     /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
        for the size assert anyway */
     return copy(Containers::StridedArrayView4D<const char>{
             {static_cast<const char*>(src.data()), ~std::size_t{}},
-            {1, srcSize[0], srcSize[1], srcSize[2]},
+            {1, size[0], size[1], size[2]},
             {srcStride[0], srcStride[0], srcStride[1], srcStride[2]}},
         Containers::StridedArrayView4D<char>{
             {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, dstSize[0], dstSize[1], dstSize[2]},
+            {1, size[0], size[1], size[2]},
             {dstStride[0], dstStride[0], dstStride[1], dstStride[2]}});
 }
 
 void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
-    const Containers::StridedDimensions<4, std::size_t> srcSize_ = src.size();
-    const Containers::StridedDimensions<4, std::size_t> dstSize_ = dst.size();
-    CORRADE_ASSERT(srcSize_ == dstSize_,
-        "Utility::Algorithms::copy(): sizes" << srcSize_ << "and" << dstSize_ << "don't match", );
+    const Containers::StridedDimensions<4, std::size_t> srcSize = src.size();
+    #ifndef CORRADE_NO_ASSERT
+    const Containers::StridedDimensions<4, std::size_t> dstSize = dst.size();
+    #endif
+    CORRADE_ASSERT(srcSize == dstSize,
+        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
-    const std::size_t* const size = srcSize_.begin();
+    const std::size_t* const size = srcSize.begin();
     auto* const srcPtr = static_cast<const char*>(src.data());
     auto* const dstPtr = static_cast<char*>(dst.data());
 
