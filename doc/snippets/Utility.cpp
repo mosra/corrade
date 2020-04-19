@@ -117,7 +117,7 @@ bool initialize(char = 0);
 void foo(char userParam) {
 /* [CORRADE_ASSERT-output] */
 CORRADE_ASSERT(initialize(userParam),
-    "Initialization failed: wrong parameter" << userParam, );
+    "Initialization failed: wrong parameter" << userParam, ); // wrong!
 /* [CORRADE_ASSERT-output] */
 
 /* [CORRADE_ASSERT_OUTPUT] */
@@ -126,7 +126,7 @@ CORRADE_ASSERT_OUTPUT(initialize(userParam),
 /* [CORRADE_ASSERT_OUTPUT] */
 
 /* [CORRADE_INTERNAL_ASSERT-output] */
-CORRADE_INTERNAL_ASSERT(initialize());
+CORRADE_INTERNAL_ASSERT(initialize()); // wrong!
 /* [CORRADE_INTERNAL_ASSERT-output] */
 
 /* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
@@ -142,18 +142,61 @@ for(; src != end; ++src, ++dst) *dst += *src;
 }
 }
 
-enum class Flag { A, B };
-bool foo(Flag flag) {
-bool foo{}, bar{};
-/* [CORRADE_ASSERT_UNREACHABLE] */
-switch(flag) {
-    case Flag::A: return foo;
-    case Flag::B: return bar;
+#ifdef CORRADE_TARGET_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
+enum class Status { Great, NotGreat };
+/* [CORRADE_ASSERT-unreachable] */
+std::string statusString(Status status) {
+    switch(status) {
+        case Status::Great: return "great";
+        case Status::NotGreat: return "not great";
+    }
+    CORRADE_ASSERT(false, "status is neither great nor non-great", {}); // wrong!
 }
+/* [CORRADE_ASSERT-unreachable] */
 
-CORRADE_ASSERT_UNREACHABLE();
-/* [CORRADE_ASSERT_UNREACHABLE] */
+enum class Type { UnsignedInt, UnsignedShort, UnsignedByte };
+/* [CORRADE_INTERNAL_ASSERT-unreachable] */
+std::size_t elementCount(std::size_t size, Type type) {
+    switch(type) {
+        case Type::UnsignedInt: return size/4;
+        case Type::UnsignedShort: return size/2;
+        case Type::UnsignedByte: return size/1;
+    }
+
+    CORRADE_INTERNAL_ASSERT(false); // wrong!
 }
+/* [CORRADE_INTERNAL_ASSERT-unreachable] */
+#ifdef CORRADE_TARGET_GCC
+#pragma GCC diagnostic push
+#endif
+};
+
+struct Vec2 {
+enum class Status { Great, NotGreat };
+/* [CORRADE_ASSERT_UNREACHABLE] */
+std::string statusString(Status status) {
+    switch(status) {
+        case Status::Great: return "great";
+        case Status::NotGreat: return "not great";
+    }
+    CORRADE_ASSERT_UNREACHABLE("status is neither great nor non-great", {});
+}
+/* [CORRADE_ASSERT_UNREACHABLE] */
+
+enum class Type { UnsignedInt, UnsignedShort, UnsignedByte };
+/* [CORRADE_INTERNAL_ASSERT_UNREACHABLE] */
+std::size_t elementCount(std::size_t size, Type type) {
+    switch(type) {
+        case Type::UnsignedInt: return size/4;
+        case Type::UnsignedShort: return size/2;
+        case Type::UnsignedByte: return size/1;
+    }
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+}
+/* [CORRADE_INTERNAL_ASSERT_UNREACHABLE] */
 };
 
 /* [CORRADE_CONSTEXPR_ASSERT] */

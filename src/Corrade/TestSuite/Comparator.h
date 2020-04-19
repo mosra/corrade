@@ -272,7 +272,7 @@ template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags, Utilit
 
 /* LCOV_EXCL_START */
 template<class T> void Comparator<T>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, const std::string&) {
-    CORRADE_ASSERT_UNREACHABLE();
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 /* LCOV_EXCL_STOP */
 

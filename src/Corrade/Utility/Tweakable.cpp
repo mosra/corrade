@@ -570,7 +570,7 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             ++variable;
 
         /* Shouldn't get here */
-        } else CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
     }
 
     /* Being inside a line comment is okay, being inside a block comment is not */

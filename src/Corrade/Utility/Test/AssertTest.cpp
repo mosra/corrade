@@ -43,9 +43,10 @@ struct AssertTest: TestSuite::Tester {
     void constexprTest();
     void evaluateOnce();
 
-    bool _failAssert, _failConstexprAssert, _failInternalAssert,
-        _failInternalConstexprAssert, _failAssertOutput,
-        _failInternalAssertOutput, _failAssertUnreachable;
+    bool _failAssert, _failInternalAssert,
+        _failConstexprAssert, _failInternalConstexprAssert,
+        _failAssertOutput, _failInternalAssertOutput,
+        _failAssertUnreachable, _failInternalAssertUnreachable;
 };
 
 AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgumentPrefixes({"fail-on"})} {
@@ -55,21 +56,23 @@ AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgu
 
     Arguments args{"fail-on"};
     args.addOption("assert", "false").setHelp("assert", "fail on CORRADE_ASSERT()", "BOOL")
-        .addOption("constexpr-assert", "false").setHelp("constexpr-assert", "fail on CORRADE_CONSTEXPR_ASSERT()", "BOOL")
         .addOption("internal-assert", "false").setHelp("internal-assert", "fail on CORRADE_INTERNAL_ASSERT()", "BOOL")
+        .addOption("constexpr-assert", "false").setHelp("constexpr-assert", "fail on CORRADE_CONSTEXPR_ASSERT()", "BOOL")
         .addOption("internal-constexpr-assert", "false").setHelp("internal-constexpr-assert", "fail on CORRADE_INTERNAL_CONSTEXPR_ASSERT()", "BOOL")
         .addOption("assert-output", "false").setHelp("assert-output", "fail on CORRADE_ASSERT_OUTPUT()", "BOOL")
         .addOption("internal-assert-output", "false").setHelp("internal-assert-output", "fail on CORRADE_INTERNAL_ASSERT_OUTPUT()", "BOOL")
         .addOption("assert-unreachable", "false").setHelp("assert-unreachable", "fail on CORRADE_ASSERT_UNREACHABLE()", "BOOL")
+        .addOption("internal-assert-unreachable", "false").setHelp("internal-assert-unreachable", "fail on CORRADE_INTERNAL_ASSERT_UNREACHABLE()", "BOOL")
         .parse(arguments().first, arguments().second);
 
     _failAssert = args.value<bool>("assert");
-    _failConstexprAssert = args.value<bool>("constexpr-assert");
     _failInternalAssert = args.value<bool>("internal-assert");
+    _failConstexprAssert = args.value<bool>("constexpr-assert");
     _failInternalConstexprAssert = args.value<bool>("internal-constexpr-assert");
     _failAssertOutput = args.value<bool>("assert-output");
     _failInternalAssertOutput = args.value<bool>("internal-assert-output");
     _failAssertUnreachable = args.value<bool>("assert-unreachable");
+    _failInternalAssertUnreachable = args.value<bool>("internal-assert-unreachable");
 
     #ifdef CORRADE_STANDARD_ASSERT
     setTestName("Corrade::Utility::Test::AssertStandardTest");
@@ -79,7 +82,7 @@ AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgu
 void AssertTest::test() {
     std::ostringstream out;
     /* Redirect output only if no failures are expected */
-    Error redirectError{_failAssert || _failInternalAssert || _failAssertOutput || _failInternalAssertOutput || _failAssertUnreachable ? Error::output() : &out};
+    Error redirectError{_failAssert || _failInternalAssert || _failAssertOutput || _failInternalAssertOutput || _failAssertUnreachable || _failInternalAssertUnreachable ? Error::output() : &out};
 
     int a = 0;
     CORRADE_ASSERT(!a && !_failAssert, "A should be zero", );
@@ -91,13 +94,18 @@ void AssertTest::test() {
     int c = [&](){ CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
     CORRADE_INTERNAL_ASSERT_OUTPUT(foo() && !_failInternalAssertOutput);
 
-    if(!a || _failAssertUnreachable) CORRADE_ASSERT_UNREACHABLE();
+    if(c != 3 || _failAssertUnreachable)
+        CORRADE_ASSERT_UNREACHABLE("C should be 3", );
+    int d = [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("C should be 3!", 7); return 3; }();
+    if(c != 3 || _failInternalAssertUnreachable)
+        CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 
     CORRADE_ASSUME(a != 1);
 
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);
+    CORRADE_COMPARE(d, 3);
     CORRADE_COMPARE(out.str(), "");
 }
 

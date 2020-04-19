@@ -64,11 +64,16 @@ void AssertDisabledTest::test() {
     int c = [&](){ CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
     CORRADE_INTERNAL_ASSERT_OUTPUT(foo());
 
-    if(!a) CORRADE_ASSERT_UNREACHABLE();
+    /* These *still* compile to __builtin_unreachable, so we shouldn't trigger
+       them */
+    [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("c should be 3", ); }();
+    int d = [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("c should be 3!", 7); return 3; }();
+    if(c != 3) CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);
+    CORRADE_COMPARE(d, 3);
     CORRADE_COMPARE(out.str(), "");
     #else
     CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");

@@ -65,11 +65,10 @@ template<> char formatTypeChar<int>(FormatType type) {
         case FormatType::FloatFixed:
         case FormatType::FloatFixedUppercase:
             /* Return some reasonable default so we can test for the assert */
-            CORRADE_ASSERT(false,
-                "Utility::format(): floating-point type used for an integral value", 'i');
+            CORRADE_ASSERT_UNREACHABLE("Utility::format(): floating-point type used for an integral value", 'i');
     }
 
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 template<> char formatTypeChar<unsigned int>(FormatType type) {
@@ -87,11 +86,10 @@ template<> char formatTypeChar<unsigned int>(FormatType type) {
         case FormatType::FloatFixed:
         case FormatType::FloatFixedUppercase:
             /* Return some reasonable default so we can test for the assert */
-            CORRADE_ASSERT(false,
-                "Utility::format(): floating-point type used for an integral value", 'u');
+            CORRADE_ASSERT_UNREACHABLE("Utility::format(): floating-point type used for an integral value", 'u');
     }
 
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 template<> char formatTypeChar<float>(FormatType type) {
@@ -109,11 +107,10 @@ template<> char formatTypeChar<float>(FormatType type) {
         case FormatType::Hexadecimal:
         case FormatType::HexadecimalUppercase:
             /* Return some reasonable default so we can test for the assert */
-            CORRADE_ASSERT(false,
-                "Utility::format(): integral type used for a floating-point value", 'g');
+            CORRADE_ASSERT_UNREACHABLE("Utility::format(): integral type used for a floating-point value", 'g');
     }
 
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 std::size_t Formatter<int>::format(const Containers::ArrayView<char>& buffer, const int value, int precision, const FormatType type) {

@@ -142,7 +142,7 @@ inline void printStats(Utility::Debug& out, const double mean, const double stdd
             return;
     }
 
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 }}}

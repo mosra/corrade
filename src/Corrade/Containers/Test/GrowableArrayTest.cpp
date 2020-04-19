@@ -1756,7 +1756,7 @@ std::uint64_t GrowableArrayTest::benchmarkAllocationsEnd() {
         return allocationReuseCount;
     else if(testCaseInstanceId() == 2)
         return reallocationCount;
-    else CORRADE_ASSERT_UNREACHABLE();
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 
 void GrowableArrayTest::benchmarkAllocationsVector() {

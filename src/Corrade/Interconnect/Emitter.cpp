@@ -116,7 +116,7 @@ void Emitter::disconnectFromReceiver(const Implementation::ConnectionData& data)
     }
 
     /* The connection must be found */
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 bool disconnect(Emitter& emitter, const Connection& connection) {

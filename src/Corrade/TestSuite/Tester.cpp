@@ -406,7 +406,7 @@ benchmark types:
         switch(testCase.second.type) {
             /* LCOV_EXCL_START */
             case TestCaseType::DefaultBenchmark:
-                CORRADE_ASSERT_UNREACHABLE();
+                CORRADE_INTERNAL_ASSERT_UNREACHABLE();
             /* LCOV_EXCL_STOP */
 
             case TestCaseType::Test:

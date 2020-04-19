@@ -89,7 +89,7 @@ template<> class Comparator<MessageDiagnostic> {
                 out << "This is a message";
             else if(flags & ComparisonStatusFlag::Verbose)
                 out << "This is a verbose note";
-            else CORRADE_ASSERT_UNREACHABLE();
+            else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 
             out << "when comparing" << actual << "and" << expected;
         }

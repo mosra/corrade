@@ -175,6 +175,9 @@ namespace Corrade {
     This makes it possible to both verify assertion behavior and catch
     unexpected assertions in tests that enable graceful assertions for larger
     pieces of code.
+-   @ref CORRADE_ASSERT_UNREACHABLE() now accepts a message, acting as a
+    better alternative to @cpp CORRADE_ASSERT(false, ...) @ce; the original
+    functionality is provided by @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE()
 -   @ref Utility::Sha1 can now consume also @ref Containers::ArrayView in
     addition to @ref std::string and its internal processing is completely
     allocation-less (see [mosra/corrade#85](https://github.com/mosra/corrade/pull/85))
@@ -228,6 +231,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
+-   @ref CORRADE_ASSERT_UNREACHABLE() now accepts a message and will fail to
+    compile when used with an empty argument list. The original functionality
+    is provided by @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() instead.
 -   @ref Containers::Array and @ref Containers::StaticArray was switched to
     do the @ref Containers::ValueInit construction by default instead of
     @ref Containers::DefaultInit, i.e. zero-initializing trivial types instead

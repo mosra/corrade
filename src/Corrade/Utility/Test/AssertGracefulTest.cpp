@@ -57,17 +57,23 @@ void AssertGracefulTest::test() {
     [&](){ CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed", ); }();
     int c = [&](){ CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
 
+    [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("C should be 3", ); }();
+    int d = [&](){ if(a) CORRADE_ASSERT_UNREACHABLE("C should be 3!", 7); return 3; }();
+
     /* CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT() and
-       CORRADE_ASSERT_UNREACHABLE() do not have a graceful version */
+       CORRADE_INTERNAL_ASSERT_UNREACHABLE() do not have a graceful version */
 
     CORRADE_COMPARE(a, 7);
     CORRADE_COMPARE(b, 7);
     CORRADE_COMPARE(c, 7);
+    CORRADE_COMPARE(d, 7);
     CORRADE_COMPARE(out.str(),
         "A should be zero\n"
         "A should be zero!\n"
         "foo() should succeed\n"
-        "foo() should succeed!\n");
+        "foo() should succeed!\n"
+        "C should be 3\n"
+        "C should be 3!\n");
 }
 
 constexpr int divide(int a, int b) {

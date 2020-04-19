@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
 #include "Corrade/configure.h"
@@ -129,21 +129,32 @@ You can use stream output operators for formatting just like when printing to
 
 @snippet Utility.cpp CORRADE_ASSERT-stream
 
-@attention
-    Don't use this function for checking function output like this:
-@attention
+<b></b>
+
+@m_class{m-block m-warning}
+
+@par Problematic use cases
+    Don't use this function for checking function output like below --- if
+    @ref CORRADE_NO_ASSERT is defined, the macro is not expanded and thus the
+    function gets never called. Use @ref CORRADE_ASSERT_OUTPUT() instead.
+@par
     @snippet Utility.cpp CORRADE_ASSERT-output
-@attention
-    If @cpp CORRADE_NO_ASSERT @ce is defined, the macro is not expanded and
-    thus the function gets never called. See @ref CORRADE_ASSERT_OUTPUT() for a
-    possible solution.
+@par
+    Similarly, this macro shouldn't be used for asserting on unreachable code
+    --- if @ref CORRADE_NO_ASSERT is defined, there's nothing left to tell the
+    compiler this code is unreachable, potentially producing a compile error
+    due to a missing @cpp return @ce. In this case it's better to use
+    @ref CORRADE_ASSERT_UNREACHABLE() instead, which will emit a corresponding
+    compiler hint in all cases.
+@par
+    @snippet Utility.cpp CORRADE_ASSERT-unreachable
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
 @see @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(),
-    @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME()
+    @ref CORRADE_ASSUME()
 */
 #ifndef CORRADE_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -275,6 +286,58 @@ You can override this implementation by placing your own
 #endif
 
 /** @hideinitializer
+@brief Assert that the code is unreachable
+@param message      Message on assertion fail
+@param returnValue  Return value on assertion fail
+
+By default, if code marked with this macro is reached, @p message is printed to
+error output and the application aborts. If @ref CORRADE_GRACEFUL_ASSERT is
+defined *and* @ref Corrade::Utility::Error output is redirected (i.e., in tests
+verifying the assert behavior), the message is printed and the function returns
+with @p returnValue instead of aborting. If @ref CORRADE_STANDARD_ASSERT is
+defined, this macro compiles to @cpp assert(!"unreachable code") @ce. If
+@ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
+@cpp NDEBUG @ce are defined), this macro hints to the compiler that given code
+is not reachable, possibly helping the optimizer (using a compiler builtin on
+GCC, Clang and MSVC; calling @ref std::abort() otherwise). Example usage:
+
+@snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT_UNREACHABLE @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
+@see @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSERT(),
+    @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSUME()
+*/
+#ifndef CORRADE_ASSERT_UNREACHABLE
+#if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
+#if defined(__GNUC__)
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
+#else
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) std::abort()
+#endif
+#elif defined(CORRADE_GRACEFUL_ASSERT)
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                    \
+    do {                                                                    \
+        Corrade::Utility::Error{} << message;                               \
+        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
+        return returnValue;                                                 \
+    } while(false)
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) assert(!"unreachable code")
+#else
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                                        \
+    do {                                                                    \
+        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message; \
+        std::abort();                                                       \
+    } while(false)
+#endif
+#endif
+
+/** @hideinitializer
 @brief Internal assertion macro
 @param condition    Assert condition
 
@@ -290,14 +353,26 @@ Example usage:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT
 
-@attention
-    Don't use this function for checking function output like this:
-@attention
-    @snippet Utility.cpp CORRADE_INTERNAL_ASSERT-output
-@attention
-    If @ref CORRADE_NO_ASSERT is defined, the macro is not expanded and thus
+<b></b>
+
+@m_class{m-block m-warning}
+
+@par Problematic use cases
+    Don't use this function for checking function output like below --- if
+    @ref CORRADE_NO_ASSERT is defined, the macro is not expanded and thus
     the function gets never called. Use @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
     instead.
+@par
+    @snippet Utility.cpp CORRADE_INTERNAL_ASSERT-output
+@par
+    Similarly, this macro shouldn't be used for asserting on unreachable code
+    --- if @ref CORRADE_NO_ASSERT is defined, there's nothing left to tell the
+    compiler this code is unreachable, potentially producing a compile error
+    due to a missing @cpp return @ce. In this case it's better to use
+    @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() instead, which will emit a
+    corresponding compiler hint in all cases.
+@par
+    @snippet Utility.cpp CORRADE_INTERNAL_ASSERT-unreachable
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT @ce before including the
@@ -394,39 +469,41 @@ You can override this implementation by placing your own
 #endif
 
 /** @hideinitializer
-@brief Assert that the following code is unreachable
+@brief Internal assert that the code is unreachable
+@m_since_latest
+
+Compared to @ref CORRADE_ASSERT_UNREACHABLE(), usable for sanity checks on
+internal state, as it prints what failed and where instead of a user-friendly
+message.
 
 By default, if code marked with this macro is reached, message with file and
 line is printed to error output and the application aborts. If
 @ref CORRADE_STANDARD_ASSERT is defined, this macro compiles to
-@cpp assert(false) @ce. If @ref CORRADE_NO_ASSERT is defined (or if both
-@ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this macro hints
-to the compiler that given code is not reachable, possibly improving
-performance (using a compiler builtin on GCC, Clang and MSVC; calling
+@cpp assert(!"unreachable code") @ce. If @ref CORRADE_NO_ASSERT is defined (or
+if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this
+macro hints to the compiler that given code is not reachable, possibly helping
+the optimizer (using a compiler builtin on GCC, Clang and MSVC; calling
 @ref std::abort() otherwise). Example usage:
 
-@snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
+@snippet Utility.cpp CORRADE_INTERNAL_ASSERT_UNREACHABLE
 
 You can override this implementation by placing your own
-@cpp #define CORRADE_ASSERT_UNREACHABLE @ce before including the
+@cpp #define CORRADE_INTERNAL_ASSERT_UNREACHABLE @ce before including the
 @ref Corrade/Utility/Assert.h header.
-
-@see @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(),
-    @ref CORRADE_ASSUME()
 */
-#ifndef CORRADE_ASSERT_UNREACHABLE
+#ifndef CORRADE_INTERNAL_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #if defined(__GNUC__)
-#define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __builtin_unreachable()
 #elif defined(_MSC_VER)
-#define CORRADE_ASSERT_UNREACHABLE() __assume(0)
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __assume(0)
 #else
-#define CORRADE_ASSERT_UNREACHABLE() std::abort()
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() std::abort()
 #endif
 #elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_ASSERT_UNREACHABLE() assert(!"unreachable code")
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() assert(!"unreachable code")
 #else
-#define CORRADE_ASSERT_UNREACHABLE()                                        \
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \
         Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Reached unreachable code at " __FILE__ ":" CORRADE_LINE_STRING; \
         std::abort();                                                       \
