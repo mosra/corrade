@@ -40,6 +40,8 @@ namespace Corrade {
     @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
     @ref CORRADE_TARGET_MSVC and @ref CORRADE_TARGET_MINGW variables for easier
     compiler identification
+-   New @ref CORRADE_TARGET_SSE2 providing an *extremely minimal* SIMD feature
+    detection. More extensions to come later.
 -   New @ref CORRADE_TARGET_BIG_ENDIAN macro. A variant of this macro called
     just @cpp CORRADE_BIG_ENDIAN @ce was used internally for a long time, now
     it's been exposed publicly.

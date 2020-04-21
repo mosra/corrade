@@ -44,6 +44,7 @@ struct TargetTest: TestSuite::Tester {
     void endian();
     void compiler();
     void stl();
+    void simd();
 };
 
 TargetTest::TargetTest() {
@@ -51,7 +52,8 @@ TargetTest::TargetTest() {
               &TargetTest::architecture,
               &TargetTest::endian,
               &TargetTest::compiler,
-              &TargetTest::stl});
+              &TargetTest::stl,
+              &TargetTest::simd});
 }
 
 void TargetTest::system() {
@@ -229,6 +231,18 @@ void TargetTest::stl() {
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
     CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
     CORRADE_COMPARE(unique, 1);
+}
+
+void TargetTest::simd() {
+    std::ostringstream out;
+
+    #ifdef CORRADE_TARGET_SSE2
+    Debug{&out} << "CORRADE_TARGET_SSE2";
+    #endif
+
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
+    if(out.str().empty()) Debug{} << "No suitable CORRADE_TARGET_* defined";
+    CORRADE_VERIFY(true);
 }
 
 }}}

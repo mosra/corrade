@@ -169,6 +169,18 @@
 #define CORRADE_BIG_ENDIAN
 #endif
 
+/* SIMD extensions. Not much here yet. */
+#ifdef CORRADE_TARGET_GCC
+#ifdef __SSE2__
+#define CORRADE_TARGET_SSE2
+#endif
+
+#elif defined(CORRADE_TARGET_MSVC)
+#if defined(_M_IX86_FP) && _M_IX86_FP == 2
+#define CORRADE_TARGET_SSE2
+#endif
+#endif
+
 /* Documented in Utility/TypeTraits.h */
 #if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || (defined(CORRADE_TARGET_EMSCRIPTEN) && __LDBL_DIG__ == __DBL_DIG__)
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE

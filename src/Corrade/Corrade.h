@@ -429,6 +429,18 @@ exposed in CMake because the detection is non-trivial.
 #undef CORRADE_TARGET_DINKUMWARE
 
 /**
+@brief SSE2 target
+@m_since_latest
+
+Defined on x86 if [SSE2](https://en.wikipedia.org/wiki/SSE2) instructions are
+enabled at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or
+higher on MSVC). Nowadays it can be assumed that all x86 targets support SSE2,
+so (unlike AVX and newer) this feature doesn't need any runtime detection.
+*/
+#define CORRADE_TARGET_SSE2
+#undef CORRADE_TARGET_SSE2
+
+/**
 @brief PluginManager doesn't have dynamic plugin support on this platform
 
 Defined if the @ref Corrade::PluginManager "PluginManager" library doesn't
