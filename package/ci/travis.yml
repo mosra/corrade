@@ -40,6 +40,7 @@ matrix:
     - JOBID=linux-static
     - TARGET=desktop
     - CMAKE_CXX_FLAGS="--coverage"
+    - LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
     - BUILD_STATIC=ON
     - CONFIGURATION=Debug
   - language: cpp
