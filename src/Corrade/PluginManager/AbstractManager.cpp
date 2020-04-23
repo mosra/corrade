@@ -471,9 +471,9 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         registerDynamicPlugin(name, new Plugin{name, Directory::join(_state->pluginDirectory, name + ".conf"), this});
     }
 
-    /* If some of the currently loaded plugins aliased plugins that werre in
-       the old plugin directory, these are no longer there. Refresh the alias
-       list with the new plugins. */
+    /* If some of the currently loaded plugins aliased plugins that were in the
+       old plugin directory, these are no longer there. Refresh the alias list
+       with the new plugins. */
     for(auto p: *globalPlugins) {
         if(p.second->manager != this) continue;
 
