@@ -123,6 +123,8 @@ struct ManagerTest: TestSuite::Tester {
     void utf8Path();
     #endif
 
+    void twoEmptyInstancesSharingAGlobalState();
+
     void debugLoadState();
     void debugLoadStates();
 
@@ -197,6 +199,8 @@ ManagerTest::ManagerTest() {
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::utf8Path,
               #endif
+
+              &ManagerTest::twoEmptyInstancesSharingAGlobalState,
 
               &ManagerTest::debugLoadState,
               &ManagerTest::debugLoadStates});
@@ -1034,6 +1038,20 @@ void ManagerTest::utf8Path() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
+
+void ManagerTest::twoEmptyInstancesSharingAGlobalState() {
+    /* If the global storage is empty when destructing a manager, it's deleted.
+       That however can be done only if there's no other manager using the same
+       storage (even if it would be empty), otherwise accessing anything in the
+       other manager would crash. */
+    PluginManager::Manager<AbstractFood> foodManager{"nonexistent"};
+    PluginManager::Manager<AbstractDeletable> deletableManager{"nonexistent"};
+    CORRADE_COMPARE(foodManager.pluginList(), std::vector<std::string>{});
+    CORRADE_COMPARE(deletableManager.pluginList(), std::vector<std::string>{});
+
+    /* Here it should destruct deletableManager, then foodManager and only then
+       delete the global storage. */
+}
 
 void ManagerTest::debugLoadState() {
     std::ostringstream o;
