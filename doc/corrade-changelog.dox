@@ -78,6 +78,12 @@ namespace Corrade {
 -   New @ref Containers::enumCastUnderlyingType() utility functions for
     casting an @cpp enum @ce or @ref Containers::EnumSet to its underlying type
 
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+
+-   Added @ref PluginManager::implicitPluginSearchPaths() for a well-documented
+    and reliable way to supply plugin search paths consistent for all for
+    plugin interfaces
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Added @ref Utility::Arguments::setParseErrorCallback() for implementing

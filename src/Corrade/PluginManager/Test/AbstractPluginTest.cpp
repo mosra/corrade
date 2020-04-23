@@ -42,11 +42,24 @@ struct AbstractPluginTest: TestSuite::Tester {
 
     void constructCopy();
     void constructMove();
+
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    void implicitPluginSearchPaths();
+    void implicitPluginSearchPathsNoLibraryLocation();
+    void implicitPluginSearchPathsNoAbsolutePath();
+    #endif
 };
 
 AbstractPluginTest::AbstractPluginTest() {
     addTests({&AbstractPluginTest::constructCopy,
-              &AbstractPluginTest::constructMove});
+              &AbstractPluginTest::constructMove,
+
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+              &AbstractPluginTest::implicitPluginSearchPaths,
+              &AbstractPluginTest::implicitPluginSearchPathsNoLibraryLocation,
+              &AbstractPluginTest::implicitPluginSearchPathsNoAbsolutePath
+              #endif
+              });
 
     importPlugin();
 }
@@ -89,6 +102,60 @@ void AbstractPluginTest::constructMove() {
         CORRADE_COMPARE(b.configuration().value("name"), "Achoo");
     }
 }
+
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+void AbstractPluginTest::implicitPluginSearchPaths() {
+    std::vector<std::string> expected{
+        "/usr/lib/64/corrade/foobars",
+        #ifdef CORRADE_TARGET_APPLE
+        "../PlugIns/corrade/foobars",
+        #endif
+        "/usr/lib/corrade/foobars",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "../lib/corrade/foobars",
+        #endif
+        "corrade/foobars"
+    };
+    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+        "/usr/lib/CorradeFooBar.so",
+        "/usr/lib/64/corrade/foobars",
+        "corrade/foobars"), expected);
+}
+
+void AbstractPluginTest::implicitPluginSearchPathsNoLibraryLocation() {
+    std::vector<std::string> expected{
+        "/usr/lib/64/corrade/foobars",
+        #ifdef CORRADE_TARGET_APPLE
+        "../PlugIns/corrade/foobars",
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        "../lib/corrade/foobars",
+        #endif
+        "corrade/foobars"
+    };
+    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+        {},
+        "/usr/lib/64/corrade/foobars",
+        "corrade/foobars"), expected);
+}
+
+void AbstractPluginTest::implicitPluginSearchPathsNoAbsolutePath() {
+    std::vector<std::string> expected{
+        #ifdef CORRADE_TARGET_APPLE
+        "../PlugIns/corrade/foobars",
+        #endif
+        "/usr/lib/corrade/foobars",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "../lib/corrade/foobars",
+        #endif
+        "corrade/foobars"
+    };
+    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+        "/usr/lib/CorradeFooBar.so",
+        {},
+        "corrade/foobars"), expected);
+}
+#endif
 
 }}}}
 

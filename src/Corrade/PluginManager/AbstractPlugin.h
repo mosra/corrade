@@ -103,9 +103,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * List of hardcoded absolute or relative paths where to search for
          * plugins of given interface. Relative paths are relative to
          * @ref Utility::Directory::executableLocation() directory. Earlier
-         * entries have more priority than later, search stops once an existing
-         * directory is found. By default this function returns an empty list.
-         * See also @ref PluginManager-Manager-paths for more information.
+         * entries have more priority than later, search stops once a directory
+         * that exists is found. By default this function returns an empty
+         * list, you can use the convenience @ref implicitPluginSearchPaths()
+         * helper for a consistent behavior on all platforms. See also
+         * @ref PluginManager-Manager-paths for more information.
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
@@ -261,6 +263,70 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         struct State;
         Containers::Pointer<State> _state;
 };
+
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+/**
+@brief Implicit plugin search paths
+@param libraryLocation  Absolute location of a dynamic library containing the
+    plugin interface. Should be empty when the library is static or the plugin
+    interface is defined directly inside an executable. Use
+    @ref Utility::Directory::libraryLocation() to retrieve the location.
+@param hardcodedPath    Hardcoded path where to search for plugins. It's
+    recommended to propagate this value from the buildsystem, keeping it empty
+    by default.
+@param relativePath     A path where plugins are stored, relative to a usual
+    library location
+@m_since_latest
+
+Meant to be used to implement @ref AbstractPlugin::pluginSearchPaths().
+Produces a list of search paths in this order:
+
+1.  @p hardcodedPath, if not empty, for example
+    @cpp "/usr/lib64/magnum/imageconverters" @ce. This is meant to act as a
+    last-hope override when everything else fails and unless there's a good
+    reason to do so (like the ones listed below), it should be empty. Supplying
+    an absolute path even when not needed may result in self-contained apps
+    picking up system-wide plugins by accident, causing all sorts of ABI
+    issues. The path can be relative as well, in which case the plugin manager
+    joins path of @ref Utility::Directory::executableLocation() with it.
+2.  @cpp "../PlugIns" @ce joined with @p relativePath, if the system is macOS
+    or iOS. Since it's a relative location, the plugin manager joins path of
+    @ref Utility::Directory::executableLocation() with it. This is meant for
+    bundles, where the main executable is expected to be stored in the `MacOS`
+    directory and plugins in the `PlugIns` directory (note the capitalization).
+    [Apple docs for reference.](https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html#//apple_ref/doc/uid/10000123i-CH101-SW3)
+3.  The path of @p libraryLocation joined with @p relativePath, if
+    @p libraryLocation is not empty. This will work for most cases of a dynamic
+    system-wide install. For example with @p libraryLocation set to
+    @cpp "/usr/lib/MagnumTrade.so" @ce and @p relativePath to
+    @cpp "magnum/imageconverters" @ce, it'll result in
+    @cpp "/usr/lib/magnum/imageconverters" @ce added to the search path. If
+    a correct library location can't be detected reliably (for example due to
+    symlinks), you to use @p hardcodedPath. This is done *after* the
+    `PluginIns` path on Apple in order to make it possible for a bundle to ship
+    and use its own plugins even if it may rely on system-installed libraries.
+4.  @cpp "../lib" @ce joined with @p relativePath, unless the system is
+    Windows (because there plugin DLLs are not in a `lib` directory but next to
+    the executable in `bin` instead). Since it's a relative location, the
+    plugin manager joins path of @ref Utility::Directory::executableLocation()
+    with it. This will work for most cases of a static system-wide install. For
+    example with executable location being @cpp "/usr/bin/magnum-player" @ce
+    and @p relativePath set to @cpp "magnum/imageconverters" @ce, it'll result
+    in @cpp "/usr/lib/magnum/imageconverters" @ce added to the search path. If
+    the system has the library dir `lib64`, `lib/64/` or similar and there's
+    no symlink that would make the above work, you need use @p hardcodedPath.
+5.  @p relativePath alone, for example @cpp "magnum/imageconverters" @ce.
+    Again, since it's a relative location, the plugin manager joins path of
+    @ref Utility::Directory::executableLocation() with it. This will work for
+    Windows and all relocatable installs, as it simply looks for the plugins
+    next to the executable.
+
+See also @ref PluginManager-Manager-paths for more information.
+@partialsupport Not available on platforms without
+    @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
+*/
+CORRADE_PLUGINMANAGER_EXPORT std::vector<std::string> implicitPluginSearchPaths(const std::string& libraryLocation, const std::string& hardcodedPath, const char* relativePath);
+#endif
 
 }}
 
