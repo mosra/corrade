@@ -216,6 +216,8 @@ namespace Corrade {
     @ref std::ostream defaults. Now it prints those with 15 and 18 digits
     respectively, consistent with @ref Utility::Debug and @ref Utility::format()
     output
+-   An empty @ref PluginManager::Manager could be crashing on destruction due
+    to another instance wiping out the global state too early
 
 @subsection corrade-changelog-latest-documentation Documentation
 

@@ -170,6 +170,14 @@ extern "C" {
 }
 #endif
 
+/* Beware: having std::map<std::string, Containers::Pointer> is an IMPOSSIBLE
+   feat on GCC 4.7, as it will fails with tons of compiler errors because
+   std::pair is trying to copy itself. So calm down and ignore those few delete
+   calls. Please. Last tried: March 2018. */
+struct GlobalPlugins: std::map<std::string, AbstractManager::Plugin*> {
+    std::size_t referenceCount = 0;
+};
+
 #ifdef CORRADE_BUILD_MULTITHREADED
 CORRADE_THREAD_LOCAL
 #endif
@@ -190,15 +198,10 @@ CORRADE_VISIBILITY_EXPORT
    already), deallocated on manager destruction in case there are no plugins
    left in it anymore.
 
-   Beware: having std::map<std::string, Containers::Pointer> is an IMPOSSIBLE
-   feat on GCC 4.7, as it will fails with tons of compiler errors because
-   std::pair is trying to copy itself. So calm down and ignore those few delete
-   calls. Please. Last tried: March 2018.
-
    The value of this variable is guaranteed to be zero-filled even before any
    static plugin initializers are executed, which means we don't hit any static
    initialization order fiasco. */
-std::map<std::string, AbstractManager::Plugin*>* globalPlugins = nullptr;
+GlobalPlugins* globalPlugins = nullptr;
 
 #if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
 }
@@ -220,8 +223,8 @@ std::map<std::string, AbstractManager::Plugin*>* globalPlugins = nullptr;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 #endif
-extern "C" CORRADE_VISIBILITY_EXPORT std::map<std::string, AbstractManager::Plugin*>*& corradePluginManagerUniqueGlobalPlugins();
-extern "C" CORRADE_VISIBILITY_EXPORT std::map<std::string, AbstractManager::Plugin*>*& corradePluginManagerUniqueGlobalPlugins() {
+extern "C" CORRADE_VISIBILITY_EXPORT GlobalPlugins*& corradePluginManagerUniqueGlobalPlugins();
+extern "C" CORRADE_VISIBILITY_EXPORT GlobalPlugins*& corradePluginManagerUniqueGlobalPlugins() {
     return globalPlugins;
 }
 #ifdef CORRADE_TARGET_CLANG_CL
@@ -237,10 +240,10 @@ Implementation::StaticPlugin*& windowsGlobalStaticPlugins() {
     return *uniqueGlobals;
 }
 
-std::map<std::string, AbstractManager::Plugin*>*& windowsGlobalPlugins() {
+GlobalPlugins*& windowsGlobalPlugins() {
     /* A function-local static to ensure it's only initialized once without any
        race conditions among threads */
-    static std::map<std::string, AbstractManager::Plugin*>*&(*const uniqueGlobals)() = reinterpret_cast<std::map<std::string, AbstractManager::Plugin*>*&(*)()>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalPlugins", reinterpret_cast<void*>(&corradePluginManagerUniqueGlobalPlugins)));
+    static GlobalPlugins*&(*const uniqueGlobals)() = reinterpret_cast<GlobalPlugins*&(*)()>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalPlugins", reinterpret_cast<void*>(&corradePluginManagerUniqueGlobalPlugins)));
     return uniqueGlobals();
 }
 
@@ -280,7 +283,8 @@ AbstractManager::AbstractManager(std::string pluginInterface):
 {
     /* If the global storage doesn't exist yet, allocate it. This gets deleted
        when it's fully empty again on manager destruction. */
-    if(!globalPlugins) globalPlugins = new std::map<std::string, AbstractManager::Plugin*>;
+    if(!globalPlugins) globalPlugins = new GlobalPlugins;
+    ++globalPlugins->referenceCount;
 
     /* Add static plugins which have the same interface and don't have a
        manager assigned to them (i.e, aren't in the map yet). */
@@ -381,7 +385,9 @@ AbstractManager::~AbstractManager() {
 
     /* If there's nothing left, deallocate the storage. If a manager needs it
        again, it will allocate it on its own. */
-    if(globalPlugins->empty()) {
+    CORRADE_INTERNAL_ASSERT(globalPlugins->referenceCount);
+    if(!--globalPlugins->referenceCount) {
+        CORRADE_INTERNAL_ASSERT(globalPlugins->empty());
         delete globalPlugins;
         globalPlugins = nullptr;
     }
