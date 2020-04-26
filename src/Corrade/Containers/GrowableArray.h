@@ -771,7 +771,6 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 */
 template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
 
-
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
    at all, so hiding this one from it until it improves. */
