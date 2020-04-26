@@ -1215,7 +1215,9 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
 }
 
 template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const T& value) {
-    return arrayAppend<T, Allocator>(array, InPlaceInit, value);
+    T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
+    new(it) T{value};
+    return *it;
 }
 
 template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
