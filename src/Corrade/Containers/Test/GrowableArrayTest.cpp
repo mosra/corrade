@@ -1491,11 +1491,22 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_COMPARE(a.size(), 5);
 
     const int six = 6;
-    arrayAppend<ArrayNewAllocator>(a, six);
-    arrayAppend<ArrayNewAllocator>(a, InPlaceInit, 7);
-    arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
-    const int values[]{11, 12, 13};
-    arrayAppend<ArrayNewAllocator>(a, arrayView(values));
+    {
+        int& value = arrayAppend<ArrayNewAllocator>(a, six);
+        CORRADE_COMPARE(value, 6);
+    } {
+        int& value = arrayAppend<ArrayNewAllocator>(a, InPlaceInit, 7);
+        CORRADE_COMPARE(value, 7);
+    } {
+        Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
+        CORRADE_COMPARE(view.size(), 3);
+        CORRADE_COMPARE(view[2], 10);
+    } {
+        const int values[]{11, 12, 13};
+        Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, arrayView(values));
+        CORRADE_COMPARE(view.size(), 3);
+        CORRADE_COMPARE(view[1], 12);
+    }
     CORRADE_COMPARE(a.size(), 13);
 
     arrayRemoveSuffix<ArrayNewAllocator>(a);
