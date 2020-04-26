@@ -1162,31 +1162,54 @@ template<class T, class... Args> inline void arrayResize(Array<T>& array, Direct
 
 namespace Implementation {
 
-template<class T, class Allocator> void arrayGrow(Array<T>& array, const std::size_t desiredCapacity) {
+template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::size_t count) {
+    /* Direct access & caching to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
 
     /* For arrays with an unknown deleter we'll always copy-allocate to a new
        place */
+    const std::size_t desiredCapacity = arrayGuts.size + count;
+    std::size_t capacity;
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    T* oldMid = nullptr;
+    #endif
     if(arrayGuts.deleter != Allocator::deleter) {
-        T* const newArray = Allocator::allocate(Allocator::grow(nullptr, desiredCapacity));
-        Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
+        capacity = Allocator::grow(nullptr, desiredCapacity);
+        T* const newArray = Allocator::allocate(capacity);
+        arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
         array = Array<T>{newArray, arrayGuts.size, Allocator::deleter};
 
-    /* Otherwise we reallocate, which might be able to grow in-place */
+    /* Otherwise, if there's no space anymore, reallocate, which might be able
+       to grow in-place */
     } else {
-        Allocator::reallocate(arrayGuts.data, arrayGuts.size, Allocator::grow(arrayGuts.data, desiredCapacity));
+        capacity = Allocator::capacity(arrayGuts.data);
+        if(arrayGuts.size + count > capacity) {
+            capacity = Allocator::grow(arrayGuts.data, desiredCapacity);
+            Allocator::reallocate(arrayGuts.data, arrayGuts.size, capacity);
+        } else {
+            #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+            oldMid = arrayGuts.data + arrayGuts.size;
+            #endif
+        }
     }
 
+    /* Increase array size and return the previous end pointer */
+    T* const it = arrayGuts.data + arrayGuts.size;
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
-    /** @todo with std::realloc, is that really a new allocation? what should I
-        do here? */
-    std::size_t capacity = Allocator::capacity(arrayGuts.data);
     __sanitizer_annotate_contiguous_container(
         Allocator::base(arrayGuts.data),
         arrayGuts.data + capacity,
-        arrayGuts.data + capacity, /* ASan assumes this for new allocations */
-        arrayGuts.data + arrayGuts.size);
+        /* For a new allocation, ASan assumes the previous middle pointer is at
+           the end of the array. If we grew an existing allocation, the
+           previous middle is set what __sanitier_acc() received as a middle
+           value before */
+        /** @todo with std::realloc possibly happening in reallocate(), is that
+            really a new allocation? what should I do there? */
+        oldMid ? oldMid : arrayGuts.data + capacity,
+        arrayGuts.data + arrayGuts.size + count);
     #endif
+    arrayGuts.size += count;
+    return it;
 }
 
 }
@@ -1201,47 +1224,15 @@ template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(A
 
 template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const Containers::ArrayView<const T> values) {
     /* Direct access & caching to speed up debug builds */
-    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
     const std::size_t valueCount = values.size();
 
-    /* If we don't have our own deleter or there's no space anymore,
-       reallocate */
-    if(arrayGuts.deleter != Allocator::deleter || arrayGuts.size + valueCount > Allocator::capacity(arrayGuts.data))
-        Implementation::arrayGrow<T, Allocator>(array, arrayGuts.size + valueCount);
-
-    /* Increase array size and copy-construct the new values */
-    T* it = array + arrayGuts.size;
-    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
-    __sanitizer_annotate_contiguous_container(
-        Allocator::base(arrayGuts.data),
-        arrayGuts.data + Allocator::capacity(array),
-        arrayGuts.data + arrayGuts.size,
-        arrayGuts.data + arrayGuts.size + valueCount);
-    #endif
-    arrayGuts.size += valueCount;
+    T* const it = Implementation::arrayGrowBy<T, Allocator>(array, valueCount);
     Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
     return {it, valueCount};
 }
 
 template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
-    /* Direct access to speed up debug builds */
-    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
-
-    /* If we don't have our own deleter or there's no space anymore,
-       reallocate */
-    if(arrayGuts.deleter != Allocator::deleter || arrayGuts.size == Allocator::capacity(arrayGuts.data))
-        Implementation::arrayGrow<T, Allocator>(array, arrayGuts.size + 1);
-
-    /* Increase array size and construct the new value in-place */
-    T* it = arrayGuts.data + arrayGuts.size;
-    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
-    __sanitizer_annotate_contiguous_container(
-        Allocator::base(arrayGuts.data),
-        arrayGuts.data + Allocator::capacity(arrayGuts.data),
-        arrayGuts.data + arrayGuts.size,
-        arrayGuts.data + arrayGuts.size + 1);
-    #endif
-    ++arrayGuts.size;
+    T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
     /* No helper function as there's no way we could memcpy such a thing. */
     /* On GCC 4.8 this includes another workaround, see the 4.8-specific
        overload docs for details */
