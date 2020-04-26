@@ -597,7 +597,8 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
 uninitialized state instead.
-@see @ref Array::size(), @ref arrayIsGrowable(), @ref Containers-Array-growable
+@see @ref Array::size(), @ref arrayIsGrowable(), @ref Containers-Array-growable,
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t)
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, NoInitT, std::size_t size);
 
@@ -784,6 +785,34 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T> inline Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
+}
+#endif
+
+/**
+@brief Append given count of uninitialized values to the array
+@return View on the newly appended items
+@m_since_latest
+
+A lower-level variant of
+@ref arrayAppend(Array<T>& array, Containers::ArrayView<const T>) where the new
+values are meant to be initialized in-place after, instead of being copied from
+a pre-existing location.
+*/
+template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count) {
+    return arrayAppend<T, Allocator<T>>(array, NoInit, count);
 }
 #endif
 
@@ -1250,6 +1279,11 @@ template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceI
     return arrayAppend<T, ArrayAllocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
 #endif
+
+template<class T, class Allocator> Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, const std::size_t count) {
+    T* const it = Implementation::arrayGrowBy<T, Allocator>(array, count);
+    return {it, count};
+}
 
 template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const std::size_t count) {
     /* Direct access to speed up debug builds */

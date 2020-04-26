@@ -97,6 +97,7 @@ struct GrowableArrayTest: TestSuite::Tester {
     void appendCopy();
     void appendMove();
     void appendList();
+    void appendCountNoInit();
 
     void appendGrowRatio();
 
@@ -257,6 +258,7 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::appendCopy,
               &GrowableArrayTest::appendMove,
               &GrowableArrayTest::appendList,
+              &GrowableArrayTest::appendCountNoInit,
 
               &GrowableArrayTest::appendGrowRatio,
 
@@ -1094,6 +1096,16 @@ void GrowableArrayTest::appendList() {
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
+void GrowableArrayTest::appendCountNoInit() {
+    Array<int> a;
+    Containers::ArrayView<int> appended = arrayAppend(a, Containers::NoInit, 4);
+    CORRADE_COMPARE(a.size(), 4);
+    CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
+    CORRADE_COMPARE(appended.data(), a.data());
+    CORRADE_COMPARE(appended.size(), 4);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
 void GrowableArrayTest::appendGrowRatio() {
     Array<int> a;
 
@@ -1506,12 +1518,18 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, arrayView(values));
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[1], 12);
+    } {
+        Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, NoInit, 2);
+        CORRADE_COMPARE(view.size(), 2);
+        view[0] = 14;
+        view[1] = 15;
+        CORRADE_COMPARE(a[13], 14);
     }
-    CORRADE_COMPARE(a.size(), 13);
+    CORRADE_COMPARE(a.size(), 15);
 
     arrayRemoveSuffix<ArrayNewAllocator>(a);
     arrayShrink<ArrayNewAllocator>(a);
-    CORRADE_COMPARE(a.size(), 12);
+    CORRADE_COMPARE(a.size(), 14);
 
     Array<Movable> b;
     arrayResize<ArrayNewAllocator>(b, DirectInit, 5, Movable{6});
