@@ -125,15 +125,15 @@ struct ManagerTest: TestSuite::Tester {
 
     void twoEmptyInstancesSharingAGlobalState();
 
-    void debugLoadState();
-    void debugLoadStates();
-
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     void multithreadedStatic();
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void multithreadedDynamic();
     #endif
     #endif
+
+    void debugLoadState();
+    void debugLoadStates();
 };
 
 ManagerTest::ManagerTest() {
@@ -200,10 +200,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::utf8Path,
               #endif
 
-              &ManagerTest::twoEmptyInstancesSharingAGlobalState,
-
-              &ManagerTest::debugLoadState,
-              &ManagerTest::debugLoadStates});
+              &ManagerTest::twoEmptyInstancesSharingAGlobalState});
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     addRepeatedTests({
@@ -213,6 +210,9 @@ ManagerTest::ManagerTest() {
         #endif
         }, 25);
     #endif
+
+    addTests({&ManagerTest::debugLoadState,
+              &ManagerTest::debugLoadStates});
 
     importPlugin();
 }
@@ -1053,20 +1053,6 @@ void ManagerTest::twoEmptyInstancesSharingAGlobalState() {
        delete the global storage. */
 }
 
-void ManagerTest::debugLoadState() {
-    std::ostringstream o;
-
-    Debug(&o) << LoadState::Static << LoadState(0x3f);
-    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
-}
-
-void ManagerTest::debugLoadStates() {
-    std::ostringstream out;
-
-    Debug{&out} << (LoadState::Static|LoadState::NotFound) << LoadStates{};
-    CORRADE_COMPARE(out.str(), "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
-}
-
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 void ManagerTest::multithreadedStatic() {
     #ifndef CORRADE_BUILD_MULTITHREADED
@@ -1148,6 +1134,20 @@ void ManagerTest::multithreadedDynamic() {
 }
 #endif
 #endif
+
+void ManagerTest::debugLoadState() {
+    std::ostringstream o;
+
+    Debug(&o) << LoadState::Static << LoadState(0x3f);
+    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
+}
+
+void ManagerTest::debugLoadStates() {
+    std::ostringstream out;
+
+    Debug{&out} << (LoadState::Static|LoadState::NotFound) << LoadStates{};
+    CORRADE_COMPARE(out.str(), "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
+}
 
 }}}}
 
