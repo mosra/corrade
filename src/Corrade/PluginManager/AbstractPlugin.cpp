@@ -30,6 +30,10 @@
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/Directory.h"
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+#include "Corrade/PluginManager/configure.h"
+#endif
+
 namespace Corrade { namespace PluginManager {
 
 struct AbstractPlugin::State {
@@ -43,7 +47,11 @@ std::string AbstractPlugin::pluginInterface() { return {}; }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractPlugin::pluginSearchPaths() { return {}; }
+
+std::string AbstractPlugin::pluginSuffix() { return PLUGIN_FILENAME_SUFFIX; }
 #endif
+
+std::string AbstractPlugin::pluginMetadataSuffix() { return ".conf"; }
 
 void AbstractPlugin::initialize() {}
 

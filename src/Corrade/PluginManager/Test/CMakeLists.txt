@@ -49,9 +49,13 @@ file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/configure.h
 corrade_add_test(PluginManagerManagerTest
     ManagerTest.cpp
     AbstractAnimal.cpp
+    AbstractCustomSuffix.cpp
     AbstractDeletable.cpp
+    AbstractDisabledMetadata.cpp
     AbstractFood.cpp
-    LIBRARIES CorradePluginManagerTestLib Canary)
+    LIBRARIES
+        CorradePluginManagerTestLib
+        Canary CustomSuffixStatic DisabledMetadataStatic)
 target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 if(NOT CORRADE_TARGET_EMSCRIPTEN)
     find_package(Threads REQUIRED)
@@ -122,6 +126,8 @@ endif()
 
 add_subdirectory(animals)
 add_subdirectory(init-fini)
+add_subdirectory(custom-suffix)
+add_subdirectory(disabled-metadata)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     add_subdirectory(doggo)
     add_subdirectory(deletable)

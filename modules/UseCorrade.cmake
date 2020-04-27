@@ -578,16 +578,19 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     endif()
 
     # Force IDEs display also the resource files in project view
-    add_custom_target(${plugin_name}-metadata SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+    if(metadata_file)
+        get_filename_component(metadata_file_suffix ${metadata_file} EXT)
+        add_custom_target(${plugin_name}-metadata SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
 
-    # Copy metadata next to the binary so tests and CMake subprojects can use
-    # it as well
-    add_custom_command(TARGET ${plugin_name} POST_BUILD
-        # This would be nice to Ninja, but BYPRODUCTS don't support generator
-        # expressions right now (last checked: CMake 3.16)
-        #BYPRODUCTS $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${name}-metadata)
+        # Copy metadata next to the binary so tests and CMake subprojects can
+        # use it as well
+        add_custom_command(TARGET ${plugin_name} POST_BUILD
+            # This would be nice to Ninja, but BYPRODUCTS don't support generator
+            # expressions right now (last checked: CMake 3.16)
+            #BYPRODUCTS $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${name}-metadata)
+    endif()
 
     # Install it somewhere, unless that's explicitly not wanted
     if(NOT debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
@@ -604,12 +607,14 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
             RUNTIME DESTINATION ${release_binary_install_dir}
             LIBRARY DESTINATION ${release_library_install_dir}
             ARCHIVE DESTINATION ${release_library_install_dir})
-        install(FILES ${metadata_file} DESTINATION ${debug_conf_install_dir}
-            RENAME "${plugin_name}.conf"
-            CONFIGURATIONS Debug)
-        install(FILES ${metadata_file} DESTINATION ${release_conf_install_dir}
-            RENAME "${plugin_name}.conf"
-            CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
+        if(metadata_file)
+            install(FILES ${metadata_file} DESTINATION ${debug_conf_install_dir}
+                RENAME "${plugin_name}${metadata_file_suffix}"
+                CONFIGURATIONS Debug)
+            install(FILES ${metadata_file} DESTINATION ${release_conf_install_dir}
+                RENAME "${plugin_name}${metadata_file_suffix}"
+                CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
+        endif()
     endif()
 endfunction()
 
@@ -624,10 +629,17 @@ function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
         message(FATAL_ERROR "corrade_add_static_plugin(): install dir must contain either just library location or both library and binary location")
     endif()
 
-    # Compile resources
+    # Compile resources. If the metadata file is disabled, the resource is
+    # empty.
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
-    file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
-    corrade_add_resource(${plugin_name} "${resource_file}")
+    if(metadata_file)
+        get_filename_component(metadata_file_suffix ${metadata_file} EXT)
+        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}${metadata_file_suffix}")
+        corrade_add_resource(${plugin_name} "${resource_file}")
+    else()
+        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n")
+        corrade_add_resource(${plugin_name} "${resource_file}")
+    endif()
 
     # Create static library and bring all needed options along
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})

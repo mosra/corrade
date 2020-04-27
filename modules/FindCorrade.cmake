@@ -202,6 +202,11 @@
 # ``<release library install dir>``. On non-DLL platforms everything is put
 # into ``<debug library install dir>`` / ``<release library install dir>``.
 #
+# If the plugin interface disables plugin metadata files, the
+# ``<metadata file>`` can be set to ``""``, in which case no metadata file is
+# copied anywhere. Otherwise the metadata file is copied and renamed to
+# ``<plugin name>``, retaining its original extension.
+#
 #  corrade_add_plugin(<plugin name>
 #                     <debug install dir>
 #                     <release install dir>
@@ -234,6 +239,11 @@
 # (e.g. with :variable:`CMAKE_BUILD_TYPE` set to ``Debug``) have ``"-d"``
 # suffix to make it possible to have both debug and release plugins installed
 # alongside each other.
+#
+# If the plugin interface disables plugin metadata files, the
+# ``<metadata file>`` can be set to ``""``, in which case no metadata file is
+# used. Otherwise the metadata file is bundled and renamed to
+# ``<plugin name>``, retaining its original extension.
 #
 #  corrade_add_static_plugin(<plugin name>
 #                            <install dir>

@@ -112,7 +112,57 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         static std::vector<std::string> pluginSearchPaths();
+
+        /**
+         * @brief Plugin binary suffix
+         * @m_since_latest
+         *
+         * Used for discovering plugins on the filesystem. By default set to
+         * platform's native extension for dynamic modules such as
+         * @cpp ".dll" @ce or @cpp ".so" @ce, override this function in your
+         * plugin interface if you want a different suffix. On CMake side you
+         * can override the suffix by setting the `SUFFIX` property, for
+         * example:
+         *
+         * @code{.cmake}
+         * set_target_properties(MyPlugin PROPERTIES SUFFIX .mod)
+         * @endcode
+         *
+         * @partialsupport Not available on platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
+         *
+         * @see @ref pluginMetadataSuffix()
+         */
+        static std::string pluginSuffix();
         #endif
+
+        /**
+         * @brief Plugin metadata file suffix
+         * @m_since_latest
+         *
+         * Suffix for plugin-specific metadata files. By default set to
+         * @cpp ".conf" @ce. If non-empty, the plugin manager will expect the
+         * files to exist on the filesystem when loading dynamic plugins, and
+         * static plugins have them bundled into the library. If empty, no
+         * plugin-specific metadata file will be loaded (and thus it's also not
+         * possible to specify inter-plugin dependencies and other properties).
+         * On CMake side the metadata file passed to
+         * @ref corrade-cmake-add-plugin "corrade_add_plugin()" or
+         * @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"
+         * is expected to have the same extension or be set to @cpp "" @ce when
+         * metadata are not used, for example:
+         *
+         * @code{.cmake}
+         * corrade_add_plugin(MyPlugin
+         *     ${MYPLUGINS_DEBUG_INSTALL_DIR}
+         *     ${MYPLUGINS_RELEASE_INSTALL_DIR}
+         *     MyPlugin.modconf # or "" when metadata not used
+         *     MyPlugin.cpp)
+         * @endcode
+         *
+         * @see @ref pluginSuffix()
+         */
+        static std::string pluginMetadataSuffix();
 
         /**
          * @brief Initialize plugin

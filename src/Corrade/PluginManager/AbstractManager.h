@@ -387,9 +387,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     protected:
     #endif
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
+        explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginSuffix, std::string pluginConfSuffix, std::string pluginDirectory);
         #else
-        explicit AbstractManager(std::string pluginInterface);
+        explicit AbstractManager(std::string pluginInterface, std::string pluginConfSuffix);
         #endif
 
         Containers::Pointer<AbstractPlugin> instantiateInternal(const std::string& plugin);

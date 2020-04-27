@@ -60,8 +60,6 @@
 #include "Corrade/Utility/Unicode.h"
 using Corrade::Utility::Unicode::widen;
 #endif
-
-#include "Corrade/PluginManager/configure.h"
 #endif
 
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -123,12 +121,26 @@ struct AbstractManager::Plugin {
 };
 
 struct AbstractManager::State {
-    explicit State(std::string&& pluginInterface): pluginInterface{std::move(pluginInterface)} {}
+    explicit State(std::string&& pluginInterface,
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+        std::string&& pluginSuffix,
+        #endif
+        std::string&& pluginMetadataSuffix):
+        pluginInterface{std::move(pluginInterface)},
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+        pluginSuffix{std::move(pluginSuffix)},
+        #endif
+        pluginMetadataSuffix{std::move(pluginMetadataSuffix)}
+    {}
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     std::string pluginDirectory;
     #endif
     std::string pluginInterface;
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    std::string pluginSuffix;
+    #endif
+    std::string pluginMetadataSuffix;
     std::map<std::string, Plugin&> aliases;
     std::map<std::string, std::vector<AbstractPlugin*>> instances;
 };
@@ -275,11 +287,15 @@ void AbstractManager::ejectStaticPlugin(int version, Implementation::StaticPlugi
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory):
+AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginSuffix, std::string pluginMetadataSuffix, std::string pluginDirectory):
 #else
-AbstractManager::AbstractManager(std::string pluginInterface):
+AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginMetadataSuffix):
 #endif
-    _state{Containers::InPlaceInit, std::move(pluginInterface)}
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    _state{Containers::InPlaceInit, std::move(pluginInterface), std::move(pluginSuffix), std::move(pluginMetadataSuffix)}
+    #else
+    _state{Containers::InPlaceInit, std::move(pluginInterface), std::move(pluginMetadataSuffix)}
+    #endif
 {
     /* If the global storage doesn't exist yet, allocate it. This gets deleted
        when it's fully empty again on manager destruction. */
@@ -301,10 +317,12 @@ AbstractManager::AbstractManager(std::string pluginInterface):
         Plugin& p = *(inserted.first->second = new Plugin{*staticPlugin});
 
         /* Assign the plugin to this manager, parse its metadata and
-           initialize it */
-        Resource r("CorradeStaticPlugin_" + inserted.first->first);
-        std::istringstream metadata(r.get(inserted.first->first + ".conf"));
-        p.configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
+           initialize it (unless the plugin is metadata-less) */
+        if(!_state->pluginMetadataSuffix.empty()) {
+            Resource rs{"CorradeStaticPlugin_" + inserted.first->first};
+            std::istringstream metadata(rs.get(inserted.first->first + _state->pluginMetadataSuffix));
+            p.configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
+        }
         p.metadata.emplace(inserted.first->first, p.configuration);
         p.manager = this;
         p.staticPlugin->initializer();
@@ -459,16 +477,19 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         Directory::Flag::SortAscending);
     for(const std::string& filename: d) {
         /* File doesn't have module suffix, continue to next */
-        if(!Utility::String::endsWith(filename, PLUGIN_FILENAME_SUFFIX))
+        if(!Utility::String::endsWith(filename, _state->pluginSuffix))
             continue;
 
         /* Dig plugin name from filename */
-        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
+        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
 
         /* Skip the plugin if it is among loaded */
         if(globalPlugins->find(name) != globalPlugins->end()) continue;
 
-        registerDynamicPlugin(name, new Plugin{name, Directory::join(_state->pluginDirectory, name + ".conf"), this});
+        registerDynamicPlugin(name, new Plugin{name,
+            _state->pluginMetadataSuffix.empty() ? std::string{} :
+                Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix),
+            this});
     }
 
     /* If some of the currently loaded plugins aliased plugins that were in the
@@ -554,10 +575,10 @@ LoadState AbstractManager::loadState(const std::string& plugin) const {
 LoadState AbstractManager::load(const std::string& plugin) {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* File path passed, load directly */
-    if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
+    if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
         const std::string filename = Utility::Directory::filename(plugin);
-        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
+        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
         const auto found = globalPlugins->find(name);
         if(found != globalPlugins->end() && (found->second->loadState & LoadState::Loaded)) {
             Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
@@ -567,7 +588,10 @@ LoadState AbstractManager::load(const std::string& plugin) {
         /* Load the plugin and register it only if loading succeeded so we
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
-        Containers::Pointer<Plugin> data{new Plugin{name, Directory::join(Utility::Directory::path(plugin), name + ".conf"), this}};
+        Containers::Pointer<Plugin> data{new Plugin{name,
+            _state->pluginMetadataSuffix.empty() ? std::string{} :
+                Directory::join(Utility::Directory::path(plugin), name + _state->pluginMetadataSuffix),
+            this}};
         const LoadState state = loadInternal(*data, plugin);
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
@@ -616,7 +640,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
-    return loadInternal(plugin, Directory::join(_state->pluginDirectory, plugin.metadata->_name + PLUGIN_FILENAME_SUFFIX));
+    return loadInternal(plugin, Directory::join(_state->pluginDirectory, plugin.metadata->_name + _state->pluginSuffix));
 }
 
 LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filename) {
@@ -918,9 +942,9 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If file path passed, instantiate extracted name instead */
-    if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
+    if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
         const std::string filename = Utility::Directory::filename(plugin);
-        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
+        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
         auto found = _state->aliases.find(name);
         CORRADE_INTERNAL_ASSERT(found != _state->aliases.end());
         return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, name)));
@@ -934,16 +958,22 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{Containers::InPlaceInit, std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
-    if(configuration.isValid()) {
-        if(Utility::Directory::exists(metadata)) {
-            loadState = LoadState::NotLoaded;
-            return;
+    /* If the path is empty, we don't use any plugin configuration file, so
+       don't do any checks. */
+    if(metadata.empty()) {
+        loadState = LoadState::NotLoaded;
+    } else {
+        if(configuration.isValid()) {
+            if(Utility::Directory::exists(metadata)) {
+                loadState = LoadState::NotLoaded;
+                return;
+            }
+
+            Error{} << "PluginManager::Manager:" << metadata << "was not found";
         }
 
-        Error{} << "PluginManager::Manager:" << metadata << "was not found";
+        loadState = LoadState::WrongMetadataFile;
     }
-
-    loadState = LoadState::WrongMetadataFile;
 }
 #endif
 

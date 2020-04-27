@@ -83,6 +83,9 @@ namespace Corrade {
 -   Added @ref PluginManager::implicitPluginSearchPaths() for a well-documented
     and reliable way to supply plugin search paths consistent for all for
     plugin interfaces
+-   Ability to override plugin binary and metadata file extensions on a
+    per-interface basis using @ref PluginManager::AbstractPlugin::pluginSuffix()
+    and @ref PluginManager::AbstractPlugin::pluginMetadataSuffix()
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

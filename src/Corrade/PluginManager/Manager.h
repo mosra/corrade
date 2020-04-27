@@ -144,9 +144,9 @@ template<class T> class Manager: public AbstractManager {
          */
         explicit Manager(std::string pluginDirectory = {}):
             #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
+            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), T::pluginSuffix(), T::pluginMetadataSuffix(), std::move(pluginDirectory)} {}
             #else
-            AbstractManager{T::pluginInterface()} { static_cast<void>(pluginDirectory); }
+            AbstractManager{T::pluginInterface(), T::pluginMetadataSuffix()} { static_cast<void>(pluginDirectory); }
             #endif
 
         /**
