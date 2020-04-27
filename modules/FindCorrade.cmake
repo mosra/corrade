@@ -193,13 +193,14 @@
 #                     <metadata file>
 #                     <sources>...)
 #
-# The macro adds preprocessor directive ``CORRADE_DYNAMIC_PLUGIN``. Additional
-# libraries can be linked in via :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
+# The macro adds a preprocessor directive ``CORRADE_DYNAMIC_PLUGIN`` when
+# compiling ``<sources>``. Additional libraries can be linked in via
+# :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
 # On DLL platforms, the plugin DLLs and metadata files are put into
-# ``<debug binary install dir>``/``<release binary install dir>`` and the
-# ``*.lib`` files into ``<debug library install dir>``/``<release library install dir>``.
-# On non-DLL platforms everything is put into ``<debug library install dir>``/
-# ``<release library install dir>``.
+# ``<debug binary install dir>`` / ``<release binary install dir>`` and the
+# ``*.lib`` files into ``<debug library install dir>`` /
+# ``<release library install dir>``. On non-DLL platforms everything is put
+# into ``<debug library install dir>`` / ``<release library install dir>``.
 #
 #  corrade_add_plugin(<plugin name>
 #                     <debug install dir>
@@ -224,8 +225,9 @@
 #                            <metadata file>
 #                            <sources>...)
 #
-# The macro adds preprocessor directive ``CORRADE_STATIC_PLUGIN``. Additional
-# libraries can be linked in via :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
+# The macro adds a preprocessor directive ``CORRADE_STATIC_PLUGIN`` when
+# compiling ``<sources>``. Additional libraries can be linked in via
+# :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
 # The ``<binary install dir>`` is ignored and included just for compatibility
 # with the :command:`corrade_add_plugin` command, everything is installed into
 # ``<library install dir>``. Note that plugins built in debug configuration
