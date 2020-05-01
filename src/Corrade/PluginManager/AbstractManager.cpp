@@ -139,11 +139,7 @@ struct AbstractManager::State {
     #endif
     std::string pluginMetadataSuffix;
 
-    /* Beware: having std::map<std::string, Containers::Pointer> is an
-       IMPOSSIBLE feat on GCC 4.7, as it will fails with tons of compiler
-       errors because std::pair is trying to copy itself. So calm down and
-       ignore those few delete calls. Please. Last tried: March 2018. */
-    std::map<std::string, Plugin*> plugins;
+    std::map<std::string, Containers::Pointer<Plugin>> plugins;
     std::map<std::string, Plugin&> aliases;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -265,7 +261,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         /* Insert the plugin into our list. The names should be globally
            unique, so the insertion is expected to always succeed (if it
            wouldn't, we would have a leak here). */
-        const auto inserted = _state->plugins.insert(std::make_pair(staticPlugin->plugin, new Plugin{*staticPlugin, std::move(configuration)}));
+        const auto inserted = _state->plugins.emplace(staticPlugin->plugin, Containers::pointer(new Plugin{*staticPlugin, std::move(configuration)}));
         CORRADE_INTERNAL_ASSERT(inserted.second);
         Plugin& p = *inserted.first->second;
 
@@ -341,7 +337,7 @@ AbstractManager::~AbstractManager() {
     #endif
 
     /* Unload all plugins */
-    for(const std::pair<const std::string, Plugin*>& plugin: _state->plugins) {
+    for(std::pair<const std::string, Containers::Pointer<Plugin>>& plugin: _state->plugins) {
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /* Try to unload the plugin (and all plugins that depend on it) */
         unloadRecursiveInternal(*plugin.second);
@@ -350,8 +346,6 @@ AbstractManager::~AbstractManager() {
         /* Finalize static plugins before they get removed from the list */
         if(plugin.second->loadState == LoadState::Static)
             plugin.second->staticPlugin->finalizer();
-
-        delete plugin.second;
     }
 }
 
@@ -399,10 +393,9 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     /* Remove all unloaded plugins from the container */
     auto it = _state->plugins.cbegin();
     while(it != _state->plugins.cend()) {
-        if(it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
-            delete it->second;
+        if(it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
             it = _state->plugins.erase(it);
-        } else ++it;
+        else ++it;
     }
 
     /* Find plugin files in the directory. Sort the list so we have predictable
@@ -422,15 +415,15 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         /* Skip the plugin if it is among loaded */
         if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
-        registerDynamicPlugin(name, new Plugin{name,
+        registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
             _state->pluginMetadataSuffix.empty() ? std::string{} :
-                Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)});
+                Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
     }
 
     /* If some of the currently loaded plugins aliased plugins that were in the
        old plugin directory, these are no longer there. Refresh the alias list
        with the new plugins. */
-    for(const std::pair<const std::string, Plugin*>& p: _state->plugins) {
+    for(std::pair<const std::string, Containers::Pointer<Plugin>>& p: _state->plugins) {
         /* Add aliases to the list (only the ones that aren't already there are
            added, calling insert() won't overwrite the existing value) */
         for(const std::string& alias: p.second->metadata._provides) {
@@ -469,7 +462,7 @@ void AbstractManager::setPreferredPlugins(const std::string& alias, const std::i
 
 std::vector<std::string> AbstractManager::pluginList() const {
     std::vector<std::string> names;
-    for(const std::pair<const std::string, Plugin*>& plugin: _state->plugins)
+    for(const std::pair<const std::string, Containers::Pointer<Plugin>>& plugin: _state->plugins)
         names.push_back(plugin.first);
     return names;
 }
@@ -529,17 +522,16 @@ LoadState AbstractManager::load(const std::string& plugin) {
                    be dangling now. */
                 auto ait = _state->aliases.cbegin();
                 while(ait != _state->aliases.cend()) {
-                    if(&ait->second == found->second)
+                    if(&ait->second == found->second.get())
                         ait = _state->aliases.erase(ait);
                     else ++ait;
                 }
 
                 /* Erase the plugin from the plugin map */
-                delete found->second;
                 _state->plugins.erase(found);
             }
 
-            registerDynamicPlugin(name, data.release());
+            registerDynamicPlugin(name, std::move(data));
         }
         return state;
     }
@@ -762,11 +754,11 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
         Plugin* dependency = nullptr;
         auto foundDependency = _state->plugins.find(*it);
         if(foundDependency != _state->plugins.end())
-            dependency = foundDependency->second;
+            dependency = foundDependency->second.get();
         else for(AbstractManager* other: _state->externalManagers) {
             foundDependency = other->_state->plugins.find(*it);
             if(foundDependency != other->_state->plugins.end()) {
-                dependency = foundDependency->second;
+                dependency = foundDependency->second.get();
                 break;
             }
         }
@@ -819,9 +811,9 @@ void AbstractManager::registerExternalManager(AbstractManager& manager) {
     #endif
 }
 
-void AbstractManager::registerDynamicPlugin(const std::string& name, Plugin* const plugin) {
+void AbstractManager::registerDynamicPlugin(const std::string& name, Containers::Pointer<Plugin>&& plugin) {
     /* Insert plugin to list */
-    const auto result = _state->plugins.insert({name, plugin});
+    const auto result = _state->plugins.emplace(name, std::move(plugin));
     CORRADE_INTERNAL_ASSERT(result.second);
 
     /* The plugin is the best version of itself. If there was already an

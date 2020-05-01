@@ -411,7 +411,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     private:
         struct State;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(const std::string& name, Plugin* plugin);
+        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(const std::string& name, Containers::Pointer<Plugin>&& plugin);
 
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void reregisterInstance(const std::string& plugin, AbstractPlugin& oldInstance, AbstractPlugin* newInstance);
