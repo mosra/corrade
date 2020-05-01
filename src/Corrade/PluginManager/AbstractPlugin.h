@@ -89,10 +89,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Plugins implementing given interface have to define exactly the same
          * interface string, otherwise they won't be loaded. This can be used
          * to ensure the interface and plugin is correctly paired even in case
-         * where there is no ABI mismatch A good practice is to use a "Java
-         * package name"-style syntax. The interface name should also contain
-         * version identifier to make sure the plugin will not be loaded with
-         * incompatible interface version.
+         * where there is no ABI mismatch. A good practice is to use a "Java
+         * package name"-style syntax, for example
+         * @cpp "cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0" @ce. The
+         * interface name should also contain version identifier to make sure
+         * the plugin will not be loaded with incompatible interface version.
+         *
+         * The default implementation returns an empty string, which is
+         * technically valid, but note that keeping it empty will inhibit
+         * various sanity checks when loading dynamic plugins, leading to
+         * crashes and security issues.
          */
         static std::string pluginInterface();
 

@@ -49,7 +49,7 @@ namespace Corrade { namespace PluginManager {
 @brief Plugin manager
 
 Manages loading, instancing and unloading plugins. See @ref plugin-management
-for a detailed usage tutorial.
+for a high-level introduction.
 
 @section PluginManager-Manager-paths Plugin directories
 
@@ -68,6 +68,8 @@ saved and available through @ref pluginDirectory().
 Besides the above, it's possible to call @ref load() with a concrete path to a
 dynamic module file to load a plugin from outside of the plugin directory. The
 file is expected to be accompanied by its corresponding `*.conf` metadata file
+(unless overriden in the plugin interface using
+@ref AbstractPlugin::pluginMetadataSuffix())
 and no plugin with the same name is expected to be loaded at the same time. If
 loading succeeds, the module is exposed through the API under its basename
 (excluding extension).
@@ -103,8 +105,8 @@ of what the general plugin interface provides, the
 @ref AbstractPlugin::configuration() function provides read-write access to
 a configuration specific to a particular plugin instance. This can be used for
 example to adjust various quality/speed properties of a JPEG image conversion
-plugin that wouldn't be otherwise available in the general image converter
-plugin API.
+plugin that wouldn't be otherwise available in a general image converter plugin
+API.
 
 See @ref PluginMetadata for detailed description of the plugin metadata file.
 
