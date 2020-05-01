@@ -1022,6 +1022,12 @@ void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
 }
 
 void ManagerTest::utf8Path() {
+    #if defined(__has_feature)
+    #if __has_feature(address_sanitizer)
+    CORRADE_SKIP("Because the same shared object is loaded from two different paths, its globals (the vtable) are loaded twice. Skipping to avoid AddressSanitizer complain about ODR violation.");
+    #endif
+    #endif
+
     /* Copy the dog plugin to a new UTF-8 path */
     const std::string utf8PluginsDir = Utility::Directory::join(PLUGINS_DIR, "hýždě");
     CORRADE_VERIFY(Utility::Directory::mkpath(utf8PluginsDir));
