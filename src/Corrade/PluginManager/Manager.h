@@ -108,6 +108,21 @@ plugin API.
 
 See @ref PluginMetadata for detailed description of the plugin metadata file.
 
+@section PluginManager-Manager-dependencies Plugin dependencies
+
+Plugins can depend on each other by listing then in the metadata file, as
+described in the @ref PluginMetadata class documentation. From the user
+point-of-view the dependency handling is completely transparent --- loading a
+plugin will also load all its dependencies, fail if some dependencies can't be
+found, and disallow the plugin from being unloaded when some other still needs
+it.
+
+A special (and rarer) case is inter-manager dependencies. By default, to avoid
+shared mutable global state, plugin manager instances don't know about each
+other, so if a plugin depends on another from a different interface, you need
+to instantiate a manager for the other interface and register it with the
+original manager using @ref registerExternalManager().
+
 @section PluginManager-Manager-multithreading Thread safety
 
 Static plugins register themselves into a global storage. If done implicitly,
@@ -116,13 +131,9 @@ If done explicitly via @ref CORRADE_PLUGIN_IMPORT() / @ref CORRADE_PLUGIN_EJECT(
 these macros *have to* be called from a single thread or externally guarded to
 avoid data races.
 
-All other operation (instantiating a manager, loading/unloading plugins,
-instantiating them, ...) is done thread-locally if Corrade is compiled with
-@ref CORRADE_BUILD_MULTITHREADED enabled (the default). This might cause some
-performance penalties --- if you are sure that you will never need to manage
-plugins over multiple threads (and won't need any other functionality enabled
-by this option either), build Corrade with the option disabled.
- */
+On the other hand, all other functionality only reads from the global storage
+and thus is thread-safe.
+*/
 template<class T> class Manager: public AbstractManager {
     public:
         /**

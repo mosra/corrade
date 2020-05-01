@@ -92,7 +92,10 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin depends on another plugin, which cannot be loaded (e.g. not
-     * found or wrong version). Returned by @ref AbstractManager::load().
+     * found or wrong version). Returned by @ref AbstractManager::load(). Note
+     * that plugins may have cross-manager dependencies, and to resolve these
+     * you need to explicitly pass a manager instance containing the
+     * dependencies to @ref AbstractManager::registerExternalManager().
      * @partialsupport Not available on platforms without
      *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
@@ -361,6 +364,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          */
         LoadState unload(const std::string& plugin);
 
+        /**
+         * @brief Register an external manager for resolving inter-manager dependencies
+         * @m_since_latest
+         *
+         * To be used for loading dependencies from different plugin
+         * interfaces. Once registered, the @p manager is expected to stay in
+         * scope for the whole lifetime of this instance.
+         */
+        void registerExternalManager(AbstractManager& manager);
+
     protected:
         /**
          * @brief Destructor
@@ -407,7 +420,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, const std::string& filename);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
-        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursive(const std::string& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
 

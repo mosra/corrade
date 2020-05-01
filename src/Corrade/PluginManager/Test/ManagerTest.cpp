@@ -26,6 +26,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -45,10 +46,6 @@
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
 #include "configure.h"
-#endif
-
-#ifndef CORRADE_TARGET_EMSCRIPTEN
-#include <thread>
 #endif
 
 static void importPlugin() {
@@ -106,6 +103,7 @@ struct ManagerTest: TestSuite::Tester {
     void hierarchy();
     void destructionHierarchy();
     void crossManagerDependencies();
+    void crossManagerDependenciesWrongDestructionOrder();
     void unresolvedDependencies();
 
     void reloadPluginDirectory();
@@ -126,14 +124,6 @@ struct ManagerTest: TestSuite::Tester {
     #endif
 
     void twoManagerInstances();
-    void twoEmptyInstancesSharingAGlobalState();
-
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    void multithreadedStatic();
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    void multithreadedDynamic();
-    #endif
-    #endif
 
     void customSuffix();
     void disabledMetadata();
@@ -187,6 +177,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::hierarchy,
               &ManagerTest::destructionHierarchy,
               &ManagerTest::crossManagerDependencies,
+              &ManagerTest::crossManagerDependenciesWrongDestructionOrder,
               &ManagerTest::unresolvedDependencies,
 
               &ManagerTest::reloadPluginDirectory,
@@ -207,18 +198,8 @@ ManagerTest::ManagerTest() {
               #endif
 
               &ManagerTest::twoManagerInstances,
-              &ManagerTest::twoEmptyInstancesSharingAGlobalState});
 
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    addRepeatedTests({
-        &ManagerTest::multithreadedStatic,
-        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        &ManagerTest::multithreadedDynamic
-        #endif
-        }, 25);
-    #endif
-
-    addTests({&ManagerTest::customSuffix,
+              &ManagerTest::customSuffix,
               &ManagerTest::disabledMetadata,
 
               &ManagerTest::debugLoadState,
@@ -751,6 +732,7 @@ void ManagerTest::destructionHierarchy() {
 void ManagerTest::crossManagerDependencies() {
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
+    foodManager.registerExternalManager(manager);
 
     #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
@@ -793,12 +775,31 @@ void ManagerTest::crossManagerDependencies() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::instantiate(): plugin Canary is not loaded\n");
 }
 
+void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
+    #endif
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't fully test assertions");
+    #endif
+
+    Containers::Optional<PluginManager::Manager<AbstractAnimal>> manager{Containers::InPlaceInit};
+    PluginManager::Manager<AbstractFood> foodManager;
+    foodManager.registerExternalManager(*manager);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    manager = Containers::NullOpt;
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager: wrong destruction order, cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0 plugins still needed by 1 other managers for external dependencies\n");
+}
+
 void ManagerTest::unresolvedDependencies() {
     #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
+    foodManager.registerExternalManager(manager);
 
     /* HotDogWithSnail depends on Dog and Snail, which cannot be loaded, so the
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
@@ -1093,102 +1094,6 @@ void ManagerTest::twoManagerInstances() {
         CORRADE_COMPARE(animal->legCount(), 2);
     }
 }
-
-void ManagerTest::twoEmptyInstancesSharingAGlobalState() {
-    /* If the global storage is empty when destructing a manager, it's deleted.
-       That however can be done only if there's no other manager using the same
-       storage (even if it would be empty), otherwise accessing anything in the
-       other manager would crash. */
-    PluginManager::Manager<AbstractFood> foodManager{"nonexistent"};
-    PluginManager::Manager<AbstractDeletable> deletableManager{"nonexistent"};
-    CORRADE_COMPARE(foodManager.pluginList(), std::vector<std::string>{});
-    CORRADE_COMPARE(deletableManager.pluginList(), std::vector<std::string>{});
-
-    /* Here it should destruct deletableManager, then foodManager and only then
-       delete the global storage. */
-}
-
-#ifndef CORRADE_TARGET_EMSCRIPTEN
-void ManagerTest::multithreadedStatic() {
-    #ifndef CORRADE_BUILD_MULTITHREADED
-    CORRADE_SKIP("CORRADE_BUILD_MULTITHREADED not enabled.");
-    #endif
-
-    auto f = [](int& out) {
-        PluginManager::Manager<AbstractAnimal> manager;
-
-        for(std::size_t i = 0; i != 25; ++i) {
-            if(!(manager.load("Canary") & LoadState::Static)) {
-                out = -1;
-                break;
-            }
-
-            {
-                Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
-                out += animal->legCount();
-            }
-
-            if(!(manager.unload("Canary") & LoadState::Static)) {
-                out = -2;
-                break;
-            }
-
-            Utility::System::sleep(1);
-        }
-    };
-
-    int out1{}, out2{};
-    std::thread t1{f, std::ref(out1)};
-    std::thread t2{f, std::ref(out2)};
-
-    t1.join();
-    t2.join();
-
-    CORRADE_COMPARE(out1, 50);
-    CORRADE_COMPARE(out2, 50);
-}
-
-#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-void ManagerTest::multithreadedDynamic() {
-    #ifndef CORRADE_BUILD_MULTITHREADED
-    CORRADE_SKIP("CORRADE_BUILD_MULTITHREADED not enabled.");
-    #endif
-
-    auto f = [](int& out) {
-        PluginManager::Manager<AbstractAnimal> manager;
-
-        for(std::size_t i = 0; i != 25; ++i) {
-            if(!(manager.load("Dog") & LoadState::Loaded)) {
-                out = -1;
-                break;
-            }
-
-            {
-                Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
-                out += animal->legCount();
-            }
-
-            if(!(manager.unload("Dog") & LoadState::NotLoaded)) {
-                out = -2;
-                break;
-            }
-
-            Utility::System::sleep(1);
-        }
-    };
-
-    int out1{}, out2{};
-    std::thread t1{f, std::ref(out1)};
-    std::thread t2{f, std::ref(out2)};
-
-    t1.join();
-    t2.join();
-
-    CORRADE_COMPARE(out1, 100);
-    CORRADE_COMPARE(out2, 100);
-}
-#endif
-#endif
 
 void ManagerTest::customSuffix() {
     {

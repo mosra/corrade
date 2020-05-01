@@ -57,10 +57,6 @@ corrade_add_test(PluginManagerManagerTest
         CorradePluginManagerTestLib
         Canary CustomSuffixStatic DisabledMetadataStatic)
 target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
-if(NOT CORRADE_TARGET_EMSCRIPTEN)
-    find_package(Threads REQUIRED)
-    target_link_libraries(PluginManagerManagerTest PRIVATE Threads::Threads)
-endif()
 
 corrade_add_test(PluginManagerManagerInitFiniTest
     ManagerInitFiniTest.cpp

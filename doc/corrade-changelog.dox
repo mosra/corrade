@@ -166,6 +166,15 @@ namespace Corrade {
 -   @ref Interconnect::connect() now can recognize trivially copyable lambdas
     also on GCC versions before 5 and store them more efficiently
 
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+
+-   Internals of @ref PluginManager::Manager were rewritten to not need any
+    shared global state. This was only needed for inter-manager dependencies,
+    which is presently not used by Corrade or Magnum in any way. This feature
+    is now rewritten to not need any global state, instead the user is expected
+    to connect manager instances together using
+    @ref PluginManager::AbstractManager::registerExternalManager().
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   The @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_BENCHMARK()
@@ -225,8 +234,11 @@ namespace Corrade {
     @ref std::ostream defaults. Now it prints those with 15 and 18 digits
     respectively, consistent with @ref Utility::Debug and @ref Utility::format()
     output
--   An empty @ref PluginManager::Manager could be crashing on destruction due
-    to another instance wiping out the global state too early
+-   As internals of @ref PluginManager::Manager were rewritten to not need any
+    shared global state anymore, various corner cases and crashes on
+    destruction are not happening anymore. In particular, it's now also
+    possible to have two instances of the same manager type without the two
+    interferring with each other in any way.
 
 @subsection corrade-changelog-latest-documentation Documentation
 
