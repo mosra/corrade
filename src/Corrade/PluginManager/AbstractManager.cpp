@@ -111,7 +111,6 @@ struct AbstractManager::Plugin {
     /* Constructor for static plugins */
     explicit Plugin(const Implementation::StaticPlugin& staticPlugin);
 
-    /* Ensure that we don't delete staticPlugin twice */
     Plugin(const Plugin&) = delete;
     Plugin(Plugin&&) = delete;
     Plugin& operator=(const Plugin&) = delete;
