@@ -125,6 +125,7 @@ struct ManagerTest: TestSuite::Tester {
     void utf8Path();
     #endif
 
+    void twoManagerInstances();
     void twoEmptyInstancesSharingAGlobalState();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -205,6 +206,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::utf8Path,
               #endif
 
+              &ManagerTest::twoManagerInstances,
               &ManagerTest::twoEmptyInstancesSharingAGlobalState});
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -1046,6 +1048,51 @@ void ManagerTest::utf8Path() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
+
+void ManagerTest::twoManagerInstances() {
+    PluginManager::Manager<AbstractAnimal> a;
+    PluginManager::Manager<AbstractAnimal> b;
+
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_COMPARE_AS(a.aliasList(), (std::vector<std::string>{
+        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(b.aliasList(), (std::vector<std::string>{
+        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    #else
+    CORRADE_COMPARE_AS(a.aliasList(), (std::vector<std::string>{
+        "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(b.aliasList(), (std::vector<std::string>{
+        "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
+    #endif
+
+    /* Verify that loading a dynamic plugin works the same in both */
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    {
+        Containers::Pointer<AbstractAnimal> animal = a.loadAndInstantiate("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->legCount(), 4);
+    } {
+        Containers::Pointer<AbstractAnimal> animal = b.loadAndInstantiate("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->legCount(), 4);
+    }
+    #endif
+
+    /* Verify that loading a static plugin works also */
+    {
+        Containers::Pointer<AbstractAnimal> animal = a.loadAndInstantiate("Canary");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Achoo");
+        CORRADE_COMPARE(animal->legCount(), 2);
+    } {
+        Containers::Pointer<AbstractAnimal> animal = b.loadAndInstantiate("Canary");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Achoo");
+        CORRADE_COMPARE(animal->legCount(), 2);
+    }
+}
 
 void ManagerTest::twoEmptyInstancesSharingAGlobalState() {
     /* If the global storage is empty when destructing a manager, it's deleted.
