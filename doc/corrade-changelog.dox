@@ -170,10 +170,9 @@ namespace Corrade {
 
 -   Internals of @ref PluginManager::Manager were rewritten to not need any
     shared global state. This was only needed for inter-manager dependencies,
-    which is presently not used by Corrade or Magnum in any way. This feature
-    is now rewritten to not need any global state, instead the user is expected
-    to connect manager instances together using
-    @ref PluginManager::AbstractManager::registerExternalManager().
+    which is only very rarely used by Magnum. This feature is now rewritten to
+    not need any global state, instead the user is expected to connect manager
+    instances together using @ref PluginManager::AbstractManager::registerExternalManager().
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
