@@ -75,7 +75,7 @@
 #   included
 #  CORRADE_BUILD_STATIC         - Defined if compiled as static libraries.
 #   Default are shared libraries.
-#  CORRADE_BUILD_STATIC_UNIQUE_GLOBALS - Defined if static libraries keep the
+#  CORRADE_BUILD_STATIC_UNIQUE_GLOBALS - Defined if static libraries keep their
 #   globals unique even across different shared libraries. Enabled by default
 #   for static builds.
 #  CORRADE_BUILD_MULTITHREADED  - Defined if compiled in a way that makes it
