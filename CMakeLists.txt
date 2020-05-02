@@ -79,6 +79,7 @@ else()
     set(ON_EXCEPT_EMSCRIPTEN ON)
 endif()
 cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
+cmake_dependent_option(BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
 set(CORRADE_INCLUDE_INSTALL_PREFIX "."
@@ -148,6 +149,9 @@ endif()
 
 if(BUILD_STATIC)
     set(CORRADE_BUILD_STATIC 1)
+    if(BUILD_STATIC_UNIQUE_GLOBALS)
+        set(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS 1)
+    endif()
 endif()
 
 # Initialize macros etc.

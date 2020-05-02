@@ -531,6 +531,11 @@ Options controlling the build:
     code. Enabled by default when building static libraries, disable if you
     don't need this feature. On @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
     this option is always off.
+-   `BUILD_STATIC_UNIQUE_GLOBALS` --- Build static libraries in a way that
+    keeps their globals unique even across different shared libraries. Enabled
+    by default for static builds. May introduce additional overhead on some
+    platforms, disable if you will only link static libraries to one final
+    executable and won't use any dynamic plugins.
 -   `BUILD_DEPRECATED` --- Include deprecated APIs in the build. Enabled by
     default to preserve backwards compatibility, disabling it forces you to
     update your code whenever there's a breaking API change. It's however

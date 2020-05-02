@@ -135,6 +135,9 @@ namespace Corrade {
     @cb{.shell-session} <file>:<line> @ce, which is consistent with
     @ref Utility-Debug-source-location "Utility::Debug source location" and how
     GCC or GDB print those
+-   Added an ability to disable unique globals across shared libraries using
+    @ref CORRADE_BUILD_STATIC_UNIQUE_GLOBALS on static builds that don't need
+    it
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 

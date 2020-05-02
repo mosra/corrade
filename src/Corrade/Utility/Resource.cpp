@@ -43,13 +43,13 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
-#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
 #endif
 
 namespace Corrade { namespace Utility {
 
-#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
+#if !defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) || defined(CORRADE_TARGET_WINDOWS)
 /* (Of course) can't be in an unnamed namespace in order to export it below
    (except for Windows, where we do extern "C" so this doesn't matter, but we
    don't want to expose the ResourceGlobals symbols if not needed) */
@@ -67,8 +67,9 @@ struct ResourceGlobals {
     std::map<std::string, std::string>* overrideGroups;
 };
 
-#if !defined(CORRADE_BUILD_STATIC) || (defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)) || defined(CORRADE_TARGET_WINDOWS_RT)
-#ifdef CORRADE_BUILD_STATIC
+/* What the hell is going on here with the #ifdefs?! */
+#if !defined(CORRADE_BUILD_STATIC) || !defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) || (defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS)) || defined(CORRADE_TARGET_WINDOWS_RT)
+#ifdef CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
 /* On static builds that get linked to multiple shared libraries and then used
    in a single app we want to ensure there's just one global symbol. On Linux
    it's apparently enough to just export, macOS needs the weak attribute. */
@@ -93,7 +94,7 @@ extern "C" {
 }
 #endif
 
-#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
+#if !defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) || defined(CORRADE_TARGET_WINDOWS)
 }
 #endif
 
@@ -102,7 +103,7 @@ extern "C" {
    pick up the same symbol of the final exe independently of the DLL it was
    called from. To avoid #ifdef hell in code below, the resourceGlobals are
    redefined to return a value from this uniqueness-ensuring function. */
-#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 namespace {
 
 ResourceGlobals& windowsResourceGlobals() {

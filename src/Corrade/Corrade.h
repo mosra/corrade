@@ -82,6 +82,16 @@ Defined if built as static libraries. Default are shared libraries.
 #undef CORRADE_BUILD_STATIC
 
 /**
+@brief Static library build with globals unique across shared libraries
+@m_since_latest
+
+Enabled by default in a static build.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
+#undef CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
+
+/**
 @brief Multi-threaded build
 @m_since{2019,10}
 
