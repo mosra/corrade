@@ -502,12 +502,62 @@ Installation to given prefix can be done from within QtCreator by adding a new
 
 @subsection building-corrade-features Enabling or disabling features
 
-The libraries are build as shared by default. If you are developing for a
-platform which doesn't support shared libraries or if you just want to link
-them statically, enable `BUILD_STATIC` to build the libraries as static. If you
-plan to use them with shared libraries later, enable also position-independent
-code with `BUILD_STATIC_PIC`. If you want to build with another compiler (e.g.
-Clang), pass `-DCMAKE_CXX_COMPILER=clang++` to CMake.
+By default the library is built with everything included. Using the following
+`WITH_*` CMake options you can specify which parts will be built and which
+not:
+
+-   `WITH_INTERCONNECT` --- Build the @ref Interconnect library. Enables also
+    building of the Utility library.
+-   `WITH_PLUGINMANAGER` --- Build the @ref PluginManager library. Enables also
+    building of the Utility library.
+-   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
+    building of the Utility library.
+-   `WITH_UTILITY` --- Build the @ref Utility library. Enables also building of
+    the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
+    `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers
+    library is built along with this library.
+-   `WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility. Enabled
+    automatically if `WITH_UTILITY` or anything depending on it is enabled.
+    It's possible to build just this executable without anything else, for
+    example when crosscompiling.
+
+Options controlling the build:
+
+-   `BUILD_STATIC` --- Build all libraries as static. Default is shared, except
+    on platforms such as @ref CORRADE_TARGET_ANDROID "Android" or
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" that don't support dynamic
+    linking.
+-   `BUILD_STATIC_PIC` --- Build static libraries with position-independent
+    code. Enabled by default when building static libraries, disable if you
+    don't need this feature. On @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
+    this option is always off.
+-   `BUILD_DEPRECATED` --- Include deprecated APIs in the build. Enabled by
+    default to preserve backwards compatibility, disabling it forces you to
+    update your code whenever there's a breaking API change. It's however
+    recommended to have this option disabled when deploying a final application
+    as it can result in smaller binaries.
+-   `BUILD_MULTITHREADED` --- Makes it possible to safely use certain Corrade
+    features simultaenously in multiple threads. Enabled by default, disable if
+    you don't need this and don't want to pay potential performance penalties
+    coming from thread-local variables.
+
+Platform-specific options:
+
+-   `UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will use ANSI
+    escape codes in @ref Utility::Debug instead of WINAPI functions. Note that
+    you need at least Windows 10 or non-standard console emulator to display
+    them properly. Note that when compiling for
+    @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" this option is implicitly
+    enabled, because the WINAPI functions are not available for this target.
+-   `TESTSUITE_TARGET_XCTEST` --- if building for Xcode on macOS or iOS, this
+    will make the @ref TestSuite tests compatible with the XCTest framework and
+    thus runnable directly from Xcode and also directly on iOS.
+
+The features used can be conveniently detected in depending projects both in
+CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
+more information. Note that each [namespace](namespaces.html) documentation
+contains more detailed guide how to enable given library for building and how
+to use it with CMake.
 
 Libraries built in `Debug` configuration (e.g. with `CMAKE_BUILD_TYPE` set to
 `Debug`) have a `-d` suffix to make it possible to have both debug and release
@@ -517,10 +567,12 @@ automatically when using the library in depending projects, see @ref corrade-cma
 for more information.
 
 By default the library expects standards-conforming compiler. However, for
-portability, compatibility mode for older compilers is provided. The build
+portability, compatibility mode for some compilers is provided. The build
 system tries to autodect it, but in some rare cases you may need to enable
 the compatibility mode explicitly:
 
+-   `MSVC2019_COMPATIBILITY` --- Enable for compiling with compatibility mode
+    for Microsoft Visual C++ 2019.
 -   `MSVC2017_COMPATIBILITY` --- Enable for compiling with compatibility mode
     for Microsoft Visual C++ 2017.
 -   `MSVC2015_COMPATIBILITY` --- Enable for compiling with compatibility mode
@@ -544,56 +596,6 @@ installed files. The following variables are supported:
     based on target API and platform, but looks for headers in a central
     location at <tt>&lt;ndk&gt;/sysroot/usr</tt>. Defaults to ``.``. If a
     relative path is used, it's relative to `CMAKE_INSTALL_PREFIX`.
-
-The library is constantly evolving and thus some APIs are deprecated and then
-later removed in favor of better ones. To preserve backwards compatibility,
-Corrade is by default built with all deprecated APIs included. However, to make
-your code more robust and future-proof, it's recommended to build the library
-with `BUILD_DEPRECATED` disabled.
-
-By default the library is built in a way that makes it possible to safely use
-certain Corrade features simultaenously in multiple threads. This might cause
-some performance penalties --- if you are sure that you will never need such
-feature, you can disable it via the `BUILD_MULTITHREADED` option.
-
-By default the library is built with everything included. Using the following
-`WITH_*` CMake options you can specify which parts will be built and which
-not:
-
--   `WITH_INTERCONNECT` --- Build the @ref Interconnect library. Enables also
-    building of the Utility library.
--   `WITH_PLUGINMANAGER` --- Build the @ref PluginManager library. Enables also
-    building of the Utility library.
--   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
-    building of the Utility library.
--   `WITH_UTILITY` --- Build the @ref Utility library. Enables also building of
-    the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
-    `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers
-    library is built along with this library.
--   `WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility. Enabled
-    automatically if `WITH_UTILITY` or anything depending on it is enabled.
-    It's possible to build just this executable without anything else, for
-    example when crosscompiling.
-
-Platform-specific options:
-
--   `UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will use ANSI
-    escape codes in @ref Utility::Debug instead of WINAPI functions. Note that
-    you need at least Windows 10 or non-standard console emulator to display
-    them properly. Note that when compiling for
-    @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" this option is implicitly
-    enabled, because the WINAPI functions are not available for this target.
--   `TESTSUITE_TARGET_XCTEST` --- if building for Xcode on macOS or iOS, this
-    will make the @ref TestSuite tests compatible with the XCTest framework and
-    thus runnable directly from Xcode and also directly on iOS.
-
-The features used can be conveniently detected in depending projects both in
-CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
-more information.
-
-Note that each [namespace](namespaces.html) documentation contains more
-detailed guide how to enable given library for building and how to use it with
-CMake.
 
 @subsection building-corrade-tests Building and running tests
 
