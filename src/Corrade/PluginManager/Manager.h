@@ -125,6 +125,18 @@ other, so if a plugin depends on another from a different interface, you need
 to instantiate a manager for the other interface and register it with the
 original manager using @ref registerExternalManager().
 
+@section PluginManager-Manager-multiple-instances Multiple instances of the same manager
+
+It's possible to have more than one instance of the same manager as well as
+loading and instantiating the same plugin in more than one manager at the same
+time. For static plugins there's no reason this could work, for dynamic both
+the Unix @m_class{m-doc-external} [dlopen()](http://man7.org/linux/man-pages/man3/dlopen.3.html)
+and Windows @m_class{m-doc-external} [LoadLibrary()](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryw)
+load the library only once and maintain reference count to ensure it's unloaded
+only after it's not needed anymore. The only way you may run into problem is by
+loading the same plugin binary twice under different filenames, causing the
+loader to have symbol conflicts, violating ODR.
+
 @section PluginManager-Manager-multithreading Thread safety
 
 Static plugins register themselves into a global storage. If done implicitly,
