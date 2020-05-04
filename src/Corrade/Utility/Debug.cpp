@@ -117,7 +117,12 @@ CORRADE_VISIBILITY_EXPORT
     #endif
 #endif
 DebugGlobals debugGlobals{
+    #if defined(CORRADE_TARGET_MINGW) && defined(CORRADE_TARGET_CLANG)
+    /* Referencing the globals directly makes MinGW Clang segfault for some reason */
     Debug::defaultOutput(), Warning::defaultOutput(), Error::defaultOutput(),
+    #else
+    &std::cout, &std::cerr, &std::cerr,
+    #endif
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color::Default, false
     #endif
