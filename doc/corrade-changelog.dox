@@ -220,6 +220,8 @@ namespace Corrade {
     `MSVC2019_COMPATIBILITY` option as well (see [mosra/corrade#93](https://github.com/mosra/corrade/issues/93))
 -   The library again compiles and tests cleanly with @ref CORRADE_NO_ASSERT
     enabled, and this setup is verified on the CI to avoid further regressions
+-   Fixes to make the library work under MinGW Clang (see
+    [mosra/corrade#95](https://github.com/mosra/corrade/pull/95))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

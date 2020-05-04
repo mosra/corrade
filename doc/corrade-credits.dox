@@ -89,6 +89,7 @@ Is the below list missing your name or something's wrong?
     static analyis, bug reports
 -   **Allie** ([\@bowling-allie](https://github.com/bowling-allie)) ---
     improvements to the Emscripten CMake toolchain
+-   **[\@Amphaal](https://github.com/Amphaal)** --- MinGW/Clang fixes
 -   **[\@biosek](https://github.com/biosek)** --- MinGW compilation fixes
 -   **David Lin** ([\@davll](https://github.com/davll)) --- initial macOS port
 -   **Chris Chambers** ([\@chris-chambers](https://github.com/chris-chambers))
