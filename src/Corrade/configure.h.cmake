@@ -177,7 +177,9 @@
 #endif
 
 #elif defined(CORRADE_TARGET_MSVC)
-#if defined(_M_IX86_FP) && _M_IX86_FP == 2
+/* _M_IX86_FP is defined only on 32bit, 64bit has SSE2 always (so we need to
+   detect 64bit instead: https://stackoverflow.com/a/18570487) */
+#if (defined(_M_IX86_FP) && _M_IX86_FP == 2) || defined(_M_AMD64) || defined(_M_X64)
 #define CORRADE_TARGET_SSE2
 #endif
 #endif
