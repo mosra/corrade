@@ -117,7 +117,7 @@ CORRADE_VISIBILITY_EXPORT
     #endif
 #endif
 DebugGlobals debugGlobals{
-    &std::cout, &std::cerr, &std::cerr,
+    Debug::defaultOutput(), Warning::defaultOutput(), Error::defaultOutput(),
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color::Default, false
     #endif
