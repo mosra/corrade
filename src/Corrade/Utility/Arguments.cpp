@@ -652,7 +652,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
             _values[found->id] = argv[i];
             parsedArguments[found-_entries.begin()] = true;
-            nextArgument = found+1;
+            nextArgument = found + 1;
         }
     }
 
