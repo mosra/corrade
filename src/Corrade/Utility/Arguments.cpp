@@ -435,7 +435,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
     /* Clear previously parsed values */
-    for(auto&& boolean: _booleans) boolean = false;
+    for(bool& boolean: _booleans) boolean = false;
     for(const Entry& entry: _entries) {
         if(entry.type == Type::BooleanOption) continue;
 
@@ -573,7 +573,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                        less restrictive argument parsers can be used for the
                        prefixed version. */
                     bool ignore = false;
-                    for(auto&& prefix: _skippedPrefixes) {
+                    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
                         if(!keyHasPrefix(key, prefix.first)) continue;
 
                         /* Ignore the option and also its value (except for
@@ -701,7 +701,7 @@ std::string Arguments::usage() const {
     out << "Usage:\n  " << (_command.empty() ? "./app" : _command);
 
     /* Print all skipped prefixes */
-    for(auto&& prefix: _skippedPrefixes)
+    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes)
         out << " [--" << prefix.first << "...]";
 
     /* Print all options and named argument */
@@ -773,7 +773,7 @@ std::string Arguments::help() const {
     /* Calculate key column width. Minimal is to display `-h, --help` */
     constexpr std::size_t maxKeyColumnWidth = 26;
     std::size_t keyColumnWidth = 10;
-    for(auto&& prefix: _skippedPrefixes) {
+    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
         /* Add space for `--` at the beginning and `...` at the end */
         keyColumnWidth = std::max(prefix.first.size() + 5, keyColumnWidth);
 
@@ -885,7 +885,7 @@ std::string Arguments::help() const {
     }
 
     /* Print references to skipped prefies last */
-    for(auto&& prefix: _skippedPrefixes) {
+    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
         out << "  --" << std::left << std::setw(keyColumnWidth) << prefix.first + "...  ";
         if(!prefix.second.empty()) out << prefix.second << '\n' << std::string(keyColumnWidth + 4, ' ');
         out << "(see --" << prefix.first << "help for details)\n";
@@ -915,7 +915,7 @@ bool Arguments::isSet(const std::string& key) const {
 }
 
 bool Arguments::skippedPrefix(const std::string& key) const {
-    for(auto&& prefix: _skippedPrefixes)
+    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes)
         if(keyHasPrefix(key, prefix.first)) return true;
 
     return false;
