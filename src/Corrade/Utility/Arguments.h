@@ -796,12 +796,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
         bool isSet(const std::string& key) const;
 
     private:
+        enum class Type: std::uint8_t;
         enum class InternalFlag: std::uint8_t;
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
         struct CORRADE_UTILITY_LOCAL Entry;
 
+        CORRADE_UTILITY_LOCAL void addOptionInternal(char shortKey, std::string key, std::string helpKey, std::string defaultValue, Type type, std::size_t id, const char* assertPrefix);
         bool CORRADE_UTILITY_LOCAL skippedPrefix(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(char shortKey) const;

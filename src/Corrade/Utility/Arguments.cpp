@@ -55,13 +55,6 @@ using Corrade::Utility::Unicode::narrow;
 namespace Corrade { namespace Utility {
 
 namespace {
-    enum class Type: std::uint8_t {
-        Argument,
-        NamedArgument,
-        Option,
-        BooleanOption
-    };
-
     inline std::string uppercaseKey(std::string key) {
         for(char& i: key) {
             if(i >= 'a' && i <= 'z')
@@ -73,6 +66,13 @@ namespace {
         return key;
     }
 }
+
+enum class Arguments::Type: std::uint8_t {
+    Argument,
+    NamedArgument,
+    Option,
+    BooleanOption
+};
 
 struct Arguments::Entry {
     Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id);
@@ -243,21 +243,27 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     return *this;
 }
 
-Arguments& Arguments::addOption(char shortKey, std::string key, std::string defaultValue) {
+void Arguments::addOptionInternal(const char shortKey, std::string key, std::string helpKey, std::string defaultValue, const Type type, std::size_t id, const char* assertPrefix) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
-        "Utility::Arguments::addOption(): invalid key" << key << "or its short variant", *this);
-
+        assertPrefix << "invalid key" << key << "or its short variant", );
     CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
-        "Utility::Arguments::addOption(): the key" << key << "or its short version is already used", *this);
-
-    CORRADE_ASSERT(_prefix.empty() || shortKey == '\0',
-        "Utility::Arguments::addOption(): short option" << std::string{shortKey} << "not allowed in prefixed version", *this);
+        assertPrefix << "the key" << key << "or its short version is already used", );
     CORRADE_ASSERT(!skippedPrefix(key),
-        "Utility::Arguments::addOption(): key" << key << "conflicts with skipped prefixes", *this);
+        assertPrefix << "key" << key << "conflicts with skipped prefixes", );
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(assertPrefix);
+    #endif
 
     /* Reset the parsed flag -- it's probably a mistake to add an option and
        then ask for values without parsing again */
     _flags &= ~InternalFlag::Parsed;
+
+    arrayAppend(_entries, Containers::InPlaceInit, type, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), id);
+}
+
+Arguments& Arguments::addOption(const char shortKey, std::string key, std::string defaultValue) {
+    CORRADE_ASSERT(_prefix.empty() || shortKey == '\0',
+        "Utility::Arguments::addOption(): short option" << std::string{shortKey} << "not allowed in prefixed version", *this);
 
     std::string helpKey;
     if(_prefix.empty())
@@ -267,26 +273,15 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
         key = _prefix + tmp;
         helpKey = std::move(tmp);
     }
-    arrayAppend(_entries, Containers::InPlaceInit, Type::Option, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
+
+    addOptionInternal(shortKey, key, helpKey, defaultValue, Type::Option, _values.size(), "Utility::Arguments::addOption():");
     arrayAppend(_values, Containers::InPlaceInit);
     return *this;
 }
 
-Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
-    CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
-        "Utility::Arguments::addBooleanOption(): invalid key" << key << "or its short variant", *this);
-
-    CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(key),
-        "Utility::Arguments::addBooleanOption(): the key" << key << "or its short version is already used", *this);
-
+Arguments& Arguments::addBooleanOption(const char shortKey, std::string key) {
     CORRADE_ASSERT(_prefix.empty() || key == "help",
         "Utility::Arguments::addBooleanOption(): boolean option" << key << "not allowed in prefixed version", *this);
-    CORRADE_ASSERT(!skippedPrefix(key),
-        "Utility::Arguments::addBooleanOption(): key" << key << "conflicts with skipped prefixes", *this);
-
-    /* Reset the parsed flag -- it's probably a mistake to add an option and
-       then ask for values without parsing again */
-    _flags &= ~InternalFlag::Parsed;
 
     /* The prefix addition is here only for --prefix-help, which is the only
        allowed boolean option */
@@ -295,7 +290,8 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
         helpKey = key;
     else
         helpKey = key = _prefix + std::move(key);
-    arrayAppend(_entries, Containers::InPlaceInit, Type::BooleanOption, shortKey, std::move(key), std::move(helpKey), std::string(), _booleans.size());
+
+    addOptionInternal(shortKey, key, helpKey, {}, Type::BooleanOption, _booleans.size(), "Utility::Arguments::addBooleanOption():");
     arrayAppend(_booleans, false);
     return *this;
 }
