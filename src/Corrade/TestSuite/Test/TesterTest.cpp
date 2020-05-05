@@ -557,6 +557,7 @@ struct TesterTest: Tester {
     void abortOnFail();
     void abortOnFailSkip();
     void noXfail();
+    void noCatch();
 
     /* warning and message verified in test() already */
     void compareMessageVerboseDisabled();
@@ -624,6 +625,7 @@ TesterTest::TesterTest() {
               &TesterTest::abortOnFail,
               &TesterTest::abortOnFailSkip,
               &TesterTest::noXfail,
+              &TesterTest::noCatch,
 
               &TesterTest::compareMessageVerboseDisabled,
               &TesterTest::compareMessageVerboseEnabled,
@@ -980,6 +982,30 @@ void TesterTest::noXfail() {
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "noXfail.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::noCatch() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "20", "--no-catch" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+
+    bool failed = false;
+    try {
+        t.exec(this, &out, &out);
+    } catch(const std::out_of_range& e) {
+        failed = true;
+        CORRADE_COMPARE(std::string{e.what()}, "YOU ARE FORBIDDEN FROM ACCESSING ID 7!!!");
+    }
+
+    CORRADE_VERIFY(failed);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "noCatch.txt"),
         Compare::StringToFile);
 }
 

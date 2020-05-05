@@ -387,10 +387,14 @@ the exception type and contents of @ref std::exception::what(). No file/line
 info is provided in this case, as it's not easily possible to know where the
 exception originated from. Only exceptions derived from @ref std::exception are
 caught to avoid interferring with serious issues such as memory access errors.
-Apart from that, the test suite doesn't provide any builtin exception support
---- if it's needed to verify that an exception was or wasn't thrown, the user
-is expected to implement a @cpp try {} catch @ce block inside the test case and
-verify the desired properties directly.
+If catching unhandled exceptions is not desired (for example when you want to
+do a post-mortem debugging of the stack trace leading to the exception), it can
+be disabled with the `--no-catch` @ref TestSuite-Tester-command-line "command-line option".
+
+Apart from the above, the test suite doesn't provide any builtin exception
+support --- if it's needed to verify that an exception was or wasn't thrown,
+the user is expected to implement a @cpp try {} catch @ce block inside the test
+case and verify the desired properties directly.
 
 @section TestSuite-Tester-command-line Command-line options
 
@@ -404,7 +408,7 @@ Usage:
 ./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
     [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
     [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
-    [--save-diagnostic PATH] [--verbose] [--benchmark TYPE]
+    [--no-catch] [--save-diagnostic PATH] [--verbose] [--benchmark TYPE]
     [--benchmark-discard N] [--benchmark-yellow N] [--benchmark-red N]
 @endcode
 
@@ -432,6 +436,8 @@ Arguments:
     `CORRADE_TEST_ABORT_ON_FAIL=ON|OFF`)
 -   `--no-xfail` --- disallow expected failures (environment:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
+-   `--no-catch` --- don't catch standard exceptions (environment:
+    `CORRADE_TEST_NO_CATCH=ON|OFF`)
 -   `--save-diagnostic PATH` --- save diagnostic files to given path
     (environment: `CORRADE_TEST_SAVE_DIAGNOSTIC`)
 -   `-v`, `--verbose` --- enable verbose output (environment:

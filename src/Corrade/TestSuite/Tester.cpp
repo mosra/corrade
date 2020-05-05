@@ -211,6 +211,8 @@ int Tester::exec(Tester* const previousTester, std::ostream* const logOutput, st
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
+        .addBooleanOption("no-catch").setHelp("no-catch", "don't catch standard exceptions")
+            .setFromEnvironment("no-catch", "CORRADE_TEST_NO_CATCH")
         .addOption("save-diagnostic", "").setHelp("save-diagnostic", "save diagnostic files to given path", "PATH")
             .setFromEnvironment("save-diagnostic", "CORRADE_TEST_SAVE_DIAGNOSTIC")
         .addBooleanOption('v', "verbose").setHelp("verbose", "enable verbose output")
@@ -479,6 +481,10 @@ benchmark types:
                 aborted = true;
                 skipped = true;
             } catch(const std::exception& e) {
+                /* Conditionally rethrow to let the standard exception abort
+                   the process -- useful for debugging */
+                if(args.isSet("no-catch")) throw;
+
                 ++errorCount;
                 aborted = true;
                 Error out{_state->errorOutput, _state->useColor};

@@ -45,6 +45,9 @@ fi
 if [ ! -z ${CORRADE_TEST_NO_XFAIL+x} ]; then
     test_env="$test_env CORRADE_TEST_NO_XFAIL=$CORRADE_TEST_NO_XFAIL"
 fi
+if [ ! -z ${CORRADE_TEST_NO_CATCH+x} ]; then
+    test_env="$test_env CORRADE_TEST_NO_CATCH=$CORRADE_TEST_NO_CATCH"
+fi
 if [ ! -z ${CORRADE_TEST_BENCHMARK+x} ]; then
     test_env="$test_env CORRADE_BENCHMARK=$CORRADE_BENCHMARK"
 fi

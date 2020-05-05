@@ -46,6 +46,7 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/compareMessageVerboseDisabled.txt
         TesterTestFiles/compareMessageVerboseEnabled.txt
         TesterTestFiles/compareMessageXfail.txt
+        TesterTestFiles/noCatch.txt
         TesterTestFiles/noXfail.txt
         TesterTestFiles/repeatAll.txt
         TesterTestFiles/repeatEvery.txt
