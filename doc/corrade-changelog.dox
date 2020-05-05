@@ -87,6 +87,13 @@ namespace Corrade {
     per-interface basis using @ref PluginManager::AbstractPlugin::pluginSuffix()
     and @ref PluginManager::AbstractPlugin::pluginMetadataSuffix()
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   New @ref CORRADE_ITERATION() macro for annotating loops
+-   Added @ref TestSuite::Compare::Divisible and
+    @ref TestSuite::Compare::NotDivisible pseudo-types for checking
+    divisibility with clear diagnostic messages
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Added @ref Utility::Arguments::setParseErrorCallback() for implementing
@@ -122,13 +129,6 @@ namespace Corrade {
     @ref Utility::Debug::newline and an inverse of @ref Utility::Debug::nospace
 -   Added a @ref Utility::Endianness::fourCC() utility for creating
     endian-independent four-character codes
-
-@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
-
--   New @ref CORRADE_ITERATION() macro for annotating loops
--   Added @ref TestSuite::Compare::Divisible and
-    @ref TestSuite::Compare::NotDivisible pseudo-types for checking
-    divisibility with clear diagnostic messages
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
