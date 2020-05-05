@@ -189,6 +189,10 @@ namespace Corrade {
     Magnum used. In particular, the epsilons are now @cpp 1.0e-5f @ce,
     @cpp 1.0e-14 @ce and @cpp 1.0e-17l @ce instead of @cpp 1.0e-6f @ce,
     @cpp 1.0e-12 @ce and @cpp 1.0e-15l @ce
+-   To avoid aborting the whole test on unhandled exceptions,
+    @ref TestSuite::Tester now catches exceptions derived from
+    @ref std::exception. See @ref TestSuite-Tester-exceptions for more
+    information.
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

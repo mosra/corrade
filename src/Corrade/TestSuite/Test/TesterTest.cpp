@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -34,6 +35,7 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/StlMath.h"
+#include "Corrade/Utility/String.h"
 
 #include "configure.h"
 
@@ -144,6 +146,9 @@ struct Test: Tester {
     void iteration();
     void iterationScope();
 
+    void exception();
+    void exceptionNoTestCaseLine();
+
     void testCaseName();
     void testCaseNameNoChecks();
     void testCaseTemplateName();
@@ -210,6 +215,9 @@ Test::Test(std::ostream* const out, const TesterConfiguration& configuration): T
               &Test::skip,
               &Test::iteration,
               &Test::iterationScope,
+
+              &Test::exception,
+              &Test::exceptionNoTestCaseLine,
 
               &Test::testCaseName,
               &Test::testCaseNameNoChecks,
@@ -369,6 +377,15 @@ void Test::iterationScope() {
 
     /* Shouldn't print any iteration info */
     CORRADE_COMPARE(2 + 2, 5);
+}
+
+void Test::exception() {
+    CORRADE_VERIFY(true);
+    throw std::out_of_range{"YOU ARE FORBIDDEN FROM ACCESSING ID 7!!!"};
+}
+
+void Test::exceptionNoTestCaseLine() {
+    throw std::out_of_range{"AGAIN?! NO!! ID 7 IS NOT THERE!!!"};
 }
 
 void Test::testCaseName() {
@@ -724,7 +741,10 @@ void TesterTest::test() {
     int result = t.exec(this, &out, &out);
 
     CORRADE_VERIFY(result == 1);
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(
+        /* Replace mangled name of std::out_of_range from the exception() tests
+           with a placeholder to remove platform-specific differences */
+        Utility::String::replaceAll(out.str(), typeid(const std::out_of_range&).name(), "[mangled std::out_of_range]"),
         Utility::Directory::join(TESTER_TEST_DIR, "test.txt"),
         Compare::StringToFile);
 }
@@ -779,7 +799,7 @@ void TesterTest::skipAll() {
 void TesterTest::skipTests() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 44 9", "--skip-tests" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 46 9", "--skip-tests" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -800,7 +820,7 @@ void TesterTest::skipTests() {
 void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 43 9", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 45 9", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -832,7 +852,7 @@ void TesterTest::skipTestsNothingElse() {
 void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "43", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "45", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -881,7 +901,7 @@ void TesterTest::shuffleOne() {
 void TesterTest::repeatEvery() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "34 4", "--repeat-every", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "36 4", "--repeat-every", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -898,7 +918,7 @@ void TesterTest::repeatEvery() {
 void TesterTest::repeatAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "34 4", "--repeat-all", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "36 4", "--repeat-all", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1269,7 +1289,7 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "wall-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "--benchmark", "wall-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1290,7 +1310,7 @@ void TesterTest::benchmarkWallClock() {
 void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "cpu-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "--benchmark", "cpu-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1311,7 +1331,7 @@ void TesterTest::benchmarkCpuClock() {
 void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark", "cpu-cycles" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "--benchmark", "cpu-cycles" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1332,7 +1352,7 @@ void TesterTest::benchmarkCpuCycles() {
 void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "--benchmark-discard", "100" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "--benchmark-discard", "100" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1353,7 +1373,7 @@ void TesterTest::benchmarkDiscardAll() {
 void TesterTest::benchmarkDebugBuildNote() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1376,7 +1396,7 @@ void TesterTest::benchmarkDebugBuildNote() {
 void TesterTest::benchmarkCpuScalingNoWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1396,7 +1416,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
 void TesterTest::benchmarkCpuScalingWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1416,7 +1436,7 @@ void TesterTest::benchmarkCpuScalingWarning() {
 void TesterTest::benchmarkCpuScalingWarningVerbose() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "42 44", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "44 46", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 

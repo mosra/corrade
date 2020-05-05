@@ -1,5 +1,5 @@
 Starting TesterTest::Test with 2 test cases...
   WARN CPU powersave scaling detected, benchmark measurements may be noisy.
- BENCH [42]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
- BENCH [44] 348.36          kB benchmarkOnce()@1x1
+ BENCH [44]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
+ BENCH [46] 348.36          kB benchmarkOnce()@1x1
 Finished TesterTest::Test with 0 errors out of 0 checks.

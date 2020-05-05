@@ -379,6 +379,19 @@ taking a pair of parameter-less @cpp void @ce functions for setup and teardown.
 Both functions are called before and after each test case run, independently on
 whether the test case passed or failed.
 
+@section TestSuite-Tester-exceptions Catching exceptions
+
+If a test case fails with an unhandled exception, a @cb{.ansi} [1;31mTHROW @ce
+is printed on the output, together with a (platform-specific mangled) name of
+the exception type and contents of @ref std::exception::what(). No file/line
+info is provided in this case, as it's not easily possible to know where the
+exception originated from. Only exceptions derived from @ref std::exception are
+caught to avoid interferring with serious issues such as memory access errors.
+Apart from that, the test suite doesn't provide any builtin exception support
+--- if it's needed to verify that an exception was or wasn't thrown, the user
+is expected to implement a @cpp try {} catch @ce block inside the test case and
+verify the desired properties directly.
+
 @section TestSuite-Tester-command-line Command-line options
 
 Command-line options that make sense to be set globally for multiple test cases

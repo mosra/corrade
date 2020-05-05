@@ -30,6 +30,7 @@
 #include <iostream>
 #include <random>
 #include <sstream>
+#include <typeinfo>
 #include <utility>
 
 #include "Corrade/Containers/Array.h"
@@ -477,7 +478,22 @@ benchmark types:
             } catch(const SkipException&) {
                 aborted = true;
                 skipped = true;
+            } catch(const std::exception& e) {
+                ++errorCount;
+                aborted = true;
+                Error out{_state->errorOutput, _state->useColor};
+                printTestCaseLabel(out, " THROW", Debug::Color::Red,
+                    _state->testCaseLine ? Debug::Color::Default : Debug::Color::Yellow);
+                /* The file/line info is available but useless because the
+                   exception definitely doesn't come from there, thus not
+                   printing it. Also not doing ++noCheckCount because the
+                   checks could still be there, only after the exception
+                   happened. */
+                out << Debug::newline << "       " << typeid(e).name() << Debug::nospace << ":" << e.what();
             }
+
+            /* Not catching ... exceptions because those could obscure critical
+               problems: https://stackoverflow.com/a/2183971 */
 
             _state->testCase = nullptr;
 
