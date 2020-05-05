@@ -460,13 +460,20 @@ void ArgumentsTest::duplicateKey() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
+    Arguments args;
+    args.addArgument("foo");
+
     std::ostringstream out;
     Error redirectError{&out};
-    Arguments args;
-    args.addArgument("foo")
-        .addOption("foo");
-
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addOption(): the key foo or its short version is already used\n");
+    args.addNamedArgument("foo")
+        .addOption("foo")
+        .addBooleanOption("foo")
+        .addFinalOptionalArgument("foo");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
+        "Utility::Arguments::addOption(): the key foo or its short variant is already used\n"
+        "Utility::Arguments::addBooleanOption(): the key foo or its short variant is already used\n"
+        "Utility::Arguments::addFinalOptionalArgument(): the key foo is already used\n");
 }
 
 void ArgumentsTest::duplicateShortKey() {
@@ -474,13 +481,18 @@ void ArgumentsTest::duplicateShortKey() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
+    Arguments args;
+    args.addNamedArgument('b', "bar");
+
     std::ostringstream out;
     Error redirectError{&out};
-    Arguments args;
-    args.addNamedArgument('b', "bar")
-        .addBooleanOption('b', "foo");
-
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addBooleanOption(): the key foo or its short version is already used\n");
+    args.addNamedArgument('b', "foo")
+        .addOption('b', "fig")
+        .addBooleanOption('b', "bur");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
+        "Utility::Arguments::addOption(): the key fig or its short variant is already used\n"
+        "Utility::Arguments::addBooleanOption(): the key bur or its short variant is already used\n");
 }
 
 void ArgumentsTest::disallowedCharacter() {
@@ -488,12 +500,21 @@ void ArgumentsTest::disallowedCharacter() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
+    Arguments args;
+    /* It's fine here (even though confusing) -- the user won't be typing this
+       on the terminal */
+    args.addFinalOptionalArgument("i'm saying");
+
     std::ostringstream out;
     Error redirectError{&out};
-    Arguments args;
-    args.addNamedArgument('b', "a mistake");
-
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addNamedArgument(): invalid key a mistake or its short variant\n");
+    args
+        .addNamedArgument("a mistake")
+        .addOption("it is")
+        .addBooleanOption("really!");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addNamedArgument(): invalid key a mistake or its short variant\n"
+        "Utility::Arguments::addOption(): invalid key it is or its short variant\n"
+        "Utility::Arguments::addBooleanOption(): invalid key really! or its short variant\n");
 }
 
 void ArgumentsTest::disallowedCharacterShort() {
@@ -504,9 +525,14 @@ void ArgumentsTest::disallowedCharacterShort() {
     std::ostringstream out;
     Error redirectError{&out};
     Arguments args;
-    args.addOption(' ', "bar");
-
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addOption(): invalid key bar or its short variant\n");
+    args
+        .addNamedArgument('-', "dash")
+        .addOption(' ', "bar")
+        .addBooleanOption('?', "halp");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addNamedArgument(): invalid key dash or its short variant\n"
+        "Utility::Arguments::addOption(): invalid key bar or its short variant\n"
+        "Utility::Arguments::addBooleanOption(): invalid key halp or its short variant\n");
 }
 
 void ArgumentsTest::disallowedIgnoreUnknown() {
@@ -1201,8 +1227,8 @@ void ArgumentsTest::valueMismatchedBoolean() {
     args.value("boolean");
     args.isSet("value");
     CORRADE_COMPARE(out.str(),
-        "Utility::Arguments::value(): cannot use this function for boolean option boolean\n"
-        "Utility::Arguments::isSet(): cannot use this function for non-boolean value value\n");
+        "Utility::Arguments::value(): cannot use this function for a boolean option boolean\n"
+        "Utility::Arguments::isSet(): cannot use this function for a non-boolean option value\n");
 }
 
 void ArgumentsTest::parseErrorCallback() {

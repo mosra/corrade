@@ -228,7 +228,7 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
         "Utility::Arguments::addNamedArgument(): invalid key" << key << "or its short variant", *this);
 
     CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
-        "Utility::Arguments::addNamedArgument(): the key" << key << "or its short version is already used", *this);
+        "Utility::Arguments::addNamedArgument(): the key" << key << "or its short variant is already used", *this);
 
     CORRADE_ASSERT(_prefix.empty(),
         "Utility::Arguments::addNamedArgument(): argument" << key << "not allowed in prefixed version", *this);
@@ -247,7 +247,7 @@ void Arguments::addOptionInternal(const char shortKey, std::string key, std::str
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         assertPrefix << "invalid key" << key << "or its short variant", );
     CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
-        assertPrefix << "the key" << key << "or its short version is already used", );
+        assertPrefix << "the key" << key << "or its short variant is already used", );
     CORRADE_ASSERT(!skippedPrefix(key),
         assertPrefix << "key" << key << "conflicts with skipped prefixes", );
     #ifdef CORRADE_NO_ASSERT
@@ -893,8 +893,8 @@ std::string Arguments::help() const {
 std::string Arguments::valueInternal(const std::string& key) const {
     const Entry* found = find(_prefix + key);
     CORRADE_ASSERT(found, "Utility::Arguments::value(): key" << key << "not found", {});
-    CORRADE_ASSERT(found->type != Type::BooleanOption,
-        "Utility::Arguments::value(): cannot use this function for boolean option" << key, {});
+    CORRADE_ASSERT(found->type == Type::Argument || found->type == Type::NamedArgument || found->type == Type::Option,
+        "Utility::Arguments::value(): cannot use this function for a boolean option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
     CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
     return _values[found->id];
@@ -904,7 +904,7 @@ bool Arguments::isSet(const std::string& key) const {
     const Entry* found = find(_prefix + key);
     CORRADE_ASSERT(found, "Utility::Arguments::isSet(): key" << key << "not found", false);
     CORRADE_ASSERT(found->type == Type::BooleanOption,
-        "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
+        "Utility::Arguments::isSet(): cannot use this function for a non-boolean option" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
     CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::isSet(): arguments were not successfully parsed yet", {});
     return _booleans[found->id];
