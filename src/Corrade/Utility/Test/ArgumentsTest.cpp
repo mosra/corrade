@@ -112,6 +112,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseErrorCallback();
     void parseErrorCallbackIgnoreAll();
     void parseErrorCallbackIgnoreAll2();
+
+    void debugParseError();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -190,7 +192,9 @@ ArgumentsTest::ArgumentsTest() {
 
               &ArgumentsTest::parseErrorCallback,
               &ArgumentsTest::parseErrorCallbackIgnoreAll,
-              &ArgumentsTest::parseErrorCallbackIgnoreAll2});
+              &ArgumentsTest::parseErrorCallbackIgnoreAll2,
+
+              &ArgumentsTest::debugParseError});
 }
 
 bool hasEnv(const std::string& value) {
@@ -1267,7 +1271,8 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
 
             switch(error) {
                 case Arguments::ParseError::InvalidShortArgument:
-                    CORRADE_COMPARE(key, "?");
+                    if(key == "?") CORRADE_COMPARE(key, "?");
+                    else CORRADE_COMPARE(key, "help");
                     return true;
                 case Arguments::ParseError::InvalidArgument:
                     CORRADE_COMPARE(key, "!!");
@@ -1296,11 +1301,11 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
             return true;
         }, &count);
 
-    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "--hello", "--output" };
+    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--output" };
     /* The parsing should ignore the errors, not die where it shouldn't, but
        still extracting the valid optionas */
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(count, 6);
+    CORRADE_COMPARE(count, 7);
     CORRADE_VERIFY(args.isSet("hello"));
 }
 
@@ -1339,6 +1344,13 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(count, 1);
     CORRADE_VERIFY(args.isSet("hello"));
+}
+
+void ArgumentsTest::debugParseError() {
+    std::ostringstream out;
+
+    Debug{&out} << Arguments::ParseError::MissingArgument << Arguments::ParseError(0xf0);
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::ParseError::MissingArgument Utility::Arguments::ParseError(0xf0)\n");
 }
 
 }}}}
