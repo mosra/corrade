@@ -83,6 +83,9 @@ Arguments:
                        (default: log.txt)
 @endcode
 
+It doesn't end with just the above, check out the @ref addArrayOption() and
+@ref addFinalOptionalArgument() APIs for more involved uses.
+
 @section Utility-Arguments-delegating Delegating arguments to different parts of the application
 
 Sometimes you want to have some set of arguments for the application and some
@@ -471,10 +474,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *                     (default: defaultValue)
          * @endcode
          *
-         * Option value can be retrieved using @ref value().
-         *
-         * Short key is not allowed in the prefixed version, use
+         * Option value can be retrieved using @ref value(). Short key is not
+         * allowed in the prefixed version, use
          * @ref addOption(std::string, std::string) instead.
+         * @see @ref addArrayOption(), @ref addBooleanOption()
          */
         Arguments& addOption(char shortKey, std::string key, std::string defaultValue = std::string());
 
@@ -500,6 +503,54 @@ class CORRADE_UTILITY_EXPORT Arguments {
         }
 
         /**
+         * @brief Add an array option with both short and long key alternative
+         * @m_since_latest
+         *
+         * Compared to @ref addOption(), which remembers only the last value
+         * when multiple options of the same name are passed in the argument
+         * list, this function remembers the whole sequence. That also means
+         * there's no default value, the default is simply an empty sequence.
+         *
+         * After calling @cpp addArrayOption('o', "option") @ce the option will
+         * be displayed in help text like the following. Option value is just
+         * uppercased key value, call @ref setHelp() to change it:
+         *
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [-o|--option OPTION]...
+         *
+         * Arguments:
+         *   -o, --option      help text
+         * @endcode
+         *
+         * Array length and values can be retrieved using
+         * @ref arrayValueCount() and @ref arrayValue(). Short key is not
+         * allowed in the prefixed version, use @ref addArrayOption(std::string)
+         * instead.
+         * @see @ref addBooleanOption()
+         */
+        Arguments& addArrayOption(char shortKey, std::string key);
+
+        /**
+         * @brief Add an array option with long key only
+         * @m_since_latest
+         *
+         * Similar to the above, the only difference is that the usage and help
+         * text does not mention the short option:
+         *
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [--option OPTION]*
+         *
+         * Arguments:
+         *   --option          help text
+         * @endcode
+         */
+        Arguments& addArrayOption(std::string key) {
+            return addArrayOption('\0', std::move(key));
+        }
+
+        /**
          * @brief Add boolean option with both short and long key alternative
          *
          * If the option is present, the option has a @cpp true @ce value,
@@ -521,6 +572,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() instead.
+         * @see @ref addOption(), @ref addArrayOption()
          */
         Arguments& addBooleanOption(char shortKey, std::string key);
 
@@ -778,20 +830,49 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @param key       Long argument or option key
          * @param flags     Configuration value flags
          *
-         * Expects that the key exists and @ref parse() was successful. Use
-         * @ref isSet() for boolean options. If @p T is not @ref std::string,
+         * Expects that the key exists and @ref parse() was successful. Only
+         * for arguments and non-array non-boolean options, use @ref arrayValue()
+         * or @ref isSet() for those instead. If @p T is not @ref std::string,
          * uses @ref ConfigurationValue::fromString() to convert the value to
          * given type.
          */
         template<class T = std::string> T value(const std::string& key, ConfigurationValueFlags flags = {}) const;
 
         /**
+         * @brief Count of parsed values in given array option
+         * @param key       Array option key
+         * @m_since_latest
+         *
+         * Expects that the key exists, @ref parse() was successful and
+         * @p key is an array option.
+         * @see @ref addArrayOption()
+         */
+        std::size_t arrayValueCount(const std::string& key) const;
+
+        /**
+         * @brief Value of given array option
+         * @param key       Array option key
+         * @param id        Array value index
+         * @param flags     Configuration value flags
+         * @m_since_latest
+         *
+         * Expects that the key exists, @ref parse() was successful and
+         * @p id is less than @ref arrayValueCount(). Only for array options,
+         * use @ref value() or @ref isSet() for those instead. If @p T is not
+         * @ref std::string, uses @ref ConfigurationValue::fromString() to
+         * convert the value to given type.
+         * @see @ref addArrayOption()
+         */
+        template<class T = std::string> T arrayValue(const std::string& key, const std::size_t id, ConfigurationValueFlags flags = {}) const;
+
+        /**
          * @brief Whether boolean option is set
          * @param key   Long option key
          *
-         * Expects that the option exists, is boolean and @ref parse() was
-         * successful. Help option (`-h`, `--help`) is present by default.
-         * @see @ref value()
+         * Expects that the option exists, was added using
+         * @ref addBooleanOption()  and @ref parse() was successful. The help
+         * option (`-h`, `--help`) is added implicitly.
+         * @see @ref value(), @ref arrayValue()
          */
         bool isSet(const std::string& key) const;
 
@@ -815,6 +896,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         std::string CORRADE_UTILITY_LOCAL keyName(const Entry& entry) const;
 
         std::string valueInternal(const std::string& key) const;
+        std::string arrayValueInternal(const std::string& key, std::size_t id) const;
 
         InternalFlags _flags;
         /* not std::size_t so it fits into the padding after flags */
@@ -824,6 +906,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
         std::string _help;
         Containers::Array<Entry> _entries;
         Containers::Array<std::string> _values;
+        /* Three nested allocations. Feels kinda noobish, eh? */
+        Containers::Array<Containers::Array<std::string>> _arrayValues;
         Containers::Array<std::pair<std::string, std::string>> _skippedPrefixes;
         Containers::Array<bool> _booleans;
         ParseErrorCallback _parseErrorCallback;
@@ -844,6 +928,11 @@ template<> inline std::string Arguments::value(const std::string& key, Configura
 
 template<class T> T Arguments::value(const std::string& key, ConfigurationValueFlags flags) const {
     std::string value = valueInternal(key);
+    return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
+}
+
+template<class T> T Arguments::arrayValue(const std::string& key, std::size_t id, ConfigurationValueFlags flags) const {
+    std::string value = arrayValueInternal(key, id);
     return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
 }
 

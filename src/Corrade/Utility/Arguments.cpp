@@ -71,6 +71,7 @@ enum class Arguments::Type: std::uint8_t {
     Argument,
     NamedArgument,
     Option,
+    ArrayOption,
     BooleanOption
 };
 
@@ -95,7 +96,7 @@ enum class Arguments::InternalFlag: std::uint8_t {
 #endif
 
 Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
-    if(type == Type::NamedArgument || type == Type::Option)
+    if(type == Type::NamedArgument || type == Type::Option || type == Type::ArrayOption)
         this->helpKey = this->key + ' ' + uppercaseKey(helpKey);
     else this->helpKey = std::move(helpKey);
 }
@@ -274,8 +275,26 @@ Arguments& Arguments::addOption(const char shortKey, std::string key, std::strin
         helpKey = std::move(tmp);
     }
 
-    addOptionInternal(shortKey, key, helpKey, defaultValue, Type::Option, _values.size(), "Utility::Arguments::addOption():");
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), Type::Option, _values.size(), "Utility::Arguments::addOption():");
     arrayAppend(_values, Containers::InPlaceInit);
+    return *this;
+}
+
+Arguments& Arguments::addArrayOption(const char shortKey, std::string key) {
+    CORRADE_ASSERT(_prefix.empty() || shortKey == '\0',
+        "Utility::Arguments::addArrayOption(): short option" << std::string{shortKey} << "not allowed in prefixed version", *this);
+
+    std::string helpKey;
+    if(_prefix.empty())
+        helpKey = key;
+    else {
+        std::string tmp = std::move(key);
+        key = _prefix + tmp;
+        helpKey = std::move(tmp);
+    }
+
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::ArrayOption, _arrayValues.size(), "Utility::Arguments::addArrayOption():");
+    arrayAppend(_arrayValues, Containers::InPlaceInit);
     return *this;
 }
 
@@ -291,7 +310,7 @@ Arguments& Arguments::addBooleanOption(const char shortKey, std::string key) {
     else
         helpKey = key = _prefix + std::move(key);
 
-    addOptionInternal(shortKey, key, helpKey, {}, Type::BooleanOption, _booleans.size(), "Utility::Arguments::addBooleanOption():");
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::BooleanOption, _booleans.size(), "Utility::Arguments::addBooleanOption():");
     arrayAppend(_booleans, false);
     return *this;
 }
@@ -390,9 +409,12 @@ Arguments& Arguments::setHelp(const std::string& key, std::string help, std::str
         CORRADE_ASSERT(found->type != Type::BooleanOption,
             "Utility::Arguments::setHelpKey(): help key can't be set for boolean option", *this);
 
-        if(found->type == Type::NamedArgument || found->type == Type::Option)
+        if(found->type == Type::NamedArgument || found->type == Type::Option || found->type == Type::ArrayOption)
             found->helpKey = _prefix + key + ' ' + std::move(helpKey);
-        else found->helpKey = std::move(helpKey);
+        else {
+            CORRADE_INTERNAL_ASSERT(found->type == Type::Argument);
+            found->helpKey = std::move(helpKey);
+        }
     }
 
     return *this;
@@ -431,12 +453,17 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
     /* Clear previously parsed values */
-    for(bool& boolean: _booleans) boolean = false;
     for(const Entry& entry: _entries) {
-        if(entry.type == Type::BooleanOption) continue;
-
-        CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
-        _values[entry.id] = entry.defaultValue;
+        if(entry.type == Type::Argument || entry.type == Type::NamedArgument || entry.type == Type::Option) {
+            CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
+            _values[entry.id] = entry.defaultValue;
+        } else if(entry.type == Type::ArrayOption) {
+            CORRADE_INTERNAL_ASSERT(entry.id < _arrayValues.size());
+            arrayResize(_arrayValues[entry.id], 0);
+        } else if(entry.type == Type::BooleanOption) {
+            CORRADE_INTERNAL_ASSERT(entry.id < _booleans.size());
+            _booleans[entry.id] = false;
+        } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
     }
 
     /* Get options from environment */
@@ -508,9 +535,14 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     for(int i = 1; i < argc; ++i) {
         /* Value for given argument */
         if(valueFor) {
-            CORRADE_INTERNAL_ASSERT(valueFor->type != Type::BooleanOption);
-            CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
-            _values[valueFor->id] = argv[i];
+            if(valueFor->type == Type::Argument || valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
+                CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
+                _values[valueFor->id] = argv[i];
+            } else if(valueFor->type == Type::ArrayOption) {
+                CORRADE_INTERNAL_ASSERT(valueFor->id < _arrayValues.size());
+                arrayAppend(_arrayValues[valueFor->id], Containers::InPlaceInit, argv[i]);
+            } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+
             parsedArguments[valueFor-_entries.begin()] = true;
             valueFor = nullptr;
             continue;
@@ -671,7 +703,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         const Entry& entry = _entries[i];
 
         /* Non-mandatory, nothing to do */
-        if(entry.type == Type::BooleanOption || entry.type == Type::Option)
+        if(entry.type == Type::Option || entry.type == Type::ArrayOption || entry.type == Type::BooleanOption)
             continue;
 
         /* Argument was not parsed and it was not the final optional one */
@@ -715,7 +747,7 @@ std::string Arguments::usage() const {
         out << ' ';
 
         /* Optional */
-        if(entry.type == Type::Option || entry.type == Type::BooleanOption)
+        if(entry.type == Type::Option || entry.type == Type::ArrayOption || entry.type == Type::BooleanOption)
             out << '[';
 
         /* Key name (+ value) */
@@ -726,6 +758,8 @@ std::string Arguments::usage() const {
         /* Optional */
         if(entry.type == Type::Option || entry.type == Type::BooleanOption)
             out << ']';
+        else if(entry.type == Type::ArrayOption)
+            out << "]...";
     }
 
     /* Separator between named arguments (options) and unnamed arguments. Help
@@ -894,10 +928,34 @@ std::string Arguments::valueInternal(const std::string& key) const {
     const Entry* found = find(_prefix + key);
     CORRADE_ASSERT(found, "Utility::Arguments::value(): key" << key << "not found", {});
     CORRADE_ASSERT(found->type == Type::Argument || found->type == Type::NamedArgument || found->type == Type::Option,
-        "Utility::Arguments::value(): cannot use this function for a boolean option" << key, {});
+        "Utility::Arguments::value(): cannot use this function for an array/boolean option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
     CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
     return _values[found->id];
+}
+
+std::size_t Arguments::arrayValueCount(const std::string& key) const {
+    const Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::arrayValueCount(): key" << key << "not found", {});
+    CORRADE_ASSERT(found->type == Type::ArrayOption,
+        "Utility::Arguments::arrayValueCount(): cannot use this function for a non-array option" << key, {});
+    CORRADE_INTERNAL_ASSERT(found->id < _arrayValues.size());
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet", {});
+    return _arrayValues[found->id].size();
+}
+
+std::string Arguments::arrayValueInternal(const std::string& key, const std::size_t id) const {
+    const Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::arrayValue(): key" << key << "not found", {});
+    CORRADE_ASSERT(found->type == Type::ArrayOption,
+        "Utility::Arguments::arrayValue(): cannot use this function for a non-array option" << key, {});
+    CORRADE_INTERNAL_ASSERT(found->id < _arrayValues.size());
+    /* Check for ID bounds only after we're sure the arguments were parsed,
+       otherwise the message wouldn't make sense */
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet", {});
+    CORRADE_ASSERT(id < _arrayValues[found->id].size(),
+        "Utility::Arguments::arrayValue(): id" << id << "out of range for" << _arrayValues[found->id].size() << "values with key" << key, {});
+    return _arrayValues[found->id][id];
 }
 
 bool Arguments::isSet(const std::string& key) const {

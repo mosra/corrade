@@ -67,9 +67,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseHelp();
     void parseArguments();
     void parseMixed();
+    void parseRepeatedArguments();
     void parseCustomType();
     void parseCustomTypeFlags();
-    void parseDoubleArgument();
     void parseEnvironment();
     void parseEnvironmentUtf8();
     void parseFinalOptionalArgument();
@@ -107,7 +107,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void notParsedYet();
     void notParsedYetOnlyHelp();
     void valueNotFound();
-    void valueMismatchedBoolean();
+    void valueMismatchedUse();
+    void arrayValueOutOfBounds();
 
     void parseErrorCallback();
     void parseErrorCallbackIgnoreAll();
@@ -148,9 +149,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseHelp,
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
+              &ArgumentsTest::parseRepeatedArguments,
               &ArgumentsTest::parseCustomType,
               &ArgumentsTest::parseCustomTypeFlags,
-              &ArgumentsTest::parseDoubleArgument,
               &ArgumentsTest::parseEnvironment,
               &ArgumentsTest::parseEnvironmentUtf8,
               &ArgumentsTest::parseFinalOptionalArgument,
@@ -188,7 +189,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::notParsedYet,
               &ArgumentsTest::notParsedYetOnlyHelp,
               &ArgumentsTest::valueNotFound,
-              &ArgumentsTest::valueMismatchedBoolean,
+              &ArgumentsTest::valueMismatchedUse,
+              &ArgumentsTest::arrayValueOutOfBounds,
 
               &ArgumentsTest::parseErrorCallback,
               &ArgumentsTest::parseErrorCallbackIgnoreAll,
@@ -285,17 +287,19 @@ void ArgumentsTest::helpNamedOnly() {
     args.addOption('n', "bars", "42").setHelp("bars", "number of bars to foo")
         .addNamedArgument('b', "baz").setHelp("baz", {}, "LEVEL")
         .addOption("sanity-level", "INSANE").setHelp("sanity-level", {}, "SANITY")
+        .addArrayOption("name").setHelp("name", "all names to use", "Ni")
         .addBooleanOption("no-bare-foos").setHelp("no-bare-foos", "don't use bare foos")
         .setCommand("foobar");
 
     const auto expected = R"text(Usage:
-  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity-level SANITY] [--no-bare-foos]
+  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity-level SANITY] [--name Ni]... [--no-bare-foos]
 
 Arguments:
   -h, --help             display this help message and exit
   -n, --bars BARS        number of bars to foo
                          (default: 42)
   --sanity-level SANITY  (default: INSANE)
+  --name Ni              all names to use
   --no-bare-foos         don't use bare foos
 )text";
     CORRADE_COMPARE(args.help(), expected);
@@ -304,14 +308,16 @@ Arguments:
 void ArgumentsTest::helpBoth() {
     Arguments args;
     args.addArgument("foo").setHelp("foo", "which foo to bar with")
+        .addArrayOption("name").setHelp("name", "name(s) to use")
         .addBooleanOption('B', "no-bars").setHelp("no-bars", "don't foo with bars");
 
     const auto expected = R"text(Usage:
-  ./app [-h|--help] [-B|--no-bars] [--] foo
+  ./app [-h|--help] [--name NAME]... [-B|--no-bars] [--] foo
 
 Arguments:
   foo            which foo to bar with
   -h, --help     display this help message and exit
+  --name NAME    name(s) to use
   -B, --no-bars  don't foo with bars
 )text";
     CORRADE_COMPARE(args.help(), expected);
@@ -471,11 +477,13 @@ void ArgumentsTest::duplicateKey() {
     Error redirectError{&out};
     args.addNamedArgument("foo")
         .addOption("foo")
+        .addArrayOption("foo")
         .addBooleanOption("foo")
         .addFinalOptionalArgument("foo");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addOption(): the key foo or its short variant is already used\n"
+        "Utility::Arguments::addArrayOption(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addBooleanOption(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addFinalOptionalArgument(): the key foo is already used\n");
 }
@@ -492,10 +500,12 @@ void ArgumentsTest::duplicateShortKey() {
     Error redirectError{&out};
     args.addNamedArgument('b', "foo")
         .addOption('b', "fig")
+        .addArrayOption('b', "plop")
         .addBooleanOption('b', "bur");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addOption(): the key fig or its short variant is already used\n"
+        "Utility::Arguments::addArrayOption(): the key plop or its short variant is already used\n"
         "Utility::Arguments::addBooleanOption(): the key bur or its short variant is already used\n");
 }
 
@@ -514,10 +524,12 @@ void ArgumentsTest::disallowedCharacter() {
     args
         .addNamedArgument("a mistake")
         .addOption("it is")
+        .addArrayOption("tru ly")
         .addBooleanOption("really!");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addNamedArgument(): invalid key a mistake or its short variant\n"
         "Utility::Arguments::addOption(): invalid key it is or its short variant\n"
+        "Utility::Arguments::addArrayOption(): invalid key tru ly or its short variant\n"
         "Utility::Arguments::addBooleanOption(): invalid key really! or its short variant\n");
 }
 
@@ -627,36 +639,47 @@ void ArgumentsTest::parseMixed() {
     CORRADE_VERIFY(!args.isSet("loud"));
 }
 
+void ArgumentsTest::parseRepeatedArguments() {
+    Arguments args;
+    args.addNamedArgument("arg")
+        .addBooleanOption('b', "bool")
+        .addArrayOption('F', "fibonacci");
+
+    const char* argv[] = { "", "-F", "0", "--arg", "first", "--fibonacci", "1", "-F", "1", "-b", "--arg", "second", "-F", "2", "-b" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("arg"), "second");
+    CORRADE_COMPARE(args.arrayValueCount("fibonacci"), 4);
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 0), "0");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 1), "1");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 2), "1");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 3), "2");
+    CORRADE_VERIFY(args.isSet("bool"));
+}
+
 void ArgumentsTest::parseCustomType() {
     Arguments args;
-    args.addNamedArgument("pi");
+    args.addNamedArgument("pi")
+        .addArrayOption('F', "fibonacci");
 
-    const char* argv[] = { "", "--pi", "0.3141516e+1" };
+    const char* argv[] = { "", "--pi", "0.3141516e+1", "-F", "0", "--fibonacci", "1", "-F", "1", "-F", "2" };
 
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
+    CORRADE_COMPARE(args.arrayValueCount("fibonacci"), 4);
+    CORRADE_COMPARE(args.arrayValue<int>("fibonacci", 3), 2);
 }
 
 void ArgumentsTest::parseCustomTypeFlags() {
     Arguments args;
-    args.addNamedArgument("key");
+    args.addNamedArgument("key")
+        .addArrayOption('M', "mod");
 
-    const char* argv[] = { "", "--key", "0xdeadbeef" };
+    const char* argv[] = { "", "--key", "0xdeadbeef", "-M", "0644"};
 
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value<unsigned int>("key", ConfigurationValueFlag::Hex), 0xdeadbeef);
-}
-
-void ArgumentsTest::parseDoubleArgument() {
-    Arguments args;
-    args.addNamedArgument("arg")
-        .addBooleanOption('b', "bool");
-
-    const char* argv[] = { "", "--arg", "first", "-b", "--arg", "second", "-b" };
-
-    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(args.value("arg"), "second");
-    CORRADE_VERIFY(args.isSet("bool"));
+    CORRADE_COMPARE(args.arrayValue<int>("mod", 0, ConfigurationValueFlag::Oct), 0644);
 }
 
 void ArgumentsTest::parseEnvironment() {
@@ -912,12 +935,13 @@ void ArgumentsTest::prefixedParse() {
 
     Arguments arg2{"read"};
     arg2.addOption("behavior")
-        .addOption("buffer-size");
+        .addOption("buffer-size")
+        .addArrayOption("seek");
 
     CORRADE_COMPARE(arg1.prefix(), "");
     CORRADE_COMPARE(arg2.prefix(), "read");
 
-    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-buffer-size", "4K", "file.dat" };
+    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "file.dat", "--read-seek", "-0" };
 
     CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(arg1.isSet("binary"));
@@ -927,6 +951,9 @@ void ArgumentsTest::prefixedParse() {
     CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
     CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
+    CORRADE_COMPARE(arg2.arrayValueCount("seek"), 2);
+    CORRADE_COMPARE(arg2.arrayValue("seek", 0), "33");
+    CORRADE_COMPARE(arg2.arrayValue("seek", 1), "-0");
 }
 
 void ArgumentsTest::prefixedParseMinus() {
@@ -1046,6 +1073,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
     args.addArgument("foo")
         .addNamedArgument("bar")
         .addOption('a', "baz")
+        .addArrayOption('X', "booboo")
         .addBooleanOption("eh")
         .setGlobalHelp("global help");
 
@@ -1053,6 +1081,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
         "Utility::Arguments::addArgument(): argument foo not allowed in prefixed version\n"
         "Utility::Arguments::addNamedArgument(): argument bar not allowed in prefixed version\n"
         "Utility::Arguments::addOption(): short option a not allowed in prefixed version\n"
+        "Utility::Arguments::addArrayOption(): short option X not allowed in prefixed version\n"
         "Utility::Arguments::addBooleanOption(): boolean option eh not allowed in prefixed version\n"
         "Utility::Arguments::setGlobalHelp(): global help text only allowed in unprefixed version\n");
 }
@@ -1157,15 +1186,20 @@ void ArgumentsTest::notParsedYet() {
 
     Arguments args;
     args.addOption("value")
+        .addArrayOption("array")
         .addBooleanOption("boolean");
 
     std::ostringstream out;
     Error redirectError{&out};
     args.value("value");
+    args.arrayValueCount("array");
+    args.arrayValue("array", 0);
     args.isSet("boolean");
     CORRADE_VERIFY(!args.isParsed());
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet\n"
         "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
 }
 
@@ -1178,6 +1212,7 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
 
     Arguments args;
     args.addArgument("value")
+        .addArrayOption("array")
         .addBooleanOption("boolean");
 
     std::ostringstream out;
@@ -1186,11 +1221,15 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
        not specified */
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     args.value("value");
+    args.arrayValueCount("array");
+    args.arrayValue("array", 0);
     args.isSet("boolean");
     CORRADE_VERIFY(!args.isParsed());
     CORRADE_COMPARE(out.str(),
         "Missing command-line argument value\n"
         "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet\n"
         "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
 }
 
@@ -1205,29 +1244,64 @@ void ArgumentsTest::valueNotFound() {
     std::ostringstream out;
     Error redirectError{&out};
     args.value("nonexistent");
+    args.arrayValueCount("nonexistent");
+    args.arrayValue("nonexistent", 0);
     args.isSet("nonexistent");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::value(): key nonexistent not found\n"
+        "Utility::Arguments::arrayValueCount(): key nonexistent not found\n"
+        "Utility::Arguments::arrayValue(): key nonexistent not found\n"
         "Utility::Arguments::isSet(): key nonexistent not found\n");
 }
 
-void ArgumentsTest::valueMismatchedBoolean() {
+void ArgumentsTest::valueMismatchedUse() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
     Arguments args;
     args.addOption("value")
+        .addArrayOption("array")
         .addBooleanOption("boolean")
         .parse(0, nullptr);
 
     std::ostringstream out;
     Error redirectError{&out};
+    args.value("array");
     args.value("boolean");
+    args.arrayValueCount("value");
+    args.arrayValueCount("boolean");
+    args.arrayValue("value", 0);
+    args.arrayValue("boolean", 0);
     args.isSet("value");
+    args.isSet("array");
     CORRADE_COMPARE(out.str(),
-        "Utility::Arguments::value(): cannot use this function for a boolean option boolean\n"
-        "Utility::Arguments::isSet(): cannot use this function for a non-boolean option value\n");
+        "Utility::Arguments::value(): cannot use this function for an array/boolean option array\n"
+        "Utility::Arguments::value(): cannot use this function for an array/boolean option boolean\n"
+        "Utility::Arguments::arrayValueCount(): cannot use this function for a non-array option value\n"
+        "Utility::Arguments::arrayValueCount(): cannot use this function for a non-array option boolean\n"
+        "Utility::Arguments::arrayValue(): cannot use this function for a non-array option value\n"
+        "Utility::Arguments::arrayValue(): cannot use this function for a non-array option boolean\n"
+        "Utility::Arguments::isSet(): cannot use this function for a non-boolean option value\n"
+        "Utility::Arguments::isSet(): cannot use this function for a non-boolean option array\n");
+}
+
+void ArgumentsTest::arrayValueOutOfBounds() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    const char* argv[] = { "", "-X", "first", "--opt", "second", "-X", "last" };
+
+    Arguments args;
+    args.addArrayOption('X', "opt")
+        .parse(Containers::arraySize(argv), argv);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.arrayValue("opt", 3);
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::arrayValue(): id 3 out of range for 3 values with key opt\n");
 }
 
 void ArgumentsTest::parseErrorCallback() {
