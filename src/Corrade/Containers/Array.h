@@ -310,7 +310,7 @@ class Array {
          * types this is the same as @ref Array(std::size_t). If the size is
          * zero, no allocation is done.
          *
-         * Useful if you want to create an array of primitive types and sett
+         * Useful if you want to create an array of primitive types and set
          * them to zero.
          * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
          */
