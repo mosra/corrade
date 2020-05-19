@@ -128,7 +128,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * @see @ref hasGroups(), @ref valueCount()
          */
-        unsigned int groupCount() const { return _groups.size(); }
+        unsigned int groupCount() const {
+            return static_cast<unsigned int>(_groups.size());
+        }
 
         /**
          * @brief Whether given group exists
