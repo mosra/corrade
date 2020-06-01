@@ -401,13 +401,13 @@ Arguments& Arguments::setHelp(std::string help) {
 
 Arguments& Arguments::setHelp(const std::string& key, std::string help, std::string helpKey) {
     Entry* found = find(_prefix + key);
-    CORRADE_ASSERT(found, "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
+    CORRADE_ASSERT(found, "Utility::Arguments::setHelp(): key" << key << "not found", *this);
 
     found->help = std::move(help);
 
     if(!helpKey.empty()) {
         CORRADE_ASSERT(found->type != Type::BooleanOption,
-            "Utility::Arguments::setHelpKey(): help key can't be set for boolean option", *this);
+            "Utility::Arguments::setHelp(): help key can't be set for boolean option" << key, *this);
 
         if(found->type == Type::NamedArgument || found->type == Type::Option || found->type == Type::ArrayOption)
             found->helpKey = _prefix + key + ' ' + std::move(helpKey);

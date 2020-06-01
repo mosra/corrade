@@ -54,6 +54,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void helpLongKeyNotPrinted();
     void helpFinalOptionalArgument();
     void helpFinalOptionalArgumentDefaultValueOnly();
+    void setHelpNotFound();
+    void setHelpKeyForBoolean();
 
     void duplicateKey();
     void duplicateShortKey();
@@ -136,6 +138,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::helpLongKeyNotPrinted,
               &ArgumentsTest::helpFinalOptionalArgument,
               &ArgumentsTest::helpFinalOptionalArgumentDefaultValueOnly,
+              &ArgumentsTest::setHelpNotFound,
+              &ArgumentsTest::setHelpKeyForBoolean,
 
               &ArgumentsTest::duplicateKey,
               &ArgumentsTest::duplicateShortKey,
@@ -463,6 +467,32 @@ Arguments:
   -h, --help  display this help message and exit
 )text";
     CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::setHelpNotFound() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Arguments args;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.setHelp("opt", "this is an option");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::setHelp(): key opt not found\n");
+}
+
+void ArgumentsTest::setHelpKeyForBoolean() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Arguments args;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.setHelp("help", "this very thing", "HALP");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::setHelp(): help key can't be set for boolean option help\n");
 }
 
 void ArgumentsTest::duplicateKey() {
