@@ -235,9 +235,12 @@ set(CORRADE_DATA_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/corrade)
 set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/cmake/Corrade)
 set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/include/Corrade)
 
-# Library version
+# Library version. CORRADE_VERSION_YEAR/MONTH is used in
+# src/Corrade/CMakeLists.txt to generate the version.h header.
 set(CORRADE_LIBRARY_VERSION 2.3)
 set(CORRADE_LIBRARY_SOVERSION 2)
+set(CORRADE_VERSION_YEAR 2019)
+set(CORRADE_VERSION_MONTH 10)
 
 # A single output location. After a decade of saying NO THIS IS A NON-SOLUTION
 # TO A NON-PROBLEM I reconsidered my views and enabled this, because:
