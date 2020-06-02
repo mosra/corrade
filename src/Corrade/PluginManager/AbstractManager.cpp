@@ -55,9 +55,6 @@
 #define WIN32_LEAN_AND_MEAN /* Otherwise `#define interface struct` breaks everything */
 #endif
 #include <windows.h>
-#define dlsym GetProcAddress
-#define dlerror GetLastError
-#define dlclose FreeLibrary
 #include "Corrade/Utility/Unicode.h"
 using Corrade::Utility::Unicode::widen;
 #endif
@@ -605,8 +602,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #endif
     if(!module) {
         Error{} << "PluginManager::Manager::load(): cannot load plugin"
-                << plugin.metadata._name << "from \"" << Debug::nospace
-                << filename << Debug::nospace << "\":" << dlerror();
+            << plugin.metadata._name << "from \"" << Debug::nospace
+            << filename << Debug::nospace << "\":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
         return LoadState::LoadFailed;
     }
 
@@ -614,18 +617,38 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    int (*version)() = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
+    int (*version)() = reinterpret_cast<int(*)()>(
+        #ifndef CORRADE_TARGET_WINDOWS
+        dlsym
+        #else
+        GetProcAddress
+        #endif
+        (module, "pluginVersion"));
     if(version == nullptr) {
         Error{} << "PluginManager::Manager::load(): cannot get version of plugin"
-                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
+            << plugin.metadata._name << Debug::nospace << ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::LoadFailed;
     }
     if(version() != Version) {
         Error{} << "PluginManager::Manager::load(): wrong version of plugin"
                 << plugin.metadata._name << Debug::nospace << ", expected"
                 << Version << "but got" << version();
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::WrongPluginVersion;
     }
 
@@ -633,16 +656,36 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
+    const char* (*interface)() = reinterpret_cast<const char* (*)()>(
+        #ifndef CORRADE_TARGET_WINDOWS
+        dlsym
+        #else
+        GetProcAddress
+        #endif
+        (module, "pluginInterface"));
     if(interface == nullptr) {
         Error{} << "PluginManager::Manager::load(): cannot get interface string of plugin"
-                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
+            << plugin.metadata._name << Debug::nospace << ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
         Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin.metadata._name + ", expected" << pluginInterface() << "but got" << interface();
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::WrongInterfaceVersion;
     }
 
@@ -650,11 +693,27 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
+    void(*initializer)() = reinterpret_cast<void(*)()>(
+        #ifndef CORRADE_TARGET_WINDOWS
+        dlsym
+        #else
+        GetProcAddress
+        #endif
+        (module, "pluginInitializer"));
     if(initializer == nullptr) {
         Error{} << "PluginManager::Manager::load(): cannot get initializer of plugin"
-                << plugin.metadata._name + ":" << dlerror();
+            << plugin.metadata._name + ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::LoadFailed;
     }
 
@@ -662,11 +721,27 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginFinalizer"));
+    void(*finalizer)() = reinterpret_cast<void(*)()>(
+        #ifndef CORRADE_TARGET_WINDOWS
+        dlsym
+        #else
+        GetProcAddress
+        #endif
+        (module, "pluginFinalizer"));
     if(finalizer == nullptr) {
         Error{} << "PluginManager::Manager::load(): cannot get finalizer of plugin"
-                << plugin.metadata._name + ":" << dlerror();
+            << plugin.metadata._name + ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::LoadFailed;
     }
 
@@ -674,11 +749,27 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
+    Instancer instancer = reinterpret_cast<Instancer>(
+        #ifndef CORRADE_TARGET_WINDOWS
+        dlsym
+        #else
+        GetProcAddress
+        #endif
+        (module, "pluginInstancer"));
     if(instancer == nullptr) {
         Error{} << "PluginManager::Manager::load(): cannot get instancer of plugin"
-                << plugin.metadata._name + ":" << dlerror();
+            << plugin.metadata._name + ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
+        #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
+        #else
+        FreeLibrary(module);
+        #endif
         return LoadState::LoadFailed;
     }
 
@@ -777,17 +868,24 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
     /* Close the module */
     #ifndef CORRADE_TARGET_WINDOWS
-    if(dlclose(plugin.module) != 0) {
+    if(dlclose(plugin.module) != 0)
     #else
-    if(!FreeLibrary(plugin.module)) {
+    if(!FreeLibrary(plugin.module))
     #endif
+    {
         /* This is hard to test, the only possibility I can think of is
            dlclose() when a symbol is still needed (by another plugin, e.g.),
            but that's possible only on QNX, on linux dlclose() only unloads the
            library if it's really not needed. Source:
            https://stackoverflow.com/questions/28882298/error-on-dlclose-shared-objects-still-referenced */
         Error{} << "PluginManager::Manager::unload(): cannot unload plugin"
-                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
+            << plugin.metadata._name << Debug::nospace << ":"
+            #ifndef CORRADE_TARGET_WINDOWS
+            << dlerror()
+            #else
+            << GetLastError()
+            #endif
+            ;
         plugin.loadState = LoadState::NotLoaded;
         return LoadState::UnloadFailed;
     }
