@@ -39,6 +39,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 
@@ -857,6 +858,36 @@ auto b = Containers::pointer(ptr);
 auto a = Containers::Pointer<std::string>{Containers::InPlaceInit, 'a', 'b'};
 auto b = Containers::pointer<std::string>('a', 'b');
 /* [pointer-inplace] */
+}
+
+{
+/* [StringView-literal] */
+using namespace Containers::Literals;
+
+Containers::StringView a = "hello world!";
+Containers::StringView b = "hello world!"_s;
+/* [StringView-literal] */
+static_cast<void>(a);
+static_cast<void>(b);
+}
+
+{
+using namespace Containers::Literals;
+/* [StringView-literal-null] */
+Containers::StringView a = "hello\0world!";     // a.size() == 5
+Containers::StringView b = "hello\0world!"_s;   // a.size() == 12
+/* [StringView-literal-null] */
+static_cast<void>(a);
+static_cast<void>(b);
+}
+
+{
+/* [StringView-mutable] */
+char a[] = "hello world!";
+Containers::MutableStringView view = a;
+view[5] = '\0';
+/* [StringView-mutable] */
+static_cast<void>(a);
 }
 
 }

@@ -31,6 +31,13 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2020.06
 
+@subsection corrade-changelog-latest-new New features
+
+@subsubsection corrade-changelog-latest-new-containers Containers library
+
+-   New @ref Containers::BasicStringView "Containers::StringView" class as a
+    lightweight but more flexible alternative to C++17 @ref std::string_view
+
 @subsection corrade-changelog-latest-changes Changes and improvements
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library

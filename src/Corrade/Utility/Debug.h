@@ -577,6 +577,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *      @ref operator<<(Debug&, const T&)
          */
         Debug& operator<<(const char* value);
+        Debug& operator<<(Containers::StringView value); /**< @overload */
 
         /**
          * @brief Print a pointer value to debug output

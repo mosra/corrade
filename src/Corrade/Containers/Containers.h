@@ -57,6 +57,10 @@ template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 template<class T> class Optional;
 template<class T> class Pointer;
 template<class T> class Reference;
+
+template<class> class BasicStringView;
+typedef BasicStringView<const char> StringView;
+typedef BasicStringView<char> MutableStringView;
 #endif
 
 }}

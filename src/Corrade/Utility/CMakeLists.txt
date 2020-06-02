@@ -40,7 +40,9 @@ if(WITH_UTILITY)
         Format.cpp
         Resource.cpp
         String.cpp
-        Unicode.cpp)
+        Unicode.cpp
+
+        ../Containers/StringView.cpp)
 
     set(CorradeUtility_HEADERS
         Algorithms.h
@@ -198,7 +200,9 @@ if(NOT CMAKE_CROSSCOMPILING)
         ConfigurationGroup.cpp
         Format.cpp
         Resource.cpp
-        String.cpp)
+        String.cpp
+
+        ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)
         list(APPEND CorradeUtilityRc_SRCS
             # Needed for dealing with the design failure that's called "Unicode WINAPI"

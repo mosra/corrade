@@ -45,7 +45,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Containers
- * @brief Namespace @ref Corrade::Containers
+ * @brief Namespace @ref Corrade::Containers, @ref Corrade::Containers::Literals
  */
 /** @namespace Corrade::Containers
 @brief Container implementations
@@ -53,6 +53,27 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 Implementations for various containers which don't have direct equivalents in
 STL or are better tailored to specific use cases than general standard
 implementations.
+
+This library is built if `WITH_UTILITY` is enabled when building Corrade. To
+use this library with CMake, request the `Containers` component of the
+`Corrade` package and link to the `Corrade::Containers` target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED Containers)
+
+# ...
+target_link_libraries(your-app PRIVATE Corrade::Containers)
+@endcode
+
+Parts of this library are additionally available in a form of
+@ref corrade-singles "single-header libraries". See also
+@ref building-corrade and @ref corrade-cmake for more information.
+*/
+/** @namespace Corrade::Containers::Literals
+@brief Container literals
+@m_since_latest
+
+Literals for easy construction of string views.
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
 use this library with CMake, request the `Containers` component of the

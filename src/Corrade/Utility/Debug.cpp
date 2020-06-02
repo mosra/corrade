@@ -54,6 +54,7 @@
 #endif
 
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/DebugStl.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -70,6 +71,10 @@ namespace {
 
 template<class T> inline void toStream(std::ostream& s, const T& value) {
     s << value;
+}
+
+template<> inline void toStream(std::ostream& s, const Containers::StringView& value) {
+    s.write(value.data(), value.size());
 }
 
 template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostream& s, const Implementation::DebugOstreamFallback& value) {
@@ -482,6 +487,8 @@ Debug& Debug::operator<<(const void* const value) {
 }
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
+Debug& Debug::operator<<(Containers::StringView value) { return print(value); }
+
 Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
 Debug& Debug::operator<<(int value) { return print(value); }
 

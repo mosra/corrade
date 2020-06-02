@@ -1,3 +1,5 @@
+#ifndef Corrade_Containers_StringStl_h
+#define Corrade_Containers_StringStl_h
 /*
     This file is part of Corrade.
 
@@ -23,57 +25,34 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
+/** @file
+@brief STL @ref std::string compatibility for @ref Corrade::Containers::StringView
+@m_since_latest
 
-#include "Corrade/Containers/ArrayViewStl.h"
-#include "Corrade/Containers/PointerStl.h"
-#include "Corrade/Containers/StringStl.h"
-#include "Corrade/Containers/ReferenceStl.h"
+Including this header allows you to convert a
+@ref Corrade::Containers::StringView from and to @ref std::string. See
+@ref Containers-BasicStringView-stl "StringView STL compatibility" for more
+information.
+*/
 
-using namespace Corrade;
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Utility/StlForwardString.h"
 
-int main() {
-{
-/* [ArrayView] */
-std::vector<int> a;
+/* Listing these namespaces doesn't add anything to the docs, so don't */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+namespace Corrade { namespace Containers { namespace Implementation {
 
-Containers::ArrayView<int> b = a;
-/* [ArrayView] */
-static_cast<void>(b);
-}
+template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<const char, std::string> {
+    static StringView from(const std::string& other);
+    static std::string to(StringView other);
+};
 
-{
-/* [Pointer] */
-std::unique_ptr<int> a{new int{5}};
-Containers::Pointer<int> b = std::move(a);
+template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<char, std::string> {
+    static MutableStringView from(std::string& other);
+    static std::string to(MutableStringView other);
+};
 
-std::unique_ptr<int> c = Containers::pointer<int>(12);
+}}}
+#endif
 
-auto d = Containers::pointer(std::unique_ptr<int>{new int{5}});
-        // d is Containers::Pointer<int>
-/* [Pointer] */
-}
-
-{
-/* [StringView] */
-using namespace Containers::Literals;
-
-std::string a = "Hello\0world!"_s;
-
-Containers::MutableStringView b = a;
-b[5] = ' ';
-/* [StringView] */
-}
-
-{
-/* [Reference] */
-int a = 1337;
-Containers::Reference<int> b = a;
-
-std::reference_wrapper<int> c = b;
-Containers::Reference<const int> d = std::cref(a);
-/* [Reference] */
-static_cast<void>(c);
-static_cast<void>(d);
-}
-}
+#endif

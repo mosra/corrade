@@ -42,6 +42,8 @@ set(CorradeContainers_HEADERS
     ScopeGuard.h
     StaticArray.h
     StridedArrayView.h
+    StringStl.h
+    StringView.h
     Tags.h)
 
 set(CorradeContainers_PRIVATE_HEADERS

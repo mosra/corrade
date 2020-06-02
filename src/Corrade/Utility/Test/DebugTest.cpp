@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -46,6 +47,8 @@ struct DebugTest: TestSuite::Tester {
     void isTty();
 
     void debug();
+    void string();
+    void stringStl();
     template<class T> void ints();
     template<class T> void floats();
     void boolean();
@@ -101,6 +104,8 @@ DebugTest::DebugTest() {
         &DebugTest::isTty,
 
         &DebugTest::debug,
+        &DebugTest::string,
+        &DebugTest::stringStl,
         &DebugTest::boolean,
         &DebugTest::ints<unsigned char>,
         &DebugTest::ints<char>,
@@ -189,6 +194,20 @@ void DebugTest::debug() {
     debug.str("");
     Debug{&debug};
     CORRADE_COMPARE(debug.str(), "");
+}
+
+void DebugTest::string() {
+    using namespace Containers::Literals;
+
+    std::ostringstream out;
+    Debug{&out} << "hello\0world!"_s;
+    CORRADE_COMPARE(out.str(), (std::string{"hello\0world!\n", 13}));
+}
+
+void DebugTest::stringStl() {
+    std::ostringstream out;
+    Debug{&out} << std::string{"hello\0world!", 12};
+    CORRADE_COMPARE(out.str(), (std::string{"hello\0world!\n", 13}));
 }
 
 template<class> struct IntsData;
@@ -963,9 +982,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":955: hello\n"
-        __FILE__ ":957: and this is from another line\n"
-        __FILE__ ":959\n"
+        __FILE__ ":974: hello\n"
+        __FILE__ ":976: and this is from another line\n"
+        __FILE__ ":978\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),
