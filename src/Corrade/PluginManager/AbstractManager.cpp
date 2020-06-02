@@ -63,6 +63,9 @@ using Corrade::Utility::Unicode::widen;
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
 #endif
+#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+#include "Corrade/Utility/Implementation/WindowsError.h"
+#endif
 
 using namespace Corrade::Utility;
 
@@ -607,7 +610,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         return LoadState::LoadFailed;
@@ -630,7 +633,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         #ifndef CORRADE_TARGET_WINDOWS
@@ -669,7 +672,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         #ifndef CORRADE_TARGET_WINDOWS
@@ -706,7 +709,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         #ifndef CORRADE_TARGET_WINDOWS
@@ -734,7 +737,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         #ifndef CORRADE_TARGET_WINDOWS
@@ -762,7 +765,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         #ifndef CORRADE_TARGET_WINDOWS
@@ -883,7 +886,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
             #ifndef CORRADE_TARGET_WINDOWS
             << dlerror()
             #else
-            << GetLastError()
+            << Utility::Implementation::windowsErrorString(GetLastError())
             #endif
             ;
         plugin.loadState = LoadState::NotLoaded;

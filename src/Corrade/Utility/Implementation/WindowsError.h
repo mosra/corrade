@@ -29,6 +29,7 @@
 #include "Corrade/configure.h"
 
 #include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/visibility.h"
 
 #ifndef CORRADE_TARGET_WINDOWS
 #error this file is only meant to be used in Windows builds
@@ -36,7 +37,8 @@
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-std::string windowsErrorString(unsigned int errorCode);
+/* Exported because used in PluginManager as well */
+CORRADE_UTILITY_EXPORT std::string windowsErrorString(unsigned int errorCode);
 
 }}}
 
