@@ -196,7 +196,7 @@ template<> struct IntsData<char> {
     static const char* name() { return "char"; }
     static char value() {
         /* Android has unsigned char */
-        return std::is_signed<char>::value ? -123 : 223;
+        return std::is_signed<char>::value ? -123 : char(223);
     }
     static const char* expected() {
         /* Android has unsigned char */
