@@ -54,6 +54,8 @@ corrade_add_test(ContainersStaticArrayTest StaticArrayTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
 corrade_add_test(ContainersStaticArrayViewStlTest StaticArrayViewStlTest.cpp)
 corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
+corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(ContainersStringStlTest StringStlTest.cpp)
 corrade_add_test(ContainersStringViewTest StringViewTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersStringViewStlTest StringViewStlTest.cpp)
 corrade_add_test(ContainersTagsTest TagsTest.cpp)
@@ -68,6 +70,7 @@ set_property(TARGET
     ContainersPointerTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest
+    ContainersStringTest
     ContainersStringViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
 
@@ -85,6 +88,8 @@ set_target_properties(
     ContainersStaticArrayTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest
+    ContainersStringTest
+    ContainersStringStlTest
     ContainersStringViewTest
     ContainersStringViewStlTest
     ContainersTagsTest

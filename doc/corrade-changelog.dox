@@ -35,6 +35,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
+-   New @ref Containers::String class as a lightweight but more flexible
+    alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a
     lightweight but more flexible alternative to C++17 @ref std::string_view
 

@@ -42,6 +42,7 @@ if(WITH_UTILITY)
         String.cpp
         Unicode.cpp
 
+        ../Containers/String.cpp
         ../Containers/StringView.cpp)
 
     set(CorradeUtility_HEADERS
@@ -202,6 +203,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         Resource.cpp
         String.cpp
 
+        ../Containers/String.cpp
         ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)
         list(APPEND CorradeUtilityRc_SRCS

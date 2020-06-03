@@ -39,6 +39,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
@@ -888,6 +889,16 @@ Containers::MutableStringView view = a;
 view[5] = '\0';
 /* [StringView-mutable] */
 static_cast<void>(a);
+}
+
+{
+using namespace Containers::Literals;
+/* [String-literal-null] */
+Containers::String a = "hello\0world!";         // a.size() == 5
+Containers::String b = "hello\0world!"_s;       // a.size() == 12
+/* [String-literal-null] */
+static_cast<void>(a);
+static_cast<void>(b);
 }
 
 }

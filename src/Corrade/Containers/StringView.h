@@ -307,6 +307,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;
+        friend String;
 
         friend bool operator==(StringView a, StringView b);
         friend bool operator!=(StringView a, StringView b);

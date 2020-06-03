@@ -58,6 +58,7 @@ template<class T> class Optional;
 template<class T> class Pointer;
 template<class T> class Reference;
 
+class String;
 template<class> class BasicStringView;
 typedef BasicStringView<const char> StringView;
 typedef BasicStringView<char> MutableStringView;

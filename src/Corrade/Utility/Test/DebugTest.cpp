@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"
@@ -200,8 +201,8 @@ void DebugTest::string() {
     using namespace Containers::Literals;
 
     std::ostringstream out;
-    Debug{&out} << "hello\0world!"_s;
-    CORRADE_COMPARE(out.str(), (std::string{"hello\0world!\n", 13}));
+    Debug{&out} << "hello\0world,"_s << Containers::String{"very\0well!"_s};
+    CORRADE_COMPARE(out.str(), (std::string{"hello\0world, very\0well!\n", 24}));
 }
 
 void DebugTest::stringStl() {
@@ -982,9 +983,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":974: hello\n"
-        __FILE__ ":976: and this is from another line\n"
-        __FILE__ ":978\n"
+        __FILE__ ":975: hello\n"
+        __FILE__ ":977: and this is from another line\n"
+        __FILE__ ":979\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),

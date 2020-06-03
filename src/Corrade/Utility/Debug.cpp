@@ -54,6 +54,7 @@
 #endif
 
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -74,6 +75,10 @@ template<class T> inline void toStream(std::ostream& s, const T& value) {
 }
 
 template<> inline void toStream(std::ostream& s, const Containers::StringView& value) {
+    s.write(value.data(), value.size());
+}
+
+template<> inline void toStream(std::ostream& s, const Containers::String& value) {
     s.write(value.data(), value.size());
 }
 
@@ -488,6 +493,7 @@ Debug& Debug::operator<<(const void* const value) {
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
 Debug& Debug::operator<<(Containers::StringView value) { return print(value); }
+Debug& Debug::operator<<(const Containers::String& value) { return print(value); }
 
 Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
 Debug& Debug::operator<<(int value) { return print(value); }

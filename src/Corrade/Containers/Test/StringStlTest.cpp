@@ -23,64 +23,54 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
-#include "Corrade/Containers/ArrayViewStl.h"
-#include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
-#include "Corrade/Containers/ReferenceStl.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h"
 
-using namespace Corrade;
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
-int main() {
-{
-/* [ArrayView] */
-std::vector<int> a;
+struct StringStlTest: TestSuite::Tester {
+    explicit StringStlTest();
 
-Containers::ArrayView<int> b = a;
-/* [ArrayView] */
-static_cast<void>(b);
+    void convertToStlString();
+    void convertToStlStringEmpty();
+    void convertFromStlString();
+    void convertFromStlStringEmpty();
+};
+
+StringStlTest::StringStlTest() {
+    addTests({&StringStlTest::convertToStlString,
+              &StringStlTest::convertToStlStringEmpty,
+              &StringStlTest::convertFromStlString,
+              &StringStlTest::convertFromStlStringEmpty});
 }
 
-{
-/* [Pointer] */
-std::unique_ptr<int> a{new int{5}};
-Containers::Pointer<int> b = std::move(a);
+using namespace Literals;
 
-std::unique_ptr<int> c = Containers::pointer<int>(12);
-
-auto d = Containers::pointer(std::unique_ptr<int>{new int{5}});
-        // d is Containers::Pointer<int>
-/* [Pointer] */
+void StringStlTest::convertToStlString() {
+    String a = "hello\0!!!"_s;
+    std::string b = a;
+    CORRADE_COMPARE(b, (std::string{"hello\0!!!", 9}));
 }
 
-{
-/* [StringView] */
-using namespace Containers::Literals;
-
-std::string a = "Hello\0world!"_s;
-
-Containers::MutableStringView b = a;
-b[5] = ' ';
-/* [StringView] */
+void StringStlTest::convertToStlStringEmpty() {
+    String a;
+    std::string b = a;
+    CORRADE_COMPARE(b, std::string{});
 }
 
-{
-/* [String] */
-std::string a = "Hello world!";
-Containers::String b = a.substr(5);
-/* [String] */
+void StringStlTest::convertFromStlString() {
+    const std::string a{"hello\0!!!", 9};
+    String b = a;
+    CORRADE_COMPARE(b, "hello\0!!!"_s);
 }
 
-{
-/* [Reference] */
-int a = 1337;
-Containers::Reference<int> b = a;
+void StringStlTest::convertFromStlStringEmpty() {
+    const std::string a;
+    String b = a;
+    CORRADE_COMPARE(b, ""_s);
+}
 
-std::reference_wrapper<int> c = b;
-Containers::Reference<const int> d = std::cref(a);
-/* [Reference] */
-static_cast<void>(c);
-static_cast<void>(d);
-}
-}
+}}}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::StringStlTest)
