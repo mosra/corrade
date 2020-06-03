@@ -576,9 +576,23 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref operator<<(Debug&, const std::string&),
          *      @ref operator<<(Debug&, const T&)
          */
-        Debug& operator<<(const char* value);            /**< @overload */
+        Debug& operator<<(const char* value);
+
+        /**
+         * @brief Print a pointer value to debug output
+         *
+         * The value is printed in lowercase hexadecimal, for example
+         * @cb{.shell-session} 0xdeadbeef @ce.
+         */
         Debug& operator<<(const void* value);            /**< @overload */
-        Debug& operator<<(bool value);                   /**< @overload */
+
+        /**
+         * @brief Print a boolean value to debug output
+         *
+         * The value is printed as literal @cb{.shell-session} true @ce or
+         * @cb{.shell-session} false @ce.
+         */
+        Debug& operator<<(bool value);
 
         /**
          * @brief Print char to debug output
