@@ -548,7 +548,7 @@ Debug& Debug::operator<<(long double value) {
 
 Debug& Debug::operator<<(char32_t value) {
     std::ostringstream o;
-    o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
+    o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << std::uint32_t(value);
     return print(o.str());
 }
 

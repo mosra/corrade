@@ -234,6 +234,7 @@ namespace Corrade {
     enabled, and this setup is verified on the CI to avoid further regressions
 -   Fixes to make the library work under MinGW Clang (see
     [mosra/corrade#95](https://github.com/mosra/corrade/pull/95))
+-   Fixed compilation on GCC 10 (see [mosra/corrade#97](https://github.com/mosra/corrade/issues/97))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
