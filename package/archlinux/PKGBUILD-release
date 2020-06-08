@@ -36,10 +36,10 @@ build() {
 
 check() {
     cd "$_rootdir/build"
-    CORRADE_TEST_COLOR=ON ctest --output-on-failure
+    CORRADE_TEST_COLOR=ON ctest --output-on-failure -j5
 
     cd "$_rootdir/build-release"
-    CORRADE_TEST_COLOR=ON ctest --output-on-failure
+    CORRADE_TEST_COLOR=ON ctest --output-on-failure -j5
 }
 
 package() {
