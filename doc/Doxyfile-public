@@ -3,8 +3,8 @@
 ## Patches for the public docs. Hiding internal stuff and using a different
 ## stylesheet.
 
-OUTPUT_DIRECTORY       = build/doc-public/
-GENERATE_TAGFILE       = build/doc-public/corrade.tag
+OUTPUT_DIRECTORY       = ../build/doc-public/
+GENERATE_TAGFILE       = ../build/doc-public/corrade.tag
 
 ## No need to expose TODO list or bug list in public docs. Aliases copied from
 ## Doxyfile-mcss, with @todoc changed to be just an alias to @todo so it also
