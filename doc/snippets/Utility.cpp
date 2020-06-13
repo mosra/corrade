@@ -768,7 +768,11 @@ struct Fizz;
 class CORRADE_DEPRECATED("use Bar instead") Foo;
 CORRADE_DEPRECATED("use bar() instead") void foo();
 typedef CORRADE_DEPRECATED("use Fizz instead") Fizz Buzz;
+CORRADE_DEPRECATED("use Value instead") constexpr int Vauel = 3;
 /* [CORRADE_DEPRECATED] */
+CORRADE_IGNORE_DEPRECATED_PUSH
+inline void soVauelIsNotUnused() { static_cast<void>(Vauel); } /* eugh */
+CORRADE_IGNORE_DEPRECATED_POP
 
 }
 

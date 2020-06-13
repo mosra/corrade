@@ -75,6 +75,7 @@ void MacrosTest::alignAs() {
 }
 
 /* Declarations on their own shouldn't produce any compiler diagnostics */
+CORRADE_DEPRECATED("use Variable instead") constexpr int DeprecatedVariable = 3;
 CORRADE_DEPRECATED("use function() instead") int deprecatedFunction() { return 1; }
 struct CORRADE_DEPRECATED("use Struct instead") DeprecatedStruct { enum: int { Value = 1 }; int value = 1; };
 struct Struct { enum: int { Value = 1 }; int value = 1; };
@@ -100,6 +101,8 @@ CORRADE_DEPRECATED_FILE( /* Warning on MSVC, GCC, Clang */
 
 void MacrosTest::deprecated() {
     DEPRECATED_MACRO(hello?); /* Warning on MSVC, GCC, Clang */
+
+    CORRADE_COMPARE(DeprecatedVariable, 3);
 
     CORRADE_VERIFY(deprecatedFunction()); /* Warning on MSVC, GCC, Clang */
 
