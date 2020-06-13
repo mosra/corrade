@@ -75,6 +75,51 @@ bool operator!=(const StringView a, const StringView b) {
         std::memcmp(a._data, b._data, aSize) != 0;
 }
 
+namespace {
+    /* Because std::min needs <algorithm> and is shitty */
+    inline std::size_t min(std::size_t a, std::size_t b) { return b < a ? b : a; }
+}
+
+bool operator<(const StringView a, const StringView b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
+    if(result != 0) return result < 0;
+    if(aSize < bSize) return true;
+    return false;
+}
+
+bool operator<=(const StringView a, const StringView b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
+    if(result != 0) return result < 0;
+    if(aSize <= bSize) return true;
+    return false;
+}
+
+bool operator>=(const StringView a, const StringView b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
+    if(result != 0) return result > 0;
+    if(aSize >= bSize) return true;
+    return false;
+}
+
+bool operator>(const StringView a, const StringView b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
+    if(result != 0) return result > 0;
+    if(aSize > bSize) return true;
+    return false;
+}
+
 Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
     debug << "Containers::StringViewFlag" << Utility::Debug::nospace;
 

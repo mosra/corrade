@@ -107,7 +107,8 @@ struct StringViewTest: TestSuite::Tester {
     void convertConstFromExternalView();
     void convertToConstExternalView();
 
-    void compare();
+    void compareEquality();
+    void compareNonEquality();
 
     void access();
     void accessMutable();
@@ -138,7 +139,8 @@ StringViewTest::StringViewTest() {
               &StringViewTest::convertConstFromExternalView,
               &StringViewTest::convertToConstExternalView,
 
-              &StringViewTest::compare,
+              &StringViewTest::compareEquality,
+              &StringViewTest::compareNonEquality,
 
               &StringViewTest::access,
               &StringViewTest::accessMutable,
@@ -348,7 +350,7 @@ void StringViewTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.size, 5);
 }
 
-void StringViewTest::compare() {
+void StringViewTest::compareEquality() {
     /* Trivial case */
     StringView a = "hello";
     CORRADE_VERIFY(a == a);
@@ -400,6 +402,54 @@ void StringViewTest::compare() {
     CORRADE_VERIFY(e != "hello");
     CORRADE_VERIFY("hello" == d);
     CORRADE_VERIFY("hello" != e);
+}
+
+void StringViewTest::compareNonEquality() {
+    /* Test same length w/ data difference and also same prefix + extra data */
+    StringView a = "hell";
+    StringView b = "hella";
+    StringView hello = "hello";
+    StringView c = "hello";
+    StringView d = "helly";
+    StringView e = "hello!";
+
+    /* Less than */
+    CORRADE_VERIFY(a < hello);      CORRADE_VERIFY(!(hello < a));
+    CORRADE_VERIFY(b < hello);      CORRADE_VERIFY(!(hello < b));
+    CORRADE_VERIFY(!(hello < c));   CORRADE_VERIFY(!(c < hello));
+    CORRADE_VERIFY(hello < d);      CORRADE_VERIFY(!(d < hello));
+    CORRADE_VERIFY(hello < e);      CORRADE_VERIFY(!(e < hello));
+
+    /* Less than or equal */
+    CORRADE_VERIFY(a <= hello);     CORRADE_VERIFY(!(hello <= a));
+    CORRADE_VERIFY(b <= hello);     CORRADE_VERIFY(!(hello <= b));
+    CORRADE_VERIFY(hello <= c);     CORRADE_VERIFY(c <= hello);
+    CORRADE_VERIFY(hello <= d);     CORRADE_VERIFY(!(d <= hello));
+    CORRADE_VERIFY(hello <= e);     CORRADE_VERIFY(!(e <= hello));
+
+    /* Greater than or equal */
+    CORRADE_VERIFY(!(a >= hello));  CORRADE_VERIFY(hello >= a);
+    CORRADE_VERIFY(!(b >= hello));  CORRADE_VERIFY(hello >= b);
+    CORRADE_VERIFY(hello >= c);     CORRADE_VERIFY(c >= hello);
+    CORRADE_VERIFY(!(hello >= d));  CORRADE_VERIFY(d >= hello);
+    CORRADE_VERIFY(!(hello >= e));  CORRADE_VERIFY(e >= hello);
+
+    /* Greater than */
+    CORRADE_VERIFY(!(a > hello));  CORRADE_VERIFY(hello > a);
+    CORRADE_VERIFY(!(b > hello));  CORRADE_VERIFY(hello > b);
+    CORRADE_VERIFY(!(hello > c));  CORRADE_VERIFY(!(c > hello));
+    CORRADE_VERIFY(!(hello > d));  CORRADE_VERIFY(d > hello);
+    CORRADE_VERIFY(!(hello > e));  CORRADE_VERIFY(e > hello);
+
+    /* Comparing with an empty view should also work */
+    CORRADE_VERIFY(!(StringView{} < StringView{}));
+    CORRADE_VERIFY(StringView{} < hello);
+    CORRADE_VERIFY(StringView{} <= hello);
+    CORRADE_VERIFY(StringView{} <= StringView{});
+    CORRADE_VERIFY(StringView{} >= StringView{});
+    CORRADE_VERIFY(hello >= StringView{});
+    CORRADE_VERIFY(hello > StringView{});
+    CORRADE_VERIFY(!(StringView{} > StringView{}));
 }
 
 void StringViewTest::access() {

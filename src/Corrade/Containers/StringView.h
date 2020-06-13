@@ -311,6 +311,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
 
         friend bool operator==(StringView a, StringView b);
         friend bool operator!=(StringView a, StringView b);
+        friend bool operator<(StringView a, StringView b);
+        friend bool operator<=(StringView a, StringView b);
+        friend bool operator>=(StringView a, StringView b);
+        friend bool operator>(StringView a, StringView b);
 
         T* _data;
         std::size_t _size;
@@ -343,6 +347,30 @@ CORRADE_UTILITY_EXPORT bool operator==(StringView a, StringView b);
 @m_since_latest
 */
 CORRADE_UTILITY_EXPORT bool operator!=(StringView a, StringView b);
+
+/**
+@brief String view less-than comparison
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT bool operator<(StringView a, StringView b);
+
+/**
+@brief String view less-than-or-equal comparison
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT bool operator<=(StringView a, StringView b);
+
+/**
+@brief String view greater-than-or-equal comparison
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT bool operator>=(StringView a, StringView b);
+
+/**
+@brief String view greater-than comparison
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT bool operator>(StringView a, StringView b);
 
 /* operator<<(Debug&, StringView) implemented directly in Debug */
 
