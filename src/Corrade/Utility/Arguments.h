@@ -895,8 +895,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         std::string CORRADE_UTILITY_LOCAL keyName(const Entry& entry) const;
 
-        std::string valueInternal(const std::string& key) const;
-        std::string arrayValueInternal(const std::string& key, std::size_t id) const;
+        const std::string& valueInternal(const std::string& key) const;
+        const std::string& arrayValueInternal(const std::string& key, std::size_t id) const;
 
         InternalFlags _flags;
         /* not std::size_t so it fits into the padding after flags */
@@ -927,12 +927,12 @@ template<> inline std::string Arguments::value(const std::string& key, Configura
 #endif
 
 template<class T> T Arguments::value(const std::string& key, ConfigurationValueFlags flags) const {
-    std::string value = valueInternal(key);
+    const std::string& value = valueInternal(key);
     return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
 }
 
 template<class T> T Arguments::arrayValue(const std::string& key, std::size_t id, ConfigurationValueFlags flags) const {
-    std::string value = arrayValueInternal(key, id);
+    const std::string& value = arrayValueInternal(key, id);
     return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
 }
 

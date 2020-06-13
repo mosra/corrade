@@ -238,9 +238,9 @@ unsigned int ConfigurationGroup::valueCount(const std::string& key) const {
     return count;
 }
 
-std::string ConfigurationGroup::valueInternal(const std::string& key, const unsigned int index, ConfigurationValueFlags) const {
+const std::string* ConfigurationGroup::valueInternal(const std::string& key, const unsigned int index, ConfigurationValueFlags) const {
     const auto it = findValue(key, index);
-    return it != _values.end() ? it->value : std::string();
+    return it != _values.end() ? &it->value : nullptr;
 }
 
 std::vector<std::string> ConfigurationGroup::valuesInternal(const std::string& key, ConfigurationValueFlags) const {

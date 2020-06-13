@@ -1269,7 +1269,8 @@ void ArgumentsTest::valueNotFound() {
     #endif
 
     Arguments args;
-    args.parse(0, nullptr);
+    args.addOption("foobar") /* only so asserts have some reference to return */
+        .parse(0, nullptr);
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1324,7 +1325,8 @@ void ArgumentsTest::arrayValueOutOfBounds() {
     const char* argv[] = { "", "-X", "first", "--opt", "second", "-X", "last" };
 
     Arguments args;
-    args.addArrayOption('X', "opt")
+    args.addOption("foobar") /* only so asserts have some reference to return */
+        .addArrayOption('X', "opt")
         .parse(Containers::arraySize(argv), argv);
 
     std::ostringstream out;

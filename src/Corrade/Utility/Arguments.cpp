@@ -924,13 +924,15 @@ std::string Arguments::help() const {
     return out.str();
 }
 
-std::string Arguments::valueInternal(const std::string& key) const {
+const std::string& Arguments::valueInternal(const std::string& key) const {
     const Entry* found = find(_prefix + key);
-    CORRADE_ASSERT(found, "Utility::Arguments::value(): key" << key << "not found", {});
+    /* All asserts return _values[0] because we need to return a reference,
+       this is guarded in the tests so that there's always at least one value */
+    CORRADE_ASSERT(found, "Utility::Arguments::value(): key" << key << "not found", _values[0]);
     CORRADE_ASSERT(found->type == Type::Argument || found->type == Type::NamedArgument || found->type == Type::Option,
-        "Utility::Arguments::value(): cannot use this function for an array/boolean option" << key, {});
+        "Utility::Arguments::value(): cannot use this function for an array/boolean option" << key, _values[0]);
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
-    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", _values[0]);
     return _values[found->id];
 }
 
@@ -944,17 +946,19 @@ std::size_t Arguments::arrayValueCount(const std::string& key) const {
     return _arrayValues[found->id].size();
 }
 
-std::string Arguments::arrayValueInternal(const std::string& key, const std::size_t id) const {
+const std::string& Arguments::arrayValueInternal(const std::string& key, const std::size_t id) const {
     const Entry* found = find(_prefix + key);
-    CORRADE_ASSERT(found, "Utility::Arguments::arrayValue(): key" << key << "not found", {});
+    /* All asserts return _values[0] because we need to return a reference,
+       this is guarded in the tests so that there's always at least one value */
+    CORRADE_ASSERT(found, "Utility::Arguments::arrayValue(): key" << key << "not found", _values[0]);
     CORRADE_ASSERT(found->type == Type::ArrayOption,
-        "Utility::Arguments::arrayValue(): cannot use this function for a non-array option" << key, {});
+        "Utility::Arguments::arrayValue(): cannot use this function for a non-array option" << key, _values[0]);
     CORRADE_INTERNAL_ASSERT(found->id < _arrayValues.size());
     /* Check for ID bounds only after we're sure the arguments were parsed,
        otherwise the message wouldn't make sense */
-    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet", {});
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet", _values[0]);
     CORRADE_ASSERT(id < _arrayValues[found->id].size(),
-        "Utility::Arguments::arrayValue(): id" << id << "out of range for" << _arrayValues[found->id].size() << "values with key" << key, {});
+        "Utility::Arguments::arrayValue(): id" << id << "out of range for" << _arrayValues[found->id].size() << "values with key" << key, _values[0]);
     return _arrayValues[found->id][id];
 }
 

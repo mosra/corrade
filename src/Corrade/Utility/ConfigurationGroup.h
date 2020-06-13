@@ -415,7 +415,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         CORRADE_UTILITY_LOCAL std::vector<Value>::iterator findValue(const std::string& key, unsigned int index);
         CORRADE_UTILITY_LOCAL std::vector<Value>::const_iterator findValue(const std::string& key, unsigned int index) const;
 
-        std::string valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
+        /* Returns nullptr in case the key is not found */
+        const std::string* valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
         std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
         bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
         void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
@@ -431,7 +432,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
 template<> bool ConfigurationGroup::setValue(const std::string&, const std::string&, unsigned int, ConfigurationValueFlags) = delete;
 template<> void ConfigurationGroup::addValue(std::string, const std::string&, ConfigurationValueFlags) = delete;
 template<> inline std::string ConfigurationGroup::value(const std::string& key, unsigned int index, const ConfigurationValueFlags flags) const {
-    return valueInternal(key, index, flags);
+    const std::string* value = valueInternal(key, index, flags);
+    return value ? *value : std::string{};
 }
 template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
     return valuesInternal(key, flags);
@@ -439,8 +441,11 @@ template<> inline std::vector<std::string> ConfigurationGroup::values(const std:
 #endif
 
 template<class T> inline T ConfigurationGroup::value(const std::string& key, const unsigned int index, const ConfigurationValueFlags flags) const {
-    std::string value = valueInternal(key, index, flags);
-    return ConfigurationValue<T>::fromString(value, flags);
+    const std::string* value = valueInternal(key, index, flags);
+    /* Can't do value ? *value : std::string{} BECAUSE THAT MAKES A COPY! C++
+       YOU'RE FIRED */
+    const std::string empty;
+    return ConfigurationValue<T>::fromString(value ? *value : empty, flags);
 }
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
