@@ -240,6 +240,14 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /*implicit*/ BasicStringView(T* data) noexcept;
 
         /**
+         * @brief Construct from a `nullptr`
+         *
+         * As a special case of BasicStringView(T*), this function is
+         * @cpp constexpr @ce, creating an empty view.
+         */
+        constexpr /*implicit*/ BasicStringView(std::nullptr_t) noexcept: _data{}, _size{} {}
+
+        /**
          * @brief Construct a view on an external type / from an external representation
          *
          * @see @ref Containers-BasicStringView-stl
