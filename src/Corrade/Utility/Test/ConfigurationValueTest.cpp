@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -55,6 +57,8 @@ namespace Test { namespace {
 struct ConfigurationValueTest: TestSuite::Tester {
     explicit ConfigurationValueTest();
 
+    void stlString();
+    void stringView();
     void string();
     void unsignedInteger();
     void signedInteger();
@@ -71,7 +75,9 @@ struct ConfigurationValueTest: TestSuite::Tester {
 };
 
 ConfigurationValueTest::ConfigurationValueTest() {
-    addTests({&ConfigurationValueTest::string,
+    addTests({&ConfigurationValueTest::stlString,
+              &ConfigurationValueTest::stringView,
+              &ConfigurationValueTest::string,
               &ConfigurationValueTest::unsignedInteger,
               &ConfigurationValueTest::signedInteger,
               &ConfigurationValueTest::integerFlags,
@@ -88,7 +94,7 @@ ConfigurationValueTest::ConfigurationValueTest() {
               &ConfigurationValueTest::custom});
 }
 
-void ConfigurationValueTest::string() {
+void ConfigurationValueTest::stlString() {
     Configuration c;
 
     /* It should not change any whitespace */
@@ -103,6 +109,39 @@ void ConfigurationValueTest::string() {
     /* Empty value is default-constructed */
     c.setValue("empty", "");
     CORRADE_COMPARE(c.value("empty"), "");
+}
+
+void ConfigurationValueTest::stringView() {
+    using namespace Containers::Literals;
+
+    Configuration c;
+
+    /* It should behave the same as a STL string */
+    Containers::StringView spaces = " value\t "_s;
+    c.setValue("spaces", spaces);
+    CORRADE_COMPARE(c.value<Containers::StringView>("spaces"), spaces);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", Containers::StringView{});
+    CORRADE_COMPARE(c.value<Containers::StringView>("empty"), ""_s);
+
+    /* Non-existent value is an empty view */
+    CORRADE_COMPARE(c.value<Containers::StringView>("nonexistent"), ""_s);
+}
+
+void ConfigurationValueTest::string() {
+    using namespace Containers::Literals;
+
+    Configuration c;
+
+    /* It should behave the same as a STL string */
+    Containers::String spaces = " value\t "_s;
+    c.setValue("spaces", spaces);
+    CORRADE_COMPARE(c.value<Containers::String>("spaces"), spaces);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", Containers::String{});
+    CORRADE_COMPARE(c.value<Containers::String>("empty"), ""_s);
 }
 
 void ConfigurationValueTest::unsignedInteger() {

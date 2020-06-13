@@ -105,6 +105,38 @@ template<class T> struct ConfigurationValue {
     #endif
 };
 
+/**
+@brief Configuration value parser and writer for @ref Containers::StringView
+@m_since_latest
+
+The returned view might become dangling, parse as @ref Containers::String to
+prevent that.
+*/
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<Containers::StringView> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static Containers::StringView fromString(const std::string& value, ConfigurationValueFlags flags);
+    static std::string toString(Containers::StringView value, ConfigurationValueFlags flags);
+    #endif
+};
+
+/**
+@brief Configuration value parser and writer for @ref Containers::String
+@m_since_latest
+
+The returned string is a copy, parse as @ref Containers::StringView to avoid a
+copy.
+*/
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<Containers::String> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static Containers::String fromString(const std::string& value, ConfigurationValueFlags flags);
+    static std::string toString(const Containers::String& value, ConfigurationValueFlags flags);
+    #endif
+};
+
 namespace Implementation {
     template<class T> struct CORRADE_UTILITY_EXPORT IntegerConfigurationValue {
         IntegerConfigurationValue() = delete;

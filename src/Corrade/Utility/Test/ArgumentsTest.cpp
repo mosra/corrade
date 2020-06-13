@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -70,6 +71,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseArguments();
     void parseMixed();
     void parseRepeatedArguments();
+    void parseStringView();
     void parseCustomType();
     void parseCustomTypeFlags();
     void parseEnvironment();
@@ -154,6 +156,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
               &ArgumentsTest::parseRepeatedArguments,
+              &ArgumentsTest::parseStringView,
               &ArgumentsTest::parseCustomType,
               &ArgumentsTest::parseCustomTypeFlags,
               &ArgumentsTest::parseEnvironment,
@@ -685,6 +688,19 @@ void ArgumentsTest::parseRepeatedArguments() {
     CORRADE_COMPARE(args.arrayValue("fibonacci", 2), "1");
     CORRADE_COMPARE(args.arrayValue("fibonacci", 3), "2");
     CORRADE_VERIFY(args.isSet("bool"));
+}
+
+void ArgumentsTest::parseStringView() {
+    Arguments args;
+    args.addArgument("stuff")
+        .addArrayOption('O', "other");
+
+    const char* argv[] = { "", "hello this is a string", "-O", "hello this also", "--other", "it should not be dangling" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value<Containers::StringView>("stuff"), "hello this is a string");
+    CORRADE_COMPARE(args.arrayValueCount("other"), 2);
+    CORRADE_COMPARE(args.arrayValue<Containers::StringView>("other", 1), "it should not be dangling");
 }
 
 void ArgumentsTest::parseCustomType() {

@@ -28,9 +28,24 @@
 #include <iomanip>
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility {
+
+Containers::StringView ConfigurationValue<Containers::StringView>::fromString(const std::string& value, ConfigurationValueFlags) {
+    return value;
+}
+std::string ConfigurationValue<Containers::StringView>::toString(const Containers::StringView value, ConfigurationValueFlags) {
+    return value;
+}
+
+Containers::String ConfigurationValue<Containers::String>::fromString(const std::string& value, ConfigurationValueFlags) {
+    return value;
+}
+std::string ConfigurationValue<Containers::String>::toString(const Containers::String& value, ConfigurationValueFlags) {
+    return value;
+}
 
 namespace Implementation {
     template<class T> std::string IntegerConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {

@@ -40,6 +40,11 @@ namespace Corrade {
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a
     lightweight but more flexible alternative to C++17 @ref std::string_view
 
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   @ref Utility::Configuration and @ref Utility::Arguments can now read and
+    write @ref Containers::String and @ref Containers::StringView values
+
 @subsection corrade-changelog-latest-changes Changes and improvements
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
