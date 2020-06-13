@@ -372,7 +372,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(a, local);
         CORRADE_COMPARE(b, local);
         CORRADE_COMPARE(c, local);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
+        {
+            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
+            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
+            #endif
+            CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
+        }
         CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
         CORRADE_VERIFY(static_cast<void*>(c.data()) != local.data());
         CORRADE_VERIFY(a.deleter());
@@ -387,9 +392,14 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(a, local);
         CORRADE_COMPARE(b, local);
         CORRADE_COMPARE(c, local);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
-        CORRADE_COMPARE(static_cast<void*>(b.data()), local.data());
-        CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
+        {
+            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
+            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
+            #endif
+            CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
+            CORRADE_COMPARE(static_cast<void*>(b.data()), local.data());
+            CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
+        }
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
         CORRADE_VERIFY(c.deleter());
@@ -404,7 +414,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(c, local);
         CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
-        CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
+        {
+            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
+            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
+            #endif
+            CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
+        }
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
         CORRADE_VERIFY(c.deleter());

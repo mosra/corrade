@@ -205,7 +205,12 @@ void StringViewTest::constructConstexpr() {
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(size, 6);
     CORRADE_COMPARE(flags, StringViewFlag::Global|StringViewFlag::NullTerminated);
-    CORRADE_COMPARE(data, string);
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #endif
+        CORRADE_COMPARE(data, string);
+    }
 }
 
 template<class T> void StringViewTest::constructPointer() {
@@ -316,15 +321,33 @@ void StringViewTest::convertExternalView() {
 
     constexpr const char* cdata = "hello world!";
     constexpr ConstStrView ca{cdata, 12};
-    CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
+    CORRADE_COMPARE(ca.data, StringView{"hello world!"});
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #endif
+        CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
+    }
     CORRADE_COMPARE(ca.size, 12);
 
     constexpr StringView cb = ca;
-    CORRADE_COMPARE(cb.data(), cdata);
+    CORRADE_COMPARE(cb, StringView{"hello world!"});
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #endif
+        CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
+    }
     CORRADE_COMPARE(cb.size(), 12);
 
     constexpr ConstStrView cc = cb;
-    CORRADE_COMPARE(cc.data, cdata);
+    CORRADE_COMPARE(cc.data, StringView{"hello world!"});
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #endif
+        CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
+    }
     CORRADE_COMPARE(cc.size, 12);
 }
 
