@@ -918,15 +918,28 @@ void ArrayViewTest::sliceInvalid() {
     std::ostringstream out;
     Error redirectError{&out};
 
+    /* Testing both pointer and size versions */
     a.slice(a - 1, a);
     a.slice(a + 5, a + 6);
+    a.slice(5, 6);
     a.slice(a + 2, a + 1);
+    a.slice(2, 1);
+    /* Testing template size + pointer, template size + size and full template
+       version */
+    a.slice<1>(a - 1);
+    a.slice<5>(a + 1);
     a.slice<5>(1);
+    a.slice<1, 6>();
 
     CORRADE_COMPARE(out.str(),
         "Containers::ArrayView::slice(): slice [-1:0] out of range for 5 elements\n"
         "Containers::ArrayView::slice(): slice [5:6] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::ArrayView::slice(): slice [2:1] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [2:1] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [-1:0] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [1:6] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [1:6] out of range for 5 elements\n"
         "Containers::ArrayView::slice(): slice [1:6] out of range for 5 elements\n");
 }
 
