@@ -115,6 +115,9 @@ struct StringTest: TestSuite::Tester {
     void access();
     void accessSmall();
 
+    void slice();
+    void slicePointer();
+
     void release();
 
     void releaseDeleterSmall();
@@ -168,6 +171,9 @@ StringTest::StringTest() {
 
               &StringTest::access,
               &StringTest::accessSmall,
+
+              &StringTest::slice,
+              &StringTest::slicePointer,
 
               &StringTest::release,
 
@@ -928,6 +934,46 @@ void StringTest::accessSmall() {
     *(a.end() - 1) = '?';
     *a.begin() = 'H';
     CORRADE_COMPARE(a, "Hell!?");
+}
+
+void StringTest::slice() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior */
+
+    String a = "hello";
+    CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
+    CORRADE_COMPARE(a.prefix(3), "hel"_s);
+    CORRADE_COMPARE(a.prefix(2).flags(), StringViewFlags{});
+    CORRADE_COMPARE(a.except(2), "hel"_s);
+    CORRADE_COMPARE(a.suffix(2), "llo"_s);
+    CORRADE_COMPARE(a.suffix(2).flags(), StringViewFlag::NullTerminated);
+
+    const String ca = "hello";
+    CORRADE_COMPARE(ca.slice(1, 4), "ell"_s);
+    CORRADE_COMPARE(ca.prefix(3), "hel"_s);
+    CORRADE_COMPARE(ca.prefix(2).flags(), StringViewFlags{});
+    CORRADE_COMPARE(ca.except(2), "hel"_s);
+    CORRADE_COMPARE(ca.suffix(2), "llo"_s);
+    CORRADE_COMPARE(ca.suffix(2).flags(), StringViewFlag::NullTerminated);
+}
+
+void StringTest::slicePointer() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior and neither the resulting flags */
+
+    String a = "hello";
+    CORRADE_COMPARE(a.slice(a.data() + 1, a.data() + 4), "ell"_s);
+    CORRADE_COMPARE(a.prefix(a.data() + 3), "hel"_s);
+    CORRADE_COMPARE(a.prefix(a.data() + 2).flags(), StringViewFlags{});
+    CORRADE_COMPARE(a.suffix(a.data() + 2), "llo"_s);
+    CORRADE_COMPARE(a.suffix(a.data() + 2).flags(), StringViewFlag::NullTerminated);
+
+    const String ca = "hello";
+    CORRADE_COMPARE(ca.slice(ca.data() + 1, ca.data() + 4), "ell"_s);
+    CORRADE_COMPARE(ca.prefix(ca.data() + 3), "hel"_s);
+    CORRADE_COMPARE(ca.prefix(ca.data() + 2).flags(), StringViewFlags{});
+    CORRADE_COMPARE(ca.suffix(ca.data() + 2), "llo"_s);
+    CORRADE_COMPARE(ca.suffix(ca.data() + 2).flags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::release() {

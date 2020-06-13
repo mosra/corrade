@@ -369,6 +369,47 @@ class CORRADE_UTILITY_EXPORT String {
         char operator[](std::size_t i) const; /**< @overload */
 
         /**
+         * @brief String slice
+         *
+         * Equivalent to @ref BasicStringView::slice(). Both arguments are
+         * expected to be in range. If @p end points to (one item after) the
+         * end of the original (null-terminated) string, the result has
+         * @ref StringViewFlag::NullTerminated set.
+         */
+        MutableStringView slice(char* begin, char* end);
+        StringView slice(const char* begin, const char* end) const; /**< @overload */
+        MutableStringView slice(std::size_t begin, std::size_t end); /**< @overload */
+        StringView slice(std::size_t begin, std::size_t end) const; /**< @overload */
+
+        /**
+         * @brief String prefix
+         *
+         * Equivalent to @ref BasicStringView::prefix().
+         */
+        MutableStringView prefix(char* end);
+        StringView prefix(const char* end) const; /**< @overload */
+        MutableStringView prefix(std::size_t end); /**< @overload */
+        StringView prefix(std::size_t end) const; /**< @overload */
+
+        /**
+         * @brief String suffix
+         *
+         * Equivalent to @ref BasicStringView::suffix().
+         */
+        MutableStringView suffix(char* begin);
+        StringView suffix(const char* begin) const; /**< @overload */
+        MutableStringView suffix(std::size_t begin); /**< @overload */
+        StringView suffix(std::size_t begin) const; /**< @overload */
+
+        /**
+         * @brief String suffix
+         *
+         * Equivalent to @ref BasicStringView::except().
+         */
+        MutableStringView except(std::size_t count);
+        StringView except(std::size_t count) const; /**< @overload */
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

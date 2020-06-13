@@ -113,6 +113,12 @@ struct StringViewTest: TestSuite::Tester {
     void access();
     void accessMutable();
 
+    void sliceInvalid();
+    void sliceNullptr();
+    void slice();
+    void slicePointer();
+    void sliceFlags();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -144,6 +150,12 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::access,
               &StringViewTest::accessMutable,
+
+              &StringViewTest::sliceInvalid,
+              &StringViewTest::sliceNullptr,
+              &StringViewTest::slice,
+              &StringViewTest::slicePointer,
+              &StringViewTest::sliceFlags,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -496,6 +508,169 @@ void StringViewTest::accessMutable() {
     *(view.end() - 1) = '>';
     ++*(view.cend() - 1);
     CORRADE_COMPARE(view, StringView{"Jello world?"});
+}
+
+void StringViewTest::sliceInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    /* Basically the same as in ArrayViewTest::sliceInvalid() */
+
+    /* Do it this way to avoid (reasonable) warnings about out-of-bounds array
+       access with `a - 1`. Also use the flags so we ensure the size is always
+       properly masked out. */
+    const char* data = "Bhello";
+    StringView a{data + 1, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    /* Testing both pointer and size versions */
+    a.slice(a.data() - 1, a.data());
+    a.slice(a.data() + 5, a.data() + 6);
+    a.slice(5, 6);
+    a.slice(a.data() + 2, a.data() + 1);
+    a.slice(2, 1);
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::slice(): slice [-1:0] out of range for 5 elements\n"
+        "Containers::StringView::slice(): slice [5:6] out of range for 5 elements\n"
+        "Containers::StringView::slice(): slice [5:6] out of range for 5 elements\n"
+        "Containers::StringView::slice(): slice [2:1] out of range for 5 elements\n"
+        "Containers::StringView::slice(): slice [2:1] out of range for 5 elements\n");
+}
+
+void StringViewTest::sliceNullptr() {
+    /* Basically the same as in ArrayViewTest::sliceNullptr() -- we want the
+       same semantics as this is useful for parsers */
+
+    MutableStringView a{nullptr, 5};
+
+    MutableStringView b = a.prefix(nullptr);
+    CORRADE_VERIFY(!b.data());
+    CORRADE_COMPARE(b.size(), 0);
+
+    MutableStringView c = a.suffix(nullptr);
+    CORRADE_VERIFY(!c.data());
+    CORRADE_COMPARE(c.size(), 5);
+
+    constexpr MutableStringView ca{nullptr, 5};
+
+    constexpr MutableStringView cb = ca.prefix(nullptr);
+    CORRADE_VERIFY(!cb.data());
+    CORRADE_COMPARE(cb.size(), 0);
+
+    /* constexpr MutableStringView cc = ca.suffix(nullptr) won't compile because
+       arithmetic on nullptr is not allowed */
+
+    char data[5];
+    MutableStringView d{data, 5};
+
+    MutableStringView e = d.prefix(nullptr);
+    CORRADE_VERIFY(!e.data());
+    CORRADE_COMPARE(e.size(), 0);
+
+    MutableStringView f = d.suffix(nullptr);
+    CORRADE_VERIFY(!f.data());
+    CORRADE_COMPARE(f.size(), 0);
+
+    using namespace Literals;
+    constexpr StringView cd = "things"_s;
+    constexpr StringView ce = cd.prefix(nullptr);
+    CORRADE_VERIFY(!ce.data());
+    CORRADE_COMPARE(ce.size(), 0);
+
+    constexpr StringView cf = cd.suffix(nullptr);
+    CORRADE_VERIFY(!cf.data());
+    CORRADE_COMPARE(cf.size(), 0);
+}
+
+void StringViewTest::slice() {
+    using namespace Literals;
+
+    /* Use the flags so we ensure the size is always properly masked out */
+    char data[] = "hello";
+    MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
+
+    CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
+    CORRADE_COMPARE(a.prefix(3), "hel"_s);
+    CORRADE_COMPARE(a.except(2), "hel"_s);
+    CORRADE_COMPARE(a.suffix(2), "llo"_s);
+
+    constexpr StringView ca = "hello"_s;
+    constexpr StringView cb = ca.slice(1, 4);
+    CORRADE_COMPARE(cb, "ell");
+
+    constexpr StringView cc1 = ca.prefix(3);
+    constexpr StringView cc2 = ca.except(2);
+    CORRADE_COMPARE(cc1, "hel");
+    CORRADE_COMPARE(cc2, "hel");
+
+    constexpr StringView cd = ca.suffix(2);
+    CORRADE_COMPARE(cd, "llo");
+}
+
+void StringViewTest::slicePointer() {
+    using namespace Literals;
+
+    /* Use the flags so we ensure the size is always properly masked out */
+    char data[] = "hello";
+    MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
+
+    CORRADE_COMPARE(a.slice(data + 1, data + 4), "ell"_s);
+    CORRADE_COMPARE(a.prefix(data + 3), "hel"_s);
+    CORRADE_COMPARE(a.suffix(data + 2), "llo"_s);
+
+    constexpr const char* cdata = "hello";
+    constexpr StringView ca{cdata, 5};
+    constexpr StringView cb = ca.slice(cdata + 1, cdata + 4);
+    CORRADE_COMPARE(cb, "ell");
+
+    constexpr StringView cc = ca.prefix(cdata + 3);
+    CORRADE_COMPARE(cc, "hel");
+
+    constexpr StringView cd = ca.suffix(cdata + 2);
+    CORRADE_COMPARE(cd, "llo");
+}
+
+void StringViewTest::sliceFlags() {
+    using namespace Literals;
+
+    StringView globalNullTerminated = "hello"_s;
+    CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    StringView nullTerminated = "hello";
+    CORRADE_COMPARE(nullTerminated.flags(), StringViewFlag::NullTerminated);
+
+    StringView none{"hello", 5};
+    CORRADE_COMPARE(none.flags(), StringViewFlags{});
+
+    /* Null-terminated flag stays if it's a suffix */
+    CORRADE_COMPARE(globalNullTerminated.prefix(5).flags(),
+        StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(globalNullTerminated.prefix(globalNullTerminated.data() + 5).flags(),
+        StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    CORRADE_COMPARE(nullTerminated.prefix(5).flags(),
+        StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(nullTerminated.prefix(nullTerminated.data() + 5).flags(),
+        StringViewFlag::NullTerminated);
+
+    CORRADE_COMPARE(none.prefix(5).flags(), StringViewFlags{});
+    CORRADE_COMPARE(none.prefix(none.data() + 5).flags(), StringViewFlags{});
+
+    /* Global flag stays always */
+    CORRADE_COMPARE(globalNullTerminated.prefix(4).flags(),
+        StringViewFlag::Global);
+    CORRADE_COMPARE(globalNullTerminated.prefix(globalNullTerminated.data() + 4).flags(),
+        StringViewFlag::Global);
+
+    CORRADE_COMPARE(nullTerminated.prefix(4).flags(), StringViewFlags{});
+    CORRADE_COMPARE(nullTerminated.prefix(nullTerminated.data() + 4).flags(), StringViewFlags{});
+
+    CORRADE_COMPARE(none.prefix(4).flags(), StringViewFlags{});
+    CORRADE_COMPARE(none.prefix(none.data() + 4).flags(), StringViewFlags{});
 }
 
 void StringViewTest::debugFlag() {

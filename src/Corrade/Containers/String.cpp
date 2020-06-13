@@ -264,6 +264,62 @@ char String::operator[](std::size_t i) const {
     return _large.data[i];
 }
 
+MutableStringView String::slice(char* const begin, char* const end) {
+    return MutableStringView{*this}.slice(begin, end);
+}
+
+StringView String::slice(const char* const begin, const char* const end) const {
+    return StringView{*this}.slice(begin, end);
+}
+
+MutableStringView String::slice(const std::size_t begin, const std::size_t end) {
+    return MutableStringView{*this}.slice(begin, end);
+}
+
+StringView String::slice(const std::size_t begin, const std::size_t end) const {
+    return StringView{*this}.slice(begin, end);
+}
+
+MutableStringView String::prefix(char* const end) {
+    return MutableStringView{*this}.prefix(end);
+}
+
+StringView String::prefix(const char* const end) const {
+    return StringView{*this}.prefix(end);
+}
+
+MutableStringView String::prefix(const std::size_t end) {
+    return MutableStringView{*this}.prefix(end);
+}
+
+StringView String::prefix(const std::size_t end) const {
+    return StringView{*this}.prefix(end);
+}
+
+MutableStringView String::suffix(char* const begin) {
+    return MutableStringView{*this}.suffix(begin);
+}
+
+StringView String::suffix(const char* const begin) const {
+    return StringView{*this}.suffix(begin);
+}
+
+MutableStringView String::suffix(const std::size_t begin) {
+    return MutableStringView{*this}.suffix(begin);
+}
+
+StringView String::suffix(const std::size_t begin) const {
+    return StringView{*this}.suffix(begin);
+}
+
+MutableStringView String::except(const std::size_t count) {
+    return MutableStringView{*this}.except(count);
+}
+
+StringView String::except(const std::size_t count) const {
+    return StringView{*this}.except(count);
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

@@ -319,6 +319,72 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /** @brief Element access */
         constexpr T& operator[](std::size_t i) const { return _data[i]; }
 
+        /**
+         * @brief String slice
+         *
+         * Both arguments are expected to be in range. Propagates the
+         * @ref StringViewFlag::Global flag and if @p end points to (one item
+         * after) the end of the original null-terminated string, the result
+         * has @ref StringViewFlag::NullTerminated also.
+         */
+        constexpr BasicStringView<T> slice(T* begin, T* end) const;
+
+        /** @overload */
+        constexpr BasicStringView<T> slice(std::size_t begin, std::size_t end) const;
+
+        /**
+         * @brief String prefix
+         *
+         * Equivalent to @cpp string.slice(string.begin(), end) @ce. If @p end
+         * is @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce view.
+         * @see @ref slice(T*, T*) const
+         */
+        constexpr BasicStringView<T> prefix(T* end) const {
+            return end ? slice(_data, end) : BasicStringView<T>{};
+        }
+
+        /**
+         * @brief String prefix
+         *
+         * Equivalent to @cpp string.slice(0, end) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
+         */
+        constexpr BasicStringView<T> prefix(std::size_t end) const {
+            return slice(0, end);
+        }
+
+        /**
+         * @brief String suffix
+         *
+         * Equivalent to @cpp string.slice(begin, string.end()) @ce. If
+         * @p begin is @cpp nullptr @ce and the original view isn't, returns a
+         * zero-sized @cpp nullptr @ce view.
+         * @see @ref slice(T*, T*) const
+         */
+        constexpr BasicStringView<T> suffix(T* begin) const {
+            return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_size & ~Implementation::StringViewSizeMask));
+        }
+
+        /**
+         * @brief String suffix
+         *
+         * Equivalent to @cpp string.slice(begin, string.size()) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
+         */
+        constexpr BasicStringView<T> suffix(std::size_t begin) const {
+            return slice(begin, _size & ~Implementation::StringViewSizeMask);
+        }
+
+        /**
+         * @brief String prefix except the last @p count items
+         *
+         * Equivalent to @cpp string.slice(0, string.size() - count) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
+         */
+        constexpr BasicStringView<T> except(std::size_t count) const {
+            return slice(0, (_size & ~Implementation::StringViewSizeMask) - count);
+        }
+
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;
@@ -330,6 +396,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         friend bool operator<=(StringView a, StringView b);
         friend bool operator>=(StringView a, StringView b);
         friend bool operator>(StringView a, StringView b);
+
+        /* Used by slice() to skip unneeded checks in the public constexpr
+           constructor */
+        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t): _data{data}, _size{sizePlusFlags} {}
 
         T* _data;
         std::size_t _size;
@@ -405,6 +475,40 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
     return StringView{data, size, StringViewFlag(std::size_t(StringViewFlag::Global)|std::size_t(StringViewFlag::NullTerminated))};
 }
 
+}
+
+template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* const begin, T* const end) const {
+    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + (_size & ~Implementation::StringViewSizeMask),
+            "Containers::StringView::slice(): slice ["
+            << Utility::Debug::nospace << begin - _data
+            << Utility::Debug::nospace << ":"
+            << Utility::Debug::nospace << end - _data
+            << Utility::Debug::nospace << "] out of range for"
+            << (_size & ~Implementation::StringViewSizeMask) << "elements"),
+        BasicStringView<T>{begin, std::size_t(end - begin)|
+            /* Propagate the global flag always */
+            (_size & std::size_t(StringViewFlag::Global))|
+            /* The null termination flag only if the original is
+               null-terminated and end points to the original end */
+            ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == _data + (_size & ~Implementation::StringViewSizeMask))),
+            nullptr};
+}
+
+template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(const std::size_t begin, const std::size_t end) const {
+    return CORRADE_CONSTEXPR_ASSERT(begin <= end && end <= (_size & ~Implementation::StringViewSizeMask),
+            "Containers::StringView::slice(): slice ["
+            << Utility::Debug::nospace << begin
+            << Utility::Debug::nospace << ":"
+            << Utility::Debug::nospace << end
+            << Utility::Debug::nospace << "] out of range for"
+            << (_size & ~Implementation::StringViewSizeMask) << "elements"),
+        BasicStringView<T>{_data + begin, (end - begin)|
+            /* Propagate the global flag always */
+            (_size & std::size_t(StringViewFlag::Global))|
+            /* The null termination flag only if the original is
+               null-terminated and end points to the original end */
+            ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == (_size & ~Implementation::StringViewSizeMask))),
+            nullptr};
 }
 
 }}
