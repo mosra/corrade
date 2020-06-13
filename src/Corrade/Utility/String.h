@@ -66,7 +66,6 @@ namespace Implementation {
     CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, Containers::ArrayView<const char> characters);
     CORRADE_UTILITY_EXPORT std::string trim(std::string string, Containers::ArrayView<const char> characters);
 
-    CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, Containers::ArrayView<const char> delimiters);
     CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
     CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
 
@@ -260,6 +259,12 @@ CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string);
 CORRADE_UTILITY_EXPORT std::vector<std::string> split(const std::string& string, char delimiter);
 
 /**
+@overload
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> split(const Containers::StringView string, char delimiter);
+
+/**
 @brief Split string on given character and remove empty parts
 @param string       String to split
 @param delimiter    Delimiter
@@ -267,26 +272,37 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> split(const std::string& string,
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
 
 /**
+@overload
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, char delimiter);
+
+/**
 @brief Split string on any character from given set and remove empty parts
 @param string       String to split
 @param delimiters   Delimiter characters
 */
-inline std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
-    return Implementation::splitWithoutEmptyParts(string, {delimiters.data(), delimiters.size()});
-}
+CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters);
 
-/** @overload */
-template<std::size_t size> inline std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char(&delimiters)[size]) {
-    return Implementation::splitWithoutEmptyParts(string, {delimiters, size - 1});
-}
+/**
+@overload
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters);
 
 /**
 @brief Split string on whitespaces and remove empty parts
 
-Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const char(&)[size])
+Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const std::string&)
 with @cpp " \t\f\v\r\n" @ce as second parameter.
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
+
+/**
+@overload
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string);
 
 /**
 @brief Partition a string

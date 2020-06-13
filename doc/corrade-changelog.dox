@@ -52,6 +52,9 @@ namespace Corrade {
 -   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"
     is now enabled on MSVC 2019 16.6+ as well, making it available across all
     compilers
+-   @ref Utility::String::split() and
+    @ref Utility::String::splitWithoutEmptyParts() now have
+    @ref Containers::StringView overloads that allocate much less
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

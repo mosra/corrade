@@ -25,7 +25,9 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -41,6 +43,7 @@ struct StringTest: TestSuite::Tester {
     void trimInPlace();
     void split();
     void splitMultipleCharacters();
+    void splitNullView();
     void partition();
     void join();
     void lowercase();
@@ -75,6 +78,7 @@ StringTest::StringTest() {
               &StringTest::trimInPlace,
               &StringTest::split,
               &StringTest::splitMultipleCharacters,
+              &StringTest::splitNullView,
               &StringTest::partition,
               &StringTest::join,
               &StringTest::lowercase,
@@ -216,67 +220,88 @@ void StringTest::trimInPlace() {
 }
 
 void StringTest::split() {
+    /* These delegate into the StringView implementation, so they test both.
+       Except for null views, which is below. The explicit cast to avoid an
+       ambiguous overload is kinda nasty, but I don't expect much people to
+       call this function with a C string literal except for testing. */
+
     /* Empty */
-    CORRADE_COMPARE_AS(String::split({}, '/'),
+    CORRADE_COMPARE_AS(String::split(std::string{}, '/'),
         std::vector<std::string>{}, TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, '/'),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{}, '/'),
         std::vector<std::string>{}, TestSuite::Compare::Container);
 
     /* Only delimiter */
-    CORRADE_COMPARE_AS(String::split("/", '/'),
+    CORRADE_COMPARE_AS(String::split(std::string{"/"}, '/'),
         (std::vector<std::string>{"", ""}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("/", '/'),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"/"}, '/'),
         std::vector<std::string>{}, TestSuite::Compare::Container);
 
     /* No delimiters */
-    CORRADE_COMPARE_AS(String::split("abcdef", '/'),
+    CORRADE_COMPARE_AS(String::split(std::string{"abcdef"}, '/'),
         std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("abcdef", '/'),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"abcdef"}, '/'),
         std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
 
     /* Common case */
-    CORRADE_COMPARE_AS(String::split("ab/c/def", '/'),
+    CORRADE_COMPARE_AS(String::split(std::string{"ab/c/def"}, '/'),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab/c/def", '/'),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab/c/def"}, '/'),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 
     /* Empty parts */
-    CORRADE_COMPARE_AS(String::split("ab//c/def//", '/'),
+    CORRADE_COMPARE_AS(String::split(std::string{"ab//c/def//"}, '/'),
         (std::vector<std::string>{"ab", "", "c", "def", "", ""}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab//c/def//", '/'),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab//c/def//"}, '/'),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
 void StringTest::splitMultipleCharacters() {
+    /* These delegate into the StringView implementation, so they test both.
+       Except for null views, which is below. The explicit cast to avoid an
+       ambiguous overload is kinda nasty, but I don't expect much people to
+       call this function with a C string literal except for testing. */
+
     const char delimiters[] = ".:;";
 
     /* Empty */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, delimiters),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{}, delimiters),
         std::vector<std::string>{}, TestSuite::Compare::Container);
 
     /* Only delimiters */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(".::;", delimiters),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{".::;"}, delimiters),
         std::vector<std::string>{}, TestSuite::Compare::Container);
 
     /* No delimiters */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("abcdef", delimiters),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"abcdef"}, delimiters),
         std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
 
     /* Common case */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;def", delimiters),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab:c;def"}, delimiters),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 
     /* Empty parts */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", delimiters),
-        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
-
-    /* Delimiters as a string */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", std::string{delimiters}),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab:c;;def."}, delimiters),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 
     /* Whitespace */
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab c  \t \ndef\r"),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab c  \t \ndef\r"}),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+}
+
+void StringTest::splitNullView() {
+    CORRADE_COMPARE_AS(String::split(Containers::StringView{nullptr}, ' '),
+        Containers::Array<Containers::StringView>({}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}, ' '),
+        Containers::Array<Containers::StringView>({}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}, " "),
+        Containers::Array<Containers::StringView>({}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}),
+        Containers::Array<Containers::StringView>({}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::partition() {
