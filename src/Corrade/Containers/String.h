@@ -127,6 +127,56 @@ class CORRADE_UTILITY_EXPORT String {
         typedef void(*Deleter)(char*, std::size_t); /**< @brief Deleter type */
 
         /**
+         * @brief Turn a view into a null-terminated string
+         *
+         * If the view is @ref StringViewFlag::NullTerminated, returns a
+         * non-owning reference to it without any extra allocations or copies
+         * involved. Otherwise allocates a null-terminated owning copy using
+         * @ref String(StringView).
+         *
+         * This function is primarily meant for efficiently passing
+         * @ref BasicStringView "StringView" instances to APIs that expect
+         * null-terminated @cpp const char* @ce. Mutating the result in any way
+         * is undefined behavior.
+         * @see @ref nullTerminatedGlobalView(), @ref globalView()
+         */
+        static String nullTerminatedView(StringView view);
+
+        /**
+         * @brief Turn a view into a null-terminated global string
+         *
+         * If the view is both @ref StringViewFlag::NullTerminated and
+         * @ref StringViewFlag::Global, returns a non-owning reference to it
+         * without any extra allocations or copies involved. Otherwise
+         * allocates a null-terminated owning copy using
+         * @ref String(StringView).
+         *
+         * This function is primarily meant for efficiently storing
+         * @ref BasicStringView "StringView" instances, ensuring the
+         * memory stays in scope and then passing them to APIs that expect
+         * null-terminated @cpp const char* @ce. Mutating the result in any way
+         * is undefined behavior.
+         * @see @ref nullTerminatedView(), @ref globalView()
+         */
+        static String nullTerminatedGlobalView(StringView view);
+
+        /**
+         * @brief Turn a view into a global string
+         *
+         * If the view is @ref StringViewFlag::Global, returns a non-owning
+         * reference to it without any extra allocations or copies involved.
+         * Otherwise allocates a null-terminated owning copy using
+         * @ref String(StringView).
+         *
+         * This function is primarily meant for efficiently storing
+         * @ref BasicStringView "StringView" instances and ensuring the memory
+         * stays in scope. Mutating the result in any way is undefined
+         * behavior.
+         * @see @ref nullTerminatedView(), @ref globalView()
+         */
+        static String globalView(StringView view);
+
+        /**
          * @brief Default constructor
          *
          * Creates an empty string.
@@ -197,6 +247,8 @@ class CORRADE_UTILITY_EXPORT String {
          * reference global immutable data (such as C string literals) without
          * having to allocate a copy, it's the user responsibility to avoid
          * mutating the data in any way.
+         * @see @ref nullTerminatedView(), @ref nullTerminatedGlobalView(),
+         *      @ref globalView()
          */
         explicit String(const char* data, std::size_t size, void(*deleter)(char*, std::size_t)) noexcept: String{const_cast<char*>(data), size, deleter} {}
 

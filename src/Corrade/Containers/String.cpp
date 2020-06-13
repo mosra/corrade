@@ -44,6 +44,24 @@ namespace {
 static_assert(std::size_t(LargeSizeMask) == Implementation::StringViewSizeMask,
     "reserved bits should be the same in String and StringView");
 
+String String::nullTerminatedView(StringView view) {
+    if(view.flags() & StringViewFlag::NullTerminated)
+        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    return String{view};
+}
+
+String String::nullTerminatedGlobalView(StringView view) {
+    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global))
+        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    return String{view};
+}
+
+String String::globalView(StringView view) {
+    if(view.flags() & StringViewFlag::Global)
+        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    return String{view};
+}
+
 inline void String::construct(const char* data, std::size_t size) {
     /* If the size is small enough for SSO, use that. Not using <= because we
        need to store the null terminator as well. */
