@@ -192,12 +192,13 @@ template<class T> using IsIterable = std::integral_constant<bool,
     >;
 
 /**
-@brief Traits class for checking whether given type is iterable
+@brief Traits class for checking whether given type is string-like
 @m_since{2019,10}
 
 Equivalent to @ref std::true_type if the class is has a @cpp c_str() @ce
-member. Otherwise equivalent to @ref std::false_type. Useful for dispatching
-on the @ref std::string type without having to include or
+member or is a @ref Containers::BasicStringView "Containers::[Mutable]StringView"
+/ @ref Containers::String. Otherwise equivalent to @ref std::false_type. Useful
+for dispatching on the @ref std::string type without having to include or
 @ref StlForwardString.h "forward-declare" it.
 
 Used together with @ref IsIterable by @ref Debug to decide whether given type
@@ -206,7 +207,7 @@ should be printed as a container of its contents or as a whole.
 */
 template<class T> using IsStringLike = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    Implementation::HasMemberCStr<T>::value
+    Implementation::HasMemberCStr<T>::value || std::is_same<typename std::decay<T>::type, Containers::StringView>::value || std::is_same<typename std::decay<T>::type, Containers::MutableStringView>::value || std::is_same<typename std::decay<T>::type, Containers::String>::value
     #else
     implementation-specific
     #endif

@@ -31,6 +31,8 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -172,8 +174,12 @@ void TypeTraitsTest::isIterableNot() {
 
 void TypeTraitsTest::isStringLike() {
     CORRADE_VERIFY(IsStringLike<std::string>{});
-    CORRADE_VERIFY(IsStringLike<std::wstring>{});
-    CORRADE_VERIFY(IsStringLike<std::u32string>{});
+    CORRADE_VERIFY(IsStringLike<const std::wstring&>{});
+    CORRADE_VERIFY(IsStringLike<std::u32string&&>{});
+
+    CORRADE_VERIFY(IsStringLike<Containers::String&>{});
+    CORRADE_VERIFY(IsStringLike<const Containers::MutableStringView&>{});
+    CORRADE_VERIFY(IsStringLike<Containers::StringView>{});
 }
 
 void TypeTraitsTest::isStringLikeNot() {
