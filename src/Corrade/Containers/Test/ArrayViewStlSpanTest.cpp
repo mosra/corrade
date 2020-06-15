@@ -130,8 +130,8 @@ void ArrayViewStlSpanTest::convertSpan() {
 
     /* Because we're using builtin std::span conversion constructor here, check
        that conversion to a different size or type is correctly not allowed */
-    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<int>, std::span<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<int>, std::span<float>>::value));
+    CORRADE_VERIFY((std::is_convertible<const Containers::ArrayView<int>&, std::span<int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Containers::ArrayView<int>&, std::span<float>>::value));
     #endif
 }
 

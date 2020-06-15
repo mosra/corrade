@@ -102,8 +102,8 @@ void StaticArrayViewStlSpanTest::convertToSpan() {
 
     /* Because we're using builtin std::span conversion constructor here, check
        that conversion to a different type is correctly not allowed */
-    CORRADE_VERIFY((std::is_convertible<Containers::StaticArrayView<5, int>, std::span<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<float>>::value));
+    CORRADE_VERIFY((std::is_convertible<const Containers::StaticArrayView<5, int>&, std::span<int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Containers::StaticArrayView<5, int>&, std::span<float>>::value));
     #endif
 }
 
