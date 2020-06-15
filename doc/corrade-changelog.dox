@@ -212,6 +212,7 @@ namespace Corrade {
 -   @ref CORRADE_ASSERT_UNREACHABLE() now accepts a message, acting as a
     better alternative to @cpp CORRADE_ASSERT(false, ...) @ce; the original
     functionality is provided by @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE()
+-   @ref CORRADE_DEPRECATED_NAMESPACE() now works on GCC 10 as well
 -   @ref Utility::Sha1 can now consume also @ref Containers::ArrayView in
     addition to @ref std::string and its internal processing is completely
     allocation-less (see [mosra/corrade#85](https://github.com/mosra/corrade/pull/85))

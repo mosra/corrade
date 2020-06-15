@@ -95,7 +95,7 @@ will not.
 @brief Namespace deprecation mark
 
 Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, MSVC and Clang):
+(C++17 feature, MSVC and Clang, GCC 10+):
 
 @snippet Utility.cpp CORRADE_DEPRECATED_NAMESPACE
 
@@ -123,7 +123,7 @@ such namespace is used --- which is practically useless
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #endif
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10)
 #define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message)
