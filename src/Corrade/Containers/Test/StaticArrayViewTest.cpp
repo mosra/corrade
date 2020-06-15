@@ -331,7 +331,7 @@ void StaticArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #endif
     ConstStaticArrayView<5> cb = ca;
@@ -340,7 +340,7 @@ void StaticArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #endif
     ConstIntView5 cc = cb;
@@ -348,7 +348,7 @@ void StaticArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #else
     const

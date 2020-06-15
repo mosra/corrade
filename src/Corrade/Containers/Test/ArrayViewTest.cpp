@@ -666,7 +666,7 @@ void ArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #endif
     ConstArrayView cb = ca;
@@ -675,7 +675,7 @@ void ArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #endif
     ConstIntView cc = cb;
@@ -684,7 +684,7 @@ void ArrayViewTest::convertExternalView() {
 
     /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
        (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if defined(CORRADE_TARGET_APPLE) && __clang_major__*100 + __clang_minor__ > 703
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
     constexpr
     #else
     const
