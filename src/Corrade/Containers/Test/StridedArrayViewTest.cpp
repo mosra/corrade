@@ -525,9 +525,14 @@ void StridedArrayViewTest::dimensionsConstructNoInit() {
     Size3D a{1, 37, 4564};
 
     new(&a)Size3D{NoInit};
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(a[1], 37);
-    CORRADE_COMPARE(a[2], 4564);
+    {
+        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        CORRADE_EXPECT_FAIL("GCC 10+ misoptimizes and overwrites the value.");
+        #endif
+        CORRADE_COMPARE(a[0], 1);
+        CORRADE_COMPARE(a[1], 37);
+        CORRADE_COMPARE(a[2], 4564);
+    }
 
     CORRADE_VERIFY((std::is_nothrow_constructible<Size1D, NoInitT>::value));
 
