@@ -148,7 +148,7 @@ template<std::size_t size_, class T> class StaticArray {
          * (i.e., builtin types are not initialized).
          * @see @ref DefaultInit, @ref StaticArray(ValueInitT)
          */
-        explicit StaticArray(DefaultInitT): StaticArray{DefaultInit, std::integral_constant<bool, std::is_pod<T>::value>{}} {}
+        explicit StaticArray(DefaultInitT): StaticArray{DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
 
         /**
          * @brief Construct a value-initialized array

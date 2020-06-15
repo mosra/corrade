@@ -212,7 +212,7 @@ Implementation::StaticPlugin*& windowsGlobalStaticPlugins() {
 #define globalStaticPlugins windowsGlobalStaticPlugins()
 #endif
 
-static_assert(std::is_pod<Implementation::StaticPlugin>::value,
+static_assert(std::is_standard_layout<Implementation::StaticPlugin>::value && std::is_trivial<Implementation::StaticPlugin>::value,
     "static plugins shouldn't cause any global initialization / finalization to happen on their own");
 
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
