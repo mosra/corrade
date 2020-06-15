@@ -356,7 +356,12 @@ void StringViewTest::convertExternalView() {
     }
     CORRADE_COMPARE(ca.size, 12);
 
-    constexpr StringView cb = ca;
+    /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
+       (Travis ASan build). ¯\_(ツ)_/¯ */
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
+    constexpr
+    #endif
+    StringView cb = ca;
     CORRADE_COMPARE(cb, StringView{"hello world!"});
     {
         #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
@@ -366,7 +371,12 @@ void StringViewTest::convertExternalView() {
     }
     CORRADE_COMPARE(cb.size(), 12);
 
-    constexpr ConstStrView cc = cb;
+    /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
+       (Travis ASan build). ¯\_(ツ)_/¯ */
+    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
+    constexpr
+    #endif
+    ConstStrView cc = cb;
     CORRADE_COMPARE(cc.data, StringView{"hello world!"});
     {
         #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
