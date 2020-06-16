@@ -125,6 +125,34 @@ String::String(const char* const data, const std::size_t size)
     construct(data, size);
 }
 
+String::String(AllocatedInitT, const StringView view): String{AllocatedInit, view._data, view._size & ~Implementation::StringViewSizeMask} {}
+
+String::String(AllocatedInitT, const MutableStringView view): String{AllocatedInit, view._data, view._size & ~Implementation::StringViewSizeMask} {}
+
+String::String(AllocatedInitT, const ArrayView<const char> view): String{AllocatedInit, view.data(), view.size()} {}
+
+String::String(AllocatedInitT, const ArrayView<char> view): String{AllocatedInit, view.data(), view.size()} {}
+
+String::String(AllocatedInitT, const char* const data): String{AllocatedInit, data, data ? std::strlen(data) : 0} {}
+
+String::String(AllocatedInitT, const char* const data, const std::size_t size)
+    #ifdef CORRADE_GRACEFUL_ASSERT
+    /* Zero-init the contents so the destructor doesn't crash if we assert here */
+    : _large{}
+    #endif
+{
+    CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
+        "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    CORRADE_ASSERT(data || !size,
+        "Containers::String: received a null string of size" << size, );
+
+    _large.data = new char[size+1];
+    std::memcpy(_large.data, data, size);
+    _large.data[size] = '\0';
+    _large.size = size;
+    _large.deleter = nullptr;
+}
+
 String::String(char* const data, const std::size_t size, void(*deleter)(char*, std::size_t)) noexcept
     #ifdef CORRADE_GRACEFUL_ASSERT
     /* Zero-init the contents so the destructor doesn't crash if we assert here */

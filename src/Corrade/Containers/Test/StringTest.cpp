@@ -273,6 +273,15 @@ void StringTest::constructPointerSmall() {
     /* Verify the data is really stored inside */
     CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, "hello\0world!"};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_VERIFY(!aa.isEmpty());
+    CORRADE_COMPARE(aa.size(), 5);
+    CORRADE_COMPARE(aa.data()[0], 'h');
+    CORRADE_COMPARE(aa.data()[a.size() - 1], 'o');
+    CORRADE_COMPARE(aa.data()[a.size()], '\0');
 }
 
 void StringTest::constructPointerNull() {
@@ -280,6 +289,12 @@ void StringTest::constructPointerNull() {
     CORRADE_VERIFY(a.isSmall());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, nullptr};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 0);
+    CORRADE_COMPARE(aa.data()[0], '\0');
 }
 
 void StringTest::constructPointerSize() {
@@ -306,6 +321,14 @@ void StringTest::constructPointerSizeSmall() {
     CORRADE_COMPARE(a.data()[0], 't');
     CORRADE_COMPARE(a.data()[a.size() - 1], 'd');
     CORRADE_COMPARE(a.data()[a.size()], '\0');
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, "this\0world\0is hell", 10};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 10);
+    CORRADE_COMPARE(aa.data()[0], 't');
+    CORRADE_COMPARE(aa.data()[a.size() - 1], 'd');
+    CORRADE_COMPARE(aa.data()[a.size()], '\0');
 }
 
 void StringTest::constructPointerSizeNullZero() {
@@ -313,6 +336,12 @@ void StringTest::constructPointerSizeNullZero() {
     CORRADE_VERIFY(a.isSmall());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, nullptr, 0};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 0);
+    CORRADE_COMPARE(aa.data()[0], '\0');
 }
 
 void StringTest::constructPointerSizeNullNonZero() {
@@ -323,7 +352,10 @@ void StringTest::constructPointerSizeNullNonZero() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{nullptr, 3};
-    CORRADE_COMPARE(out.str(), "Containers::String: received a null string of size 3\n");
+    String aa{AllocatedInit, nullptr, 3};
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: received a null string of size 3\n"
+        "Containers::String: received a null string of size 3\n");
 }
 
 void StringTest::constructPointerSizeTooLarge() {
@@ -334,8 +366,11 @@ void StringTest::constructPointerSizeTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{"abc", ~std::size_t{}};
+    String aa{AllocatedInit, "abc", ~std::size_t{}};
     CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n"
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+        "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n"
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
 }
 
@@ -460,6 +495,12 @@ void StringTest::convertStringViewSmall() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Bypassing SSO */
+    const String aa{AllocatedInit, "this\0world"_s};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 10);
+    CORRADE_COMPARE(aa[0], 't');
 }
 
 void StringTest::convertMutableStringView() {
@@ -492,6 +533,12 @@ void StringTest::convertMutableStringViewSmall() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, MutableStringView{aData, 10}};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 10);
+    CORRADE_COMPARE(aa[0], 't');
 }
 
 void StringTest::convertArrayView() {
@@ -514,6 +561,12 @@ void StringTest::convertArrayViewSmall() {
     ArrayView<const char> aView = a;
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Bypassing SSO */
+    const String aa{AllocatedInit, Containers::arrayView("this\0world").except(1)};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 10);
+    CORRADE_COMPARE(aa[0], 't');
 }
 
 void StringTest::convertMutableArrayView() {
@@ -538,6 +591,12 @@ void StringTest::convertMutableArrayViewSmall() {
     ArrayView<char> aView = a;
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, ArrayView<char>{aData}.except(1)};
+    CORRADE_VERIFY(!aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 10);
+    CORRADE_COMPARE(aa[0], 't');
 }
 
 void StringTest::convertExternal() {

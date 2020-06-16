@@ -48,6 +48,31 @@ namespace Implementation {
 }
 
 /**
+@brief Allocated initialization tag type
+@m_since_latest
+
+Used to distinguish @ref String construction that bypasses small string
+optimization.
+@see @ref AllocatedInit, @ref Containers-String-sso
+*/
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct AllocatedInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit AllocatedInitT(Init) {}
+    #endif
+};
+
+/**
+@brief Allocated initialization tag
+@m_since_latest
+
+Use for @ref String construction that bypasses small string optimization.
+@ref Containers-String-sso
+*/
+constexpr AllocatedInitT AllocatedInit{AllocatedInitT::Init{}};
+
+/**
 @brief String
 @m_since_latest
 
@@ -89,9 +114,12 @@ by default stored inside the class.
 
 Such optimization is completely transparent to the user, the only difference is
 that @ref deleter() and @ref release() can't be called on SSO strings, as there
-is nothing to delete / release. This optimization can be side-stepped by
-explicitly passing heap-allocated data to @ref String(char*, std::size_t, void(*)(char*, std::size_t)),
-presence of SSO can be queried using @ref isSmall().
+is nothing to delete / release. Presence of SSO on an instance can be queried
+using @ref isSmall(). In cases where SSO isn't desired (for example when
+storing pointers to string contents stored in a growable array), the string can
+be constructed using the @ref AllocatedInit tag (for example with
+@ref String(AllocatedInitT, const char*)), which bypasses this optimization and
+always allocates.
 
 @attention For consistency with @ref StringView and in order to allow the small
     string optimization, on 32-bit systems the size is limited to 1 GB. That
@@ -190,7 +218,7 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p view is allowed to be
          * @cpp nullptr @ce, but only if it's size is zero. Depending on the
          * size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, StringView)
          */
         /*implicit*/ String(StringView view);
         /*implicit*/ String(Containers::ArrayView<const char> view); /**< @overload */
@@ -206,7 +234,7 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p data is allowed to be
          * @cpp nullptr @ce --- in that case an empty string is constructed.
          * Depending on the size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, const char*)
          */
         /*implicit*/ String(const char* data);
 
@@ -217,9 +245,39 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p data is allowed to be
          * @cpp nullptr @ce, but only if @p size is zero. Depending on the
          * size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, const char*, std::size_t)
          */
         /*implicit*/ String(const char* data, std::size_t size);
+
+        /**
+         * @brief Construct from a string view, bypassing SSO
+         *
+         * Compared to @ref String(StringView) the data is always allocated.
+         * @see @ref Containers-String-sso
+         */
+        explicit String(AllocatedInitT, StringView view);
+        explicit String(AllocatedInitT, Containers::ArrayView<const char> view); /**< @overload */
+        /* Without these there's ambiguity between StringView / ArrayView and
+           char* */
+        explicit String(AllocatedInitT, MutableStringView view); /**< @overload */
+        explicit String(AllocatedInitT, Containers::ArrayView<char> view); /**< @overload */
+
+        /**
+         * @brief Construct from a null-terminated C string, bypassing SSO
+         *
+         * Compared to @ref String(const char*) the data is always allocated.
+         * @see @ref Containers-String-sso
+         */
+        explicit String(AllocatedInitT, const char* data);
+
+        /**
+         * @brief Construct from a sized C string
+         *
+         * Compared to @ref String(const char*, std::size_t) the data is always
+         * allocated.
+         * @see @ref Containers-String-sso
+         */
+        explicit String(AllocatedInitT, const char* data, std::size_t size);
 
         /**
          * @brief Take ownership of an external data array
