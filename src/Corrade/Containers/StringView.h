@@ -398,12 +398,13 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         template<class> friend class BasicStringView;
         friend String;
 
-        friend bool operator==(StringView a, StringView b);
-        friend bool operator!=(StringView a, StringView b);
-        friend bool operator<(StringView a, StringView b);
-        friend bool operator<=(StringView a, StringView b);
-        friend bool operator>=(StringView a, StringView b);
-        friend bool operator>(StringView a, StringView b);
+        /* MSVC demands the export macro to be here as well */
+        friend CORRADE_UTILITY_EXPORT bool operator==(StringView a, StringView b);
+        friend CORRADE_UTILITY_EXPORT bool operator!=(StringView a, StringView b);
+        friend CORRADE_UTILITY_EXPORT bool operator<(StringView a, StringView b);
+        friend CORRADE_UTILITY_EXPORT bool operator<=(StringView a, StringView b);
+        friend CORRADE_UTILITY_EXPORT bool operator>=(StringView a, StringView b);
+        friend CORRADE_UTILITY_EXPORT bool operator>(StringView a, StringView b);
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */
