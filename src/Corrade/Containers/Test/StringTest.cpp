@@ -436,6 +436,12 @@ void StringTest::convertStringView() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Explicit conversion shouldn't be ambiguous */
+    StringView aView2(a);
+    CORRADE_COMPARE(aView2.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aView2.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView2.data()), a.data());
 }
 
 void StringTest::convertStringViewSmall() {
@@ -461,6 +467,12 @@ void StringTest::convertMutableStringView() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    /* Explicit conversion shouldn't be ambiguous */
+    MutableStringView aView2(a);
+    CORRADE_COMPARE(aView2.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aView2.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView2.data()), a.data());
 }
 
 void StringTest::convertMutableStringViewSmall() {
