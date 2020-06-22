@@ -52,6 +52,23 @@ template<> struct ConfigurationValue<NoDefaultConstructor> {
     }
 };
 
+namespace {
+
+enum class UsingContainersString: int { Value = 3 };
+
+}
+
+template<> struct ConfigurationValue<UsingContainersString> {
+    ConfigurationValue() = delete;
+
+    static Containers::String toString(UsingContainersString value, ConfigurationValueFlags) {
+        return value == UsingContainersString::Value ? "three" : "";
+    }
+    static UsingContainersString fromString(const Containers::StringView& stringValue, ConfigurationValueFlags) {
+        return stringValue == "three" ? UsingContainersString::Value : UsingContainersString{};
+    }
+};
+
 namespace Test { namespace {
 
 struct ConfigurationValueTest: TestSuite::Tester {
@@ -72,6 +89,7 @@ struct ConfigurationValueTest: TestSuite::Tester {
     void boolean();
 
     void custom();
+    void customUsingContainersString();
 };
 
 ConfigurationValueTest::ConfigurationValueTest() {
@@ -91,7 +109,8 @@ ConfigurationValueTest::ConfigurationValueTest() {
               &ConfigurationValueTest::unicodeCharLiteral,
               &ConfigurationValueTest::boolean,
 
-              &ConfigurationValueTest::custom});
+              &ConfigurationValueTest::custom,
+              &ConfigurationValueTest::customUsingContainersString});
 }
 
 void ConfigurationValueTest::stlString() {
@@ -451,6 +470,18 @@ void ConfigurationValueTest::custom() {
     CORRADE_COMPARE(values[1].a, 5);
     CORRADE_COMPARE(values[2].a, 0);
     CORRADE_COMPARE(values[3].a, 7);
+}
+
+void ConfigurationValueTest::customUsingContainersString() {
+    Configuration c;
+
+    c.setValue("custom", UsingContainersString::Value);
+    CORRADE_COMPARE(c.value("custom"), "three");
+    CORRADE_COMPARE(int(c.value<UsingContainersString>("custom")), int(UsingContainersString::Value));
+
+    c.setValue("empty", UsingContainersString{});
+    CORRADE_COMPARE(c.value("empty"), "");
+    CORRADE_COMPARE(int(c.value<UsingContainersString>("empty")), int(UsingContainersString{}));
 }
 
 }}}}

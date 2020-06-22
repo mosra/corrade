@@ -26,13 +26,28 @@
 #include <algorithm>
 #include <sstream>
 
-#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
 
-namespace Corrade { namespace Utility { namespace Test { namespace {
+namespace Corrade { namespace Utility {
+
+namespace {
+
+enum class UsingContainersString: int { Value = 3 };
+
+}
+
+template<> struct ConfigurationValue<UsingContainersString> {
+    ConfigurationValue() = delete;
+
+    static UsingContainersString fromString(const Containers::StringView& stringValue, ConfigurationValueFlags) {
+        return stringValue == "three" ? UsingContainersString::Value : UsingContainersString{};
+    }
+};
+
+namespace Test { namespace {
 
 struct ArgumentsTest: TestSuite::Tester {
     explicit ArgumentsTest();
@@ -74,6 +89,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseStringView();
     void parseCustomType();
     void parseCustomTypeFlags();
+    void parseCustomTypeUsingContainersString();
     void parseEnvironment();
     void parseEnvironmentUtf8();
     void parseFinalOptionalArgument();
@@ -159,6 +175,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseStringView,
               &ArgumentsTest::parseCustomType,
               &ArgumentsTest::parseCustomTypeFlags,
+              &ArgumentsTest::parseCustomTypeUsingContainersString,
               &ArgumentsTest::parseEnvironment,
               &ArgumentsTest::parseEnvironmentUtf8,
               &ArgumentsTest::parseFinalOptionalArgument,
@@ -726,6 +743,16 @@ void ArgumentsTest::parseCustomTypeFlags() {
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value<unsigned int>("key", ConfigurationValueFlag::Hex), 0xdeadbeef);
     CORRADE_COMPARE(args.arrayValue<int>("mod", 0, ConfigurationValueFlag::Oct), 0644);
+}
+
+void ArgumentsTest::parseCustomTypeUsingContainersString() {
+    Arguments args;
+    args.addArgument("value");
+
+    const char* argv[] = { "", "three" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(int(args.value<UsingContainersString>("value")), int(UsingContainersString::Value));
 }
 
 void ArgumentsTest::parseEnvironment() {

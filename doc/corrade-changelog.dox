@@ -43,7 +43,9 @@ namespace Corrade {
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   @ref Utility::Configuration and @ref Utility::Arguments can now read and
-    write @ref Containers::String and @ref Containers::StringView values
+    write @ref Containers::String and @ref Containers::StringView values,
+    @ref Utility::ConfigurationValue can be implemented using those instead of
+    @ref std::string as well
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
