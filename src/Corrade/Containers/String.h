@@ -287,26 +287,12 @@ class CORRADE_UTILITY_EXPORT String {
         String& operator=(String&& other) noexcept;
 
         /**
-         * @brief Convert to a @ref StringView
-         *
-         * The resulting view has @ref StringViewFlag::NullTerminated set.
-         */
-        /*implicit*/ operator StringView() const noexcept;
-
-        /**
          * @brief Convert to a const @ref ArrayView
          *
          * The resulting view has the same size as this string @ref size() ---
          * the null terminator is not counted into it.
          */
         /*implicit*/ operator ArrayView<const char>() const noexcept; /**< @overload */
-
-        /**
-         * @brief Convert to a @ref MutableStringView
-         *
-         * The resulting view has @ref StringViewFlag::NullTerminated set.
-         */
-        /*implicit*/ operator MutableStringView() noexcept;
 
         /**
          * @brief Convert to an @ref ArrayView

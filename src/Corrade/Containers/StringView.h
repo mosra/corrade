@@ -203,6 +203,21 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
             size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}
 
         /**
+         * @brief Construct from a @ref String
+         *
+         * The resulting view has @ref StringViewFlag::NullTerminated set.
+         */
+        /*implicit*/ BasicStringView(String& data) noexcept;
+
+        /**
+         * @brief Construct from a const @ref String
+         *
+         * Enabled only if the view is not mutable. The resulting view has
+         * @ref StringViewFlag::NullTerminated set.
+         */
+        template<class U = T, class = typename std::enable_if<std::is_const<U>::value>::type> /*implicit*/ BasicStringView(const String& data) noexcept;
+
+        /**
          * @brief Construct from an @ref ArrayView
          *
          * The resulting view has the same size as @p other, by default no

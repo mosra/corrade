@@ -39,6 +39,11 @@ template<class T> BasicStringView<T>::BasicStringView(T* data) noexcept: BasicSt
     data ? std::strlen(data) : 0,
     data ? StringViewFlag::NullTerminated : StringViewFlags{}} {}
 
+template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
+
+/* Yes, I'm also surprised this works */
+template<> template<> BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
+
 template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
 template<class T> BasicStringView<T>::operator ArrayView<T>() noexcept {

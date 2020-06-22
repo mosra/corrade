@@ -188,19 +188,9 @@ String& String::operator=(String&& other) noexcept {
     return *this;
 }
 
-String::operator StringView() const noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return StringView{data.first, data.second, StringViewFlag::NullTerminated};
-}
-
 String::operator ArrayView<const char>() const noexcept {
     const std::pair<const char*, std::size_t> data = dataInternal();
     return {data.first, data.second};
-}
-
-String::operator MutableStringView() noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return MutableStringView{const_cast<char*>(data.first), data.second, StringViewFlag::NullTerminated};
 }
 
 String::operator ArrayView<char>() noexcept {
