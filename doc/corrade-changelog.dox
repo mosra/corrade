@@ -238,6 +238,7 @@ namespace Corrade {
 -   Fixed compilation on GCC 10 (see [mosra/corrade#97](https://github.com/mosra/corrade/issues/97))
 -   `UseAndroid.cmake` no longer expects `adb` to be in @cb{.sh} $PATH @ce, but
     it locates it relatively to Android SDK (see [mosra/toolchains#10](https://github.com/mosra/toolchains/pull/10))
+-   Various warning fixes (see [mosra/corrade#96](https://github.com/mosra/corrade/pull/96))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
