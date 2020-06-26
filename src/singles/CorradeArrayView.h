@@ -53,10 +53,11 @@
    CORRADE_CONSTEXPR_ASSERT is used, wrapping the #include <cassert> above.
    When enabling additional asserts, be sure to update it above as well. */
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_ASSERT_UNREACHABLE
 #pragma ACME enable CORRADE_INTERNAL_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT_OUTPUT
-#pragma ACME enable CORRADE_ASSERT_UNREACHABLE
+#pragma ACME enable CORRADE_INTERNAL_ASSERT_UNREACHABLE
 
 #ifndef CorradeArrayView_h
 #define CorradeArrayView_h
