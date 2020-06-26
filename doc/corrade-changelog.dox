@@ -29,13 +29,17 @@ namespace Corrade {
 
 @tableofcontents
 
-@section corrade-changelog-latest Changes since 2019.10
+@anchor corrade-changelog-latest
+
+@section corrade-changelog-2020-06 2020.06
+
+Released 2020-06-27, tagged as
+[v2020.06](https://github.com/mosra/corrade/releases/tag/v2020.06).
+
+@subsection corrade-changelog-2020-06-new New features
 
 -   Clang-CL is now a supported compiler on Windows. See also
     [mosra/corrade#40](https://github.com/mosra/corrade/issues/40).
-
-@subsection corrade-changelog-latest-new New features
-
 -   New @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
     @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
     @ref CORRADE_TARGET_MSVC and @ref CORRADE_TARGET_MINGW variables for easier
@@ -49,7 +53,7 @@ namespace Corrade {
     that make use of C++14 relaxed constexpr rules but still need to work under
     C++11 as well.
 
-@subsubsection corrade-changelog-latest-new-containers Containers library
+@subsubsection corrade-changelog-2020-06-new-containers Containers library
 
 -   New @ref Containers::arrayAppend(), @ref Containers::arrayReserve() family
     of functions for opt-in growable arrays. See @ref Containers-Array-growable
@@ -78,7 +82,7 @@ namespace Corrade {
 -   New @ref Containers::enumCastUnderlyingType() utility functions for
     casting an @cpp enum @ce or @ref Containers::EnumSet to its underlying type
 
-@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2020-06-new-pluginmanager PluginManager library
 
 -   Added @ref PluginManager::implicitPluginSearchPaths() for a well-documented
     and reliable way to supply plugin search paths consistent for all for
@@ -87,14 +91,14 @@ namespace Corrade {
     per-interface basis using @ref PluginManager::AbstractPlugin::pluginSuffix()
     and @ref PluginManager::AbstractPlugin::pluginMetadataSuffix()
 
-@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+@subsubsection corrade-changelog-2020-06-new-testsuite TestSuite library
 
 -   New @ref CORRADE_ITERATION() macro for annotating loops
 -   Added @ref TestSuite::Compare::Divisible and
     @ref TestSuite::Compare::NotDivisible pseudo-types for checking
     divisibility with clear diagnostic messages
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-2020-06-new-utility Utility library
 
 -   Added @ref Utility::Arguments::setParseErrorCallback() for implementing
     additional argument parsing logic and overriding the default behavior
@@ -130,7 +134,7 @@ namespace Corrade {
 -   Added a @ref Utility::Endianness::fourCC() utility for creating
     endian-independent four-character codes
 
-@subsection corrade-changelog-latest-changes Changes and improvements
+@subsection corrade-changelog-2020-06-changes Changes and improvements
 
 -   @ref TestSuite::Tester and the @ref CORRADE_INTERNAL_ASSERT() family of
     macros now prints file/line info in test failures as a more compact
@@ -147,7 +151,7 @@ namespace Corrade {
     to avoid trigerring a full rebuild when Git commit changes. If Git is not
     found, only the first two defines are present.
 
-@subsubsection corrade-changelog-latest-changes-containers Containers library
+@subsubsection corrade-changelog-2020-06-changes-containers Containers library
 
 -   @ref Containers::Array::Array(NoInitT, std::size_t) is now equivalent to
     @ref Containers::Array::Array(DefaultInitT, std::size_t) for trivial types.
@@ -172,12 +176,12 @@ namespace Corrade {
     constructor is explicit in copy-initialization` compiler error on Clang and
     a rarer but similar one in case of GCC as well.
 
-@subsubsection corrade-changelog-latest-changes-interconnect Interconnect library
+@subsubsection corrade-changelog-2020-06-changes-interconnect Interconnect library
 
 -   @ref Interconnect::connect() now can recognize trivially copyable lambdas
     also on GCC versions before 5 and store them more efficiently
 
-@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2020-06-changes-pluginmanager PluginManager library
 
 -   Internals of @ref PluginManager::Manager were rewritten to not need any
     shared global state. This was only needed for inter-manager dependencies,
@@ -185,7 +189,7 @@ namespace Corrade {
     not need any global state, instead the user is expected to connect manager
     instances together using @ref PluginManager::AbstractManager::registerExternalManager().
 
-@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+@subsubsection corrade-changelog-2020-06-changes-testsuite TestSuite library
 
 -   The @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_BENCHMARK()
     and other macros can now be called also from inside lambdas and helper
@@ -200,7 +204,7 @@ namespace Corrade {
     @ref std::exception. See @ref TestSuite-Tester-exceptions for more
     information.
 
-@subsubsection corrade-changelog-latest-changes-utility Utility library
+@subsubsection corrade-changelog-2020-06-changes-utility Utility library
 
 -   @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT() and
     @ref CORRADE_ASSERT_OUTPUT() now only return if @ref CORRADE_GRACEFUL_ASSERT
@@ -223,7 +227,7 @@ namespace Corrade {
 -   @ref Utility::Directory::mkpath() now properly reports errors instead of
     just arrogantly returning @cpp false @ce (see [mosra/corrade#92](https://github.com/mosra/corrade/pull/92))
 
-@subsection corrade-changelog-latest-buildsystem Build system
+@subsection corrade-changelog-2020-06-buildsystem Build system
 
 -   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW
 -   `UseCorrade.cmake` defined `NOMINMAX` and `WIN32_LEAN_AND_MEAN` by mistake
@@ -240,7 +244,7 @@ namespace Corrade {
     it locates it relatively to Android SDK (see [mosra/toolchains#10](https://github.com/mosra/toolchains/pull/10))
 -   Various warning fixes (see [mosra/corrade#96](https://github.com/mosra/corrade/pull/96))
 
-@subsection corrade-changelog-latest-bugfixes Bug fixes
+@subsection corrade-changelog-2020-06-bugfixes Bug fixes
 
 -   The @ref CORRADE_TARGET_LIBSTDCXX macro was defined on GCC < 5 only when
     certain headers were included before. That caused problems especially with
@@ -261,13 +265,13 @@ namespace Corrade {
     possible to have two instances of the same manager type without the two
     interferring with each other in any way.
 
-@subsection corrade-changelog-latest-documentation Documentation
+@subsection corrade-changelog-2020-06-documentation Documentation
 
 -   Various fixes and clarifications (see
     [mosra/corrade#80](https://github.com/mosra/corrade/pull/80),
     [mosra/magnum#418](https://github.com/mosra/magnum/pull/418))
 
-@subsection corrade-changelog-latest-deprecated Deprecated APIs
+@subsection corrade-changelog-2020-06-deprecated Deprecated APIs
 
 -   @cpp Utility::Directory::map(const std::string&, std::size_t) @ce is
     deprecated and renamed to @ref Utility::Directory::mapWrite() as it doesn't
@@ -277,7 +281,7 @@ namespace Corrade {
     @ref CORRADE_TARGET_BIG_ENDIAN and made public. The old variant is still
     present for backwards compatibility, but will be removed in the future.
 
-@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+@subsection corrade-changelog-2020-06-compatibility Potential compatibility breakages, removed APIs
 
 -   @ref CORRADE_ASSERT_UNREACHABLE() now accepts a message and will fail to
     compile when used with an empty argument list. The original functionality
