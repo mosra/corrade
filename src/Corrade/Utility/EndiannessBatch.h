@@ -27,7 +27,7 @@
 
 /** @file
  * @brief Namespace @ref Corrade::Utility::Endianness
- * @m_since_latest
+ * @m_since{2020,06}
  */
 
 #include "Corrade/Containers/StridedArrayView.h"
@@ -45,7 +45,7 @@ namespace Implementation {
 
 /**
 @brief Endian-swap bytes of each argument in-place
-@m_since_latest
+@m_since{2020,06}
 
 Equivalent to calling @ref swap() on each value.
 @see @ref littleEndianInPlace(const Containers::StridedArrayView1D<T>&),
@@ -59,7 +59,7 @@ template<class T> void swapInPlace(const Containers::StridedArrayView1D<T>& valu
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 template<class T> void swapInPlace(const Containers::ArrayView<T>& values) {
     return swapInPlace(Containers::stridedArrayView(values));
@@ -67,7 +67,7 @@ template<class T> void swapInPlace(const Containers::ArrayView<T>& values) {
 
 /**
 @brief Convert values from or to Little-Endian in-place
-@m_since_latest
+@m_since{2020,06}
 
 On Big-Endian systems calls @ref swapInPlace(const Containers::StridedArrayView1D<T>&),
 on Little-Endian systems does nothing.
@@ -84,7 +84,7 @@ template<class T> inline void littleEndianInPlace(const Containers::StridedArray
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 template<class T> void littleEndianInPlace(const Containers::ArrayView<T>& values) {
     return littleEndianInPlace(Containers::stridedArrayView(values));
@@ -92,7 +92,7 @@ template<class T> void littleEndianInPlace(const Containers::ArrayView<T>& value
 
 /**
 @brief Convert values from or to Big-Endian in-place
-@m_since_latest
+@m_since{2020,06}
 
 On Little-Endian systems calls @ref swapInPlace(const Containers::StridedArrayView1D<T>&),
 on Big-Endian systems does nothing.
@@ -109,7 +109,7 @@ template<class T> inline void bigEndianInPlace(const Containers::StridedArrayVie
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 template<class T> void bigEndianInPlace(const Containers::ArrayView<T>& values) {
     return bigEndianInPlace(Containers::stridedArrayView(values));

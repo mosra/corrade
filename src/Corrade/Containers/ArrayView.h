@@ -686,7 +686,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[si
 
 /** @relatesalso ArrayView
 @brief Make a view on an initializer list
-@m_since_latest
+@m_since{2020,06}
 
 Not present as a constructor in order to avoid accidental dangling references
 with r-value initializer lists. See
@@ -751,7 +751,7 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
 
 /** @relatesalso ArrayView
 @brief Reinterpret-cast a void array view
-@m_since_latest
+@m_since{2020,06}
 
 Size of the new array is calculated as @cpp view.size()/sizeof(U) @ce.
 Expects that the target type is [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
@@ -767,7 +767,7 @@ template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
 
 /** @relatesalso ArrayView
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class U> ArrayView<U> arrayCast(ArrayView<void> view) {
     auto out = arrayCast<const U>(ArrayView<const void>{view});

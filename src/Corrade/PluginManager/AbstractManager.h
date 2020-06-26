@@ -366,7 +366,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         /**
          * @brief Register an external manager for resolving inter-manager dependencies
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * To be used for loading dependencies from different plugin
          * interfaces. Once registered, the @p manager is expected to stay in

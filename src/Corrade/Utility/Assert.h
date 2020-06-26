@@ -470,7 +470,7 @@ You can override this implementation by placing your own
 
 /** @hideinitializer
 @brief Internal assert that the code is unreachable
-@m_since_latest
+@m_since{2020,06}
 
 Compared to @ref CORRADE_ASSERT_UNREACHABLE(), usable for sanity checks on
 internal state, as it prints what failed and where instead of a user-friendly
@@ -513,7 +513,7 @@ You can override this implementation by placing your own
 
 /** @hideinitializer
 @brief Assume a condition
-@m_since_latest
+@m_since{2020,06}
 
 Compared to @ref CORRADE_INTERNAL_ASSERT() this macro does not handle the case
 when the condition isn't @cpp true @ce in any way --- only provides a hint to

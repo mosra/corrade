@@ -111,7 +111,7 @@ template<class T> inline T swap(T value) {
 
 /**
 @brief Endian-swap bytes of each argument in-place
-@m_since_latest
+@m_since{2020,06}
 
 Calls @ref swap() on each value.
 @see @ref littleEndianInPlace(), @ref bigEndianInPlace()
@@ -224,7 +224,7 @@ template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::va
 
 /**
 @brief Create a FourCC code
-@m_since_latest
+@m_since{2020,06}
 
 Creates a [FourCC](https://en.wikipedia.org/wiki/FourCC) code from given four
 characters. The characters are always stored in a Big-Endian order. Usable as a

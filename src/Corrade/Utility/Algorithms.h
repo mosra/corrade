@@ -27,7 +27,7 @@
 
 /** @file
  * @brief Function @ref Corrade::Utility::copy()
- * @m_since_latest
+ * @m_since{2020,06}
  */
 
 #include "Corrade/Containers/StridedArrayView.h"
@@ -37,7 +37,7 @@ namespace Corrade { namespace Utility {
 
 /**
 @brief Copy an array view to another
-@m_since_latest
+@m_since{2020,06}
 
 Calls @ref std::memcpy() on the contents. Expects that both arrays have the
 same size.
@@ -46,7 +46,7 @@ CORRADE_UTILITY_EXPORT void copy(const Containers::ArrayView<const void>& src, c
 
 /**
 @brief Copy an array view to another
-@m_since_latest
+@m_since{2020,06}
 
 Casts views into a @cpp void @ce type and delegates into
 @ref copy(const Containers::ArrayView<const void>&, const Containers::ArrayView<void>&).
@@ -67,7 +67,7 @@ template<class T> inline void copy(const Containers::ArrayView<const T>& src, co
 
 /**
 @brief Copy a strided array view to another
-@m_since_latest
+@m_since{2020,06}
 
 Optimized to call @ref std::memcpy() on largest contiguous sub-dimensions,
 looping over the non-contiguous dimensions (except when memcpy would be called
@@ -82,31 +82,31 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst);
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst);
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst);
 
 /**
  * @overload
- * @m_since_latest
+ * @m_since{2020,06}
  */
 CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst);
 
 /**
 @brief Copy a strided array view to another
-@m_since_latest
+@m_since{2020,06}
 
 Casts views into a @cpp char @ce type of one dimension more (where the last
 dimension has a size of @cpp sizeof(T) @ce and delegates into
@@ -150,7 +150,7 @@ template<unsigned dimensions, class T> struct StridedArrayViewType<Containers::S
 
 /**
 @brief Copy a view to another
-@m_since_latest
+@m_since{2020,06}
 
 Converts @p src and @p dst to a common array view type that's either
 @ref Containers::ArrayView or @ref Containers::StridedArrayView and then calls

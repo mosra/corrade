@@ -405,7 +405,7 @@ inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::str
 
 /**
 @brief File size
-@m_since_latest
+@m_since{2020,06}
 
 If the file doesn't exist or is not seekable, prints a message to @ref Error
 and returns @ref Containers::NullOpt. Note that some special files on Unix
@@ -498,7 +498,7 @@ CORRADE_UTILITY_EXPORT bool copy(const std::string& from, const std::string& to)
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**
 @brief Map file for reading and writing
-@m_since_latest
+@m_since{2020,06}
 
 Maps the file as read-write memory. The array deleter takes care of unmapping.
 If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
@@ -525,7 +525,7 @@ CORRADE_UTILITY_EXPORT Containers::Array<const char, MapDeleter> mapRead(const s
 
 /**
 @brief Map file for writing
-@m_since_latest
+@m_since{2020,06}
 
 Maps the file as read-write memory and enlarges it to @p size. If the file does
 not exist yet, it is created, if it exists, it's truncated --- thus no data
@@ -541,7 +541,7 @@ CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> mapWrite(const std::s
 #ifdef CORRADE_BUILD_DEPRECATED
 /**
  * @copybrief mapWrite()
- * @m_deprecated_since_latest Use @ref mapWrite() instead.
+ * @m_deprecated_since{2020,06} Use @ref mapWrite() instead.
  */
 CORRADE_DEPRECATED("use mapWrite() instead") CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
 #endif

@@ -133,7 +133,7 @@ template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}
 
 /**
 @brief Pseudo-type for verifying that value is divisible by
-@m_since_latest
+@m_since{2020,06}
 
 Prints both values if the first *is not* divisible by the second. Compared type
 needs to implement at least an @cpp operator%() @ce returning the same type.
@@ -148,7 +148,7 @@ template<class T> class Divisible {};
 
 /**
 @brief Pseudo-type for verifying that value is not divisible by
-@m_since_latest
+@m_since{2020,06}
 
 Prints both values if the first *is* divisible by the second. Compared type
 needs to implement at least an @cpp operator%() @ce returning the same type.

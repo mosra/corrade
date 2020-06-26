@@ -38,7 +38,7 @@ namespace Corrade { namespace Utility {
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /** @hideinitializer
 @brief Whether `long double` has the same size as `double`
-@m_since_latest
+@m_since{2020,06}
 
 Defined on platforms where the @cpp long double @ce type is 64-bit instead of
 80-bit, thus same as @cpp double @ce. It's the case for
@@ -88,7 +88,7 @@ namespace Implementation {
 
 /** @hideinitializer
 @brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library
-@m_since_latest
+@m_since{2020,06}
 
 The @ref std::is_trivially_constructible,
 @ref std::is_trivially_default_constructible,

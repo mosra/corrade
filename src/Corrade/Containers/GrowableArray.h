@@ -27,7 +27,7 @@
 
 /** @file
  * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
- * @m_since_latest
+ * @m_since{2020,06}
  */
 
 #include <cstdlib>
@@ -62,7 +62,7 @@ namespace Corrade { namespace Containers {
 
 /**
 @brief New-based allocator for growable arrays
-@m_since_latest
+@m_since{2020,06}
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C++
 @cpp new[] @ce / @cpp delete[] @ce constructs, reserving an extra space
@@ -171,7 +171,7 @@ template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<boo
 
 /**
 @brief Malloc-based allocator for growable arrays
-@m_since_latest
+@m_since{2020,06}
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C
 @ref std::malloc() / @ref std::free() constructs in order to be able to use
@@ -273,7 +273,7 @@ template<class T> struct ArrayMallocAllocator {
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
 @brief Allocator for growable arrays
-@m_since_latest
+@m_since{2020,06}
 
 Is either @ref ArrayMallocAllocator for trivially copyable @p T, or
 @ref ArrayNewAllocator otherwise. See @ref Containers-Array-growable for an
@@ -367,7 +367,7 @@ template<class T> using ArrayAllocator = typename std::conditional<
 
 /**
 @brief Reinterpret-cast a growable array
-@m_since_latest
+@m_since{2020,06}
 
 If the array is growable using @ref ArrayMallocAllocator (which is aliased to
 @ref ArrayAllocator for all trivially-copyable types), the deleter is a simple
@@ -386,7 +386,7 @@ template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array);
 
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class U, template<class> class Allocator, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
@@ -413,7 +413,7 @@ template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
 
 /**
 @brief Whether the array is growable
-@m_since_latest
+@m_since{2020,06}
 
 Returns @cpp true @ce if the array is growable and using given @p Allocator,
 @cpp false @ce otherwise. Note that even non-growable arrays are usable with
@@ -429,7 +429,7 @@ template<class T, class Allocator = ArrayAllocator<T>> bool arrayIsGrowable(Arra
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -441,7 +441,7 @@ template<template<class T> class Allocator, class T> inline bool arrayIsGrowable
 
 /**
 @brief Array capacity
-@m_since_latest
+@m_since{2020,06}
 
 For a growable array returns its capacity, for a non-growable array returns
 @ref Array::size().
@@ -455,7 +455,7 @@ template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayCapacity
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -468,7 +468,7 @@ template<template<class T> class Allocator, class T> inline std::size_t arrayCap
 /**
 @brief Reserve given capacity in an array
 @return New capacity of the array
-@m_since_latest
+@m_since{2020,06}
 
 If @p array capacity is already large enough, the function returns the current
 capacity. Otherwise the memory is reallocated to desired @p capacity, with the
@@ -490,7 +490,7 @@ template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayReserve(
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -502,7 +502,7 @@ template<template<class T> class Allocator, class T> inline std::size_t arrayRes
 
 /**
 @brief Resize an array to given size, default-initializing new elements
-@m_since_latest
+@m_since{2020,06}
 
 If the array is growable and capacity is large enough, calls a destructor on
 elements that get cut off the end (if any, and if @p T is not trivially
@@ -526,7 +526,7 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -538,7 +538,7 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 
 /**
 @brief Resize an array to given size, value-initializing new elements
-@m_since_latest
+@m_since{2020,06}
 
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but value-initialized
@@ -554,7 +554,7 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -566,7 +566,7 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 
 /**
 @brief Resize an array to given size, value-initializing new elements
-@m_since_latest
+@m_since{2020,06}
 
 Alias to @ref arrayResize(Array<T>&, ValueInitT, std::size_t).
 */
@@ -580,7 +580,7 @@ template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(A
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -592,7 +592,7 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 
 /**
 @brief Resize an array to given size, keeping new elements uninitialized
-@m_since_latest
+@m_since{2020,06}
 
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
@@ -608,7 +608,7 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -620,7 +620,7 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 
 /**
 @brief Resize an array to given size, constructing new elements using provided arguments
-@m_since_latest
+@m_since{2020,06}
 
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are constructed using placement-new with provided
@@ -630,7 +630,7 @@ template<class T, class... Args> void arrayResize(Array<T>& array, DirectInitT, 
 
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class T, class Allocator, class... Args> void arrayResize(Array<T>& array, DirectInitT, std::size_t size, Args&&... args);
 
@@ -640,7 +640,7 @@ template<class T, class Allocator, class... Args> void arrayResize(Array<T>& arr
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -653,7 +653,7 @@ template<template<class> class Allocator, class T, class... Args> inline void ar
 /**
 @brief Copy-append an item to an array
 @return Reference to the newly appended item
-@m_since_latest
+@m_since{2020,06}
 
 If the array is not growable or the capacity is not large enough, the array capacity is grown first. Then, @p value is copy-constructed at the end of the
 array and @ref Array::size() increased by 1.
@@ -670,7 +670,7 @@ template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -683,7 +683,7 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 /**
 @brief In-place append an item to an array
 @return Reference to the newly appended item
-@m_since_latest
+@m_since{2020,06}
 
 Similar to @ref arrayAppend(Array<T>&, const T&) except that the new element
 is constructed using placement-new with provided @p args.
@@ -696,13 +696,13 @@ template<class T, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, A
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
 
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -715,7 +715,7 @@ template<template<class> class Allocator, class T, class... Args> inline T& arra
 /**
 @brief Move-append an item to an array
 @return Reference to the newly appended item
-@m_since_latest
+@m_since{2020,06}
 
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 */
@@ -729,7 +729,7 @@ template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Arr
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -742,7 +742,7 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 /**
 @brief Append a list of items to an array
 @return View on the newly appended items
-@m_since_latest
+@m_since{2020,06}
 
 Like @ref arrayAppend(Array<T>&, const T&), but inserting multiple values at
 once.
@@ -756,7 +756,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -768,7 +768,7 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
 
@@ -778,7 +778,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -791,7 +791,7 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 /**
 @brief Append given count of uninitialized values to the array
 @return View on the newly appended items
-@m_since_latest
+@m_since{2020,06}
 
 A lower-level variant of
 @ref arrayAppend(Array<T>& array, Containers::ArrayView<const T>) where the new
@@ -806,7 +806,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -818,7 +818,7 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 
 /**
 @brief Remove a suffix from the array
-@m_since_latest
+@m_since{2020,06}
 
 Expects that @p count is not larger than @ref Array::size(). If the array is
 not growable, all its elements except the suffix are first reallocated to a
@@ -834,7 +834,7 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Ar
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
@@ -846,7 +846,7 @@ template<template<class> class Allocator, class T> inline void arrayRemoveSuffix
 
 /**
 @brief Convert an array back to non-growable
-@m_since_latest
+@m_since{2020,06}
 
 Allocates memory that's exactly large enough to fit @ref Array::size()
 elements, move-constructs the elements there and frees the old memory using
@@ -865,7 +865,7 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_since{2020,06}
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.

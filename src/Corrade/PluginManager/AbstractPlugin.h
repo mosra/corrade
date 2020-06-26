@@ -121,7 +121,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 
         /**
          * @brief Plugin binary suffix
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Used for discovering plugins on the filesystem. By default set to
          * platform's native extension for dynamic modules such as
@@ -144,7 +144,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 
         /**
          * @brief Plugin metadata file suffix
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Suffix for plugin-specific metadata files. By default set to
          * @cpp ".conf" @ce. If non-empty, the plugin manager will expect the
@@ -332,7 +332,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     by default.
 @param relativePath     A path where plugins are stored, relative to a usual
     library location
-@m_since_latest
+@m_since{2020,06}
 
 Meant to be used to implement @ref AbstractPlugin::pluginSearchPaths().
 Produces a list of search paths in this order:

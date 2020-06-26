@@ -181,7 +181,7 @@ class EnumSet {
 
 /** @relatesalso EnumSet
 @brief Cast an enum to its underlying type
-@m_since_latest
+@m_since{2020,06}
 
 @see @ref std::underlying_type
 */
@@ -191,7 +191,7 @@ template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
 
 /** @relatesalso EnumSet
 @brief Cast an enum set to its underlying type
-@m_since_latest
+@m_since{2020,06}
 
 @see @ref std::underlying_type
 */

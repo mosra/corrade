@@ -654,7 +654,7 @@ class Array {
 
 /** @relatesalso Array
 @brief Construct a list-initialized array
-@m_since_latest
+@m_since{2020,06}
 
 Convenience shortcut to the @ref Array::Array(InPlaceInitT, std::initializer_list<T>)
 constructor. See its documentation for a design rationale.

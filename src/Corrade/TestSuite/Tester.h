@@ -1587,7 +1587,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 /** @hideinitializer
 @brief Annotate an iteration in a test case
 @param ...      Value to print in a failure diagnostic
-@m_since_latest
+@m_since{2020,06}
 
 Annotates loop iterations in order to provide clearer failure diagnostics next
 to the file/line info. Doesn't print anything if there was no failure. Applies

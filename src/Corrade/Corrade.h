@@ -83,7 +83,7 @@ Defined if built as static libraries. Default are shared libraries.
 
 /**
 @brief Static library build with globals unique across shared libraries
-@m_since_latest
+@m_since{2020,06}
 
 Enabled by default in a static build.
 @see @ref building-corrade, @ref corrade-cmake
@@ -268,7 +268,7 @@ yet.
 
 /**
 @brief Big-Endian target
-@m_since_latest
+@m_since{2020,06}
 
 Defined when the platform defaults to Big-Endian (such as HP/PA RISC, Motorola
 68k, Big-Endian MIPS, PowerPC and SPARC). Not defined on Little-Endian
@@ -287,7 +287,7 @@ unclear on platforms with multi-architecture binaries.
 
 /**
 @brief GCC compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by GCC or GCC-compatible Clang (which is
 @ref CORRADE_TARGET_APPLE_CLANG but not @ref CORRADE_TARGET_CLANG_CL, for
@@ -304,7 +304,7 @@ a library can be built with GCC and then used via Clang.
 
 /**
 @brief Clang compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by Clang or any of its variants
 (@ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL). If this
@@ -323,7 +323,7 @@ for example, a library can be built with Clang and then used via GCC.
 
 /**
 @brief Apple's Clang compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by Apple's Clang. If this variable is
 defined, @ref CORRADE_TARGET_GCC and @ref CORRADE_TARGET_CLANG are also
@@ -341,7 +341,7 @@ via GCC.
 
 /**
 @brief Clang-CL compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by Clang with a MSVC frontend. If this
 variable is defined, @ref CORRADE_TARGET_CLANG and @ref CORRADE_TARGET_MSVC is
@@ -358,7 +358,7 @@ then used via MSVC.
 
 /**
 @brief MSVC compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by MSVC or Clang with a MSVC frontend. If
 this variable is defined, @ref CORRADE_TARGET_CLANG might also be defined.
@@ -374,7 +374,7 @@ library can be built with MSVC and then used via Clang-CL.
 
 /**
 @brief MinGW compiler
-@m_since_latest
+@m_since{2020,06}
 
 Defined if the code is being compiled by GCC / Clang running under MinGW. If
 this variable is defined, @ref CORRADE_TARGET_GCC and possibly also
@@ -440,7 +440,7 @@ exposed in CMake because the detection is non-trivial.
 
 /**
 @brief SSE2 target
-@m_since_latest
+@m_since{2020,06}
 
 Defined on x86 if [SSE2](https://en.wikipedia.org/wiki/SSE2) instructions are
 enabled at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or

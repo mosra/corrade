@@ -44,7 +44,7 @@ namespace Corrade { namespace Utility {
 
 /**
 @brief Source location support in debug output
-@m_since_latest
+@m_since{2020,06}
 
 Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
 source location support. Available on GCC at least since version 4.8 and Clang
@@ -347,7 +347,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Output a space
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Puts a space (not surrounded by additional spaces) to the output.
          * Useful for adding an explicit leading space or for delimiting values
@@ -759,7 +759,7 @@ namespace Implementation {
 
 /** @relatesalso Debug
 @brief Prefix the output with source location
-@m_since_latest
+@m_since{2020,06}
 
 Only on supported compilers, does nothing otherwise. See
 @ref Utility-Debug-source-location for more information.

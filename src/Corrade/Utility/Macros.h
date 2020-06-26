@@ -347,7 +347,7 @@ regarding RAII.
 
 /** @hideinitializer
 @brief C++14 constexpr
-@m_since_latest
+@m_since{2020,06}
 
 Expands to @cpp constexpr @ce on C++14 and newer, empty on C++11. Useful for
 selectively marking functions that make use of C++14 relaxed constexpr rules.

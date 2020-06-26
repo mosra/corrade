@@ -197,7 +197,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Parse error
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * @see @ref setParseErrorCallback(),
          *      @ref Utility-Arguments-parse-error-callback
@@ -304,7 +304,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Parse error callback
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * @see @ref setParseErrorCallback(),
          *      @ref Utility-Arguments-parse-error-callback
@@ -504,7 +504,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Add an array option with both short and long key alternative
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Compared to @ref addOption(), which remembers only the last value
          * when multiple options of the same name are passed in the argument
@@ -533,7 +533,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Add an array option with long key only
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
@@ -727,7 +727,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Parse error callback
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * The default callback unconditionally returns @cpp false @ce.
          */
@@ -735,7 +735,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Parse error callback state
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * The default state is @cpp nullptr @ce.
          */
@@ -743,7 +743,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Set parse error callback
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * The @p callback function receives a reference to this instance, a
          * @ref ParseError enum describing what exactly is wrong, and a
@@ -841,7 +841,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Count of parsed values in given array option
          * @param key       Array option key
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Expects that the key exists, @ref parse() was successful and
          * @p key is an array option.
@@ -854,7 +854,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @param key       Array option key
          * @param id        Array value index
          * @param flags     Configuration value flags
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Expects that the key exists, @ref parse() was successful and
          * @p id is less than @ref arrayValueCount(). Only for array options,
@@ -916,7 +916,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
 /**
 @debugoperatorclassenum{Arguments,Arguments::ParseError}
-@m_since_latest
+@m_since{2020,06}
 */
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Arguments::ParseError value);
 

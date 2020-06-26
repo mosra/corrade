@@ -523,7 +523,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Whether the view is contiguous from given dimension further
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * The view is considered contiguous if its last dimension has
          * @ref stride() equal to the type size and every dimension before that
@@ -540,7 +540,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Convert the view to a contiguous one
-         * @m_since_latest
+         * @m_since{2020,06}
          *
          * Returns a view large as the product of sizes in all dimensions.
          * Expects that the view is contiguous.
@@ -778,7 +778,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
 /**
 @brief Multi-dimensional void array view with size and stride information
-@m_since_latest
+@m_since{2020,06}
 
 Specialization of @ref StridedArrayView which is convertible from a
 compile-time array, @ref Array, @ref ArrayView, @ref StaticArrayView or
@@ -988,7 +988,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
 
 /**
 @brief Multi-dimensional const void array view with size and stride information
-@m_since_latest
+@m_since{2020,06}
 
 Specialization of @ref StridedArrayView which is convertible from a
 compile-time array, @ref Array, @ref ArrayView, @ref StaticArrayView or
@@ -1244,7 +1244,7 @@ template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 
 /** @relatesalso StridedArrayView
 @brief Make an one-dimensional strided view
-@m_since_latest
+@m_since{2020,06}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<ErasedType>, T*, const Size&, const Stride&).
 The following two lines are equivalent:
@@ -1280,7 +1280,7 @@ template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArray
 
 /** @relatesalso StridedArrayView
 @brief Make a strided view on an initializer list
-@m_since_latest
+@m_since{2020,06}
 
 Not present as a constructor in order to avoid accidental dangling references
 with r-value initializer lists. See
@@ -1367,7 +1367,7 @@ template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> 
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast a void strided array view
-@m_since_latest
+@m_since{2020,06}
 
 Size of the new array is the same as original. Expects that the target type is
 [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
@@ -1389,7 +1389,7 @@ template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast
 
 /** @relatesalso StridedArrayView
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, void>& view) {
     auto out = arrayCast<const U, dimensions>(StridedArrayView<dimensions, const void>{view});
@@ -1509,7 +1509,7 @@ template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedA
 
 /**
 @brief Reinterpret-cast and inflate an array view
-@m_since_latest
+@m_since{2020,06}
 
 Converts @p view to a @ref StridedArrayView1D and calls the above function.
 */
@@ -1519,7 +1519,7 @@ template<unsigned newDimensions, class U, class T> inline StridedArrayView<newDi
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast and inflate a void strided array view
-@m_since_latest
+@m_since{2020,06}
 
 Inflates the last dimension into the new type @p U, its element count being
 @p lastDimensionSize. The @p newDimensions template parameter is expected to
@@ -1560,7 +1560,7 @@ template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<
 
 /** @relatesalso StridedArrayView
 @overload
-@m_since_latest
+@m_since{2020,06}
 */
 template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, void>& view, std::size_t lastDimensionSize) {
     auto out = arrayCast<newDimensions, const U, dimensions>(StridedArrayView<dimensions, const void>{view}, lastDimensionSize);
