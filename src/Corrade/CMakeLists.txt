@@ -44,10 +44,12 @@ if(Git_FOUND)
         OUTPUT_VARIABLE CORRADE_VERSION_STRING
         RESULT_VARIABLE _CORRADE_VERSION_RESULT
         ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(CORRADE_VERSION_STRING MATCHES "^v([0-9][0-9][0-9][0-9])\\.0?([0-9][0-9])-([0-9]+)-g([a-f0-9]+)$")
+    if(CORRADE_VERSION_STRING MATCHES "^v([0-9][0-9][0-9][0-9])\\.0?([0-9][0-9]?)-([0-9]+)-g([a-f0-9]+)$")
         set(CORRADE_VERSION_YEAR ${CMAKE_MATCH_1})
         set(CORRADE_VERSION_MONTH ${CMAKE_MATCH_2})
         set(CORRADE_VERSION_COMMIT ${CMAKE_MATCH_3})
+        # Otherwise if commit is 0, it would #undef the variable
+        set(CORRADE_VERSION_COMMIT " ${CORRADE_VERSION_COMMIT}")
         set(CORRADE_VERSION_HASH ${CMAKE_MATCH_4})
     elseif(_CORRADE_VERSION_RESULT EQUAL 0)
         message(WARNING "Can't match Git version from ${CORRADE_VERSION_STRING}")
