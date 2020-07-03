@@ -47,13 +47,13 @@ namespace Corrade { namespace Utility {
 @m_since{2020,06}
 
 Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
-source location support. Available on GCC at least since version 4.8 and Clang
-9+. See @ref Utility-Debug-source-location for more information.
+source location support. Available on GCC at least since version 4.8, Clang 9+
+and MSVC 2019 16.6 and newer. See @ref Utility-Debug-source-location for more
+information.
 */
 /* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
-   __apple_build_version__ according to https://stackoverflow.com/a/19391724.
-   Not in MSVC yet: https://github.com/microsoft/STL/issues/54. */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9)))
+   __apple_build_version__ according to https://stackoverflow.com/a/19391724 */
+#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9))) || (defined(_MSC_VER) && _MSC_VER >= 1926)
 #define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 namespace Implementation { struct DebugSourceLocation; }
 #endif
@@ -746,7 +746,7 @@ CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 namespace Implementation {
     struct CORRADE_UTILITY_EXPORT DebugSourceLocation {
-        #if defined(__GNUC__) || defined(__clang__)
+        #if defined(__GNUC__) || defined(__clang__) || defined(_MSC_VER)
         /* Not using std::experimental::source_location because it's not in
            libc++ 9 yet and GCC version has a C++14 usage of constexpr */
         /*implicit*/ DebugSourceLocation(Debug&& debug, const char* file = __builtin_FILE(), int line = __builtin_LINE());

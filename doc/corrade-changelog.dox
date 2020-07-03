@@ -29,7 +29,15 @@ namespace Corrade {
 
 @tableofcontents
 
-@anchor corrade-changelog-latest
+@section corrade-changelog-latest Changes since 2020.06
+
+@subsection corrade-changelog-latest-changes Changes and improvements
+
+@subsubsection corrade-changelog-latest-changes-utility Utility library
+
+-   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"
+    is now enabled on MSVC 2019 16.6+ as well, making it available across all
+    compilers
 
 @section corrade-changelog-2020-06 2020.06
 
