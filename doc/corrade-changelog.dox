@@ -45,6 +45,14 @@ namespace Corrade {
     if it doesn't exist and a directory only if it exists and is a directory
     (see [mosra/corrade#90](https://github.com/mosra/corrade/issues/90))
 
+@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+
+-   All includes of @ref Corrade/Containers/PointerStl.h that were added in
+    2019.01 for preserving backwards compatibility after the move from
+    @ref std::unique_ptr to @ref Containers::Pointer are now removed. This
+    should have a significant positive effect on compile times of code using
+    especially the @ref PluginManager library.
+
 @section corrade-changelog-2020-06 2020.06
 
 Released 2020-06-27, tagged as
