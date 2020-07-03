@@ -184,6 +184,7 @@ def sort_copyrights(copyrights: List[str]) -> List[str]:
             # instead
             if years > email_dict[email][0]:
                 output[email_dict[email][1]] = copyright
+                email_dict[email] = (years, email_dict[email][1])
                 continue
 
             # Otherwise complain
