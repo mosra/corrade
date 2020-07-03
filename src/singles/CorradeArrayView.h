@@ -15,6 +15,13 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-0-g61d1b58c (2020-06-27)
+    -   Conversion of const types to mutable arrays is now disabled with SFINAE
+        to prevent ambiguous constructor overloads
+    -   Added arrayCast() overloads from ArrayView<void> and
+        ArrayView<const void>
+    -   Updated std::span compatibility for libc++ 9.0, which switched away
+        from a signed size type
     v2019.10-0-g162d6a7d (2019-10-24)
     -   Fixed OOB access when converting empty STL containers to ArrayView
     v2019.01-301-gefe8d740 (2019-08-05)
@@ -77,5 +84,9 @@ template<std::size_t, class> class StaticArrayView;
 #endif
 #ifdef CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY
 // {{includes}}
+#include <ciso646>
+#ifdef _LIBCPP_VERSION
+#define CORRADE_TARGET_LIBCXX
+#endif
 #include "Corrade/Containers/ArrayViewStlSpan.h"
 #endif

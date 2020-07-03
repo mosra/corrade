@@ -15,6 +15,13 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-0-g61d1b58c (2020-06-27)
+    -   Added mutable StridedDimensions::begin()/end()
+    -   New cross-dimension arrayCast() overloads
+    -   Added isContiguous() and asContiguous() overloads
+    -   Similarly to ArrayView, there's now a StridedArrayView<void> and
+        StridedArrayView<const void> specialization usable for type-erased
+        storage in constexpr contexts
     v2019.10-0-g162d6a7d (2019-10-24)
     -   Don't assert when creating arrays with non-zero stride but zero size
     -   Added a StridedArrayView4D convenience typedef

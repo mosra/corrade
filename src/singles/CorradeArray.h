@@ -17,6 +17,11 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-0-g61d1b58c (2020-06-27)
+    -   Default initialization got changed to ValueInit, which means builtin
+        types are zero-initialized instead of kept uninitialized
+    -   Working around various compiler-specific issues and standard defects
+        when using {}-initialization for aggregate types
     v2019.10-0-g162d6a7d (2019-10-24)
     -   StaticArray is now copy/movable if the underlying type is
     v2019.01-301-gefe8d740 (2019-08-05)
@@ -41,11 +46,15 @@
 #pragma ACME enable Corrade_Containers_ArrayView_h
 #include "CorradeArrayView.h"
 
-/* We need just CORRADE_MSVC2019_COMPATIBILITY from configure.h, but that's
-   handled by CorradeArrayView.h already. From Containers.h we need just the
-   array forward declarations, the array view ones are again already in
-   CorradeArrayView.h. */
+/* We need CORRADE_MSVC2019_COMPATIBILITY from configure.h, which is handled by
+   CorradeArrayView.h already, and CORRADE_TARGET_GCC */
 #pragma ACME enable Corrade_configure_h
+#ifdef __GNUC__
+#define CORRADE_TARGET_GCC
+#endif
+
+/* From Containers.h we need just the array forward declarations, the array
+   view ones are again already in CorradeArrayView.h. */
 #pragma ACME enable Corrade_Containers_Containers_h
 
 /* Disable all asserts, CorradeArrayView.h has both CORRADE_ASSERT and

@@ -13,6 +13,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-0-g61d1b58c (2020-06-27)
+    -   Working around various compiler-specific issues and standard defects
+        when using {}-initialization for aggregate types
     v2019.10-0-g162d6a7d (2019-10-24)
     -   Minor simplifications in the internals
     v2019.01-107-g80d9f347 (2019-03-23)
@@ -32,8 +35,11 @@
 #include <cassert>
 #endif
 
-/* We don't need anything from configure.h here */
+/* We don't need much from configure.h here */
 #pragma ACME enable Corrade_configure_h
+#ifdef __GNUC__
+#define CORRADE_TARGET_GCC
+#endif
 
 /* Disable asserts that are not used. CORRADE_ASSERT is used, wrapping the
    #include <cassert> above. When enabling additional asserts, be sure to
