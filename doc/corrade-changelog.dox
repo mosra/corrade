@@ -39,6 +39,12 @@ namespace Corrade {
     is now enabled on MSVC 2019 16.6+ as well, making it available across all
     compilers
 
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   The `-o` option in the @ref acme utility now treats the argument as a file
+    if it doesn't exist and a directory only if it exists and is a directory
+    (see [mosra/corrade#90](https://github.com/mosra/corrade/issues/90))
+
 @section corrade-changelog-2020-06 2020.06
 
 Released 2020-06-27, tagged as

@@ -635,10 +635,11 @@ def acme(toplevel_file, output) -> List[str]:
             of.write(line)
 
 if __name__ == '__main__': # pragma: no cover
-    parser = argparse.ArgumentParser(description=r"""
-Creates single-header libraries from given top-level input file.""")
+    parser = argparse.ArgumentParser(
+        description=r"""Creates single-header libraries from given top-level input file.""",
+        epilog="""If output exists and is a directory, the file is saved inside with the same name as the input.""")
     parser.add_argument('file', help='top-level file')
-    parser.add_argument('-o', '--output', help="output directory", default='output')
+    parser.add_argument('-o', '--output', help="output file or directory", default='output')
     parser.add_argument('--debug', help="verbose debug output", action='store_true')
     args = parser.parse_args()
 
@@ -647,6 +648,14 @@ Creates single-header libraries from given top-level input file.""")
     else:
         logging.basicConfig(level=logging.INFO)
 
-    output_dir = os.path.join(os.path.dirname(args.file), args.output)
-    if not os.path.exists(output_dir): os.makedirs(output_dir)
-    acme(args.file, os.path.join(output_dir, os.path.basename(args.file)))
+    output = os.path.join(os.path.dirname(args.file), args.output)
+
+    # If a directory, save the file inside
+    if os.path.exists(output) and os.path.isdir(output):
+        output = os.path.join(output, os.path.basename(args.file))
+
+    # Otherwise assume it's a filename, create all directories above it if they
+    # don't exist
+    else: os.makedirs(os.path.dirname(output), exist_ok=True)
+
+    acme(args.file, output)
