@@ -299,7 +299,7 @@ if(CORRADE_BUILD_DEPRECATED)
     string(REPLACE ";" " " CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}${CORRADE_PEDANTIC_COMPILER_OPTIONS}")
 
     # Remove generator expressions that distinct between C and C++
-    string(REGEX REPLACE "\\$<\\$<STREQUAL:\\$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:([^>]+)>" "\\1" CORRADE_CXX_FLAGS ${CORRADE_CXX_FLAGS})
+    string(REGEX REPLACE "\\$<\\$<STREQUAL:\\$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:([^>]+)>" "\\1" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
 endif()
 
 # Provide a way to distinguish between debug and release builds via

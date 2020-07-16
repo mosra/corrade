@@ -44,6 +44,8 @@ namespace Corrade {
 -   The `-o` option in the @ref acme utility now treats the argument as a file
     if it doesn't exist and a directory only if it exists and is a directory
     (see [mosra/corrade#90](https://github.com/mosra/corrade/issues/90))
+-   Fixed a potential error in `UseCorrade.cmake` that would happen when
+    compiling with an unrecognized compiler (see [mosra/magnum#457](https://github.com/mosra/magnum/issues/457))
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
