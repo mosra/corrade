@@ -41,8 +41,9 @@ template<class T> BasicStringView<T>::BasicStringView(T* data) noexcept: BasicSt
 
 template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
 
-/* Yes, I'm also surprised this works */
-template<> template<> BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
+/* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
+   needs an explicit export otherwise the symbol doesn't get exported. */
+template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
 
 template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
