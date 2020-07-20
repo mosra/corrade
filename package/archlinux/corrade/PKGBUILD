@@ -1,24 +1,28 @@
 # Maintainer: Alexander F. Rødseth <xyproto@archlinux.org>
 # Contributor: Mosra <mosra@centrum.cz>
 
+# An up-to-date version of this PKGBUILD is maintained at
+# https://github.com/mosra/corrade/blob/master/package/archlinux/corrade/PKGBUILD
+
 pkgname=corrade
-pkgver=2019.10
+pkgver=2020.06
 pkgrel=1
 pkgdesc='C++11/C++14 multiplatform utility library'
 arch=(x86_64)
 url='https://magnum.graphics/corrade/'
 license=(MIT)
 makedepends=(cmake git ninja)
-source=("git+https://github.com/mosra/corrade.git#tag=v$pkgver")
+# tag: v2020.06
+source=("git+https://github.com/mosra/corrade#commit=61d1b58cbcb159837bca506b5336a810da67f0a7")
 sha256sums=('SKIP')
 
 build() {
   mkdir -p build
   cd build
   cmake "$srcdir/corrade" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/usr \
-    -GNinja
+    -D CMAKE_BUILD_TYPE=Release \
+    -D CMAKE_INSTALL_PREFIX=/usr \
+    -G Ninja
   ninja
 }
 
