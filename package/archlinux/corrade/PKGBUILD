@@ -12,8 +12,7 @@ arch=(x86_64)
 url='https://magnum.graphics/corrade/'
 license=(MIT)
 makedepends=(cmake git ninja)
-# tag: v2020.06
-source=("git+https://github.com/mosra/corrade#commit=61d1b58cbcb159837bca506b5336a810da67f0a7")
+source=("git+https://github.com/mosra/corrade#tag=v$pkgver")
 sha256sums=('SKIP')
 
 build() {
