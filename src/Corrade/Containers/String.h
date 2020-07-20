@@ -101,8 +101,8 @@ As with @ref BasicStringView "StringView", the class is implicitly convertible
 to @ref ArrayView. In addition it's also move-convertible to @ref Array, transferring the ownership of the internal data array to it. Ownership transfer
 in the other direction is not provided because it's not possible to implicitly
 guarantee null termination of the input @ref Array --- use the explicit
-@ref String(char*, std::size_t, void(*)(char*, std::size_t)) constructor
-together with @ref Array::release() in that case.
+@ref String(char*, std::size_t, Deleter) constructor together with
+@ref Array::release() in that case.
 
 @section Containers-String-sso Small string optimization
 
@@ -294,21 +294,21 @@ class CORRADE_UTILITY_EXPORT String {
          * to @p deleter is one byte less than the actual memory size, and if
          * the deleter does sized deallocation, it has to account for that.
          */
-        explicit String(char* data, std::size_t size, void(*deleter)(char*, std::size_t)) noexcept;
+        explicit String(char* data, std::size_t size, Deleter deleter) noexcept;
 
         /**
          * @brief Take ownership of an immutable external data array
          *
          * Casts away the @cpp const @ce and delegates to
-         * @ref String(char*, std::size_t, void(*)(char*, std::size_t)). This
-         * constructor is provided mainly to allow a @ref String instance to
-         * reference global immutable data (such as C string literals) without
-         * having to allocate a copy, it's the user responsibility to avoid
-         * mutating the data in any way.
+         * @ref String(char*, std::size_t, Deleter). This constructor is
+         * provided mainly to allow a @ref String instance to reference global
+         * immutable data (such as C string literals) without having to
+         * allocate a copy, it's the user responsibility to avoid mutating the
+         * data in any way.
          * @see @ref nullTerminatedView(), @ref nullTerminatedGlobalView(),
          *      @ref globalView()
          */
-        explicit String(const char* data, std::size_t size, void(*deleter)(char*, std::size_t)) noexcept: String{const_cast<char*>(data), size, deleter} {}
+        explicit String(const char* data, std::size_t size, Deleter deleter) noexcept: String{const_cast<char*>(data), size, deleter} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -397,7 +397,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @cpp operator delete[] @ce. Can be called only if the string is not
          * stored using SSO --- see @ref Containers-String-sso for more
          * information.
-         * @see @ref String(char*, std::size_t, void(*)(char*, std::size_t))
+         * @see @ref String(char*, std::size_t, Deleter)
          */
         Deleter deleter() const;
 
