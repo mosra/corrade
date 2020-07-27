@@ -65,6 +65,8 @@ namespace Corrade {
     (see [mosra/corrade#90](https://github.com/mosra/corrade/issues/90))
 -   Fixed a potential error in `UseCorrade.cmake` that would happen when
     compiling with an unrecognized compiler (see [mosra/magnum#457](https://github.com/mosra/magnum/issues/457))
+-   The `version.h` header now gets populated from Git correctly also when
+    inside a CMake subproject
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

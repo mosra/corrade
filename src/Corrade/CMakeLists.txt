@@ -43,6 +43,9 @@ if(Git_FOUND)
     execute_process(COMMAND ${GIT_EXECUTABLE} describe --match "v*" --long
         OUTPUT_VARIABLE CORRADE_VERSION_STRING
         RESULT_VARIABLE _CORRADE_VERSION_RESULT
+        # Otherwise this gets executed in the build dir, which might be inside
+        # a totally different Git working copy
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(CORRADE_VERSION_STRING MATCHES "^v([0-9][0-9][0-9][0-9])\\.0?([0-9][0-9]?)-([0-9]+)-g([a-f0-9]+)$")
         set(CORRADE_VERSION_YEAR ${CMAKE_MATCH_1})
