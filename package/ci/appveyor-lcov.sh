@@ -9,7 +9,7 @@ curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.ta
 pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
 pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
 
-pacman -S --noconfirm mingw-w64-x86_64-perl
+pacman -Sy --noconfirm mingw-w64-x86_64-perl
 
 # mingw lcov package is empty, so download and use it manually
 # https://github.com/appveyor/ci/issues/1628
