@@ -855,7 +855,7 @@ assumed to be already as small as possible, and nothing is done.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @f$ \mathcal{O}(1) @f$ if the array is already non-growable.
-@see @ref arrayShrink(Array<T>, DefaultInitT), @ref arrayIsGrowable(),
+@see @ref arrayShrink(Array<T>&, DefaultInitT), @ref arrayIsGrowable(),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, NoInitT = NoInit);

@@ -51,7 +51,7 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
--   Added @ref Containers::arrayShrink(Array<T>, DefaultInitT) overload for
+-   Added @ref Containers::arrayShrink(Array<T>&, DefaultInitT) overload for
     cases where it's not desired to have an @ref Containers::Array with a
     `NoInit` deleter
 
