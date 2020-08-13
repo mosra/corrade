@@ -149,6 +149,7 @@ struct Movable {
     static int constructed;
     static int destructed;
     static int moved;
+    static int assigned;
 
     /*implicit*/ Movable(int a = 0) noexcept: a{short(a)} { ++constructed; }
     Movable(const Movable&) = delete;
@@ -163,6 +164,12 @@ struct Movable {
         thisDestructed = true;
     }
     Movable& operator=(const Movable&) = delete;
+    Movable& operator=(Movable&& other) noexcept {
+        a = other.a;
+        ++assigned;
+        ++moved;
+        return *this;
+    }
 
     /* "compatibility" with ints */
     Movable& operator=(int value) {
@@ -180,6 +187,7 @@ static_assert(sizeof(Movable) == 4, "tests require Movable to be four bytes");
 int Movable::constructed = 0;
 int Movable::destructed = 0;
 int Movable::moved = 0;
+int Movable::assigned = 0;
 
 static_assert(!
     #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
@@ -321,7 +329,7 @@ GrowableArrayTest::GrowableArrayTest() {
 }
 
 void GrowableArrayTest::resetCounters() {
-    Movable::constructed = Movable::destructed = Movable::moved = 0;
+    Movable::constructed = Movable::destructed = Movable::moved = Movable::assigned = 0;
 }
 
 template<class> struct TypeName;
@@ -355,6 +363,7 @@ template<class T> void GrowableArrayTest::reserveFromEmpty() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 0);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 }
@@ -372,6 +381,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -391,6 +401,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3 + 3);
         CORRADE_COMPARE(Movable::moved, 3);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3 + 3);
     }
 }
@@ -407,6 +418,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowableNoOp() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -426,6 +438,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowableNoOp() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -441,6 +454,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -453,6 +467,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3 + 3);
             CORRADE_COMPARE(Movable::moved, 3);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 3);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -474,6 +489,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3 + 3 + 3);
         CORRADE_COMPARE(Movable::moved, 3 + 3);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3 + 3 + 3);
     }
 }
@@ -489,6 +505,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -501,6 +518,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3 + 3);
             CORRADE_COMPARE(Movable::moved, 3);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 3);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -520,6 +538,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3 + 3);
         CORRADE_COMPARE(Movable::moved, 3);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3 + 3);
     }
 }
@@ -543,6 +562,7 @@ template<class T> void GrowableArrayTest::resizeFromEmpty() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -557,6 +577,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 2);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -576,6 +597,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 2 + 4);
         CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 2 + 4);
     }
 }
@@ -592,6 +614,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowableNoOp() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -611,6 +634,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowableNoOp() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -630,6 +654,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 2);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -652,6 +677,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 2 + 4);
         CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 2 + 4);
     }
 }
@@ -670,6 +696,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoOp() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 3);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -689,6 +716,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoOp() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -713,6 +741,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoRealloc() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 2);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -733,6 +762,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoRealloc() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4);
     }
 }
@@ -816,6 +846,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
         /* Not growable, no ASan annotation check */
@@ -834,6 +865,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4 + 2);
         CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4 + 2);
     }
 }
@@ -853,6 +885,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
 
@@ -869,6 +902,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 2);
         }
     }
@@ -876,6 +910,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4);
     }
 }
@@ -906,6 +941,7 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 2);
         CORRADE_COMPARE(Movable::moved, 1);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 2);
     }
 }
@@ -920,6 +956,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 1);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 0);
         }
 
@@ -948,6 +985,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4);
     }
 }
@@ -1000,10 +1038,12 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         if(sizeof(std::size_t) == 8) {
             CORRADE_COMPARE(Movable::constructed, 8);
             CORRADE_COMPARE(Movable::moved, 5);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 8);
         } else {
             CORRADE_COMPARE(Movable::constructed, 6);
             CORRADE_COMPARE(Movable::moved, 3);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 6);
         }
     }
@@ -1036,6 +1076,7 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 1);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -1079,6 +1120,7 @@ void GrowableArrayTest::appendMove() {
 
     CORRADE_COMPARE(Movable::constructed, 2);
     CORRADE_COMPARE(Movable::moved, 1);
+    CORRADE_COMPARE(Movable::assigned, 0);
     CORRADE_COMPARE(Movable::destructed, 2);
 }
 
@@ -1211,6 +1253,7 @@ template<class T> void GrowableArrayTest::removeSuffixZero() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -1241,6 +1284,7 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 6);
             CORRADE_COMPARE(Movable::moved, 2);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 4);
         }
     }
@@ -1248,6 +1292,7 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 6);
         CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 6);
     }
 }
@@ -1280,6 +1325,7 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 2);
         }
 
@@ -1291,6 +1337,7 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 4);
         }
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -1299,6 +1346,7 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4);
     }
 }
@@ -1331,6 +1379,7 @@ void GrowableArrayTest::shrinkEmpty() {
     /* Nothing should be done by the shrink */
     CORRADE_COMPARE(Movable::constructed, 0);
     CORRADE_COMPARE(Movable::moved, 0);
+    CORRADE_COMPARE(Movable::assigned, 0);
     CORRADE_COMPARE(Movable::destructed, 0);
 }
 
@@ -1359,6 +1408,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
@@ -1390,6 +1440,7 @@ template<class T> void GrowableArrayTest::shrinkGrowable() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 6);
         CORRADE_COMPARE(Movable::moved, 3);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 6);
     }
 }
@@ -1402,6 +1453,7 @@ template<class T> void GrowableArrayTest::move() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 10);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 
@@ -1411,6 +1463,7 @@ template<class T> void GrowableArrayTest::move() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 10);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 
@@ -1421,6 +1474,7 @@ template<class T> void GrowableArrayTest::move() {
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 20);
         CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 }
