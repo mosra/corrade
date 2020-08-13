@@ -220,6 +220,8 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceDimensionDown();
     void sliceDimensionDownInvalid();
 
+    void sliceMemberPointer();
+
     void every();
     void everyNegative();
     void everyInvalid();
@@ -420,6 +422,8 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceDimensionUpInvalid,
               &StridedArrayViewTest::sliceDimensionDown,
               &StridedArrayViewTest::sliceDimensionDownInvalid,
+
+              &StridedArrayViewTest::sliceMemberPointer,
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
@@ -2846,6 +2850,54 @@ void StridedArrayViewTest::sliceDimensionDownInvalid() {
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::slice(): slice [{0, 1, 4}:{1, 2, 5}] out of range for {2, 2, 3} elements in dimension 2\n"
         "Containers::StridedArrayView::slice(): slice [{0, 1, 0}:{1, 0, 1}] out of range for {2, 2, 3} elements in dimension 1\n");
+}
+
+void StridedArrayViewTest::sliceMemberPointer() {
+    struct Data {
+        float first;
+        short second;
+        char third;
+    };
+
+    Data data[]{
+        {1.5f, 3, 'a'},
+        {-0.5f, 11, '7'}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+
+    Containers::StridedArrayView1D<float> first = view.slice(&Data::first);
+    CORRADE_COMPARE(first.data(), &view[0].first);
+    CORRADE_COMPARE(first.size(), 2);
+    CORRADE_COMPARE(first.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(first,
+        Containers::stridedArrayView({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), &view[0].second);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+
+    Containers::StridedArrayView1D<char> third = view.slice(&Data::third);
+    CORRADE_COMPARE(third.data(), &view[0].third);
+    CORRADE_COMPARE(third.size(), 2);
+    CORRADE_COMPARE(third.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(third,
+        Containers::stridedArrayView<char>({'a', '7'}),
+        TestSuite::Compare::Container);
+
+    /* Should work for multiple dimensions as well */
+    Containers::StridedArrayView2D<Data> view2D{data, {1, 2}};
+    Containers::StridedArrayView2D<short> second2D = view2D.slice(&Data::second);
+    CORRADE_COMPARE(second2D.data(), &view2D[0][0].second);
+    CORRADE_COMPARE(second2D.size(), (Containers::StridedArrayView2D<short>::Size{1, 2}));
+    CORRADE_COMPARE(second2D.stride(), (Containers::StridedArrayView2D<short>::Stride{sizeof(Data)*2, sizeof(Data)}));
+    CORRADE_COMPARE_AS(second2D[0],
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
 }
 
 void StridedArrayViewTest::every() {

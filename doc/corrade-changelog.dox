@@ -39,6 +39,8 @@ namespace Corrade {
     alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a
     lightweight but more flexible alternative to C++17 @ref std::string_view
+-   Added a @ref Containers::StridedArrayView::slice() overload for slicing
+    into @cpp struct @ce members
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

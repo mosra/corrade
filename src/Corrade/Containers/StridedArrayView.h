@@ -621,6 +621,24 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
+         * @brief Slice to a member
+         * @m_since_latest
+         *
+         * Returns a view on a particular structure member. Example usage:
+         *
+         * @snippet Containers.cpp StridedArrayView-slice-member
+         *
+         * @see @ref StridedArrayView::StridedArrayView(ArrayView<ErasedType>, T*, const Size&, const Stride&)
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U> StridedArrayView<dimensions, U> slice(U T::*member) const;
+        #else
+        template<class U, class V = T, class = typename std::enable_if<std::is_class<V>::value || std::is_union<V>::value>::type> StridedArrayView<dimensions, U> slice(U V::*member) const {
+            return StridedArrayView<dimensions, U>{_size, _stride, &(static_cast<T*>(_data)->*member)};
+        }
+        #endif
+
+        /**
          * @brief Array prefix
          *
          * Equivalent to @cpp data.slice(0, end) @ce.
@@ -1250,6 +1268,9 @@ Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<Era
 The following two lines are equivalent:
 
 @snippet Containers.cpp stridedArrayView-data-member
+
+See also @ref StridedArrayView::slice() const for slicing into @cpp struct @ce
+members.
 */
 template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType> data, T* member, std::size_t size, std::ptrdiff_t stride) {
     return StridedArrayView1D<T>{data, member, size, stride};

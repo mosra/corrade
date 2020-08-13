@@ -777,6 +777,18 @@ static_cast<void>(b);
 }
 
 {
+/* [StridedArrayView-slice-member] */
+struct Position {
+    float x, y;
+};
+
+Containers::StridedArrayView1D<Position> data;
+Containers::StridedArrayView1D<float> y = data.slice(&Position::y);
+/* [StridedArrayView-slice-member] */
+static_cast<void>(y);
+}
+
+{
 /* [stridedArrayView-array] */
 std::uint32_t data[15];
 
