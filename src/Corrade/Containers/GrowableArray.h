@@ -848,16 +848,34 @@ template<template<class> class Allocator, class T> inline void arrayRemoveSuffix
 @brief Convert an array back to non-growable
 @m_since{2020,06}
 
-Allocates memory that's exactly large enough to fit @ref Array::size()
-elements, move-constructs the elements there and frees the old memory using
-@ref Array::deleter(). If the array is not growable, it's assumed to be already
-as small as possible, and nothing is done.
+Allocates a @ref NoInit array that's exactly large enough to fit
+@ref Array::size() elements, move-constructs the elements there and frees the
+old memory using @ref Array::deleter(). If the array is not growable, it's
+assumed to be already as small as possible, and nothing is done.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @f$ \mathcal{O}(1) @f$ if the array is already non-growable.
+@see @ref arrayShrink(Array<T>, DefaultInitT), @ref arrayIsGrowable(),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, NoInitT = NoInit);
+
+/**
+@brief Convert an array back to non-growable using a default initialization
+@m_since_latest
+
+Allocates a @ref DefaultInit array that's exactly large enough to fit
+@ref Array::size() elements, move-assigns the elements there and frees the old
+memory using @ref Array::deleter(). If the array is not growable, it's assumed
+to be already as small as possible, and nothing is done.
+
+Compared to @ref arrayShrink(Array<T>&, NoInitT) this overload works only with
+types that are default-constructible, and the resulting array instance always
+has a default (@cpp nullptr @ce) deleter. This is useful when it's not possible
+to use custom deleters, such as in plugin implementations.
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array);
+template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, DefaultInitT);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -959,6 +977,29 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
         #else
         new(dst) T{std::move(*src)};
         #endif
+}
+
+template<class T> inline void arrayMoveAssign(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    std::memcpy(dst, src, count*sizeof(T));
+}
+
+template<class T> inline void arrayMoveAssign(T* src, T* dst, const std::size_t count, typename std::enable_if<!
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    static_assert(std::is_nothrow_move_assignable<T>::value,
+        "noexcept move-assignable type is required");
+    for(T* end = src + count; src != end; ++src, ++dst)
+        *dst = std::move(*src);
 }
 
 template<class T> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count, typename std::enable_if<
@@ -1327,7 +1368,7 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
     }
 }
 
-template<class T, class Allocator> void arrayShrink(Array<T>& array) {
+template<class T, class Allocator> void arrayShrink(Array<T>& array, NoInitT) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
 
@@ -1340,6 +1381,26 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array) {
        common deleters to avoid surprises */
     Array<T> newArray{NoInit, arrayGuts.size};
     Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
+    array = std::move(newArray);
+
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    /* Nothing to do (not annotating the arrays with default deleter) */
+    #endif
+}
+
+template<class T, class Allocator> void arrayShrink(Array<T>& array, DefaultInitT) {
+    /* Direct access to speed up debug builds */
+    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
+
+    /* If not using our growing allocator, assume the array size equals its
+       capacity and do nothing */
+    if(arrayGuts.deleter != Allocator::deleter)
+        return;
+
+    /* Even if we don't need to shrink, reallocating to an usual array with
+       common deleters to avoid surprises */
+    Array<T> newArray{DefaultInit, arrayGuts.size};
+    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
     array = std::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED

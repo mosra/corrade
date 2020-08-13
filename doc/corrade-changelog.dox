@@ -49,6 +49,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+@subsubsection corrade-changelog-latest-changes-containers Containers library
+
+-   Added @ref Containers::arrayShrink(Array<T>, DefaultInitT) overload for
+    cases where it's not desired to have an @ref Containers::Array with a
+    `NoInit` deleter
+
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"

@@ -107,8 +107,10 @@ struct GrowableArrayTest: TestSuite::Tester {
     void removeSuffixInvalid();
 
     void shrinkEmpty();
-    template<class T> void shrinkNonGrowable();
-    template<class T> void shrinkGrowable();
+    template<class T> void shrinkNonGrowableNoInit();
+    template<class T> void shrinkNonGrowableDefaultInit();
+    template<class T> void shrinkGrowableNoInit();
+    template<class T> void shrinkGrowableDefaultInit();
 
     template<class T> void move();
 
@@ -279,10 +281,14 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::removeSuffixInvalid,
 
               &GrowableArrayTest::shrinkEmpty,
-              &GrowableArrayTest::shrinkNonGrowable<int>,
-              &GrowableArrayTest::shrinkNonGrowable<Movable>,
-              &GrowableArrayTest::shrinkGrowable<int>,
-              &GrowableArrayTest::shrinkGrowable<Movable>,
+              &GrowableArrayTest::shrinkNonGrowableNoInit<int>,
+              &GrowableArrayTest::shrinkNonGrowableNoInit<Movable>,
+              &GrowableArrayTest::shrinkNonGrowableDefaultInit<int>,
+              &GrowableArrayTest::shrinkNonGrowableDefaultInit<Movable>,
+              &GrowableArrayTest::shrinkGrowableNoInit<int>,
+              &GrowableArrayTest::shrinkGrowableNoInit<Movable>,
+              &GrowableArrayTest::shrinkGrowableDefaultInit<int>,
+              &GrowableArrayTest::shrinkGrowableDefaultInit<Movable>,
 
               &GrowableArrayTest::move<int>,
               &GrowableArrayTest::move<Movable>},
@@ -1383,7 +1389,7 @@ void GrowableArrayTest::shrinkEmpty() {
     CORRADE_COMPARE(Movable::destructed, 0);
 }
 
-template<class T> void GrowableArrayTest::shrinkNonGrowable() {
+template<class T> void GrowableArrayTest::shrinkNonGrowableNoInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
@@ -1413,7 +1419,37 @@ template<class T> void GrowableArrayTest::shrinkNonGrowable() {
     }
 }
 
-template<class T> void GrowableArrayTest::shrinkGrowable() {
+template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{3};
+        T* prev = a.data();
+        a[0] = 2;
+        a[1] = 7;
+        a[2] = -1;
+
+        /* Should do no nuthin' */
+        arrayShrink(a, DefaultInit);
+        CORRADE_VERIFY(!arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 3);
+        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(int(a[0]), 2);
+        CORRADE_COMPARE(int(a[1]), 7);
+        CORRADE_COMPARE(int(a[2]), -1);
+        /* Not growable, no ASan annotation check */
+    }
+
+    /* Nothing should be done by the shrink */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 3);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 3);
+    }
+}
+
+template<class T> void GrowableArrayTest::shrinkGrowableNoInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
@@ -1441,6 +1477,40 @@ template<class T> void GrowableArrayTest::shrinkGrowable() {
         CORRADE_COMPARE(Movable::constructed, 6);
         CORRADE_COMPARE(Movable::moved, 3);
         CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 6);
+    }
+}
+
+template<class T> void GrowableArrayTest::shrinkGrowableDefaultInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 10);
+        T* prev = a.data();
+        arrayAppend(a, InPlaceInit, 2);
+        arrayAppend(a, InPlaceInit, 7);
+        arrayAppend(a, InPlaceInit, -1);
+
+        /* Should convert to non-growable */
+        arrayShrink(a, DefaultInit);
+        CORRADE_VERIFY(!arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 3);
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        CORRADE_VERIFY(a.data() != prev);
+        CORRADE_COMPARE(int(a[0]), 2);
+        CORRADE_COMPARE(int(a[1]), 7);
+        CORRADE_COMPARE(int(a[2]), -1);
+        /* Not growable, no ASan annotation check */
+    }
+
+    /* Compared to shrinkGrowableDefaultInit(), instead of constructing
+       in-place we default-construct and then assign, so three more assignments
+       in addition */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 6);
+        CORRADE_COMPARE(Movable::moved, 3);
+        CORRADE_COMPARE(Movable::assigned, 3);
         CORRADE_COMPARE(Movable::destructed, 6);
     }
 }
