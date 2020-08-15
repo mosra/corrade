@@ -628,6 +628,14 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
     WIN32_FIND_DATAW data;
     HANDLE hFile = FindFirstFileW(widen(join(path, "*")).data(), &data);
     if(hFile == INVALID_HANDLE_VALUE) return list;
+    Containers::ScopeGuard closeHandle{hFile,
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* MSVC 2015 is unable to cast the parameter for FindClose */
+        [](HANDLE hFile){ FindClose(hFile); }
+        #else
+        FindClose
+        #endif
+    };
 
     /* Explicitly add `.` for compatibility with other systems */
     if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
