@@ -76,6 +76,11 @@ namespace Corrade {
 -   The `version.h` header now gets populated from Git correctly also when
     inside a CMake subproject
 
+@subsection corrade-changelog-latest-bugfixes Bug fixes
+
+-   @ref Utility::Directory::list() was leaking the file handle on Windows
+    (see [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
+
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
 -   All includes of @ref Corrade/Containers/PointerStl.h that were added in
