@@ -40,6 +40,10 @@
 
 #include <clocale>
 
+#ifdef CORRADE_TARGET_WINDOWS
+#include <windows.h>
+#endif
+
 #include "configure.h"
 
 #ifdef CORRADE_UTILITY_LINUX
@@ -933,9 +937,22 @@ void DirectoryTest::list() {
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
+    #ifdef CORRADE_TARGET_WINDOWS
+    DWORD handleCount = 0;
+    GetProcessHandleCount(GetCurrentProcess(), &handleCount);
+    #endif
+
     CORRADE_COMPARE_AS(Directory::list(_testDir),
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::SortedContainer);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Ensure we are not leaking handles */
+    DWORD newHandleCount = 0;
+    GetProcessHandleCount(GetCurrentProcess(), &newHandleCount);
+
+    CORRADE_COMPARE(newHandleCount, handleCount);
+    #endif
 }
 
 void DirectoryTest::listSkipDirectories() {
