@@ -972,7 +972,7 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
         "noexcept move-constructible type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
         Implementation::construct(*dst, std::move(*src));
         #else
         new(dst) T{std::move(*src)};
