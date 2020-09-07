@@ -364,7 +364,7 @@ class Array {
          * @ref array(std::initializer_list<T>) helper which doesn't suffer
          * from this problem.
          */
-        explicit Array(InPlaceInitT, std::initializer_list<T> list);
+        /*implicit*/ Array(InPlaceInitT, std::initializer_list<T> list);
 
         /**
          * @brief Construct a value-initialized array

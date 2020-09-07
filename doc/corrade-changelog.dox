@@ -56,6 +56,9 @@ namespace Corrade {
 -   Added @ref Containers::arrayShrink(Array<T>&, DefaultInitT) overload for
     cases where it's not desired to have an @ref Containers::Array with a
     `NoInit` deleter
+-   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
+    constructor is no longer @cpp explicit @ce to allow for easier use in
+    initializer lists
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
