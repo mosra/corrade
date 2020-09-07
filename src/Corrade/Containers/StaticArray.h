@@ -566,17 +566,31 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(const Stati
 
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
     for(T& i: _data)
+        /* This works around a featurebug in C++ where new T{} doesn't work for
+           an explicit defaulted constructor. Additionally it works around GCC
+           4.8 bugs where copy/move construction can't be done with {} for
+           plain structs. */
         Implementation::construct(i, std::forward<Args>(args)...);
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{NoInit} {
     for(std::size_t i = 0; i != other.size(); ++i)
-        new(&_data[i]) T{other._data[i]};
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_data[i], other._data[i]);
+        #else
+        new(_data + i) T{other._data[i]};
+        #endif
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArray{NoInit} {
     for(std::size_t i = 0; i != other.size(); ++i)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_data[i], std::move(other._data[i]));
+        #else
         new(&_data[i]) T{std::move(other._data[i])};
+        #endif
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {

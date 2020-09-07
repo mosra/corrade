@@ -149,6 +149,8 @@ struct OptionalTest: TestSuite::Tester {
     void debug();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void copyConstructPlainStruct();
+    void moveConstructPlainStruct();
     void vectorOfMovableOptional();
 };
 
@@ -204,6 +206,8 @@ OptionalTest::OptionalTest() {
               &OptionalTest::debug,
 
               &OptionalTest::emplaceConstructorExplicitInCopyInitialization,
+              &OptionalTest::copyConstructPlainStruct,
+              &OptionalTest::moveConstructPlainStruct,
               &OptionalTest::vectorOfMovableOptional});
 }
 
@@ -979,6 +983,66 @@ void OptionalTest::emplaceConstructorExplicitInCopyInitialization() {
     c.emplace();
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(c);
+}
+
+void OptionalTest::copyConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably. */
+    const ExtremelyTrivial value{3, 'a'};
+    Optional<ExtremelyTrivial> a{value};
+    CORRADE_COMPARE(a->a, 3);
+
+    /* This copy-constructs the wrapped value */
+    Optional<ExtremelyTrivial> b = a;
+    CORRADE_COMPARE(b->a, 3);
+
+    /* This deletes and then copy-constructs the wrapped value */
+    Optional<ExtremelyTrivial> c;
+    c = b;
+    CORRADE_COMPARE(c->a, 3);
+}
+
+void OptionalTest::moveConstructPlainStruct() {
+    /* Can't make MoveOnlyStruct directly non-copyable because then we'd hit
+       another GCC 4.8 bug where it can't be constructed using {} anymore. In
+       other tests I simply add a (move-only) Array or Pointer member, but here
+       I don't want to avoid a needless header dependency. */
+    struct MoveOnlyPointer {
+        MoveOnlyPointer(std::nullptr_t) {}
+        MoveOnlyPointer(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer(MoveOnlyPointer&&) = default;
+        MoveOnlyPointer& operator=(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer& operator=(MoveOnlyPointer&&) = default;
+
+        std::nullptr_t a;
+    };
+
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        MoveOnlyPointer b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably. */
+    Optional<MoveOnlyStruct> a{MoveOnlyStruct{3, 'a', nullptr}};
+    CORRADE_COMPARE(a->a, 3);
+
+    /* This copy-constructs the wrapped value */
+    Optional<MoveOnlyStruct> b = std::move(a);
+    CORRADE_COMPARE(b->a, 3);
+
+    /* This deletes and then copy-constructs the wrapped value */
+    Optional<MoveOnlyStruct> c;
+    c = std::move(b);
+    CORRADE_COMPARE(c->a, 3);
 }
 
 void OptionalTest::vectorOfMovableOptional() {

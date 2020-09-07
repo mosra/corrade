@@ -1020,7 +1020,12 @@ template<class T> inline void arrayCopyConstruct(const T* src, T* dst, const std
     #endif
 >::type* = nullptr) {
     for(const T* end = src + count; src != end; ++src, ++dst)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
+        Implementation::construct(*dst, *src);
+        #else
         new(dst) T{*src};
+        #endif
 }
 
 template<class T> inline void arrayDestruct(T*, T*, typename std::enable_if<std::is_trivially_destructible<T>::value>::type* = nullptr) {
@@ -1286,7 +1291,12 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
 
 template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const T& value) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
+    /* Can't use {}, see the GCC 4.8-specific overload for details */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
+    Implementation::construct(*it, value);
+    #else
     new(it) T{value};
+    #endif
     return *it;
 }
 

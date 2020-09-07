@@ -44,13 +44,22 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class, class> struct PointerConverter;
 
-    /* see constructHelpers.h for more information */
+    /* Same as construct() utils in constructHelpers.h but not in-place. See
+       their docs for more information. */
     template<class T, class First, class ...Next> T* allocate(First&& first, Next&& ...next) {
         return new T{std::forward<First>(first), std::forward<Next>(next)...};
     }
     template<class T> T* allocate() {
         return new T();
     }
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+    template<class T> inline T* allocate(const T& b) {
+        return new T(b);
+    }
+    template<class T> inline T* allocate(T&& b) {
+        return new T(std::move(b));
+    }
+    #endif
 }
 
 /**
@@ -123,7 +132,13 @@ template<class T> class Pointer {
          * Allocates a new object by passing @p args to its constructor.
          * @see @ref operator bool(), @ref operator->()
          */
-        template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{Implementation::allocate<T>(std::forward<Args>(args)...)} {}
+        template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{
+            /* This works around a featurebug in C++ where new T{} doesn't work
+               for an explicit defaulted constructor. Additionally it works
+               around GCC 4.8 bugs where copy/move construction can't be done
+               with {} for plain structs. */
+            Implementation::allocate<T>(std::forward<Args>(args)...)
+        } {}
 
         /**
          * @brief Construct a unique pointer from another of a derived type
@@ -263,6 +278,10 @@ template<class T> class Pointer {
          */
         template<class ...Args> T& emplace(Args&&... args) {
             delete _pointer;
+            /* This works around a featurebug in C++ where new T{} doesn't work
+               for an explicit defaulted constructor. Additionally it works
+               around GCC 4.8 bugs where copy/move construction can't be done
+               with {} for plain structs. */
             _pointer = Implementation::allocate<T>(std::forward<Args>(args)...);
             return *_pointer;
         }

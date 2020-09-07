@@ -132,7 +132,12 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(const T& value) noexcept(std::is_nothrow_copy_assignable<T>::value): _set{true} {
+            /* Can't use {}, see the GCC 4.8-specific overload for details */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            Implementation::construct(_value, value);
+            #else
             new(&_value) T{value};
+            #endif
         }
 
         /**
@@ -142,7 +147,12 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value): _set{true} {
+            /* Can't use {}, see the GCC 4.8-specific overload for details */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            Implementation::construct(_value, std::move(value));
+            #else
             new(&_value) T{std::move(value)};
+            #endif
         }
 
         /**
@@ -460,16 +470,34 @@ template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Option
 #endif
 
 template<class T> Optional<T>::Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): _set(other._set) {
-    if(_set) new(&_value) T{other._value};
+    if(_set)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_value, other._value);
+        #else
+        new(&_value) T{other._value};
+        #endif
 }
 
 template<class T> Optional<T>::Optional(Optional<T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): _set(other._set) {
-    if(_set) new(&_value) T{std::move(other._value)};
+    if(_set)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_value, std::move(other._value));
+        #else
+        new(&_value) T{std::move(other._value)};
+        #endif
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value) {
     if(_set) _value.~T();
-    if((_set = other._set)) new(&_value) T{other._value};
+    if((_set = other._set))
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_value, other._value);
+        #else
+        new(&_value) T{other._value};
+        #endif
     return *this;
 }
 
@@ -479,7 +507,13 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
         swap(other._value, _value);
     } else {
         if(_set) _value.~T();
-        if((_set = other._set)) new(&_value) T{std::move(other._value)};
+        if((_set = other._set))
+            /* Can't use {}, see the GCC 4.8-specific overload for details */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            Implementation::construct(_value, std::move(other._value));
+            #else
+            new(&_value) T{std::move(other._value)};
+            #endif
     }
     return *this;
 }

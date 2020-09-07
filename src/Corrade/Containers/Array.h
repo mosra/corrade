@@ -718,12 +718,22 @@ template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexce
 
 template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args&&... args): Array{NoInit, size} {
     for(std::size_t i = 0; i != size; ++i)
+        /* This works around a featurebug in C++ where new T{} doesn't work for
+           an explicit defaulted constructor. Additionally it works around GCC
+           4.8 bugs where copy/move construction can't be done with {} for
+           plain structs. */
         Implementation::construct(_data[i], std::forward<Args>(args)...);
 }
 
 template<class T, class D> Array<T, D>::Array(InPlaceInitT, std::initializer_list<T> list): Array{NoInit, list.size()} {
     std::size_t i = 0;
-    for(const T& item: list) new(_data + i++) T{item};
+    for(const T& item: list)
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+        Implementation::construct(_data[i++], item);
+        #else
+        new(_data + i++) T{item};
+        #endif
 }
 
 template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {

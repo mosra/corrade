@@ -32,8 +32,9 @@
 
 namespace Corrade { namespace Containers { namespace Implementation {
 
-/* Used by Array.h, GrowableArray.h and Optional.h; Pointer.h has a variant
-   that isn't in-place. C++ has a featurebug where a code like
+/* Used by Array.h, GrowableArray.h, StaticArray.h and Optional.h; Pointer.h
+   has a variant that isn't in-place so it's implemented directly in there. C++
+   has a featurebug where a code like
 
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;
@@ -70,11 +71,12 @@ template<class T> inline void construct(T& value) {
 
 #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
 /* Can't use {} because for plain structs it would attempt to initialize the
-   first member with `b` instead of calling the move constructor. See
-   GrowableArrayTest::moveConstructPlainStruct() for details. This will also
-   make it work in all cases where the above construct() overloads are used,
-   though I'm not going to test that explicitly unless I hit this again
-   elsewhere. */
+   first member with `b` instead of calling the copy/move constructor. See
+   copyConstructPlainStruct() and moveConstructPlainStruct() tests for Array,
+   GrowableArray, StaticArray, Optional and Pointer for details. */
+template<class T> inline void construct(T& value, const T& b) {
+    new(&value) T(b);
+}
 template<class T> inline void construct(T& value, T&& b) {
     new(&value) T(std::move(b));
 }

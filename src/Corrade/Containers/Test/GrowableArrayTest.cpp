@@ -123,6 +123,7 @@ struct GrowableArrayTest: TestSuite::Tester {
     void explicitAllocatorParameter();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void copyConstructPlainStruct();
     void moveConstructPlainStruct();
 
     void benchmarkAppendVector();
@@ -303,6 +304,7 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::explicitAllocatorParameter,
 
               &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &GrowableArrayTest::copyConstructPlainStruct,
               &GrowableArrayTest::moveConstructPlainStruct});
 
     addBenchmarks({
@@ -1680,6 +1682,32 @@ void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     arrayResize(b, DirectInit, 1);
     arrayAppend(b, InPlaceInit);
     CORRADE_COMPARE(b.size(), 2);
+}
+
+void GrowableArrayTest::copyConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    Array<ExtremelyTrivial> a;
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably. */
+    arrayAppend(a, ExtremelyTrivial{3, 'a'});
+
+    /* This copy-constructs the new values */
+    arrayResize(a, DirectInit, 10, ExtremelyTrivial{4, 'b'});
+
+    /* And this also */
+    const ExtremelyTrivial data[2]{
+        {5, 'c'},
+        {6, 'd'}
+    };
+    arrayAppend(a, arrayView(data));
+
+    CORRADE_COMPARE(a.size(), 12);
 }
 
 void GrowableArrayTest::moveConstructPlainStruct() {

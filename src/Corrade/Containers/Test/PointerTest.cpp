@@ -103,6 +103,8 @@ struct PointerTest: TestSuite::Tester {
     void cast();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void copyConstructPlainStruct();
+    void moveConstructPlainStruct();
 
     void debug();
 };
@@ -137,6 +139,8 @@ PointerTest::PointerTest() {
     addTests({&PointerTest::cast,
 
               &PointerTest::emplaceConstructorExplicitInCopyInitialization,
+              &PointerTest::copyConstructPlainStruct,
+              &PointerTest::moveConstructPlainStruct,
 
               &PointerTest::debug});
 }
@@ -533,6 +537,47 @@ void PointerTest::emplaceConstructorExplicitInCopyInitialization() {
     c.emplace();
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(c);
+}
+
+void PointerTest::copyConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably -- a{InPlaceInit, 3, 'a'} would in-place
+       initialize them, which is fine and doesn't need workarounds */
+    const ExtremelyTrivial value{3, 'a'};
+    Pointer<ExtremelyTrivial> a{InPlaceInit, value};
+    CORRADE_COMPARE(a->a, 3);
+
+    /* This copy-constructs new values -- emplace(4, 'b') would in-place
+       initialize them, which is fine and doesn't need workarounds */
+    const ExtremelyTrivial another{4, 'b'};
+    a.emplace(another);
+    CORRADE_COMPARE(a->a, 4);
+}
+
+void PointerTest::moveConstructPlainStruct() {
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        Pointer<int> b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
+       to convert MoveOnlyStruct to int to initialize the first argument and
+       fails miserably -- a{InPlaceInit, 3, 'a', nullptr} would in-place
+       initialize them, which is fine and doesn't need workarounds */
+    Pointer<MoveOnlyStruct> a{InPlaceInit, MoveOnlyStruct{3, 'a', nullptr}};
+    CORRADE_COMPARE(a->a, 3);
+
+    /* This copy-constructs new values -- emplace(4, 'b', nullptr) would
+       in-place initialize them, which is fine and doesn't need workarounds */
+    a.emplace(MoveOnlyStruct{4, 'b', nullptr});
+    CORRADE_COMPARE(a->a, 4);
 }
 
 void PointerTest::debug() {

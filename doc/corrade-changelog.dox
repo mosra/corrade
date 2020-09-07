@@ -80,6 +80,13 @@ namespace Corrade {
 
 -   @ref Utility::Directory::list() was leaking the file handle on Windows
     (see [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
+-   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable
+    array utils, @ref Containers::Optional, @ref Containers::Pointer and
+    @ref Containers::StaticArray where using @cpp T{b} @ce or
+    @cpp T{std::move(b)} @ce to perform copy/move-construction on a plain
+    @cpp struct @ce would cause GCC 4.8 to attempt to construct the members
+    directly instead of invoking a copy/move-constructor, using @cpp () @ce
+    instead works.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

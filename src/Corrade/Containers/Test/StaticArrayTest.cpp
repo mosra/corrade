@@ -108,6 +108,8 @@ struct StaticArrayTest: TestSuite::Tester {
     void size();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void copyConstructPlainStruct();
+    void moveConstructPlainStruct();
 };
 
 typedef Containers::StaticArray<5, int> StaticArray;
@@ -166,7 +168,9 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::cast,
               &StaticArrayTest::size,
 
-              &StaticArrayTest::emplaceConstructorExplicitInCopyInitialization});
+              &StaticArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &StaticArrayTest::copyConstructPlainStruct,
+              &StaticArrayTest::moveConstructPlainStruct});
 }
 
 void StaticArrayTest::construct() {
@@ -968,6 +972,55 @@ void StaticArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     /* So this should too */
     Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit};
     CORRADE_COMPARE(b.size(), 3);
+}
+
+void StaticArrayTest::copyConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably. */
+    Containers::StaticArray<3, ExtremelyTrivial> a{DirectInit, 3, 'a'};
+    CORRADE_COMPARE(a.front().a, 3);
+
+    /* This copy-constructs new values */
+    Containers::StaticArray<3, ExtremelyTrivial> b{a};
+    CORRADE_COMPARE(b.front().a, 3);
+}
+
+void StaticArrayTest::moveConstructPlainStruct() {
+    /* Can't make MoveOnlyStruct directly non-copyable because then we'd hit
+       another GCC 4.8 bug where it can't be constructed using {} anymore. In
+       other tests I simply add a (move-only) Array or Pointer member, but here
+       I don't want to avoid a needless header dependency. */
+    struct MoveOnlyPointer {
+        MoveOnlyPointer(std::nullptr_t) {}
+        MoveOnlyPointer(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer(MoveOnlyPointer&&) = default;
+        MoveOnlyPointer& operator=(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer& operator=(MoveOnlyPointer&&) = default;
+
+        std::nullptr_t a;
+    };
+
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        MoveOnlyPointer b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
+       to convert MoveOnlyStruct to int to initialize the first argument and
+       fails miserably. */
+    Containers::StaticArray<3, MoveOnlyStruct> a{DirectInit, 3, 'a', nullptr};
+    CORRADE_COMPARE(a.front().a, 3);
+
+    /* This move-constructs new values */
+    Containers::StaticArray<3, MoveOnlyStruct> b{std::move(a)};
+    CORRADE_COMPARE(b.front().a, 3);
 }
 
 }}}}

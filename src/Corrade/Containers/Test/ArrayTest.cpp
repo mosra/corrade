@@ -116,6 +116,8 @@ struct ArrayTest: TestSuite::Tester {
     void size();
 
     void emplaceConstructorExplicitInCopyInitialization();
+    void copyConstructPlainStruct();
+    void moveConstructPlainStruct();
 };
 
 typedef Containers::Array<int> Array;
@@ -170,7 +172,9 @@ ArrayTest::ArrayTest() {
               &ArrayTest::cast,
               &ArrayTest::size,
 
-              &ArrayTest::emplaceConstructorExplicitInCopyInitialization});
+              &ArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &ArrayTest::copyConstructPlainStruct,
+              &ArrayTest::moveConstructPlainStruct});
 }
 
 void ArrayTest::constructEmpty() {
@@ -879,6 +883,44 @@ void ArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     /* So this should too */
     Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit, 5};
     CORRADE_COMPARE(b.size(), 5);
+}
+
+void ArrayTest::copyConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably. */
+    Containers::Array<ExtremelyTrivial> a{DirectInit, 2, 3, 'a'};
+    CORRADE_COMPARE(a.size(), 2);
+
+    /* This copy-constructs the new values */
+    Containers::Array<ExtremelyTrivial> b{InPlaceInit, {
+        {4, 'b'},
+        {5, 'c'},
+        {6, 'd'}
+    }};
+    CORRADE_COMPARE(b.size(), 3);
+}
+
+void ArrayTest::moveConstructPlainStruct() {
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        Array b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
+       to convert MoveOnlyStruct to int to initialize the first argument and
+       fails miserably. */
+    Containers::Array<MoveOnlyStruct> a{DirectInit, 2, 3, 'a', nullptr};
+    CORRADE_COMPARE(a.size(), 2);
+
+    /* Unlike with copyConstructPlainStruct(), the InPlaceInit doesn't use
+       move-construction, so that's not affected */
 }
 
 }}}}
