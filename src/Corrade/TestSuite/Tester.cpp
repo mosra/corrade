@@ -792,6 +792,10 @@ std::size_t Tester::testCaseRepeatId() const {
     return _state->testCaseRepeatId;
 }
 
+Containers::StringView Tester::testName() const {
+    return _state->testName;
+}
+
 void Tester::setTestName(const std::string& name) {
     _state->testName = name;
 }

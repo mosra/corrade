@@ -1095,6 +1095,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::size_t testCaseRepeatId() const;
 
         /**
+         * @brief Test name
+         * @m_since_latest
+         */
+        Containers::StringView testName() const;
+
+        /**
          * @brief Set custom test name
          *
          * By default the test name is gathered together with test filename by

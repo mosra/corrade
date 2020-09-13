@@ -30,6 +30,7 @@
 #include <typeinfo>
 
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -1492,6 +1493,7 @@ void TesterTest::testName() {
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(this, &out, &out);
 
+    CORRADE_COMPARE(t.testName(), "MyCustomTestName");
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "testName.txt"),

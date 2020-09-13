@@ -60,6 +60,11 @@ namespace Corrade {
     constructor is no longer @cpp explicit @ce to allow for easier use in
     initializer lists
 
+@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+
+-   Added a @ref TestSuite::Tester::testName() getter, used by Magnum Vulkan
+    tests to provide application name for each executable
+
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"

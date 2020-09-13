@@ -1,43 +1,43 @@
 Starting TesterTest::Test with 49 test cases...
      ? [01] <unknown>()
     OK [02] trueExpression()
-  FAIL [03] falseExpression() at here.cpp:275
+  FAIL [03] falseExpression() at here.cpp:276
         Expression 5 != 5 failed.
     OK [04] equal()
-  FAIL [05] nonEqual() at here.cpp:285
+  FAIL [05] nonEqual() at here.cpp:286
         Values a and b are not the same, actual is
         5
         but expected
         3
- XFAIL [06] expectFail() at here.cpp:291
-        The world is not mad yet. 2 + 2 and 5 failed the comparison.
  XFAIL [06] expectFail() at here.cpp:292
+        The world is not mad yet. 2 + 2 and 5 failed the comparison.
+ XFAIL [06] expectFail() at here.cpp:293
         The world is not mad yet. Expression false == true failed.
- XPASS [07] unexpectedPassExpression() at here.cpp:305
+ XPASS [07] unexpectedPassExpression() at here.cpp:306
         Expression true == true was expected to fail.
- XPASS [08] unexpectedPassEqual() at here.cpp:310
+ XPASS [08] unexpectedPassEqual() at here.cpp:311
         2 + 2 and 4 were expected to fail the comparison.
     OK [09] compareAs()
-  FAIL [10] compareAsFail() at here.cpp:318
+  FAIL [10] compareAsFail() at here.cpp:319
         Length of actual "meh" doesn't match length of expected "hello" with epsilon 0
     OK [11] compareWith()
-  FAIL [12] compareWithFail() at here.cpp:326
+  FAIL [12] compareWithFail() at here.cpp:327
         Length of actual "You rather GTFO" doesn't match length of expected "hello" with epsilon 9
-  FAIL [13] compareImplicitConversionFail() at here.cpp:331
+  FAIL [13] compareImplicitConversionFail() at here.cpp:332
         Values "holla" and hello are not the same, actual is
         holla
         but expected
         hello
-  WARN [14] compareWarning() at here.cpp:342
+  WARN [14] compareWarning() at here.cpp:343
         This is a warning when comparing "a.txt" and "b.txt"
-  INFO [15] compareMessage() at here.cpp:338
+  INFO [15] compareMessage() at here.cpp:339
         This is a message when comparing "a.txt" and "b.txt"
     OK [16] compareSaveDiagnostic()
   SKIP [17] skip()
         This testcase is skipped.
-  FAIL [18] iteration() at here.cpp:362 (iteration JOHN, 1)
+  FAIL [18] iteration() at here.cpp:363 (iteration JOHN, 1)
         Expression !std::isupper(name[i]) failed.
-  FAIL [19] iterationScope() at here.cpp:379
+  FAIL [19] iterationScope() at here.cpp:380
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected
@@ -58,7 +58,7 @@ Starting TesterTest::Test with 49 test cases...
        [28] tearing down...
      ? [28] <unknown>()
        [29] setting up...
-  FAIL [29] setupTeardownFail() at here.cpp:429
+  FAIL [29] setupTeardownFail() at here.cpp:430
         Expression false failed.
        [29] tearing down...
        [30] setting up...
@@ -67,7 +67,7 @@ Starting TesterTest::Test with 49 test cases...
        [30] tearing down...
     OK [31] instancedTest(zero)
     OK [32] instancedTest(1)
-  FAIL [33] instancedTest(two) at here.cpp:452
+  FAIL [33] instancedTest(two) at here.cpp:453
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
@@ -81,7 +81,7 @@ Starting TesterTest::Test with 49 test cases...
 4
     OK [36] repeatedTest()@5
      ? [37] <unknown>()@50
-  FAIL [38] repeatedTestFail()@18 at here.cpp:463
+  FAIL [38] repeatedTestFail()@18 at here.cpp:464
         Expression _i++ < 17 failed.
   SKIP [39] repeatedTestSkip()@29
         Too late.
@@ -96,7 +96,7 @@ Starting TesterTest::Test with 49 test cases...
        [41] tearing down...
      ? [41] <unknown>()@2
        [42] setting up...
-  FAIL [42] repeatedTestSetupTeardownFail()@1 at here.cpp:477
+  FAIL [42] repeatedTestSetupTeardownFail()@1 at here.cpp:478
         Expression false failed.
        [42] tearing down...
        [43] setting up...
