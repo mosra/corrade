@@ -36,6 +36,8 @@
 #include <utility>
 
 #include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/StringView.h" /* needs to be included for
+                                              comparison operators */
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
