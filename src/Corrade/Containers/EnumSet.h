@@ -108,7 +108,7 @@ class EnumSet {
         }
 
         /**
-         * @brief Whether @p other is a subset @f$ \supseteq @f$ of this
+         * @brief Whether @p other is a subset of this (@f$ a \supseteq o @f$)
          *
          * Equivalent to @cpp (a & other) == other @ce.
          */
@@ -117,7 +117,7 @@ class EnumSet {
         }
 
         /**
-         * @brief Whether @p other is a superset @f$ \subseteq @f$ of this
+         * @brief Whether @p other is a superset of this (@f$ a \subseteq o @f$)
          *
          * Equivalent to @cpp (a & other) == a @ce.
          */
