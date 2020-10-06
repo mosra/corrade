@@ -313,6 +313,14 @@ class CORRADE_UTILITY_EXPORT String {
         explicit String(const char* data, std::size_t size, Deleter deleter) noexcept: String{const_cast<char*>(data), size, deleter} {}
 
         /**
+         * @brief Taking ownership of a null pointer is not allowed
+         *
+         * Since the @ref String class provides a guarantee of null-terminated
+         * strings, @p data *can't* be @cpp nullptr @ce.
+         */
+        explicit String(std::nullptr_t, std::size_t size, Deleter deleter) noexcept = delete;
+
+        /**
          * @brief Construct a view on an external type / from an external representation
          *
          * @see @ref Containers-String-stl
