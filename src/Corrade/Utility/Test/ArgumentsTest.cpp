@@ -946,6 +946,8 @@ void ArgumentsTest::parseSingleDash() {
     Arguments args;
     args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
         CORRADE_COMPARE(error, Arguments::ParseError::SuperfluousArgument);
+        /* Compared to parseSuperfluousArgument(), this verifies that the dash
+           isn't stripped here */
         CORRADE_COMPARE(key, "-");
         return false;
     });
