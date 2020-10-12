@@ -27,9 +27,11 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace {
@@ -118,6 +120,8 @@ struct StringTest: TestSuite::Tester {
     void slice();
     void slicePointer();
 
+    void partition();
+
     void release();
 
     void releaseDeleterSmall();
@@ -174,6 +178,8 @@ StringTest::StringTest() {
 
               &StringTest::slice,
               &StringTest::slicePointer,
+
+              &StringTest::partition,
 
               &StringTest::release,
 
@@ -1033,6 +1039,32 @@ void StringTest::slicePointer() {
     CORRADE_COMPARE(ca.prefix(ca.data() + 2).flags(), StringViewFlags{});
     CORRADE_COMPARE(ca.suffix(ca.data() + 2), "llo"_s);
     CORRADE_COMPARE(ca.suffix(ca.data() + 2).flags(), StringViewFlag::NullTerminated);
+}
+
+void StringTest::partition() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    const String ca = "ab=c";
+    {
+        Array3<StringView> p = ca.partition('=');
+        CORRADE_COMPARE_AS(p, (Array3<StringView>{"ab", "=", "c"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(p[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p[2].flags(), StringViewFlag::NullTerminated);
+    }
+
+    String a = "ab=c";
+    {
+        /** @todo any chance this could get done better? */
+        String p1 = "ab";
+        String p2 = "=";
+        String p3 = "c";
+        CORRADE_COMPARE_AS(a.partition('='),
+            (Array3<MutableStringView>{p1, p2, p3}),
+            TestSuite::Compare::Container);
+    }
 }
 
 void StringTest::release() {

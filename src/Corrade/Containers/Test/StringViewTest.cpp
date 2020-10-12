@@ -25,8 +25,10 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace {
@@ -121,6 +123,9 @@ struct StringViewTest: TestSuite::Tester {
     void slicePointer();
     void sliceFlags();
 
+    void partition();
+    void partitionFlags();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -160,6 +165,9 @@ StringViewTest::StringViewTest() {
               &StringViewTest::slice,
               &StringViewTest::slicePointer,
               &StringViewTest::sliceFlags,
+
+              &StringViewTest::partition,
+              &StringViewTest::partitionFlags,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -701,6 +709,90 @@ void StringViewTest::sliceFlags() {
 
     CORRADE_COMPARE(none.prefix(4).flags(), StringViewFlags{});
     CORRADE_COMPARE(none.prefix(none.data() + 4).flags(), StringViewFlags{});
+}
+
+void StringViewTest::partition() {
+    /* Happy case */
+    CORRADE_COMPARE_AS("ab=c"_s.partition('='),
+        (Array3<StringView>{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
+
+    /* Two occurences */
+    CORRADE_COMPARE_AS("ab=c=d"_s.partition('='),
+        (Array3<StringView>{"ab", "=", "c=d"}),
+        TestSuite::Compare::Container);
+
+    /* Not found */
+    CORRADE_COMPARE_AS("abc"_s.partition('='),
+        (Array3<StringView>{"abc", "", ""}),
+        TestSuite::Compare::Container);
+
+    /* Empty string -- all are non-null */
+    CORRADE_COMPARE_AS(""_s.partition('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
+    for(StringView a: ""_s.partition('='))
+        CORRADE_VERIFY(a.data());
+
+    /* Nullptr string -- all are non-null */
+    CORRADE_COMPARE_AS(StringView{}.partition('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
+    for(StringView a: StringView{}.partition('='))
+        CORRADE_VERIFY(!a.data());
+}
+
+void StringViewTest::partitionFlags() {
+    /* All flags come from the slice() implementation, so just verify the edge
+       cases */
+
+    /* Usual case -- all global, only the last null-terminated */
+    {
+        Array3<StringView> a = "ab=c"_s.partition('=');
+        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "=", "c"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Found at the end -- last two null-terminated */
+    } {
+        Array3<StringView> a = "ab="_s.partition('=');
+        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "=", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Not found -- all three null-terminated */
+    } {
+        Array3<StringView> a = "ab"_s.partition('=');
+        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Empty -- all three null-terminated as well */
+    } {
+        Array3<StringView> a = ""_s.partition('=');
+        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null pointer -- no flags (a literal nullptr would have the Global flag
+       set) */
+    } {
+        const char* zero{};
+        Array3<StringView> a = StringView{zero}.partition('=');
+        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(a[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(a[2].flags(), StringViewFlags{});
+    }
 }
 
 void StringViewTest::debugFlag() {

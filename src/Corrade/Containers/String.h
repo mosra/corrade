@@ -478,6 +478,15 @@ class CORRADE_UTILITY_EXPORT String {
         StringView except(std::size_t count) const; /**< @overload */
 
         /**
+         * @brief Partition
+         *
+         * Equivalent to @ref BasicStringView::partition(). Not allowed to be
+         * called on a rvalue since the returned views would become dangling.
+         */
+        Array3<MutableStringView> partition(char separator) &;
+        Array3<StringView> partition(char separator) const &; /**< @overload */
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

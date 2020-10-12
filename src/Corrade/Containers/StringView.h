@@ -392,6 +392,22 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
             return slice(0, (_size & ~Implementation::StringViewSizeMask) - count);
         }
 
+        /**
+         * @brief Partition
+         *
+         * Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
+         * Splits @p string at the first occurence of @p separator. First
+         * returned value is the part before the separator, second the
+         * separator, third a part after the separator. If the separator is not
+         * found, returns the input string followed by two empty strings.
+         *
+         * The function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting views are
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         */
+        Array3<BasicStringView<T>> partition(char separator) const;
+
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;

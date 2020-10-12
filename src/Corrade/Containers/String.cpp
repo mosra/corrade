@@ -29,6 +29,7 @@
 #include <string>
 #include <cstring>
 
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers {
@@ -346,6 +347,14 @@ MutableStringView String::except(const std::size_t count) {
 
 StringView String::except(const std::size_t count) const {
     return StringView{*this}.except(count);
+}
+
+Array3<MutableStringView> String::partition(const char separator) & {
+    return MutableStringView{*this}.partition(separator);
+}
+
+Array3<StringView> String::partition(const char separator) const & {
+    return StringView{*this}.partition(separator);
 }
 
 char* String::release() {

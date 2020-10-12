@@ -31,6 +31,7 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers {
@@ -49,6 +50,21 @@ template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, String
 
 template<class T> BasicStringView<T>::operator ArrayView<T>() noexcept {
     return {_data, size()};
+}
+
+template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {
+    /** @todo partition() using multiple characters, would need implementing
+        a non-shitty strstr() that can work on non-null-terminated strings */
+    /** @todo and then rpartition(), which has absolutely no standard library
+        functions either, SIGH */
+
+    const std::size_t size = this->size();
+    T* const pos = static_cast<T*>(std::memchr(_data, separator, size));
+    return {
+        pos ? prefix(pos) : *this,
+        pos ? slice(pos, pos + 1) : suffix(size),
+        pos ? suffix(pos + 1) : suffix(size)
+    };
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
