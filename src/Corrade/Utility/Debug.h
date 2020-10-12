@@ -584,6 +584,19 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug& operator<<(Containers::StringView value);
 
+        /* Unfortunately we can't have just a StringView overload because
+           when StringStl.h is included, printing a String also matches
+           operator<<(DebugOstreamFallback&&), causing ambiguity. And when we
+           have a String overload, we need a MutableStringView one as well,
+           because otherwise there's an ambiguity between StringView and
+           String. Sigh. */
+
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        Debug& operator<<(Containers::MutableStringView value);
+
         /**
          * @overload
          * @m_since_latest

@@ -78,6 +78,10 @@ template<> inline void toStream(std::ostream& s, const Containers::StringView& v
     s.write(value.data(), value.size());
 }
 
+template<> inline void toStream(std::ostream& s, const Containers::MutableStringView& value) {
+    s.write(value.data(), value.size());
+}
+
 template<> inline void toStream(std::ostream& s, const Containers::String& value) {
     s.write(value.data(), value.size());
 }
@@ -493,6 +497,7 @@ Debug& Debug::operator<<(const void* const value) {
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
 Debug& Debug::operator<<(Containers::StringView value) { return print(value); }
+Debug& Debug::operator<<(Containers::MutableStringView value) { return print(value); }
 Debug& Debug::operator<<(const Containers::String& value) { return print(value); }
 
 Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }

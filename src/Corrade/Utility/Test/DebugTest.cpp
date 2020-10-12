@@ -200,9 +200,11 @@ void DebugTest::debug() {
 void DebugTest::string() {
     using namespace Containers::Literals;
 
+    Containers::String a = "mutable";
+
     std::ostringstream out;
-    Debug{&out} << "hello\0world,"_s << Containers::String{"very\0well!"_s};
-    CORRADE_COMPARE(out.str(), (std::string{"hello\0world, very\0well!\n", 24}));
+    Debug{&out} << "hello\0world,"_s << Containers::String{"very\0well!"_s} << Containers::MutableStringView{a};
+    CORRADE_COMPARE(out.str(), (std::string{"hello\0world, very\0well! mutable\n", 32}));
 }
 
 void DebugTest::stringStl() {
@@ -983,9 +985,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":975: hello\n"
-        __FILE__ ":977: and this is from another line\n"
-        __FILE__ ":979\n"
+        __FILE__ ":977: hello\n"
+        __FILE__ ":979: and this is from another line\n"
+        __FILE__ ":981\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),
