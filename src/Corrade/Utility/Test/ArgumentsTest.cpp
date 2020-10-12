@@ -896,7 +896,10 @@ void ArgumentsTest::parseShortBooleanOptionValuePack() {
 
 void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::UnknownArgument);
         CORRADE_COMPARE(key, "error");
         return false;
@@ -912,7 +915,10 @@ void ArgumentsTest::parseUnknownArgument() {
 
 void ArgumentsTest::parseUnknownShortArgument() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::UnknownShortArgument);
         CORRADE_COMPARE(key, "e");
         return false;
@@ -928,7 +934,10 @@ void ArgumentsTest::parseUnknownShortArgument() {
 
 void ArgumentsTest::parseSuperfluousArgument() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::SuperfluousArgument);
         CORRADE_COMPARE(key, "error");
         return false;
@@ -944,7 +953,10 @@ void ArgumentsTest::parseSuperfluousArgument() {
 
 void ArgumentsTest::parseSingleDash() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::SuperfluousArgument);
         /* Compared to parseSuperfluousArgument(), this verifies that the dash
            isn't stripped here */
@@ -974,7 +986,10 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
 
 void ArgumentsTest::parseInvalidShortArgument() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::InvalidShortArgument);
         CORRADE_COMPARE(key, "?");
         return false;
@@ -990,7 +1005,10 @@ void ArgumentsTest::parseInvalidShortArgument() {
 
 void ArgumentsTest::parseInvalidLongArgument() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::InvalidArgument);
         CORRADE_COMPARE(key, "??");
         return false;
@@ -1006,7 +1024,10 @@ void ArgumentsTest::parseInvalidLongArgument() {
 
 void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Arguments args;
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::InvalidShortArgument);
         CORRADE_COMPARE(key, "long-argument");
         return false;
@@ -1023,7 +1044,10 @@ void ArgumentsTest::parseInvalidLongArgumentDashes() {
 void ArgumentsTest::parseMissingValue() {
     Arguments args;
     args.addOption("output");
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
         CORRADE_COMPARE(error, Arguments::ParseError::MissingValue);
         CORRADE_COMPARE(key, "output");
         return false;
@@ -1039,14 +1063,19 @@ void ArgumentsTest::parseMissingValue() {
 
 void ArgumentsTest::parseMissingOption() {
     Arguments args;
-    args.addNamedArgument("output");
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.addBooleanOption("yes")
+        .addNamedArgument("output");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Everything should be parsed at this point */
+        CORRADE_VERIFY(args.isParsed());
+        CORRADE_VERIFY(args.isSet("yes"));
+
         CORRADE_COMPARE(error, Arguments::ParseError::MissingArgument);
         CORRADE_COMPARE(key, "output");
         return false;
     });
 
-    const char* argv[] = { "" };
+    const char* argv[] = { "", "--yes" };
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1056,14 +1085,19 @@ void ArgumentsTest::parseMissingOption() {
 
 void ArgumentsTest::parseMissingArgument() {
     Arguments args;
-    args.addArgument("file").setHelp("file", "", "file.dat");
-    args.setParseErrorCallback([](const Arguments&, Arguments::ParseError error, const std::string& key) {
+    args.addBooleanOption("yes")
+        .addArgument("file").setHelp("file", "", "file.dat");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Everything should be parsed at this point */
+        CORRADE_VERIFY(args.isParsed());
+        CORRADE_VERIFY(args.isSet("yes"));
+
         CORRADE_COMPARE(error, Arguments::ParseError::MissingArgument);
         CORRADE_COMPARE(key, "file");
         return false;
     });
 
-    const char* argv[] = { "" };
+    const char* argv[] = { "", "--yes" };
 
     std::ostringstream out;
     Error redirectError{&out};
