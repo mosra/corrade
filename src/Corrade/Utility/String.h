@@ -321,7 +321,7 @@ CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const s
 @overload
 @m_since{2019,10}
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& delimiter);
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator);
 
 /**
 @brief Right-partition a string
@@ -340,7 +340,7 @@ CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const 
 @overload
 @m_since{2019,10}
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& delimiter);
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator);
 
 /**
 @brief Join strings with given character
