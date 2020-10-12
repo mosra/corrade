@@ -79,14 +79,16 @@ struct ArgumentsTest: TestSuite::Tester {
     void disallowedCharacter();
     void disallowedCharacterShort();
     void disallowedIgnoreUnknown();
+    void arrayArgumentTwice();
     void finalOptionalArgumentTwice();
-    void finalOptionalArgumentNotLast();
+    void finalOptionalArgumentWithArray();
+    void argumentAfterFinalOptionalArgument();
+    void arrayArgumentAfterFinalOptionalArgument();
 
     void parseNullptr();
     void parseHelp();
     void parseArguments();
     void parseMixed();
-    void parseRepeatedArguments();
     void parseStringView();
     void parseCustomType();
     void parseCustomTypeFlags();
@@ -101,6 +103,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseShortBooleanOptionPack();
     void parseShortBooleanOptionValuePack();
 
+    void parseArrayArguments();
+    void parseArrayOptions();
+
     void parseUnknownArgument();
     void parseUnknownShortArgument();
     void parseSuperfluousArgument();
@@ -113,6 +118,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingValue();
     void parseMissingOption();
     void parseMissingArgument();
+    void parseMissingArrayArgument();
 
     void prefixedParse();
     void prefixedParseMinus();
@@ -171,14 +177,16 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
               &ArgumentsTest::disallowedIgnoreUnknown,
+              &ArgumentsTest::arrayArgumentTwice,
               &ArgumentsTest::finalOptionalArgumentTwice,
-              &ArgumentsTest::finalOptionalArgumentNotLast,
+              &ArgumentsTest::finalOptionalArgumentWithArray,
+              &ArgumentsTest::argumentAfterFinalOptionalArgument,
+              &ArgumentsTest::arrayArgumentAfterFinalOptionalArgument,
 
               &ArgumentsTest::parseNullptr,
               &ArgumentsTest::parseHelp,
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
-              &ArgumentsTest::parseRepeatedArguments,
               &ArgumentsTest::parseStringView,
               &ArgumentsTest::parseCustomType,
               &ArgumentsTest::parseCustomTypeFlags,
@@ -193,6 +201,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseShortBooleanOptionPack,
               &ArgumentsTest::parseShortBooleanOptionValuePack,
 
+              &ArgumentsTest::parseArrayArguments,
+              &ArgumentsTest::parseArrayOptions,
+
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
@@ -205,6 +216,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
               &ArgumentsTest::parseMissingArgument,
+              &ArgumentsTest::parseMissingArrayArgument,
 
               &ArgumentsTest::prefixedParse,
               &ArgumentsTest::prefixedParseMinus,
@@ -305,13 +317,15 @@ void ArgumentsTest::move() {
 void ArgumentsTest::helpArgumentsOnly() {
     Arguments args;
     args.addArgument("foo")
+        .addArrayArgument("input").setHelp("input", "one or more inputs", "files")
         .addArgument("bar").setHelp("bar", "where to put things", "output.bin.gz")
         .setCommand("foobar");
 
     const auto expected = R"text(Usage:
-  foobar [-h|--help] [--] foo output.bin.gz
+  foobar [-h|--help] [--] foo files... output.bin.gz
 
 Arguments:
+  files          one or more inputs
   output.bin.gz  where to put things
   -h, --help     display this help message and exit
 )text";
@@ -538,6 +552,7 @@ void ArgumentsTest::duplicateKey() {
     std::ostringstream out;
     Error redirectError{&out};
     args.addArgument("foo")
+        .addArrayArgument("foo")
         .addNamedArgument("foo")
         .addOption("foo")
         .addArrayOption("foo")
@@ -545,6 +560,7 @@ void ArgumentsTest::duplicateKey() {
         .addFinalOptionalArgument("foo");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addArgument(): the key foo is already used\n"
+        "Utility::Arguments::addArrayArgument(): the key foo is already used\n"
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addOption(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addArrayOption(): the key foo or its short variant is already used\n"
@@ -583,6 +599,7 @@ void ArgumentsTest::emptyKey() {
     std::ostringstream out;
     Error redirectError{&out};
     args.addArgument("")
+        .addArrayArgument("")
         .addNamedArgument("")
         .addOption("")
         .addArrayOption("")
@@ -590,6 +607,7 @@ void ArgumentsTest::emptyKey() {
         .addFinalOptionalArgument("");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addArgument(): key can't be empty\n"
+        "Utility::Arguments::addArrayArgument(): key can't be empty\n"
         "Utility::Arguments::addNamedArgument(): invalid key  or its short variant\n"
         "Utility::Arguments::addOption(): invalid key  or its short variant\n"
         "Utility::Arguments::addArrayOption(): invalid key  or its short variant\n"
@@ -653,6 +671,19 @@ void ArgumentsTest::disallowedIgnoreUnknown() {
     CORRADE_COMPARE(out.str(), "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant\n");
 }
 
+void ArgumentsTest::arrayArgumentTwice() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args;
+    args.addArrayArgument("first")
+        .addArrayArgument("second");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArrayArgument(): there's already an array argument first\n");
+}
+
 void ArgumentsTest::finalOptionalArgumentTwice() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
@@ -666,7 +697,20 @@ void ArgumentsTest::finalOptionalArgumentTwice() {
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument first\n");
 }
 
-void ArgumentsTest::finalOptionalArgumentNotLast() {
+void ArgumentsTest::finalOptionalArgumentWithArray() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args;
+    args.addArrayArgument("first")
+        .addFinalOptionalArgument("second");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::addFinalOptionalArgument(): there's already an array argument first\n");
+}
+
+void ArgumentsTest::argumentAfterFinalOptionalArgument() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
@@ -677,6 +721,19 @@ void ArgumentsTest::finalOptionalArgumentNotLast() {
     args.addFinalOptionalArgument("arg")
         .addArgument("bla");
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addArgument(): can't add more arguments after the final optional one\n");
+}
+
+void ArgumentsTest::arrayArgumentAfterFinalOptionalArgument() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args;
+    args.addFinalOptionalArgument("arg")
+        .addArrayArgument("bla");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArrayArgument(): can't add more arguments after the final optional one\n");
 }
 
 void ArgumentsTest::parseNullptr() {
@@ -728,24 +785,6 @@ void ArgumentsTest::parseMixed() {
     /* Default values */
     CORRADE_COMPARE(args.value("size"), "56");
     CORRADE_VERIFY(!args.isSet("loud"));
-}
-
-void ArgumentsTest::parseRepeatedArguments() {
-    Arguments args;
-    args.addNamedArgument("arg")
-        .addBooleanOption('b', "bool")
-        .addArrayOption('F', "fibonacci");
-
-    const char* argv[] = { "", "-F", "0", "--arg", "first", "--fibonacci", "1", "-F", "1", "-b", "--arg", "second", "-F", "2", "-b" };
-
-    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(args.value("arg"), "second");
-    CORRADE_COMPARE(args.arrayValueCount("fibonacci"), 4);
-    CORRADE_COMPARE(args.arrayValue("fibonacci", 0), "0");
-    CORRADE_COMPARE(args.arrayValue("fibonacci", 1), "1");
-    CORRADE_COMPARE(args.arrayValue("fibonacci", 2), "1");
-    CORRADE_COMPARE(args.arrayValue("fibonacci", 3), "2");
-    CORRADE_VERIFY(args.isSet("bool"));
 }
 
 void ArgumentsTest::parseStringView() {
@@ -923,6 +962,53 @@ void ArgumentsTest::parseShortBooleanOptionValuePack() {
     CORRADE_VERIFY(args.isSet("refresh"));
     CORRADE_COMPARE(args.value("search"), "magnum");
     CORRADE_COMPARE(args.value("package"), "corrade");
+}
+
+void ArgumentsTest::parseArrayArguments() {
+    Arguments args;
+    args.addArrayOption("error") /* only to verify the array values are not
+                                    overwriting each other */
+        .addArgument("mode")
+        .addArrayArgument("input")
+        .addArgument("output")
+        .addArgument("logfile");
+
+    const char* argv[] = { "", "compress", "a.txt", "b.jpg", "c.cpp", "data.zip", "data.log", "--error", "never" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("mode"), "compress");
+    CORRADE_COMPARE(args.arrayValueCount("input"), 3);
+    CORRADE_COMPARE(args.arrayValue("input", 0), "a.txt");
+    CORRADE_COMPARE(args.arrayValue("input", 1), "b.jpg");
+    CORRADE_COMPARE(args.arrayValue("input", 2), "c.cpp");
+    CORRADE_COMPARE(args.value("output"), "data.zip");
+    CORRADE_COMPARE(args.value("logfile"), "data.log");
+
+    CORRADE_COMPARE(args.arrayValueCount("error"), 1);
+    CORRADE_COMPARE(args.arrayValue("error", 0), "never");
+}
+
+void ArgumentsTest::parseArrayOptions() {
+    Arguments args;
+    args.addArrayArgument("input") /* only to verify the array values are not
+                                      overwriting each other */
+        .addNamedArgument("arg")
+        .addBooleanOption('b', "bool")
+        .addArrayOption('F', "fibonacci");
+
+    /* For --arg and -b / --bool only the last value is taken */
+    const char* argv[] = { "", "-F", "0", "--arg", "first", "--fibonacci", "1", "-F", "1", "-b", "--arg", "second", "-F", "2", "-b", "in.txt" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("arg"), "second");
+    CORRADE_COMPARE(args.arrayValueCount("fibonacci"), 4);
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 0), "0");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 1), "1");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 2), "1");
+    CORRADE_COMPARE(args.arrayValue("fibonacci", 3), "2");
+    CORRADE_VERIFY(args.isSet("bool"));
+
+    CORRADE_COMPARE(args.arrayValueCount("input"), 1);
+    CORRADE_COMPARE(args.arrayValue("input", 0), "in.txt");
 }
 
 void ArgumentsTest::parseUnknownArgument() {
@@ -1136,6 +1222,23 @@ void ArgumentsTest::parseMissingArgument() {
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
 }
 
+void ArgumentsTest::parseMissingArrayArgument() {
+    Arguments args;
+    args.addArgument("mode")
+        .addArrayArgument("input")
+        .addArgument("output")
+        .addArgument("logfile");
+
+    const char* argv[] = { "", "compress", "data.zip", "data.log" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    /* It's actually the array arguments missing (there has to be at least
+       one), but that's impossible to distinguish here */
+    CORRADE_COMPARE(out.str(), "Missing command-line argument logfile\n");
+}
+
 void ArgumentsTest::prefixedParse() {
     Arguments arg1;
     arg1.addArgument("file")
@@ -1281,6 +1384,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
     Error redirectError{&out};
     Arguments args{"reader"};
     args.addArgument("foo")
+        .addArrayArgument("bizbaz")
         .addNamedArgument("bar")
         .addOption('a', "baz")
         .addArrayOption('X', "booboo")
@@ -1289,6 +1393,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
 
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addArgument(): argument foo not allowed in prefixed version\n"
+        "Utility::Arguments::addArrayArgument(): argument bizbaz not allowed in prefixed version\n"
         "Utility::Arguments::addNamedArgument(): argument bar not allowed in prefixed version\n"
         "Utility::Arguments::addOption(): short option a not allowed in prefixed version\n"
         "Utility::Arguments::addArrayOption(): short option X not allowed in prefixed version\n"

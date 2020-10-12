@@ -86,8 +86,9 @@ Arguments:
                        (default: log.txt)
 @endcode
 
-It doesn't end with just the above, check out the @ref addArrayOption() and
-@ref addFinalOptionalArgument() APIs for more involved uses.
+It doesn't end with just the above, check out the @ref addArrayArgument(),
+@ref addArrayOption() and @ref addFinalOptionalArgument() APIs for more
+involved uses.
 
 @section Utility-Arguments-delegating Delegating arguments to different parts of the application
 
@@ -403,9 +404,42 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
-         * @see @ref addFinalOptionalArgument()
+         * @see @ref addArrayArgument(), @ref addFinalOptionalArgument()
          */
         Arguments& addArgument(std::string key);
+
+        /**
+         * @brief Add a mandatory array argument
+         * @m_since_latest
+         *
+         * Compared to @ref addArgument(), which requires exactly one argument
+         * to be present, this function requires one or more arguments. There
+         * can be only one array argument and this function can't be combined
+         * with @ref addFinalOptionalArgument(), but it can be placed at any
+         * position relative to other positional arguments.
+         *
+         * After calling @cpp addArrayArgument("argument") @ce the option will
+         * be displayed in help text like the following. Call @ref setHelp() to
+         * change the displayed key:
+         *
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [--] argument...
+         *
+         * Arguments:
+         *   argument          help text
+         * @endcode
+         *
+         * If no help text is set, the argument is not displayed in the
+         * argument list. Call @ref setHelp() to set it. Array length and
+         * values can be retrieved using @ref arrayValueCount() and
+         * @ref arrayValue().
+         *
+         * Only non-boolean options are allowed in the prefixed version, no
+         * arguments --- use @ref addArrayArgument() in that case instead.
+         * @see @ref addFinalOptionalArgument(), @ref addArrayOption()
+         */
+        Arguments& addArrayArgument(std::string key);
 
         /**
          * @brief Add named mandatory argument with both short and long key alternative
@@ -538,6 +572,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Short key is not allowed in the prefixed version, use
          * @ref addArrayOption(std::string) in that case instead.
+         * @see @ref addArrayArgument()
          */
         Arguments& addArrayOption(char shortKey, std::string key);
 
@@ -614,7 +649,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Compared to arguments added with @ref addArgument() this one doesn't
          * need to be present; compared to options added with @ref addOption()
          * it doesn't need to be specified together with option name. There can
-         * be only one final optional argument.
+         * be only one final optional argument and this function can't be
+         * combined with @ref addArrayArgument().
          *
          * After calling @cpp addFinalOptionalArgument("argument") @ce the
          * argument will be displayed in help text like the following. Call
@@ -635,6 +671,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
+         * @see @ref addArrayArgument()
          */
         Arguments& addFinalOptionalArgument(std::string key, std::string defaultValue = std::string());
 
@@ -849,37 +886,38 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @param flags     Configuration value flags
          *
          * Expects that the key exists and @ref parse() was successful. Only
-         * for arguments and non-array non-boolean options, use @ref arrayValue()
-         * or @ref isSet() for those instead. If @p T is not @ref std::string,
-         * uses @ref ConfigurationValue::fromString() to convert the value to
-         * given type.
+         * for non-array arguments and non-array non-boolean options, use
+         * @ref arrayValue() or @ref isSet() for those instead. If @p T is not
+         * @ref std::string, uses @ref ConfigurationValue::fromString() to
+         * convert the value to given type.
          */
         template<class T = std::string> T value(const std::string& key, ConfigurationValueFlags flags = {}) const;
 
         /**
-         * @brief Count of parsed values in given array option
-         * @param key       Array option key
+         * @brief Count of parsed values in given array argument or option
+         * @param key       Array argument or option key
          * @m_since{2020,06}
          *
          * Expects that the key exists, @ref parse() was successful and
-         * @p key is an array option.
-         * @see @ref addArrayOption()
+         * @p key is an array argument or option.
+         * @see @ref addArrayArgument(), @ref addArrayOption()
          */
         std::size_t arrayValueCount(const std::string& key) const;
 
         /**
-         * @brief Value of given array option
-         * @param key       Array option key
+         * @brief Value of given array argument or option
+         * @param key       Array argument or option key
          * @param id        Array value index
          * @param flags     Configuration value flags
          * @m_since{2020,06}
          *
          * Expects that the key exists, @ref parse() was successful and
-         * @p id is less than @ref arrayValueCount(). Only for array options,
-         * use @ref value() or @ref isSet() for those instead. If @p T is not
-         * @ref std::string, uses @ref ConfigurationValue::fromString() to
-         * convert the value to given type.
-         * @see @ref addArrayOption()
+         * @p id is less than @ref arrayValueCount(). Only for array arguments
+         * and options, use @ref value() or @ref isSet() for those instead. If
+         * @p T is not @ref std::string, uses
+         * @ref ConfigurationValue::fromString() to convert the value to given
+         * type.
+         * @see @ref addArrayArgument(), @ref addArrayOption()
          */
         template<class T = std::string> T arrayValue(const std::string& key, const std::size_t id, ConfigurationValueFlags flags = {}) const;
 
@@ -917,7 +955,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         InternalFlags _flags;
         /* not std::size_t so it fits into the padding after flags */
-        std::uint32_t _finalOptionalArgument{};
+        std::uint16_t _finalOptionalArgument{}, _arrayArgument{};
         std::string _prefix;
         std::string _command;
         std::string _help;

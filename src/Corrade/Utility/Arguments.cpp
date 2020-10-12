@@ -69,6 +69,7 @@ namespace {
 
 enum class Arguments::Type: std::uint8_t {
     Argument,
+    ArrayArgument,
     NamedArgument,
     Option,
     ArrayOption,
@@ -224,6 +225,33 @@ Arguments& Arguments::addArgument(std::string key) {
     return *this;
 }
 
+Arguments& Arguments::addArrayArgument(std::string key) {
+    CORRADE_ASSERT(_prefix.empty(),
+        "Utility::Arguments::addArrayArgument(): argument" << key << "not allowed in prefixed version", *this);
+    CORRADE_ASSERT(!key.empty(),
+        "Utility::Arguments::addArrayArgument(): key can't be empty", *this);
+    CORRADE_ASSERT(!find(key),
+        "Utility::Arguments::addArrayArgument(): the key" << key << "is already used", *this);
+
+    /* There can be only one array argument and thre can't be both an array
+       argument and a final optional argument, as otherwise we would have no
+       way to know what is what */
+    CORRADE_ASSERT(!_arrayArgument,
+        "Utility::Arguments::addArrayArgument(): there's already an array argument" << _entries[_arrayArgument].key, *this);
+    CORRADE_ASSERT(!_finalOptionalArgument,
+        "Utility::Arguments::addArrayArgument(): can't add more arguments after the final optional one", *this);
+
+    /* Reset the parsed flag -- it's probably a mistake to add an argument and
+       then ask for values without parsing again */
+    _flags &= ~InternalFlag::Parsed;
+
+    _arrayArgument = _entries.size();
+    std::string helpKey = key;
+    arrayAppend(_entries, Containers::InPlaceInit, Type::ArrayArgument, '\0', std::move(key), std::move(helpKey), std::string(), _arrayValues.size());
+    arrayAppend(_arrayValues, Containers::InPlaceInit);
+    return *this;
+}
+
 Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addNamedArgument(): invalid key" << key << "or its short variant", *this);
@@ -329,6 +357,8 @@ Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defa
         "Utility::Arguments::addFinalOptionalArgument(): key can't be empty", *this);
     CORRADE_ASSERT(!find(key),
         "Utility::Arguments::addFinalOptionalArgument(): the key" << key << "is already used", *this);
+    CORRADE_ASSERT(!_arrayArgument,
+        "Utility::Arguments::addFinalOptionalArgument(): there's already an array argument" << _entries[_arrayArgument].key, *this);
     CORRADE_ASSERT(!_finalOptionalArgument,
         "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument" << _entries[_finalOptionalArgument].key, *this);
 
@@ -412,7 +442,7 @@ Arguments& Arguments::setHelp(const std::string& key, std::string help, std::str
         if(found->type == Type::NamedArgument || found->type == Type::Option || found->type == Type::ArrayOption)
             found->helpKey = _prefix + key + ' ' + std::move(helpKey);
         else {
-            CORRADE_INTERNAL_ASSERT(found->type == Type::Argument);
+            CORRADE_INTERNAL_ASSERT(found->type == Type::Argument || found->type == Type::ArrayArgument);
             found->helpKey = std::move(helpKey);
         }
     }
@@ -457,7 +487,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         if(entry.type == Type::Argument || entry.type == Type::NamedArgument || entry.type == Type::Option) {
             CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
             _values[entry.id] = entry.defaultValue;
-        } else if(entry.type == Type::ArrayOption) {
+        } else if(entry.type == Type::ArrayArgument || entry.type == Type::ArrayOption) {
             CORRADE_INTERNAL_ASSERT(entry.id < _arrayValues.size());
             arrayResize(_arrayValues[entry.id], 0);
         } else if(entry.type == Type::BooleanOption) {
@@ -537,7 +567,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         /* Value for given argument. The shortOptionPackOffset is zero in case
            we're not coming from a short option pack */
         if(valueFor) {
-            if(valueFor->type == Type::Argument || valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
+            if(/*valueFor->type == Type::Argument || */valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
                 _values[valueFor->id] = argv[i] + shortOptionPackOffset;
             } else if(valueFor->type == Type::ArrayOption) {
@@ -687,7 +717,8 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             if(!_prefix.empty()) continue;
 
             /* Append to the argument array, defer assigning them to the
-               correct positional arguments to later */
+               correct positional arguments to later as that makes array
+               arguments easier to handle */
             arrayAppend(argumentValues, argv[i]);
         }
     }
@@ -700,11 +731,31 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
     /* Assign argument values to the correct positional arguments */
     {
+        /* If we have array arguments, calculate how many of them is there ---
+           there has to be at least one. The _arrayArgument points to one of
+           the entries or is 0 if it's not set -- we assume that entry 0 is
+           always --help, so there's no ambiguity. */
+        CORRADE_INTERNAL_ASSERT(_entries[0].type == Type::BooleanOption);
+        std::size_t arrayArgumentCount{};
+        if(_arrayArgument) {
+            std::size_t nonArrayArgumentCount = 0;
+            for(const Entry& e: _entries) if(e.type == Type::Argument)
+                ++nonArrayArgumentCount;
+
+            /* If there's more expected arguments than parsed, we'll be
+               emitting the SuperfluousArgument error below */
+            if(nonArrayArgumentCount < argumentValues.size())
+                arrayArgumentCount = argumentValues.size() - nonArrayArgumentCount;
+            else
+                arrayArgumentCount = 1;
+        }
+
         Entry* e = _entries.begin();
         for(const char* const argumentValue: argumentValues) {
             /* Find the next argument. If not found, we have superfluous
                arguments at the end, which is an error. */
-            while(e != _entries.end() && e->type != Type::Argument) ++e;
+            while(e != _entries.end() && e->type != Type::Argument && e->type != Type::ArrayArgument)
+                ++e;
             if(e == _entries.end()) {
                 if(_parseErrorCallback(*this, ParseError::SuperfluousArgument, argumentValue))
                     continue;
@@ -713,11 +764,21 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 return false;
             }
 
-            /* If found, assign the value, mark it as parsed, and start
-               searching from the next entry in the following iteration */
-            _values[e->id] = argumentValue;
             parsedArguments[e - _entries.begin()] = true;
-            ++e;
+
+            /* If found and it's not an array argument, assign the value and
+               start searching from the next entry in the following iteration */
+            if(e->type == Type::Argument) {
+                _values[e->id] = argumentValue;
+                ++e;
+
+            /* Otherwise consume one of the array arguments. If that was the
+               last one, move to the next entry in the following iteration. */
+            } else {
+                CORRADE_INTERNAL_ASSERT(e->type == Type::ArrayArgument);
+                arrayAppend(_arrayValues[e->id], Containers::InPlaceInit, argumentValue);
+                if(!--arrayArgumentCount) ++e;
+            }
         }
     }
 
@@ -768,7 +829,7 @@ std::string Arguments::usage() const {
     for(std::size_t i = 0; i != _entries.size(); ++i) {
         const Entry& entry = _entries[i];
 
-        if(entry.type == Type::Argument) {
+        if(entry.type == Type::Argument || entry.type == Type::ArrayArgument) {
             /* Final argument should be always after all other arguments */
             CORRADE_INTERNAL_ASSERT(!_finalOptionalArgument || _finalOptionalArgument >= i);
             hasArguments = true;
@@ -801,7 +862,8 @@ std::string Arguments::usage() const {
     for(std::size_t i = 0; i != _entries.size(); ++i) {
         const Entry& entry = _entries[i];
 
-        if(entry.type != Type::Argument) continue;
+        if(entry.type != Type::Argument && entry.type != Type::ArrayArgument)
+            continue;
 
         out << ' ';
 
@@ -811,7 +873,10 @@ std::string Arguments::usage() const {
 
         out << entry.helpKey;
 
-        if(_finalOptionalArgument == i) out << ']';
+        if(entry.type == Type::Argument && _finalOptionalArgument == i)
+            out << ']';
+        else if(entry.type == Type::ArrayArgument)
+            out << "...";
     }
 
     /* Print ellipsis for main application arguments, if this is an prefixed
@@ -888,7 +953,7 @@ std::string Arguments::help() const {
         const Entry& entry = _entries[i];
         /* Skip non-arguments and arguments without help text (or default
            value, in case of the final optional argument) */
-        if(entry.type != Type::Argument || (entry.defaultValue.empty() && entry.help.empty()))
+        if((entry.type != Type::Argument && entry.type != Type::ArrayArgument) || (entry.defaultValue.empty() && entry.help.empty()))
             continue;
 
         out << "  " << std::left << std::setw(keyColumnWidth) << entry.helpKey << "  ";
@@ -910,7 +975,7 @@ std::string Arguments::help() const {
     for(const Entry& entry: _entries) {
         /* Skip arguments and options without default value, environment or
            help text (no additional info to show) */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
+        if(entry.type == Type::Argument || entry.type == Type::ArrayArgument || (entry.defaultValue.empty() && entry.help.empty()
             #ifndef CORRADE_TARGET_WINDOWS_RT
             && entry.environment.empty()
             #endif
@@ -970,7 +1035,7 @@ const std::string& Arguments::valueInternal(const std::string& key) const {
 std::size_t Arguments::arrayValueCount(const std::string& key) const {
     const Entry* found = find(_prefix + key);
     CORRADE_ASSERT(found, "Utility::Arguments::arrayValueCount(): key" << key << "not found", {});
-    CORRADE_ASSERT(found->type == Type::ArrayOption,
+    CORRADE_ASSERT(found->type == Type::ArrayArgument || found->type == Type::ArrayOption,
         "Utility::Arguments::arrayValueCount(): cannot use this function for a non-array option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _arrayValues.size());
     CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet", {});
@@ -982,7 +1047,7 @@ const std::string& Arguments::arrayValueInternal(const std::string& key, const s
     /* All asserts return _values[0] because we need to return a reference,
        this is guarded in the tests so that there's always at least one value */
     CORRADE_ASSERT(found, "Utility::Arguments::arrayValue(): key" << key << "not found", _values[0]);
-    CORRADE_ASSERT(found->type == Type::ArrayOption,
+    CORRADE_ASSERT(found->type == Type::ArrayArgument || found->type == Type::ArrayOption,
         "Utility::Arguments::arrayValue(): cannot use this function for a non-array option" << key, _values[0]);
     CORRADE_INTERNAL_ASSERT(found->id < _arrayValues.size());
     /* Check for ID bounds only after we're sure the arguments were parsed,
