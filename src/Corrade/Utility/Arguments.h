@@ -401,9 +401,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
          * using @ref value().
          *
-         * Only non-boolean options are allowed in the prefixed version, use
-         * @ref addOption() instead.
-         *
+         * Only non-boolean options are allowed in the prefixed version, no
+         * arguments --- use @ref addOption() in that case instead.
          * @see @ref addFinalOptionalArgument()
          */
         Arguments& addArgument(std::string key);
@@ -428,8 +427,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
          * using @ref value().
          *
-         * Only non-boolean options are allowed in the prefixed version, use
-         * @ref addOption() instead.
+         * Only non-boolean options are allowed in the prefixed version, no
+         * arguments --- use @ref addOption() in that case instead.
          */
         Arguments& addNamedArgument(char shortKey, std::string key);
 
@@ -447,8 +446,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   --argument        help text
          * @endcode
          *
-         * Only non-boolean options are allowed in the prefixed version, use
-         * @ref addOption() instead.
+         * Only non-boolean options are allowed in the prefixed version, no
+         * arguments --- use @ref addOption() in that case instead.
          */
         Arguments& addNamedArgument(std::string key) {
             return addNamedArgument('\0', std::move(key));
@@ -479,7 +478,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Option value can be retrieved using @ref value(). Short key is not
          * allowed in the prefixed version, use
-         * @ref addOption(std::string, std::string) instead.
+         * @ref addOption(std::string, std::string) in that case instead.
          * @see @ref addArrayOption(), @ref addBooleanOption()
          */
         Arguments& addOption(char shortKey, std::string key, std::string defaultValue = std::string());
@@ -529,7 +528,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Array length and values can be retrieved using
          * @ref arrayValueCount() and @ref arrayValue(). Short key is not
          * allowed in the prefixed version, use @ref addArrayOption(std::string)
-         * instead.
+         * in that case instead.
          * @see @ref addBooleanOption()
          */
         Arguments& addArrayOption(char shortKey, std::string key);
@@ -543,7 +542,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * @code{.shell-session}
          * Usage:
-         *   ./app [--option OPTION]*
+         *   ./app [--option OPTION]...
          *
          * Arguments:
          *   --option          help text
@@ -574,7 +573,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Option for getting help (`-h`, `--help`) is added automatically.
          *
          * Only non-boolean options are allowed in the prefixed version, use
-         * @ref addOption() instead.
+         * @ref addOption() in that case instead.
          * @see @ref addOption(), @ref addArrayOption()
          */
         Arguments& addBooleanOption(char shortKey, std::string key);
@@ -873,7 +872,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @param key   Long option key
          *
          * Expects that the option exists, was added using
-         * @ref addBooleanOption()  and @ref parse() was successful. The help
+         * @ref addBooleanOption() and @ref parse() was successful. The help
          * option (`-h`, `--help`) is added implicitly.
          * @see @ref value(), @ref arrayValue()
          */
