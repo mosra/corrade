@@ -397,9 +397,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   argument          help text
          * @endcode
          *
-         * If no help text is set, the argument is not displayed in argument
-         * list. Call @ref setHelp() to set it. Argument value can be retrieved
-         * using @ref value().
+         * If no help text is set, the argument is not displayed in the
+         * argument list. Call @ref setHelp() to set it. Argument value can be
+         * retrieved using @ref value().
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
@@ -423,9 +423,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   -a, --argument    help text
          * @endcode
          *
-         * If no help text is set, the argument is not displayed in argument
-         * list. Call @ref setHelp() to set it. Argument value can be retrieved
-         * using @ref value().
+         * If no help text is set, the argument is not displayed in the
+         * argument list. Call @ref setHelp() to set it. Argument value can be
+         * retrieved using @ref value().
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
@@ -445,6 +445,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Arguments:
          *   --argument        help text
          * @endcode
+         *
+         * If no help text is set, the argument is not displayed in the
+         * argument list. Call @ref setHelp() to set it. Argument value can be
+         * retrieved using @ref value().
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
@@ -476,8 +480,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *                     (default: defaultValue)
          * @endcode
          *
-         * Option value can be retrieved using @ref value(). Short key is not
-         * allowed in the prefixed version, use
+         * If no help text is set, the option is not displayed in the argument
+         * list. Call @ref setHelp() to set it. Option value can be retrieved
+         * using @ref value().
+         *
+         * Short key is not allowed in the prefixed version, use
          * @ref addOption(std::string, std::string) in that case instead.
          * @see @ref addArrayOption(), @ref addBooleanOption()
          */
@@ -525,11 +532,12 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   -o, --option      help text
          * @endcode
          *
-         * Array length and values can be retrieved using
-         * @ref arrayValueCount() and @ref arrayValue(). Short key is not
-         * allowed in the prefixed version, use @ref addArrayOption(std::string)
-         * in that case instead.
-         * @see @ref addBooleanOption()
+         * If no help text is set, the option is not displayed in the argument
+         * list. Call @ref setHelp() to set it. Array length and values can be
+         * retrieved using @ref arrayValueCount() and @ref arrayValue().
+         *
+         * Short key is not allowed in the prefixed version, use
+         * @ref addArrayOption(std::string) in that case instead.
          */
         Arguments& addArrayOption(char shortKey, std::string key);
 
@@ -568,9 +576,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   -o, --option      help text
          * @endcode
          *
-         * Option presence can be queried with @ref isSet(). Setting displayed
+         * If no help text is set, the option is not displayed in the argument
+         * list. Call @ref setHelp() to set it, however setting displayed
          * key name in @ref setHelp() is not possible with boolean options.
-         * Option for getting help (`-h`, `--help`) is added automatically.
+         * Option presence can be queried with @ref isSet() Option for getting
+         * help (`-h`, `--help`) is added automatically.
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() in that case instead.
@@ -591,9 +601,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Arguments:
          *   --option          help text
          * @endcode
-         *
-         * Only non-boolean options are allowed in the prefixed version, use
-         * @ref addOption() instead.
          */
         Arguments& addBooleanOption(std::string key) {
             return addBooleanOption('\0', std::move(key));
@@ -607,9 +614,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Compared to arguments added with @ref addArgument() this one doesn't
          * need to be present; compared to options added with @ref addOption()
          * it doesn't need to be specified together with option name. There can
-         * be only one final optional argument. After calling
-         * @cpp addFinalOptionalArgument("argument") @ce the argument will be
-         * displayed in help text like the following:
+         * be only one final optional argument.
+         *
+         * After calling @cpp addFinalOptionalArgument("argument") @ce the
+         * argument will be displayed in help text like the following. Call
+         * @ref setHelp() to change the displayed key:
          *
          * @code{.shell-session}
          * Usage:
@@ -619,6 +628,13 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   argument          help text
          *                     (default: defaultValue)
          * @endcode
+         *
+         * If no help text is set, the argument is not displayed in the
+         * argument list. Call @ref setHelp() to set it. Argument value can be
+         * retrieved using @ref value().
+         *
+         * Only non-boolean options are allowed in the prefixed version, no
+         * arguments --- use @ref addOption() in that case instead.
          */
         Arguments& addFinalOptionalArgument(std::string key, std::string defaultValue = std::string());
 
