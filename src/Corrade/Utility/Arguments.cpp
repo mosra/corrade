@@ -530,8 +530,8 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     const Entry* valueFor = nullptr;
     bool optionsAllowed = true;
     std::size_t shortOptionPackOffset = 0;
-    const Entry* nextArgument = _entries.begin();
     Containers::Array<bool> parsedArguments{_entries.size()};
+    Containers::Array<const char*> argumentValues;
 
     for(int i = 1; i < argc; ++i) {
         /* Value for given argument. The shortOptionPackOffset is zero in case
@@ -686,19 +686,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             /* Ignore if this is the prefixed version */
             if(!_prefix.empty()) continue;
 
-            /* Find next argument */
-            const Entry* const found = findNextArgument(nextArgument);
-            if(!found) {
-                if(_parseErrorCallback(*this, ParseError::SuperfluousArgument, argv[i]))
-                    continue;
-
-                Error() << "Superfluous command-line argument" << argv[i];
-                return false;
-            }
-
-            _values[found->id] = argv[i];
-            parsedArguments[found-_entries.begin()] = true;
-            nextArgument = found + 1;
+            /* Append to the argument array, defer assigning them to the
+               correct positional arguments to later */
+            arrayAppend(argumentValues, argv[i]);
         }
     }
 
@@ -706,6 +696,29 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     if(valueFor && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
         Error() << "Missing value for command-line argument" << keyName(*valueFor);
         return false;
+    }
+
+    /* Assign argument values to the correct positional arguments */
+    {
+        Entry* e = _entries.begin();
+        for(const char* const argumentValue: argumentValues) {
+            /* Find the next argument. If not found, we have superfluous
+               arguments at the end, which is an error. */
+            while(e != _entries.end() && e->type != Type::Argument) ++e;
+            if(e == _entries.end()) {
+                if(_parseErrorCallback(*this, ParseError::SuperfluousArgument, argumentValue))
+                    continue;
+
+                Error{} << "Superfluous command-line argument" << argumentValue;
+                return false;
+            }
+
+            /* If found, assign the value, mark it as parsed, and start
+               searching from the next entry in the following iteration */
+            _values[e->id] = argumentValue;
+            parsedArguments[e - _entries.begin()] = true;
+            ++e;
+        }
     }
 
     /* Except success, set the internal flag to parsed so the MissingArgument
@@ -1024,12 +1037,6 @@ auto Arguments::find(const std::string& key) -> Entry* {
 auto Arguments::find(const char shortKey) const -> const Entry* {
     for(const Entry& e: _entries)
         if(e.shortKey == shortKey) return &e;
-    return nullptr;
-}
-
-auto Arguments::findNextArgument(const Entry* start) const -> const Entry* {
-    for(const Entry* e = start; e != _entries.end(); ++e)
-        if(e->type == Type::Argument) return e;
     return nullptr;
 }
 

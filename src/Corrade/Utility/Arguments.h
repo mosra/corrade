@@ -893,7 +893,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
         CORRADE_UTILITY_LOCAL Entry* find(const std::string& key);
         CORRADE_UTILITY_LOCAL const Entry* find(const std::string& key) const;
         CORRADE_UTILITY_LOCAL const Entry* find(char shortKey) const;
-        CORRADE_UTILITY_LOCAL const Entry* findNextArgument(const Entry* start) const;
 
         std::string CORRADE_UTILITY_LOCAL keyName(const Entry& entry) const;
 
