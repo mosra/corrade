@@ -75,6 +75,7 @@ struct ArgumentsTest: TestSuite::Tester {
 
     void duplicateKey();
     void duplicateShortKey();
+    void emptyKey();
     void disallowedCharacter();
     void disallowedCharacterShort();
     void disallowedIgnoreUnknown();
@@ -166,6 +167,7 @@ ArgumentsTest::ArgumentsTest() {
 
               &ArgumentsTest::duplicateKey,
               &ArgumentsTest::duplicateShortKey,
+              &ArgumentsTest::emptyKey,
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
               &ArgumentsTest::disallowedIgnoreUnknown,
@@ -535,12 +537,14 @@ void ArgumentsTest::duplicateKey() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    args.addNamedArgument("foo")
+    args.addArgument("foo")
+        .addNamedArgument("foo")
         .addOption("foo")
         .addArrayOption("foo")
         .addBooleanOption("foo")
         .addFinalOptionalArgument("foo");
     CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addArgument(): the key foo is already used\n"
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addOption(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addArrayOption(): the key foo or its short variant is already used\n"
@@ -569,6 +573,30 @@ void ArgumentsTest::duplicateShortKey() {
         "Utility::Arguments::addBooleanOption(): the key bur or its short variant is already used\n");
 }
 
+void ArgumentsTest::emptyKey() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Arguments args;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.addArgument("")
+        .addNamedArgument("")
+        .addOption("")
+        .addArrayOption("")
+        .addBooleanOption("")
+        .addFinalOptionalArgument("");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addArgument(): key can't be empty\n"
+        "Utility::Arguments::addNamedArgument(): invalid key  or its short variant\n"
+        "Utility::Arguments::addOption(): invalid key  or its short variant\n"
+        "Utility::Arguments::addArrayOption(): invalid key  or its short variant\n"
+        "Utility::Arguments::addBooleanOption(): invalid key  or its short variant\n"
+        "Utility::Arguments::addFinalOptionalArgument(): key can't be empty\n");
+}
+
 void ArgumentsTest::disallowedCharacter() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
@@ -577,7 +605,8 @@ void ArgumentsTest::disallowedCharacter() {
     Arguments args;
     /* It's fine here (even though confusing) -- the user won't be typing this
        on the terminal */
-    args.addFinalOptionalArgument("i'm saying");
+    args.addArgument("well, actually")
+        .addFinalOptionalArgument("i'm saying");
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -604,10 +633,12 @@ void ArgumentsTest::disallowedCharacterShort() {
     args
         .addNamedArgument('-', "dash")
         .addOption(' ', "bar")
+        .addArrayOption('#', "hash")
         .addBooleanOption('?', "halp");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addNamedArgument(): invalid key dash or its short variant\n"
         "Utility::Arguments::addOption(): invalid key bar or its short variant\n"
+        "Utility::Arguments::addArrayOption(): invalid key hash or its short variant\n"
         "Utility::Arguments::addBooleanOption(): invalid key halp or its short variant\n");
 }
 

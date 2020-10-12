@@ -204,7 +204,7 @@ Arguments& Arguments::addArgument(std::string key) {
     CORRADE_ASSERT(_prefix.empty(),
         "Utility::Arguments::addArgument(): argument" << key << "not allowed in prefixed version", *this);
 
-    CORRADE_ASSERT(!key.empty(), "Utility::Arguments::addArgument(): key must not be empty", *this);
+    CORRADE_ASSERT(!key.empty(), "Utility::Arguments::addArgument(): key can't be empty", *this);
 
     /* Verify that the argument has an unique key */
     CORRADE_ASSERT(!find(key), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
@@ -326,7 +326,7 @@ Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defa
     CORRADE_ASSERT(_prefix.empty(),
         "Utility::Arguments::addFinalOptionalArgument(): argument" << key << "not allowed in prefixed version", *this);
     CORRADE_ASSERT(!key.empty(),
-        "Utility::Arguments::addFinalOptionalArgument(): key must not be empty", *this);
+        "Utility::Arguments::addFinalOptionalArgument(): key can't be empty", *this);
     CORRADE_ASSERT(!find(key),
         "Utility::Arguments::addFinalOptionalArgument(): the key" << key << "is already used", *this);
     CORRADE_ASSERT(!_finalOptionalArgument,
