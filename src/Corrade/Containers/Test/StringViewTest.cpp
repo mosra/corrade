@@ -257,14 +257,16 @@ void StringViewTest::constructEmpty() {
 }
 
 void StringViewTest::constructNullptr() {
+    /* It's the default constructor, just with the default argument explicit */
+
     StringView view = nullptr;
     CORRADE_COMPARE(view.size(), 0);
-    CORRADE_COMPARE(view.flags(), StringViewFlags{});
+    CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 
     constexpr StringView cview = nullptr;
     CORRADE_COMPARE(cview.size(), 0);
-    CORRADE_COMPARE(cview.flags(), StringViewFlags{});
+    CORRADE_COMPARE(cview.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(cview.data()), nullptr);
 }
 

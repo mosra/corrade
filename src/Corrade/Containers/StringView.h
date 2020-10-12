@@ -176,8 +176,9 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Default constructor
          *
          * A default-constructed instance has @ref StringViewFlag::Global set.
+         * @ref BasicStringView(T*)
          */
-        constexpr /*implicit*/ BasicStringView() noexcept: _data{}, _size{std::size_t(StringViewFlag::Global)} {}
+        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _size{std::size_t(StringViewFlag::Global)} {}
 
         /**
          * @brief Construct from a C string of known size
@@ -236,16 +237,13 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * be @cpp nullptr @ce --- in that case an empty view is constructed.
          * If @p data is not @cpp nullptr @ce, the resulting instance has
          * @ref StringViewFlag::NullTerminated set.
+         *
+         * The @ref BasicStringView(std::nullptr_t) overload (which is a
+         * default constructor) is additionally @cpp constexpr @ce and has
+         * @ref StringViewFlag::Global set instead of
+         * @ref StringViewFlag::NullTerminated.
          */
         /*implicit*/ BasicStringView(T* data) noexcept;
-
-        /**
-         * @brief Construct from a `nullptr`
-         *
-         * As a special case of BasicStringView(T*), this function is
-         * @cpp constexpr @ce, creating an empty view.
-         */
-        constexpr /*implicit*/ BasicStringView(std::nullptr_t) noexcept: _data{}, _size{} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
