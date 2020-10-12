@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::ArrayView, @ref Corrade::Containers::StaticArrayView
+ * @brief Class @ref Corrade::Containers::ArrayView, @ref Corrade::Containers::StaticArrayView, alias @ref Corrade::Containers::ArrayView2, @ref Corrade::Containers::ArrayView3, @ref Corrade::Containers::ArrayView4
  */
 
 #include <initializer_list>
@@ -824,7 +824,8 @@ information.
     @ref Containers-ArrayView-single-header "ArrayView documentation" for more
     information.
 
-@see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>)
+@see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>),
+    @ref ArrayView2, @ref ArrayView3, @ref ArrayView4
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -1055,6 +1056,38 @@ template<std::size_t size_, class T> class StaticArrayView {
     private:
         T* _data;
 };
+
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
+/**
+@brief Two-component array view
+@m_since_latest
+
+Convenience alternative to @cpp StaticArrayView<2, T> @ce. See
+@ref StaticArrayView for more information.
+@see @ref ArrayView3, @ref ArrayView4, @ref Array2, @ref Array3, @ref Array4
+*/
+template<class T> using ArrayView2 = StaticArrayView<2, T>;
+
+/**
+@brief Three-component array view
+@m_since_latest
+
+Convenience alternative to @cpp StaticArrayView<3, T> @ce. See
+@ref StaticArrayView for more information.
+@see @ref ArrayView2, @ref ArrayView4, @ref Array2, @ref Array3, @ref Array4
+*/
+template<class T> using ArrayView3 = StaticArrayView<3, T>;
+
+/**
+@brief Four-component array view
+@m_since_latest
+
+Convenience alternative to @cpp StaticArrayView<4, T> @ce. See
+@ref StaticArrayView for more information.
+@see @ref ArrayView2, @ref ArrayView3, @ref Array2, @ref Array3, @ref Array4
+*/
+template<class T> using ArrayView4 = StaticArrayView<4, T>;
+#endif
 
 /** @relatesalso StaticArrayView
 @brief Make a static view on an array

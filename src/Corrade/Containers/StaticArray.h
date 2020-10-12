@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::StaticArray
+ * @brief Class @ref Corrade::Containers::StaticArray, alias @ref Corrade::Containers::Array2, @ref Corrade::Containers::Array3, @ref Corrade::Containers::Array4
  */
 
 #include <new>
@@ -124,7 +124,8 @@ more information.
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 
-@see @ref arrayCast(StaticArray<size, T>&), @ref Array
+@see @ref arrayCast(StaticArray<size, T>&), @ref Array,
+    @ref Array2, @ref Array3, @ref Array4
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -488,6 +489,41 @@ template<std::size_t size_, class T> class StaticArray {
             T _data[size_];
         };
 };
+
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
+/**
+@brief Two-component array
+@m_since_latest
+
+Convenience alternative to @cpp StaticArray<2, T> @ce. See @ref StaticArray for
+more information.
+@see @ref Array3, @ref Array4, @ref ArrayView2, @ref ArrayView3,
+    @ref ArrayView4
+*/
+template<class T> using Array2 = StaticArray<2, T>;
+
+/**
+@brief Three-component array
+@m_since_latest
+
+Convenience alternative to @cpp StaticArray<3, T> @ce. See @ref StaticArray for
+more information.
+@see @ref Array2, @ref Array4, @ref ArrayView2, @ref ArrayView3,
+    @ref ArrayView4
+*/
+template<class T> using Array3 = StaticArray<3, T>;
+
+/**
+@brief Four-component array
+@m_since_latest
+
+Convenience alternative to @cpp StaticArray<4, T> @ce. See @ref StaticArray for
+more information.
+@see @ref Array2, @ref Array3, @ref ArrayView2, @ref ArrayView3,
+    @ref ArrayView4
+*/
+template<class T> using Array4 = StaticArray<4, T>;
+#endif
 
 /** @relatesalso StaticArray
 @brief Make view on @ref StaticArray

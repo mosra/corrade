@@ -41,6 +41,9 @@ template<class T, class = void(*)(T*, std::size_t)> class Array;
 template<class> class ArrayView;
 template<std::size_t, class> class StaticArrayView;
 template<std::size_t, class> class StaticArray;
+template<class T> using Array2 = StaticArray<2, T>;
+template<class T> using Array3 = StaticArray<3, T>;
+template<class T> using Array4 = StaticArray<4, T>;
 
 template<unsigned, class> class StridedDimensions;
 template<unsigned, class> class StridedArrayView;
