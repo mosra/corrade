@@ -529,19 +529,25 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
     const Entry* valueFor = nullptr;
     bool optionsAllowed = true;
+    std::size_t shortOptionPackOffset = 0;
     const Entry* nextArgument = _entries.begin();
     std::vector<bool> parsedArguments(_entries.size());
 
     for(int i = 1; i < argc; ++i) {
-        /* Value for given argument */
+        /* Value for given argument. The shortOptionPackOffset is zero in case
+           we're not coming from a short option pack */
         if(valueFor) {
             if(valueFor->type == Type::Argument || valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
-                _values[valueFor->id] = argv[i];
+                _values[valueFor->id] = argv[i] + shortOptionPackOffset;
             } else if(valueFor->type == Type::ArrayOption) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _arrayValues.size());
-                arrayAppend(_arrayValues[valueFor->id], Containers::InPlaceInit, argv[i]);
+                arrayAppend(_arrayValues[valueFor->id], Containers::InPlaceInit, argv[i] + shortOptionPackOffset);
             } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+
+            /* The value always eats everything until the end, so there's
+               nothing left in the pack for the next iteration */
+            shortOptionPackOffset = 0;
 
             parsedArguments[valueFor-_entries.begin()] = true;
             valueFor = nullptr;
@@ -554,23 +560,17 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         if(optionsAllowed && len > 1 && argv[i][0] == '-') {
             const Entry* found = nullptr;
 
-            /* Short option */
+            /* Short option or a pack of short options / values. This branch
+               gets re-entered for subsequent options in the pack. */
             if(argv[i][1] != '-') {
                 /* Ignore if this is the prefixed version (these can be
                    anything, including values of long options) */
                 if(!_prefix.empty()) continue;
 
-                /* Typo (long option with only one dash) */
-                if(len > 2) {
-                    if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, argv[i] + 1))
-                        continue;
+                /* Start a short option pack, if not already */
+                if(!shortOptionPackOffset) shortOptionPackOffset = 1;
 
-                    Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
-                    return false;
-                }
-
-                const char key = argv[i][1];
-
+                const char key = argv[i][shortOptionPackOffset];
                 if(!verifyKey(key)) {
                     if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, std::string{key}))
                         continue;
@@ -581,6 +581,17 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
                 /* Find the option */
                 if(!(found = find(key))) {
+                    /* If this is the first option in a larger pack and it's
+                       not found, it might be that the user forgot a double
+                       dash -- print a more helpful error in that case. */
+                    if(shortOptionPackOffset && len > 2) {
+                        if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, argv[i] + 1))
+                            continue;
+
+                        Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
+                        return false;
+                    }
+
                     if(_parseErrorCallback(*this, ParseError::UnknownShortArgument, std::string{key}))
                         continue;
 
@@ -659,6 +670,16 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
             /* Value option, save in next cycle */
             } else valueFor = found;
+
+            /* This is a pack of short options and we're not at the end,
+               stay at the same value and increment the offset */
+            if(shortOptionPackOffset && shortOptionPackOffset + 1 != len) {
+                ++shortOptionPackOffset;
+                --i;
+
+            /* Otherwise (implicitly) advance to the next value and reset the
+               pack offset to zero  */
+            } else shortOptionPackOffset = 0;
 
         /* Argument */
         } else {

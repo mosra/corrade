@@ -48,17 +48,19 @@ namespace Corrade { namespace Utility {
 /**
 @brief Command-line argument parser
 
-Supports positional arguments (arguments without name), short and long options
-(e.g. `-o file` or `--output file`) and named arguments (i.e. non-optional
-options) along with boolean options (e.g. `--verbose`). Positional and named
-arguments can be given in any order, it is possible to separate positional
-arguments from option list with `--`.
+Parses Unix-style command line, with positional and named arguments and options
+both in a short (e.g., `-o file`) and long variant (e.g., `--output file`),
+boolean options and array options. If needed, positional arguments can be
+separated from named ones using `--`; short options can be packed together
+(e.g. `-xzOfile.dat` is equivalent to `-x -z -O file.dat` providing `-x` and
+`-z` are boolean options).
 
-The parsing is semi-autonomous, which means that the parser will exit with
-failure or print help text (and exit) on its own: If `-h` or `--help` is given
-as first argument (the remaining ones are then ignored), the parser prints full
-help text to the output and exits. If parse error occurs (missing/unknown
-argument etc.), the parser prints short usage information and exits.
+The parsing is semi-autonomous, which means that the parser will also exit with
+failure or print help text (and exit) on its own. if `-h` or `--help` is
+given anywhere on the command line, the parser prints full help text to the
+output and exits, ignoring all other arguments. If a parse error occurs
+(missing/unknown argument etc.), the parser prints a shorter variant of the
+help text and exits.
 
 @section Utility-Arguments-usage Example usage
 

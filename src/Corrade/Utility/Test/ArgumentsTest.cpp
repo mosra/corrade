@@ -95,6 +95,11 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseFinalOptionalArgument();
     void parseFinalOptionalArgumentDefault();
 
+    void parseShortOptionValuePack();
+    void parseShortOptionValuePackEmpty();
+    void parseShortBooleanOptionPack();
+    void parseShortBooleanOptionValuePack();
+
     void parseUnknownArgument();
     void parseUnknownShortArgument();
     void parseSuperfluousArgument();
@@ -180,6 +185,11 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseEnvironmentUtf8,
               &ArgumentsTest::parseFinalOptionalArgument,
               &ArgumentsTest::parseFinalOptionalArgumentDefault,
+
+              &ArgumentsTest::parseShortOptionValuePack,
+              &ArgumentsTest::parseShortOptionValuePackEmpty,
+              &ArgumentsTest::parseShortBooleanOptionPack,
+              &ArgumentsTest::parseShortBooleanOptionValuePack,
 
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
@@ -822,6 +832,66 @@ void ArgumentsTest::parseFinalOptionalArgumentDefault() {
     CORRADE_COMPARE(args.value("output"), "a.out");
     CORRADE_COMPARE(args.value("language"), "c++");
     CORRADE_VERIFY(args.isSet("debug"));
+}
+
+void ArgumentsTest::parseShortOptionValuePack() {
+    Arguments args;
+    args.addOption('D', "define")
+        .addArgument("input");
+
+    /* The argument after is to test that the short option pack offset got
+       reset correctly */
+    const char* argv[] = { "", "-DNDEBUG", "main.cpp" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("define"), "NDEBUG");
+    CORRADE_COMPARE(args.value("input"), "main.cpp");
+}
+
+void ArgumentsTest::parseShortOptionValuePackEmpty() {
+    Arguments args;
+    args.addOption('D', "define")
+        .addArgument("input");
+
+    const char* argv[] = { "", "-D", "main.cpp" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Missing command-line argument input\n");
+}
+
+void ArgumentsTest::parseShortBooleanOptionPack() {
+    Arguments args;
+    args.addBooleanOption('S', "sync")
+        .addBooleanOption('y', "refresh")
+        .addBooleanOption('u', "sysupgrade")
+        .addArgument("package");
+
+    /* The argument after is to test that the short option pack offset got
+       reset correctly */
+    const char* argv[] = { "", "-Syu", "magnum" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(args.isSet("sync"));
+    CORRADE_VERIFY(args.isSet("refresh"));
+    CORRADE_VERIFY(args.isSet("sysupgrade"));
+    CORRADE_COMPARE(args.value("package"), "magnum");
+}
+
+void ArgumentsTest::parseShortBooleanOptionValuePack() {
+    Arguments args;
+    args.addBooleanOption('S', "sync")
+        .addBooleanOption('y', "refresh")
+        .addOption('s', "search")
+        .addArgument("package");
+
+    /* The argument after is to test that the short option pack offset got
+       reset correctly */
+    const char* argv[] = { "", "-Sysmagnum", "corrade" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(args.isSet("sync"));
+    CORRADE_VERIFY(args.isSet("refresh"));
+    CORRADE_COMPARE(args.value("search"), "magnum");
+    CORRADE_COMPARE(args.value("package"), "corrade");
 }
 
 void ArgumentsTest::parseUnknownArgument() {
