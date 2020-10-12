@@ -262,7 +262,7 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> split(const std::string& string,
 @overload
 @m_since_latest
 */
-CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> split(const Containers::StringView string, char delimiter);
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> split(Containers::StringView string, char delimiter);
 
 /**
 @brief Split string on given character and remove empty parts
@@ -275,7 +275,7 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 @overload
 @m_since_latest
 */
-CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, char delimiter);
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, char delimiter);
 
 /**
 @brief Split string on any character from given set and remove empty parts
@@ -288,7 +288,7 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 @overload
 @m_since_latest
 */
-CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters);
+CORRADE_UTILITY_EXPORT Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, Containers::StringView delimiters);
 
 /**
 @brief Split string on whitespaces and remove empty parts
