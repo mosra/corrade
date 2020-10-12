@@ -824,7 +824,7 @@ std::string Arguments::usage() const {
     for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes)
         out << " [--" << prefix.first << "...]";
 
-    /* Print all options and named argument */
+    /* Print all options and named arguments */
     bool hasArguments = false;
     for(std::size_t i = 0; i != _entries.size(); ++i) {
         const Entry& entry = _entries[i];
