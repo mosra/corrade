@@ -555,17 +555,21 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             const Entry* found = nullptr;
 
             /* Short option */
-            if(len == 2) {
-                /* Ignore if this is the prefixed version */
+            if(argv[i][1] != '-') {
+                /* Ignore if this is the prefixed version (these can be
+                   anything, including values of long options) */
                 if(!_prefix.empty()) continue;
 
-                const char key = argv[i][1];
+                /* Typo (long option with only one dash) */
+                if(len > 2) {
+                    if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, argv[i] + 1))
+                        continue;
 
-                /* Option / argument separator */
-                if(key == '-') {
-                    optionsAllowed = false;
-                    continue;
+                    Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
+                    return false;
                 }
+
+                const char key = argv[i][1];
 
                 if(!verifyKey(key)) {
                     if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, std::string{key}))
@@ -584,77 +588,70 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                     return false;
                 }
 
+            /* Option / argument separator */
+            } else if(len == 2) {
+                CORRADE_INTERNAL_ASSERT(argv[i][1] == '-');
+                optionsAllowed = false;
+                continue;
+
             /* Long option */
-            } else if(len > 2) {
-                if(std::strncmp(argv[i], "--", 2) == 0) {
-                    const std::string key = argv[i]+2;
+            } else {
+                const std::string key = argv[i]+2;
 
-                    /* If this is prefixed version and the option does not have
-                       the prefix, ignore. Do this before verifying validity of
-                       the key so less restrictive argument parsers can be used
-                       for the unprefixed version. */
-                    if(!_prefix.empty() && !keyHasPrefix(key, _prefix))
+                /* If this is prefixed version and the option does not have the
+                   prefix, ignore. Do this before verifying validity of the key
+                   so less restrictive argument parsers can be used for the
+                   unprefixed version. */
+                if(!_prefix.empty() && !keyHasPrefix(key, _prefix))
+                    continue;
+
+                /* If skipped prefix, ignore the option and its value. Again do
+                   this before verifying validity of the key so less
+                   restrictive argument parsers can be used for the prefixed
+                   version. */
+                bool ignore = false;
+                for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
+                    if(!keyHasPrefix(key, prefix.first)) continue;
+
+                    /* Ignore the option and also its value (except for
+                       help, which is the only allowed boolean option) */
+                    ignore = true;
+                    if(key != prefix.first + "help") ++i;
+                    break;
+                }
+                if(ignore) continue;
+
+                if(!verifyKey(key)) {
+                    if(_parseErrorCallback(*this, ParseError::InvalidArgument, key))
                         continue;
 
-                    /* If skipped prefix, ignore the option and its value.
-                       Again do this before verifying validity of the key so
-                       less restrictive argument parsers can be used for the
-                       prefixed version. */
-                    bool ignore = false;
-                    for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
-                        if(!keyHasPrefix(key, prefix.first)) continue;
+                    Error() << "Invalid command-line argument" << std::string("--") + key;
+                    return false;
+                }
 
-                        /* Ignore the option and also its value (except for
-                           help, which is the only allowed boolean option) */
-                        ignore = true;
-                        if(key != prefix.first + "help") ++i;
-                        break;
-                    }
-                    if(ignore) continue;
-
-                    if(!verifyKey(key)) {
-                        if(_parseErrorCallback(*this, ParseError::InvalidArgument, key))
-                            continue;
-
-                        Error() << "Invalid command-line argument" << std::string("--") + key;
-                        return false;
+                /* Find the option */
+                if(!(found = find(key))) {
+                    /* If we are told to ignore unknown options, do exactly
+                       that. This should happen only in the prefixed version as
+                       there we can know what's an option and what its value,
+                       in the unprefixed version we have no idea unless we know
+                       *all* options. */
+                    if(_flags & InternalFlag::IgnoreUnknownOptions) {
+                        CORRADE_INTERNAL_ASSERT(!_prefix.empty() && keyHasPrefix(key, _prefix));
+                        continue;
                     }
 
-                    /* Find the option */
-                    if(!(found = find(key))) {
-                        /* If we are told to ignore unknown options, do exactly
-                           that. This should happen only in the prefixed
-                           version as there we can know what's an option and
-                           what its value, in the unprefixed version we have
-                           no idea unless we know *all* options. */
-                        if(_flags & InternalFlag::IgnoreUnknownOptions) {
-                            CORRADE_INTERNAL_ASSERT(!_prefix.empty() && keyHasPrefix(key, _prefix));
-                            continue;
-                        }
-
-                        if(_parseErrorCallback(*this, ParseError::UnknownArgument, key))
-                            continue;
-
-                        Error() << "Unknown command-line argument" << std::string("--") + key;
-                        return false;
-                    }
-
-                /* Typo (long option with only one dash). Ignore them if this
-                   is prefixed version because they can actually be values of
-                   some long options. */
-                } else {
-                    if(!_prefix.empty()) continue;
-
-                    if(_parseErrorCallback(*this, ParseError::InvalidShortArgument, argv[i] + 1))
+                    if(_parseErrorCallback(*this, ParseError::UnknownArgument, key))
                         continue;
 
-                    Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
+                    Error() << "Unknown command-line argument" << std::string("--") + key;
                     return false;
                 }
             }
 
-            /* Boolean option */
             CORRADE_INTERNAL_ASSERT(found);
+
+            /* Boolean option */
             if(found->type == Type::BooleanOption) {
                 CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
                 _booleans[found->id] = true;
