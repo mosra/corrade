@@ -531,7 +531,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     bool optionsAllowed = true;
     std::size_t shortOptionPackOffset = 0;
     const Entry* nextArgument = _entries.begin();
-    std::vector<bool> parsedArguments(_entries.size());
+    Containers::Array<bool> parsedArguments{_entries.size()};
 
     for(int i = 1; i < argc; ++i) {
         /* Value for given argument. The shortOptionPackOffset is zero in case
