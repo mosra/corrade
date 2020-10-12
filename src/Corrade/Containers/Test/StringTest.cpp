@@ -997,7 +997,7 @@ void StringTest::accessSmall() {
 
 void StringTest::slice() {
     /* These rely on StringView conversion and then delegate there so we don't
-       need to verify SSO behavior */
+       need to verify SSO behavior, only the basics and flag propagation */
 
     String a = "hello";
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
@@ -1018,7 +1018,7 @@ void StringTest::slice() {
 
 void StringTest::slicePointer() {
     /* These rely on StringView conversion and then delegate there so we don't
-       need to verify SSO behavior and neither the resulting flags */
+       need to verify SSO behavior, only the basics and flag propagation */
 
     String a = "hello";
     CORRADE_COMPARE(a.slice(a.data() + 1, a.data() + 4), "ell"_s);
