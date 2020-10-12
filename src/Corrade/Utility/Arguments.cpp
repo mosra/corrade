@@ -708,7 +708,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         return false;
     }
 
-    /* Except success, set the internal flag to parsed so the MissingValue
+    /* Except success, set the internal flag to parsed so the MissingArgument
        callback can access the values */
     bool success = true;
     _flags |= InternalFlag::Parsed;
