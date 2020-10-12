@@ -125,6 +125,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
             # TODO: enable when this gets to Clang (not in 3.9, but in master
             # since https://github.com/llvm-mirror/clang/commit/0a022661c797356e9c28e4999b6ec3881361371e)
             "-Wdouble-promotion")
+
+        # GCC 4.8 doesn't like when structs are initialized using just {} and
+        # because we use that a lot, the output gets extremely noisy. Disable
+        # the warning altogether there.
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
+            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "-Wno-missing-field-initializers")
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
