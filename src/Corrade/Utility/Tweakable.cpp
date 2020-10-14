@@ -29,6 +29,8 @@
 #include <set>
 #include <unordered_map>
 
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
@@ -155,6 +157,8 @@ namespace {
 }
 
 std::string findTweakableAlias(const std::string& data) {
+    using namespace Containers::Literals;
+
     std::string name = "CORRADE_TWEAKABLE";
     std::size_t pos = 0;
     while((pos = data.find("#define", pos)) != std::string::npos) {
@@ -186,7 +190,9 @@ std::string findTweakableAlias(const std::string& data) {
         eatWhitespace(data, pos);
 
         /* If the rest doesn't read CORRADE_TWEAKABLE, nope */
-        if(!String::viewBeginsWith({data.data() + pos, data.size() - pos}, "CORRADE_TWEAKABLE"))
+        /** @todo convert all this to operate on StringViews when we have
+            find() as well */
+        if(!Containers::StringView{data}.suffix(pos).hasPrefix("CORRADE_TWEAKABLE"_s))
             continue;
 
         /* Get rid of whitespace at the end of the line */

@@ -134,6 +134,21 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
     };
 }
 
+template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
+    const std::size_t prefixSize = prefix.size();
+    if(size() < prefixSize) return false;
+
+    return std::strncmp(_data, prefix.data(), prefixSize) == 0;
+}
+
+template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) const {
+    const std::size_t size = this->size();
+    const std::size_t suffixSize = suffix.size();
+    if(size < suffixSize) return false;
+
+    return std::strncmp(_data + size - suffixSize, suffix.data(), suffixSize) == 0;
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template class
     /* GCC needs the export macro on the class definition (and here it warns

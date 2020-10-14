@@ -117,6 +117,12 @@ namespace Corrade {
     @ref Containers::BasicStringView::split() and
     @ref Containers::BasicStringView::splitWithoutEmptyParts();
     the overloads taking @ref std::string are still kept
+-   @cpp Utility::String::viewBeginsWith() @ce and
+    @cpp Utility::String::viewEndsWith() @ce variants of
+    @ref Utility::String::beginsWith() / @ref Utility::String::endsWith() are
+    deprecated in favor of @ref Containers::BasicStringView::hasPrefix() and
+    @ref Containers::BasicStringView::hasSuffix(); the overloads taking
+    @ref std::string are still kept
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

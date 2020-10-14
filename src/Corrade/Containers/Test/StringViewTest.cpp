@@ -133,6 +133,11 @@ struct StringViewTest: TestSuite::Tester {
     void partition();
     void partitionFlags();
 
+    void hasPrefix();
+    void hasPrefixEmpty();
+    void hasSuffix();
+    void hasSuffixEmpty();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -181,6 +186,11 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::partition,
               &StringViewTest::partitionFlags,
+
+              &StringViewTest::hasPrefix,
+              &StringViewTest::hasPrefixEmpty,
+              &StringViewTest::hasSuffix,
+              &StringViewTest::hasSuffixEmpty,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -981,6 +991,29 @@ void StringViewTest::partitionFlags() {
         CORRADE_COMPARE(a[1].flags(), StringViewFlags{});
         CORRADE_COMPARE(a[2].flags(), StringViewFlags{});
     }
+}
+
+void StringViewTest::hasPrefix() {
+    CORRADE_VERIFY("overcomplicated"_s.hasPrefix("over"));
+    CORRADE_VERIFY(!"overcomplicated"_s.hasPrefix("oven"));
+}
+
+void StringViewTest::hasPrefixEmpty() {
+    CORRADE_VERIFY(!""_s.hasPrefix("overcomplicated"));
+    CORRADE_VERIFY("overcomplicated"_s.hasPrefix(""));
+    CORRADE_VERIFY(""_s.hasPrefix(""));
+}
+
+void StringViewTest::hasSuffix() {
+    CORRADE_VERIFY("overcomplicated"_s.hasSuffix("complicated"));
+    CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("somplicated"));
+    CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("overcomplicated even more"));
+}
+
+void StringViewTest::hasSuffixEmpty() {
+    CORRADE_VERIFY(!""_s.hasSuffix("overcomplicated"));
+    CORRADE_VERIFY("overcomplicated"_s.hasSuffix(""));
+    CORRADE_VERIFY(""_s.hasSuffix(""));
 }
 
 void StringViewTest::debugFlag() {

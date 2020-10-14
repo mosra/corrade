@@ -106,15 +106,15 @@ std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const
 }
 
 bool beginsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> prefix) {
-    if(string.size() < prefix.size()) return false;
-
-    return std::strncmp(string, prefix, prefix.size()) == 0;
+    /* This is soon meant to be deprecated so all the ugly conversions don't
+       bother me too much */
+    return Containers::StringView{string}.hasPrefix(Containers::StringView{prefix});
 }
 
 bool endsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> suffix) {
-    if(string.size() < suffix.size()) return false;
-
-    return std::strncmp(string + string.size() - suffix.size(), suffix, suffix.size()) == 0;
+    /* This is soon meant to be deprecated so all the ugly conversions don't
+       bother me too much */
+    return Containers::StringView{string}.hasSuffix(Containers::StringView{suffix});
 }
 
 std::string stripPrefix(std::string string, const Containers::ArrayView<const char> prefix) {

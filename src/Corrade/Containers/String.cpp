@@ -390,6 +390,14 @@ Array3<StringView> String::partition(const char separator) const & {
     return StringView{*this}.partition(separator);
 }
 
+bool String::hasPrefix(const StringView prefix) const {
+    return StringView{*this}.hasPrefix(prefix);
+}
+
+bool String::hasSuffix(const StringView suffix) const {
+    return StringView{*this}.hasSuffix(suffix);
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

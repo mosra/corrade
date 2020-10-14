@@ -453,6 +453,22 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          */
         Array3<BasicStringView<T>> partition(char separator) const;
 
+        /**
+         * @brief Whether the string begins with given prefix
+         *
+         * For an empty string returns @cpp true @ce only if @p prefix is empty
+         * as well.
+         */
+        bool hasPrefix(StringView prefix) const;
+
+        /**
+         * @brief Whether the string ends with given suffix
+         *
+         * For an empty string returns @cpp true @ce only if @p suffix is empty
+         * as well.
+         */
+        bool hasSuffix(StringView suffix) const;
+
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;

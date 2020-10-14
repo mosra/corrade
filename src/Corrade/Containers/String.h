@@ -526,6 +526,20 @@ class CORRADE_UTILITY_EXPORT String {
         Array3<StringView> partition(char separator) const &; /**< @overload */
 
         /**
+         * @brief Whether the string begins with given prefix
+         *
+         * Equivalent to @ref BasicStringView::hasPrefix().
+         */
+        bool hasPrefix(StringView prefix) const;
+
+        /**
+         * @brief Whether the string ends with given suffix
+         *
+         * Equivalent to @ref BasicStringView::hasSuffix().
+         */
+        bool hasSuffix(StringView suffix) const;
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

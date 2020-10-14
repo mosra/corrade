@@ -28,6 +28,7 @@
 #include <cstring>
 #include <algorithm>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
@@ -35,14 +36,15 @@
 namespace Corrade { namespace Utility {
 
 namespace {
-    std::pair<const char*, int> integerBase(Containers::ArrayView<const char> value) {
-        if(String::viewBeginsWith(value, "0x") || String::viewBeginsWith(value, "0X"))
-            return {value + 2, 16};
-        if(String::viewBeginsWith(value, "0b") || String::viewBeginsWith(value, "0B"))
-            return {value + 2, 2};
-        if(String::viewBeginsWith(value, "0"))
-            return {value + 1, 8};
-        return {value, 10};
+    std::pair<const char*, int> integerBase(Containers::StringView value) {
+        using namespace Containers::Literals;
+        if(value.hasPrefix("0x"_s) || value.hasPrefix("0X"_s))
+            return {value.data() + 2, 16};
+        if(value.hasPrefix("0b"_s) || value.hasPrefix("0B"_s))
+            return {value.data() + 2, 2};
+        if(value.hasPrefix("0"_s))
+            return {value.data() + 1, 8};
+        return {value.data(), 10};
     }
 }
 

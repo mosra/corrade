@@ -427,7 +427,8 @@ CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 
 In particular, returns @cpp true @ce for empty @p string only if @p prefix is
 empty as well.
-@see @ref viewBeginsWith(), @ref stripPrefix()
+@see @ref viewBeginsWith(), @ref stripPrefix(),
+    @ref Containers::StringView::hasPrefix()
 */
 inline bool beginsWith(const std::string& string, const std::string& prefix) {
     return Implementation::beginsWith({string.data(), string.size()}, {prefix.data(), prefix.size()});
@@ -443,28 +444,33 @@ inline bool beginsWith(const std::string& string, char prefix) {
     return !string.empty() && string[0] == prefix;
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether string view has given prefix
-
-In particular, returns @cpp true @ce for empty @p string only if @p prefix is
-empty as well.
-@see @ref beginsWith()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
+    instead.
 */
-template<std::size_t size> inline bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
+template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
     return Implementation::beginsWith(string, {prefix, size - 1});
 }
 
-/** @overload */
-inline bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
+    instead.
+*/
+inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
     return !string.empty() && string[0] == prefix;
 }
+#endif
 
 /**
 @brief Whether the string has given suffix
 
 In particular, returns @cpp true @ce for empty @p string only if @p suffix is
 empty as well.
-@see @ref viewEndsWith(), @ref stripSuffix()
+@see @ref viewEndsWith(), @ref stripSuffix(),
+    @ref Containers::StringView::hasSuffix()
 */
 inline bool endsWith(const std::string& string, const std::string& suffix) {
     return Implementation::endsWith({string.data(), string.size()}, {suffix.data(), suffix.size()});
@@ -480,21 +486,25 @@ inline bool endsWith(const std::string& string, char suffix) {
     return !string.empty() && string[string.size() - 1] == suffix;
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether string view has given suffix
-
-In particular, returns @cpp true @ce for empty @p string only if @p suffix is
-empty as well.
-@see @ref endsWith()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
+    instead.
 */
-template<std::size_t size> inline bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {
+template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {
     return Implementation::endsWith(string, {suffix, size - 1});
 }
 
-/** @overload */
-inline bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
+    instead.
+*/
+inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
     return !string.empty() && string[string.size() - 1] == suffix;
 }
+#endif
 
 /**
 @brief Strip given prefix from a string

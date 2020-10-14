@@ -50,10 +50,14 @@ struct StringTest: TestSuite::Tester {
 
     void beginsWith();
     void beginsWithEmpty();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void viewBeginsWith();
+    #endif
     void endsWith();
     void endsWithEmpty();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void viewEndsWith();
+    #endif
 
     void stripPrefix();
     void stripPrefixInvalid();
@@ -84,10 +88,14 @@ StringTest::StringTest() {
 
               &StringTest::beginsWith,
               &StringTest::beginsWithEmpty,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::viewBeginsWith,
+              #endif
               &StringTest::endsWith,
               &StringTest::endsWithEmpty,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::viewEndsWith,
+              #endif
 
               &StringTest::stripPrefix,
               &StringTest::stripPrefixInvalid,
@@ -402,6 +410,9 @@ void StringTest::uppercase() {
 }
 
 void StringTest::beginsWith() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
     CORRADE_VERIFY(String::beginsWith("overcomplicated", "over"));
     CORRADE_VERIFY(String::beginsWith("overcomplicated", std::string{"over"}));
 
@@ -414,21 +425,34 @@ void StringTest::beginsWith() {
 }
 
 void StringTest::beginsWithEmpty() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
     CORRADE_VERIFY(!String::beginsWith("", "overcomplicated"));
     CORRADE_VERIFY(String::beginsWith("overcomplicated", ""));
     CORRADE_VERIFY(String::beginsWith("", ""));
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringTest::viewBeginsWith() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
+    CORRADE_IGNORE_DEPRECATED_PUSH
     CORRADE_VERIFY(String::viewBeginsWith("overcomplicated", "over"));
     CORRADE_VERIFY(!String::viewBeginsWith("overcomplicated", "oven"));
 
     CORRADE_VERIFY(String::viewBeginsWith("hello", 'h'));
     CORRADE_VERIFY(!String::viewBeginsWith("hello", 'o'));
     CORRADE_VERIFY(!String::viewBeginsWith("", 'h'));
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 void StringTest::endsWith() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
     CORRADE_VERIFY(String::endsWith("overcomplicated", "complicated"));
     CORRADE_VERIFY(String::endsWith("overcomplicated", std::string{"complicated"}));
 
@@ -443,12 +467,20 @@ void StringTest::endsWith() {
 }
 
 void StringTest::endsWithEmpty() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
     CORRADE_VERIFY(!String::endsWith("", "overcomplicated"));
     CORRADE_VERIFY(String::endsWith("overcomplicated", ""));
     CORRADE_VERIFY(String::endsWith("", ""));
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringTest::viewEndsWith() {
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated. */
+
+    CORRADE_IGNORE_DEPRECATED_PUSH
     CORRADE_VERIFY(String::viewEndsWith({"overcomplicated", 15}, "complicated"));
     CORRADE_VERIFY(!String::viewEndsWith("overcomplicated", "complicated"));
 
@@ -459,7 +491,9 @@ void StringTest::viewEndsWith() {
     CORRADE_VERIFY(String::viewEndsWith({"hello", 5}, 'o'));
     CORRADE_VERIFY(!String::viewEndsWith("hello", 'o'));
     CORRADE_VERIFY(!String::viewEndsWith("", 'h'));
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 void StringTest::stripPrefix() {
     CORRADE_COMPARE(String::stripPrefix("overcomplicated", "over"), "complicated");

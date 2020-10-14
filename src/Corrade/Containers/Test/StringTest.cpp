@@ -126,6 +126,9 @@ struct StringTest: TestSuite::Tester {
 
     void partition();
 
+    void hasPrefix();
+    void hasSuffix();
+
     void release();
 
     void releaseDeleterSmall();
@@ -188,6 +191,9 @@ StringTest::StringTest() {
               &StringTest::splitMultipleCharactersWhitespace,
 
               &StringTest::partition,
+
+              &StringTest::hasPrefix,
+              &StringTest::hasSuffix,
 
               &StringTest::release,
 
@@ -1168,6 +1174,22 @@ void StringTest::partition() {
             (Array3<MutableStringView>{p1, p2, p3}),
             TestSuite::Compare::Container);
     }
+}
+
+void StringTest::hasPrefix() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics */
+
+    CORRADE_VERIFY(String{"overcomplicated"}.hasPrefix("over"));
+    CORRADE_VERIFY(!String{"overcomplicated"}.hasPrefix("oven"));
+}
+
+void StringTest::hasSuffix() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics */
+
+    CORRADE_VERIFY(String{"overcomplicated"}.hasSuffix("complicated"));
+    CORRADE_VERIFY(!String{"overcomplicated"}.hasSuffix("somplicated"));
 }
 
 void StringTest::release() {
