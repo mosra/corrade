@@ -25,6 +25,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -123,6 +124,12 @@ struct StringViewTest: TestSuite::Tester {
     void slicePointer();
     void sliceFlags();
 
+    void split();
+    void splitFlags();
+    void splitMultipleCharacters();
+    void splitMultipleCharactersFlags();
+    void splitNullView();
+
     void partition();
     void partitionFlags();
 
@@ -165,6 +172,12 @@ StringViewTest::StringViewTest() {
               &StringViewTest::slice,
               &StringViewTest::slicePointer,
               &StringViewTest::sliceFlags,
+
+              &StringViewTest::split,
+              &StringViewTest::splitFlags,
+              &StringViewTest::splitMultipleCharacters,
+              &StringViewTest::splitMultipleCharactersFlags,
+              &StringViewTest::splitNullView,
 
               &StringViewTest::partition,
               &StringViewTest::partitionFlags,
@@ -709,6 +722,181 @@ void StringViewTest::sliceFlags() {
 
     CORRADE_COMPARE(none.prefix(4).flags(), StringViewFlags{});
     CORRADE_COMPARE(none.prefix(none.data() + 4).flags(), StringViewFlags{});
+}
+
+void StringViewTest::split() {
+    /* Empty */
+    CORRADE_COMPARE_AS(""_s.split('/'),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(""_s.splitWithoutEmptyParts('/'),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+
+    /* Only delimiter */
+    CORRADE_COMPARE_AS("/"_s.split('/'),
+        arrayView({""_s, ""_s}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("/"_s.splitWithoutEmptyParts('/'),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+
+    /* No delimiters */
+    CORRADE_COMPARE_AS("abcdef"_s.split('/'),
+        arrayView({"abcdef"_s}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("abcdef"_s.split('/'),
+        arrayView({"abcdef"_s}),
+        TestSuite::Compare::Container);
+
+    /* Common case */
+    CORRADE_COMPARE_AS("ab/c/def"_s.split('/'),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab/c/def"_s.splitWithoutEmptyParts('/'),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+
+    /* Empty parts */
+    CORRADE_COMPARE_AS("ab//c/def//"_s.split('/'),
+        arrayView({"ab"_s, ""_s, "c"_s, "def"_s, ""_s, ""_s}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab//c/def//"_s.splitWithoutEmptyParts('/'),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+}
+
+void StringViewTest::splitFlags() {
+    /* All flags come from the slice() implementation, so just verify the edge
+       cases */
+
+    /* Usual case -- all global, only the last null-terminated */
+    {
+        Array<StringView> a = "a/b/c"_s.split('/');
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s, "c"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    } {
+        Array<StringView> a = "a/b///c"_s.splitWithoutEmptyParts('/');
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s, "c"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    }
+
+    /* Found at the end -- last empty (if not skipped) is null-terminated */
+    {
+        Array<StringView> a = "a/b/"_s.split('/');
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s, ""_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    } {
+        Array<StringView> a = "a/b//"_s.splitWithoutEmptyParts('/');
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+    }
+
+    /* Not found -- the only item is null-terminated */
+    {
+        Array<StringView> a = "ab"_s.split('/');
+        CORRADE_COMPARE_AS(a, arrayView({"ab"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    } {
+        Array<StringView> a = "ab"_s.splitWithoutEmptyParts('/');
+        CORRADE_COMPARE_AS(a, arrayView({"ab"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    }
+}
+
+void StringViewTest::splitMultipleCharacters() {
+    constexpr Containers::StringView delimiters = ".:;"_s;
+
+    /* Empty */
+    CORRADE_COMPARE_AS(""_s.splitWithoutEmptyParts(delimiters),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+
+    /* Only delimiters */
+    CORRADE_COMPARE_AS(delimiters.splitWithoutEmptyParts(delimiters),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+
+    /* No delimiters */
+    CORRADE_COMPARE_AS("abcdef"_s.splitWithoutEmptyParts(delimiters),
+        array({"abcdef"_s}),
+        TestSuite::Compare::Container);
+
+    /* Common case */
+    CORRADE_COMPARE_AS("ab:c;def"_s.splitWithoutEmptyParts(delimiters),
+        array({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+
+    /* Empty parts */
+    CORRADE_COMPARE_AS("ab:c;;def."_s.splitWithoutEmptyParts(delimiters),
+        array({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+
+    /* Default is whitespace */
+    CORRADE_COMPARE_AS("ab c  \t \ndef\r"_s.splitWithoutEmptyParts(),
+        array({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+}
+
+void StringViewTest::splitMultipleCharactersFlags() {
+    constexpr Containers::StringView delimiters = ".:;"_s;
+
+    /* All flags come from the slice() implementation, so just verify the edge
+       cases */
+
+    /* Usual case -- all global, only the last null-terminated */
+    {
+        Array<StringView> a = "a.:b;c"_s.splitWithoutEmptyParts(delimiters);
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s, "c"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Found at the end -- last is not null-terminated because there are
+       characters after */
+    } {
+        Array<StringView> a = "a.b;::"_s.splitWithoutEmptyParts(delimiters);
+        CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+
+    /* Not found -- the only item is null-terminated */
+    } {
+        Array<StringView> a = "ab"_s.splitWithoutEmptyParts(delimiters);
+        CORRADE_COMPARE_AS(a, arrayView({"ab"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    }
+}
+
+void StringViewTest::splitNullView() {
+    CORRADE_COMPARE_AS(StringView{}.split(' '),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(' '),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(" "),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
 }
 
 void StringViewTest::partition() {

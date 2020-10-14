@@ -478,6 +478,45 @@ class CORRADE_UTILITY_EXPORT String {
         StringView except(std::size_t count) const; /**< @overload */
 
         /**
+         * @brief Split on given character
+         *
+         * Equivalent to @ref BasicStringView::split(). Not allowed to be
+         * called on a rvalue since the returned views would become dangling.
+         */
+        Array<MutableStringView> split(char delimiter) &;
+        Array<StringView> split(char delimiter) const &; /**< @overload */
+
+        /**
+         * @brief Split on given character, removing empty parts
+         *
+         * Equivalent to @ref BasicStringView::splitWithoutEmptyParts(char) const.
+         * Not allowed to be called on a rvalue since the returned views would
+         * become dangling.
+         */
+        Array<MutableStringView> splitWithoutEmptyParts(char delimiter) &;
+        Array<StringView> splitWithoutEmptyParts(char delimiter) const &; /**< @overload */
+
+        /**
+         * @brief Split on any character from given set, removing empty parts
+         *
+         * Equivalent to @ref BasicStringView::splitWithoutEmptyParts(StringView) const.
+         * Not allowed to be called on a rvalue since the returned views would
+         * become dangling.
+         */
+        Array<MutableStringView> splitWithoutEmptyParts(StringView delimiters) &;
+        Array<StringView> splitWithoutEmptyParts(StringView delimiters) const &; /**< @overload */
+
+        /**
+         * @brief Split on whitespace, removing empty parts
+         *
+         * Equivalent to @ref BasicStringView::splitWithoutEmptyParts() const.
+         * Not allowed to be called on a rvalue since the returned views would
+         * become dangling.
+         */
+        Array<MutableStringView> splitWithoutEmptyParts() &;
+        Array<StringView> splitWithoutEmptyParts() const &; /**< @overload */
+
+        /**
          * @brief Partition
          *
          * Equivalent to @ref BasicStringView::partition(). Not allowed to be

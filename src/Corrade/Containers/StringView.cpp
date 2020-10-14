@@ -28,8 +28,11 @@
 
 #include <cstring>
 #include <string>
+#include <algorithm> /* std::find_first_of(), sigh */
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -50,6 +53,70 @@ template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, String
 
 template<class T> BasicStringView<T>::operator ArrayView<T>() noexcept {
     return {_data, size()};
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
+    Array<BasicStringView<T>> parts;
+    T* const end = this->end();
+    T* oldpos = _data;
+    T* pos;
+    while(oldpos < end && (pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
+        arrayAppend(parts, slice(oldpos, pos));
+        oldpos = pos + 1;
+    }
+
+    if(!isEmpty())
+        arrayAppend(parts, suffix(oldpos));
+
+    return parts;
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const char delimiter) const {
+    Array<BasicStringView<T>> parts;
+    T* const end = this->end();
+    T* oldpos = _data;
+    T* pos;
+    while(oldpos < end && (pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
+        if(pos != oldpos)
+            arrayAppend(parts, slice(oldpos, pos));
+
+        oldpos = pos + 1;
+    }
+
+    if(!isEmpty() && oldpos < end)
+        arrayAppend(parts, suffix(oldpos));
+
+    return parts;
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
+    Array<BasicStringView<T>> parts;
+    const char* const sBegin = delimiters.begin();
+    const char* const sEnd = delimiters.end();
+    T* const end = this->end();
+    T* oldpos = _data;
+    T* pos;
+
+    while(oldpos < end && (pos = std::find_first_of(oldpos, end, sBegin, sEnd))) {
+        if(pos != oldpos)
+            arrayAppend(parts, slice(oldpos, pos));
+
+        oldpos = pos + 1;
+    }
+
+    if(!isEmpty() && oldpos < end)
+        arrayAppend(parts, suffix(oldpos));
+
+    return parts;
+}
+
+namespace {
+    using namespace Containers::Literals;
+    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
+    return splitWithoutEmptyParts(Whitespace);
 }
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {

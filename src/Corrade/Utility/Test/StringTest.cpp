@@ -43,7 +43,6 @@ struct StringTest: TestSuite::Tester {
     void trimInPlace();
     void split();
     void splitMultipleCharacters();
-    void splitNullView();
     void partition();
     void join();
     void lowercase();
@@ -78,7 +77,6 @@ StringTest::StringTest() {
               &StringTest::trimInPlace,
               &StringTest::split,
               &StringTest::splitMultipleCharacters,
-              &StringTest::splitNullView,
               &StringTest::partition,
               &StringTest::join,
               &StringTest::lowercase,
@@ -220,10 +218,10 @@ void StringTest::trimInPlace() {
 }
 
 void StringTest::split() {
-    /* These delegate into the StringView implementation, so they test both.
-       Except for null views, which is below. The explicit cast to avoid an
-       ambiguous overload is kinda nasty, but I don't expect much people to
-       call this function with a C string literal except for testing. */
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated.
+       The explicit cast to avoid an ambiguous overload is kinda nasty, but
+       since this is eventually getting deprecated, I don't care anymore. */
 
     /* Empty */
     CORRADE_COMPARE_AS(String::split(std::string{}, '/'),
@@ -257,10 +255,10 @@ void StringTest::split() {
 }
 
 void StringTest::splitMultipleCharacters() {
-    /* These delegate into the StringView implementation, so they test both.
-       Except for null views, which is below. The explicit cast to avoid an
-       ambiguous overload is kinda nasty, but I don't expect much people to
-       call this function with a C string literal except for testing. */
+    /* These delegate into the StringView implementation and the tests are
+       kept just for archival purposes, until the whole thing is deprecated.
+       The explicit cast to avoid an ambiguous overload is kinda nasty, but
+       since this is eventually getting deprecated, I don't care anymore. */
 
     const char delimiters[] = ".:;";
 
@@ -287,21 +285,6 @@ void StringTest::splitMultipleCharacters() {
     /* Whitespace */
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(std::string{"ab c  \t \ndef\r"}),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
-}
-
-void StringTest::splitNullView() {
-    CORRADE_COMPARE_AS(String::split(Containers::StringView{nullptr}, ' '),
-        Containers::Array<Containers::StringView>({}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}, ' '),
-        Containers::Array<Containers::StringView>({}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}, " "),
-        Containers::Array<Containers::StringView>({}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(Containers::StringView{nullptr}),
-        Containers::Array<Containers::StringView>({}),
-        TestSuite::Compare::Container);
 }
 
 void StringTest::partition() {

@@ -167,90 +167,49 @@ void rtrimInPlace(std::string& string) { rtrimInPlace(string, Whitespace); }
 
 void trimInPlace(std::string& string) { trimInPlace(string, Whitespace); }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 Containers::Array<Containers::StringView> split(const Containers::StringView string, const char delimiter) {
-    Containers::Array<Containers::StringView> parts;
-    const char* const end = string.end();
-    const char* oldpos = string.begin();
-    const char* pos;
-    while(oldpos < end && (pos = static_cast<const char*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
-        arrayAppend(parts, string.slice(oldpos, pos));
-        oldpos = pos + 1;
-    }
-
-    if(!string.isEmpty())
-        arrayAppend(parts, string.suffix(oldpos));
-
-    return parts;
+    return string.split(delimiter);
 }
 
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const char delimiter) {
-    Containers::Array<Containers::StringView> parts;
-    const char* const end = string.end();
-    const char* oldpos = string.begin();
-    const char* pos;
-    while(oldpos < end && (pos = static_cast<const char*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
-        if(pos != oldpos)
-            arrayAppend(parts, string.slice(oldpos, pos));
-
-        oldpos = pos + 1;
-    }
-
-    if(!string.isEmpty() && oldpos < end)
-        arrayAppend(parts, string.suffix(oldpos));
-
-    return parts;
+    return string.splitWithoutEmptyParts(delimiter);
 }
 
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters) {
-    Containers::Array<Containers::StringView> parts;
-    const char* const sBegin = delimiters.begin();
-    const char* const sEnd = delimiters.end();
-    const char* const end = string.end();
-    const char* oldpos = string.begin();
-    const char* pos;
-
-    while(oldpos < end && (pos = std::find_first_of(oldpos, end, sBegin, sEnd))) {
-        if(pos != oldpos)
-            arrayAppend(parts, string.slice(oldpos, pos));
-
-        oldpos = pos + 1;
-    }
-
-    if(!string.isEmpty() && oldpos < end)
-        arrayAppend(parts, string.suffix(oldpos));
-
-    return parts;
+    return string.splitWithoutEmptyParts(delimiters);
 }
 
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string) {
-    return splitWithoutEmptyParts(string, Whitespace);
+    return string.splitWithoutEmptyParts();
 }
+#endif
 
 std::vector<std::string> split(const std::string& string, const char delimiter) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = split(Containers::StringView{string}, delimiter);
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.split(delimiter);
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char delimiter) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = splitWithoutEmptyParts(Containers::StringView{string}, delimiter);
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts(delimiter);
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = splitWithoutEmptyParts(Containers::StringView{string}, Containers::StringView{delimiters});
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts(delimiters);
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = splitWithoutEmptyParts(Containers::StringView{string});
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts();
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 

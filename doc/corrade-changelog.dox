@@ -109,6 +109,15 @@ namespace Corrade {
     directly instead of invoking a copy/move-constructor, using @cpp () @ce
     instead works.
 
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
+
+-   @ref Utility::String::split() and
+    @ref Utility::String::splitWithoutEmptyParts() overloads taking
+    @ref Containers::BasicStringView are deprecated in favor of
+    @ref Containers::BasicStringView::split() and
+    @ref Containers::BasicStringView::splitWithoutEmptyParts();
+    the overloads taking @ref std::string are still kept
+
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
 -   All includes of @ref Corrade/Containers/PointerStl.h that were added in

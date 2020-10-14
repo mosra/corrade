@@ -29,6 +29,7 @@
 #include <string>
 #include <cstring>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -347,6 +348,38 @@ MutableStringView String::except(const std::size_t count) {
 
 StringView String::except(const std::size_t count) const {
     return StringView{*this}.except(count);
+}
+
+Array<MutableStringView> String::split(const char delimiter) & {
+    return MutableStringView{*this}.split(delimiter);
+}
+
+Array<StringView> String::split(const char delimiter) const & {
+    return StringView{*this}.split(delimiter);
+}
+
+Array<MutableStringView> String::splitWithoutEmptyParts(const char delimiter) & {
+    return MutableStringView{*this}.splitWithoutEmptyParts(delimiter);
+}
+
+Array<StringView> String::splitWithoutEmptyParts(const char delimiter) const & {
+    return StringView{*this}.splitWithoutEmptyParts(delimiter);
+}
+
+Array<MutableStringView> String::splitWithoutEmptyParts(const StringView delimiters) & {
+    return MutableStringView{*this}.splitWithoutEmptyParts(delimiters);
+}
+
+Array<StringView> String::splitWithoutEmptyParts(const StringView delimiters) const & {
+    return StringView{*this}.splitWithoutEmptyParts(delimiters);
+}
+
+Array<MutableStringView> String::splitWithoutEmptyParts() & {
+    return MutableStringView{*this}.splitWithoutEmptyParts();
+}
+
+Array<StringView> String::splitWithoutEmptyParts() const & {
+    return StringView{*this}.splitWithoutEmptyParts();
 }
 
 Array3<MutableStringView> String::partition(const char separator) & {

@@ -120,6 +120,10 @@ struct StringTest: TestSuite::Tester {
     void slice();
     void slicePointer();
 
+    void split();
+    void splitMultipleCharacters();
+    void splitMultipleCharactersWhitespace();
+
     void partition();
 
     void release();
@@ -178,6 +182,10 @@ StringTest::StringTest() {
 
               &StringTest::slice,
               &StringTest::slicePointer,
+
+              &StringTest::split,
+              &StringTest::splitMultipleCharacters,
+              &StringTest::splitMultipleCharactersWhitespace,
 
               &StringTest::partition,
 
@@ -1039,6 +1047,101 @@ void StringTest::slicePointer() {
     CORRADE_COMPARE(ca.prefix(ca.data() + 2).flags(), StringViewFlags{});
     CORRADE_COMPARE(ca.suffix(ca.data() + 2), "llo"_s);
     CORRADE_COMPARE(ca.suffix(ca.data() + 2).flags(), StringViewFlag::NullTerminated);
+}
+
+void StringTest::split() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    const String ca = "ab//c/def";
+    {
+        Array<StringView> s = ca.split('/');
+        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, ""_s, "c"_s, "def"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[2].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[3].flags(), StringViewFlag::NullTerminated);
+    } {
+        Array<StringView> s = ca.splitWithoutEmptyParts('/');
+        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[2].flags(), StringViewFlag::NullTerminated);
+    }
+
+    String a = "ab//c/def";
+    {
+        /** @todo any chance this could get done better? */
+        String s1 = "ab";
+        String s2 = "c";
+        String s3 = "def";
+        CORRADE_COMPARE_AS(a.split('/'),
+            array<MutableStringView>({s1, {}, s2, s3}),
+            TestSuite::Compare::Container);
+    } {
+        String s1 = "ab";
+        String s2 = "c";
+        String s3 = "def";
+        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts('/'),
+            array<MutableStringView>({s1, s2, s3}),
+            TestSuite::Compare::Container);
+    }
+}
+
+void StringTest::splitMultipleCharacters() {
+    constexpr Containers::StringView delimiters = ".:;"_s;
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    const String ca = "ab.:c;def";
+    {
+        Array<StringView> s = ca.splitWithoutEmptyParts(delimiters);
+        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[2].flags(), StringViewFlag::NullTerminated);
+    }
+
+    String a = "ab.:c;def";
+    {
+        /** @todo any chance this could get done better? */
+        String s1 = "ab";
+        String s2 = "c";
+        String s3 = "def";
+        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts(delimiters),
+            array<MutableStringView>({s1, s2, s3}),
+            TestSuite::Compare::Container);
+    }
+}
+
+void StringTest::splitMultipleCharactersWhitespace() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    const String ca = "ab\n  c\t\rdef";
+    {
+        Array<StringView> s = ca.splitWithoutEmptyParts();
+        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[2].flags(), StringViewFlag::NullTerminated);
+    }
+
+    String a = "ab\n  c\t\rdef";
+    {
+        /** @todo any chance this could get done better? */
+        String s1 = "ab";
+        String s2 = "c";
+        String s3 = "def";
+        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts(),
+            array<MutableStringView>({s1, s2, s3}),
+            TestSuite::Compare::Container);
+    }
 }
 
 void StringTest::partition() {

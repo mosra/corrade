@@ -393,6 +393,50 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         }
 
         /**
+         * @brief Split on given character
+         *
+         * If @p delimiter is not found, returns a single-item array containing
+         * the full input string. If the string is empty, returns an empty
+         * array. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate.
+         * @see @ref splitWithoutEmptyParts(), @ref partition()
+         */
+        Array<BasicStringView<T>> split(char delimiter) const;
+
+        /**
+         * @brief Split on given character, removing empty parts
+         *
+         * If @p delimiter is not found, returns a single-item array containing
+         * the full input string. If the string is empty or consists just of
+         * @p delimiter characters, returns an empty array. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate.
+         * @see @ref split(), @ref splitWithoutEmptyParts(StringView) const,
+         *      @ref partition()
+         */
+        Array<BasicStringView<T>> splitWithoutEmptyParts(char delimiter) const;
+
+        /**
+         * @brief Split on any character from given set, removing empty parts
+         *
+         * If no characters from @p delimiters are found, returns a single-item
+         * array containing the full input string. If the string is empty or
+         * consists just of characters from @p delimiters, returns an empty
+         * array. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate.
+         * @see @ref split(), @ref splitWithoutEmptyParts() const
+         */
+        Array<BasicStringView<T>> splitWithoutEmptyParts(StringView delimiters) const;
+
+        /**
+         * @brief Split on whitespace, removing empty parts
+         *
+         * Equivalent to calling @ref splitWithoutEmptyParts(StringView) const
+         * with @cpp " \t\f\v\r\n" @ce passed to @p delimiters.
+         */
+        Array<BasicStringView<T>> splitWithoutEmptyParts() const;
+
+        /**
          * @brief Partition
          *
          * Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
@@ -405,6 +449,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @ref flags() as appropriate. Additionally, the resulting views are
          * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
          * the view always points to existing memory.
+         * @see @ref split()
          */
         Array3<BasicStringView<T>> partition(char separator) const;
 
