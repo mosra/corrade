@@ -510,7 +510,7 @@ inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool
 @brief Strip given prefix from a string
 
 Expects that the string actually begins with given prefix.
-@see @ref beginsWith()
+@see @ref beginsWith(), @ref Containers::StringView::stripPrefix()
 */
 inline std::string stripPrefix(std::string string, const std::string& prefix) {
     return Implementation::stripPrefix(std::move(string), {prefix.data(), prefix.size()});
@@ -530,7 +530,7 @@ inline std::string stripPrefix(std::string string, char prefix) {
 @brief Strip given suffix from a string
 
 Expects that the string actually ends with given suffix.
-@see @ref endsWith()
+@see @ref endsWith(), @ref Containers::StringView::stripSuffix()
 */
 inline std::string stripSuffix(std::string string, const std::string& suffix) {
     return Implementation::stripSuffix(std::move(string), {suffix.data(), suffix.size()});

@@ -398,6 +398,22 @@ bool String::hasSuffix(const StringView suffix) const {
     return StringView{*this}.hasSuffix(suffix);
 }
 
+MutableStringView String::stripPrefix(const StringView prefix) & {
+    return MutableStringView{*this}.stripPrefix(prefix);
+}
+
+StringView String::stripPrefix(const StringView prefix) const & {
+    return StringView{*this}.stripPrefix(prefix);
+}
+
+MutableStringView String::stripSuffix(const StringView suffix) & {
+    return MutableStringView{*this}.stripSuffix(suffix);
+}
+
+StringView String::stripSuffix(const StringView suffix) const & {
+    return StringView{*this}.stripSuffix(suffix);
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

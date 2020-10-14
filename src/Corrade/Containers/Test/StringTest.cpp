@@ -129,6 +129,11 @@ struct StringTest: TestSuite::Tester {
     void hasPrefix();
     void hasSuffix();
 
+    void stripPrefix();
+    void stripPrefixInvalid();
+    void stripSuffix();
+    void stripSuffixInvalid();
+
     void release();
 
     void releaseDeleterSmall();
@@ -194,6 +199,11 @@ StringTest::StringTest() {
 
               &StringTest::hasPrefix,
               &StringTest::hasSuffix,
+
+              &StringTest::stripPrefix,
+              &StringTest::stripPrefixInvalid,
+              &StringTest::stripSuffix,
+              &StringTest::stripSuffixInvalid,
 
               &StringTest::release,
 
@@ -1190,6 +1200,68 @@ void StringTest::hasSuffix() {
 
     CORRADE_VERIFY(String{"overcomplicated"}.hasSuffix("complicated"));
     CORRADE_VERIFY(!String{"overcomplicated"}.hasSuffix("somplicated"));
+}
+
+void StringTest::stripPrefix() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    String a{"overcomplicated"};
+    CORRADE_COMPARE(a.stripPrefix("over"), "complicated"_s);
+    CORRADE_COMPARE(a.stripPrefix("over").flags(), StringViewFlag::NullTerminated);
+
+    const String ca{"overcomplicated"};
+    CORRADE_COMPARE(ca.stripPrefix("over"), "complicated");
+}
+
+void StringTest::stripPrefixInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    String a{"overcomplicated"};
+    const String ca{"overcomplicated"};
+
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    a.stripPrefix("complicated");
+    ca.stripPrefix("complicated");
+    /* Assert is coming from StringView */
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::stripPrefix(): string doesn't begin with complicated\n"
+        "Containers::StringView::stripPrefix(): string doesn't begin with complicated\n");
+}
+
+void StringTest::stripSuffix() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    String a{"overcomplicated"};
+
+    CORRADE_COMPARE(a.stripSuffix("complicated"), "over"_s);
+    CORRADE_COMPARE(a.stripSuffix("complicated").flags(), StringViewFlags{});
+    CORRADE_COMPARE(a.stripSuffix("").flags(), StringViewFlag::NullTerminated);
+
+    const String ca{"overcomplicated"};
+    CORRADE_COMPARE(ca.stripSuffix("complicated"), "over");
+}
+
+void StringTest::stripSuffixInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    String a{"overcomplicated"};
+    const String ca{"overcomplicated"};
+
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    a.stripSuffix("over");
+    ca.stripSuffix("over");
+    /* Assert is coming from StringView */
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::stripSuffix(): string doesn't end with over\n"
+        "Containers::StringView::stripSuffix(): string doesn't end with over\n");
 }
 
 void StringTest::release() {

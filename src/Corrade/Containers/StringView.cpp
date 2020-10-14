@@ -149,6 +149,18 @@ template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) co
     return std::strncmp(_data + size - suffixSize, suffix.data(), suffixSize) == 0;
 }
 
+template<class T> BasicStringView<T> BasicStringView<T>::stripPrefix(const StringView prefix) const {
+    CORRADE_ASSERT(hasPrefix(prefix),
+        "Containers::StringView::stripPrefix(): string doesn't begin with" << prefix, {});
+    return suffix(prefix.size());
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::stripSuffix(const StringView suffix) const {
+    CORRADE_ASSERT(hasSuffix(suffix),
+        "Containers::StringView::stripSuffix(): string doesn't end with" << suffix, {});
+    return prefix(size() - suffix.size());
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template class
     /* GCC needs the export macro on the class definition (and here it warns

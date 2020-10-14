@@ -458,6 +458,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * For an empty string returns @cpp true @ce only if @p prefix is empty
          * as well.
+         * @see @ref stripPrefix()
          */
         bool hasPrefix(StringView prefix) const;
 
@@ -466,8 +467,33 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * For an empty string returns @cpp true @ce only if @p suffix is empty
          * as well.
+         * @see @ref stripSuffix()
          */
         bool hasSuffix(StringView suffix) const;
+
+        /**
+         * @brief Strip given prefix
+         *
+         * Expects that the string actually begins with given prefix. The
+         * function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting view is
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref hasPrefix()
+         */
+        BasicStringView<T> stripPrefix(StringView prefix) const;
+
+        /**
+         * @brief Strip given suffix
+         *
+         * Expects that the string actually ends with given suffix. The
+         * function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting view is
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref hasSuffix()
+         */
+        BasicStringView<T> stripSuffix(StringView suffix) const;
 
     private:
         /* Needed for mutable/immutable conversion */

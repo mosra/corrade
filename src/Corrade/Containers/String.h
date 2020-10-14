@@ -529,6 +529,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string begins with given prefix
          *
          * Equivalent to @ref BasicStringView::hasPrefix().
+         * @see @ref stripPrefix()
          */
         bool hasPrefix(StringView prefix) const;
 
@@ -536,8 +537,29 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string ends with given suffix
          *
          * Equivalent to @ref BasicStringView::hasSuffix().
+         * @see @ref stripSuffix()
          */
         bool hasSuffix(StringView suffix) const;
+
+        /**
+         * @brief Strip given prefix
+         *
+         * Equivalent to @ref BasicStringView::stripPrefix(). Not allowed to be
+         * called on a rvalue since the returned view would become dangling.
+         * @see @ref hasPrefix()
+         */
+        MutableStringView stripPrefix(StringView prefix) &;
+        StringView stripPrefix(StringView prefix) const &; /**< @overload */
+
+        /**
+         * @brief Strip given prefix
+         *
+         * Equivalent to @ref BasicStringView::stripSuffix(). Not allowed to be
+         * called on a rvalue since the returned view would become dangling.
+         * @see @ref hasSuffix()
+         */
+        MutableStringView stripSuffix(StringView suffix) &;
+        StringView stripSuffix(StringView suffix) const &; /**< @overload */
 
         /**
          * @brief Release data storage
