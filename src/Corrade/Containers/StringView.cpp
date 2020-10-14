@@ -75,16 +75,18 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     Array<BasicStringView<T>> parts;
     T* const end = this->end();
     T* oldpos = _data;
-    T* pos;
-    while(oldpos < end && (pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
+
+    while(oldpos < end) {
+        T* pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos));
+        /* Not sure why memchr can't just do this, it would make much more
+           sense */
+        if(!pos) pos = end;
+
         if(pos != oldpos)
             arrayAppend(parts, slice(oldpos, pos));
 
         oldpos = pos + 1;
     }
-
-    if(!isEmpty() && oldpos < end)
-        arrayAppend(parts, suffix(oldpos));
 
     return parts;
 }
@@ -95,17 +97,14 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     const char* const sEnd = delimiters.end();
     T* const end = this->end();
     T* oldpos = _data;
-    T* pos;
 
-    while(oldpos < end && (pos = std::find_first_of(oldpos, end, sBegin, sEnd))) {
+    while(oldpos < end) {
+        T* const pos = std::find_first_of(oldpos, end, sBegin, sEnd);
         if(pos != oldpos)
             arrayAppend(parts, slice(oldpos, pos));
 
         oldpos = pos + 1;
     }
-
-    if(!isEmpty() && oldpos < end)
-        arrayAppend(parts, suffix(oldpos));
 
     return parts;
 }
