@@ -460,9 +460,9 @@ void StringTest::endsWith() {
 }
 
 void StringTest::endsWithEmpty() {
-    CORRADE_VERIFY(!String::beginsWith("", "overcomplicated"));
-    CORRADE_VERIFY(String::beginsWith("overcomplicated", ""));
-    CORRADE_VERIFY(String::beginsWith("", ""));
+    CORRADE_VERIFY(!String::endsWith("", "overcomplicated"));
+    CORRADE_VERIFY(String::endsWith("overcomplicated", ""));
+    CORRADE_VERIFY(String::endsWith("", ""));
 }
 
 void StringTest::viewEndsWith() {
