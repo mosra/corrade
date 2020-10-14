@@ -28,7 +28,6 @@
 
 #include <cstring>
 #include <string>
-#include <algorithm> /* std::find_first_of(), sigh */
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayView.h"
@@ -91,15 +90,46 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     return parts;
 }
 
+namespace {
+
+/* I don't want to include <algorithm> just for std::find_first_of() and
+   unfortunately there's no equivalent in the C string library. Coming close
+   are strpbrk() or strcspn() but both of them work with null-terminated
+   strings, which is absolutely useless here, not to mention that both do
+   *exactly* the same thing, with one returning a pointer but the other an
+   offset, so what's the point of having both? What the hell. And there's no
+   memcspn() or whatever which would take explicit lengths. Which means I'm
+   left to my own devices. Looking at how strpbrk() / strcspn() is done, it
+   ranges from trivial code:
+
+    https://github.com/bminor/newlib/blob/6497fdfaf41d47e835fdefc78ecb0a934875d7cf/newlib/libc/string/strcspn.c
+
+   to extremely optimized machine-specific code (don't look, it's GPL):
+
+    https://github.com/bminor/glibc/blob/43b1048ab9418e902aac8c834a7a9a88c501620a/sysdeps/x86_64/multiarch/strcspn-c.c
+
+   and the only trick I realized above the nested loop is using memchr() in an
+   inverse way. In all honesty, I think that'll still be *at least* as fast as
+   std::find_first_of() because I doubt STL implementations explicitly optimize
+   for that case. Yes, std::string::find_first_of() probably would have that,
+   but I'd first need to allocate to make use of that and FUCK NO. */
+inline const char* findFirstOf(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
+    for(; begin != end; ++begin)
+        if(std::memchr(characters, *begin, characterCount)) return begin;
+    return end;
+}
+
+}
+
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
     Array<BasicStringView<T>> parts;
-    const char* const sBegin = delimiters.begin();
-    const char* const sEnd = delimiters.end();
+    const char* const characters = delimiters.begin();
+    const std::size_t characterCount = delimiters.size();
     T* const end = this->end();
     T* oldpos = _data;
 
     while(oldpos < end) {
-        T* const pos = std::find_first_of(oldpos, end, sBegin, sEnd);
+        T* const pos = const_cast<T*>(findFirstOf(oldpos, end, characters, characterCount));
         if(pos != oldpos)
             arrayAppend(parts, slice(oldpos, pos));
 
