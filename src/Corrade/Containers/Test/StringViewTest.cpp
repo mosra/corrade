@@ -166,6 +166,8 @@ StringViewTest::StringViewTest() {
               &StringViewTest::debug});
 }
 
+using namespace Literals;
+
 template<class> struct NameFor;
 template<> struct NameFor<const char> {
     static const char* name() { return "StringView"; }
@@ -286,8 +288,6 @@ void StringViewTest::constructFromMutable() {
 }
 
 void StringViewTest::constructLiteral() {
-    using namespace Literals;
-
     StringView view = "hell\0!"_s;
     CORRADE_COMPARE(view.size(), 6);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
@@ -300,8 +300,6 @@ void StringViewTest::constructLiteral() {
 }
 
 void StringViewTest::constructLiteralEmpty() {
-    using namespace Literals;
-
     StringView view = ""_s;
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
@@ -447,11 +445,8 @@ void StringViewTest::compareEquality() {
     CORRADE_VERIFY(empty != a);
 
     /* Null terminator in the middle -- it should not stop at it */
-    {
-        using namespace Literals;
-        CORRADE_VERIFY("hello\0world"_s == (StringView{"hello\0world!", 11}));
-        CORRADE_VERIFY("hello\0wOrld"_s != (StringView{"hello\0world!", 11}));
-    }
+    CORRADE_VERIFY("hello\0world"_s == (StringView{"hello\0world!", 11}));
+    CORRADE_VERIFY("hello\0wOrld"_s != (StringView{"hello\0world!", 11}));
 
     /* C strings on either side */
     CORRADE_VERIFY(a == "hello");
@@ -612,7 +607,6 @@ void StringViewTest::sliceNullptr() {
     CORRADE_VERIFY(!f.data());
     CORRADE_COMPARE(f.size(), 0);
 
-    using namespace Literals;
     constexpr StringView cd = "things"_s;
     constexpr StringView ce = cd.prefix(nullptr);
     CORRADE_VERIFY(!ce.data());
@@ -624,8 +618,6 @@ void StringViewTest::sliceNullptr() {
 }
 
 void StringViewTest::slice() {
-    using namespace Literals;
-
     /* Use the flags so we ensure the size is always properly masked out */
     char data[] = "hello";
     MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
@@ -649,8 +641,6 @@ void StringViewTest::slice() {
 }
 
 void StringViewTest::slicePointer() {
-    using namespace Literals;
-
     /* Use the flags so we ensure the size is always properly masked out */
     char data[] = "hello";
     MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
@@ -677,8 +667,6 @@ void StringViewTest::slicePointer() {
 }
 
 void StringViewTest::sliceFlags() {
-    using namespace Literals;
-
     StringView globalNullTerminated = "hello"_s;
     CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
@@ -730,8 +718,6 @@ void StringViewTest::debugFlags() {
 }
 
 void StringViewTest::debug() {
-    using namespace Literals;
-
     std::ostringstream out;
     /* The operator<< is implemented directly in Debug, testing here to have
        everything together */
