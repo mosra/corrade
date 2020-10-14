@@ -90,10 +90,10 @@ typedef EnumSet<StringViewFlag
 
 CORRADE_ENUMSET_OPERATORS(StringViewFlags)
 
-/** @debugoperatorclassenum{StringView,StringViewFlag} */
+/** @debugoperatorclassenum{BasicStringView,StringViewFlag} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringViewFlag value);
 
-/** @debugoperatorclassenum{StringView,StringViewFlags} */
+/** @debugoperatorclassenum{BasicStringView,StringViewFlags} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringViewFlags value);
 
 /**
@@ -469,7 +469,7 @@ CORRADE_UTILITY_EXPORT bool operator>(StringView a, StringView b);
 
 namespace Literals {
 
-/** @relatesalso BasicStringView
+/** @relatesalso Corrade::Containers::BasicStringView
 @brief String view literal
 @m_since_latest
 
