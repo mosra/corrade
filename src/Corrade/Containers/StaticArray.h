@@ -630,7 +630,13 @@ template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticAr
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
-    for(T& i: _data) i.~T();
+    for(T& i: _data) {
+        i.~T();
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* Complains i is set but not used for trivially destructible types */
+        static_cast<void>(i);
+        #endif
+    }
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value) {
