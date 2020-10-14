@@ -109,13 +109,31 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     return parts;
 }
 
+#ifndef CORRADE_MSVC2019_COMPATIBILITY
 namespace {
     using namespace Containers::Literals;
     constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
 }
+#endif
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
+    /* If I use an externally defined view here, MSVC (2015, 2017, 2019) will
+       blow up on the explicit template instantiation with
+
+        ..\src\Corrade\Containers\StringView.cpp(176): error C2946: explicit instantiation; 'Corrade::Containers::BasicStringView<const char>::<lambda_e55a1a450af96fadfe37cfb50a99d6f7>' is not a template-class specialization
+
+       I spent an embarrassing amount of time trying to find what lambda it
+       doesn't like, reimplemented std::find_first_of() used in
+       splitWithoutEmptyParts(), added a non-asserting variants of slice() etc,
+       but nothing helped. Only defining CORRADE_NO_ASSERT at the very top made
+       the problem go away, and I discovered this only by accident after
+       removing basically all other code. WHAT THE FUCK, MSVC. */
+    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    using namespace Containers::Literals;
+    return splitWithoutEmptyParts(" \t\f\v\r\n"_s);
+    #else
     return splitWithoutEmptyParts(Whitespace);
+    #endif
 }
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {
