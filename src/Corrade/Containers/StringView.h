@@ -99,6 +99,7 @@ CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringV
 /**
 @brief Base for string views
 @m_since_latest
+
 @m_keywords{StringView MutableStringView}
 
 A lighter alternative to C++17 @ref std::string_view that has also a mutable
