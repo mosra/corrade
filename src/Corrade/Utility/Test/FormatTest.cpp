@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -74,8 +75,13 @@ struct FormatTest: TestSuite::Tester {
     void floatBase();
 
     void charArray();
-    void charArrayView();
+    void stringView();
+    void mutableStringView();
     void string();
+    #ifdef CORRADE_BUILD_DEPRECATED
+    void charArrayView();
+    #endif
+    void stlString();
     void stringPrecision();
 
     void enumConstant();
@@ -153,8 +159,13 @@ FormatTest::FormatTest() {
               &FormatTest::floatBase,
 
               &FormatTest::charArray,
-              &FormatTest::charArrayView,
+              &FormatTest::stringView,
+              &FormatTest::mutableStringView,
               &FormatTest::string,
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &FormatTest::charArrayView,
+              #endif
+              &FormatTest::stlString,
               &FormatTest::stringPrecision,
 
               &FormatTest::enumConstant,
@@ -560,14 +571,34 @@ void FormatTest::charArray() {
     CORRADE_COMPARE(formatString("hello {}", false ? "world" : "nobody"), "hello nobody");
 }
 
-void FormatTest::charArrayView() {
-    CORRADE_COMPARE(formatString("hello {}", Containers::arrayView("worlds", 5)),
+void FormatTest::stringView() {
+    using namespace Containers::Literals;
+
+    CORRADE_COMPARE(formatString("hello {}", "worlds"_s.except(1)),
         "hello world");
-    CORRADE_COMPARE(formatString("hello {}", Containers::arrayView("world\0, i guess?", 16)),
+    CORRADE_COMPARE(formatString("hello {}", "world\0, i guess?"_s),
         (std::string{"hello world\0, i guess?", 22}));
 }
 
+void FormatTest::mutableStringView() {
+    Containers::String a = "world";
+    CORRADE_COMPARE(formatString("hello {}", Containers::MutableStringView{a}),
+        "hello world");
+}
+
 void FormatTest::string() {
+    CORRADE_COMPARE(formatString("hello {}", Containers::String{"world"}),
+        "hello world");
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+void FormatTest::charArrayView() {
+    CORRADE_COMPARE(formatString("hello {}", Containers::arrayView("worlds", 5)),
+        "hello world");
+}
+#endif
+
+void FormatTest::stlString() {
     CORRADE_COMPARE(formatString("hello {}", std::string{"worlds", 5}),
         "hello world");
     CORRADE_COMPARE(formatString("hello {}", std::string{"world\0, i guess?", 16}),

@@ -29,6 +29,8 @@
 #include <cstring>
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
 
@@ -188,7 +190,7 @@ void Formatter<long double>::format(std::FILE* const file, const long double val
     std::fprintf(file, format, precision, value);
 }
 
-std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char>& buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
+std::size_t Formatter<Containers::StringView>::format(const Containers::ArrayView<char>& buffer, const Containers::StringView value, const int precision, const FormatType type) {
     std::size_t size = value.size();
     if(std::size_t(precision) < size) size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
@@ -197,10 +199,10 @@ std::size_t Formatter<Containers::ArrayView<const char>>::format(const Container
     static_cast<void>(type);
     #endif
     /* strncpy() would stop on \0 characters */
-    if(buffer) std::memcpy(buffer, value, size);
+    if(buffer) std::memcpy(buffer, value.data(), size);
     return size;
 }
-void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
+void Formatter<Containers::StringView>::format(std::FILE* const file, const Containers::StringView value, const int precision, const FormatType type) {
     std::size_t size = value.size();
     if(std::size_t(precision) < size) size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
@@ -211,16 +213,24 @@ void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file,
     std::fwrite(value.data(), size, 1, file);
 }
 std::size_t Formatter<const char*>::format(const Containers::ArrayView<char>& buffer, const char* value, const int precision, const FormatType type) {
-    return Formatter<Containers::ArrayView<const char>>::format(buffer, {value, std::strlen(value)}, precision, type);
+    return Formatter<Containers::StringView>::format(buffer, value, precision, type);
 }
 void Formatter<const char*>::format(std::FILE* const file, const char* value, const int precision, const FormatType type) {
-    Formatter<Containers::ArrayView<const char>>::format(file, {value, std::strlen(value)}, precision, type);
+    Formatter<Containers::StringView>::format(file, value, precision, type);
 }
+#ifdef CORRADE_BUILD_DEPRECATED
+std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char>& buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
+    return Formatter<Containers::StringView>::format(buffer, value, precision, type);
+}
+void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
+    Formatter<Containers::StringView>::format(file, value, precision, type);
+}
+#endif
 std::size_t Formatter<std::string>::format(const Containers::ArrayView<char>& buffer, const std::string& value, const int precision, const FormatType type) {
-    return Formatter<Containers::ArrayView<const char>>::format(buffer, {value.data(), value.size()}, precision, type);
+    return Formatter<Containers::StringView>::format(buffer, value, precision, type);
 }
 void Formatter<std::string>::format(std::FILE* const file, const std::string& value, const int precision, const FormatType type) {
-    return Formatter<Containers::ArrayView<const char>>::format(file, {value.data(), value.size()}, precision, type);
+    return Formatter<Containers::StringView>::format(file, value, precision, type);
 }
 
 namespace {

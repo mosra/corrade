@@ -86,6 +86,8 @@ namespace Corrade {
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() now have
     @ref Containers::StringView overloads that allocate much less
+-   Ability to print @ref Containers::BasicStringView and
+    @ref Containers::String using @ref Utility::format()
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
