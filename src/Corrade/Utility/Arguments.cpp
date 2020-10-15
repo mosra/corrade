@@ -1106,7 +1106,8 @@ auto Arguments::find(const char shortKey) const -> const Entry* {
 }
 
 inline std::string Arguments::keyName(const Entry& entry) const {
-    return entry.type == Type::Argument ? entry.helpKey : "--" + entry.key;
+    return entry.type == Type::Argument || entry.type == Type::ArrayArgument ?
+        entry.helpKey : "--" + entry.key;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
