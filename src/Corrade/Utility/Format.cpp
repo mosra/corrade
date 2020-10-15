@@ -32,7 +32,7 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
+#include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
@@ -235,7 +235,7 @@ void Formatter<std::string>::format(std::FILE* const file, const std::string& va
 
 namespace {
 
-int parseNumber(Containers::ArrayView<const char> format, std::size_t& formatOffset) {
+int parseNumber(Containers::StringView format, std::size_t& formatOffset) {
     int number = -1;
     while(formatOffset < format.size() && format[formatOffset] >= '0' && format[formatOffset] <= '9') {
         if(number == -1) number = 0;
@@ -246,7 +246,7 @@ int parseNumber(Containers::ArrayView<const char> format, std::size_t& formatOff
     return number;
 }
 
-template<class Writer, class FormattedWriter, class Formatter> void formatWith(const Writer writer, const FormattedWriter formattedWriter, const Containers::ArrayView<const char> format, const Containers::ArrayView<Formatter> formatters) {
+template<class Writer, class FormattedWriter, class Formatter> void formatWith(const Writer writer, const FormattedWriter formattedWriter, const Containers::StringView format, const Containers::ArrayView<Formatter> formatters) {
     bool inPlaceholder = false;
     std::size_t placeholderOffset = 0;
     std::size_t formatterToGo = 0;
@@ -257,7 +257,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
         /* Placeholder begin (or escaped {) */
         if(format[formatOffset] == '{') {
             if(formatOffset + 1 < format.size() && format[formatOffset+1] == '{') {
-                writer(format.slice<1>(formatOffset));
+                writer(format.slice(formatOffset, formatOffset + 1));
                 formatOffset += 2;
                 continue;
             }
@@ -276,7 +276,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
         /* Placeholder end (or escaped }) */
         if(format[formatOffset] == '}') {
             if(!inPlaceholder && formatOffset + 1 < format.size() && format[formatOffset+1] == '}') {
-                writer(format.slice<1>(formatOffset));
+                writer(format.slice(formatOffset, formatOffset + 1));
                 formatOffset += 2;
                 continue;
             }
@@ -317,7 +317,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
                     ++formatOffset;
                     precision = parseNumber(format, formatOffset);
                     CORRADE_ASSERT(precision != -1,
-                        "Utility::format(): invalid character in precision specifier:" << std::string{format[formatOffset]}, );
+                        "Utility::format(): invalid character in precision specifier:" << format.slice(formatOffset, formatOffset + 1), );
                 }
 
                 /* Type */
@@ -356,7 +356,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
                             break;
                         default:
                             CORRADE_ASSERT(false,
-                                "Utility::format(): invalid type specifier:" << std::string{format[formatOffset]}, );
+                                "Utility::format(): invalid type specifier:" << format.slice(formatOffset, formatOffset + 1), );
                     }
                     ++formatOffset;
                 }
@@ -368,7 +368,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
             /* Next should be the placeholder end */
             CORRADE_ASSERT(format[formatOffset] == '}',
-                "Utility::format(): unknown placeholder content:" << std::string{format[formatOffset]}, );
+                "Utility::format(): unknown placeholder content:" << format.slice(formatOffset, formatOffset + 1), );
             continue;
         }
 
@@ -404,7 +404,7 @@ std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* co
         } else if(formatter.size == ~std::size_t{})
             formatter.size = formatter(nullptr, precision, type);
         bufferOffset += formatter.size;
-    }, {format, std::strlen(format)}, Containers::arrayView(formatters, formatterCount));
+    }, format, Containers::arrayView(formatters, formatterCount));
     return bufferOffset;
 }
 
@@ -421,7 +421,7 @@ void formatInto(std::FILE* const file, const char* format, FileFormatter* const 
         fwrite(data.data(), data.size(), 1, file);
     }, [&file](const FileFormatter& formatter, int precision, FormatType type) {
         formatter(file, precision, type);
-    }, {format, std::strlen(format)}, Containers::arrayView(formatters, formatterCount));
+    }, format, Containers::arrayView(formatters, formatterCount));
 }
 
 }
