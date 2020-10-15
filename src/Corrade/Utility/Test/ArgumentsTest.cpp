@@ -118,7 +118,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingValue();
     void parseMissingOption();
     void parseMissingArgument();
-    void parseMissingArrayArgument();
+    void parseMissingArrayArgumentMiddle();
+    void parseMissingArrayArgumentLast();
 
     void prefixedParse();
     void prefixedParseMinus();
@@ -216,7 +217,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
               &ArgumentsTest::parseMissingArgument,
-              &ArgumentsTest::parseMissingArrayArgument,
+              &ArgumentsTest::parseMissingArrayArgumentMiddle,
+              &ArgumentsTest::parseMissingArrayArgumentLast,
 
               &ArgumentsTest::prefixedParse,
               &ArgumentsTest::prefixedParseMinus,
@@ -1222,7 +1224,7 @@ void ArgumentsTest::parseMissingArgument() {
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
 }
 
-void ArgumentsTest::parseMissingArrayArgument() {
+void ArgumentsTest::parseMissingArrayArgumentMiddle() {
     Arguments args;
     args.addArgument("mode")
         .addArrayArgument("input")
@@ -1237,6 +1239,20 @@ void ArgumentsTest::parseMissingArrayArgument() {
     /* It's actually the array arguments missing (there has to be at least
        one), but that's impossible to distinguish here */
     CORRADE_COMPARE(out.str(), "Missing command-line argument logfile\n");
+}
+
+void ArgumentsTest::parseMissingArrayArgumentLast() {
+    Arguments args;
+    args.addArgument("mode")
+        .addArrayArgument("input");
+
+    const char* argv[] = { "", "compress" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    /* Verify it's correctly printed (and not --input or some such) */
+    CORRADE_COMPARE(out.str(), "Missing command-line argument input\n");
 }
 
 void ArgumentsTest::prefixedParse() {
