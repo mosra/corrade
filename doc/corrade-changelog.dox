@@ -114,6 +114,8 @@ namespace Corrade {
     @ref std::unique_ptr to @ref Containers::Pointer are now removed. This
     should have a significant positive effect on compile times of code using
     especially the @ref PluginManager library.
+-   @cpp Containers::ScopedExit @ce, deprecated in 2019.01, is removed, use
+    @ref Containers::ScopeGuard instead
 
 @section corrade-changelog-2020-06 2020.06
 

@@ -50,10 +50,6 @@ set(CorradeContainers_HEADERS
 set(CorradeContainers_PRIVATE_HEADERS
     Implementation/RawForwardList.h)
 
-if(BUILD_DEPRECATED)
-    list(APPEND CorradeContainers_HEADERS ScopedExit.h)
-endif()
-
 # Force IDEs to display all header files in project view
 add_custom_target(CorradeContainers-headers SOURCES
     ${CorradeContainers_HEADERS}
