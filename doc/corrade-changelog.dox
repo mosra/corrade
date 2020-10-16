@@ -67,6 +67,8 @@ namespace Corrade {
 -   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     constructor is no longer @cpp explicit @ce to allow for easier use in
     initializer lists
+-   @ref Containers::ScopeGuard now has a @ref Containers::NoCreate constructor
+    and is movable in order to support deferred creation
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 

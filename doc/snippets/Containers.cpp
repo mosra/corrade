@@ -559,6 +559,22 @@ auto b = Containers::optional<std::string>('a', 'b');
     Containers::ScopeGuard e{fd, close};
 } // fclose(f) gets called at the end of the scope
 /* [ScopeGuard-usage] */
+
+{
+Containers::StringView filename;
+/* [ScopeGuard-deferred] */
+Containers::ScopeGuard e{Containers::NoCreate};
+
+/* Read from stdin if desired, otherwise scope-guard an opened file */
+int fd;
+if(filename == "-") {
+    fd = STDIN_FILENO;
+} else {
+    fd = open(filename.data(), O_RDONLY);
+    e = Containers::ScopeGuard{fd, close};
+}
+/* [ScopeGuard-deferred] */
+}
 #endif
 
 {

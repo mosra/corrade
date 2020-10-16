@@ -31,6 +31,9 @@ namespace Corrade { namespace Containers { namespace Test { namespace {
 struct ScopeGuardTest: TestSuite::Tester {
     explicit ScopeGuardTest();
 
+    void constructNoCreate();
+    void constructMove();
+
     void pointer();
     void value();
     void lambda();
@@ -40,12 +43,50 @@ struct ScopeGuardTest: TestSuite::Tester {
 };
 
 ScopeGuardTest::ScopeGuardTest() {
-    addTests({&ScopeGuardTest::pointer,
+    addTests({&ScopeGuardTest::constructNoCreate,
+              &ScopeGuardTest::constructMove,
+
+              &ScopeGuardTest::pointer,
               &ScopeGuardTest::value,
               &ScopeGuardTest::lambda,
               &ScopeGuardTest::returningLambda,
               &ScopeGuardTest::noHandle,
               &ScopeGuardTest::release});
+}
+
+void ScopeGuardTest::constructNoCreate() {
+    {
+        ScopeGuard e{NoCreate};
+    }
+
+    /* Implicit construction from NoCreateT is not allowed, neither should be
+       default construction (because such instance is too easy to create by
+       accident but makes no sense, so prevent that) */
+    CORRADE_VERIFY(!(std::is_convertible<NoCreateT, ScopeGuard>::value));
+    CORRADE_VERIFY(!std::is_default_constructible<ScopeGuard>::value);
+}
+
+void increment(int* value) { ++*value; }
+
+void ScopeGuardTest::constructMove() {
+    int v = 0;
+
+    {
+        ScopeGuard a{&v, increment};
+        CORRADE_COMPARE(v, 0);
+
+        ScopeGuard b = std::move(a);
+        CORRADE_COMPARE(v, 0);
+
+        ScopeGuard c{NoCreate};
+        CORRADE_COMPARE(v, 0);
+
+        c = std::move(a);
+        CORRADE_COMPARE(v, 0);
+    }
+
+    /* The deleter should be only called once */
+    CORRADE_COMPARE(v, 1);
 }
 
 int fd;

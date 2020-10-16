@@ -29,7 +29,9 @@
  * @brief Class @ref Corrade::Containers::ScopeGuard
  */
 
-#include "Corrade/configure.h"
+#include <utility>
+
+#include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
@@ -66,7 +68,13 @@ just a parameter-less function or lambda:
 @par
     @snippet Containers.cpp ScopeGuard-returning-lambda
 
-<b></b>
+@section Containers-ScopeGuard-deferred Deferred guard creation
+
+Using the @ref NoCreate tag, it's possible to create an empty instance that's
+populated later by moving another object over it, for example to have a
+conditional guard:
+
+@snippet Containers.cpp ScopeGuard-deferred
 
 <b></b>
 
@@ -91,23 +99,39 @@ class ScopeGuard {
         template<class U> explicit ScopeGuard(U(*deleter)());
         #endif
 
+        /**
+         * @brief Construct without creating a guard
+         * @m_since_latest
+         *
+         * The constructed instance is equivalent to a moved-from state. Move
+         * another object over it to make it useful.
+         * @see @ref Containers-ScopeGuard-deferred
+         */
+        explicit ScopeGuard(NoCreateT) noexcept: _deleterWrapper{}, _deleter{}, _handle{} {}
+
         /** @brief Copying is not allowed */
         ScopeGuard(const ScopeGuard&) = delete;
 
-        /** @brief Moving is not allowed */
-        ScopeGuard(ScopeGuard&&) = delete;
+        /**
+         * @brief Move constructor
+         * @m_since_latest
+         */
+        ScopeGuard(ScopeGuard&& other) noexcept;
 
         /** @brief Copying is not allowed */
         ScopeGuard& operator=(const ScopeGuard&) = delete;
 
-        /** @brief Moving is not allowed */
-        ScopeGuard& operator=(ScopeGuard&&) = delete;
+        /**
+         * @brief Move assignment
+         * @m_since_latest
+         */
+        ScopeGuard& operator=(ScopeGuard&&) noexcept;
 
         /**
          * @brief Release the handle ownership
          *
          * Causes the deleter passed in constructor to not get called on
-         * destruction.
+         * destruction. The instance is then equivalent to a moved-out state.
          */
         void release() { _deleterWrapper = nullptr; }
 
@@ -150,6 +174,18 @@ template<class Deleter> ScopeGuard::ScopeGuard(Deleter deleter): _deleter{
     _deleterWrapper = [](void(**deleter)(), void**) {
         (*reinterpret_cast<Deleter*>(deleter))();
     };
+}
+
+inline ScopeGuard::ScopeGuard(ScopeGuard&& other) noexcept: _deleterWrapper{other._deleterWrapper}, _deleter{other._deleter}, _handle{other._handle} {
+    other._deleterWrapper = nullptr;
+}
+
+inline ScopeGuard& ScopeGuard::operator=(ScopeGuard&& other) noexcept {
+    using std::swap;
+    swap(other._deleterWrapper, _deleterWrapper);
+    swap(other._deleter, _deleter);
+    swap(other._handle, _handle);
+    return *this;
 }
 
 #ifdef CORRADE_MSVC2015_COMPATIBILITY
