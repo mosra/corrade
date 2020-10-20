@@ -76,7 +76,23 @@ namespace Implementation {
         return 1;
     }
     template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const StridedDimensions<dimensions, std::size_t>& size, std::size_t index, Sequence<first, next...>) {
+        /* GCC since version 10.2 complains that
+            warning: comparison of unsigned expression in ‘< 0’ is always false [-Wtype-limits]
+           and there's no way to silence that except for a pragma (doing things
+           like `first && first > index` doesn't change anything). There was
+           nothing in the 10.2 changelog mentioning this and the only vaguely
+           relevant bug is https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95148
+           (which complains about the inability to circumvent this, but not
+           about the stupidity of this warning being trigerred in a template
+           code) */
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 102
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wtype-limits"
+        #endif
         return (first > index ? size[first] : 1)*strideForSizeInternal(size, index, Sequence<next...>{});
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 102
+        #pragma GCC diagnostic pop
+        #endif
     }
     template<unsigned dimensions, std::size_t ...index> constexpr StridedDimensions<dimensions, std::ptrdiff_t> strideForSize(const StridedDimensions<dimensions, std::size_t>& size, std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
