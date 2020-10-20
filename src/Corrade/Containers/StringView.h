@@ -311,17 +311,41 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
             return !(_size & ~Implementation::StringViewSizeMask);
         }
 
-        /** @brief Pointer to the first byte */
+        /**
+         * @brief Pointer to the first byte
+         *
+         * @see @ref front()
+         */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; } /**< @overload */
 
-        /** @brief Pointer to (one item after) the last byte */
+        /**
+         * @brief Pointer to (one item after) the last byte
+         *
+         * @see @ref back()
+         */
         constexpr T* end() const {
             return _data + (_size & ~Implementation::StringViewSizeMask);
         }
         constexpr T* cend() const {
             return _data + (_size & ~Implementation::StringViewSizeMask);
         } /**< @overload */
+
+        /**
+         * @brief First byte
+         *
+         * Expects there is at least one byte.
+         * @see @ref begin()
+         */
+        T& front() const;
+
+        /**
+         * @brief Last byte
+         *
+         * Expects there is at least one byte.
+         * @see @ref end()
+         */
+        T& back() const;
 
         /** @brief Element access */
         constexpr T& operator[](std::size_t i) const { return _data[i]; }

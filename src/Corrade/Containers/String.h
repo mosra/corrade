@@ -422,15 +422,41 @@ class CORRADE_UTILITY_EXPORT String {
          */
         std::size_t size() const;
 
-        /** @brief Pointer to the first byte */
+        /**
+         * @brief Pointer to the first byte
+         *
+         * @see @ref front()
+         */
         char* begin();
         const char* begin() const; /**< @overload */
         const char* cbegin() const; /**< @overload */
 
-        /** @brief Pointer to (one item after) the last byte */
+        /**
+         * @brief Pointer to (one item after) the last byte
+         *
+         * @see @ref back()
+         */
         char* end();
         const char* end() const; /**< @overload */
         const char* cend() const; /**< @overload */
+
+        /**
+         * @brief First byte
+         *
+         * Expects there is at least one byte.
+         * @see @ref begin()
+         */
+        char& front();
+        char front() const; /**< @overload */
+
+        /**
+         * @brief Last byte
+         *
+         * Expects there is at least one byte.
+         * @see @ref end()
+         */
+        char& back();
+        char back() const; /**< @overload */
 
         /** @brief Element access */
         char& operator[](std::size_t i);

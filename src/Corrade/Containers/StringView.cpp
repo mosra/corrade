@@ -54,6 +54,19 @@ template<class T> BasicStringView<T>::operator ArrayView<T>() noexcept {
     return {_data, size()};
 }
 
+/** @todo does it make a practical sense (debug perf) to rewrite these two
+    directly without delegating to size()? i don't think so */
+
+template<class T> T& BasicStringView<T>::front() const {
+    CORRADE_ASSERT(size(), "Containers::StringView::front(): view is empty", _data[0]);
+    return _data[0];
+}
+
+template<class T> T& BasicStringView<T>::back() const {
+    CORRADE_ASSERT(size(), "Containers::StringView::back(): view is empty", _data[size() - 1]);
+    return _data[size() - 1];
+}
+
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
     Array<BasicStringView<T>> parts;
     T* const end = this->end();

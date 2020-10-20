@@ -117,6 +117,7 @@ struct StringViewTest: TestSuite::Tester {
 
     void access();
     void accessMutable();
+    void accessInvalid();
 
     void sliceInvalid();
     void sliceNullptr();
@@ -178,6 +179,7 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::access,
               &StringViewTest::accessMutable,
+              &StringViewTest::accessInvalid,
 
               &StringViewTest::sliceInvalid,
               &StringViewTest::sliceNullptr,
@@ -570,8 +572,10 @@ void StringViewTest::access() {
     const StringView view{string, 12, StringViewFlag::Global|StringViewFlag::NullTerminated};
     CORRADE_COMPARE(*view.begin(), 'h');
     CORRADE_COMPARE(*view.cbegin(), 'h');
+    CORRADE_COMPARE(view.front(), 'h');
     CORRADE_COMPARE(*(view.end() - 1), '!');
     CORRADE_COMPARE(*(view.cend() - 1), '!');
+    CORRADE_COMPARE(view.back(), '!');
     CORRADE_COMPARE(view[6], 'w');
 }
 
@@ -582,9 +586,31 @@ void StringViewTest::accessMutable() {
     view[5] = ' ';
     *view.begin() = 'I';
     ++*view.begin();
+    ++view.front();
     *(view.end() - 1) = '>';
     ++*(view.cend() - 1);
-    CORRADE_COMPARE(view, StringView{"Jello world?"});
+    ++view.back();
+    CORRADE_COMPARE(view, StringView{"Kello world@"});
+}
+
+void StringViewTest::accessInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::stringstream out;
+    Error redirectError{&out};
+
+    /* Use an empty literal to have flags set, testing that the implementation
+       uses size() and not _size */
+    StringView a = ""_s;
+    CORRADE_VERIFY(a.flags());
+
+    a.front();
+    a.back();
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::front(): view is empty\n"
+        "Containers::StringView::back(): view is empty\n");
 }
 
 void StringViewTest::sliceInvalid() {

@@ -284,6 +284,27 @@ const char* String::cend() const {
     return _large.data + _large.size;
 }
 
+/** @todo does it make a practical sense (debug perf) to rewrite these two
+    directly without delegating to size()/begin()/end()? i don't think so */
+
+char& String::front() {
+    CORRADE_ASSERT(size(), "Containers::String::front(): string is empty", *begin());
+    return *begin();
+}
+
+char String::front() const {
+    return const_cast<String&>(*this).front();
+}
+
+char& String::back() {
+    CORRADE_ASSERT(size(), "Containers::String::back(): string is empty", *(end() - 1));
+    return *(end() - 1);
+}
+
+char String::back() const {
+    return const_cast<String&>(*this).back();
+}
+
 char& String::operator[](std::size_t i) {
     if(_small.size & 0x80) return _small.data[i];
     return _large.data[i];

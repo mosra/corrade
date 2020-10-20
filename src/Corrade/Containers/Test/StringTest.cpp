@@ -116,6 +116,7 @@ struct StringTest: TestSuite::Tester {
 
     void access();
     void accessSmall();
+    void accessInvalid();
 
     void slice();
     void slicePointer();
@@ -187,6 +188,7 @@ StringTest::StringTest() {
 
               &StringTest::access,
               &StringTest::accessSmall,
+              &StringTest::accessInvalid,
 
               &StringTest::slice,
               &StringTest::slicePointer,
@@ -994,20 +996,26 @@ void StringTest::access() {
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_COMPARE(*a.begin(), 'A');
     CORRADE_COMPARE(*a.cbegin(), 'A');
+    CORRADE_COMPARE(a.front(), 'A');
     CORRADE_COMPARE(*(a.end() - 1), 'd');
     CORRADE_COMPARE(*(a.cend() - 1), 'd');
+    CORRADE_COMPARE(a.back(), 'd');
 
     a[14] = '!';
-    *a.begin() = 'O';
-    *(a.end() - 1) = 't';
+    *a.begin() = 'N';
+    ++a.front();
+    *(a.end() - 1) = 's';
+    ++a.back();
     CORRADE_COMPARE(a, "Ollocated hell! for a verbose worlt");
 
     const String ca = "Allocated hello for a verbose world";
     CORRADE_VERIFY(!ca.isSmall());
     CORRADE_COMPARE(*ca.begin(), 'A');
     CORRADE_COMPARE(*ca.cbegin(), 'A');
+    CORRADE_COMPARE(ca.front(), 'A');
     CORRADE_COMPARE(*(ca.end() - 1), 'd');
     CORRADE_COMPARE(*(ca.cend() - 1), 'd');
+    CORRADE_COMPARE(ca.back(), 'd');
     CORRADE_COMPARE(ca[14], 'o');
 }
 
@@ -1016,13 +1024,36 @@ void StringTest::accessSmall() {
     CORRADE_VERIFY(a.isSmall());
     CORRADE_COMPARE(*a.begin(), 'h');
     CORRADE_COMPARE(*a.cbegin(), 'h');
+    CORRADE_COMPARE(a.front(), 'h');
     CORRADE_COMPARE(*(a.end() - 1), '!');
     CORRADE_COMPARE(*(a.cend() - 1), '!');
+    CORRADE_COMPARE(a.back(), '!');
 
     a[4] = '!';
     *(a.end() - 1) = '?';
-    *a.begin() = 'H';
-    CORRADE_COMPARE(a, "Hell!?");
+    *a.begin() = 'J';
+    ++a.front();
+    ++a.back();
+    CORRADE_COMPARE(a, "Kell!@");
+}
+
+void StringTest::accessInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::stringstream out;
+    Error redirectError{&out};
+
+    /* Use a SSO instance to test we're not checking the members directly */
+    String a;
+    CORRADE_VERIFY(a.isSmall());
+
+    a.front();
+    a.back();
+    CORRADE_COMPARE(out.str(),
+        "Containers::String::front(): string is empty\n"
+        "Containers::String::back(): string is empty\n");
 }
 
 void StringTest::slice() {
