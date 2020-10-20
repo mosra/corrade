@@ -50,7 +50,7 @@ template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicS
 
 template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
-template<class T> BasicStringView<T>::operator ArrayView<T>() noexcept {
+template<class T> BasicStringView<T>::operator ArrayView<T>() const noexcept {
     return {_data, size()};
 }
 

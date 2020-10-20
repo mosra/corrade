@@ -265,7 +265,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * The resulting view has the same size as this string @ref size() ---
          * the null terminator, if any, is not counted into it.
          */
-        operator ArrayView<T>() noexcept;
+        operator ArrayView<T>() const noexcept;
 
         /** @todo convert mutable to const ArrayView, how to do without having
             to do it via a template (and thus including ArrayView?) */
