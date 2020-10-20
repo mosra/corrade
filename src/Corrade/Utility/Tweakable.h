@@ -33,6 +33,7 @@
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/TweakableParser.h"
@@ -342,7 +343,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
     private:
         struct Data;
 
-        std::pair<bool, void*> registerVariable(const char* file, int line, std::size_t variable, TweakableState(*parser)(Containers::ArrayView<const char>, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>));
+        std::pair<bool, void*> registerVariable(const char* file, int line, std::size_t variable, TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>));
 
         void scopeInternal(void(*lambda)(void(*)(), void*), void(*userCall)(), void* userData);
 
@@ -396,7 +397,7 @@ namespace Implementation {
             "tweakable type is not trivially destructible, use the advanced parser signature instead");
         #endif
 
-        static TweakableState parse(Containers::ArrayView<const char> value, Containers::StaticArrayView<TweakableStorageSize, char> storage) {
+        static TweakableState parse(Containers::StringView value, Containers::StaticArrayView<TweakableStorageSize, char> storage) {
             std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(value);
             if(parsed.first != TweakableState::Success)
                 return parsed.first;

@@ -42,7 +42,7 @@ struct TweakableVariable {
        access. */
     CORRADE_ALIGNAS(8) char storage[TweakableStorageSize]{};
     int line{};
-    TweakableState(*parser)(Containers::ArrayView<const char>, Containers::StaticArrayView<TweakableStorageSize, char>);
+    TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<TweakableStorageSize, char>);
     void(*scopeLambda)(void(*)(), void*){};
     void(*scopeUserCall)(){};
     void* scopeUserData{};

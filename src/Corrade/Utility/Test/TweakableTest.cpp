@@ -86,7 +86,7 @@ constexpr struct {
 constexpr struct {
     const char* name;
     const char* data;
-    TweakableState(*parser)(Containers::ArrayView<const char>, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>);
+    TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>);
     TweakableState state;
     const char* error;
 } ParseErrorData[]{

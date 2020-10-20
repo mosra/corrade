@@ -99,7 +99,7 @@ void Tweakable::scopeInternal(void(*lambda)(void(*)(), void*), void(*userCall)()
     }
 }
 
-std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const int line, const std::size_t variable, TweakableState(*parser)(Containers::ArrayView<const char>, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>)) {
+std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const int line, const std::size_t variable, TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>)) {
     CORRADE_INTERNAL_ASSERT(_data);
 
     /* Find the file in the map */

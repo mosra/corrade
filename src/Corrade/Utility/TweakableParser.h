@@ -151,7 +151,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<int> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, int> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, int> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -167,7 +167,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned int> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, unsigned int> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, unsigned int> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -183,7 +183,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, long> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, long> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -199,7 +199,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned long> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, unsigned long> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, unsigned long> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -215,7 +215,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long long> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, long long> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, long long> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -231,7 +231,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned long long> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, unsigned long long> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, unsigned long long> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -246,7 +246,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<float> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, float> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, float> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -261,7 +261,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<double> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, double> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, double> parse(Containers::StringView value);
 };
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -279,7 +279,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long double> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, long double> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, long double> parse(Containers::StringView value);
 };
 #endif
 
@@ -294,7 +294,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<char> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, char> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, char> parse(Containers::StringView value);
 };
 
 /** @relatesalso Tweakable
@@ -307,7 +307,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<bool> {
     TweakableParser() = delete;
 
     /** @brief Parse the value */
-    static std::pair<TweakableState, bool> parse(Containers::ArrayView<const char> value);
+    static std::pair<TweakableState, bool> parse(Containers::StringView value);
 };
 
 }}

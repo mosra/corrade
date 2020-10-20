@@ -26,11 +26,9 @@
 #include "TweakableParser.h"
 
 #include <cstring>
-#include <algorithm>
+#include <algorithm> /** @todo get rid of this once StringView::find() exists */
 
 #include "Corrade/Containers/StringView.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
-#include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 
 namespace Corrade { namespace Utility {
@@ -48,79 +46,79 @@ namespace {
     }
 }
 
-std::pair<TweakableState, int> TweakableParser<int>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, int> TweakableParser<int>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const int result = std::strtol(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end()) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned int> TweakableParser<unsigned int>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, unsigned int> TweakableParser<unsigned int>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const unsigned int result = std::strtoul(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     /* If value would be empty, the above catches that */
     if(value.back() != 'u' && value.back() != 'U') {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected u";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected u";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 1) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, long> TweakableParser<long>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, long> TweakableParser<long>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const long result = std::strtol(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     /* If value would be empty, the above catches that */
     if(value.back() != 'l' && value.back() != 'L') {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected l";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected l";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 1) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const unsigned long result = std::strtoul(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -128,25 +126,25 @@ std::pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(C
       (value[value.size() - 1] != 'l' && value[value.size() - 1] != 'L' &&
        value[value.size() - 2] != 'u' && value[value.size() - 2] != 'U'))
     {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected ul";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected ul";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 2) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, long long> TweakableParser<long long>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, long long> TweakableParser<long long>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const long long result = std::strtoll(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -154,25 +152,25 @@ std::pair<TweakableState, long long> TweakableParser<long long>::parse(Container
       (value[value.size() - 1] != 'l' && value[value.size() - 1] != 'L' &&
        value[value.size() - 2] != 'l' && value[value.size() - 2] != 'L'))
     {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected ll";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected ll";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 2) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned long long> TweakableParser<unsigned long long>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, unsigned long long> TweakableParser<unsigned long long>::parse(Containers::StringView value) {
     const std::pair<const char*, int> valueBase = integerBase(value);
     char* end;
     const int result = std::strtoull(valueBase.first, &end, valueBase.second);
 
     if(end == value.begin()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not an integer literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -181,52 +179,52 @@ std::pair<TweakableState, unsigned long long> TweakableParser<unsigned long long
        value[value.size() - 2] != 'l' && value[value.size() - 2] != 'L' &&
        value[value.size() - 2] != 'u' && value[value.size() - 2] != 'U'))
     {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected ull";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected ull";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 3) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after an integer literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after an integer literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, float> TweakableParser<float>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, float> TweakableParser<float>::parse(Containers::StringView value) {
     char* end;
-    const float result = std::strtof(value, &end);
+    const float result = std::strtof(value.data(), &end);
 
     if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not a floating-point literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
     /* If value would be empty, the above catches that */
     if(value.back() != 'f' && value.back() != 'F') {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected f";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected f";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 1) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after a floating-point literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::StringView value) {
     char* end;
-    const double result = std::strtod(value, &end);
+    const double result = std::strtod(value.data(), &end);
 
     if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not a floating-point literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end()) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after a floating-point literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -234,23 +232,23 @@ std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::Arr
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
-std::pair<TweakableState, long double> TweakableParser<long double>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, long double> TweakableParser<long double>::parse(Containers::StringView value) {
     char* end;
-    const long double result = std::strtold(value, &end);
+    const long double result = std::strtold(value.data(), &end);
 
     if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not a floating-point literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
     /* If value would be empty, the above catches that */
     if(value.back() != 'l' && value.back() != 'L') {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "has an unexpected suffix, expected l";
+        Warning{} << "Utility::TweakableParser:" << value << "has an unexpected suffix, expected l";
         return {TweakableState::Recompile, {}};
     }
 
     if(end != value.end() - 1) {
-        Warning{} << "Utility::TweakableParser: unexpected characters" << std::string{const_cast<const char*>(end), value.end()} <<  "after a floating-point literal";
+        Warning{} << "Utility::TweakableParser: unexpected characters" << value.suffix(end) << "after a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -258,9 +256,9 @@ std::pair<TweakableState, long double> TweakableParser<long double>::parse(Conta
 }
 #endif
 
-std::pair<TweakableState, char> TweakableParser<char>::parse(Containers::ArrayView<const char> value) {
+std::pair<TweakableState, char> TweakableParser<char>::parse(Containers::StringView value) {
     if(value.size() < 3 || value.front() != '\'' || value.back() != '\'') {
-        Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not a character literal";
+        Warning{} << "Utility::TweakableParser:" << value << "is not a character literal";
         return {TweakableState::Recompile, {}};
     }
 
@@ -272,13 +270,15 @@ std::pair<TweakableState, char> TweakableParser<char>::parse(Containers::ArrayVi
     return {TweakableState::Success, value[1]};
 }
 
-std::pair<TweakableState, bool> TweakableParser<bool>::parse(Containers::ArrayView<const char> value) {
-    if(value.size() == 4 && std::strncmp(value.data(), "true", value.size()) == 0)
+std::pair<TweakableState, bool> TweakableParser<bool>::parse(Containers::StringView value) {
+    using namespace Containers::Literals;
+
+    if(value == "true"_s)
         return {TweakableState::Success, true};
-    if(value.size() == 5 && std::strncmp(value.data(), "false", value.size()) == 0)
+    if(value == "false"_s)
         return {TweakableState::Success, false};
 
-    Warning{} << "Utility::TweakableParser:" << std::string{value, value.size()} << "is not a boolean literal";
+    Warning{} << "Utility::TweakableParser:" << value << "is not a boolean literal";
     return {TweakableState::Recompile, {}};
 }
 
