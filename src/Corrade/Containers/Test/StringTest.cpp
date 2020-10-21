@@ -442,17 +442,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         String a = String::nullTerminatedView(localNullTerminated);
         String b = String::nullTerminatedGlobalView(localNullTerminated);
         String c = String::globalView(localNullTerminated);
-        CORRADE_COMPARE(a, local);
-        CORRADE_COMPARE(b, local);
-        CORRADE_COMPARE(c, local);
-        {
-            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
-            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
-            #endif
-            CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
-        }
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
-        CORRADE_VERIFY(static_cast<void*>(c.data()) != local.data());
+        CORRADE_COMPARE(a, localNullTerminated);
+        CORRADE_COMPARE(b, localNullTerminated);
+        CORRADE_COMPARE(c, localNullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
+        CORRADE_VERIFY(static_cast<void*>(c.data()) != localNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(!b.deleter());
         CORRADE_VERIFY(!c.deleter());
@@ -462,17 +457,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         String a = String::nullTerminatedView(globalNullTerminated);
         String b = String::nullTerminatedGlobalView(globalNullTerminated);
         String c = String::globalView(globalNullTerminated);
-        CORRADE_COMPARE(a, local);
-        CORRADE_COMPARE(b, local);
-        CORRADE_COMPARE(c, local);
-        {
-            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
-            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
-            #endif
-            CORRADE_COMPARE(static_cast<void*>(a.data()), local.data());
-            CORRADE_COMPARE(static_cast<void*>(b.data()), local.data());
-            CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
-        }
+        CORRADE_COMPARE(a, globalNullTerminated);
+        CORRADE_COMPARE(b, globalNullTerminated);
+        CORRADE_COMPARE(c, globalNullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
+        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
+        CORRADE_COMPARE(static_cast<void*>(c.data()), globalNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
         CORRADE_VERIFY(c.deleter());
@@ -482,17 +472,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         String a = String::nullTerminatedView(global);
         String b = String::nullTerminatedGlobalView(global);
         String c = String::globalView(global);
-        CORRADE_COMPARE(a, local);
-        CORRADE_COMPARE(b, local);
-        CORRADE_COMPARE(c, local);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
-        {
-            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && defined(_DEBUG)
-            CORRADE_EXPECT_FAIL("MSVC does some CRAZY SHIT with string literal addresses. But only in Debug builds.");
-            #endif
-            CORRADE_COMPARE(static_cast<void*>(c.data()), local.data());
-        }
+        CORRADE_COMPARE(a, global);
+        CORRADE_COMPARE(b, global);
+        CORRADE_COMPARE(c, global);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
+        CORRADE_COMPARE(static_cast<void*>(c.data()), global.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
         CORRADE_VERIFY(c.deleter());
