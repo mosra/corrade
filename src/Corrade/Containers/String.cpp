@@ -58,12 +58,6 @@ String String::nullTerminatedGlobalView(StringView view) {
     return String{view};
 }
 
-String String::globalView(StringView view) {
-    if(view.flags() & StringViewFlag::Global)
-        return String{view.data(), view.size(), [](char*, std::size_t){}};
-    return String{view};
-}
-
 inline void String::construct(const char* data, std::size_t size) {
     /* If the size is small enough for SSO, use that. Not using <= because we
        need to store the null terminator as well. */

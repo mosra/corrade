@@ -168,7 +168,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @ref BasicStringView "StringView" instances to APIs that expect
          * null-terminated @cpp const char* @ce. Mutating the result in any way
          * is undefined behavior.
-         * @see @ref nullTerminatedGlobalView(), @ref globalView()
+         * @see @ref nullTerminatedGlobalView()
          */
         static String nullTerminatedView(StringView view);
 
@@ -186,25 +186,9 @@ class CORRADE_UTILITY_EXPORT String {
          * memory stays in scope and then passing them to APIs that expect
          * null-terminated @cpp const char* @ce. Mutating the result in any way
          * is undefined behavior.
-         * @see @ref nullTerminatedView(), @ref globalView()
+         * @see @ref nullTerminatedView()
          */
         static String nullTerminatedGlobalView(StringView view);
-
-        /**
-         * @brief Turn a view into a global string
-         *
-         * If the view is @ref StringViewFlag::Global, returns a non-owning
-         * reference to it without any extra allocations or copies involved.
-         * Otherwise allocates a null-terminated owning copy using
-         * @ref String(StringView).
-         *
-         * This function is primarily meant for efficiently storing
-         * @ref BasicStringView "StringView" instances and ensuring the memory
-         * stays in scope. Mutating the result in any way is undefined
-         * behavior.
-         * @see @ref nullTerminatedView(), @ref globalView()
-         */
-        static String globalView(StringView view);
 
         /**
          * @brief Default constructor
@@ -307,8 +291,7 @@ class CORRADE_UTILITY_EXPORT String {
          * immutable data (such as C string literals) without having to
          * allocate a copy, it's the user responsibility to avoid mutating the
          * data in any way.
-         * @see @ref nullTerminatedView(), @ref nullTerminatedGlobalView(),
-         *      @ref globalView()
+         * @see @ref nullTerminatedView(), @ref nullTerminatedGlobalView()
          */
         explicit String(const char* data, std::size_t size, Deleter deleter) noexcept: String{const_cast<char*>(data), size, deleter} {}
 

@@ -409,78 +409,60 @@ void StringTest::constructPointerSizeTooLarge() {
 void StringTest::constructNullTerminatedGlobalView() {
     using namespace Literals;
 
+    /* For a local non-null-terminated string, both convert it to an owning
+       copy */
     StringView local{"Allocated hello for a verbose world", 35};
     CORRADE_COMPARE(local.flags(), StringViewFlags{});
-
-    StringView localNullTerminated = "Allocated hello for a verbose world";
-    CORRADE_COMPARE(localNullTerminated.flags(), StringViewFlag::NullTerminated);
-
-    StringView globalNullTerminated = "Allocated hello for a verbose world"_s;
-    CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-
-    StringView global{"Allocated hello for a verbose world", 35, StringViewFlag::Global};
-    CORRADE_COMPARE(global.flags(), StringViewFlag::Global);
-
-    /* For a local non-null-terminated string, all three convert it to a owning
-       copy */
     {
         String a = String::nullTerminatedView(local);
         String b = String::nullTerminatedGlobalView(local);
-        String c = String::globalView(local);
         CORRADE_COMPARE(a, local);
         CORRADE_COMPARE(b, local);
-        CORRADE_COMPARE(c, local);
         CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
-        CORRADE_VERIFY(static_cast<void*>(c.data()) != local.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
-        CORRADE_VERIFY(!c.deleter());
+    }
 
-    /* For a local null-terminated only the last two do */
-    } {
+    /* For a local null-terminated only second does */
+    StringView localNullTerminated = "Allocated hello for a verbose world";
+    CORRADE_COMPARE(localNullTerminated.flags(), StringViewFlag::NullTerminated);
+    {
         String a = String::nullTerminatedView(localNullTerminated);
         String b = String::nullTerminatedGlobalView(localNullTerminated);
-        String c = String::globalView(localNullTerminated);
         CORRADE_COMPARE(a, localNullTerminated);
         CORRADE_COMPARE(b, localNullTerminated);
-        CORRADE_COMPARE(c, localNullTerminated);
         CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
-        CORRADE_VERIFY(static_cast<void*>(c.data()) != localNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(!b.deleter());
-        CORRADE_VERIFY(!c.deleter());
+    }
 
-    /* For a global null-terminated string, all three keep a view */
-    } {
+    /* For a global null-terminated string, both keep a view */
+    StringView globalNullTerminated = "Allocated hello for a verbose world"_s;
+    CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    {
         String a = String::nullTerminatedView(globalNullTerminated);
         String b = String::nullTerminatedGlobalView(globalNullTerminated);
-        String c = String::globalView(globalNullTerminated);
         CORRADE_COMPARE(a, globalNullTerminated);
         CORRADE_COMPARE(b, globalNullTerminated);
-        CORRADE_COMPARE(c, globalNullTerminated);
         CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
         CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
-        CORRADE_COMPARE(static_cast<void*>(c.data()), globalNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
-        CORRADE_VERIFY(c.deleter());
+    }
 
-    /* For a global non-null-terminated string, only the last keeps a view */
-    } {
+    /* For a global non-null-terminated string, neither keeps a view */    StringView global{"Allocated hello for a verbose world", 35, StringViewFlag::Global};
+    CORRADE_COMPARE(global.flags(), StringViewFlag::Global);
+    {
         String a = String::nullTerminatedView(global);
         String b = String::nullTerminatedGlobalView(global);
-        String c = String::globalView(global);
         CORRADE_COMPARE(a, global);
         CORRADE_COMPARE(b, global);
-        CORRADE_COMPARE(c, global);
         CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
-        CORRADE_COMPARE(static_cast<void*>(c.data()), global.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
-        CORRADE_VERIFY(c.deleter());
     }
 }
 
