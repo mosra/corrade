@@ -464,6 +464,23 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
     }
+
+    /* A null view is a special case. It has the flags, but a non-owning String
+       can't guarantee the null-termination so an owning empty instance has to
+       be made instead. */
+    StringView null;
+    CORRADE_VERIFY(!null.data());
+    CORRADE_COMPARE(null.flags(), StringViewFlag::Global);
+    {
+        String a = String::nullTerminatedView(null);
+        String b = String::nullTerminatedGlobalView(null);
+        CORRADE_COMPARE(a, null);
+        CORRADE_COMPARE(b, null);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
+        CORRADE_VERIFY(a.isSmall());
+        CORRADE_VERIFY(b.isSmall());
+    }
 }
 
 void StringTest::convertStringView() {
