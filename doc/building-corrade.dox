@@ -918,7 +918,7 @@ for more information.
 
 In `package/ci/` there is a `travis.yml` file with Linux GCC 4.8, macOS, iOS,
 Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration. Online
-at https://travis-ci.org/mosra/corrade.
+at https://travis-ci.com/github/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
