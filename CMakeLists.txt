@@ -161,7 +161,7 @@ if(CMAKE_CROSSCOMPILING)
     if(NOT CORRADE_RC_EXECUTABLE)
         message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
     endif()
-    add_executable(Corrade::rc IMPORTED)
+    add_executable(Corrade::rc IMPORTED GLOBAL)
     set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
 endif()
 
