@@ -343,7 +343,7 @@ class CORRADE_UTILITY_EXPORT String {
          * The resulting view has the same size as this string @ref size() ---
          * the null terminator is not counted into it.
          */
-        /*implicit*/ operator ArrayView<const char>() const noexcept; /**< @overload */
+        /*implicit*/ operator ArrayView<const char>() const noexcept;
 
         /**
          * @brief Convert to an @ref ArrayView
