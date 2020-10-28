@@ -517,6 +517,11 @@ void StringTest::convertStringViewSmall() {
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_COMPARE(aa.size(), 10);
     CORRADE_COMPARE(aa[0], 't');
+
+    StringView aaView = aa;
+    CORRADE_COMPARE(aaView.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aaView.size(), aa.size());
+    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
 }
 
 void StringTest::convertMutableStringView() {
@@ -555,6 +560,11 @@ void StringTest::convertMutableStringViewSmall() {
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_COMPARE(aa.size(), 10);
     CORRADE_COMPARE(aa[0], 't');
+
+    MutableStringView aaView = aa;
+    CORRADE_COMPARE(aaView.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aaView.size(), aa.size());
+    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
 }
 
 void StringTest::convertArrayView() {
@@ -583,6 +593,10 @@ void StringTest::convertArrayViewSmall() {
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_COMPARE(aa.size(), 10);
     CORRADE_COMPARE(aa[0], 't');
+
+    ArrayView<const char> aaView = aa;
+    CORRADE_COMPARE(aaView.size(), aa.size());
+    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
 }
 
 void StringTest::convertMutableArrayView() {
@@ -613,6 +627,10 @@ void StringTest::convertMutableArrayViewSmall() {
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_COMPARE(aa.size(), 10);
     CORRADE_COMPARE(aa[0], 't');
+
+    ArrayView<char> aaView = aa;
+    CORRADE_COMPARE(aaView.size(), aa.size());
+    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
 }
 
 void StringTest::convertExternal() {
