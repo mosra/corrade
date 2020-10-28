@@ -452,6 +452,7 @@ class CORRADE_UTILITY_EXPORT String {
          * expected to be in range. If @p end points to (one item after) the
          * end of the original (null-terminated) string, the result has
          * @ref StringViewFlag::NullTerminated set.
+         * @m_keywords{substr()}
          */
         MutableStringView slice(char* begin, char* end);
         StringView slice(const char* begin, const char* end) const; /**< @overload */

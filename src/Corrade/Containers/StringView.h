@@ -357,6 +357,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @ref StringViewFlag::Global flag and if @p end points to (one item
          * after) the end of the original null-terminated string, the result
          * has @ref StringViewFlag::NullTerminated also.
+         * @m_keywords{substr()}
          */
         constexpr BasicStringView<T> slice(T* begin, T* end) const;
 
