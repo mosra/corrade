@@ -108,6 +108,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructTooLarge();
 
     template<class T> void convertArrayView();
+    template<class T> void convertVoidArrayView();
     void convertExternalView();
     void convertConstFromExternalView();
     void convertToConstExternalView();
@@ -170,6 +171,8 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
+              &StringViewTest::convertVoidArrayView<const char>,
+              &StringViewTest::convertVoidArrayView<char>,
               &StringViewTest::convertExternalView,
               &StringViewTest::convertConstFromExternalView,
               &StringViewTest::convertToConstExternalView,
@@ -387,6 +390,22 @@ template<class T> void StringViewTest::convertArrayView() {
     ArrayView<T> array2 = string;
     CORRADE_COMPARE(array2.size(), 7); /* keeps the same size */
     CORRADE_COMPARE(static_cast<const void*>(array2.data()), &data[0]);
+}
+
+template<class T> void StringViewTest::convertVoidArrayView() {
+    using VoidT = typename std::conditional<std::is_const<T>::value, const void, void>::type;
+
+    setTestCaseTemplateName(NameFor<T>::name());
+
+    char data[] = "hello!";
+    BasicStringView<T> string = data;
+    CORRADE_COMPARE(string.size(), 6); /* without the null terminator */
+    CORRADE_COMPARE(string.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(static_cast<const void*>(string.data()), &data[0]);
+
+    ArrayView<VoidT> array = string;
+    CORRADE_COMPARE(array.size(), 6); /* keeps the same size */
+    CORRADE_COMPARE(static_cast<const void*>(array.data()), &data[0]);
 }
 
 void StringViewTest::convertExternalView() {

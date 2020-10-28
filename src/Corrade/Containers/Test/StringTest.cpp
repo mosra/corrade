@@ -576,6 +576,10 @@ void StringTest::convertArrayView() {
     ArrayView<const char> aView = a;
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    ArrayView<const void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
 }
 
 void StringTest::convertArrayViewSmall() {
@@ -588,6 +592,10 @@ void StringTest::convertArrayViewSmall() {
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 
+    ArrayView<const void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
+
     /* Bypassing SSO */
     const String aa{AllocatedInit, Containers::arrayView("this\0world").except(1)};
     CORRADE_VERIFY(!aa.isSmall());
@@ -597,6 +605,10 @@ void StringTest::convertArrayViewSmall() {
     ArrayView<const char> aaView = aa;
     CORRADE_COMPARE(aaView.size(), aa.size());
     CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+
+    ArrayView<const void> aaVoidView = aa;
+    CORRADE_COMPARE(aaVoidView.size(), aa.size());
+    CORRADE_COMPARE(aaVoidView.data(), aa.data());
 }
 
 void StringTest::convertMutableArrayView() {
@@ -609,6 +621,10 @@ void StringTest::convertMutableArrayView() {
     ArrayView<char> aView = a;
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+
+    ArrayView<void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
 }
 
 void StringTest::convertMutableArrayViewSmall() {
@@ -622,6 +638,10 @@ void StringTest::convertMutableArrayViewSmall() {
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 
+    ArrayView<void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
+
     /* Bypassing SSO */
     String aa{AllocatedInit, ArrayView<char>{aData}.except(1)};
     CORRADE_VERIFY(!aa.isSmall());
@@ -631,6 +651,10 @@ void StringTest::convertMutableArrayViewSmall() {
     ArrayView<char> aaView = aa;
     CORRADE_COMPARE(aaView.size(), aa.size());
     CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+
+    ArrayView<void> aaVoidView = aa;
+    CORRADE_COMPARE(aaVoidView.size(), aa.size());
+    CORRADE_COMPARE(aaVoidView.data(), aa.data());
 }
 
 void StringTest::convertExternal() {

@@ -266,6 +266,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * the null terminator, if any, is not counted into it.
          */
         operator ArrayView<T>() const noexcept;
+        operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept; /**< @overload */
 
         /** @todo convert mutable to const ArrayView, how to do without having
             to do it via a template (and thus including ArrayView?) */

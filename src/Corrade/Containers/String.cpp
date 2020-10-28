@@ -217,7 +217,17 @@ String::operator ArrayView<const char>() const noexcept {
     return {data.first, data.second};
 }
 
+String::operator ArrayView<const void>() const noexcept {
+    const std::pair<const char*, std::size_t> data = dataInternal();
+    return {data.first, data.second};
+}
+
 String::operator ArrayView<char>() noexcept {
+    const std::pair<const char*, std::size_t> data = dataInternal();
+    return {const_cast<char*>(data.first), data.second};
+}
+
+String::operator ArrayView<void>() noexcept {
     const std::pair<const char*, std::size_t> data = dataInternal();
     return {const_cast<char*>(data.first), data.second};
 }

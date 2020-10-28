@@ -54,6 +54,10 @@ template<class T> BasicStringView<T>::operator ArrayView<T>() const noexcept {
     return {_data, size()};
 }
 
+template<class T> BasicStringView<T>::operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept {
+    return {_data, size()};
+}
+
 /** @todo does it make a practical sense (debug perf) to rewrite these two
     directly without delegating to size()? i don't think so */
 

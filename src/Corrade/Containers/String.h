@@ -344,6 +344,7 @@ class CORRADE_UTILITY_EXPORT String {
          * the null terminator is not counted into it.
          */
         /*implicit*/ operator ArrayView<const char>() const noexcept;
+        /*implicit*/ operator ArrayView<const void>() const noexcept; /**< @overload */
 
         /**
          * @brief Convert to an @ref ArrayView
@@ -352,6 +353,7 @@ class CORRADE_UTILITY_EXPORT String {
          * the null terminator is not counted into it.
          */
         /*implicit*/ operator ArrayView<char>() noexcept;
+        /*implicit*/ operator ArrayView<void>() noexcept; /**< @overload */
 
         /**
          * @brief Convert the view to external representation
