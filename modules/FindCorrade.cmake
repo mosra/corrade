@@ -124,15 +124,6 @@
 #   definitions used for targets with :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS`
 #   enabled
 #
-# Workflows without :prop_tgt:`IMPORTED` targets are deprecated and the
-# following variables are included just for backwards compatibility and only if
-# :variable:`CORRADE_BUILD_DEPRECATED` is enabled:
-#
-#  CORRADE_CXX_FLAGS            - Pedantic compile flags. Use
-#   :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS` property or
-#   :variable:`CORRADE_PEDANTIC_COMPILER_DEFINITIONS` /
-#   :variable:`CORRADE_PEDANTIC_COMPILER_OPTIONS` list variables instead.
-#
 # Corrade provides these macros and functions:
 #
 # .. command:: corrade_add_test

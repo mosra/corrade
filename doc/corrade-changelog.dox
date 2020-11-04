@@ -135,6 +135,8 @@ namespace Corrade {
     especially the @ref PluginManager library.
 -   @cpp Containers::ScopedExit @ce, deprecated in 2019.01, is removed, use
     @ref Containers::ScopeGuard instead
+-   Removed the `CORRADE_CXX_FLAGS` CMake variable, which was deprecated in
+    favor of the `CORRADE_USE_PEDANTIC_FLAGS` target property in 2016.
 
 @section corrade-changelog-2020-06 2020.06
 

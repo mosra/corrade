@@ -244,15 +244,6 @@ because the meaning is unclear with projects that mix more different C++
 standards / STL implementations or on platforms with multi-architecture
 binaries.
 
-Workflows without imported targets are deprecated and the following variables
-are included just for backwards compatibility and only if
-@ref CORRADE_BUILD_DEPRECATED is enabled:
-
--   `CORRADE_CXX_FLAGS` --- Additional pedantic compile flags. Use
-    `CORRADE_USE_PEDANTIC_FLAGS` per-target property or
-    `CORRADE_PEDANTIC_COMPILER_DEFINITIONS` / `CORRADE_PEDANTIC_COMPILER_OPTIONS`
-    list variables instead.
-
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
 
