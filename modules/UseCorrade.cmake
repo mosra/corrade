@@ -250,49 +250,48 @@ define_property(TARGET PROPERTY CORRADE_USE_PEDANTIC_FLAGS INHERITED
     FULL_DOCS "Enables additional pedantic C, C++ and linker flags on given
         targets or directories.")
 
-# In order to avoid clashes with builtin CMake features, we won't add the
-# standard flag in case the CXX_STANDARD property is present. Additionally,
+# Enable C++11/14/17/2a on GCC/Clang if CORRADE_CXX_STANDARD is set. Does
+# nothing in case the user put "-std=" in CMAKE_CXX_FLAGS.
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+    set(CORRADE_CXX11_STANDARD_FLAG "-std=c++11")
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9) OR ((CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5))
+        set(CORRADE_CXX14_STANDARD_FLAG "-std=c++14")
+    else()
+        set(CORRADE_CXX14_STANDARD_FLAG "-std=c++1y")
+    endif()
+    # TODO: change to C++17 when compiler support is widespread enough
+    set(CORRADE_CXX17_STANDARD_FLAG "-std=c++1z")
+    set(CORRADE_CXX20_STANDARD_FLAG "-std=c++2a")
+endif()
+
+# Enable C++14/17/2a on MSVC if CORRADE_CXX_STANDARD is set. C++11 is present
+# implicitly, 14, 17 and 20 has to be enabled through a flag. Does nothing in
+# case the user put "/std:" or "-std:" in CMAKE_CXX_FLAGS.
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") AND NOT CMAKE_CXX_FLAGS MATCHES "[-/]std:")
+    set(CORRADE_CXX14_STANDARD_FLAG "/std:c++14")
+    set(CORRADE_CXX17_STANDARD_FLAG "/std:c++17")
+    # TODO: change to c++20? when such flag appears
+    # https://docs.microsoft.com/en-us/cpp/build/reference/std-specify-language-standard-version?view=vs-2019
+    set(CORRADE_CXX20_STANDARD_FLAG "/std:c++latest")
+endif()
+
+# Finally, in order to avoid clashes with builtin CMake features, we won't add
+# the standard flag in case the CXX_STANDARD property is present. Additionally,
 # since CMake 3.15, the cxx_std_14 compile feature doesn't result in any flag
 # being added to compiler command-line if C++14 is a default on given compiler
 # (such as GCC 6 and up). That unfortunately means ours default flag (-std=c++11)
 # gets set, making it look like the COMPILE_FEATURES didn't work at all. To
 # circumvent that, the CORRADE_CXX_STANDARD isn't set if anything from
-# COMPILE_FEATURES is present either.
+# COMPILE_FEATURES is present either. It doesn't cover adding flags using
+# target_compile_options(), though.
 set(_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET
     "$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<NOT:$<BOOL:$<TARGET_PROPERTY:COMPILE_FEATURES>>>")
-
-# Enable C++11/14/17/2a on GCC/Clang if CORRADE_CXX_STANDARD is set. In
-# addition to the above it also does nothing in case the user put "-std=" in
-# CMAKE_CXX_FLAGS. It doesn't cover adding flags using target_compile_options(),
-# though.
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9) OR ((CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5))
-        set(_CORRADE_CXX14_STANDARD_FLAG "-std=c++14")
-    else()
-        set(_CORRADE_CXX14_STANDARD_FLAG "-std=c++1y")
+foreach(_standard 11 14 17 20)
+    if(CORRADE_CXX${_standard}_STANDARD_FLAG)
+        set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
+            "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,${_standard}>>:${CORRADE_CXX${_standard}_STANDARD_FLAG}>")
     endif()
-
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,11>>:-std=c++11>"
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,14>>:${_CORRADE_CXX14_STANDARD_FLAG}>"
-        # TODO: change to C++17 when compiler support is widespread enough
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,17>>:-std=c++1z>"
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,20>>:-std=c++2a>")
-endif()
-
-# Enable C++14/17/2a on MSVC if CORRADE_CXX_STANDARD is set. C++11 is present
-# implicitly, 14, 17 and 20 has to be enabled through a flag. Does nothing in
-# case the user specified CXX_STANDARD property or put "/std:" or "-std:" in
-# CMAKE_CXX_FLAGS. It doesn't cover adding flags using target_compile_options(),
-# though.
-if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") AND NOT CMAKE_CXX_FLAGS MATCHES "[-/]std:")
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,14>>:/std:c++14>"
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,17>>:/std:c++17>"
-        # TODO: change to c++20? when such flag appears
-        # https://docs.microsoft.com/en-us/cpp/build/reference/std-specify-language-standard-version?view=vs-2019
-        "$<$<AND:${_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET},$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,20>>:/std:c++latest>")
-endif()
+endforeach()
 
 # On-demand pedantic compiler flags
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<BOOL:$<TARGET_PROPERTY:CORRADE_USE_PEDANTIC_FLAGS>>:${CORRADE_PEDANTIC_COMPILER_OPTIONS}>")

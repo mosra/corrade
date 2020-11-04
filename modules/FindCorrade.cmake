@@ -123,6 +123,10 @@
 #  CORRADE_PEDANTIC_COMPILER_DEFINITIONS - List of pedantic compiler
 #   definitions used for targets with :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS`
 #   enabled
+#  CORRADE_CXX{11,14,17,20}_STANDARD_FLAG - Compiler flag to use for targeting
+#   C++11, 14, 17 or 20 in cases where it's not possible to use
+#   :prop_tgt:`CORRADE_CXX_STANDARD`. Not defined if a standard switch is
+#   already present in :variable:`CMAKE_CXX_FLAGS`.
 #
 # Corrade provides these macros and functions:
 #
