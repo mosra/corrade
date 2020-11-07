@@ -576,6 +576,19 @@ void DirectoryTest::mkpath() {
 
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::exists(leaf));
+
+    /* Creating current directory should be a no-op because it exists */
+    CORRADE_VERIFY(Directory::exists("."));
+    CORRADE_VERIFY(Directory::mkpath("."));
+
+    /* Parent as well */
+    CORRADE_VERIFY(Directory::exists(".."));
+    CORRADE_VERIFY(Directory::mkpath(".."));
+
+    /* Empty should be just a no-op without checking anything. Not like
+       in Python, where `os.makedirs('', exist_ok=True)` stupidly fails with
+        FileNotFoundError: [Errno 2] No such file or directory: '' */
+    CORRADE_VERIFY(Directory::mkpath(""));
 }
 
 void DirectoryTest::mkpathNoPermission() {

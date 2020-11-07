@@ -88,6 +88,8 @@ namespace Corrade {
     @ref Containers::StringView overloads that allocate much less
 -   Ability to print @ref Containers::BasicStringView and
     @ref Containers::String using @ref Utility::format()
+-   Creating an empty path with @ref Utility::Directory::mkpath() now succeeds
+    because it makes no sense to fail for such case
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

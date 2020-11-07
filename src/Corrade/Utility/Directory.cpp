@@ -198,7 +198,7 @@ std::string join(const std::initializer_list<std::string> paths) {
 }
 
 bool mkpath(const std::string& path) {
-    if(path.empty()) return false;
+    if(path.empty()) return true;
 
     /* If path contains trailing slash, strip it */
     if(path.back() == '/')
