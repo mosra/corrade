@@ -378,8 +378,9 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 @m_since{2019,10}
 
 Returns @cpp true @ce if the file exists and is accessible (i.e., user has a
-permission to open it), @cpp false @ce otherwise. Expects that the filename is
-in UTF-8.
+permission to open it), @cpp false @ce otherwise. In particular, checking for
+an empty filename always fails, however checking @cpp "." @ce succeeds in case
+current working directory exists. Expects that the filename is in UTF-8.
 @see @ref isDirectory(), @ref list()
 */
 CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);

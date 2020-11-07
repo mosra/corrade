@@ -442,6 +442,10 @@ void DirectoryTest::exists() {
 
     /* Nonexistent file */
     CORRADE_VERIFY(!Directory::exists(Directory::join(_testDir, "nonexistentFile")));
+
+    /* Current directory, empty */
+    CORRADE_VERIFY(Directory::exists("."));
+    CORRADE_VERIFY(!Directory::exists(""));
 }
 
 void DirectoryTest::existsUtf8() {
