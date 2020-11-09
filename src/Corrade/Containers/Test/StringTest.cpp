@@ -69,6 +69,9 @@ namespace Test { namespace {
 struct StringTest: TestSuite::Tester {
     explicit StringTest();
 
+    void allocatedInitTagNoDefaultConstructor();
+    void allocatedInitTagInlineDefinition();
+
     void constructDefault();
     void constructTakeOwnership();
     void constructTakeOwnershipNull();
@@ -141,7 +144,10 @@ struct StringTest: TestSuite::Tester {
 };
 
 StringTest::StringTest() {
-    addTests({&StringTest::constructDefault,
+    addTests({&StringTest::allocatedInitTagNoDefaultConstructor,
+              &StringTest::allocatedInitTagInlineDefinition,
+
+              &StringTest::constructDefault,
               &StringTest::constructTakeOwnership,
               &StringTest::constructTakeOwnershipNull,
               &StringTest::constructTakeOwnershipNotNullTerminated,
@@ -213,6 +219,15 @@ StringTest::StringTest() {
 }
 
 using namespace Literals;
+
+/** @todo move these to TagsTest once the tags gets used outside of String */
+void StringTest::allocatedInitTagNoDefaultConstructor() {
+    CORRADE_VERIFY(!std::is_default_constructible<AllocatedInitT>::value);
+}
+
+void StringTest::allocatedInitTagInlineDefinition() {
+    CORRADE_VERIFY((std::is_same<decltype(AllocatedInit), const AllocatedInitT>::value));
+}
 
 void StringTest::constructDefault() {
     String a;
