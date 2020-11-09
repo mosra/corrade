@@ -26,6 +26,8 @@
 #include "Algorithms.h"
 
 #include <cstring>
+/* CORRADE_FALLTHROUGH, needed on Clang when CORRADE_NO_ASSERT is defined */
+#include <Corrade/Utility/Macros.h>
 
 namespace Corrade { namespace Utility {
 
