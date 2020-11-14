@@ -583,11 +583,21 @@ void DirectoryTest::mkpath() {
 
     /* Creating current directory should be a no-op because it exists */
     CORRADE_VERIFY(Directory::exists("."));
-    CORRADE_VERIFY(Directory::mkpath("."));
+    {
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        CORRADE_EXPECT_FAIL("Emscripten doesn't return EEXIST on mdkir(\".\") but fails instead.");
+        #endif
+        CORRADE_VERIFY(Directory::mkpath("."));
+    }
 
     /* Parent as well */
     CORRADE_VERIFY(Directory::exists(".."));
-    CORRADE_VERIFY(Directory::mkpath(".."));
+    {
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        CORRADE_EXPECT_FAIL("Emscripten doesn't return EEXIST on mdkir(\"..\") but fails instead.");
+        #endif
+        CORRADE_VERIFY(Directory::mkpath(".."));
+    }
 
     /* Empty should be just a no-op without checking anything. Not like
        in Python, where `os.makedirs('', exist_ok=True)` stupidly fails with
