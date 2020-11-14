@@ -161,6 +161,14 @@ if(CMAKE_CROSSCOMPILING)
     if(NOT CORRADE_RC_EXECUTABLE)
         message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
     endif()
+    # Strictly speaking the GLOBAL isn't needed, but when crosscompiling with
+    # Corrade as a CMake subproject and find_package(Corrade REQUIRED rc) (or
+    # Utility) isn't present for whatever reason, corrade_add_resource() called
+    # outside of Corrade itself would fail on the rc target not existing. We
+    # could require everyone to call find_package() to fix this one particular
+    # issue but that would be kinda mean. Don't be mean. The find_package()
+    # call is still recommended as it unifies the external and subproject
+    # workflows but it shouldn't be *required*.
     add_executable(Corrade::rc IMPORTED GLOBAL)
     set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
 endif()
