@@ -48,6 +48,12 @@ project(Corrade ${LANG})
 # Use folders for nice tree in Visual Studio and XCode
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# set module path properly
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/modules
+    ${CMAKE_SOURCE_DIR}/toolchains/modules
+)
+
 include(CMakeDependentOption)
 option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
 option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
@@ -218,7 +224,7 @@ if(MSVC2015_COMPATIBILITY)
     set(CORRADE_MSVC2019_COMPATIBILITY 1)
 endif()
 
-if(TESTSUITE_TARGET_XCTEST)
+if(TESTSUITE_TARGET_XCTEST) 
     set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
 endif()
 
