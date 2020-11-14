@@ -270,6 +270,14 @@ if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY AND NOT DEFINED CMAKE_LIBRARY_OUTP
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib CACHE PATH "" FORCE)
 endif()
 
+# Implicitly, corrade_add_test(), corrade_add_plugin() and other macros check
+# for existence of Corrade::TestSuite, Corrade::PluginManager and other targets
+# to avoid cryptic errors later during the build. However, when building
+# Corrade itself, those may not be defined yet (for example Containers tests
+# are added before the TestSuite subdirectory), however it will work correctly
+# during the actual build and thus such errors would be wrong.
+set(_CORRADE_USE_NO_TARGET_CHECKS 1)
+
 add_subdirectory(modules)
 add_subdirectory(src)
 

@@ -320,6 +320,11 @@ if(CORRADE_TARGET_IOS AND NOT CORRADE_TESTSUITE_TARGET_XCTEST)
 endif()
 
 function(corrade_add_test test_name)
+    # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
+    if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND (NOT TARGET Corrade::TestSuite OR NOT TARGET Corrade::Main))
+        message(FATAL_ERROR "The Corrade::TestSuite target, needed by corrade_add_test(), doesn't exist. Add the TestSuite component to your find_package() or enable WITH_TESTSUITE if you have Corrade as a CMake subproject.")
+    endif()
+
     set(_corrade_file_pair_match "^(.+)@([^@]+)$")
     set(_corrade_file_pair_replace "\\1;\\2")
 
@@ -478,6 +483,11 @@ function(corrade_add_test test_name)
 endfunction()
 
 function(corrade_add_resource name configurationFile)
+    # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
+    if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::rc)
+        message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package() or enable WITH_UTILITY / WITH_RC if you have Corrade as a CMake subproject.")
+    endif()
+
     # Parse dependencies from the file
     set(dependencies )
     set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
@@ -518,6 +528,11 @@ function(corrade_add_resource name configurationFile)
 endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs metadata_file)
+    # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
+    if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::PluginManager)
+        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
+    endif()
+
     if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
         message(SEND_ERROR "corrade_add_plugin(): dynamic plugins are not available on this platform, use corrade_add_static_plugin() instead")
     endif()
@@ -619,6 +634,11 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
 endfunction()
 
 function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
+    # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
+    if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::PluginManager)
+        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_static_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
+    endif()
+
     # Populate library_install_dir variable
     list(LENGTH install_dirs install_dir_count)
     if(install_dir_count EQUAL 1)

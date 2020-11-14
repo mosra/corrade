@@ -100,6 +100,11 @@ namespace Corrade {
     compiling with an unrecognized compiler (see [mosra/magnum#457](https://github.com/mosra/magnum/issues/457))
 -   The `version.h` header now gets populated from Git correctly also when
     inside a CMake subproject
+-   The @cmake corrade_add_test() @ce, @cmake corrade_add_plugin() @ce,
+    @cmake corrade_add_static_plugin() @ce and @cmake corrade_add_resource() @ce
+    CMake functions now check for presence of the targets they depend on,
+    giving the user a clear message in case something is missing (see
+    [mosra/corrade#101](https://github.com/mosra/corrade/pull/101))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
