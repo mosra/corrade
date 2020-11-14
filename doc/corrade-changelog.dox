@@ -139,6 +139,12 @@ namespace Corrade {
     @ref Containers::ScopeGuard instead
 -   Removed the `CORRADE_CXX_FLAGS` CMake variable, which was deprecated in
     favor of the `CORRADE_USE_PEDANTIC_FLAGS` target property in 2016.
+-   Removed a dependency of `UseCorrade` on `UseEmscripten` to allow 3rd party
+    Emscripten toolchains to be used. This may break code that uses the
+    @cmake emscripten_embed_file() @ce CMake function, to fix that either
+    explicitly @cmake include(UseEmscripten) @ce or update the `toolchains`
+    submodule, which now includes the file implicitly. See
+    [mosra/corrade#104](https://github.com/mosra/corrade/issues/104).
 
 @section corrade-changelog-2020-06 2020.06
 

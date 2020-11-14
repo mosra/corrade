@@ -223,9 +223,6 @@ if(TESTSUITE_TARGET_XCTEST)
 endif()
 
 include(UseCorrade)
-if(CORRADE_TARGET_EMSCRIPTEN)
-    include(UseEmscripten)
-endif()
 
 # Installation paths
 include(CorradeLibSuffix)
