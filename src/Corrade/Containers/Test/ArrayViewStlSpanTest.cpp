@@ -336,7 +336,7 @@ void ArrayViewStlSpanTest::convertConstFromSpanSized() {
     std::span<float, 3> a = data;
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, static_cast<void*>(data));
+    CORRADE_COMPARE(b, static_cast<const void*>(data));
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
