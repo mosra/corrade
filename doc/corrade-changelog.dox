@@ -43,7 +43,10 @@ namespace Corrade {
     into @cpp struct @ce members
 -   New @ref Containers::Array2, @ref Containers::Array3 and
     @ref Containers::Array4 convenience aliases for
-    @ref Containers::StaticArray
+    @ref Containers::StaticArray, together with @ref Containers::Array1 that's
+    useful in case you want to take advantage of the @ref Containers::NoInit
+    tag on an arbitrary type and @ref Containers::Optional doesn't suit the use
+    case.
 -   New @ref Containers::ArrayView2, @ref Containers::ArrayView3 and
     @ref Containers::ArrayView4 convenience aliases for
     @ref Containers::StaticArrayView

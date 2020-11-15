@@ -113,7 +113,7 @@ overload also allows for such a conversion. Example:
     well.
 
 @see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args),
-    @ref Reference
+    @ref Reference, @ref Array1
 */
 template<class T> class Optional {
     public:

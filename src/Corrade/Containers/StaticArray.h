@@ -492,12 +492,24 @@ template<std::size_t size_, class T> class StaticArray {
 
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 /**
+@brief One-component array
+@m_since_latest
+
+Convenience alternative to @cpp StaticArray<1, T> @ce. See @ref StaticArray for
+more information. Useful in case you want to take advantage of the @ref NoInit
+tag on an arbitrary type and @ref Optional doesn't suit the use case.
+@see @ref Array2, @ref Array3, @ref Array4, @ref ArrayView2, @ref ArrayView3,
+    @ref ArrayView4
+*/
+template<class T> using Array1 = StaticArray<1, T>;
+
+/**
 @brief Two-component array
 @m_since_latest
 
 Convenience alternative to @cpp StaticArray<2, T> @ce. See @ref StaticArray for
 more information.
-@see @ref Array3, @ref Array4, @ref ArrayView2, @ref ArrayView3,
+@see @ref Array1, @ref Array3, @ref Array4, @ref ArrayView2, @ref ArrayView3,
     @ref ArrayView4
 */
 template<class T> using Array2 = StaticArray<2, T>;
@@ -508,7 +520,7 @@ template<class T> using Array2 = StaticArray<2, T>;
 
 Convenience alternative to @cpp StaticArray<3, T> @ce. See @ref StaticArray for
 more information.
-@see @ref Array2, @ref Array4, @ref ArrayView2, @ref ArrayView3,
+@see @ref Array1, @ref Array2, @ref Array4, @ref ArrayView2, @ref ArrayView3,
     @ref ArrayView4
 */
 template<class T> using Array3 = StaticArray<3, T>;
@@ -519,7 +531,7 @@ template<class T> using Array3 = StaticArray<3, T>;
 
 Convenience alternative to @cpp StaticArray<4, T> @ce. See @ref StaticArray for
 more information.
-@see @ref Array2, @ref Array3, @ref ArrayView2, @ref ArrayView3,
+@see @ref Array1, @ref Array2, @ref Array3, @ref ArrayView2, @ref ArrayView3,
     @ref ArrayView4
 */
 template<class T> using Array4 = StaticArray<4, T>;
