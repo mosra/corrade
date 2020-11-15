@@ -72,8 +72,14 @@ fi
 if [ ! -z ${MAGNUM_DISABLE_WORKAROUNDS+x} ]; then
     test_env="$test_env MAGNUM_DISABLE_WORKAROUNDS=$MAGNUM_DISABLE_WORKAROUNDS"
 fi
+if [ ! -z ${MAGNUM_DISABLE_LAYERS+x} ]; then
+    test_env="$test_env MAGNUM_DISABLE_LAYERS=$MAGNUM_DISABLE_LAYERS"
+fi
 if [ ! -z ${MAGNUM_DISABLE_EXTENSIONS+x} ]; then
     test_env="$test_env MAGNUM_DISABLE_EXTENSIONS=$MAGNUM_DISABLE_EXTENSIONS"
+fi
+if [ ! -z ${MAGNUM_VULKAN_VERSION+x} ]; then
+    test_env="$test_env MAGNUM_VULKAN_VERSION=$MAGNUM_VULKAN_VERSION"
 fi
 if [ ! -z ${MAGNUM_GPU_VALIDATION+x} ]; then
     test_env="$test_env MAGNUM_GPU_VALIDATION=$MAGNUM_GPU_VALIDATION"
