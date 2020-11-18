@@ -842,7 +842,7 @@ void ArgumentsTest::parseEnvironment() {
     CORRADE_SKIP("No environment on this platform.");
     #else
     if(!hasEnv("ARGUMENTSTEST_SIZE") || !hasEnv("ARGUMENTSTEST_VERBOSE") || !hasEnv("ARGUMENTSTEST_COLOR"))
-        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTTEST_COLOR=OFF to enable this test case.");
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTSTEST_COLOR=OFF to enable this test case.");
 
     Arguments args;
     args.addOption("size").setFromEnvironment("size", "ARGUMENTSTEST_SIZE")
