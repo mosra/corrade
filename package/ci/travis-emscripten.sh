@@ -1,12 +1,17 @@
 #!/bin/bash
 set -ev
 
+# Get Ninja
+apt update
+apt install -y ninja-build
+
 git submodule update --init
 
 # Build native corrade-rc
 mkdir build && cd build || exit /b
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_MAKE_PROGRAM=ninja \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps-native \
     -DWITH_INTERCONNECT=OFF \
     -DWITH_PLUGINMANAGER=OFF \
@@ -19,16 +24,16 @@ cd ..
 # Crosscompile
 mkdir build-emscripten && cd build-emscripten
 cmake .. \
+    -DCMAKE_MAKE_PROGRAM=ninja \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten-wasm.cmake" \
-    -DEMSCRIPTEN_PREFIX=$(echo /usr/local/Cellar/emscripten/*/libexec) \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     -DBUILD_TESTS=ON \
     -G Ninja
-ninja -j4
+ninja
 
 # Test
 CORRADE_TEST_COLOR=ON ctest -V

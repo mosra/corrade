@@ -98,13 +98,17 @@ matrix:
     env:
     - JOBID=ios
     - TARGET=ios-simulator
-  - language: cpp
-    os: osx
-    # Using whatever is the default, since that could be hopefully most
-    # up-to-date
+  - language: generic
+    os: ubuntu
+    services:
+    - docker
     env:
     - JOBID=emscripten
     - TARGET=emscripten
+    - EMSCRIPTEN_VERSION=1.39.1-upstream
+    before_install:
+    - docker pull emscripten/emsdk:${EMSCRIPTEN_VERSION}
+    - docker ps -a
   - language: android
     os: linux
     # Setting xenial here will cause it to use 12.04, with GCC 4.6 and other
@@ -179,7 +183,7 @@ script:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then ./package/ci/travis-android-arm.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "desktop" ]; then ./package/ci/travis-desktop.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then ./package/ci/travis-ios-simulator.sh; fi
-- if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then ./package/ci/travis-emscripten.sh; fi
+- if [ "$TARGET" == "emscripten" ]; then docker run -v $TRAVIS_BUILD_DIR:/github -w /github -t emscripten/emsdk:${EMSCRIPTEN_VERSION} /bin/bash -c ./package/ci/travis-emscripten.sh; fi
 # Travis somehow is not able to gather all output, try to force it using this
 - sync
 
