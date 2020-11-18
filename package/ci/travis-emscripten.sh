@@ -35,7 +35,7 @@ cmake .. \
     -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     -DBUILD_TESTS=ON \
     -G Ninja
-ninja -j4
+ninja -j2
 
 # Test
 CORRADE_TEST_COLOR=ON ctest -V
