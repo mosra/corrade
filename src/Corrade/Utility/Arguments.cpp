@@ -119,11 +119,14 @@ std::vector<std::string> Arguments::environment() {
     #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
     #endif
     char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
-        var env = '';
+        let env = '';
         if(typeof process !== 'undefined') for(var key in process.env)
             env += key + '=' + process.env[key] + '\b';
         env += '\b';
-        return allocate(intArrayFromString(env), 'i8', ALLOC_NORMAL);
+        const bytes = lengthBytesUTF8(env) + 1;
+        const memory = _malloc(bytes);
+        stringToUTF8(env, memory, bytes);
+        return memory;
     }));
     #ifdef __clang__
     #pragma GCC diagnostic pop
@@ -510,8 +513,15 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
         #endif
         char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
-            var name = UTF8ToString($0);
-            return typeof process !== 'undefined' && name in process.env ? allocate(intArrayFromString(process.env[name]), 'i8', ALLOC_NORMAL) : 0;
+            const name = UTF8ToString($0);
+            if(typeof process !== 'undefined' && name in process.env) {
+                const env = process.env[name];
+                const bytes = lengthBytesUTF8(env) + 1;
+                const memory = _malloc(bytes);
+                stringToUTF8(env, memory, bytes);
+                return memory;
+            }
+            return 0;
         }, entry.environment.data()));
         #ifdef __clang__
         #pragma GCC diagnostic pop
