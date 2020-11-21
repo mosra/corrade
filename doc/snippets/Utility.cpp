@@ -117,6 +117,7 @@ return {};
 }
 
 bool initialize(char = 0);
+void consume(Containers::Array<char>&&);
 void foo(char userParam) {
 /* [CORRADE_ASSERT-output] */
 CORRADE_ASSERT(initialize(userParam),
@@ -135,6 +136,20 @@ CORRADE_INTERNAL_ASSERT(initialize()); // wrong!
 /* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
 CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 /* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
+
+{
+/* [CORRADE_INTERNAL_ASSERT_EXPRESSION-without] */
+Containers::Array<char> data;
+CORRADE_INTERNAL_ASSERT_OUTPUT(data = Utility::Directory::read("file.dat"));
+consume(std::move(data));
+/* [CORRADE_INTERNAL_ASSERT_EXPRESSION-without] */
+}
+
+{
+/* [CORRADE_INTERNAL_ASSERT_EXPRESSION] */
+consume(CORRADE_INTERNAL_ASSERT_EXPRESSION(Utility::Directory::read("file.dat")));
+/* [CORRADE_INTERNAL_ASSERT_EXPRESSION] */
+}
 
 {
 int *src{}, *dst{}, *end{};

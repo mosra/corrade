@@ -59,6 +59,8 @@ namespace Corrade {
     write @ref Containers::String and @ref Containers::StringView values,
     @ref Utility::ConfigurationValue can be implemented using those instead of
     @ref std::string as well
+-   New @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() macro for assertions that can
+    be evaluated directly inside larger expressions
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

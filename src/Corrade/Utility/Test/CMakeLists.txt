@@ -87,6 +87,12 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ARGUMENTS --fail-on-internal-assert-output true)
     set_tests_properties(UtilityAssertTestFailInternalA___Output PROPERTIES
         PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
+    corrade_add_test(UtilityAssertTestFailInter___Expression
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-internal-assert-expression true)
+    set_tests_properties(UtilityAssertTestFailInter___Expression PROPERTIES
+        PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
     corrade_add_test(UtilityAssertTestFailAssertUnreachable
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp

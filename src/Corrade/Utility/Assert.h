@@ -40,6 +40,8 @@
 #endif
 #endif
 
+namespace Corrade { namespace Utility {
+
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
 @brief Disable all assertions
@@ -450,6 +452,8 @@ Example usage:
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_OUTPUT @ce before including the
 @ref Corrade/Utility/Assert.h header.
+
+@see @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
 */
 #ifndef CORRADE_INTERNAL_ASSERT_OUTPUT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -465,6 +469,71 @@ You can override this implementation by placing your own
             std::abort();                                                   \
         }                                                                   \
     } while(false)
+#endif
+#endif
+
+#if !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) && !defined(CORRADE_NO_ASSERT) && !(defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
+namespace Implementation {
+    #ifdef CORRADE_STANDARD_ASSERT
+    template<class T> T assertExpression(T&& value) {
+        assert(value);
+        return std::forward<T>(value);
+    }
+    #else
+    template<class T> T assertExpression(T&& value, const char* message) {
+        if(!value) {
+            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message;
+            std::abort();
+        }
+
+        return std::forward<T>(value);
+    }
+    #endif
+}
+#endif
+
+/** @hideinitializer
+@brief Internal expression assertion macro
+@m_since_latest
+
+A variant of @ref CORRADE_INTERNAL_ASSERT_OUTPUT() that can be used inside
+expressions. Useful in cases where creating a temporary just for the assertion
+would be too inconvenient --- for example, the following code, which uses
+@ref CORRADE_INTERNAL_ASSERT_OUTPUT() to check that the file was read
+correctly:
+
+@snippet Utility.cpp CORRADE_INTERNAL_ASSERT_EXPRESSION-without
+
+Could be rewritten in a shorter way and without having to use @cpp std::move() @ce
+to pass a r-value with @ref CORRADE_INTERNAL_ASSERT_EXPRESSION():
+
+@snippet Utility.cpp CORRADE_INTERNAL_ASSERT_EXPRESSION
+
+The macro passes the expression to a function which asserts it evaluates to
+@cpp true @ce and then returns the value forwarded. That implies the expression
+result type has to be at least movable. If @ref CORRADE_STANDARD_ASSERT is
+defined, this macro uses @cpp assert(value) @ce inside, unfortunately it's not
+possible for the standard assert macro to show the expression. If
+@ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
+@cpp NDEBUG @ce are defined), this macro compiles to nothing, leaving just the
+parenthesized expression out of it.
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_INTERNAL_ASSERT_EXPRESSION @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
+@todo In C++14 this could use an inline templated lambda, which means we could
+    drop the template function, do it inline and *also* make the standard
+    assert actually working.
+*/
+#ifndef CORRADE_INTERNAL_ASSERT_EXPRESSION
+#if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
+/* Not (...) __VA_ARGS__, because the parentheses may be important */
+#define CORRADE_INTERNAL_ASSERT_EXPRESSION
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_INTERNAL_ASSERT_EXPRESSION(...) Corrade::Utility::Implementation::assertExpression(__VA_ARGS__)
+#else
+#define CORRADE_INTERNAL_ASSERT_EXPRESSION(...) Corrade::Utility::Implementation::assertExpression(__VA_ARGS__, "Assertion " #__VA_ARGS__ " failed at " __FILE__ ":" CORRADE_LINE_STRING)
 #endif
 #endif
 
@@ -542,5 +611,7 @@ You can override this implementation by placing your own
 #define CORRADE_ASSUME(condition) do {} while(false)
 #endif
 #endif
+
+}}
 
 #endif

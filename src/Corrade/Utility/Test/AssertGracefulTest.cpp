@@ -64,7 +64,8 @@ void AssertGracefulTest::test() {
     [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("C should be 3", ); }();
     int d = [&](){ if(a) CORRADE_ASSERT_UNREACHABLE("C should be 3!", 7); return 3; }();
 
-    /* CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT() and
+    /* CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT(),
+       CORRADE_INTERNAL_ASSERT_EXPRESSION() and
        CORRADE_INTERNAL_ASSERT_UNREACHABLE() do not have a graceful version */
 
     CORRADE_COMPARE(a, 7);

@@ -72,10 +72,13 @@ void AssertDisabledTest::test() {
     int d = [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("c should be 3!", 7); return 3; }();
     if(c != 3) CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 
+    int e = CORRADE_INTERNAL_ASSERT_EXPRESSION(2 + 4)/2;
+
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);
     CORRADE_COMPARE(d, 3);
+    CORRADE_COMPARE(e, 3);
     CORRADE_COMPARE(out.str(), "");
     #else
     CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");
