@@ -78,7 +78,12 @@ TypeTraitsTest::TypeTraitsTest() {
 void TypeTraitsTest::longDoubleSize() {
     #ifdef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
     Debug{} << "long double has the same size as double";
-    CORRADE_COMPARE(sizeof(long double), sizeof(double));
+    {
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __LDBL_DIG__ != __DBL_DIG__
+        CORRADE_EXPECT_FAIL("Emscripten's long double is 80-bit, but doesn't actually have an 80-bit precision, so it's treated as 64-bit.");
+        #endif
+        CORRADE_COMPARE(sizeof(long double), sizeof(double));
+    }
     #else
     Debug{} << "long double doesn't have the same size as double";
     CORRADE_COMPARE_AS(sizeof(long double), sizeof(double),

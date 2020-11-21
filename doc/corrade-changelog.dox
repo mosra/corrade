@@ -95,6 +95,10 @@ namespace Corrade {
     @ref Containers::String using @ref Utility::format()
 -   Creating an empty path with @ref Utility::Directory::mkpath() now succeeds
     because it makes no sense to fail for such case
+-   The @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro is now defined on
+    Emscripten always, because even if it's @cpp long double @ce is 80-bit
+    sometimes, it doesn't actually have the precision of a 80-bit
+    representation
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

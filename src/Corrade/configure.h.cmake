@@ -185,7 +185,7 @@
 #endif
 
 /* Documented in Utility/TypeTraits.h */
-#if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || (defined(CORRADE_TARGET_EMSCRIPTEN) && __LDBL_DIG__ == __DBL_DIG__)
+#if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif
 
