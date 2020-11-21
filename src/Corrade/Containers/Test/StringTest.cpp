@@ -916,6 +916,8 @@ void StringTest::moveConstructLarge() {
 
     /* b is deallocated just once */
     CORRADE_COMPARE(aData[0], 'B');
+
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<String>::value);
 }
 
 void StringTest::moveLargeToLarge() {
@@ -950,6 +952,8 @@ void StringTest::moveLargeToLarge() {
     /* both is deallocated as usual */
     CORRADE_COMPARE(aData[0], 'B');
     CORRADE_COMPARE(bData[1], 'M');
+
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<String>::value);
 }
 
 void StringTest::moveLargeToSmall() {

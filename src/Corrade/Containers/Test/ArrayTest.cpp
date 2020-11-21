@@ -329,6 +329,9 @@ void ArrayTest::constructMove() {
     CORRADE_COMPARE(c.size(), 5);
     CORRADE_VERIFY(b.deleter() == noDeleter);
     CORRADE_VERIFY(c.deleter() == myDeleter);
+
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Array>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Array>::value);
 }
 
 void ArrayTest::constructDirectReferences() {
