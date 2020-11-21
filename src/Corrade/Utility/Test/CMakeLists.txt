@@ -93,11 +93,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ARGUMENTS --fail-on-assert-unreachable true)
     set_tests_properties(UtilityAssertTestFailAssertUnreachable PROPERTIES
         PASS_REGULAR_EXPRESSION "C should be 3")
-    corrade_add_test(UtilityAssertTestFailInternalAssertUnreachable
+    corrade_add_test(UtilityAssertTestFailInte___Unreachable
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-assert-unreachable true)
-    set_tests_properties(UtilityAssertTestFailInternalAssertUnreachable PROPERTIES
+    set_tests_properties(UtilityAssertTestFailInte___Unreachable PROPERTIES
         PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
 endif()
 
