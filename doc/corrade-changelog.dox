@@ -114,6 +114,10 @@ namespace Corrade {
     CMake functions now check for presence of the targets they depend on,
     giving the user a clear message in case something is missing (see
     [mosra/corrade#101](https://github.com/mosra/corrade/pull/101))
+-   Switched Emscripten build on Travis CI from macOS to Ubuntu + Docker for
+    2x faster build times in a futile attempt to not use the extremely
+    expensive features of a no-longer-free service (see
+    [mosra/corrade#105](https://github.com/mosra/corrade/pull/105))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
@@ -130,6 +134,10 @@ namespace Corrade {
     @cmake find_package() @ce, @cmake corrade_add_resource() @ce failed late
     during build on the `Corrade::rc` target not being defined (see
     [mosra/corrade#101](https://github.com/mosra/corrade/pull/101))
+-   On Emscripten, @ref Utility::Arguments used an internal allocation
+    function, which changed signature in 2.0.5 and caused runtime failures
+    when `-s ASSERTIONS` was enabled. A public stable API is now used instead,
+    see [mosra/corrade#106](https://github.com/mosra/corrade/pull/106).
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

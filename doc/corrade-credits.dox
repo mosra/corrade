@@ -119,7 +119,8 @@ Is the below list missing your name or something's wrong?
     Stateful lambda support in the @ref Interconnect library
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
-    @ref Utility::Sha1 additions, various fixes, buildsystem improvements
+    @ref Utility::Sha1 additions, various fixes, buildsystem and CI
+    improvements
 -   **Marco Melorio** ([\@Melix19](https://github.com/Melix19)) --- iOS
     crosscompiling and other fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
@@ -136,6 +137,8 @@ Is the below list missing your name or something's wrong?
     design suggestions
 -   **Olga Turanksaya** ([\@olga-python](https://github.com/olga-python)) ---
     gentoo ebuild
+-   **Pablo Escobar** ([\@pezcode](https://github.com/pezcode)) --- Emscripten
+    version compatibility fixes
 -   **Pascal Thomet** ([\@pthom](https://github.com/pthom)) --- Hunter package
 -   **[\@pkubaj](https://github.com/pkubaj)**  --- fixes for big-endian
     platforms
