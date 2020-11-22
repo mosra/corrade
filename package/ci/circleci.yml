@@ -10,6 +10,9 @@ executors:
   emscripten-1_39_1:
     docker:
     - image: emscripten/emsdk:1.39.1-upstream
+  python-3_6:
+    docker:
+    - image: python:3.6.12
 
 commands:
   install-base:
@@ -179,6 +182,23 @@ jobs:
     - build:
         script: travis-emscripten.sh
 
+  # Python preprocessor for magnum-singles, for a lack of better name
+  acme:
+    executor: python-3_6
+    steps:
+    - run:
+        name: Install coverage and codecov
+        command: pip install coverage codecov
+    - checkout
+    - run:
+        name: Run tests and collect coverage
+        working_directory: src/acme
+        command: coverage run -m unittest
+    - run:
+        name: Upload coverage
+        working_directory: src/acme
+        command: codecov
+
 workflows:
   version: 2
   build:
@@ -189,3 +209,4 @@ workflows:
     - linux-sanitizers
     - linux-threadsanitizer
     - emscripten
+    - acme
