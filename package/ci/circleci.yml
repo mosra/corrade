@@ -113,7 +113,7 @@ jobs:
     - install-cmake-3_4
     - make-expected-linux-dirs
     - build:
-        script: travis-desktop.sh
+        script: unix-desktop.sh
     - lcov
 
   linux-static:
@@ -131,7 +131,7 @@ jobs:
     - install-cmake-3_4
     - make-expected-linux-dirs
     - build:
-        script: travis-desktop.sh
+        script: unix-desktop.sh
     - lcov
 
   linux-nondeprecated:
@@ -147,7 +147,7 @@ jobs:
     - install-cmake-3_4
     - make-expected-linux-dirs
     - build:
-        script: travis-desktop.sh
+        script: unix-desktop.sh
 
   linux-sanitizers:
     executor: ubuntu-16_04
@@ -160,7 +160,7 @@ jobs:
     - install-cmake-3_4
     - make-expected-linux-dirs
     - build:
-        script: travis-desktop.sh
+        script: unix-desktop.sh
 
   linux-threadsanitizer:
     executor: ubuntu-16_04
@@ -173,14 +173,14 @@ jobs:
     - install-cmake-3_4
     - make-expected-linux-dirs
     - build:
-        script: travis-desktop.sh
+        script: unix-desktop.sh
 
   emscripten:
     executor: emscripten-1_39_1
     steps:
     - install-base
     - build:
-        script: travis-emscripten.sh
+        script: emscripten.sh
 
   # Python preprocessor for magnum-singles, for a lack of better name
   acme:
