@@ -7,6 +7,9 @@ executors:
   ubuntu-16_04:
     docker:
     - image: ubuntu:xenial-20201014
+  emscripten-1_39_1:
+    docker:
+    - image: emscripten/emsdk:1.39.1-upstream
 
 commands:
   install-base:
@@ -169,6 +172,13 @@ jobs:
     - build:
         script: travis-desktop.sh
 
+  emscripten:
+    executor: emscripten-1_39_1
+    steps:
+    - install-base
+    - build:
+        script: travis-emscripten.sh
+
 workflows:
   version: 2
   build:
@@ -178,3 +188,4 @@ workflows:
     - linux-nondeprecated
     - linux-sanitizers
     - linux-threadsanitizer
+    - emscripten
