@@ -5,76 +5,77 @@ addons:
     - ninja-build
 
 matrix:
+  # The commented-out jobs are currently handled on Circle CI
   include:
-  - language: cpp
-    os: linux
-    dist: xenial
-    compiler: gcc
-    env:
-    - JOBID=linux
-    - TARGET=desktop
-    - CMAKE_CXX_FLAGS="--coverage"
-    - LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
-    - CONFIGURATION=Debug
-    addons:
-      apt:
-        packages:
-        - g++-4.8
-        - ninja-build
-        - lcov
-  - language: cpp
-    os: linux
-    compiler: gcc
-    dist: xenial
-    env:
-    - JOBID=linux-nondeprecated
-    - TARGET=desktop
-    - BUILD_DEPRECATED=OFF
-    - CMAKE_CXX_FLAGS="-DCORRADE_NO_ASSERT"
-    - CONFIGURATION=Release
-  - language: cpp
-    os: linux
-    compiler: gcc
-    dist: xenial
-    env:
-    - JOBID=linux-static
-    - TARGET=desktop
-    - CMAKE_CXX_FLAGS="--coverage"
-    - LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
-    - BUILD_STATIC=ON
-    - CONFIGURATION=Debug
-  - language: cpp
-    os: linux
-    compiler: clang
-    dist: xenial
-    env:
-    - JOBID=linux-sanitizers
-    - TARGET=desktop-sanitizers
-    - CMAKE_CXX_FLAGS="-fsanitize=address"
-    - CONFIGURATION=Debug
-    addons:
-      apt:
-        sources:
-        - llvm-toolchain-xenial
-        packages:
-        - ninja-build
-        - clang-3.8
-  - language: cpp
-    os: linux
-    compiler: clang
-    dist: xenial
-    env:
-    - JOBID=linux-threadsanitizer
-    - TARGET=desktop-sanitizers
-    - CMAKE_CXX_FLAGS="-fsanitize=thread"
-    - CONFIGURATION=Debug
-    addons:
-      apt:
-        sources:
-        - llvm-toolchain-xenial
-        packages:
-        - ninja-build
-        - clang-3.8
+  #- language: cpp
+    #os: linux
+    #dist: xenial
+    #compiler: gcc
+    #env:
+    #- JOBID=linux
+    #- TARGET=desktop
+    #- CMAKE_CXX_FLAGS="--coverage"
+    #- LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
+    #- CONFIGURATION=Debug
+    #addons:
+      #apt:
+        #packages:
+        #- g++-4.8
+        #- ninja-build
+        #- lcov
+  #- language: cpp
+    #os: linux
+    #compiler: gcc
+    #dist: xenial
+    #env:
+    #- JOBID=linux-nondeprecated
+    #- TARGET=desktop
+    #- BUILD_DEPRECATED=OFF
+    #- CMAKE_CXX_FLAGS="-DCORRADE_NO_ASSERT"
+    #- CONFIGURATION=Release
+  #- language: cpp
+    #os: linux
+    #compiler: gcc
+    #dist: xenial
+    #env:
+    #- JOBID=linux-static
+    #- TARGET=desktop
+    #- CMAKE_CXX_FLAGS="--coverage"
+    #- LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
+    #- BUILD_STATIC=ON
+    #- CONFIGURATION=Debug
+  #- language: cpp
+    #os: linux
+    #compiler: clang
+    #dist: xenial
+    #env:
+    #- JOBID=linux-sanitizers
+    #- TARGET=desktop-sanitizers
+    #- CMAKE_CXX_FLAGS="-fsanitize=address"
+    #- CONFIGURATION=Debug
+    #addons:
+      #apt:
+        #sources:
+        #- llvm-toolchain-xenial
+        #packages:
+        #- ninja-build
+        #- clang-3.8
+  #- language: cpp
+    #os: linux
+    #compiler: clang
+    #dist: xenial
+    #env:
+    #- JOBID=linux-threadsanitizer
+    #- TARGET=desktop-sanitizers
+    #- CMAKE_CXX_FLAGS="-fsanitize=thread"
+    #- CONFIGURATION=Debug
+    #addons:
+      #apt:
+        #sources:
+        #- llvm-toolchain-xenial
+        #packages:
+        #- ninja-build
+        #- clang-3.8
   - language: cpp
     os: osx
     compiler: clang
@@ -98,17 +99,17 @@ matrix:
     env:
     - JOBID=ios
     - TARGET=ios-simulator
-  - language: generic
-    os: ubuntu
-    services:
-    - docker
-    env:
-    - JOBID=emscripten
-    - TARGET=emscripten
-    - EMSCRIPTEN_VERSION=1.39.1-upstream
-    before_install:
-    - docker pull emscripten/emsdk:${EMSCRIPTEN_VERSION}
-    - docker ps -a
+  #- language: generic
+    #os: ubuntu
+    #services:
+    #- docker
+    #env:
+    #- JOBID=emscripten
+    #- TARGET=emscripten
+    #- EMSCRIPTEN_VERSION=1.39.1-upstream
+    #before_install:
+    #- docker pull emscripten/emsdk:${EMSCRIPTEN_VERSION}
+    #- docker ps -a
   - language: android
     os: linux
     # Setting xenial here will cause it to use 12.04, with GCC 4.6 and other
@@ -127,14 +128,14 @@ matrix:
       - android-22
       - sys-img-armeabi-v7a-android-22
   # python preprocessor for magnum-singles, for a lack of better name
-  - language: python
-    python: 3.6
-    env:
-    - TARGET=acme
-    - JOBID=acme
-    addons:
-      apt:
-        packages: #none
+  #- language: python
+    #python: 3.6
+    #env:
+    #- TARGET=acme
+    #- JOBID=acme
+    #addons:
+      #apt:
+        #packages: #none
 
 notifications:
   webhooks:
