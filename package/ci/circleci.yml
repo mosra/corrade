@@ -28,6 +28,28 @@ commands:
           apt install -y g++-4.8
           echo 'export CXX=g++-4.8' >> $BASH_ENV
 
+  install-clang-3_8:
+    steps:
+    - run:
+        name: Install Clang 3.8
+        # https://askubuntu.com/questions/787383/how-to-install-llvm-3-9
+        # because the `deb` commands from https://apt.llvm.org don't work
+        #
+        # The software-properties-common need to be installed in order to have
+        # apt-add-repository. Sigh, adding a repository should be a core
+        # feature ffs!
+        #
+        # The apt-transport-https needs to be installed because
+        #  E: The method driver /usr/lib/apt/methods/https could not be found.
+        #  N: Is the package apt-transport-https installed?
+        command: |
+          apt install -y software-properties-common apt-transport-https
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+          apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main"
+          apt update
+          apt install -y clang-3.8
+          echo 'export CXX=clang++-3.8' >> $BASH_ENV
+
   install-cmake-3_4:
     steps:
     - run:
@@ -88,8 +110,67 @@ jobs:
         script: travis-desktop.sh
     - lcov
 
+  linux-static:
+    executor: ubuntu-16_04
+    environment:
+      CMAKE_CXX_FLAGS: --coverage
+      LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
+      CONFIGURATION: Debug
+    steps:
+    - install-base
+    - install-gcc-4_8
+    - install-cmake-3_4
+    - make-expected-linux-dirs
+    - build:
+        script: travis-desktop.sh
+    - lcov
+
+  linux-nondeprecated:
+    executor: ubuntu-16_04
+    environment:
+      BUILD_DEPRECATED: OFF
+      CMAKE_CXX_FLAGS: -DCORRADE_NO_ASSERT
+      CONFIGURATION: Release
+    steps:
+    - install-base
+    - install-gcc-4_8
+    - install-cmake-3_4
+    - make-expected-linux-dirs
+    - build:
+        script: travis-desktop.sh
+
+  linux-sanitizers:
+    executor: ubuntu-16_04
+    environment:
+      CMAKE_CXX_FLAGS: -fsanitize=address
+      CONFIGURATION: Debug
+    steps:
+    - install-base
+    - install-clang-3_8
+    - install-cmake-3_4
+    - make-expected-linux-dirs
+    - build:
+        script: travis-desktop.sh
+
+  linux-threadsanitizer:
+    executor: ubuntu-16_04
+    environment:
+      CMAKE_CXX_FLAGS: -fsanitize=thread
+      CONFIGURATION: Debug
+    steps:
+    - install-base
+    - install-clang-3_8
+    - install-cmake-3_4
+    - make-expected-linux-dirs
+    - build:
+        script: travis-desktop.sh
+
 workflows:
   version: 2
   build:
     jobs:
     - linux
+    - linux-static
+    - linux-nondeprecated
+    - linux-sanitizers
+    - linux-threadsanitizer
