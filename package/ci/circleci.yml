@@ -16,16 +16,17 @@ executors:
 
 commands:
   install-base:
+    parameters:
+      extra:
+        type: string
+        default: ""
     steps:
     - run:
         name: Update apt and install base tools
-        # - Curl needed by codecov, wget by us
-        # - git soft-required by the `checkout` step, but needed by us to
-        #   generate version info
         command: |
           apt update
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
-          apt install -y ninja-build wget git $LCOV_PACKAGES
+          apt install -y ninja-build $LCOV_PACKAGES << parameters.extra >>
 
   install-gcc-4_8:
     steps:
@@ -56,7 +57,7 @@ commands:
         # For some reason, CMake needs a working C compiler, so provice CC as
         # well for the case when default gcc isn't installed.
         command: |
-          apt install -y software-properties-common apt-transport-https
+          apt install -y software-properties-common apt-transport-https wget
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
           apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main"
           apt update
@@ -69,6 +70,7 @@ commands:
     - run:
         name: Install CMake 3.4
         command: |
+          apt install -y wget
           mkdir -p $HOME/cmake && cd $HOME/cmake
           wget -nc --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.3-Linux-x86_64.tar.gz
           tar --strip-components=1 -xzf cmake-3.4.3-Linux-x86_64.tar.gz
@@ -116,7 +118,9 @@ jobs:
       LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
       CONFIGURATION: Debug
     steps:
-    - install-base
+    # Install also Git so we verify that Git version embedding works
+    - install-base:
+        extra: git
     - install-gcc-4_8
     - install-cmake-3_4
     - make-expected-linux-dirs
