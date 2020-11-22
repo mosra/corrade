@@ -113,6 +113,9 @@ jobs:
   linux-static:
     executor: ubuntu-16_04
     environment:
+      # STUPID yml interprets unquoted ON as a boolean
+      # https://stackoverflow.com/questions/53648244/specifying-the-string-value-yes-in-a-yaml-property
+      BUILD_STATIC: "ON"
       CMAKE_CXX_FLAGS: --coverage
       LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
       CONFIGURATION: Debug
@@ -128,7 +131,8 @@ jobs:
   linux-nondeprecated:
     executor: ubuntu-16_04
     environment:
-      BUILD_DEPRECATED: OFF
+      # STUPID yml interprets unquoted OFF as a boolean
+      BUILD_DEPRECATED: "OFF"
       CMAKE_CXX_FLAGS: -DCORRADE_NO_ASSERT
       CONFIGURATION: Release
     steps:
