@@ -11,7 +11,6 @@ git submodule update --init
 mkdir build && cd build || exit /b
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_MAKE_PROGRAM=ninja \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps-native \
     -DWITH_INTERCONNECT=OFF \
     -DWITH_PLUGINMANAGER=OFF \
@@ -24,7 +23,6 @@ cd ..
 # Crosscompile
 mkdir build-emscripten && cd build-emscripten
 cmake .. \
-    -DCMAKE_MAKE_PROGRAM=ninja \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten-wasm.cmake" \
     -DCMAKE_BUILD_TYPE=Release \
