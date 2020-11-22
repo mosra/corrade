@@ -24,14 +24,18 @@ commands:
         #   generate version info
         command: |
           apt update
-          apt install -y ninja-build lcov wget curl git
+          if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
+          apt install -y ninja-build wget git $LCOV_PACKAGES
 
   install-gcc-4_8:
     steps:
     - run:
         name: Install GCC 4.8
+        # For some reason, CMake needs a working C compiler, so provice CC as
+        # well for the case when default gcc isn't installed.
         command: |
           apt install -y g++-4.8
+          echo 'export CC=gcc-4.8' >> $BASH_ENV
           echo 'export CXX=g++-4.8' >> $BASH_ENV
 
   install-clang-3_8:
@@ -48,12 +52,16 @@ commands:
         # The apt-transport-https needs to be installed because
         #  E: The method driver /usr/lib/apt/methods/https could not be found.
         #  N: Is the package apt-transport-https installed?
+        #
+        # For some reason, CMake needs a working C compiler, so provice CC as
+        # well for the case when default gcc isn't installed.
         command: |
           apt install -y software-properties-common apt-transport-https
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
           apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main"
           apt update
           apt install -y clang-3.8
+          echo 'export CC=clang-3.8' >> $BASH_ENV
           echo 'export CXX=clang++-3.8' >> $BASH_ENV
 
   install-cmake-3_4:
