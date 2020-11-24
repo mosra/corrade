@@ -1,9 +1,6 @@
 #!/bin/bash
 set -ev
 
-# Get Ninja
-
-
 git submodule update --init
 
 # Build native corrade-rc
