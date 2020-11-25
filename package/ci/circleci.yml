@@ -5,15 +5,23 @@ orbs:
 
 notify:
   webhooks:
-    - url: https://webhooks.gitter.im/e/cfbadbd34d28708a57c6
+    # Unfortunately Gitter messages are too verbose (one five-line message per
+    # each job in the build matrix) and thus not wanted
+    #- url: https://webhooks.gitter.im/e/cfbadbd34d28708a57c6
 
 executors:
   ubuntu-16_04:
     docker:
     - image: ubuntu:xenial-20201014
-  emscripten-1_39_1:
+  emscripten:
     docker:
-    - image: emscripten/emsdk:1.39.1-upstream
+    # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
+    # randomly asserts: https://github.com/emscripten-core/emscripten/pull/9742
+    # Then, anything before 1.39.6 is useless as well because emar has a
+    # filesystem race and randomly complains that a file doesn't exist:
+    # https://github.com/mosra/magnum/issues/413,
+    # https://github.com/emscripten-core/emscripten/pull/10161
+    - image: emscripten/emsdk:1.39.6-upstream
   python-3_6:
     docker:
     - image: python:3.6.12
@@ -60,6 +68,19 @@ commands:
         #
         # For some reason, CMake needs a working C compiler, so provice CC as
         # well for the case when default gcc isn't installed.
+        #
+        # The llvm-symbolizer link needs to be set in order to have usable
+        # symbols in the output. This affects suppressions as well, meaning
+        # they won't work if the symbols are not resolvable. It's not enough to
+        # just `export ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.8`
+        # because it then complains that
+        #
+        #   External symbolizer path is set to '/usr/bin/llvm-symbolizer-3.8'
+        #   which isn't a known symbolizer. Please set the path to the
+        #   llvm-symbolizer binary or other known tool.
+        #
+        # Probably because because it detects tool type based on the filename?
+        # Ugh.
         command: |
           apt install -y software-properties-common apt-transport-https wget
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
@@ -68,6 +89,7 @@ commands:
           apt install -y clang-3.8
           echo 'export CC=clang-3.8' >> $BASH_ENV
           echo 'export CXX=clang++-3.8' >> $BASH_ENV
+          ln -s /usr/bin/llvm-symbolizer{-3.8,}
 
   install-cmake-3_4:
     steps:
@@ -194,7 +216,7 @@ jobs:
         script: unix-desktop.sh
 
   emscripten:
-    executor: emscripten-1_39_1
+    executor: emscripten
     steps:
     - install-base
     - build:
