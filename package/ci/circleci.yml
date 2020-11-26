@@ -13,6 +13,9 @@ executors:
   ubuntu-16_04:
     docker:
     - image: ubuntu:xenial-20201014
+  xcode-9_4:
+    macos:
+      xcode: 9.4.1
   emscripten:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
@@ -27,18 +30,32 @@ executors:
     - image: python:3.6.12
 
 commands:
-  install-base:
+  install-base-linux:
     parameters:
       extra:
         type: string
         default: ""
     steps:
     - run:
-        name: Update apt and install base tools
+        name: Update apt and install base packages
         command: |
           apt update
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
           apt install -y ninja-build $LCOV_PACKAGES << parameters.extra >>
+
+  install-base-macos:
+    parameters:
+      extra:
+        type: string
+        default: ""
+    steps:
+    - run:
+        name: Install base packages
+        # As usual, homebrew takes five minutes to update and then explodes in
+        # a spectacular way. How is this acceptable?!
+        command: |
+          if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov"; fi
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install cmake ninja $LCOV_PACKAGES << parameters.extra >>
 
   install-gcc-4_8:
     steps:
@@ -147,7 +164,7 @@ jobs:
       CONFIGURATION: Debug
     steps:
     # Install also Git so we verify that Git version embedding works
-    - install-base:
+    - install-base-linux:
         extra: git
     - install-gcc-4_8
     - install-cmake-3_4
@@ -166,7 +183,7 @@ jobs:
       LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
       CONFIGURATION: Debug
     steps:
-    - install-base
+    - install-base-linux
     - install-gcc-4_8
     - install-cmake-3_4
     - make-expected-linux-dirs
@@ -182,7 +199,7 @@ jobs:
       CMAKE_CXX_FLAGS: -DCORRADE_NO_ASSERT
       CONFIGURATION: Release
     steps:
-    - install-base
+    - install-base-linux
     - install-gcc-4_8
     - install-cmake-3_4
     - make-expected-linux-dirs
@@ -195,7 +212,7 @@ jobs:
       CMAKE_CXX_FLAGS: -fsanitize=address
       CONFIGURATION: Debug
     steps:
-    - install-base
+    - install-base-linux
     - install-clang-3_8
     - install-cmake-3_4
     - make-expected-linux-dirs
@@ -208,10 +225,22 @@ jobs:
       CMAKE_CXX_FLAGS: -fsanitize=thread
       CONFIGURATION: Debug
     steps:
-    - install-base
+    - install-base-linux
     - install-clang-3_8
     - install-cmake-3_4
     - make-expected-linux-dirs
+    - build:
+        script: unix-desktop.sh
+
+  macos:
+    executor: xcode-9_4
+    environment:
+      # STUPID yml interprets unquoted ON as a boolean
+      BUILD_STATIC: "ON"
+      CMAKE_CXX_FLAGS: --coverage
+      CONFIGURATION: Debug
+    steps:
+    - install-base-macos
     - build:
         script: unix-desktop.sh
 
@@ -248,5 +277,6 @@ workflows:
     - linux-nondeprecated
     - linux-sanitizers
     - linux-threadsanitizer
+    - macos
     - emscripten
     - acme
