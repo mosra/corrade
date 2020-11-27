@@ -259,7 +259,7 @@ jobs:
   emscripten:
     executor: emscripten
     steps:
-    - install-base
+    - install-base-linux
     - build:
         script: emscripten.sh
 
