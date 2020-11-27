@@ -914,11 +914,16 @@ for more information.
 
 @section building-corrade-ci Continuous Integration
 
+@subsection building-corrade-ci-circleci CircleCI
+
+In `package/ci/` there is a `circle.yml` file with Linux GCC 4.8, macOS,
+Emscripten, AddressSanitizer and ThreadSanitizer configuration. Online
+at https://circleci.com/gh/mosra/corrade.
+
 @subsection building-corrade-ci-travis Travis
 
-In `package/ci/` there is a `travis.yml` file with Linux GCC 4.8, macOS, iOS,
-Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration. Online
-at https://travis-ci.com/mosra/corrade.
+In `package/ci/` there is a `travis.yml` file with iOS and Android
+configuration. Online at https://travis-ci.com/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
