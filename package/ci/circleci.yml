@@ -235,6 +235,17 @@ jobs:
   macos:
     executor: xcode-9_4
     environment:
+      CMAKE_CXX_FLAGS: --coverage
+      CONFIGURATION: Debug
+    steps:
+    - install-base-macos
+    - build:
+        script: unix-desktop.sh
+    - lcov
+
+  macos-static:
+    executor: xcode-9_4
+    environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
       CMAKE_CXX_FLAGS: --coverage
@@ -243,6 +254,7 @@ jobs:
     - install-base-macos
     - build:
         script: unix-desktop.sh
+    - lcov
 
   emscripten:
     executor: emscripten
@@ -278,5 +290,6 @@ workflows:
     - linux-sanitizers
     - linux-threadsanitizer
     - macos
+    - macos-static
     - emscripten
     - acme

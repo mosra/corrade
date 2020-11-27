@@ -76,23 +76,23 @@ matrix:
         #packages:
         #- ninja-build
         #- clang-3.8
-  - language: cpp
-    os: osx
-    compiler: clang
-    env:
-    - JOBID=macos
-    - TARGET=desktop
-    - CMAKE_CXX_FLAGS="--coverage"
-    - CONFIGURATION=Debug
-  - language: cpp
-    os: osx
-    compiler: clang
-    env:
-    - JOBID=macos-static
-    - TARGET=desktop
-    - CMAKE_CXX_FLAGS="--coverage"
-    - BUILD_STATIC=ON
-    - CONFIGURATION=Debug
+  #- language: cpp
+    #os: osx
+    #compiler: clang
+    #env:
+    #- JOBID=macos
+    #- TARGET=desktop
+    #- CMAKE_CXX_FLAGS="--coverage"
+    #- CONFIGURATION=Debug
+  #- language: cpp
+    #os: osx
+    #compiler: clang
+    #env:
+    #- JOBID=macos-static
+    #- TARGET=desktop
+    #- CMAKE_CXX_FLAGS="--coverage"
+    #- BUILD_STATIC=ON
+    #- CONFIGURATION=Debug
   - language: cpp
     os: osx
     osx_image: xcode7.3
