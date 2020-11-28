@@ -360,6 +360,10 @@ if(NOT CORRADE_TARGET_WINDOWS)
     list(APPEND _CORRADE_HEADER_ONLY_COMPONENTS Main)
 endif()
 set(_CORRADE_EXECUTABLE_COMPONENTS rc)
+# Currently everything is enabled implicitly. Keep in sync with Corrade's root
+# CMakeLists.txt.
+set(_CORRADE_IMPLICITLY_ENABLED_COMPONENTS
+    Containers Interconnect Main PluginManager TestSuite Utility rc)
 
 # Inter-component dependencies
 set(_CORRADE_Containers_DEPENDENCIES Utility)
@@ -386,6 +390,7 @@ endforeach()
 set(_CORRADE_TestSuite_DEPENDENCIES Containers Utility)
 
 # Join the lists, remove duplicate components
+set(_CORRADE_ORIGINAL_FIND_COMPONENTS ${Corrade_FIND_COMPONENTS})
 if(_CORRADE_ADDITIONAL_COMPONENTS)
     list(INSERT Corrade_FIND_COMPONENTS 0 ${_CORRADE_ADDITIONAL_COMPONENTS})
 endif()
@@ -565,6 +570,39 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
     endif()
 endforeach()
 
+# For CMake 3.16+ with REASON_FAILURE_MESSAGE, provide additional potentially
+# useful info about the failed components.
+if(NOT CMAKE_VERSION VERSION_LESS 3.16)
+    set(_CORRADE_REASON_FAILURE_MESSAGE)
+    # Go only through the originally specified find_package() components, not
+    # the dependencies added by us afterwards
+    foreach(_component ${_CORRADE_ORIGINAL_FIND_COMPONENTS})
+        if(Corrade_${_component}_FOUND)
+            continue()
+        endif()
+
+        # If it's not known at all, tell the user -- it might be a new library
+        # and an old Find module, or something platform-specific.
+        if(NOT _component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
+            list(APPEND _CORRADE_REASON_FAILURE_MESSAGE "${_component} is not a known component on this platform.")
+        # Otherwise, if it's not among implicitly built components, hint that
+        # the user may need to enable it.
+        # TODO: currently, the _FOUND variable doesn't reflect if dependencies
+        #   were found. When it will, this needs to be updated to avoid
+        #   misleading messages.
+        elseif(NOT _component IN_LIST _CORRADE_IMPLICITLY_ENABLED_COMPONENTS)
+            string(TOUPPER ${_component} _COMPONENT)
+            list(APPEND _CORRADE_REASON_FAILURE_MESSAGE "${_component} is not built by default. Make sure you enabled WITH_${_COMPONENT} when building Corrade.")
+        # Otherwise we have no idea. Better be silent than to print something
+        # misleading.
+        else()
+        endif()
+    endforeach()
+
+    string(REPLACE ";" " " _CORRADE_REASON_FAILURE_MESSAGE "${_CORRADE_REASON_FAILURE_MESSAGE}")
+    set(_CORRADE_REASON_FAILURE_MESSAGE REASON_FAILURE_MESSAGE "${_CORRADE_REASON_FAILURE_MESSAGE}")
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Corrade REQUIRED_VARS
     CORRADE_INCLUDE_DIR
@@ -573,7 +611,8 @@ find_package_handle_standard_args(Corrade REQUIRED_VARS
     ${CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED}
     ${CORRADE_TESTSUITE_ADB_RUNNER_NEEDED}
     ${CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER_NEEDED}
-    HANDLE_COMPONENTS)
+    HANDLE_COMPONENTS
+    ${_CORRADE_REASON_FAILURE_MESSAGE})
 
 # Finalize the finding process
 include(${CORRADE_USE_MODULE})

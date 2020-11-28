@@ -119,6 +119,8 @@ namespace Corrade {
     expensive features of a no-longer-free service (see
     [mosra/corrade#105](https://github.com/mosra/corrade/pull/105))
 -   Linux, Emscripten and macOS builds were migrated from Travis to Circle CI
+-   On CMake 3.16 and newer, `FindCorrade.cmake` can provide additional details
+    if some component is not found.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
