@@ -120,7 +120,7 @@ std::vector<std::string> Arguments::environment() {
     #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
     #endif
     char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
-        let env = '';
+        var env = '';
         if(typeof process !== 'undefined') for(var key in process.env)
             env += key + '=' + process.env[key] + '\b';
         env += '\b';
@@ -513,12 +513,15 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
         #endif
+        /* Note: can't use let or const, as that breaks closure compiler:
+            ERROR - [JSC_LANGUAGE_FEATURE] This language feature is only
+            supported for ECMASCRIPT6 mode or better: const declaration. */
         char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
-            const name = UTF8ToString($0);
+            var name = UTF8ToString($0);
             if(typeof process !== 'undefined' && name in process.env) {
-                const env = process.env[name];
-                const bytes = lengthBytesUTF8(env) + 1;
-                const memory = _malloc(bytes);
+                var env = process.env[name];
+                var bytes = lengthBytesUTF8(env) + 1;
+                var memory = _malloc(bytes);
                 stringToUTF8(env, memory, bytes);
                 return memory;
             }
