@@ -350,38 +350,40 @@ mark_as_advanced(_CORRADE_MODULE_DIR)
 set(CORRADE_USE_MODULE ${_CORRADE_MODULE_DIR}/UseCorrade.cmake)
 set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
 
+# Component distinction (listing them explicitly to avoid mistakes with finding
+# unknown components)
+set(_CORRADE_LIBRARY_COMPONENTS
+    Containers Interconnect Main PluginManager TestSuite Utility)
+set(_CORRADE_HEADER_ONLY_COMPONENTS Containers)
+if(NOT CORRADE_TARGET_WINDOWS)
+    # CorradeMain is a real library only on windows, a dummy target elsewhere
+    list(APPEND _CORRADE_HEADER_ONLY_COMPONENTS Main)
+endif()
+set(_CORRADE_EXECUTABLE_COMPONENTS rc)
+
+# Inter-component dependencies
+set(_CORRADE_Containers_DEPENDENCIES Utility)
+set(_CORRADE_Interconnect_DEPENDENCIES Containers Utility)
+set(_CORRADE_PluginManager_DEPENDENCIES Containers Utility rc)
+set(_CORRADE_TestSuite_DEPENDENCIES Containers Utility Main) # see below
+set(_CORRADE_Utility_DEPENDENCIES Containers rc)
+
 # Ensure that all inter-component dependencies are specified as well
 foreach(_component ${Corrade_FIND_COMPONENTS})
-    string(TOUPPER ${_component} _COMPONENT)
-
-    if(_component STREQUAL Containers)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Utility)
-    elseif(_component STREQUAL Interconnect)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Utility)
-    elseif(_component STREQUAL PluginManager)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Containers Utility rc)
-    elseif(_component STREQUAL TestSuite)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Utility Main) # see below
-    elseif(_component STREQUAL Utility)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Containers rc)
-    endif()
-
     # Mark the dependencies as required if the component is also required
     if(Corrade_FIND_REQUIRED_${_component})
-        foreach(_dependency ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
+        foreach(_dependency ${_CORRADE_${_component}_DEPENDENCIES})
             set(Corrade_FIND_REQUIRED_${_dependency} TRUE)
         endforeach()
     endif()
 
-    list(APPEND _CORRADE_ADDITIONAL_COMPONENTS ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
-
-    # Main is linked only in corrade_add_test(), not to everything that depends
-    # on TestSuite, so remove it from the list again once we filled the above
-    # variables
-    if(_component STREQUAL TestSuite)
-        set(_CORRADE_${_COMPONENT}_DEPENDENCIES Utility)
-    endif()
+    list(APPEND _CORRADE_ADDITIONAL_COMPONENTS ${_CORRADE_${_component}_DEPENDENCIES})
 endforeach()
+
+# Main is linked only in corrade_add_test(), not to everything that depends on
+# TestSuite, so remove it from the list again once we filled the above
+# variables
+set(_CORRADE_TestSuite_DEPENDENCIES Containers Utility)
 
 # Join the lists, remove duplicate components
 if(_CORRADE_ADDITIONAL_COMPONENTS)
@@ -390,16 +392,6 @@ endif()
 if(Corrade_FIND_COMPONENTS)
     list(REMOVE_DUPLICATES Corrade_FIND_COMPONENTS)
 endif()
-
-# Component distinction
-set(_CORRADE_LIBRARY_COMPONENTS "^(Containers|Interconnect|Main|PluginManager|TestSuite|Utility)$")
-if(CORRADE_TARGET_WINDOWS)
-    # CorradeMain is a real library only on windows, a dummy target elsewhere
-    set(_CORRADE_HEADER_ONLY_COMPONENTS "^(Containers)$")
-else()
-    set(_CORRADE_HEADER_ONLY_COMPONENTS "^(Containers|Main)$")
-endif()
-set(_CORRADE_EXECUTABLE_COMPONENTS "^(rc)$")
 
 # Find all components
 foreach(_component ${Corrade_FIND_COMPONENTS})
@@ -412,7 +404,7 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         set(Corrade_${_component}_FOUND TRUE)
     else()
         # Library (and not header-only) components
-        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} AND NOT _component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
             add_library(Corrade::${_component} UNKNOWN IMPORTED)
 
             # Try to find both debug and release version
@@ -437,19 +429,19 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # Header-only library components
-        if(_component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
+        if(_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
             add_library(Corrade::${_component} INTERFACE IMPORTED)
         endif()
 
         # Default include path names to look for for library / header-only
         # components
-        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS})
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
             set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX Corrade/${_component})
             set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES ${_component}.h)
         endif()
 
         # Executable components
-        if(_component MATCHES ${_CORRADE_EXECUTABLE_COMPONENTS})
+        if(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
             add_executable(Corrade::${_component} IMPORTED)
 
             find_program(CORRADE_${_COMPONENT}_EXECUTABLE corrade-${_component})
@@ -547,7 +539,7 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # Find library includes
-        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS})
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
             find_path(_CORRADE_${_COMPONENT}_INCLUDE_DIR
                 NAMES ${_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES}
                 HINTS ${CORRADE_INCLUDE_DIR}/${_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX})
@@ -555,9 +547,9 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # Add inter-library dependencies
-        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} OR _component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
-            foreach(_dependency ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
-                if(_dependency MATCHES ${_CORRADE_LIBRARY_COMPONENTS} OR _dependency MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS OR _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
+            foreach(_dependency ${_CORRADE_${_component}_DEPENDENCIES})
+                if(_dependency IN_LIST _CORRADE_LIBRARY_COMPONENTS OR _dependency IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
                     set_property(TARGET Corrade::${_component} APPEND PROPERTY
                         INTERFACE_LINK_LIBRARIES Corrade::${_dependency})
                 endif()
@@ -565,7 +557,7 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # Decide if the component was found
-        if((_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS} OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component MATCHES ${_CORRADE_EXECUTABLE_COMPONENTS} AND CORRADE_${_COMPONENT}_EXECUTABLE))
+        if((_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE))
             set(Corrade_${_component}_FOUND TRUE)
         else()
             set(Corrade_${_component}_FOUND FALSE)
