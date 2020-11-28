@@ -118,7 +118,7 @@ namespace Corrade {
     2x faster build times in a futile attempt to not use the extremely
     expensive features of a no-longer-free service (see
     [mosra/corrade#105](https://github.com/mosra/corrade/pull/105))
--   Linux and Emscripten builds were migrated from Travis to Circle CI
+-   Linux, Emscripten and macOS builds were migrated from Travis to Circle CI
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
