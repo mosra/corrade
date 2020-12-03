@@ -384,13 +384,6 @@ class Array {
         /* GCC <=4.8 breaks on _deleter{} */
         explicit Array(T* data, std::size_t size, D deleter = Implementation::DefaultDeleter<D>{}()): _data{data}, _size{size}, _deleter(deleter) {}
 
-        /**
-         * @brief Destructor
-         *
-         * Calls @ref deleter() on the owned @ref data().
-         */
-        ~Array() { Implementation::CallDeleter<T, D>{}(_deleter, _data, _size); }
-
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
 
@@ -401,6 +394,13 @@ class Array {
          * to a default-constructed instance.
          */
         Array(Array<T, D>&& other) noexcept;
+
+        /**
+         * @brief Destructor
+         *
+         * Calls @ref deleter() on the owned @ref data().
+         */
+        ~Array() { Implementation::CallDeleter<T, D>{}(_deleter, _data, _size); }
 
         /** @brief Copying is not allowed */
         Array<T, D>& operator=(const Array<T, D>&) = delete;
