@@ -39,6 +39,7 @@ namespace Corrade { namespace Containers {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class = void(*)(T*, std::size_t)> class Array;
 template<class> class ArrayView;
+class ArrayTuple;
 template<std::size_t, class> class StaticArrayView;
 template<std::size_t, class> class StaticArray;
 template<class T> using Array1 = StaticArray<1, T>;

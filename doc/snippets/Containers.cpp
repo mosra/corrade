@@ -31,11 +31,13 @@
 #endif
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/ArrayTuple.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
@@ -45,6 +47,8 @@
 #include "Corrade/Utility/Directory.h"
 
 using namespace Corrade;
+
+#define DOXYGEN_IGNORE(...) __VA_ARGS__
 
 namespace Other {
 /* [EnumSet-usage] */
@@ -398,6 +402,76 @@ std::size_t size = Containers::arraySize(a); // size == 5
 /* [arraySize] */
 static_cast<void>(size);
 }
+
+{
+struct VkAttachmentDescription {};
+struct VkSubpassDescription {};
+struct VkSubpassDependency {};
+struct VkRenderPassCreateInfo {
+    unsigned attachmentCount;
+    const VkAttachmentDescription* pAttachments;
+    unsigned subpassCount;
+    const VkSubpassDescription* pSubpasses;
+    unsigned dependencyCount;
+    const VkSubpassDependency* pDependencies;
+};
+std::size_t subpassCount{}, dependencyCount{};
+/* [ArrayTuple-usage] */
+Containers::ArrayView<VkAttachmentDescription> attachments;
+Containers::ArrayView<VkSubpassDescription> subpasses;
+Containers::ArrayView<VkSubpassDependency> dependencies;
+Containers::ArrayTuple data{
+    {3, attachments},
+    {subpassCount, subpasses},
+    {dependencyCount, dependencies}
+};
+
+// Fill the attachment, subpass and dependency info...
+
+VkRenderPassCreateInfo info{DOXYGEN_IGNORE()};
+info.attachmentCount = attachments.size();
+info.pAttachments = attachments;
+info.subpassCount = subpasses.size();
+info.pSubpasses = subpasses;
+info.dependencyCount = dependencies.size();
+info.pDependencies = dependencies;
+/* [ArrayTuple-usage] */
+static_cast<void>(info);
+}
+
+{
+/* [ArrayTuple-usage-nontrivial] */
+Containers::ArrayView<std::string> strings;
+Containers::ArrayView<Containers::Reference<std::string>> references;
+Containers::ArrayTuple data{
+    {Containers::ValueInit, 15, strings},
+    {Containers::NoInit, 15, references}
+};
+
+/* Initialize all references to point to the strings */
+for(std::size_t i = 0; i != strings.size(); ++i)
+    new(references + i) Containers::Reference<std::string>{strings[i]};
+/* [ArrayTuple-usage-nontrivial] */
+}
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+{
+/* [ArrayTuple-usage-mmap] */
+Containers::ArrayView<std::uint64_t> latencies;
+Containers::ArrayView<float> averages;
+Containers::ArrayTuple data{
+    {{Containers::NoInit, 200*1024*1024, latencies},
+     {Containers::NoInit, 200*1024*1024, averages}},
+    [](std::size_t size) -> std::pair<char*, Utility::Directory::MapDeleter> {
+        Containers::Array<char, Utility::Directory::MapDeleter> data =
+            Utility::Directory::mapWrite("storage.tmp", size);
+        Utility::Directory::MapDeleter deleter = data.deleter();
+        return {data, deleter};
+    }
+};
+/* [ArrayTuple-usage-mmap] */
+}
+#endif
 
 {
 /* [StaticArrayView-usage] */

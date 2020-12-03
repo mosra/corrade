@@ -31,7 +31,9 @@ if(WITH_UTILITY)
         ConfigurationValue.cpp
         MurmurHash2.cpp
         Sha1.cpp
-        System.cpp)
+        System.cpp
+
+        ../Containers/ArrayTuple.cpp)
 
     set(CorradeUtility_GracefulAssert_SRCS
         Algorithms.cpp

@@ -257,7 +257,7 @@ more information.
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 
-@see @ref arrayCast(Array<T, D>&), @ref StaticArray
+@see @ref arrayCast(Array<T, D>&), @ref StaticArray, @ref ArrayTuple
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>
