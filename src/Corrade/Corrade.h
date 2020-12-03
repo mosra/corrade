@@ -113,6 +113,20 @@ read/write access to global data.
 #undef CORRADE_BUILD_MULTITHREADED
 
 /**
+@brief Debug build
+
+Gets defined if you (even transitively) link to any `Corrade::*` target in
+CMake and the build configuration (of your project, not Corrade itself) is
+`Debug`. No need to @cpp #include @ce anything for this macro to be defined,
+it's supplied via a compiler flag by CMake.
+
+Not guaranteed to be defined if using custom buildsystems or doing things
+differently than what's documented in @ref corrade-cmake.
+*/
+#define CORRADE_IS_DEBUG_BUILD
+#undef CORRADE_IS_DEBUG_BUILD
+
+/**
 @brief C++ standard version
 
 Expands to `__cplusplus` macro on all sane compilers; on MSVC uses `_MSVC_LANG`
