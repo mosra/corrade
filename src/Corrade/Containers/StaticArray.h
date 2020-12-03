@@ -155,8 +155,8 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct a value-initialized array
          *
          * Creates array of given size, the contents are value-initialized
-         * (i.e., builtin types are zero-initialized). This is the same as
-         * @ref StaticArray().
+         * (i.e., builtin types are zero-initialized, default constructor
+         * called otherwise). This is the same as @ref StaticArray().
          *
          * Useful if you want to create an array of primitive types and set
          * them to zero.
