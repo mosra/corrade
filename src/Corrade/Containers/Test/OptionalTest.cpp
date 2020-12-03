@@ -965,6 +965,7 @@ void OptionalTest::debug() {
 }
 
 void OptionalTest::emplaceConstructorExplicitInCopyInitialization() {
+    /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;
     };

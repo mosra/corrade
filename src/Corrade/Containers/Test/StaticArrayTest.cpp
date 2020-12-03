@@ -957,6 +957,7 @@ void StaticArrayTest::size() {
 }
 
 void StaticArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+    /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;
     };
