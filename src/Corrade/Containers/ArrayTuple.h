@@ -234,6 +234,21 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
         Deleter _deleter;
 };
 
+#ifdef CORRADE_MSVC2015_COMPATIBILITY
+namespace Implementation {
+    /* Just copies of the lambdas below because MSVC 2015 can't understand
+       template parameters inside lambdas */
+    template<class T> inline void callDeleter(char* data, std::size_t) {
+        reinterpret_cast<T*>(data)->~T();
+    }
+    template<class D> inline void wrapStatefulDeleter(char* state, std::size_t size) {
+        D deleter = *reinterpret_cast<D*>(state);
+        deleter(state + sizeof(D) - size, size);
+        deleter.~D();
+    }
+}
+#endif
+
 /**
 @brief Array tuple item
 
@@ -285,9 +300,19 @@ class ArrayTuple::Item {
         template<class T> /*implicit*/ Item(NoInitT, std::size_t size, ArrayView<T>& outputView):
             _elementSize{sizeof(T)}, _elementAlignment{alignof(T)}, _elementCount{size},
             _constructor{},
-            _destructor{std::is_trivially_destructible<T>::value ? static_cast<void(*)(char*, std::size_t)>(nullptr) : [](char* data, std::size_t) {
-                reinterpret_cast<T*>(data)->~T();
-            }},
+            _destructor{std::is_trivially_destructible<T>::value ? static_cast<void(*)(char*, std::size_t)>(nullptr) :
+                /* MSVC 2015 complains that
+                    error C2061: syntax error: identifier 'T'
+                   in the lambda, working around that by passing a pointer to
+                   a real function instead */
+                #ifndef CORRADE_MSVC2015_COMPATIBILITY
+                [](char* data, std::size_t) {
+                    reinterpret_cast<T*>(data)->~T();
+                }
+                #else
+                Implementation::callDeleter<T>
+                #endif
+            },
             _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))}
         {
             /* Populate size of the output view. Pointer gets update inside
@@ -317,14 +342,25 @@ class ArrayTuple::Item {
            pointer retrieves the deleter state pointer, calls it and then
            destructs the deleter state. The state, once it's known, will be
            saved to the location provided via _outputPointer. */
-        template<class D, class = typename std::enable_if<!std::is_convertible<D, void(*)(char*, std::size_t)>::value>::type> explicit Item(void*, D*& deleterDestination): _elementSize{sizeof(D)}, _elementAlignment{alignof(D)}, _elementCount{1}, _constructor{}, _destructor{[](char* state, std::size_t size) {
-            /* Make a copy of the deleter first to avoid the deleter deleting
-               its own state, because then ~D() would touch a memory that's no
-               longer there */
-            D deleter = *reinterpret_cast<D*>(state);
-            deleter(state + sizeof(D) - size, size);
-            deleter.~D();
-        }}, _destinationPointer{reinterpret_cast<void**>(&deleterDestination)} {}
+        template<class D, class = typename std::enable_if<!std::is_convertible<D, void(*)(char*, std::size_t)>::value>::type> explicit Item(void*, D*& deleterDestination): _elementSize{sizeof(D)}, _elementAlignment{alignof(D)}, _elementCount{1}, _constructor{}, _destructor{
+            /* MSVC 2015 complains that
+                error C2146: syntax error: missing ';' before identifier 'deleter'
+                error C2061: syntax error: identifier 'D
+               in the lambda, working around that by passing a pointer to a
+               real function instead */
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            [](char* state, std::size_t size) {
+                /* Make a copy of the deleter first to avoid the deleter
+                   deleting its own state, because then ~D() would touch a
+                   memory that's no longer there */
+                D deleter = *reinterpret_cast<D*>(state);
+                deleter(state + sizeof(D) - size, size);
+                deleter.~D();
+            }
+            #else
+            Implementation::wrapStatefulDeleter<D>
+            #endif
+        }, _destinationPointer{reinterpret_cast<void**>(&deleterDestination)} {}
 
         /* In case of a memory deleter item, element size is 0 for the default
            deleter, sizeof(void*) for stateless function pointers and size of
