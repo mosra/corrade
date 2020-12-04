@@ -362,7 +362,10 @@ template<class A> ArrayTuple::ArrayTuple(ArrayView<const Item> items, A allocato
     std::size_t destructibleItemCount;
     bool arrayDeleterItemNeeded;
     std::pair<std::size_t, std::size_t> sizeAlignment = sizeAlignmentFor(items, arrayDeleterItem, destructibleItemCount, arrayDeleterItemNeeded);
-    std::pair<char*, D> allocated = allocator(sizeAlignment.first, sizeAlignment.second);
+    /* This needs to be const in order to pass const D& to the construct()
+       workaround below, which will then trigger correct copy constructor call
+       on GCC 4.8. Sigh. */
+    const std::pair<char*, D> allocated = allocator(sizeAlignment.first, sizeAlignment.second);
     _size = sizeAlignment.first;
     _data = allocated.first;
 
