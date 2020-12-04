@@ -692,6 +692,11 @@ template<int a> void ArrayTupleTest::allocatorAlignmentFromDeleter() {
     CORRADE_VERIFY(true); /* Just to register correct function name */
 
     struct CORRADE_ALIGNAS(a) Deleter {
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* If this is not present on MSVC2015, the test segfaults. HEH */
+        char aehhhhh;
+        #endif
+
         void operator()(char* data, std::size_t) {
             delete[] data;
         }
