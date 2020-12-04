@@ -31,9 +31,7 @@ if(WITH_UTILITY)
         ConfigurationValue.cpp
         MurmurHash2.cpp
         Sha1.cpp
-        System.cpp
-
-        ../Containers/ArrayTuple.cpp)
+        System.cpp)
 
     set(CorradeUtility_GracefulAssert_SRCS
         Algorithms.cpp
@@ -44,6 +42,7 @@ if(WITH_UTILITY)
         String.cpp
         Unicode.cpp
 
+        ../Containers/ArrayTuple.cpp
         ../Containers/String.cpp
         ../Containers/StringView.cpp)
 

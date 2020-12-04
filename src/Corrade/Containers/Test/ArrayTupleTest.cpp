@@ -23,9 +23,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayTuple.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -53,6 +57,9 @@ struct ArrayTupleTest: TestSuite::Tester {
     void allocatorAlignmentEmpty();
     template<int a> void allocatorAlignmentFromItems();
     template<int a> void allocatorAlignmentFromDeleter();
+
+    void convertArray();
+    void convertArrayInvalid();
 
     void release();
 
@@ -83,6 +90,9 @@ ArrayTupleTest::ArrayTupleTest() {
               &ArrayTupleTest::allocatorAlignmentFromItems<16>,
               &ArrayTupleTest::allocatorAlignmentFromDeleter<1>,
               &ArrayTupleTest::allocatorAlignmentFromDeleter<16>,
+
+              &ArrayTupleTest::convertArray,
+              &ArrayTupleTest::convertArrayInvalid,
 
               &ArrayTupleTest::release,
 
@@ -697,6 +707,73 @@ template<int a> void ArrayTupleTest::allocatorAlignmentFromDeleter() {
     };
 
     CORRADE_COMPARE(view.size(), 3);
+}
+
+void ArrayTupleTest::convertArray() {
+    char preallocated[256]{};
+    void(*deleter)(char*, std::size_t) = [](char* data, std::size_t) {
+        ++data[255];
+    };
+
+    {
+        ArrayView<int> ints;
+        ArrayView<char> chars;
+        ArrayView<double> doubles;
+        Array<char> data = ArrayTuple{
+            {{3, ints},
+            {13, chars},
+            {2, doubles}},
+            [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+                return {preallocated, deleter};
+            }
+        };
+
+        CORRADE_VERIFY(data.data());
+        CORRADE_COMPARE(data.size(),
+            3*4 +
+            13 + 7 + /* 7 bytes padding after the chars to align doubles */
+            2*8
+        );
+
+        /* The stateless deleter is used directly, as there's nothing to
+        non-trivially destruct */
+        CORRADE_VERIFY(data.deleter() == deleter);
+    }
+
+    /* Check the deleter was called just once */
+    CORRADE_COMPARE(preallocated[255], 1);
+}
+
+void ArrayTupleTest::convertArrayInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    ArrayView<NonCopyable> noncopyable;
+    ArrayTuple nonTrivialData{
+        {5, noncopyable}
+    };
+
+    struct Deleter {
+        int state;
+        void operator()(char* data, std::size_t) {
+            delete[] data;
+        }
+    };
+    ArrayTuple nonTrivialDeleter{
+        {},
+        [&](std::size_t size, std::size_t) -> std::pair<char*, Deleter> {
+            return {new char[size], {}};
+        }
+    };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Array<char> a = std::move(nonTrivialData);
+    Array<char> b = std::move(nonTrivialDeleter);
+    CORRADE_COMPARE(out.str(),
+        "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n"
+        "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n");
 }
 
 void ArrayTupleTest::release() {

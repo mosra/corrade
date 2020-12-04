@@ -24,7 +24,7 @@
 #
 
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
-corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp)
+corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersArrayViewStlTest ArrayViewStlTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)

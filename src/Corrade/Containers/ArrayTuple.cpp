@@ -25,6 +25,8 @@
 
 #include "ArrayTuple.h"
 
+#include "Corrade/Containers/Array.h"
+
 namespace Corrade { namespace Containers {
 
 /*
@@ -200,6 +202,14 @@ void arrayTupleDeleter(char* data, std::size_t dataSize) {
             entry->destructor(entry->data + i*entry->elementSize, dataSize);
 }
 
+}
+
+ArrayTuple::operator Array<char>() && {
+    CORRADE_ASSERT(_deleter != arrayTupleDeleter,
+        "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor", {});
+    const Deleter deleter = _deleter;
+    const std::size_t size = _size;
+    return Array<char>{release(), size, deleter};
 }
 
 std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {

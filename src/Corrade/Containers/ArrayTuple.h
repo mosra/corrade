@@ -174,6 +174,19 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
         ArrayTuple& operator=(ArrayTuple&& other) noexcept;
 
         /**
+         * @brief Move-conversion to an @ref Array
+         *
+         * Meant for dealing with APIs that accept untyped arrays as a storage.
+         * To avoid unforeseeable consequences stemming from the deleter
+         * storing its state inside the array it's deleting, the conversion is
+         * allowed only in case the array tuple stores trivially-destructible
+         * types and has either a default or a stateless @ref deleter(). If you
+         * need to create an @ref Array regardless, do it manually using
+         * @ref deleter(), @ref size() and @ref release().
+         */
+        /*implicit*/ operator Array<char>() &&;
+
+        /**
          * @brief Array tuple data
          *
          * Note that the data contents and layout is implementation-defined.
@@ -207,6 +220,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * destructors of non-trivially-destructible array types. Using a plain
          * @cpp delete[] @ce is appropriate only if @ref deleter() is
          * @cpp nullptr @ce.
+         * @see @ref operator Array<char>()
          */
         char* release();
 
