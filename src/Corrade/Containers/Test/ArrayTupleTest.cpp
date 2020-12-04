@@ -26,6 +26,7 @@
 #include "Corrade/Containers/ArrayTuple.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/FormatStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -48,6 +49,10 @@ struct ArrayTupleTest: TestSuite::Tester {
 
     void constructCopy();
     void constructMove();
+
+    void allocatorAlignmentEmpty();
+    template<int a> void allocatorAlignmentFromItems();
+    template<int a> void allocatorAlignmentFromDeleter();
 
     void release();
 
@@ -72,6 +77,12 @@ ArrayTupleTest::ArrayTupleTest() {
 
               &ArrayTupleTest::constructCopy,
               &ArrayTupleTest::constructMove,
+
+              &ArrayTupleTest::allocatorAlignmentEmpty,
+              &ArrayTupleTest::allocatorAlignmentFromItems<1>,
+              &ArrayTupleTest::allocatorAlignmentFromItems<16>,
+              &ArrayTupleTest::allocatorAlignmentFromDeleter<1>,
+              &ArrayTupleTest::allocatorAlignmentFromDeleter<16>,
 
               &ArrayTupleTest::release,
 
@@ -246,7 +257,7 @@ void ArrayTupleTest::constructNoInit() {
              {ValueInit, 15, initializedChars},
              {NoInit, 3, noncopyable},
              {ValueInit, 2, initializedNoncopyable}},
-            [&](std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 return {storage, [](char*, std::size_t) { }};
             }
         };
@@ -281,7 +292,7 @@ void ArrayTupleTest::constructCustomAllocatorDefaultDeleter() {
         ArrayTuple data{
             {{15, chars},
              {3, noncopyable}},
-            [&](std::size_t) -> std::pair<char*, std::nullptr_t> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, std::nullptr_t> {
                 return {preallocated, nullptr};
             }
         };
@@ -328,7 +339,7 @@ void ArrayTupleTest::constructStatelessDeleter() {
         ArrayTuple data{
             {{15, chars},
              {3, noncopyable}},
-            [&](std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 return {preallocated, deleter};
             }
         };
@@ -403,7 +414,7 @@ void ArrayTupleTest::constructStatefulAlignedNonTriviallyDestructibleDeleter() {
         ArrayTuple data{
             {{15, chars},
              {3, noncopyable}},
-            [&](std::size_t) -> std::pair<char*, StatefulAlignedNonTriviallyDestructibleDeleter> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, StatefulAlignedNonTriviallyDestructibleDeleter> {
                 return {preallocated, StatefulAlignedNonTriviallyDestructibleDeleter{usedThisPointer, usedDeleterPointer, usedDeleterSize, copyConstructorCallCount, destructorCallCount}};
             }
         };
@@ -475,7 +486,7 @@ void ArrayTupleTest::constructTriviallyDestructibleCustomAllocatorDefaultDeleter
         {{3, ints},
          {13, chars},
          {2, doubles}},
-        [&](std::size_t) -> std::pair<char*, std::nullptr_t> {
+        [&](std::size_t, std::size_t) -> std::pair<char*, std::nullptr_t> {
             return {preallocated, nullptr};
         }
     };
@@ -518,7 +529,7 @@ void ArrayTupleTest::constructTriviallyDestructibleStatelessDeleter() {
             {{3, ints},
              {13, chars},
              {2, doubles}},
-            [&](std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 return {preallocated, deleter};
             }
         };
@@ -565,7 +576,7 @@ void ArrayTupleTest::constructTriviallyDestructibleStatefulAlignedNonTriviallyDe
             {{3, ints},
              {13, chars},
              {2, doubles}},
-            [&](std::size_t) -> std::pair<char*, StatefulAlignedNonTriviallyDestructibleDeleter> {
+            [&](std::size_t, std::size_t) -> std::pair<char*, StatefulAlignedNonTriviallyDestructibleDeleter> {
                 return {preallocated, StatefulAlignedNonTriviallyDestructibleDeleter{usedThisPointer, usedDeleterPointer, usedDeleterSize, copyConstructorCallCount, destructorCallCount}};
             }
         };
@@ -603,7 +614,7 @@ void ArrayTupleTest::constructMove() {
     ArrayView<int> ints;
     ArrayTuple a{
         {{5, ints}},
-        [&](std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+        [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
             return {preallocated, deleter};
         }
     };
@@ -627,6 +638,65 @@ void ArrayTupleTest::constructMove() {
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<ArrayTuple>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<ArrayTuple>::value);
+}
+
+void ArrayTupleTest::allocatorAlignmentEmpty() {
+    std::size_t alignmentRequirement = ~std::size_t{};
+
+    CORRADE_VERIFY(true); /* Just to register correct function name */
+
+    ArrayTuple data{
+        {},
+        [&](std::size_t size, std::size_t alignment) -> std::pair<char*, std::nullptr_t> {
+            CORRADE_COMPARE(size, 0);
+            CORRADE_COMPARE(alignment, 1);
+            alignmentRequirement = alignment;
+            return {};
+        }
+    };
+
+    /* Check again to verify the allocator actually got called */
+    CORRADE_COMPARE(alignmentRequirement, 1);
+}
+
+template<int a> void ArrayTupleTest::allocatorAlignmentFromItems() {
+    setTestCaseTemplateName(Utility::formatString("{}", a));
+
+    CORRADE_VERIFY(true); /* Just to register correct function name */
+
+    ArrayView<Aligned<a>> view;
+    ArrayTuple data{
+        {{3, view}},
+        [&](std::size_t size, std::size_t alignment) -> std::pair<char*, std::nullptr_t> {
+            CORRADE_COMPARE(alignment, a);
+            return {new char[size], nullptr};
+        }
+    };
+
+    CORRADE_COMPARE(view.size(), 3);
+}
+
+template<int a> void ArrayTupleTest::allocatorAlignmentFromDeleter() {
+    setTestCaseTemplateName(Utility::formatString("{}", a));
+
+    CORRADE_VERIFY(true); /* Just to register correct function name */
+
+    struct CORRADE_ALIGNAS(a) Deleter {
+        void operator()(char* data, std::size_t) {
+            delete[] data;
+        }
+    };
+
+    ArrayView<char> view;
+    ArrayTuple data{
+        {{3, view}},
+        [&](std::size_t size, std::size_t alignment) -> std::pair<char*, Deleter> {
+            CORRADE_COMPARE(alignment, a);
+            return {new char[size], {}};
+        }
+    };
+
+    CORRADE_COMPARE(view.size(), 3);
 }
 
 void ArrayTupleTest::release() {
@@ -690,7 +760,7 @@ void ArrayTupleTest::copyConstructPlainDeleterStruct() {
        argument and fails miserably. */
     ArrayTuple data{
         {{5, view}},
-        [&](std::size_t) -> std::pair<char*, ExtremelyTrivialDeleter> {
+        [&](std::size_t, std::size_t) -> std::pair<char*, ExtremelyTrivialDeleter> {
             return {storage, ExtremelyTrivialDeleter{}};
         }
     };

@@ -150,7 +150,8 @@ ArrayTuple deleter pointer is `nullptr`, which makes the class simply do
 
 */
 
-ArrayTuple::ArrayTuple(const ArrayView<const Item> items): ArrayTuple{items, [](std::size_t size) -> std::pair<char*, std::nullptr_t> {
+ArrayTuple::ArrayTuple(const ArrayView<const Item> items): ArrayTuple{items, [](std::size_t size, std::size_t) -> std::pair<char*, std::nullptr_t> {
+    /** @todo use the alignment param once we implement aligned alloc */
     return {size ? new char[size] : nullptr, nullptr};
 }} {}
 
@@ -201,13 +202,17 @@ void arrayTupleDeleter(char* data, std::size_t dataSize) {
 
 }
 
-std::size_t ArrayTuple::sizeFor(const ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
+std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
     /* Calculate how many items actually need their destructor called. If there
        is a non-trivial destructor but no actual items, we don't need to call
        anything either. */
     destructibleItemCount = 0;
-    for(const Item& item: items)
+    std::size_t maxAlignment = 1;
+    for(const Item& item: items) {
+        if(item._elementAlignment > maxAlignment)
+            maxAlignment = item._elementAlignment;
         if(item._destructor && item._elementCount) ++destructibleItemCount;
+    }
 
     /* If all items have trivially destructible types and the array deleter is
        a plain stateless function (indicated by zero alignment), the array
@@ -232,12 +237,14 @@ std::size_t ArrayTuple::sizeFor(const ArrayView<const Item> items, const Item& a
     /* If we have a stateful array deleter (indicated by non-zero alignment),
        we need to store its state as well */
     if(arrayDeleterItem._elementAlignment) {
+        if(arrayDeleterItem._elementAlignment > maxAlignment)
+            maxAlignment = arrayDeleterItem._elementAlignment;
         offset = alignFor(offset, arrayDeleterItem._elementAlignment);
         CORRADE_INTERNAL_ASSERT(arrayDeleterItem._elementCount == 1);
         offset += arrayDeleterItem._elementSize;
     }
 
-    return offset;
+    return {offset, maxAlignment};
 }
 
 void ArrayTuple::create(const ArrayView<const Item> items, const Item& arrayDeleterItem, const std::size_t destructibleItemCount, const bool arrayDeleterItemNeeded) {

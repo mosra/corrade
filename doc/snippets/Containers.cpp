@@ -462,7 +462,9 @@ Containers::ArrayView<float> averages;
 Containers::ArrayTuple data{
     {{Containers::NoInit, 200*1024*1024, latencies},
      {Containers::NoInit, 200*1024*1024, averages}},
-    [](std::size_t size) -> std::pair<char*, Utility::Directory::MapDeleter> {
+    [](std::size_t size, std::size_t)
+        -> std::pair<char*, Utility::Directory::MapDeleter>
+    {
         Containers::Array<char, Utility::Directory::MapDeleter> data =
             Utility::Directory::mapWrite("storage.tmp", size);
         Utility::Directory::MapDeleter deleter = data.deleter();

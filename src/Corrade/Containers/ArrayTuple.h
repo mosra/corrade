@@ -118,10 +118,13 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * @brief Construct using a custom allocation
          *
          * The @p allocator needs to callable or implement a call operator with
-         * a signature of @cpp std::pair<char*, D>(*)(std::size_t) @ce. It gets
-         * passed desired allocation size in bytes and should return a pair of
-         * an allocated memory pointer and a deleter instance that will be
-         * later used to delete the allocation.
+         * a signature of @cpp std::pair<char*, D>(*)(std::size_t, std::size_t) @ce.
+         * It gets passed a pair of desired allocation size and alignment of
+         * the allocation and should return a pair of an allocated memory
+         * pointer and a deleter instance that will be later used to delete the
+         * allocation. The allocation alignment is useful mainly when
+         * allocating over-aligned types, such as SIMD vectors, as C++ is only
+         * guaranteed to align correctly only for the largest standard typeś.
          *
          * The deleter type `D` needs to be one of the following and it gets
          * passed the allocation pointer together with its size (which was
@@ -208,7 +211,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
         char* release();
 
     private:
-        static std::size_t sizeFor(ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
+        static std::pair<std::size_t, std::size_t> sizeAlignmentFor(ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
 
         void create(ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t destructibleItemCount, bool arrayDeleterItemNeeded);
 
@@ -335,7 +338,7 @@ class ArrayTuple::Item {
 template<class A> ArrayTuple::ArrayTuple(ArrayView<const Item> items, A allocator) {
     /* The allocator is expected to return std::pair<char*, D>, where the
        second value is a deleter instance */
-    typedef decltype(allocator(std::size_t{}).second) D;
+    typedef decltype(allocator(std::size_t{}, std::size_t{}).second) D;
 
     D* deleterDestination = nullptr;
     Item arrayDeleterItem{nullptr, deleterDestination};
@@ -344,8 +347,9 @@ template<class A> ArrayTuple::ArrayTuple(ArrayView<const Item> items, A allocato
        and get a memory pointer and a deleter instance back */
     std::size_t destructibleItemCount;
     bool arrayDeleterItemNeeded;
-    _size = sizeFor(items, arrayDeleterItem, destructibleItemCount, arrayDeleterItemNeeded);
-    std::pair<char*, D> allocated = allocator(_size);
+    std::pair<std::size_t, std::size_t> sizeAlignment = sizeAlignmentFor(items, arrayDeleterItem, destructibleItemCount, arrayDeleterItemNeeded);
+    std::pair<char*, D> allocated = allocator(sizeAlignment.first, sizeAlignment.second);
+    _size = sizeAlignment.first;
     _data = allocated.first;
 
     /* Create the internal state, which, in case the deleter is not default,
