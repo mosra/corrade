@@ -842,7 +842,7 @@ template<> struct InitTagName<DirectInitT> {
 };
 
 template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLess() {
-    setTestCaseTemplateName(TypeName<T>::name() + std::string{", "} + InitTagName<Init>::name());
+    setTestCaseTemplateName({TypeName<T>::name(), InitTagName<Init>::name()});
 
     {
         Array<T> a{4};
@@ -879,7 +879,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
 }
 
 template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess() {
-    setTestCaseTemplateName(TypeName<T>::name() + std::string{", "} + InitTagName<Init>::name());
+    setTestCaseTemplateName({TypeName<T>::name(), InitTagName<Init>::name()});
 
     {
         Array<T> a;

@@ -832,6 +832,14 @@ void Tester::setTestCaseTemplateName(const char* name) {
     _state->testCaseTemplateName = name;
 }
 
+void Tester::setTestCaseTemplateName(const std::initializer_list<Containers::StringView> names) {
+    _state->testCaseTemplateName = Utility::String::join({names.begin(), names.end()}, ", ");
+}
+
+void Tester::setTestCaseTemplateName(const std::initializer_list<const char*> names) {
+    _state->testCaseTemplateName = Utility::String::join({names.begin(), names.end()}, ", ");
+}
+
 void Tester::setTestCaseDescription(const std::string& description) {
     _state->testCaseDescription = description;
 }

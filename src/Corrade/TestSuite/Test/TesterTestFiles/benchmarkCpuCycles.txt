@@ -1,4 +1,4 @@
 Starting TesterTest::Test with 2 test cases...
- BENCH [44]   0.00 ± 0.00    C benchmarkDefault()@9x1000000000 (CPU cycles)
- BENCH [46] 348.36          kB benchmarkOnce()@1x1
+ BENCH [45]   0.00 ± 0.00    C benchmarkDefault()@9x1000000000 (CPU cycles)
+ BENCH [47] 348.36          kB benchmarkOnce()@1x1
 Finished TesterTest::Test with 0 errors out of 0 checks.

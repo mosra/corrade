@@ -1156,6 +1156,25 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void setTestCaseTemplateName(const char* name);
 
         /**
+         * @overload
+         * @m_since_latest
+         *
+         * Useful for test cases that are templated with more than one
+         * parameter. Names are joined with `,`.
+         */
+        void setTestCaseTemplateName(std::initializer_list<Containers::StringView> names);
+        /**
+         * @overload
+         * @m_since_latest
+         *
+         * Has to be present in order to avoid @cpp {"abc", "def"} @ce being
+         * interpreted as a begin/end @ref std::string constructor causing all
+         * sorts of nasty memory issues. Sigh.
+         * @todo remove once we get rid of @ref std::string
+         */
+        void setTestCaseTemplateName(std::initializer_list<const char*> names);
+
+        /**
          * @brief Set test case description
          *
          * Additional text displayed after the test case name. By default

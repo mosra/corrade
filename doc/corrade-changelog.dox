@@ -81,6 +81,8 @@ namespace Corrade {
 
 -   Added a @ref TestSuite::Tester::testName() getter, used by Magnum Vulkan
     tests to provide application name for each executable
+-   New @ref TestSuite::Tester::setTestCaseTemplateName() overload taking a
+    list of strings for test cases templated by more than one parameter
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
