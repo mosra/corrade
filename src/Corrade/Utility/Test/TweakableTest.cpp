@@ -211,15 +211,15 @@ TweakableTest::TweakableTest() {
 }
 
 void TweakableTest::constructCopy() {
-    CORRADE_VERIFY(!(std::is_constructible<Tweakable, const Tweakable&>{}));
-    CORRADE_VERIFY(!(std::is_assignable<Tweakable, const Tweakable&>{}));
+    CORRADE_VERIFY(!std::is_copy_constructible<Tweakable>{});
+    CORRADE_VERIFY(!std::is_copy_assignable<Tweakable>{});
 }
 
 void TweakableTest::constructMove() {
     /* For a move we would need some NoCreate state and the destructor not
        checking for globalInstance == this */
-    CORRADE_VERIFY(!(std::is_constructible<Tweakable, Tweakable&&>{}));
-    CORRADE_VERIFY(!(std::is_assignable<Tweakable, Tweakable&&>{}));
+    CORRADE_VERIFY(!std::is_move_constructible<Tweakable>{});
+    CORRADE_VERIFY(!std::is_move_assignable<Tweakable>{});
 }
 
 void TweakableTest::findTweakableAlias() {
