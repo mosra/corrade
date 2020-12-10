@@ -542,7 +542,7 @@ Options controlling the build:
     recommended to have this option disabled when deploying a final application
     as it can result in smaller binaries.
 -   `BUILD_MULTITHREADED` --- Makes it possible to safely use certain Corrade
-    features simultaenously in multiple threads. Enabled by default, disable if
+    features simultaneously in multiple threads. Enabled by default, disable if
     you don't need this and don't want to pay potential performance penalties
     coming from thread-local variables.
 

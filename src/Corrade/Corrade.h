@@ -96,7 +96,7 @@ Enabled by default in a static build.
 @m_since{2019,10}
 
 Defined if the library is built in a way that makes it possible to safely use
-certain Corrade features simultaenously in multiple threads. In particular:
+certain Corrade features simultaneously in multiple threads. In particular:
 
 -   @ref Corrade::Utility::Debug "Utility::Debug" and derived classes use it
     to have thread-local scoped output redirection and coloring
