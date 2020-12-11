@@ -85,10 +85,10 @@ class EnumSet {
         };
 
         /** @brief Create an empty set */
-        constexpr /*implicit*/ EnumSet(): value() {}
+        constexpr /*implicit*/ EnumSet(): _value{} {}
 
         /** @brief Create a set from one value */
-        constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+        constexpr /*implicit*/ EnumSet(T value): _value{static_cast<UnderlyingType>(value)} {}
 
         /**
          * @brief Create an uninitialized set
@@ -99,7 +99,7 @@ class EnumSet {
 
         /** @brief Equality comparison */
         constexpr bool operator==(EnumSet<T, fullValue> other) const {
-            return value == other.value;
+            return _value == other._value;
         }
 
         /** @brief Non-equality comparison */
@@ -127,40 +127,40 @@ class EnumSet {
 
         /** @brief Union of two sets */
         constexpr EnumSet<T, fullValue> operator|(EnumSet<T, fullValue> other) const {
-            return EnumSet<T, fullValue>(value | other.value);
+            return EnumSet<T, fullValue>(_value | other._value);
         }
 
         /** @brief Union two sets and assign */
         EnumSet<T, fullValue>& operator|=(EnumSet<T, fullValue> other) {
-            value |= other.value;
+            _value |= other._value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
         constexpr EnumSet<T, fullValue> operator&(EnumSet<T, fullValue> other) const {
-            return EnumSet<T, fullValue>(value & other.value);
+            return EnumSet<T, fullValue>(_value & other._value);
         }
 
         /** @brief Intersect two sets and assign */
         EnumSet<T, fullValue>& operator&=(EnumSet<T, fullValue> other) {
-            value &= other.value;
+            _value &= other._value;
             return *this;
         }
 
         /** @brief XOR of two sets */
         constexpr EnumSet<T, fullValue> operator^(EnumSet<T, fullValue> other) const {
-            return EnumSet<T, fullValue>(value ^ other.value);
+            return EnumSet<T, fullValue>(_value ^ other._value);
         }
 
         /** @brief XOR two sets and assign */
         EnumSet<T, fullValue>& operator^=(EnumSet<T, fullValue> other) {
-            value ^= other.value;
+            _value ^= other._value;
             return *this;
         }
 
         /** @brief Set complement */
         constexpr EnumSet<T, fullValue> operator~() const {
-            return EnumSet<T, fullValue>(fullValue & ~value);
+            return EnumSet<T, fullValue>(fullValue & ~_value);
         }
 
         /**
@@ -170,18 +170,18 @@ class EnumSet {
          * otherwise.
          */
         constexpr explicit operator bool() const {
-            return value != 0;
+            return _value != 0;
         }
 
         /** @brief Convert to the underlying enum type */
         constexpr explicit operator UnderlyingType() const {
-            return value;
+            return _value;
         }
 
     private:
-        constexpr explicit EnumSet(UnderlyingType type): value(type) {}
+        constexpr explicit EnumSet(UnderlyingType type): _value{type} {}
 
-        UnderlyingType value;
+        UnderlyingType _value;
 };
 
 /** @relatesalso EnumSet
