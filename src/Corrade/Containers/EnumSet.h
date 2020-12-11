@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::EnumSet
+ * @brief Class @ref Corrade::Containers::EnumSet, macro @ref CORRADE_ENUMSET_OPERATORS(), @ref CORRADE_ENUMSET_FRIEND_OPERATORS()
  * @see @ref Corrade/Containers/EnumSet.hpp
  */
 
@@ -72,7 +72,7 @@ template<class T, typename std::underlying_type<T>::type fullValue = typename st
 template<class T, typename std::underlying_type<T>::type fullValue>
 #endif
 class EnumSet {
-    static_assert(std::is_enum<T>::value, "EnumSet type must be strongly typed enum");
+    static_assert(std::is_enum<T>::value, "EnumSet type must be a strongly typed enum");
 
     public:
         typedef T Type; /**< @brief Enum type */
@@ -84,25 +84,25 @@ class EnumSet {
             FullValue = fullValue /**< All enum values together */
         };
 
-        /** @brief Create empty set */
+        /** @brief Create an empty set */
         constexpr /*implicit*/ EnumSet(): value() {}
 
-        /** @brief Create set from one value */
+        /** @brief Create a set from one value */
         constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /**
-         * @brief Create uninitialized set
+         * @brief Create an uninitialized set
          *
-         * The contents are left in undefined state.
+         * The contents are left in an undefined state.
          */
         explicit EnumSet(NoInitT) {}
 
-        /** @brief Equality operator */
+        /** @brief Equality comparison */
         constexpr bool operator==(EnumSet<T, fullValue> other) const {
             return value == other.value;
         }
 
-        /** @brief Non-equality operator */
+        /** @brief Non-equality comparison */
         constexpr bool operator!=(EnumSet<T, fullValue> other) const {
             return !operator==(other);
         }
@@ -163,12 +163,17 @@ class EnumSet {
             return EnumSet<T, fullValue>(fullValue & ~value);
         }
 
-        /** @brief Value as boolean */
+        /**
+         * @brief Boolean conversion
+         *
+         * Returns @cpp true @ce if at least one bit is set, @cpp false @ce
+         * otherwise.
+         */
         constexpr explicit operator bool() const {
             return value != 0;
         }
 
-        /** @brief Value in underlying type */
+        /** @brief Convert to the underlying enum type */
         constexpr explicit operator UnderlyingType() const {
             return value;
         }
@@ -202,8 +207,8 @@ template<class T, typename std::underlying_type<T>::type fullValue> constexpr ty
 /** @hideinitializer
 @brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet"
 
-See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
-usage.
+See the @ref EnumSet-out-of-class-operators "EnumSet class documentation" for
+example usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
     constexpr bool operator==(class::Type a, class b) {                     \
@@ -234,7 +239,8 @@ usage.
 /** @hideinitializer
 @brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet" as friends of encapsulating class
 
-See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
+See the @ref EnumSet-friend-operators "EnumSet class documentation" for example
+usage.
 */
 #define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
     friend constexpr bool operator==(typename class::Type a, class b) {     \

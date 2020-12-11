@@ -37,19 +37,19 @@
 namespace Corrade { namespace Containers {
 
 /** @relatedalso EnumSet
-@brief Print enum set to debug output
+@brief Print an enum set to debug output
 @param debug    Debug output
 @param value    Value to be printed
 @param empty    What to print in case of an empty enum set
 @param enums    Recognized enum values
 
-Assuming underlying enum type has already implemented `operator<<` for
-@ref Utility::Debug, this function is able to print value of given enum set.
-Example definition:
+Assuming the underlying enum type has already implemented `operator<<` for
+@ref Utility::Debug, this function is able to print the values in given enum
+set. Example definition:
 
 @snippet Containers.cpp enumSetDebugOutput
 
-The usage would be then straightforward:
+The usage would then be straightforward:
 
 @snippet Containers.cpp enumSetDebugOutput-usage
 
@@ -71,8 +71,8 @@ template<class T, typename std::underlying_type<T>::type fullValue> Utility::Deb
         value &= T(~typename std::underlying_type<T>::type(e));
     }
 
-    /* If there are leftover, pass them to the original debug operator and
-       expect it will print them as raw value */
+    /* If there are leftovers, pass them to the original debug operator and
+       expect it will print them as a raw value */
     if(value) {
         if(separate) debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
         debug << T(typename std::underlying_type<T>::type(value));
