@@ -124,8 +124,12 @@ void BigEnumSetTest::constructDefault() {
     }
 
     /* The variable has to have a global scope in order to access its internals
-       via a pointer */
-    constexpr const std::uint64_t* cData = CNoFeatures.data();
+       via a pointer. Works everywhere except MSVC2017 (MSVC2015 too!), I'll
+       just shake that off as some weird temporary bug. */
+    #if defined(CORRADE_MSVC2015_COMPATIBILITY) || !defined(CORRADE_MSVC2017_COMPATIBILITY)
+    constexpr
+    #endif
+    const std::uint64_t* cData = CNoFeatures.data();
     for(std::size_t i = 0; i != Features::Size; ++i) {
         CORRADE_ITERATION(i);
         CORRADE_COMPARE(cData[i], 0);
@@ -162,8 +166,12 @@ void BigEnumSetTest::construct() {
     }
 
     /* The variable has to have a global scope in order to access its internals
-       via a pointer */
-    constexpr const std::uint64_t* cData = CFeatures.data();
+       via a pointer. Works everywhere except MSVC2017 (MSVC2015 too!), I'll
+       just shake that off as some weird temporary bug. */
+    #if defined(CORRADE_MSVC2015_COMPATIBILITY) || !defined(CORRADE_MSVC2017_COMPATIBILITY)
+    constexpr
+    #endif
+    const std::uint64_t* cData = CFeatures.data();
     CORRADE_COMPARE(cData[0], 0);
     CORRADE_COMPARE(cData[1], TestedBit);
     CORRADE_COMPARE(cData[2], 0);
