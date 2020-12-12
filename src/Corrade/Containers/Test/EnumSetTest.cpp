@@ -264,7 +264,7 @@ void EnumSetTest::underlyingType() {
 template<class T> struct Foo {
     enum class Flag {
         A = 1 << 0,
-        B = 2 << 0
+        B = 1 << 1
     };
 
     typedef EnumSet<Flag> Flags;
