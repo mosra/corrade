@@ -30,24 +30,12 @@
  */
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/sequenceHelpers.h"
 #include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    #ifndef DOXYGEN_GENERATING_OUTPUT /* it should ignore, but it doesn't */
-    /** @todo C++14: use std::make_index_sequence and std::integer_sequence */
-    template<std::size_t ...> struct Sequence {};
-
-    /* E.g. GenerateSequence<3>::Type is Sequence<0, 1, 2> */
-    template<std::size_t N, std::size_t ...sequence> struct GenerateSequence:
-        GenerateSequence<N-1, N-1, sequence...> {};
-
-    template<std::size_t ...sequence> struct GenerateSequence<0, sequence...> {
-        typedef Sequence<sequence...> Type;
-    };
-    #endif
-
     template<unsigned, class> struct StridedElement;
     template<int> struct ArrayCastFlattenOrInflate;
 
