@@ -77,6 +77,7 @@ set_property(TARGET
 
 set_target_properties(
     ContainersArrayTest
+    ContainersArrayTupleTest
     ContainersArrayViewTest
     ContainersEnumSetTest
     ContainersLinkedListTest
