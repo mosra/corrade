@@ -37,6 +37,8 @@ namespace Corrade {
 
 -   New @ref Containers::ArrayTuple class for coalescing arrays of homogeneous
     types and varying lengths into a single allocation.
+-   New @ref Containers::BigEnumSet class for storing enum sets with more than
+    64 values
 -   New @ref Containers::String class as a lightweight but more flexible
     alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a

@@ -64,6 +64,16 @@ definitions. This macro works with templated classes as well.
 
 @snippet Containers.cpp EnumSet-friend
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Storing more than 64 values
+    The @ref EnumSet is limited by the maximum size of a builtin type, which is
+    64 bits. 128-bit types are available on some platforms, but are not
+    standard and thus not portable. If you need to store a larger set and
+    you're fine with some limitations, check out @ref BigEnumSet.
+
 @see @ref enumCastUnderlyingType(), @ref enumSetDebugOutput()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -188,6 +198,7 @@ class EnumSet {
 @brief Cast an enum to its underlying type
 @m_since{2020,06}
 
+Works only with @ref EnumSet, not with @ref BigEnumSet.
 @see @ref std::underlying_type
 */
 template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(T value) {
@@ -198,6 +209,7 @@ template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
 @brief Cast an enum set to its underlying type
 @m_since{2020,06}
 
+Works only with @ref EnumSet, not with @ref BigEnumSet.
 @see @ref std::underlying_type
 */
 template<class T, typename std::underlying_type<T>::type fullValue> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(EnumSet<T, fullValue> value) {
@@ -205,7 +217,7 @@ template<class T, typename std::underlying_type<T>::type fullValue> constexpr ty
 }
 
 /** @hideinitializer
-@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet"
+@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet" or @ref Corrade::Containers::BigEnumSet "BigEnumSet"
 
 See the @ref EnumSet-out-of-class-operators "EnumSet class documentation" for
 example usage.
@@ -237,7 +249,7 @@ example usage.
     }
 
 /** @hideinitializer
-@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet" as friends of encapsulating class
+@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet" or @ref Corrade::Containers::BigEnumSet "BigEnumSet" as friends of encapsulating class
 
 See the @ref EnumSet-friend-operators "EnumSet class documentation" for example
 usage.

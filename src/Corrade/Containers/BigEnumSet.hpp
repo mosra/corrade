@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_EnumSet_hpp
-#define Corrade_Containers_EnumSet_hpp
+#ifndef Corrade_Containers_BigEnumSet_hpp
+#define Corrade_Containers_BigEnumSet_hpp
 /*
     This file is part of Corrade.
 
@@ -26,58 +26,54 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Containers::enumSetDebugOutput()
+ * @brief Function @ref Corrade::Containers::bigEnumSetDebugOutput()
+ * @m_since_latest
  */
 
 #include <initializer_list>
 
-#include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Containers/BigEnumSet.h"
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Containers {
 
-/** @relatedalso EnumSet
-@brief Print an enum set to debug output
+/** @relatedalso BigEnumSet
+@brief Print a big enum set to debug output
 @param debug    Debug output
 @param value    Value to be printed
 @param empty    What to print in case of an empty enum set
-@param enums    Recognized enum values
+@m_since_latest
 
-Assuming the underlying enum type has already implemented `operator<<` for
-@ref Utility::Debug, this function is able to print the values in given enum
-set. Example definition:
+Compared to @ref enumSetDebugOutput(), this function doesn't need an explicit
+list of known values but will instead go through all set bits and print them
+one by one. This also means unknown bits, if any, will be interleaved with the
+known ones. Example definition:
 
-@snippet Containers.cpp enumSetDebugOutput
+@snippet Containers.cpp bigEnumSetDebugOutput
 
-The usage would then be straightforward:
+The output is then as follows:
 
-@snippet Containers.cpp enumSetDebugOutput-usage
-
-@attention This function assumes that the recognized values have unique bits
-    set. The output is undefined if more than one value share the same bit.
-
-@see @ref bigEnumSetDebugOutput()
+@snippet Containers.cpp bigEnumSetDebugOutput-usage
 */
-template<class T, typename std::underlying_type<T>::type fullValue> Utility::Debug& enumSetDebugOutput(Utility::Debug& debug, EnumSet<T, fullValue> value, const char* empty, std::initializer_list<T> enums) {
+/* The set has to be taken by value because it gets modified in the process */
+template<class T, std::size_t size> Utility::Debug& bigEnumSetDebugOutput(Utility::Debug& debug, BigEnumSet<T, size> value, const char* empty) {
     /* Print the empty value in case there is nothing */
     if(!value) return debug << empty;
 
-    /* Print known values, if set, and strip them out of the value */
+    /* Go through all bits in the range and print each of them, if set. This
+       will mean known and unknown values will be interleaved, but better than
+       forcing users to supply a list of 100+ values like with EnumSet. */
     bool separate = false;
-    for(const T e: enums) if(value >= e) {
+    for(std::size_t i = 0; value && i != size*64; ++i) {
+        if(!(value & T(i))) continue;
+
         if(separate) debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
         else separate = true;
-        debug << e;
+        debug << T(i);
 
-        /* Avoid stripping out the unknown bits by the EnumSet operator~ */
-        value &= T(~typename std::underlying_type<T>::type(e));
-    }
-
-    /* If there are leftovers, pass them to the original debug operator and
-       expect it will print them as a raw value */
-    if(value) {
-        if(separate) debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
-        debug << T(typename std::underlying_type<T>::type(value));
+        /* Clear the value from the enum so we can do an early exit if there's
+           no more bits set */
+        value &= ~T(i);
     }
 
     return debug;

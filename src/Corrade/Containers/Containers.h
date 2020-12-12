@@ -47,6 +47,8 @@ template<class T> using Array2 = StaticArray<2, T>;
 template<class T> using Array3 = StaticArray<3, T>;
 template<class T> using Array4 = StaticArray<4, T>;
 
+template<class T, std::size_t size = 1 << (sizeof(T)*8 - 6)> class BigEnumSet;
+
 template<unsigned, class> class StridedDimensions;
 template<unsigned, class> class StridedArrayView;
 template<unsigned, class> class StridedIterator;

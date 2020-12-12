@@ -27,6 +27,7 @@ corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersArrayViewStlTest ArrayViewStlTest.cpp)
+corrade_add_test(ContainersBigEnumSetTest BigEnumSetTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 
 corrade_add_test(ContainersGrowableArrayTest GrowableArrayTest.cpp)
@@ -66,6 +67,7 @@ set_property(TARGET
     ContainersArrayTest
     ContainersArrayViewTest
     ContainersArrayViewStlTest
+    ContainersBigEnumSetTest
     ContainersGrowableArrayTest
     ContainersOptionalTest
     ContainersPointerTest
@@ -79,6 +81,7 @@ set_target_properties(
     ContainersArrayTest
     ContainersArrayTupleTest
     ContainersArrayViewTest
+    ContainersBigEnumSetTest
     ContainersEnumSetTest
     ContainersLinkedListTest
     ContainersPointerTest

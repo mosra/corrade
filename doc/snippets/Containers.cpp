@@ -32,6 +32,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayTuple.h"
+#include "Corrade/Containers/BigEnumSet.hpp"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
@@ -103,6 +104,67 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
         Feature::Popular});
 }
 /* [enumSetDebugOutput] */
+
+namespace Big1 {
+/* [BigEnumSet-usage1] */
+/* 64 values at most */
+enum class Feature: std::uint64_t {
+    DeferredRendering = 1 << 0,
+    AreaLights = 1 << 1,
+    GlobalIllumination = 1 << 2,
+    Shadows = 1 << 3,
+    Reflections = 1 << 4,
+    DOXYGEN_IGNORE()
+};
+
+typedef Containers::EnumSet<Feature>
+    Features;
+CORRADE_ENUMSET_OPERATORS(Features)
+/* [BigEnumSet-usage1] */
+}
+
+namespace Big2 {
+/* [BigEnumSet-usage2] */
+/* 256 values at most, for an 8-bit type */
+enum class Feature: std::uint8_t {
+    DeferredRendering = 0,
+    AreaLights = 1,
+    GlobalIllumination = 2,
+    Shadows = 3,
+    Reflections = 4,
+    DOXYGEN_IGNORE()
+};
+
+typedef Containers::BigEnumSet<Feature>
+    Features;
+CORRADE_ENUMSET_OPERATORS(Features)
+/* [BigEnumSet-usage2] */
+}
+
+namespace Big3 {
+enum class Feature: std::uint8_t;
+typedef Containers::BigEnumSet<Feature> Features;
+Utility::Debug& operator<<(Utility::Debug& debug, Features value);
+/* [bigEnumSetDebugOutput] */
+enum class Feature: std::uint8_t {
+    Fast = 0,
+    Cheap = 1,
+    Tested = 2,
+    Popular = 3
+};
+
+// already defined to print values as e.g. Feature::Fast and Features(0xab)
+// for unknown values
+Utility::Debug& operator<<(Utility::Debug&, Feature);
+
+typedef Containers::BigEnumSet<Feature> Features;
+CORRADE_ENUMSET_OPERATORS(Features)
+
+Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
+    return Containers::bigEnumSetDebugOutput(debug, value, "Features{}");
+}
+/* [bigEnumSetDebugOutput] */
+}
 
 namespace LL1 {
 class Object;
@@ -549,6 +611,21 @@ Utility::Debug{} << (Feature::Popular|Feature(0xdead));
 // prints Features{}
 Utility::Debug{} << Features{};
 /* [enumSetDebugOutput-usage] */
+}
+
+{
+/* It's incorrect, of course, we're using the EnumSet instead of BigEnumSet
+   here */
+/* [bigEnumSetDebugOutput-usage] */
+// prints Feature::Fast|Feature::Cheap
+Utility::Debug{} << (Feature::Fast|Feature::Cheap);
+
+// prints Feature::Popular|Feature(0xca)|Feature(0xfe)
+Utility::Debug{} << (Feature::Popular|Feature(0xca)|Feature(0xfe));
+
+// prints Features{}
+Utility::Debug{} << Features{};
+/* [bigEnumSetDebugOutput-usage] */
 }
 
 {
