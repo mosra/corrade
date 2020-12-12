@@ -18,3 +18,25 @@ FINE_PRINT = """<p>Corrade docs. Part of the <a href="https://magnum.graphics/">
 FAVICON = 'favicon.ico'
 
 VERSION_LABELS = True
+
+# Code wrapped in DOXYGEN_IGNORE() will get replaced by an (Unicode) ellipsis
+# in the output. In order to make the same code compilable, add
+#
+#   #define DOXYGEN_IGNORE(...) __VA_ARGS__
+#
+# to the snippet code
+def _doxygen_ignore(code: str):
+    while 'DOXYGEN_IGNORE(' in code:
+        i = code.index('DOXYGEN_IGNORE(')
+        depth = 1
+        for j in range(i + len('DOXYGEN_IGNORE('), len(code)):
+            if code[j] == '(': depth += 1
+            elif code[j] == ')': depth -= 1
+            if depth == 0: break
+        assert depth == 0, "unmatched DOXYGEN_IGNORE() parentheses in %s" % code
+        code = code[:i] + '…' + code[j+1:]
+    return code
+
+M_CODE_FILTERS_PRE = {
+    'C++': _doxygen_ignore
+}
