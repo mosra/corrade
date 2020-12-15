@@ -31,7 +31,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 corrade_add_test(TargetTest TargetTest.cpp)
 target_include_directories(TargetTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test(VersionTest VersionTest.cpp)
+# Prefixed with project name to avoid conflicts with VersionTest in Magnum and
+# related repos
+corrade_add_test(CorradeVersionTest VersionTest.cpp)
 
 # Baseline, C++11, is everywhere
 corrade_add_test(Cpp11StandardTest CppStandardTest.cpp)
