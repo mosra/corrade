@@ -33,12 +33,14 @@ struct SequenceHelpersTest: TestSuite::Tester {
     explicit SequenceHelpersTest();
 
     void generateSequenceEmpty();
-    void generateSequence();
+    void generateSequenceEven();
+    void generateSequenceOdd();
 };
 
 SequenceHelpersTest::SequenceHelpersTest() {
     addTests({&SequenceHelpersTest::generateSequenceEmpty,
-              &SequenceHelpersTest::generateSequence});
+              &SequenceHelpersTest::generateSequenceEven,
+              &SequenceHelpersTest::generateSequenceOdd});
 
     /* Uncomment to benchmark compile times. The following command then shows
        both time and memory use:
@@ -55,7 +57,14 @@ void SequenceHelpersTest::generateSequenceEmpty() {
     >::value));
 }
 
-void SequenceHelpersTest::generateSequence() {
+void SequenceHelpersTest::generateSequenceEven() {
+    CORRADE_VERIFY((std::is_same<
+        Implementation::GenerateSequence<8>::Type,
+        Implementation::Sequence<0, 1, 2, 3, 4, 5, 6, 7>
+    >::value));
+}
+
+void SequenceHelpersTest::generateSequenceOdd() {
     CORRADE_VERIFY((std::is_same<
         Implementation::GenerateSequence<7>::Type,
         Implementation::Sequence<0, 1, 2, 3, 4, 5, 6>
