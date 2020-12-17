@@ -98,7 +98,11 @@ class EnumSet {
         constexpr /*implicit*/ EnumSet(): _value{} {}
 
         /** @brief Create a set from one value */
-        constexpr /*implicit*/ EnumSet(T value): _value{static_cast<UnderlyingType>(value)} {}
+        constexpr /*implicit*/ EnumSet(T value):
+            /* Interestingly enough, on GCC 4.8, using _value{} will spam with
+                warning: parameter ‘value’ set but not used [-Wunused-but-set-parameter]
+               even though everything works as intended. Using () instead. */
+            _value(static_cast<UnderlyingType>(value)) {}
 
         /**
          * @brief Create an uninitialized set
