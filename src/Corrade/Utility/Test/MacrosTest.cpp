@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -34,10 +35,12 @@
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 /* Putting this as early as possible so it doesn't get changed every time */
-constexpr const char* ThisIsLine37 = CORRADE_LINE_STRING;
+constexpr const char* ThisIsLine38 = CORRADE_LINE_STRING;
 
 struct MacrosTest: TestSuite::Tester {
     explicit MacrosTest();
+
+    void defer();
 
     void alignAs();
     void deprecated();
@@ -54,7 +57,9 @@ struct MacrosTest: TestSuite::Tester {
 };
 
 MacrosTest::MacrosTest() {
-    addTests({&MacrosTest::alignAs,
+    addTests({&MacrosTest::defer,
+
+              &MacrosTest::alignAs,
               &MacrosTest::deprecated,
               &MacrosTest::noreturn,
               &MacrosTest::fallthrough,
@@ -67,6 +72,20 @@ MacrosTest::MacrosTest() {
               &MacrosTest::threadLocal
               #endif
               });
+}
+
+using namespace Containers::Literals;
+
+void MacrosTest::defer() {
+    #ifdef _CORRADE_HELPER_DEFER
+    #define ABC "abc", 3, false
+    #define ADD_SUFFIX2(str, len, uppercase) str "def"
+    #define ADD_SUFFIX(...) _CORRADE_HELPER_DEFER(ADD_SUFFIX2, __VA_ARGS__)
+
+    CORRADE_COMPARE(ADD_SUFFIX(ABC), "abcdef"_s);
+    #else
+    CORRADE_SKIP("Defer functionality not available on this compiler.");
+    #endif
 }
 
 void MacrosTest::alignAs() {
@@ -186,7 +205,7 @@ void MacrosTest::function() {
 }
 
 void MacrosTest::lineString() {
-    CORRADE_COMPARE(ThisIsLine37, std::string{"37"});
+    CORRADE_COMPARE(ThisIsLine38, "38"_s);
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN

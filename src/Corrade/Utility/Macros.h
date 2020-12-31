@@ -36,7 +36,23 @@
 #define _CORRADE_HELPER_PASTE2(a, b) a ## b
 #define _CORRADE_HELPER_PASTE(a, b) _CORRADE_HELPER_PASTE2(a, b)
 #define _CORRADE_HELPER_STR(x) #x
+
+/* Deferred macro expansion doesn't work on MSVC and instead of causing an
+   error it only emits a warning like
+    warning C4003: not enough arguments for function-like macro invocation '_str2'
+   which is REALLY GREAT for debugging. In 2018 they promised the preprocessor
+   will get an overhaul and there's an /experimental:preprocessor flag but
+   doing that on a library level is pure insanity so I'm instead disabling
+   this macro on MSVC altogether to avoid it accidental uses and suffering
+   https://devblogs.microsoft.com/cppblog/msvc-preprocessor-progress-towards-conformance/ */
+#if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define _CORRADE_HELPER_DEFER(m, ...) m(__VA_ARGS__)
+#endif
+/* On the other hand, THE ONLY place where _CORRADE_HELPER_DEFER() worked on
+   MSVC is in CORRADE_LINE_STRING. Provide a specialized macro for that
+   instead. */
+#define _CORRADE_LINE_STRING_IMPLEMENTATION(...) _CORRADE_HELPER_STR(__VA_ARGS__)
+
 #endif
 
 /** @hideinitializer
@@ -455,7 +471,7 @@ as applying to the immediately following line, which is why the extra
 
 @see @ref CORRADE_FUNCTION
 */
-#define CORRADE_LINE_STRING _CORRADE_HELPER_DEFER(_CORRADE_HELPER_STR, __LINE__)
+#define CORRADE_LINE_STRING _CORRADE_LINE_STRING_IMPLEMENTATION(__LINE__)
 
 /** @hideinitializer
 @brief No-op
