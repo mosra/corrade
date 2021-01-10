@@ -109,9 +109,12 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<class T> void removeSuffixGrowable();
     void removeSuffixInvalid();
 
-    void shrinkEmpty();
+    template<class T> void shrinkNonGrowableEmptyNoInit();
+    template<class T> void shrinkNonGrowableEmptyDefaultInit();
     template<class T> void shrinkNonGrowableNoInit();
     template<class T> void shrinkNonGrowableDefaultInit();
+    template<class T> void shrinkGrowableEmptyNoInit();
+    template<class T> void shrinkGrowableEmptyDefaultInit();
     template<class T> void shrinkGrowableNoInit();
     template<class T> void shrinkGrowableDefaultInit();
 
@@ -286,11 +289,18 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::removeSuffixGrowable<Movable>,
               &GrowableArrayTest::removeSuffixInvalid,
 
-              &GrowableArrayTest::shrinkEmpty,
+              &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<int>,
+              &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<Movable>,
+              &GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit<int>,
+              &GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit<Movable>,
               &GrowableArrayTest::shrinkNonGrowableNoInit<int>,
               &GrowableArrayTest::shrinkNonGrowableNoInit<Movable>,
               &GrowableArrayTest::shrinkNonGrowableDefaultInit<int>,
               &GrowableArrayTest::shrinkNonGrowableDefaultInit<Movable>,
+              &GrowableArrayTest::shrinkGrowableEmptyNoInit<int>,
+              &GrowableArrayTest::shrinkGrowableEmptyNoInit<Movable>,
+              &GrowableArrayTest::shrinkGrowableEmptyDefaultInit<int>,
+              &GrowableArrayTest::shrinkGrowableEmptyDefaultInit<Movable>,
               &GrowableArrayTest::shrinkGrowableNoInit<int>,
               &GrowableArrayTest::shrinkGrowableNoInit<Movable>,
               &GrowableArrayTest::shrinkGrowableDefaultInit<int>,
@@ -1407,17 +1417,48 @@ void GrowableArrayTest::removeSuffixInvalid() {
         "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n");
 }
 
-void GrowableArrayTest::shrinkEmpty() {
+template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyNoInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
     {
-        Array<Movable> a;
+        Array<T> a;
+
+        /* Should do no nuthin' */
         arrayShrink(a);
+        CORRADE_VERIFY(!arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_VERIFY(!a.data());
     }
 
     /* Nothing should be done by the shrink */
-    CORRADE_COMPARE(Movable::constructed, 0);
-    CORRADE_COMPARE(Movable::moved, 0);
-    CORRADE_COMPARE(Movable::assigned, 0);
-    CORRADE_COMPARE(Movable::destructed, 0);
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 0);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 0);
+    }
+}
+
+template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+
+        /* Should do no nuthin' */
+        arrayShrink(a, DefaultInit);
+        CORRADE_VERIFY(!arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_VERIFY(!a.data());
+    }
+
+    /* Nothing should be done by the shrink */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 0);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 0);
+    }
 }
 
 template<class T> void GrowableArrayTest::shrinkNonGrowableNoInit() {
@@ -1477,6 +1518,52 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 3);
+    }
+}
+
+template<class T> void GrowableArrayTest::shrinkGrowableEmptyNoInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayAppend(a, InPlaceInit, 2);
+        arrayRemoveSuffix(a, 1);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_VERIFY(a.empty());
+        CORRADE_VERIFY(arrayCapacity(a));
+
+        arrayShrink(a);
+    }
+
+    /* Nothing extra should be done by the shrink */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 1);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 1);
+    }
+}
+
+template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayAppend(a, InPlaceInit, 2);
+        arrayRemoveSuffix(a, 1);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_VERIFY(a.empty());
+        CORRADE_VERIFY(arrayCapacity(a));
+
+        arrayShrink(a, DefaultInit);
+    }
+
+    /* Nothing extra should be done by the shrink */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 1);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 1);
     }
 }
 
