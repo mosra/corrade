@@ -1,4 +1,4 @@
 Starting TesterTest::Test with 1 test cases...
-  FAIL [15] compareMessage() at here.cpp:341
+  FAIL [15] compareMessage() at here.cpp:342
         Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
 Finished TesterTest::Test with 1 errors out of 1 checks.

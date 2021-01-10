@@ -155,9 +155,9 @@ void TweakableIntegrationTest::variable() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): updating _('X') in {0}:102\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n", __FILE__));
+"Utility::Tweakable::update(): updating _('X') in {0}:103\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -220,9 +220,9 @@ void TweakableIntegrationTest::scopeTemplated() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:102\n"
-"Utility::Tweakable::update(): updating _(133.7f) in {0}:185\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:103\n"
+"Utility::Tweakable::update(): updating _(133.7f) in {0}:186\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -286,9 +286,9 @@ void TweakableIntegrationTest::scopeVoid() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:102\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
-"Utility::Tweakable::update(): updating _(-1.44f) in {0}:251\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:103\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
+"Utility::Tweakable::update(): updating _(-1.44f) in {0}:252\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -330,8 +330,8 @@ void TweakableIntegrationTest::updateNoChange() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
@@ -363,7 +363,7 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
     TweakableState state = tweakable.update();
 
     CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): code changed around _('a') in {0}:103, requesting a recompile\n", __FILE__));
+"Utility::Tweakable::update(): code changed around _('a') in {0}:104, requesting a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
@@ -397,7 +397,7 @@ void TweakableIntegrationTest::updateDifferentType() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: 14.4f is not a character literal\n"
-"Utility::Tweakable::update(): change of _(14.4f) in {0}:102 requested a recompile\n", __FILE__));
+"Utility::Tweakable::update(): change of _(14.4f) in {0}:103 requested a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
@@ -431,7 +431,7 @@ void TweakableIntegrationTest::updateParseError() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: escape sequences in char literals are not implemented, sorry\n"
-"Utility::Tweakable::update(): error parsing _('\\X') in {0}:102\n", __FILE__));
+"Utility::Tweakable::update(): error parsing _('\\X') in {0}:103\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Error);
 }
 

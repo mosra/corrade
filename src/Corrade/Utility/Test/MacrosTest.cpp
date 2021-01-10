@@ -36,7 +36,7 @@
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 /* Putting this as early as possible so it doesn't get changed every time */
-constexpr const char* ThisIsLine38 = CORRADE_LINE_STRING;
+constexpr const char* ThisIsLine39 = CORRADE_LINE_STRING;
 
 struct MacrosTest: TestSuite::Tester {
     explicit MacrosTest();
@@ -206,7 +206,7 @@ void MacrosTest::function() {
 }
 
 void MacrosTest::lineString() {
-    CORRADE_COMPARE(ThisIsLine38, "38"_s);
+    CORRADE_COMPARE(ThisIsLine39, "39"_s);
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
