@@ -98,7 +98,9 @@ struct GrowableArrayTest: TestSuite::Tester {
     void appendCopy();
     void appendMove();
     void appendList();
+    void appendListEmpty();
     void appendCountNoInit();
+    void appendCountNoInitEmpty();
 
     void appendGrowRatio();
 
@@ -270,7 +272,9 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::appendCopy,
               &GrowableArrayTest::appendMove,
               &GrowableArrayTest::appendList,
+              &GrowableArrayTest::appendListEmpty,
               &GrowableArrayTest::appendCountNoInit,
+              &GrowableArrayTest::appendCountNoInitEmpty,
 
               &GrowableArrayTest::appendGrowRatio,
 
@@ -1147,6 +1151,18 @@ void GrowableArrayTest::appendList() {
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
+void GrowableArrayTest::appendListEmpty() {
+    Array<int> a{3};
+    int* prev = a.data();
+    Containers::ArrayView<int> appended = arrayAppend(a, {});
+
+    /* Should be a no-op, not reallocating the (non-growable) array */
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(a.data(), prev);
+    CORRADE_COMPARE(appended.data(), a.end());
+    CORRADE_COMPARE(appended.size(), 0);
+}
+
 void GrowableArrayTest::appendCountNoInit() {
     Array<int> a;
     Containers::ArrayView<int> appended = arrayAppend(a, Containers::NoInit, 4);
@@ -1155,6 +1171,18 @@ void GrowableArrayTest::appendCountNoInit() {
     CORRADE_COMPARE(appended.data(), a.data());
     CORRADE_COMPARE(appended.size(), 4);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::appendCountNoInitEmpty() {
+    Array<int> a{3};
+    int* prev = a.data();
+    Containers::ArrayView<int> appended = arrayAppend(a, Containers::NoInit, 0);
+
+    /* Should be a no-op, not reallocating the (non-growable) array */
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(a.data(), prev);
+    CORRADE_COMPARE(appended.data(), a.end());
+    CORRADE_COMPARE(appended.size(), 0);
 }
 
 void GrowableArrayTest::appendGrowRatio() {

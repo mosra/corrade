@@ -1242,6 +1242,10 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
     /* Direct access & caching to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
 
+    /* No values to add, early exit */
+    if(!count)
+        return arrayGuts.data + arrayGuts.size;
+
     /* For arrays with an unknown deleter we'll always copy-allocate to a new
        place */
     const std::size_t desiredCapacity = arrayGuts.size + count;
