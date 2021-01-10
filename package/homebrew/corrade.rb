@@ -12,8 +12,7 @@ class Corrade < Formula
     system "mkdir build"
     cd "build" do
       system "cmake",
-        "-DCMAKE_BUILD_TYPE=Release",
-        "-DCMAKE_INSTALL_PREFIX=#{prefix}",
+        *std_cmake_args,
         ".."
       system "cmake", "--build", "."
       system "cmake", "--build", ".", "--target", "install"
