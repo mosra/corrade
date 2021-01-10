@@ -123,10 +123,11 @@ namespace Corrade {
 -   Switched Emscripten build on Travis CI from macOS to Ubuntu + Docker for
     2x faster build times in a futile attempt to not use the extremely
     expensive features of a no-longer-free service (see
-    [mosra/corrade#105](https://github.com/mosra/corrade/pull/105))
+    [mosra/corrade#105](https://github.com/mosra/corrade/pull/105) and
+    [mosra/magnum#350](https://github.com/mosra/magnum/issues/350))
 -   Linux, Emscripten and macOS builds were migrated from Travis to Circle CI
 -   On CMake 3.16 and newer, `FindCorrade.cmake` can provide additional details
-    if some component is not found.
+    if some component is not found
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
