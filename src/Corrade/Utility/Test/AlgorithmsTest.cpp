@@ -40,11 +40,12 @@ struct AlgorithmsTest: TestSuite::Tester {
     explicit AlgorithmsTest();
 
     void copy();
+    void copyZeroSize();
     template<class T> void copyStrided1D();
     template<class T> void copyStrided2D();
     template<class T> void copyStrided3D();
     template<class T> void copyStrided4D();
-    void copyZeroSizeStrided();
+    void copyStridedZeroSize();
 
     void copyNonMatchingSizes();
     void copyDifferentViewTypes();
@@ -173,7 +174,8 @@ template<> struct TypeName<Data<32>> {
 };
 
 AlgorithmsTest::AlgorithmsTest() {
-    addTests({&AlgorithmsTest::copy});
+    addTests({&AlgorithmsTest::copy,
+              &AlgorithmsTest::copyZeroSize});
 
     addInstancedTests<AlgorithmsTest>({
         &AlgorithmsTest::copyStrided1D<char>,
@@ -193,7 +195,8 @@ AlgorithmsTest::AlgorithmsTest() {
         &AlgorithmsTest::copyStrided4D<Data<32>>,
         }, Containers::arraySize(Copy4DData));
 
-    addTests({&AlgorithmsTest::copyZeroSizeStrided,
+    addTests({&AlgorithmsTest::copyStridedZeroSize,
+
               &AlgorithmsTest::copyNonMatchingSizes,
               &AlgorithmsTest::copyDifferentViewTypes});
 
@@ -233,6 +236,14 @@ void AlgorithmsTest::copy() {
     CORRADE_COMPARE_AS(Containers::arrayView(dst),
         Containers::arrayView(src),
         TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyZeroSize() {
+    int dst[1];
+    Utility::copy(nullptr, Containers::arrayView(dst).prefix(std::size_t{0}));
+
+    /* Shouldn't crash */
+    CORRADE_VERIFY(true);
 }
 
 template<class T> void AlgorithmsTest::copyStrided1D() {
@@ -381,7 +392,7 @@ template<class T> void AlgorithmsTest::copyStrided4D() {
                 CORRADE_COMPARE_AS(dst[i][j][k], src[i][j][k], TestSuite::Compare::Container);
 }
 
-void AlgorithmsTest::copyZeroSizeStrided() {
+void AlgorithmsTest::copyStridedZeroSize() {
     Containers::StridedArrayView1D<char> src{nullptr, 0, 16};
     Containers::StridedArrayView1D<char> dst{nullptr, 0, 16};
 
