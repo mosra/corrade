@@ -119,6 +119,8 @@ Is the below list missing your name or something's wrong?
 -   **Jakob Weiss** ([\@TheHugeManatee](https://github.com/TheHugeManatee)) ---
     Stateful lambda support in the @ref Interconnect library
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
+-   **John Laxson** ([\@jlaxson](https://github.com/jlaxson)) --- Homebrew
+    package improvements
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
     @ref Utility::Sha1 additions, various fixes, buildsystem and CI
     improvements
