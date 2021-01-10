@@ -77,6 +77,7 @@ struct FormatTest: TestSuite::Tester {
 
     void charArray();
     void stringView();
+    void emptyStringView();
     void mutableStringView();
     void string();
     #ifdef CORRADE_BUILD_DEPRECATED
@@ -161,6 +162,7 @@ FormatTest::FormatTest() {
 
               &FormatTest::charArray,
               &FormatTest::stringView,
+              &FormatTest::emptyStringView,
               &FormatTest::mutableStringView,
               &FormatTest::string,
               #ifdef CORRADE_BUILD_DEPRECATED
@@ -585,6 +587,11 @@ void FormatTest::mutableStringView() {
     Containers::String a = "world";
     CORRADE_COMPARE(formatString("hello {}", Containers::MutableStringView{a}),
         "hello world");
+}
+
+void FormatTest::emptyStringView() {
+    CORRADE_COMPARE(formatString("hello{}!", Containers::StringView{}),
+        "hello!");
 }
 
 void FormatTest::string() {
