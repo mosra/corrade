@@ -222,7 +222,6 @@ AlgorithmsTest::AlgorithmsTest() {
 }
 
 void AlgorithmsTest::copy() {
-    /* Enough so even sparse variants fit */
     int src[5];
     int dst[5];
 
