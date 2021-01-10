@@ -749,7 +749,7 @@ Like @ref arrayAppend(Array<T>&, const T&), but inserting multiple values at
 once.
 @see @ref arrayResize(Array<T>&, NoInitT, std::size_t)
 */
-template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values);
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, ArrayView<const T> values);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -762,7 +762,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, Containers::ArrayView<const T> values) {
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppend(Array<T>& array, ArrayView<const T> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
 }
 #endif
@@ -771,7 +771,7 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 @overload
 @m_since{2020,06}
 */
-template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -784,7 +784,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline Containers::ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+template<template<class> class Allocator, class T> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
 }
 #endif
@@ -794,12 +794,11 @@ template<template<class> class Allocator, class T> inline Containers::ArrayView<
 @return View on the newly appended items
 @m_since{2020,06}
 
-A lower-level variant of
-@ref arrayAppend(Array<T>& array, Containers::ArrayView<const T>) where the new
-values are meant to be initialized in-place after, instead of being copied from
-a pre-existing location.
+A lower-level variant of @ref arrayAppend(Array<T>& array, ArrayView<const T>)
+where the new values are meant to be initialized in-place after, instead of
+being copied from a pre-existing location.
 */
-template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count);
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -812,7 +811,7 @@ template<class T, class Allocator = ArrayAllocator<T>> Containers::ArrayView<T> 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count) {
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppend(Array<T>& array, NoInitT, std::size_t count) {
     return arrayAppend<T, Allocator<T>>(array, NoInit, count);
 }
 #endif
@@ -1305,11 +1304,11 @@ template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const 
     return *it;
 }
 
-template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
+template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
     return arrayAppend(array, {values.begin(), values.size()});
 }
 
-template<class T, class Allocator> inline Containers::ArrayView<T> arrayAppend(Array<T>& array, const Containers::ArrayView<const T> values) {
+template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const ArrayView<const T> values) {
     /* Direct access & caching to speed up debug builds */
     const std::size_t valueCount = values.size();
 
@@ -1336,7 +1335,7 @@ template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceI
 }
 #endif
 
-template<class T, class Allocator> Containers::ArrayView<T> arrayAppend(Array<T>& array, NoInitT, const std::size_t count) {
+template<class T, class Allocator> ArrayView<T> arrayAppend(Array<T>& array, NoInitT, const std::size_t count) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, count);
     return {it, count};
 }
