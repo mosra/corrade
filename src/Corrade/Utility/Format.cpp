@@ -200,7 +200,9 @@ std::size_t Formatter<Containers::StringView>::format(const Containers::ArrayVie
     static_cast<void>(type);
     #endif
     /* strncpy() would stop on \0 characters */
-    if(buffer) std::memcpy(buffer, value.data(), size);
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(buffer && size) std::memcpy(buffer, value.data(), size);
     return size;
 }
 void Formatter<Containers::StringView>::format(std::FILE* const file, const Containers::StringView value, const int precision, const FormatType type) {
@@ -394,6 +396,9 @@ std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* co
             CORRADE_ASSERT(data.size() <= buffer.size(),
                 "Utility::formatInto(): buffer too small, expected at least" << bufferOffset + data.size() << "but got" << bufferOffset + buffer.size(), );
             /* strncpy() would stop on \0 characters */
+            /* data.size() can't be 0 because that would make the above assert
+               fail, thus data can't be nullptr either and so we don't need to
+               check anything to avoid calling memcpy() with a null pointer */
             std::memcpy(buffer + bufferOffset, data, data.size());
         }
         bufferOffset += data.size();

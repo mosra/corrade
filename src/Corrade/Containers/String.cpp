@@ -63,7 +63,9 @@ inline void String::construct(const char* data, std::size_t size) {
     /* If the size is small enough for SSO, use that. Not using <= because we
        need to store the null terminator as well. */
     if(size < Implementation::SmallStringSize) {
-        std::memcpy(_small.data, data, size);
+        /* Apparently memcpy() can't be called with null pointers, even if size
+           is zero. I call that bullying. */
+        if(size) std::memcpy(_small.data, data, size);
         _small.data[size] = '\0';
         _small.size = size | SmallSize;
 
@@ -144,7 +146,9 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
         "Containers::String: received a null string of size" << size, );
 
     _large.data = new char[size+1];
-    std::memcpy(_large.data, data, size);
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(size) std::memcpy(_large.data, data, size);
     _large.data[size] = '\0';
     _large.size = size;
     _large.deleter = nullptr;

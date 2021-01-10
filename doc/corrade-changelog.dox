@@ -155,6 +155,10 @@ namespace Corrade {
     function, which changed signature in 2.0.5 and caused runtime failures
     when `-s ASSERTIONS` was enabled. A public stable API is now used instead,
     see [mosra/corrade#106](https://github.com/mosra/corrade/pull/106).
+-   @ref Containers::Array growable utilities, @ref Containers::String,
+    @ref Utility::copy(), @ref Utility::format() and @ref Utility::Sha1 was
+    fixed to not call @ref std::memcpy() with @cpp nullptr @ce when size is
+    zero (see [mosra/corrade#102](https://github.com/mosra/corrade/issues/102))
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

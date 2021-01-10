@@ -50,7 +50,9 @@ void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayV
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
-    std::memcpy(dst.data(), src.data(), srcSize);
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(srcSize) std::memcpy(dst.data(), src.data(), srcSize);
 }
 
 void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {

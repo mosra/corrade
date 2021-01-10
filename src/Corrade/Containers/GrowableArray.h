@@ -958,7 +958,9 @@ template<class T> inline void arrayMoveConstruct(T* const src, T* const dst, con
     IsTriviallyCopyableOnOldGcc<T>::value
     #endif
 >::type* = nullptr) {
-    std::memcpy(dst, src, count*sizeof(T));
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size_t count, typename std::enable_if<!
@@ -986,7 +988,9 @@ template<class T> inline void arrayMoveAssign(T* const src, T* const dst, const 
     IsTriviallyCopyableOnOldGcc<T>::value
     #endif
 >::type* = nullptr) {
-    std::memcpy(dst, src, count*sizeof(T));
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T> inline void arrayMoveAssign(T* src, T* dst, const std::size_t count, typename std::enable_if<!
@@ -1009,7 +1013,9 @@ template<class T> inline void arrayCopyConstruct(const T* const src, T* const ds
     IsTriviallyCopyableOnOldGcc<T>::value
     #endif
 >::type* = nullptr) {
-    std::memcpy(dst, src, count*sizeof(T));
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T> inline void arrayCopyConstruct(const T* src, T* dst, const std::size_t count, typename std::enable_if<!
