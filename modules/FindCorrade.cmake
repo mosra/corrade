@@ -573,7 +573,7 @@ endforeach()
 # For CMake 3.16+ with REASON_FAILURE_MESSAGE, provide additional potentially
 # useful info about the failed components.
 if(NOT CMAKE_VERSION VERSION_LESS 3.16)
-    set(_CORRADE_REASON_FAILURE_MESSAGE)
+    set(_CORRADE_REASON_FAILURE_MESSAGE )
     # Go only through the originally specified find_package() components, not
     # the dependencies added by us afterwards
     foreach(_component ${_CORRADE_ORIGINAL_FIND_COMPONENTS})
