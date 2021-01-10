@@ -46,6 +46,7 @@ struct Sha1Test: TestSuite::Tester {
     void zeroInLeftover();
 
     void iterative();
+    void iterativeSecondEmpty();
     void reuse();
 };
 
@@ -58,7 +59,8 @@ Sha1Test::Sha1Test() {
 
     addRepeatedTests({&Sha1Test::iterative}, 128);
 
-    addTests({&Sha1Test::reuse});
+    addTests({&Sha1Test::iterativeSecondEmpty,
+              &Sha1Test::reuse});
 }
 
 void Sha1Test::emptyString() {
@@ -108,6 +110,13 @@ void Sha1Test::iterative() {
         hasher << std::string{slice.data(), slice.size()};
     }
 
+    CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
+}
+
+void Sha1Test::iterativeSecondEmpty() {
+    Sha1 hasher;
+    hasher << String;
+    hasher << Containers::ArrayView<const char>{};
     CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
 }
 
