@@ -34,12 +34,20 @@
 #include <initializer_list>
 #include <utility>
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Containers {
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Declaration of ArrayView helpers to avoid including the full header */
+template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list);
+namespace Implementation {
+    template<class T> T*& dataRef(Containers::ArrayView<T>& view);
+}
+#endif
 
 /**
 @brief Array tuple
@@ -111,9 +119,14 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * If the @p items view is empty, the constructed instance is
          * equivalent to a moved-from state.
          */
-        explicit ArrayTuple(ArrayView<const Item> items = {});
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit ArrayTuple(const ArrayView<const Item>& items = {});
+        #else
+        explicit ArrayTuple(const ArrayView<const Item>& items);
+        explicit ArrayTuple();
+        #endif
         /** @overload */
-        explicit ArrayTuple(std::initializer_list<Item> items): ArrayTuple{arrayView(items)} {}
+        explicit ArrayTuple(std::initializer_list<Item> items);
 
         /**
          * @brief Construct using a custom allocation
@@ -142,9 +155,14 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * the memory from under itself) and its destructor is called
          * afterwards.
          */
-        template<class A> explicit ArrayTuple(ArrayView<const Item> items, A allocator);
+        template<class A> explicit ArrayTuple(const ArrayView<const Item>& items, A allocator);
         /** @overload */
-        template<class A> explicit ArrayTuple(std::initializer_list<Item> items, A allocator): ArrayTuple{arrayView(items), allocator} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class A> explicit ArrayTuple(std::initializer_list<Item> items, A allocator);
+        #else
+        /* So we don't need to include ArrayView */
+        template<class A, class I = Item> explicit ArrayTuple(std::initializer_list<I> items, A allocator): ArrayTuple{arrayView(items), allocator} {}
+        #endif
 
         /** @brief Copying is not allowed */
         ArrayTuple(const ArrayTuple&) = delete;
@@ -226,9 +244,9 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
         char* release();
 
     private:
-        static std::pair<std::size_t, std::size_t> sizeAlignmentFor(ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
+        static std::pair<std::size_t, std::size_t> sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
 
-        void create(ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t destructibleItemCount, bool arrayDeleterItemNeeded);
+        void create(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t destructibleItemCount, bool arrayDeleterItemNeeded);
 
         char* _data;
         std::size_t _size;
@@ -386,7 +404,7 @@ class ArrayTuple::Item {
         void** _destinationPointer;
 };
 
-template<class A> ArrayTuple::ArrayTuple(ArrayView<const Item> items, A allocator) {
+template<class A> ArrayTuple::ArrayTuple(const ArrayView<const Item>& items, A allocator) {
     /* The allocator is expected to return std::pair<char*, D>, where the
        second value is a deleter instance */
     typedef decltype(allocator(std::size_t{}, std::size_t{}).second) D;

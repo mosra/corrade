@@ -153,10 +153,14 @@ ArrayTuple deleter pointer is `nullptr`, which makes the class simply do
 
 */
 
-ArrayTuple::ArrayTuple(const ArrayView<const Item> items): ArrayTuple{items, [](std::size_t size, std::size_t) -> std::pair<char*, std::nullptr_t> {
+ArrayTuple::ArrayTuple(const ArrayView<const Item>& items): ArrayTuple{items, [](std::size_t size, std::size_t) -> std::pair<char*, std::nullptr_t> {
     /** @todo use the alignment param once we implement aligned alloc */
     return {size ? new char[size] : nullptr, nullptr};
 }} {}
+
+ArrayTuple::ArrayTuple(): _data{}, _size{}, _deleter{} {}
+
+ArrayTuple::ArrayTuple(std::initializer_list<Item> items): ArrayTuple{arrayView(items)} {}
 
 ArrayTuple::ArrayTuple(ArrayTuple&& other) noexcept: _data{other._data}, _size{other._size}, _deleter{other._deleter} {
     other._data = nullptr;
@@ -213,7 +217,7 @@ ArrayTuple::operator Array<char>() && {
     return Array<char>{release(), size, deleter};
 }
 
-std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item> items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
+std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
     /* Calculate how many items actually need their destructor called. If there
        is a non-trivial destructor but no actual items, we don't need to call
        anything either. */
@@ -258,7 +262,7 @@ std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView
     return {offset, maxAlignment};
 }
 
-void ArrayTuple::create(const ArrayView<const Item> items, const Item& arrayDeleterItem, const std::size_t destructibleItemCount, const bool arrayDeleterItemNeeded) {
+void ArrayTuple::create(const ArrayView<const Item>& items, const Item& arrayDeleterItem, const std::size_t destructibleItemCount, const bool arrayDeleterItemNeeded) {
     /* If we have destructible entries, store the total count and calculate the
        (unaligned) offset for the first array. If we don't have them, don't
        store anything -- the first array will be right at the start. */
