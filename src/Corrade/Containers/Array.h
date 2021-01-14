@@ -279,6 +279,8 @@ class Array {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ Array(std::nullptr_t) noexcept:
         #else
+        /* Has to be like this because otherwise Array{0} is ambiguous. FFS
+           C++. */
         template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
         #endif
             /* GCC <=4.8 breaks on _deleter{} */
