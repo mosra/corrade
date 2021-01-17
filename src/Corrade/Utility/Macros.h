@@ -164,9 +164,13 @@ the annotation, but ignores it for both enums and enum values.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
-#if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)
+/* Qt's Meta Object Compiler doesn't recognize enum value attributes in older
+   Qt. Not sure what version was it fixed in as the bugreports don't tell
+   (https://bugreports.qt.io/browse/QTBUG-78820) so disabling it for MOC
+   altogether */
+#if (defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
