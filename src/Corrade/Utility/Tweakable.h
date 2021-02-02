@@ -50,34 +50,62 @@ namespace Implementation {
 @brief Tweakable constants
 
 Provides a mechanism to immediately reflect changes to literals in source code
-to a running application. Works best combined with a traditional hot-reload
-approach (such as loading a shared library via @ref PluginManager), which can
-take care of source code changes that tweakable constants alone can't.
+to a running application. Useful when tweaking positions, colors, physics
+factors and other constants as it reduces the usual
+
+1.  make a change to a literal,
+2.  save,
+3.  compile & link,
+4.  restart the application,
+5.  observe the difference
+
+@m_class{m-noindent}
+
+workflow to just
+
+1.  make a change to a (marked) literal,
+2.  save,
+3.  observe the difference.
+
+Works best combined with a traditional hot-reload approach (such as loading a
+dynamic module via @ref PluginManager), which can take care of source code
+changes that tweakable constants alone can't.
 
 @section Utility-Tweakable-usage Basic usage
 
 Common usage is to first define a shorter alias to the @ref CORRADE_TWEAKABLE()
-macro in every source file where you're going to use tweakable values. It's
-possible to define any alias and you can also use the `CORRADE_TWEAKABLE` name
-directly. Here we'll use a single underscore:
+macro in the source file where you want to use tweakable values. It's possible
+to define any alias and you can also use the `CORRADE_TWEAKABLE` name directly.
+Here we'll use a single underscore:
 
 @snippet Utility.cpp Tweakable-define
 
-After that, enable it using @ref enable() (it's disabled by default). From that
-point onwards, all literals wrapped with this macro invocation will get
-recognized by it. To reflect source changes in the app, periodically call
-@ref update(), for best responsiveness ideally in each event loop iteration.
+After that, enable it using @ref enable() (it's disabled by default). In all
+code that gets executed from that point onwards, all literals wrapped with the
+macro invocation --- in this case @cpp _() @ce --- will get recognized by it.
+To reflect source changes in the app, periodically call @ref update(), for best
+responsiveness ideally in each event loop iteration. The following example
+implements a 2D movement, with the gravity and linear speed being tweakable:
 
 @snippet Utility.cpp Tweakable-wrap-update
 
-The @ref update() function will monitor changes to contents of wrapped literals
-in original source files and provide the new values next time code using these
-literals is executed.
+Then, if you build & run the code, the @ref update() function will reparse the
+input source file each time it's saved, providing updated values for literals
+marked with @cpp _() @ce in the running application. All operation is logged
+into the console, with the above example you'd see something like the following
+if the source gets modified while the app is running:
+
+@code{.shell-session}
+Utility::Tweakable::update(): looking for updated _() macros in main.cpp
+Utility::Tweakable::update(): updating _(-9.81f) in main.cpp:14
+Utility::Tweakable::update(): updating _(2.3f) in main.cpp:15
+@endcode
 
 The implementation ensures the runtime-modified values are interpreted exactly
 the same way as if the code would be compiled directly from the modified source
-file. If that's not possible for whatever reason, @ref update() exits with an
-error state.
+file. If that's not possible for whatever reason, @ref update() will emit an
+error and won't update anything --- at which point you can fall back to a
+traditional hot reload approach, for example.
 
 @subsection Utility-Tweakable-usage-scope Using scopes
 
@@ -88,14 +116,14 @@ that, there's the @ref scope() function. It takes a single-parameter function
 containing block. But for every tweakable constant inside, it remembers its
 surrounding scope lambda. Then, during @ref update(), whenever one of these
 constants is changed, the corresponding scope lambda gets called again (with
-the same parameter). So for example this way you can execute part of a
+the same parameter). So for example this way you can execute a part of a
 constructor again in a response to a change of one of its init parameters:
 
 @snippet Utility.cpp Tweakable-scope
 
 Note that lambdas passed to @ref scope() may be called from @ref update() in a
-random order and multiple times, so be sure to handle their reentrancy
-properly.
+random order and multiple times, so make sure to keep all referenced data in
+scope and handle the reentrancy properly.
 
 @subsection Utility-Tweakable-usage-disabling Disabling tweakable values
 
