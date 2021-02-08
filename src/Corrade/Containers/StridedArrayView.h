@@ -638,8 +638,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U> StridedArrayView<dimensions, U> slice(U T::*member) const;
         #else
-        template<class U, class V = T, class = typename std::enable_if<std::is_class<V>::value || std::is_union<V>::value>::type> StridedArrayView<dimensions, U> slice(U V::*member) const {
-            return StridedArrayView<dimensions, U>{_size, _stride, &(static_cast<T*>(_data)->*member)};
+        template<class U, class V = T, class = typename std::enable_if<std::is_class<V>::value || std::is_union<V>::value>::type> StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type> slice(U V::*member) const {
+            return StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>{_size, _stride, &(static_cast<T*>(_data)->*member)};
         }
         #endif
 
