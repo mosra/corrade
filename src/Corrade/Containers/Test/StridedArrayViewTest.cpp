@@ -222,6 +222,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceDimensionDownInvalid();
 
     void sliceMemberPointer();
+    void sliceMemberPointerConstData();
 
     void every();
     void everyNegative();
@@ -425,6 +426,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceDimensionDownInvalid,
 
               &StridedArrayViewTest::sliceMemberPointer,
+              &StridedArrayViewTest::sliceMemberPointerConstData,
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
@@ -2897,6 +2899,29 @@ void StridedArrayViewTest::sliceMemberPointer() {
     CORRADE_COMPARE(second2D.size(), (Containers::StridedArrayView2D<short>::Size{1, 2}));
     CORRADE_COMPARE(second2D.stride(), (Containers::StridedArrayView2D<short>::Stride{sizeof(Data)*2, sizeof(Data)}));
     CORRADE_COMPARE_AS(second2D[0],
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceMemberPointerConstData() {
+    struct Data {
+        float first;
+        short second;
+    };
+
+    const Data data[]{
+        {1.5f, 3},
+        {-0.5f, 11}
+    };
+    Containers::StridedArrayView1D<const Data> view = data;
+
+    /* Here the member pointer is not const but the original view is, so it
+       should correctly add const where needed */
+    Containers::StridedArrayView1D<const short> second = view.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), &view[0].second);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
         Containers::stridedArrayView<short>({3, 11}),
         TestSuite::Compare::Container);
 }
