@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <Corrade/Containers/ArrayView.h>
 #include <Corrade/TestSuite/Tester.h>
 #include <Corrade/Utility/StlMath.h>
 
@@ -40,13 +41,11 @@ struct RoundTest: TestSuite::Tester {
     void test();
 };
 
-enum: std::size_t { RoundDataCount = 5 };
-
 constexpr const struct {
     const char* name;
     float input;
     float expected;
-} RoundData[RoundDataCount] {
+} RoundData[] {
     {"positive down", 3.3f, 3.0f},
     {"positive up", 3.5f, 4.0f},
     {"zero", 0.0f, 0.0f},
@@ -55,7 +54,8 @@ constexpr const struct {
 };
 
 RoundTest::RoundTest() {
-    addInstancedTests({&RoundTest::test}, RoundDataCount);
+    addInstancedTests({&RoundTest::test},
+        Containers::arraySize(RoundData));
 }
 
 void RoundTest::test() {
