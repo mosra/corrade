@@ -84,7 +84,7 @@ custom deleters. Owning counterpart to @ref BasicStringView "StringView".
 
 @section Containers-String-usage Usage
 
-It's recommended to prefer using @ref BasicStringView "StringView" and in most
+It's recommended to prefer using @ref BasicStringView "StringView" in most
 cases, and only create a @ref String instance if you need to extend lifetime of
 the data or mutate it. The @ref String is implicitly convertible from C string
 literals, but the designated way to instantiate a string is using the
