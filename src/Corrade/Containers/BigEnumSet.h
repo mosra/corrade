@@ -106,10 +106,10 @@ class BigEnumSet {
         };
 
         /** @brief Create an empty set */
-        constexpr /*implicit*/ BigEnumSet(): _data{} {}
+        constexpr /*implicit*/ BigEnumSet() noexcept: _data{} {}
 
         /** @brief Create a set from one value */
-        constexpr /*implicit*/ BigEnumSet(T value): BigEnumSet<T, size>{
+        constexpr /*implicit*/ BigEnumSet(T value) noexcept: BigEnumSet<T, size>{
             (CORRADE_CONSTEXPR_ASSERT(static_cast<typename std::underlying_type<T>::type>(value) < size*64,
                 "Containers::BigEnumSet: value" << static_cast<typename std::underlying_type<T>::type>(value) << "too large for a" << size*64 << Utility::Debug::nospace << "-bit storage"
             ), nullptr),
@@ -211,11 +211,11 @@ class BigEnumSet {
     private:
         /* Used by the BigEnumSet(T) constructor, void* to avoid accidental
            matches by users */
-        template<std::size_t ...sequence> constexpr explicit BigEnumSet(void*, T value, Implementation::Sequence<sequence...>): _data{Implementation::bigEnumSetElementValue(sequence, value)...} {}
+        template<std::size_t ...sequence> constexpr explicit BigEnumSet(void*, T value, Implementation::Sequence<sequence...>) noexcept: _data{Implementation::bigEnumSetElementValue(sequence, value)...} {}
 
         /* Used by the *Internal() functions below, void* to avoid accidental
            matches by users */
-        template<class First, class ...Next> constexpr explicit BigEnumSet(void*, First first, Next... next): _data{first, next...} {
+        template<class First, class ...Next> constexpr explicit BigEnumSet(void*, First first, Next... next) noexcept: _data{first, next...} {
             static_assert(sizeof...(Next) + 1 == Size, "improper value count for construction");
         }
 

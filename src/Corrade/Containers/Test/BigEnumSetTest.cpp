@@ -135,6 +135,11 @@ void BigEnumSetTest::constructDefault() {
         CORRADE_ITERATION(i);
         CORRADE_COMPARE(cData[i], 0);
     }
+
+    /* Useful when BigEnumSet{} is a default value in some constructor -- in
+       that case not having it noexcept means the constructor call isn't
+       noexcept either */
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<Features>::value);
 }
 
 constexpr Features CFeatures = Feature::Tested;
@@ -177,6 +182,12 @@ void BigEnumSetTest::construct() {
     CORRADE_COMPARE(cData[1], TestedBit);
     CORRADE_COMPARE(cData[2], 0);
     CORRADE_COMPARE(cData[3], 0);
+
+    /* Useful when a BigEnumSet is a default value in some constructor -- in
+       that case not having it noexcept means the constructor call isn't
+       noexcept either */
+    /** @todo this should be for all the operators as well, sigh */
+    CORRADE_VERIFY((std::is_nothrow_constructible<Features, Feature>::value));
 }
 
 void BigEnumSetTest::constructOutOfRange() {

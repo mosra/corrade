@@ -96,10 +96,10 @@ class EnumSet {
         };
 
         /** @brief Create an empty set */
-        constexpr /*implicit*/ EnumSet(): _value{} {}
+        constexpr /*implicit*/ EnumSet() noexcept: _value{} {}
 
         /** @brief Create a set from one value */
-        constexpr /*implicit*/ EnumSet(T value):
+        constexpr /*implicit*/ EnumSet(T value) noexcept:
             /* Interestingly enough, on GCC 4.8, using _value{} will spam with
                 warning: parameter ‘value’ set but not used [-Wunused-but-set-parameter]
                even though everything works as intended. Using () instead. */
@@ -194,7 +194,7 @@ class EnumSet {
         }
 
     private:
-        constexpr explicit EnumSet(UnderlyingType type): _value{type} {}
+        constexpr explicit EnumSet(UnderlyingType type) noexcept: _value{type} {}
 
         UnderlyingType _value;
 };
