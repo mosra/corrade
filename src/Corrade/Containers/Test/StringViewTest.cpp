@@ -299,7 +299,7 @@ template<class T> void StringViewTest::constructPointer() {
 void StringViewTest::constructPointerNull() {
     StringView view = static_cast<const char*>(nullptr);
     CORRADE_COMPARE(view.size(), 0);
-    CORRADE_COMPARE(view.flags(), StringViewFlags{});
+    CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 }
 
@@ -1042,16 +1042,15 @@ void StringViewTest::partitionFlags() {
         CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Null pointer -- no flags (a literal nullptr would have the Global flag
-       set) */
+    /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
         const char* zero{};
         Array3<StringView> a = StringView{zero}.partition('=');
         CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlags{});
-        CORRADE_COMPARE(a[1].flags(), StringViewFlags{});
-        CORRADE_COMPARE(a[2].flags(), StringViewFlags{});
+        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global);
     }
 }
 

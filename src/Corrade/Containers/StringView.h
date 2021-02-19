@@ -238,12 +238,11 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * Contrary to the behavior of @ref std::string, @p data is allowed to
          * be @cpp nullptr @ce --- in that case an empty view is constructed.
          * If @p data is not @cpp nullptr @ce, the resulting instance has
-         * @ref StringViewFlag::NullTerminated set.
+         * @ref StringViewFlag::NullTerminated set, otherwise it has
+         * @ref StringViewFlag::Global.
          *
          * The @ref BasicStringView(std::nullptr_t) overload (which is a
-         * default constructor) is additionally @cpp constexpr @ce and has
-         * @ref StringViewFlag::Global set instead of
-         * @ref StringViewFlag::NullTerminated.
+         * default constructor) is additionally @cpp constexpr @ce.
          */
         /*implicit*/ BasicStringView(T* data) noexcept;
 
