@@ -67,43 +67,23 @@ std::string trim(std::string string, const Containers::ArrayView<const char> cha
 }
 
 std::string join(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
-    /* Compute size of the resulting string, count also delimiters */
-    std::size_t size = 0;
-    for(const auto& s: strings) size += s.size() + delimiter.size();
-    if(size) size -= delimiter.size();
-
-    /* Reserve memory for the resulting string */
-    std::string result;
-    result.reserve(size);
-
-    /* Join strings */
-    for(const auto& s: strings) {
-        result += s;
-        if(result.size() != size) result.append(delimiter, delimiter.size());
-    }
-
-    return result;
+    /* IDGAF that this has two extra allocations due to the Array being created
+       and then the String converted to a std::string vector, the input
+       std::string instances are MUCH worse */
+    Containers::Array<Containers::StringView> stringViews{strings.size()};
+    for(std::size_t i = 0; i != strings.size(); ++i)
+        stringViews[i] = strings[i];
+    return Containers::StringView{delimiter}.join(stringViews);
 }
 
 std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
-    /* Compute size of the resulting string, count also delimiters */
-    std::size_t size = 0;
-    for(const auto& s: strings) if(!s.empty()) size += s.size() + delimiter.size();
-    if(size) size -= delimiter.size();
-
-    /* Reserve memory for the resulting string */
-    std::string result;
-    result.reserve(size);
-
-    /* Join strings */
-    for(const auto& s: strings) {
-        if(s.empty()) continue;
-
-        result += s;
-        if(result.size() != size) result.append(delimiter, delimiter.size());
-    }
-
-    return result;
+    /* IDGAF that this has two extra allocations due to the Array being created
+       and then the String converted to a std::string vector, the input
+       std::string instances are MUCH worse */
+    Containers::Array<Containers::StringView> stringViews{strings.size()};
+    for(std::size_t i = 0; i != strings.size(); ++i)
+        stringViews[i] = strings[i];
+    return Containers::StringView{delimiter}.joinWithoutEmptyParts(stringViews);
 }
 
 bool beginsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> prefix) {

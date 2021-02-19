@@ -141,6 +141,9 @@ struct StringTest: TestSuite::Tester {
 
     void partition();
 
+    void join();
+    void joinNullViews();
+
     void hasPrefix();
     void hasSuffix();
 
@@ -225,6 +228,9 @@ StringTest::StringTest() {
               &StringTest::splitMultipleCharactersWhitespace,
 
               &StringTest::partition,
+
+              &StringTest::join,
+              &StringTest::joinNullViews,
 
               &StringTest::hasPrefix,
               &StringTest::hasSuffix,
@@ -1387,6 +1393,58 @@ void StringTest::partition() {
             (Array3<MutableStringView>{p1, p2, p3}),
             TestSuite::Compare::Container);
     }
+}
+
+void StringTest::join() {
+    /* Tests also the StringView API as it's better to do it here instead of in
+       StringViewTest where we would need to include String */
+
+    /* Empty */
+    CORRADE_COMPARE(", "_s.join({}), "");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({}), "");
+
+    /* One empty value */
+    CORRADE_COMPARE(", "_s.join({""}), "");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({""}), "");
+
+    /* Two empty values */
+    CORRADE_COMPARE(", "_s.join({"", ""}), ", ");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"", ""}), "");
+
+    /* One value */
+    CORRADE_COMPARE(", "_s.join({"abcdef"}), "abcdef");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"abcdef"}), "abcdef");
+
+    /* Common case */
+    CORRADE_COMPARE(", "_s.join({"ab", "c", "def"}),
+        "ab, c, def");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"ab", "c", "def"}),
+        "ab, c, def");
+
+    /* Empty parts, also the overload directly on a String */
+    CORRADE_COMPARE(", "_s.join({"ab", "", "c", "def", "", ""}),
+        "ab, , c, def, , ");
+    CORRADE_COMPARE(String{", "}.join({"ab", "", "c", "def", "", ""}),
+        "ab, , c, def, , ");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}),
+        "ab, c, def");
+    CORRADE_COMPARE(String{", "}.joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}),
+        "ab, c, def");
+}
+
+void StringTest::joinNullViews() {
+    /* Test that these don't trigger bullying from UBSan (memcpy called with
+       null pointers) */
+
+    /* Null values */
+    CORRADE_COMPARE(", "_s.join({nullptr, nullptr}), ", ");
+    CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({nullptr, nullptr}), "");
+
+    /* Null joiner */
+    CORRADE_COMPARE(StringView{nullptr}.join({"ab", "c", "def"}),
+        "abcdef");
+    CORRADE_COMPARE(StringView{nullptr}.joinWithoutEmptyParts({"ab", "c", "def"}),
+        "abcdef");
 }
 
 void StringTest::hasPrefix() {

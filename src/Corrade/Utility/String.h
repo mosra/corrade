@@ -369,6 +369,8 @@ CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const 
 @brief Join strings with given character
 @param strings      Strings to join
 @param delimiter    Delimiter
+
+@see @ref Containers::StringView::join()
 */
 inline std::string join(const std::vector<std::string>& strings, char delimiter) {
     return Implementation::join(strings, {&delimiter, 1});
@@ -394,6 +396,8 @@ inline std::string join(const std::vector<std::string>& strings, const std::stri
 @brief Join strings with given character and remove empty parts
 @param strings      Strings to join
 @param delimiter    Delimiter
+
+@see @ref Containers::StringView::joinWithoutEmptyParts()
 */
 inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
     return Implementation::joinWithoutEmptyParts(strings, {&delimiter, 1});

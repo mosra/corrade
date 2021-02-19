@@ -1074,6 +1074,14 @@ static_cast<void>(a);
 }
 
 {
+/* [StringView-join] */
+using namespace Containers::Literals;
+
+Containers::String a = ", "_s.join({"hello", "world"});
+/* [StringView-join] */
+}
+
+{
 using namespace Containers::Literals;
 /* [String-literal-null] */
 Containers::String a = "hello\0world!";         // a.size() == 5

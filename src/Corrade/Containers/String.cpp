@@ -463,6 +463,26 @@ Array3<StringView> String::partition(const char separator) const & {
     return StringView{*this}.partition(separator);
 }
 
+String String::join(const ArrayView<const StringView> strings) const {
+    return StringView{*this}.join(strings);
+}
+
+String String::join(const std::initializer_list<StringView> strings) const {
+    /* Doing it this way instead of calling directly into StringView to have
+       the above overload implicitly covered */
+    return join(arrayView(strings));
+}
+
+String String::joinWithoutEmptyParts(const ArrayView<const StringView> strings) const {
+    return StringView{*this}.joinWithoutEmptyParts(strings);
+}
+
+String String::joinWithoutEmptyParts(const std::initializer_list<StringView> strings) const {
+    /* Doing it this way instead of calling directly into StringView to have
+       the above overload implicitly covered */
+    return joinWithoutEmptyParts(arrayView(strings));
+}
+
 bool String::hasPrefix(const StringView prefix) const {
     return StringView{*this}.hasPrefix(prefix);
 }

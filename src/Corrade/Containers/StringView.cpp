@@ -199,6 +199,82 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
     };
 }
 
+template<class T> String BasicStringView<T>::join(const ArrayView<const StringView> strings) const {
+    /* Calculate size of the resulting string including delimiters */
+    const std::size_t delimiterSize = size();
+    std::size_t totalSize = strings.empty() ? 0 : (strings.size() - 1)*delimiterSize;
+    for(const StringView& s: strings) totalSize += s.size();
+
+    /* Reserve memory for the resulting string */
+    String result{NoInit, totalSize};
+
+    /* Join strings */
+    char* out = result.data();
+    char* const end = out + totalSize;
+    for(const StringView& string: strings) {
+        const std::size_t stringSize = string.size();
+        /* Apparently memcpy() can't be called with null pointers, even if size
+           is zero. I call that bullying. */
+        if(stringSize) {
+            std::memcpy(out, string._data, stringSize);
+            out += stringSize;
+        }
+        if(delimiterSize && out != end) {
+            std::memcpy(out, _data, delimiterSize);
+            out += delimiterSize;
+        }
+    }
+
+    CORRADE_INTERNAL_ASSERT(out == end);
+
+    return result;
+}
+
+template<class T> String BasicStringView<T>::join(const std::initializer_list<StringView> strings) const {
+    return join(arrayView(strings));
+}
+
+template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const ArrayView<const StringView> strings) const {
+    /* Calculate size of the resulting string including delimiters */
+    const std::size_t delimiterSize = size();
+    std::size_t totalSize = 0;
+    for(const StringView& string: strings) {
+        if(string.isEmpty()) continue;
+        totalSize += string.size() + delimiterSize;
+    }
+    if(totalSize) totalSize -= delimiterSize;
+
+    /* Reserve memory for the resulting string */
+    String result{NoInit, totalSize};
+
+    /* Join strings */
+    char* out = result.data();
+    char* const end = out + totalSize;
+    for(const StringView& string: strings) {
+        if(string.isEmpty()) continue;
+
+        const std::size_t stringSize = string.size();
+        /* Apparently memcpy() can't be called with null pointers, even if size
+           is zero. I call that bullying. */
+        if(stringSize) {
+            std::memcpy(out, string._data, stringSize);
+            out += stringSize;
+        }
+        if(delimiterSize && out != end) {
+            std::memcpy(out, _data, delimiterSize);
+            out += delimiterSize;
+        }
+    }
+
+    CORRADE_INTERNAL_ASSERT(out == end);
+
+    return result;
+}
+
+template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const std::initializer_list<StringView> strings) const {
+    return joinWithoutEmptyParts(arrayView(strings));
+}
+
 template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
     const std::size_t prefixSize = prefix.size();
     if(size() < prefixSize) return false;

@@ -136,6 +136,8 @@ struct StringViewTest: TestSuite::Tester {
     void partition();
     void partitionFlags();
 
+    /* join() tested in StringTest */
+
     void hasPrefix();
     void hasPrefixEmpty();
     void hasSuffix();

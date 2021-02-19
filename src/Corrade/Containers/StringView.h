@@ -481,6 +481,30 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         Array3<BasicStringView<T>> partition(char separator) const;
 
         /**
+         * @brief Join strings with this view as the delimiter
+         *
+         * Similar in usage to Python's @m_class{m-doc-external} [str.join()](https://docs.python.org/3/library/stdtypes.html#str.join) --- the
+         * following produces @cpp "hello, world" @ce:
+         *
+         * @snippet Containers.cpp StringView-join
+         */
+        String join(ArrayView<const StringView> strings) const;
+
+        /** @overload */
+        String join(std::initializer_list<StringView> strings) const;
+
+        /**
+         * @brief Join strings with this view as the delimiter, skipping empty parts
+         *
+         * Like @ref join(), but empty views in @p strings are skipped instead
+         * of causing multiple repeated delimiters in the output.
+         */
+        String joinWithoutEmptyParts(ArrayView<const StringView> strings) const;
+
+        /** @overload */
+        String joinWithoutEmptyParts(std::initializer_list<StringView> strings) const;
+
+        /**
          * @brief Whether the string begins with given prefix
          *
          * For an empty string returns @cpp true @ce only if @p prefix is empty
