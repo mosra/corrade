@@ -178,7 +178,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Default constructor
          *
          * A default-constructed instance has @ref StringViewFlag::Global set.
-         * @ref BasicStringView(T*)
+         * @see @ref BasicStringView(T*, StringViewFlags)
          */
         constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _size{std::size_t(StringViewFlag::Global)} {}
 
@@ -200,6 +200,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * their default. On the other hand, C string literals are always
          * global and null-terminated --- for those, the recommended way is to
          * use the @link operator""_s() @endlink literal instead.
+         * @see @ref BasicStringView(T*, StringViewFlags)
          */
         constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _size{
             (CORRADE_CONSTEXPR_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
@@ -240,14 +241,18 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * Contrary to the behavior of @ref std::string, @p data is allowed to
          * be @cpp nullptr @ce --- in that case an empty view is constructed.
-         * If @p data is not @cpp nullptr @ce, the resulting instance has
-         * @ref StringViewFlag::NullTerminated set, otherwise it has
-         * @ref StringViewFlag::Global.
+         *
+         * Calls @ref BasicStringView(T*, std::size_t, StringViewFlags) with
+         * @p size set to @ref std::strlen() of @p data if @p data is not
+         * @cpp nullptr @ce. If @p data is @cpp nullptr @ce, @p size is set to
+         * @cpp 0 @ce. In addition to @p extraFlags, if @p data is not
+         * @cpp nullptr @ce, @ref StringViewFlag::NullTerminated is set,
+         * otherwise @ref StringViewFlag::Global is set.
          *
          * The @ref BasicStringView(std::nullptr_t) overload (which is a
          * default constructor) is additionally @cpp constexpr @ce.
          */
-        /*implicit*/ BasicStringView(T* data) noexcept;
+        /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept;
 
         /**
          * @brief Construct a view on an external type / from an external representation

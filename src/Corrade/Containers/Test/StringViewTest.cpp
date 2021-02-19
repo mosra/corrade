@@ -101,6 +101,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructConstexpr();
     template<class T> void constructPointer();
     void constructPointerNull();
+    void constructPointerFlags();
     void constructEmpty();
     void constructNullptr();
     void constructFromMutable();
@@ -166,6 +167,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructPointer<const char>,
               &StringViewTest::constructPointer<char>,
               &StringViewTest::constructPointerNull,
+              &StringViewTest::constructPointerFlags,
               &StringViewTest::constructEmpty,
               &StringViewTest::constructNullptr,
               &StringViewTest::constructFromMutable,
@@ -303,6 +305,14 @@ void StringViewTest::constructPointerNull() {
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
+}
+
+void StringViewTest::constructPointerFlags() {
+    char string[] = "hello\0world!";
+    StringView view{string, StringViewFlag::Global};
+    CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
+    CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+    CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
 }
 
 void StringViewTest::constructEmpty() {
