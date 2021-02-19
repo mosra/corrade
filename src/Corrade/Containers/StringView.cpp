@@ -39,7 +39,7 @@
 
 namespace Corrade { namespace Containers {
 
-template<class T> BasicStringView<T>::BasicStringView(T* data) noexcept: BasicStringView{data,
+template<class T> BasicStringView<T>::BasicStringView(T* const data) noexcept: BasicStringView{data,
     data ? std::strlen(data) : 0,
     data ? StringViewFlag::NullTerminated : StringViewFlags{}} {}
 
@@ -49,7 +49,7 @@ template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: 
    needs an explicit export otherwise the symbol doesn't get exported. */
 template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
 
-template<class T> BasicStringView<T>::BasicStringView(ArrayView<T> other, StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
+template<class T> BasicStringView<T>::BasicStringView(const ArrayView<T> other, const StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
 template<class T> BasicStringView<T>::operator ArrayView<T>() const noexcept {
     return {_data, size()};
