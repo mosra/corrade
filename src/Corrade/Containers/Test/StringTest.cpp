@@ -88,6 +88,16 @@ struct StringTest: TestSuite::Tester {
     void constructPointerSizeNullNonZero();
     void constructPointerSizeTooLarge();
 
+    void constructValueInit();
+    void constructValueInitSmall();
+    void constructValueInitTooLarge();
+    void constructDirectInit();
+    void constructDirectInitSmall();
+    void constructDirectInitTooLarge();
+    void constructNoInit();
+    void constructNoInitSmall();
+    void constructNoInitTooLarge();
+
     void constructNullTerminatedGlobalView();
 
     void convertStringView();
@@ -162,6 +172,16 @@ StringTest::StringTest() {
               &StringTest::constructPointerSizeNullZero,
               &StringTest::constructPointerSizeNullNonZero,
               &StringTest::constructPointerSizeTooLarge,
+
+              &StringTest::constructValueInit,
+              &StringTest::constructValueInitSmall,
+              &StringTest::constructValueInitTooLarge,
+              &StringTest::constructDirectInit,
+              &StringTest::constructDirectInitSmall,
+              &StringTest::constructDirectInitTooLarge,
+              &StringTest::constructNoInit,
+              &StringTest::constructNoInitSmall,
+              &StringTest::constructNoInitTooLarge,
 
               &StringTest::constructNullTerminatedGlobalView,
 
@@ -419,6 +439,112 @@ void StringTest::constructPointerSizeTooLarge() {
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n"
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n"
+        "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+}
+
+void StringTest::constructValueInit() {
+    String a{ValueInit, 35};
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.size(), 35);
+    CORRADE_COMPARE(a.data()[0], '\0');
+    CORRADE_COMPARE(a.data()[a.size() - 1], '\0');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+}
+
+void StringTest::constructValueInitSmall() {
+    String a{ValueInit, 10};
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a.data()[0], '\0');
+    CORRADE_COMPARE(a.data()[a.size() - 1], '\0');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
+void StringTest::constructValueInitTooLarge() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    String a{ValueInit, ~std::size_t{}};
+    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+        "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+}
+
+void StringTest::constructDirectInit() {
+    String a{DirectInit, 35, 'X'};
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.size(), 35);
+    CORRADE_COMPARE(a.data()[0], 'X');
+    CORRADE_COMPARE(a.data()[a.size() - 1], 'X');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+}
+
+void StringTest::constructDirectInitSmall() {
+    String a{DirectInit, 10, 'X'};
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a.data()[0], 'X');
+    CORRADE_COMPARE(a.data()[a.size() - 1], 'X');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
+void StringTest::constructDirectInitTooLarge() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    String a{DirectInit, ~std::size_t{}, 'X'};
+    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+        "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+}
+
+void StringTest::constructNoInit() {
+    String a{NoInit, 35};
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.size(), 35);
+    /* Contents can be just anything */
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+}
+
+void StringTest::constructNoInitSmall() {
+    String a{NoInit, 10};
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    /* Contents can be just anything */
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
+void StringTest::constructNoInitTooLarge() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    String a{NoInit, ~std::size_t{}};
+    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
 }
 

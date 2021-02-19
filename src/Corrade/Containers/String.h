@@ -129,6 +129,24 @@ always allocates.
     should be more than enough for real-world strings (as opposed to arbitrary
     binary data), if you need more please use an @ref Array instead.
 
+@section Containers-String-initialization String initialization
+
+In addition to creating a @ref String from an existing string (literal) or
+wrapping an externally allocated memory as mentioned above, explicit
+initialization constructors are provided, similarly to the @ref Array class:
+
+-   @ref String(ValueInitT, std::size_t) zero-initializes the string, meaning
+    each of its characters is @cpp '\0' @ce. For heap-allocated strings this is
+    equivalent to @cpp new char[size + 1]{} @ce (the one extra character is
+    for the null terminator).
+-   @ref String(DirectInitT, std::size_t, char) fills the whole string with
+    given character and zero-initializes the null terminator. For
+    heap-allocated strings this is equivalent to
+    @cpp new char[size + 1]{c, c, c, …, '\0'} @ce.
+-   @ref String(NoInitT, std::size_t) keeps the contents uninitialized, except
+    for the null terminator. Equivalent to @cpp new char[size + 1] @ce followed
+    by @cpp string[size] = '\0' @ce.
+
 @section Containers-String-stl STL compatibility
 
 Instances of @ref String are *implicitly* convertible from and to
@@ -303,6 +321,38 @@ class CORRADE_UTILITY_EXPORT String {
          * strings, @p data *can't* be @cpp nullptr @ce.
          */
         explicit String(std::nullptr_t, std::size_t size, Deleter deleter) noexcept = delete;
+
+        /**
+         * @brief Create a zero-initialized string of given size
+         * @param size      Size excluding the null terminator
+         *
+         * A @ref DefaultInitT overload isn't provided to prevent accidents ---
+         * its behavior would be the same to @ref String(NoInitT, std::size_t).
+         * @see @ref String(DirectInitT, std::size_t, char)
+         */
+        explicit String(ValueInitT, std::size_t size);
+
+        /**
+         * @brief Create a string initialized to a particular character
+         * @param size      Size excluding the null terminator
+         * @param c         Character value
+         *
+         * @see @ref String(ValueInitT, std::size_t),
+         *      @ref String(NoInitT, std::size_t)
+         */
+        explicit String(DirectInitT, std::size_t size, char c);
+
+        /**
+         * @brief Create an uninitialized string
+         * @param size      Size excluding the null terminator
+         *
+         * While the string contents are left untouched, the null terminator
+         * *does* get initialized to @cpp '\0' @ce. Useful if you're going to
+         * overwrite the contents anyway.
+         */
+        explicit String(NoInitT, std::size_t size);
+
+        /** @todo combined AllocatedInit + Value/Direct/NoInit constructors */
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -588,6 +638,7 @@ class CORRADE_UTILITY_EXPORT String {
         char* release();
 
     private:
+        CORRADE_UTILITY_LOCAL void construct(NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();
         CORRADE_UTILITY_LOCAL std::pair<const char*, std::size_t> dataInternal() const;

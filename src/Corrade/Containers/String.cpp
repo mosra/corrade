@@ -59,24 +59,32 @@ String String::nullTerminatedGlobalView(StringView view) {
     return String{view};
 }
 
-inline void String::construct(const char* data, std::size_t size) {
+inline void String::construct(NoInitT, const std::size_t size) {
+    if(size < Implementation::SmallStringSize) {
+        _small.data[size] = '\0';
+        _small.size = size | SmallSize;
+    } else {
+        _large.data = new char[size + 1];
+        _large.data[size] = '\0';
+        _large.size = size;
+        _large.deleter = nullptr;
+    }
+}
+
+inline void String::construct(const char* const data, const std::size_t size) {
+    construct(NoInit, size);
+
     /* If the size is small enough for SSO, use that. Not using <= because we
        need to store the null terminator as well. */
     if(size < Implementation::SmallStringSize) {
         /* Apparently memcpy() can't be called with null pointers, even if size
            is zero. I call that bullying. */
         if(size) std::memcpy(_small.data, data, size);
-        _small.data[size] = '\0';
-        _small.size = size | SmallSize;
 
     /* Otherwise allocate. Assuming the size is small enough -- this should
        have been checked in the caller already. */
     } else {
-        _large.data = new char[size+1];
         std::memcpy(_large.data, data, size);
-        _large.data[size] = '\0';
-        _large.size = size;
-        _large.deleter = nullptr;
     }
 }
 
@@ -168,6 +176,41 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     _large.data = data;
     _large.size = size;
     _large.deleter = deleter;
+}
+
+String::String(ValueInitT, const std::size_t size): _large{} {
+    CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
+        "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+
+    if(size < Implementation::SmallStringSize) {
+        /* Everything already zero-init'd in the constructor init list */
+        _small.size = size | SmallSize;
+    } else {
+        _large.data = new char[size + 1]{};
+        _large.size = size;
+        _large.deleter = nullptr;
+    }
+}
+
+String::String(DirectInitT, const std::size_t size, const char c): String{NoInit, size} {
+    #ifdef CORRADE_GRACEFUL_ASSERT
+    /* If the NoInit constructor asserted, don't attempt to memset */
+    if(size >= Implementation::SmallStringSize && !_large.data) return;
+    #endif
+
+    std::memset(size < Implementation::SmallStringSize ? _small.data : _large.data, c, size);
+}
+
+String::String(NoInitT, const std::size_t size)
+    #ifdef CORRADE_GRACEFUL_ASSERT
+    /* Zero-init the contents so the destructor doesn't crash if we assert here */
+    : _large{}
+    #endif
+{
+    CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
+        "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+
+    construct(NoInit, size);
 }
 
 String::~String() { destruct(); }
