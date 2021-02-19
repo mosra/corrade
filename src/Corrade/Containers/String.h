@@ -320,7 +320,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Since the @ref String class provides a guarantee of null-terminated
          * strings, @p data *can't* be @cpp nullptr @ce.
          */
-        explicit String(std::nullptr_t, std::size_t size, Deleter deleter) noexcept = delete;
+        explicit String(std::nullptr_t, std::size_t size, Deleter deleter) = delete;
 
         /**
          * @brief Create a zero-initialized string of given size
