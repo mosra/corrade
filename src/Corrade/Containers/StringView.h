@@ -191,9 +191,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * If @ref StringViewFlag::Global is set, the data pointer is assumed
          * to never go out of scope, which can avoid copies and allocations in
          * code using the instance. If @ref StringViewFlag::NullTerminated is
-         * set, it's assumed that @cpp data[size] == '\0' @ce. That can avoid
-         * copies and allocations in code that passes such string to APIs that
-         * expect null-terminated strings (such as @ref std::fopen()).
+         * set, it's expected that `data` is not @cpp nullptr @ce and
+         * @cpp data[size] == '\0' @ce. That can avoid copies and allocations
+         * in code that passes such string to APIs that expect null-terminated
+         * strings (such as @ref std::fopen()).
          *
          * If you're unsure about data origin, the safe bet is to keep flags at
          * their default. On the other hand, C string literals are always
@@ -203,6 +204,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _size{
             (CORRADE_CONSTEXPR_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
+            CORRADE_CONSTEXPR_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
+                "Containers::StringView: can't use StringViewFlag::NullTerminated with null data"),
             size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}
 
         /**

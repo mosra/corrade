@@ -107,6 +107,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructLiteral();
     void constructLiteralEmpty();
     void constructTooLarge();
+    void constructNullptrNullTerminated();
 
     template<class T> void convertArrayView();
     template<class T> void convertVoidArrayView();
@@ -171,6 +172,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructLiteral,
               &StringViewTest::constructLiteralEmpty,
               &StringViewTest::constructTooLarge,
+              &StringViewTest::constructNullptrNullTerminated,
 
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
@@ -371,6 +373,18 @@ void StringViewTest::constructTooLarge() {
     CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
         "Containers::StringView: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::StringView: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+}
+
+void StringViewTest::constructNullptrNullTerminated() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    StringView{nullptr, 0, StringViewFlag::NullTerminated};
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView: can't use StringViewFlag::NullTerminated with null data\n");
 }
 
 template<class T> void StringViewTest::convertArrayView() {
