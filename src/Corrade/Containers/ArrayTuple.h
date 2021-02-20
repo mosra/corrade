@@ -98,8 +98,9 @@ offloaded to disk in case of a memory pressure:
 
 @snippet Containers.cpp ArrayTuple-usage-mmap
 
-See the @ref ArrayTuple(ArrayView<const Item>, A) constructor documentation for
-a detailed description of the allocator and deleter signature.
+See the @ref ArrayTuple(const ArrayView<const Item>&, A) constructor
+documentation for a detailed description of the allocator and deleter
+signature.
 */
 class CORRADE_UTILITY_EXPORT ArrayTuple {
     public:
@@ -225,7 +226,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * deleter, as the function has to perform destructor calls for
          * non-trivially-destructible array items before to executing the
          * actual memory deleter.
-         * @see @ref ArrayTuple(ArrayView<const Item>, A)
+         * @see @ref ArrayTuple(const ArrayView<const Item>&, A)
          */
         Deleter deleter() const { return _deleter; }
 
