@@ -409,7 +409,10 @@ std::string StringViewConverter<const char, std::string>::to(StringView other) {
 }
 
 MutableStringView StringViewConverter<char, std::string>::from(std::string& other) {
-    return MutableStringView{other.size() ? &other[0] : nullptr, other.size(), StringViewFlag::NullTerminated};
+    /* .data() returns a const pointer until C++17, so have to use &other[0].
+       It's guaranteed to return a pointer to a single null character if the
+       string is empty. */
+    return MutableStringView{&other[0], other.size(), StringViewFlag::NullTerminated};
 }
 
 std::string StringViewConverter<char, std::string>::to(MutableStringView other) {
