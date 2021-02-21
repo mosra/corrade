@@ -215,46 +215,40 @@ int main() {
 
 {
 /* [Array-usage] */
-// Create default-initialized array with 5 integers and set them to some value
+/* Create an array with 5 integers and set them to some value */
 Containers::Array<int> a{5};
 int b = 0;
-for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
+for(auto& i: a) i = b++;        // a == {0, 1, 2, 3, 4}
 
-// Create array from given values
-Containers::Array<int> c{Containers::InPlaceInit, {3, 18, -157, 0}};
-c[3] = 25; // b = {3, 18, -157, 25}
+/* Create an array from given values */
+auto c = Containers::array<int>({3, 18, -157, 0});
+c[3] = 25;                      // c == {3, 18, -157, 25}
 /* [Array-usage] */
 }
 
 {
-/* [Array-initialization] */
-// These are equivalent
+/* [Array-usage-initialization] */
+/* These two are equivalent */
 Containers::Array<int> a1{5};
-Containers::Array<int> a2{Containers::DefaultInit, 5};
+Containers::Array<int> a2{Containers::ValueInit, 5};
 
-// Array of 100 zeros
-Containers::Array<int> b{Containers::ValueInit, 100};
+/* Array of 100 integers, uninitialized */
+Containers::Array<int> b{Containers::NoInit, 100};
 
-// Array of type with no default constructor
+/* Array of a type with no default constructor. All five elements will be
+   initialized to {5.2f, 0.5f, 1.0f}. */
 struct Vec3 {
     explicit Vec3(float, float, float) {}
 };
 Containers::Array<Vec3> c{Containers::DirectInit, 5, 5.2f, 0.4f, 1.0f};
 
-// Array from an initializer list
-Containers::Array<int> d{Containers::InPlaceInit, {1, 2, 3, 4, -5, 0, 42}};
-
-// Manual construction of each element
-struct Foo {
-    explicit Foo(int) {}
-};
-Containers::Array<Foo> e{Containers::NoInit, 5};
-int index = 0;
-for(Foo& f: e) new(&f) Foo(index++);
-/* [Array-initialization] */
+/* Array from an initializer list. These two are equivalent. */
+Containers::Array<int> d1{Containers::InPlaceInit, {1, 2, 3, 4, -5, 0, 42}};
+auto d2 = Containers::array<int>({1, 2, 3, 4, -5, 0, 42});
+/* [Array-usage-initialization] */
 }
 
-/* [Array-wrapping] */
+/* [Array-usage-wrapping] */
 {
     int* data = reinterpret_cast<int*>(std::malloc(25*sizeof(int)));
 
@@ -262,22 +256,15 @@ for(Foo& f: e) new(&f) Foo(index++);
     Containers::Array<int> array{data, 25,
         [](int* data, std::size_t) { std::free(data); }};
 }
-/* [Array-wrapping] */
+/* [Array-usage-wrapping] */
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 {
 typedef std::uint64_t GLuint;
 void* glMapNamedBuffer(GLuint, int);
 void glUnmapNamedBuffer(GLuint);
 #define GL_READ_WRITE 0
 std::size_t bufferSize{};
-/* [Array-deleter] */
+/* [Array-usage-deleter] */
 class UnmapBuffer {
     public:
         explicit UnmapBuffer(GLuint id): _id{id} {}
@@ -287,16 +274,13 @@ class UnmapBuffer {
         GLuint _id;
 };
 
-GLuint buffer;
+GLuint buffer = DOXYGEN_IGNORE({});
 char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
 
 // Will unmap the buffer on destruction
 Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}};
-/* [Array-deleter] */
+/* [Array-usage-deleter] */
 }
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 {
 struct Face {
@@ -332,6 +316,19 @@ a[80] = 5; // Even though the memory is there, this causes ASan to complain
 }
 
 {
+/* [Array-NoInit] */
+struct Foo {
+    explicit Foo(int) {}
+};
+
+Containers::Array<Foo> e{Containers::NoInit, 5};
+
+int index = 0;
+for(Foo& f: e) new(&f) Foo{index++};
+/* [Array-NoInit] */
+}
+
+{
 /* [arrayAllocatorCast] */
 Containers::Array<char> data;
 Containers::Array<float> floats =
@@ -362,50 +359,85 @@ static_cast<void>(a);
 static_cast<void>(b);
 }
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 {
 /* [ArrayView-usage] */
-// `a` gets implicitly converted to const array view
-void printArray(Containers::ArrayView<const float> values);
-Containers::Array<float> a;
-printArray(a);
+/* Convert from a compile-time-sized C array */
+int data1[]{5, 17, -36, 185};
+Containers::ArrayView<int> a = data1;               // a.size() == 4
 
-// Wrapping compile-time array with size information
-constexpr const int data[]{ 5, 17, -36, 185 };
-Containers::ArrayView<const int> b = data; // b.size() == 4
+/* Create a const view on a mutable Array */
+Containers::Array<int> data2{15};
+Containers::ArrayView<const int> b = data2;         // b.size() == 15
 
-// Wrapping general array with size information
-const int* data2;
-Containers::ArrayView<const int> c{data2, 3};
+/* Construct from a pointer and explicit size */
+float* data3 = DOXYGEN_IGNORE({});
+Containers::ArrayView<float> c{data3, 1337};        // c.size() == 1337
 /* [ArrayView-usage] */
+static_cast<void>(a);
 static_cast<void>(b);
-}
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-{
-/* [ArrayView-void-usage] */
-Containers::Array<int> a(5);
-
-Containers::ArrayView<void> b(a); // b.size() == 20
-/* [ArrayView-void-usage] */
-static_cast<void>(b);
+static_cast<void>(c);
 }
 
 {
-/* [ArrayView-const-void-usage] */
-Containers::Array<int> a(5);
+int data1[]{5, 17, -36, 185};
+/* [ArrayView-usage-void] */
+Containers::ArrayView<const int> d = data1;         // d.size() == 4
+Containers::ArrayView<const void> e = d;            // e.size() == 16
+/* [ArrayView-usage-void] */
+static_cast<void>(e);
+}
 
-Containers::ArrayView<const void> b(a); // b.size() == 20
-/* [ArrayView-const-void-usage] */
+{
+/* [ArrayView-usage-access] */
+Containers::ArrayView<int> view = DOXYGEN_IGNORE({});
+
+if(!view.empty()) {
+    int min = view.front();
+    for(int i: view) if(i < min) min = i;
+
+    DOXYGEN_IGNORE(static_cast<void>(min);)
+}
+
+if(view.size() > 2 && view[2] < 3) view[2] += 5;
+/* [ArrayView-usage-access] */
+}
+
+{
+/* [ArrayView-usage-slicing] */
+int data[]{0, 10, 20, 30, 40, 50, 60};
+Containers::ArrayView<int> view = data;
+
+Containers::ArrayView<int> a = view.slice(3, 5);    // {30, 40, 50}
+Containers::ArrayView<int> b = view.prefix(4);      // {0, 10, 20, 30}
+Containers::ArrayView<int> c = view.suffix(2);      // {50, 60}
+Containers::ArrayView<int> d = view.except(2);      // {0, 10, 20, 30, 40}
+/* [ArrayView-usage-slicing] */
+static_cast<void>(a);
 static_cast<void>(b);
+static_cast<void>(c);
+static_cast<void>(d);
+
+/* [ArrayView-usage-slicing2] */
+int* end = view;
+while(*end < 25) ++end;
+Containers::ArrayView<int> numbersLessThan25 = view.prefix(end); // {0, 10, 20}
+
+int* fortyfive = nullptr;
+for(int& i: view) if(i == 45) {
+    fortyfive = &i;
+    break;
+}
+Containers::ArrayView<int> fortyfiveAndBeyond = view.suffix(fortyfive); // {}
+/* [ArrayView-usage-slicing2] */
+static_cast<void>(numbersLessThan25);
+static_cast<void>(fortyfiveAndBeyond);
+
+/* [ArrayView-usage-slicing3] */
+int min3(Containers::ArrayView3<const int>);
+
+int minOfFirstThree = min3(view.prefix<3>());
+/* [ArrayView-usage-slicing3] */
+static_cast<void>(minOfFirstThree);
 }
 
 #ifdef __clang__
@@ -450,18 +482,18 @@ static_cast<void>(b);
 
 {
 /* [arrayCast] */
-std::int32_t data[15];
-auto a = Containers::arrayView(data); // a.size() == 15
-auto b = Containers::arrayCast<char>(a); // b.size() == 60
+int data[15];
+auto a = Containers::arrayView(data);           // a.size() == 15
+auto b = Containers::arrayCast<char>(a);        // b.size() == 60
 /* [arrayCast] */
 static_cast<void>(b);
 }
 
 {
 /* [arraySize] */
-std::int32_t a[5];
+int data[15];
 
-std::size_t size = Containers::arraySize(a); // size == 5
+std::size_t size = Containers::arraySize(data); // size == 5
 /* [arraySize] */
 static_cast<void>(size);
 }
@@ -563,9 +595,9 @@ static_cast<void>(threeInts);
 #endif
 {
 /* [staticArrayView] */
-std::uint32_t* data;
+int* data;
 
-Containers::StaticArrayView<5, std::uint32_t> a{data};
+Containers::StaticArrayView<5, int> a{data};
 auto b = Containers::staticArrayView<5>(data);
 /* [staticArrayView] */
 static_cast<void>(b);
@@ -576,9 +608,9 @@ static_cast<void>(b);
 
 {
 /* [staticArrayView-array] */
-std::uint32_t data[15];
+int data[15];
 
-Containers::StaticArrayView<15, std::uint32_t> a{data};
+Containers::StaticArrayView<15, int> a{data};
 auto b = Containers::staticArrayView(data);
 /* [staticArrayView-array] */
 static_cast<void>(b);
@@ -586,7 +618,7 @@ static_cast<void>(b);
 
 {
 /* [arrayCast-StaticArrayView] */
-std::int32_t data[15];
+int data[15];
 auto a = Containers::staticArrayView(data); // a.size() == 15
 Containers::StaticArrayView<60, char> b = Containers::arrayCast<char>(a);
 /* [arrayCast-StaticArrayView] */
@@ -595,7 +627,7 @@ static_cast<void>(b);
 
 {
 /* [arrayCast-StaticArrayView-array] */
-std::int32_t data[15];
+int data[15];
 auto a = Containers::arrayCast<char>(data); // a.size() == 60
 /* [arrayCast-StaticArrayView-array] */
 static_cast<void>(a);
@@ -768,51 +800,57 @@ FILE* f{};
 
 {
 /* [StaticArray-usage] */
-// Create default-initialized array with 5 integers and set them to some value
+/* Create an array with 5 integers and set them to some value */
 Containers::StaticArray<5, int> a;
 int b = 0;
-for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
+for(auto& i: a) i = b++;            // a == {0, 1, 2, 3, 4}
 
-// Create array from given values
+/* Create an array from given values */
 Containers::StaticArray<4, int> c{3, 18, -157, 0};
-c[3] = 25; // b = {3, 18, -157, 25}
+c[3] = 25;                          // c == {3, 18, -157, 25}
 /* [StaticArray-usage] */
 }
 
 {
-/* [StaticArray-initialization] */
-// These two are equivalent
+/* [StaticArray-usage-initialization] */
+/* These two are equivalent */
 Containers::StaticArray<5, int> a1;
 Containers::StaticArray<5, int> a2{Containers::DefaultInit};
 
-// Array of 100 zeros
-Containers::StaticArray<100, int> b{Containers::ValueInit};
+/* Array of 100 integers, uninitialized */
+Containers::StaticArray<100, int> b{Containers::NoInit};
 
-// Array of 4 values initialized in-place (these two are equivalent)
+/* Array of 4 values initialized in-place. These two are equivalent. */
 Containers::StaticArray<4, int> c1{3, 18, -157, 0};
 Containers::StaticArray<4, int> c2{Containers::InPlaceInit, 3, 18, -157, 0};
 
-// Array of type with no default constructor
+/* Array of a type with no default constructor. All five elements will be
+   initialized to {5.2f, 0.5f, 1.0f}. */
 struct Vec3 {
     explicit Vec3(float, float, float) {}
 };
 Containers::StaticArray<5, Vec3> d{Containers::DirectInit, 5.2f, 0.4f, 1.0f};
+/* [StaticArray-usage-initialization] */
+}
 
-// Manual construction of each element
+{
+/* [StaticArray-NoInit] */
 struct Foo {
     explicit Foo(int) {}
 };
+
 Containers::StaticArray<5, Foo> e{Containers::NoInit};
+
 int index = 0;
-for(Foo& f: e) new(&f) Foo(index++);
-/* [StaticArray-initialization] */
+for(Foo& f: e) new(&f) Foo{index++};
+/* [StaticArray-NoInit] */
 }
 
 {
 /* [StaticArray-arrayView] */
-Containers::StaticArray<5, std::uint32_t> data;
+Containers::StaticArray<5, int> data;
 
-Containers::ArrayView<std::uint32_t> a{data};
+Containers::ArrayView<int> a{data};
 auto b = Containers::arrayView(data);
 /* [StaticArray-arrayView] */
 static_cast<void>(a);
@@ -821,9 +859,9 @@ static_cast<void>(b);
 
 {
 /* [StaticArray-arrayView-const] */
-const Containers::StaticArray<5, std::uint32_t> data;
+const Containers::StaticArray<5, int> data;
 
-Containers::ArrayView<const std::uint32_t> a{data};
+Containers::ArrayView<const int> a{data};
 auto b = Containers::arrayView(data);
 /* [StaticArray-arrayView-const] */
 static_cast<void>(a);
@@ -832,9 +870,9 @@ static_cast<void>(b);
 
 {
 /* [StaticArray-staticArrayView] */
-Containers::StaticArray<5, std::uint32_t> data;
+Containers::StaticArray<5, int> data;
 
-Containers::StaticArrayView<5, std::uint32_t> a{data};
+Containers::StaticArrayView<5, int> a{data};
 auto b = Containers::staticArrayView(data);
 /* [StaticArray-staticArrayView] */
 static_cast<void>(a);
@@ -843,9 +881,9 @@ static_cast<void>(b);
 
 {
 /* [StaticArray-staticArrayView-const] */
-const Containers::StaticArray<5, std::uint32_t> data;
+const Containers::StaticArray<5, int> data;
 
-Containers::StaticArrayView<5, const std::uint32_t> a{data};
+Containers::StaticArrayView<5, const int> a{data};
 auto b = Containers::staticArrayView(data);
 /* [StaticArray-staticArrayView-const] */
 static_cast<void>(a);

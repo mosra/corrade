@@ -55,24 +55,93 @@ namespace Implementation {
 }
 
 /**
-@brief Array view with size information
+@brief Array view
 
-Immutable wrapper around continuous range of data, similar to a dynamic
-@ref std::span from C++2a. Unlike @ref Array this class doesn't do any memory
-management. Main use case is passing array along with size information to
-functions etc. If @p T is @cpp const @ce type, the class is implicitly
-constructible also from const references to @ref Array and @ref ArrayView of
-non-const types. There's also a variant with compile-time size information
-called @ref StaticArrayView.
+A non-owning wrapper around a sized continuous range of data, similar to a
+dynamic @ref std::span from C++2a. For a variant with compile-time size
+information see @ref StaticArrayView, for sparse and multi-dimensional views
+see @ref StridedArrayView. An owning version of this container is an @ref Array.
 
-Usage example:
+@section Containers-ArrayView-usage Usage
+
+The class is implicitly convertible from compile-time-sized C arrays and
+@ref Array / @ref StaticArray instances of the same underlying type; it's also
+possible to implicitly create a @cpp const @ce view on a mutable array.
 
 @snippet Containers.cpp ArrayView-usage
 
 @attention Note that when using @cpp Containers::ArrayView<const char> @ce, C
     string literals (such as @cpp "hello" @ce) are implicitly convertible to it
     and the size includes also the zero-terminator (thus in case of
-    @cpp "hello" @ce the size would be 6, not 5, as one might expect).
+    @cpp "hello" @ce the size would be 6, not 5, as one might expect). For
+    string views you're encouraged to use the @ref BasicStringView "StringView"
+    class instead.
+
+In addition there are @ref ArrayView<void> / @ref ArrayView<const void>
+specializations, which are meant to be used in cases where APIs accept opaque
+blobs of data, such as writing data to a file. These provide no element access,
+only data pointer and size in bytes, and an @ref ArrayView of any type is
+convertible to them:
+
+@snippet Containers.cpp ArrayView-usage-void
+
+@subsection Containers-ArrayView-usage-access Data access
+
+The class provides the usual C++ container interface --- @ref data(),
+@ref size() and @ref empty(); subscript access via @ref operator T*(), range
+access via @ref begin() / @ref end(), and their overloads and acess to the
+@ref front() and @ref back() element, if the view is non-empty. The view itself
+is immutable and thus all member functions are @cpp const @ce, but if the
+underlying type is mutable the references and pointers returned from these are
+mutable as well.
+
+@snippet Containers.cpp ArrayView-usage-access
+
+@subsection Containers-ArrayView-usage-slicing View slicing
+
+Except for the usual element access via @ref begin(), @ref end() and
+@ref operator T*() that provides also access via @cpp [] @ce, there's a
+collection of slicing functions --- @ref slice(), @ref prefix(), @ref suffix()
+and @ref except():
+
+@snippet Containers.cpp ArrayView-usage-slicing
+
+All of these accept both an index and a pointer as the begin/end arguments. As
+a special case, if @ref prefix() and @ref suffix() are called with
+@cpp nullptr @ce, they return a zero-sized @cpp nullptr @ce view. Both are
+useful when doing various kinds of searches and propagating failure states, for
+example as shown below:
+
+@snippet Containers.cpp ArrayView-usage-slicing2
+
+Finally, the slicing operations provide a conversion to
+@ref StaticArrayView (or its convenience typedefs @ref ArrayView2,
+@ref ArrayView3 etc.). Compile-time-sized arrays are useful for APIs that want
+to enforce a particular number of elements at compile time:
+
+@snippet Containers.cpp ArrayView-usage-slicing3
+
+All slice operations fire an assert if the arguments are out of range, for
+@ref StaticArrayView conversions the checks are done at compile time when
+possible.
+
+@subsection Containers-ArrayView-usage-convenience Convenience functions and type conversion
+
+To avoid having to specify the full type when constructing a view or when you
+need to disambiguate in a function call, the @ref arrayView() (or
+@ref staticArrayView()) function can be used. These also provide a safe
+conversion from @ref std::initializer_list that avoids the
+@ref Containers-ArrayView-initializer-list "pitfalls described below"  As a
+safer alternative to a @cpp reinterpret_cast @ce, @ref arrayCast() performs a
+cast, recalculates the view size accordingly and additionally checks that the
+type change makes sense for given type combination and array size:
+
+@snippet Containers.cpp arrayCast
+
+Finally, @ref arraySize() can be used to query size of compile-time C arrays in
+a failproof way:
+
+@snippet Containers.cpp arraySize
 
 @section Containers-ArrayView-stl STL compatibility
 
@@ -147,9 +216,10 @@ Example:
     @endcode
 
 Other array classes provide a subset of this STL compatibility as well, see the
-documentation of @ref Containers-Array-stl "Array",
-@ref Containers-StaticArray-stl "StaticArray" and
-@ref Containers-StridedArrayView-stl "StridedArrayView" for more information.
+documentation of @ref Containers-StaticArrayView-stl "StaticArrayView",
+@ref Containers-Array-stl "Array", @ref Containers-StaticArray-stl "StaticArray"
+and @ref Containers-StridedArrayView-stl "StridedArrayView" for more
+information.
 
 @anchor Containers-ArrayView-single-header
 
@@ -170,9 +240,6 @@ documentation of @ref Containers-Array-stl "Array",
     @cpp #define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY @ce before including
     the file. Including it multiple times with different macros defined works
     as well.
-
-@see @ref ArrayView<void>, @ref ArrayView<const void>, @ref StridedArrayView,
-    @ref arrayView(), @ref arrayCast(ArrayView<T>)
 */
 /* All member functions are const because the view doesn't own the data */
 template<class T> class ArrayView {
@@ -185,8 +252,8 @@ template<class T> class ArrayView {
         /**
          * @brief Default constructor
          *
-         * Creates an empty view. Copy a non-empty @ref Array or @ref ArrayView
-         * onto the instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
+         * or @ref ArrayView onto the instance to make it useful.
          */
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
@@ -217,7 +284,7 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief Construct a view on @ref ArrayView
+         * @brief Construct a view on an @ref ArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -273,7 +340,7 @@ template<class T> class ArrayView {
         }
 
         #ifndef CORRADE_MSVC2019_COMPATIBILITY
-        /** @brief Whether the array is non-empty */
+        /** @brief Whether the view is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. On MSVC 2019 this works properly when
            /permissive- is enabled, but I can neither detect a presence of that
@@ -282,7 +349,7 @@ template<class T> class ArrayView {
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to array type */
+        /** @brief Conversion to the underlying type */
         constexpr /*implicit*/ operator T*() const { return _data; }
 
         /** @brief View data */
@@ -295,7 +362,7 @@ template<class T> class ArrayView {
         constexpr bool empty() const { return !_size; }
 
         /**
-         * @brief Pointer to first element
+         * @brief Pointer to the first element
          *
          * @see @ref front()
          */
@@ -303,7 +370,7 @@ template<class T> class ArrayView {
         constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
-         * @brief Pointer to (one item after) last element
+         * @brief Pointer to (one item after) the last element
          *
          * @see @ref back()
          */
@@ -327,9 +394,10 @@ template<class T> class ArrayView {
         T& back() const;
 
         /**
-         * @brief Array slice
+         * @brief View slice
          *
          * Both arguments are expected to be in range.
+         * @see @ref prefix(), @ref suffix(), @ref except()
          */
         constexpr ArrayView<T> slice(T* begin, T* end) const;
 
@@ -337,10 +405,11 @@ template<class T> class ArrayView {
         constexpr ArrayView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
-         * @brief Static array slice
+         * @brief Static view slice
          *
          * Both @p begin and @cpp begin + viewSize @ce are expected to be in
          * range.
+         * @see @ref prefix() const
          */
         template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(T* begin) const;
 
@@ -348,37 +417,39 @@ template<class T> class ArrayView {
         template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(std::size_t begin) const;
 
         /**
-         * @brief Static array slice
+         * @brief Static view slice
          * @m_since{2019,10}
          *
          * At compile time expects that @cpp begin < end_ @ce, at runtime that
          * @p end_ is not larger than @ref size().
+         * @see @ref slice(T*) const, @ref prefix() const
          */
         template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
 
         /**
-         * @brief Array prefix
+         * @brief View prefix
          *
          * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
          * @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce array.
-         * @see @ref slice(T*, T*) const
+         * @see @ref slice(T*, T*) const, @ref suffix(T*) const
          */
         constexpr ArrayView<T> prefix(T* end) const {
             return end ? slice(_data, end) : nullptr;
         }
 
         /**
-         * @brief Array prefix
+         * @brief View prefix
          *
          * Equivalent to @cpp data.slice(0, end) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref suffix(std::size_t) const, @ref except()
          */
         constexpr ArrayView<T> prefix(std::size_t end) const {
             return slice(0, end);
         }
 
         /**
-         * @brief Static array prefix
+         * @brief Static view prefix
          *
          * Equivalent to @cpp data.slice<0, end_>() @ce.
          * @see @ref slice() const
@@ -388,33 +459,35 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief Array suffix
+         * @brief View suffix
          *
          * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
          * @cpp nullptr @ce and the original array isn't, returns zero-sized
          * @cpp nullptr @ce array.
-         * @see @ref slice(T*, T*) const
+         * @see @ref slice(T*, T*) const, @ref prefix(T*) const
          */
         constexpr ArrayView<T> suffix(T* begin) const {
             return _data && !begin ? nullptr : slice(begin, _data + _size);
         }
 
         /**
-         * @brief Array suffix
+         * @brief View suffix
          *
          * Equivalent to @cpp data.slice(begin, data.size()) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref prefix(std::size_t) const, @ref except()
          */
         constexpr ArrayView<T> suffix(std::size_t begin) const {
             return slice(begin, _size);
         }
 
         /**
-         * @brief Array prefix except the last @p count items
+         * @brief View prefix except the last @p count items
          * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice(0, data.size() - count) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref prefix(std::size_t) const, @ref suffix(std::size_t) const
          */
         constexpr ArrayView<T> except(std::size_t count) const {
             return slice(0, _size - count);
@@ -431,7 +504,7 @@ template<class T> class ArrayView {
 };
 
 /**
-@brief Void array view with size information
+@brief Void array view
 @m_since{2019,10}
 
 Specialization of @ref ArrayView which is convertible from a compile-time
@@ -440,13 +513,8 @@ type and also any non-constant type convertible to them. Size for a particular
 type is recalculated to a size in bytes. This specialization doesn't provide
 any accessors besides @ref data(), because it has no use for the @cpp void @ce
 type. Instead, use @ref arrayCast(ArrayView<void>) to first cast the array to a
-concrete type and then access the particular elements.
-
-Usage example:
-
-@snippet Containers.cpp ArrayView-void-usage
-
-<b></b>
+concrete type and then access the particular elements. See
+@ref Containers-ArrayView-usage "ArrayView class docs" for usage examples.
 
 @m_class{m-block m-success}
 
@@ -468,13 +536,13 @@ template<> class ArrayView<void> {
         /**
          * @brief Default constructor
          *
-         * Creates zero-sized array. Move array with nonzero size onto the
-         * instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
+         * or @ref ArrayView onto the instance to make it useful.
          */
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Construct a view on array of explicit length
+         * @brief Construct a view on an array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          */
@@ -490,7 +558,7 @@ template<> class ArrayView<void> {
         template<class T> constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /**
-         * @brief Construct a view on fixed-size array
+         * @brief Construct a view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Size in bytes is calculated automatically.
@@ -501,14 +569,14 @@ template<> class ArrayView<void> {
             #endif
         > constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
-        /** @brief Construct const void view on any @ref ArrayView */
+        /** @brief Construct a void view on any @ref ArrayView */
         template<class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , class = typename std::enable_if<!std::is_const<T>::value>::type
             #endif
         > constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
-        /** @brief Construct const void view on any @ref StaticArrayView */
+        /** @brief Construct a void view on any @ref StaticArrayView */
         template<std::size_t size, class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , class = typename std::enable_if<!std::is_const<T>::value>::type
@@ -527,7 +595,7 @@ template<> class ArrayView<void> {
         template<class T, class = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
 
         #ifndef CORRADE_MSVC2019_COMPATIBILITY
-        /** @brief Whether the array is non-empty */
+        /** @brief Whether the view is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. On MSVC 2019 this works properly when
            /permissive- is enabled, but I can neither detect a presence of that
@@ -536,16 +604,16 @@ template<> class ArrayView<void> {
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to array type */
+        /** @brief Conversion to the underlying type */
         constexpr /*implicit*/ operator void*() const { return _data; }
 
-        /** @brief Array data */
+        /** @brief View data */
         constexpr void* data() const { return _data; }
 
-        /** @brief Array size */
+        /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the array is empty */
+        /** @brief Whether the view is empty */
         constexpr bool empty() const { return !_size; }
 
     private:
@@ -554,7 +622,7 @@ template<> class ArrayView<void> {
 };
 
 /**
-@brief Constant void array view with size information
+@brief Constant void array view
 
 Specialization of @ref ArrayView which is convertible from a compile-time
 array, @ref Array, @ref ArrayView or @ref StaticArrayView of any type and also
@@ -562,13 +630,8 @@ any type convertible to them. Size for a particular type is recalculated to
 a size in bytes. This specialization doesn't provide any accessors besides
 @ref data(), because it has no use for the @cpp void @ce type. Instead, use
 @ref arrayCast(ArrayView<const void>) to first cast the array to a concrete
-type and then access the particular elements.
-
-Usage example:
-
-@snippet Containers.cpp ArrayView-const-void-usage
-
-<b></b>
+type and then access the particular elements.. See
+@ref Containers-ArrayView-usage "ArrayView class docs" for usage examples.
 
 @m_class{m-block m-success}
 
@@ -596,7 +659,7 @@ template<> class ArrayView<const void> {
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Construct a view on array of explicit length
+         * @brief Construct a view on an array of explicit length
          * @param data      Data pointer
          * @param size      Data size
          */
@@ -612,20 +675,20 @@ template<> class ArrayView<const void> {
         template<class T> constexpr /*implicit*/ ArrayView(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /**
-         * @brief Construct a view on fixed-size array
+         * @brief Construct a view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Size in bytes is calculated automatically.
          */
         template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
-        /** @brief Construct const void view on an @ref ArrayView<void> */
+        /** @brief Construct a const void view on an @ref ArrayView<void> */
         constexpr /*implicit*/ ArrayView(ArrayView<void> array) noexcept: _data{array}, _size{array.size()} {}
 
-        /** @brief Construct const void view on any @ref ArrayView */
+        /** @brief Construct a const void view on any @ref ArrayView */
         template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
-        /** @brief Construct const void view on any @ref StaticArrayView */
+        /** @brief Construct a const void view on any @ref StaticArrayView */
         template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
         /**
@@ -640,7 +703,7 @@ template<> class ArrayView<const void> {
         template<class T, class = decltype(Implementation::ErasedArrayViewConverter<const T>::from(std::declval<const T&>()))> constexpr /*implicit*/ ArrayView(const T& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<const T>::from(other)} {}
 
         #ifndef CORRADE_MSVC2019_COMPATIBILITY
-        /** @brief Whether the array is non-empty */
+        /** @brief Whether the view is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. On MSVC 2019 this works properly when
            /permissive- is enabled, but I can neither detect a presence of that
@@ -649,16 +712,16 @@ template<> class ArrayView<const void> {
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to array type */
+        /** @brief Conversion to the underlying type */
         constexpr /*implicit*/ operator const void*() const { return _data; }
 
-        /** @brief Array data */
+        /** @brief View data */
         constexpr const void* data() const { return _data; }
 
-        /** @brief Array size */
+        /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the array is empty */
+        /** @brief Whether the view is empty */
         constexpr bool empty() const { return !_size; }
 
     private:
@@ -695,7 +758,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[si
 @m_since{2020,06}
 
 Not present as a constructor in order to avoid accidental dangling references
-with r-value initializer lists. See
+with r-value initializer lists. See the
 @ref Containers-ArrayView-initializer-list "class documentation" for more
 information.
 */
@@ -807,11 +870,19 @@ namespace Implementation {
 }
 
 /**
-@brief Fixed-size array view
+@brief Compile-time-size array view
 
-Equivalent to @ref ArrayView, but with compile-time size information. Similar
-to a fixed-size @ref std::span from C++2a. Convertible from and to
-@ref ArrayView. Example usage:
+Like @ref ArrayView, but with compile-time size information. Similar to a
+fixed-size @ref std::span from C++2a. Implicitly convertible to an
+@ref ArrayView, explicitly convertible from it using the slicing APIs. An
+owning version of this container is a @ref StaticArray.
+
+@section Containers-StaticArrayView-usage Usage
+
+The general API is similar to what's shown in
+@ref Containers-ArrayView-usage "ArrayView usage docs", except that here are
+additional compile-time overloads of @ref slice(), @ref prefix(), @ref suffix()
+and @ref except().
 
 @snippet Containers.cpp StaticArrayView-usage
 
@@ -849,15 +920,16 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Default constructor
          *
-         * Creates empty view. Copy non-empty @ref StaticArrayView onto the
-         * instance to make it useful.
+         * Creates a @cpp nullptr @ce view. Copy a non-empty @ref StaticArray
+         * or @ref StaticArrayView onto the instance to make it useful.
          */
         constexpr /*implicit*/ StaticArrayView() noexcept: _data(nullptr) {}
 
         /**
-         * @brief Construct static view on an array
+         * @brief Construct a static view on an array
          * @param data      Data pointer
          *
+         * The pointer is expected to contain at least @ref Size elements.
          * @see @ref staticArrayView(T*)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -868,12 +940,11 @@ template<std::size_t size_, class T> class StaticArrayView {
         noexcept: _data(data) {}
 
         /**
-         * @brief Construct static view on a fixed-size array
+         * @brief Construct a static view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
-         * Note that, similarly as with raw pointers, you need to ensure that
-         * both types have the same size.
+         * Expects that both types have the same size.
          * @see @ref staticArrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -884,7 +955,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
 
         /**
-         * @brief Construct static view on @ref StaticArrayView
+         * @brief Construct a static view on an @ref StaticArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -925,7 +996,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         #ifndef CORRADE_MSVC2019_COMPATIBILITY
-        /** @brief Whether the array is non-empty */
+        /** @brief Whether the view is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. On MSVC 2019 this works properly when
            /permissive- is enabled, but I can neither detect a presence of that
@@ -934,20 +1005,20 @@ template<std::size_t size_, class T> class StaticArrayView {
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to array type */
+        /** @brief Conversion to the underlying type */
         constexpr /*implicit*/ operator T*() const { return _data; }
 
-        /** @brief Array data */
+        /** @brief View data */
         constexpr T* data() const { return _data; }
 
-        /** @brief Array size */
+        /** @brief View size */
         constexpr std::size_t size() const { return size_; }
 
-        /** @brief Whether the array is empty */
+        /** @brief Whether the view is empty */
         constexpr bool empty() const { return !size_; }
 
         /**
-         * @brief Pointer to first element
+         * @brief Pointer to the first element
          *
          * @see @ref front()
          */
@@ -955,7 +1026,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
-         * @brief Pointer to (one item after) last element
+         * @brief Pointer to (one item after) the last element
          *
          * @see @ref back()
          */
@@ -997,7 +1068,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /**
-         * @brief Static array slice
+         * @brief Static view slice
          * @m_since{2019,10}
          *
          * Expects (at compile time) that @cpp begin < end_ @ce and @p end_ is
@@ -1015,7 +1086,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /**
-         * @brief Static array prefix
+         * @brief Static view prefix
          *
          * Equivalent to @cpp data.slice<0, end_>() @ce.
          * @see @ref slice() const
@@ -1034,7 +1105,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /**
-         * @brief Static array suffix
+         * @brief Static view suffix
          * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice<begin_, Size>() @ce.
@@ -1050,7 +1121,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /**
-         * @brief Static array prefix except the last @p count items
+         * @brief Static view prefix except the last @p count items
          *
          * Equivalent to @cpp data.slice<0, Size - count>() @ce.
          * @see @ref slice() const

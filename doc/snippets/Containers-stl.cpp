@@ -26,6 +26,7 @@
 
 #include <string>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
@@ -41,6 +42,16 @@ std::vector<int> a;
 Containers::ArrayView<int> b = a;
 /* [ArrayView] */
 static_cast<void>(b);
+}
+
+{
+/* [Array-initializer-list] */
+std::vector<int> a(5);                  // a.size() == 5
+std::vector<int> b{5};                  // b.size() == 1, b[0] == 5
+
+Containers::Array<int> c{5};            // c.size() == 5
+auto d = Containers::array<int>({5});   // d.size() == 1, d[0] == 5
+/* [Array-initializer-list] */
 }
 
 {

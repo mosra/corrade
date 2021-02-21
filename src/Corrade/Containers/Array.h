@@ -82,22 +82,29 @@ namespace Implementation {
 }
 
 /**
-@brief Array wrapper with size information
+@brief Array
 @tparam T   Element type
 @tparam D   Deleter type. Defaults to pointer to a @cpp void(T*, std::size_t) @ce
     function, where first is array pointer and second array size
 
-Provides a RAII wrapper around a plain C array. A lighter alternative to
+A RAII owning wrapper around a plain C array. A lighter alternative to
 @ref std::vector that's deliberately move-only to avoid accidental copies of
-large memory blocks. It's usable in STL algorithms in the same way as a plain C
-array as well as in range-for cycles and other APIs operating with iterators.
-By default the array has a non-changeable size by default and growing
-functionality is opt-in, see @ref Containers-Array-growable below for more
-information. Usage example:
+large memory blocks. For a variant with compile-time size information see
+@ref StaticArray. A non-owning version of this container is an @ref ArrayView.
+
+The array has a non-changeable size by default and growing functionality is
+opt-in, see @ref Containers-Array-growable below for more information.
+
+@section Containers-Array-usage Usage
+
+The @ref Array class provides an access and slicing API similar to
+@ref ArrayView, see @ref Containers-ArrayView-usage "its usage docs" for
+details. The only difference is due to the owning aspect --- mutable access to
+the data is provided only via non @cpp const @ce overloads.
 
 @snippet Containers.cpp Array-usage
 
-@section Containers-Array-initialization Array initialization
+@subsection Containers-Array-usage-initialization Array initialization
 
 The array is by default *value-initialized*, which means that trivial types
 are zero-initialized and the default constructor is called on other types. It
@@ -105,7 +112,9 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 -   @ref Array(DefaultInitT, std::size_t) leaves trivial types uninitialized
     and calls the default constructor elsewhere. In other words,
-    @cpp new T[size] @ce.
+    @cpp new T[size] @ce. Because of the differing behavior for trivial types
+    it's better to explicitly use either the @ref ValueInit or @ref NoInit
+    variants instead.
 -   @ref Array(ValueInitT, std::size_t) is equivalent to the default case,
     zero-initializing trivial types and calling the default constructor
     elsewhere. Useful when you want to make the choice appear explicit. In
@@ -113,21 +122,24 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments. In other words,
     @cpp new T[size]{T{args...}, T{args...}, …} @ce.
--   @ref Array(InPlaceInitT, std::initializer_list<T>) allocates unitialized
-    memory and then copy-constructs all elements from the initializer list. In
-    other words, @cpp new T[size]{args...} @ce.
--   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
-    to call the constructor on all elements manually using placement new,
-    @ref std::uninitialized_copy() or similar. This is the dangerous option.
-    In other words, @cpp new char[size*sizeof(T)] @ce for non-trivial types
-    to circumvent default construction and @cpp new T[size] @ce for trivial
-    types.
+-   @ref Array(InPlaceInitT, std::initializer_list<T>) or the
+    @ref array(std::initializer_list<T>) shorthand allocates unitialized memory
+    and then copy-constructs all elements from the initializer list. In other
+    words, @cpp new T[size]{args...} @ce. The class deliberately *doesn't*
+    provide an implicit @ref std::initializer_list constructor due to
+    @ref Containers-Array-initializer-list "reasons described below".
+-   @ref Array(NoInitT, std::size_t) does not initialize anything. Useful for
+    trivial types when you'll be overwriting the contents anyway, for
+    non-trivial types this is the dangerous option and you need to call the
+    constructor on all elements manually using placement new,
+    @ref std::uninitialized_copy() or similar --- see the constructor docs for
+    an example. In other words, @cpp new char[size*sizeof(T)] @ce for
+    non-trivial types to circumvent default construction and @cpp new T[size] @ce
+    for trivial types.
 
-Example:
+@snippet Containers.cpp Array-usage-initialization
 
-@snippet Containers.cpp Array-initialization
-
-@section Containers-Array-wrapping Wrapping externally allocated arrays
+@subsection Containers-Array-usage-wrapping Wrapping externally allocated arrays
 
 By default the class makes all allocations using @cpp operator new[] @ce and
 deallocates using @cpp operator delete[] @ce for given @p T, with some
@@ -140,13 +152,13 @@ contents using @cpp operator delete[] @ce.
 
 For example, properly deallocating array allocated using @ref std::malloc():
 
-@snippet Containers.cpp Array-wrapping
+@snippet Containers.cpp Array-usage-wrapping
 
 By default, plain function pointers are used to avoid having the type affected
 by the deleter function. If the deleter needs to manage some state, a custom
 deleter type can be used:
 
-@snippet Containers.cpp Array-deleter
+@snippet Containers.cpp Array-usage-deleter
 
 @section Containers-Array-growable Growable arrays
 
@@ -246,9 +258,25 @@ Corrade type                    | ↭ | STL type
 @ref Array "Array<T>"           | → | @ref std::span "std::span<const T>"
 @ref Array "const Array<T>"     | → | @ref std::span "std::span<const T>"
 
-There are some dangerous corner cases due to the way @ref std::span is
-designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
-more information.
+@anchor Containers-Array-initializer-list
+
+<b></b>
+
+@m_class{m-block m-warning}
+
+@par Conversion from std::initializer_list
+    The class deliberately *doesn't* provide a @ref std::initializer_list
+    constructor to prevent the same usability issues as with @ref std::vector
+    --- see the snippet below. Instead you're expected to use either the
+    @ref Array(InPlaceInitT, std::initializer_list<T>) constructor or the
+    @ref array(std::initializer_list<T>) shorthand, which are both more
+    explicit and thus should prevent accidental use:
+@par
+    @snippet Containers-stl.cpp Array-initializer-list
+
+<b></b>
+
+<b></b>
 
 @m_class{m-block m-success}
 
@@ -258,7 +286,7 @@ more information.
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 
-@see @ref arrayCast(Array<T, D>&), @ref StaticArray, @ref ArrayTuple
+@see @ref ArrayTuple
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>
@@ -275,7 +303,7 @@ class Array {
         typedef T Type;     /**< @brief Element type */
         typedef D Deleter;  /**< @brief Deleter type */
 
-        /** @brief Conversion from nullptr */
+        /** @brief Conversion from `nullptr` */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ Array(std::nullptr_t) noexcept:
         #else
@@ -289,8 +317,8 @@ class Array {
         /**
          * @brief Default constructor
          *
-         * Creates a zero-sized array. Move an array with a nonzero size onto
-         * the instance to make it useful.
+         * Creates a zero-sized array. Move an @ref Array with a nonzero size
+         * onto the instance to make it useful.
          */
         /* GCC <=4.8 breaks on _deleter{} */
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter(Implementation::DefaultDeleter<D>{}()) {}
@@ -299,9 +327,12 @@ class Array {
          * @brief Construct a default-initialized array
          *
          * Creates array of given size, the contents are default-initialized
-         * (i.e. builtin types are not initialized, default constructor called
-         * otherwise). If the size is zero, no allocation is done.
-         * @see @ref DefaultInit, @ref Array(ValueInitT, std::size_t)
+         * (i.e. trivial types are not initialized, default constructor called
+         * otherwise). If the size is zero, no allocation is done. Because of
+         * the differing behavior for trivial types it's better to explicitly
+         * use either the @ref Array(ValueInitT, std::size_t) or the
+         * @ref Array(NoInitT, std::size_t) variant instead.
+         * @see @ref DefaultInit, @ref std::is_trivial
          */
         explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
 
@@ -312,9 +343,6 @@ class Array {
          * (i.e. builtin types are zero-initialized, default constructor called
          * otherwise). This is the same as @ref Array(std::size_t). If the size
          * is zero, no allocation is done.
-         *
-         * Useful if you want to create an array of primitive types and set
-         * them to zero.
          * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
          */
         explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
@@ -322,24 +350,28 @@ class Array {
         /**
          * @brief Construct an array without initializing its contents
          *
-         * Creates array of given size, the contents are *not* initialized. If
-         * the size is zero, no allocation is done. Initialize the values using
-         * placement new. Useful if you will be overwriting all elements later
-         * anyway.
+         * Creates an array of given size, the contents are *not* initialized.
+         * If the size is zero, no allocation is done. Useful if you will be
+         * overwriting all elements later anyway or if you need to call custom
+         * constructors in a way that's not expressible via any other
+         * @ref Array constructor.
          *
-         * -    For non-trivial types, the data are allocated as a
-         *      @cpp char @ce array. Destruction is done using a custom deleter
-         *      that explicitly calls destructor on *all elements* (regardless
-         *      of whether they were properly constructed or not) and then
-         *      deallocates the data as a @cpp char @ce array again.
-         * -    For trivial types is equivalent to
-         *      @ref Array(DefaultInitT, std::size_t), with @ref deleter()
-         *      being the default (@cpp nullptr @ce) as well. This is done in
-         *      order to avoid needless problems with dangling custom deleters
-         *      when returning arrays from dynamically loaded libraries.
+         * For trivial types is equivalent to @ref Array(DefaultInitT, std::size_t),
+         * with @ref deleter() being the default (@cpp nullptr @ce) as well.
+         * For non-trivial types, the data are allocated as a @cpp char @ce
+         * array. Destruction is done using a custom deleter that explicitly
+         * calls the destructor on *all elements* and then deallocates the data
+         * as a @cpp char @ce array again --- which means that for non-trivial
+         * types you're expected to construct all elements using placement new
+         * (or for example @ref std::uninitialized_copy()) in order to avoid
+         * calling destructors on uninitialized memory:
+         *
+         * @snippet Containers.cpp Array-NoInit
          *
          * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref deleter(), @ref std::is_trivial
+         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
+         *      @ref array(std::initializer_list<T>), @ref deleter(),
+         *      @ref std::is_trivial
          */
         explicit Array(NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
 
@@ -357,15 +389,13 @@ class Array {
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then copy-initializes each element with placement
-         * new using values from @p list.
+         * new using values from @p list. To save typing you can also use the
+         * @ref array(std::initializer_list<T>) shorthand.
          *
-         * Note that there's no plain initializer-list constructor because it
-         * would cause a similar fiasco as with @ref std::vector, where
-         * @cpp std::vector<int>{5} @ce creates one-element vector but
-         * @cpp std::vector<int>(5) @ce creates a zero-initialized five-element
-         * vector. To save typing, you can use the
-         * @ref array(std::initializer_list<T>) helper which doesn't suffer
-         * from this problem.
+         * Not present as an implicit constructor in order to avoid the same
+         * usability issues as with @ref std::vector --- see the
+         * @ref Containers-Array-initializer-list "class documentation" for
+         * more information.
          */
         /*implicit*/ Array(InPlaceInitT, std::initializer_list<T> list);
 
@@ -509,9 +539,9 @@ class Array {
         const T& back() const; /**< @overload */
 
         /**
-         * @brief Reference to array slice
+         * @brief Array slice
          *
-         * Equivalent to @ref ArrayView::slice().
+         * Equivalent to @ref ArrayView::slice(T*, T*) const and overloads.
          */
         ArrayView<T> slice(T* begin, T* end) {
             return ArrayView<T>(*this).slice(begin, end);
@@ -532,8 +562,7 @@ class Array {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @cpp begin @ce and @cpp begin + size @ce are expected to be in
-         * range.
+         * Equivalent to @ref ArrayView::slice(T*) const and overloads.
          */
         template<std::size_t size> StaticArrayView<size, T> slice(T* begin) {
             return ArrayView<T>(*this).template slice<size>(begin);
@@ -555,8 +584,7 @@ class Array {
          * @brief Fixed-size array slice
          * @m_since{2019,10}
          *
-         * At compile time expects that @cpp begin < end_ @ce, at runtime that
-         * @p end_ is not larger than @ref size().
+         * Equivalent to @ref ArrayView::slice() const.
          */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, T> slice() {
             return ArrayView<T>(*this).template slice<begin_, end_>();
@@ -573,7 +601,7 @@ class Array {
         /**
          * @brief Array prefix
          *
-         * Equivalent to @ref ArrayView::prefix().
+         * Equivalent to @ref ArrayView::prefix(T*) const and overloads.
          */
         ArrayView<T> prefix(T* end) {
             return ArrayView<T>(*this).prefix(end);
@@ -603,7 +631,7 @@ class Array {
         /**
          * @brief Array suffix
          *
-         * Equivalent to @ref ArrayView::suffix().
+         * Equivalent to @ref ArrayView::suffix(T*) const and overloads.
          */
         ArrayView<T> suffix(T* begin) {
             return ArrayView<T>(*this).suffix(begin);
@@ -660,14 +688,17 @@ class Array {
 @m_since{2020,06}
 
 Convenience shortcut to the @ref Array::Array(InPlaceInitT, std::initializer_list<T>)
-constructor. See its documentation for a design rationale.
+constructor. Not present as an implicit constructor in order to avoid the same
+usability issues as with @ref std::vector --- see the
+@ref Containers-Array-initializer-list "class documentation" for more
+information.
 */
 template<class T> inline Array<T> array(std::initializer_list<T> list) {
     return Array<T>{InPlaceInit, list};
 }
 
 /** @relatesalso ArrayView
-@brief Make view on @ref Array
+@brief Make a view on an @ref Array
 
 Convenience alternative to converting to an @ref ArrayView explicitly. The
 following two lines are equivalent:
@@ -679,7 +710,7 @@ template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
 }
 
 /** @relatesalso ArrayView
-@brief Make view on const @ref Array
+@brief Make a view on a const @ref Array
 
 Convenience alternative to converting to an @ref ArrayView explicitly. The
 following two lines are equivalent:

@@ -42,18 +42,28 @@
 namespace Corrade { namespace Containers {
 
 /**
-@brief Static array wrapper
+@brief Static array
 @tparam size_   Array size
 @tparam T       Element type
 
-Provides statically-sized array wrapper with API similar to @ref Array. Useful
-as more featureful alternative to plain C arrays or @ref std::array.
+Like @ref Array, but with compile-time size information. Useful as a more
+featureful alternative to plain C arrays or @ref std::array, especially when it
+comes to initialization. A non-owning version of this container is a
+@ref StaticArrayView.
 
-Usage example:
+@section Containers-StaticArray-usage Usage
+
+The @ref StaticArray class provides an access and slicing API similar to
+@ref Array, which in turn shares the basic workflow patterns with
+@ref ArrayView, see @ref Containers-ArrayView-usage "its usage docs" for
+details. The main difference is that @ref StaticArray doesn't do any heap
+allocation and thus has no concept of a deleter, and it has additional
+compile-time-sized overloads of @ref slice(), @ref prefix(), @ref suffix() and
+@ref except(), mirroring the APIs of @ref StaticArrayView.
 
 @snippet Containers.cpp StaticArray-usage
 
-@section Containers-StaticArray-initialization Array initialization
+@subsection Containers-StaticArray-usage-initialization Array initialization
 
 The array is by default *value-initialized*, which means that trivial types
 are zero-initialized and the default constructor is called on other types. It
@@ -61,7 +71,9 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 -   @ref StaticArray(DefaultInitT) leaves trivial types uninitialized
     and calls the default constructor elsewhere. In other words,
-    @cpp T array[size] @ce.
+    @cpp T array[size] @ce. Because of the differing behavior for trivial types
+    it's better to explicitly use either the @ref ValueInit or @ref NoInit
+    variants instead.
 -   @ref StaticArray(ValueInitT) is equivalent to the implicit parameterless
     constructor, zero-initializing trivial types and calling the default
     constructor elsewhere. Useful when you want to make the choice appear
@@ -72,13 +84,13 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to
     @ref StaticArray(Args&&... args), again useful when you want to make the
     choice appear explicit). In other words, @cpp T array[size]{args...} @ce.
--   @ref StaticArray(NoInitT) does not initialize anything and you need to call
-    the constructor on all elements manually using placement new,
-    @ref std::uninitialized_copy() or similar. This is the dangerous option.
+-   @ref StaticArray(NoInitT) does not initialize anything. Useful for trivial
+    types when you'll be overwriting the contents anyway, for non-trivial types
+    this is the dangerous option and you need to call the constructor on all
+    elements manually using placement new, @ref std::uninitialized_copy() or
+    similar --- see the constructor docs for an example.
 
-Example:
-
-@snippet Containers.cpp StaticArray-initialization
+@snippet Containers.cpp StaticArray-usage-initialization
 
 @section Containers-StaticArray-views Conversion to array views
 
@@ -113,10 +125,6 @@ Corrade type                    | ↭ | STL type
 @ref StaticArray "StaticArray<size, T>" | → | @ref std::span "std::span<const T, size>"
 @ref StaticArray "const StaticArray<size, T>" | → | @ref std::span "std::span<const T, size>"
 
-There are some dangerous corner cases due to the way @ref std::span is
-designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
-more information.
-
 @m_class{m-block m-success}
 
 @par Single-header version
@@ -125,8 +133,7 @@ more information.
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 
-@see @ref arrayCast(StaticArray<size, T>&), @ref Array,
-    @ref Array2, @ref Array3, @ref Array4
+@see @ref Array2, @ref Array3, @ref Array4
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -147,8 +154,11 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct a default-initialized array
          *
          * Creates array of given size, the contents are default-initialized
-         * (i.e., builtin types are not initialized).
-         * @see @ref DefaultInit, @ref StaticArray(ValueInitT)
+         * (i.e., trivial types are not initialized). Because of the differing
+         * behavior for trivial types it's better to explicitly use either the
+         * @ref StaticArray(ValueInitT) or the @ref StaticArray(NoInitT)
+         * variant instead.
+         * @see @ref DefaultInit, @ref std::is_trivial
          */
         explicit StaticArray(DefaultInitT): StaticArray{DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
 
@@ -158,9 +168,6 @@ template<std::size_t size_, class T> class StaticArray {
          * Creates array of given size, the contents are value-initialized
          * (i.e., builtin types are zero-initialized, default constructor
          * called otherwise). This is the same as @ref StaticArray().
-         *
-         * Useful if you want to create an array of primitive types and set
-         * them to zero.
          * @see @ref ValueInit, @ref StaticArray(DefaultInitT)
          */
         explicit StaticArray(ValueInitT): _data{} {}
@@ -169,13 +176,22 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct an array without initializing its contents
          *
          * Creates array of given size, the contents are *not* initialized.
-         * Initialize the values using placement new.
+         * Useful if you will be overwriting all elements later anyway or if
+         * you need to call custom constructors in a way that's not expressible
+         * via any other @ref StaticArray constructor.
          *
-         * Useful if you will be overwriting all elements later anyway.
-         * @attention Internally the destruction is done using custom deleter
-         *      that explicitly calls destructor on *all elements* regardless
-         *      of whether they were properly constructed or not.
-         * @see @ref NoInit, @ref StaticArray(DirectInitT, Args&&... args)
+         * For trivial types is equivalent to @ref StaticArray(DefaultInitT).
+         * For non-trivial types, the class will explicitly call the destructor
+         * on *all elements* --- which means that for non-trivial types you're
+         * expected to construct all elements using placement new (or for
+         * example @ref std::uninitialized_copy()) in order to avoid calling
+         * destructors on uninitialized memory:
+         *
+         * @snippet Containers.cpp StaticArray-NoInit
+         *
+         * @see @ref NoInit, @ref StaticArray(DirectInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref std::is_trivial
          */
         explicit StaticArray(NoInitT) {}
 
@@ -280,12 +296,13 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Whether the array is empty
          *
-         * Always true (it's not possible to create zero-sized C array).
+         * Always @cpp true @ce (it's not possible to create a zero-sized C
+         * array).
          */
         constexpr bool empty() const { return !size_; }
 
         /**
-         * @brief Pointer to first element
+         * @brief Pointer to the first element
          *
          * @see @ref front()
          */
@@ -294,7 +311,7 @@ template<std::size_t size_, class T> class StaticArray {
         const T* cbegin() const { return _data; }           /**< @overload */
 
         /**
-         * @brief Pointer to (one item after) last element
+         * @brief Pointer to (one item after) the last element
          *
          * @see @ref back()
          */
@@ -403,7 +420,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Static array prefix
          *
-         * Equivalent to @ref StaticArrayView::prefix(T*) const and overloads.
+         * Equivalent to @ref StaticArrayView::prefix() const and overloads.
          */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix();
         template<std::size_t viewSize> StaticArrayView<viewSize, const T> prefix() const; /**< @overload */
@@ -539,7 +556,7 @@ template<class T> using Array4 = StaticArray<4, T>;
 #endif
 
 /** @relatesalso StaticArray
-@brief Make view on @ref StaticArray
+@brief Make a view on a @ref StaticArray
 
 Convenience alternative to converting to an @ref ArrayView explicitly. The
 following two lines are equivalent:
@@ -551,7 +568,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 }
 
 /** @relatesalso StaticArray
-@brief Make view on const @ref StaticArray
+@brief Make a view on a const @ref StaticArray
 
 Convenience alternative to converting to an @ref ArrayView explicitly. The
 following two lines are equivalent:
@@ -563,7 +580,7 @@ template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const
 }
 
 /** @relatesalso StaticArray
-@brief Make static view on @ref StaticArray
+@brief Make a static view on a @ref StaticArray
 
 Convenience alternative to converting to an @ref StaticArrayView explicitly.
 The following two lines are equivalent:
@@ -577,7 +594,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 }
 
 /** @relatesalso StaticArray
-@brief Make static view on const @ref StaticArray
+@brief Make a static view on a const @ref StaticArray
 
 Convenience alternative to converting to an @ref StaticArrayView explicitly.
 The following two lines are equivalent:
