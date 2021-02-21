@@ -172,16 +172,10 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     return parts;
 }
 
-#ifndef CORRADE_MSVC2019_COMPATIBILITY
 namespace {
-    using namespace Containers::Literals;
-    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
-}
-#endif
-
-template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
-    /* If I use an externally defined view here, MSVC (2015, 2017, 2019) will
-       blow up on the explicit template instantiation with
+    /* If I use an externally defined view in splitWithoutEmptyParts(),
+       trimmed() and elsewhere, MSVC (2015, 2017, 2019) will blow up on the
+       explicit template instantiation with
 
         ..\src\Corrade\Containers\StringView.cpp(176): error C2946: explicit instantiation; 'Corrade::Containers::BasicStringView<const char>::<lambda_e55a1a450af96fadfe37cfb50a99d6f7>' is not a template-class specialization
 
@@ -191,9 +185,18 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
        but nothing helped. Only defining CORRADE_NO_ASSERT at the very top made
        the problem go away, and I discovered this only by accident after
        removing basically all other code. WHAT THE FUCK, MSVC. */
+    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    using namespace Containers::Literals;
+    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
+    #else
+    #define WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID " \t\f\v\r\n"_s
+    #endif
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
     #ifdef CORRADE_MSVC2019_COMPATIBILITY
     using namespace Containers::Literals;
-    return splitWithoutEmptyParts(" \t\f\v\r\n"_s);
+    return splitWithoutEmptyParts(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #else
     return splitWithoutEmptyParts(Whitespace);
     #endif
@@ -322,7 +325,12 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringVie
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
+    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    using namespace Containers::Literals;
+    return trimmed(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
+    #else
     return trimmed(Whitespace);
+    #endif
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
@@ -330,7 +338,12 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const Str
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
+    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    using namespace Containers::Literals;
+    return trimmedPrefix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
+    #else
     return trimmedPrefix(Whitespace);
+    #endif
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
@@ -338,7 +351,12 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const Str
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
+    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    using namespace Containers::Literals;
+    return trimmedSuffix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
+    #else
     return trimmedSuffix(Whitespace);
+    #endif
 }
 
 namespace {
