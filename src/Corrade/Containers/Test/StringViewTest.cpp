@@ -1064,8 +1064,7 @@ void StringViewTest::partitionFlags() {
 
     /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
-        const char* zero{};
-        Array3<StringView> a = StringView{zero}.partition('=');
+        Array3<StringView> a = StringView{nullptr}.partition('=');
         CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
