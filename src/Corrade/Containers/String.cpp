@@ -507,6 +507,54 @@ StringView String::exceptSuffix(const StringView suffix) const & {
     return StringView{*this}.exceptSuffix(suffix);
 }
 
+MutableStringView String::trimmed(const StringView characters) & {
+    return MutableStringView{*this}.trimmed(characters);
+}
+
+StringView String::trimmed(const StringView characters) const & {
+    return StringView{*this}.trimmed(characters);
+}
+
+MutableStringView String::trimmed() & {
+    return MutableStringView{*this}.trimmed();
+}
+
+StringView String::trimmed() const & {
+    return StringView{*this}.trimmed();
+}
+
+MutableStringView String::trimmedPrefix(const StringView characters) & {
+    return MutableStringView{*this}.trimmedPrefix(characters);
+}
+
+StringView String::trimmedPrefix(const StringView characters) const & {
+    return StringView{*this}.trimmedPrefix(characters);
+}
+
+MutableStringView String::trimmedPrefix() & {
+    return MutableStringView{*this}.trimmedPrefix();
+}
+
+StringView String::trimmedPrefix() const & {
+    return StringView{*this}.trimmedPrefix();
+}
+
+MutableStringView String::trimmedSuffix(const StringView characters) & {
+    return MutableStringView{*this}.trimmedSuffix(characters);
+}
+
+StringView String::trimmedSuffix(const StringView characters) const & {
+    return StringView{*this}.trimmedSuffix(characters);
+}
+
+MutableStringView String::trimmedSuffix() & {
+    return MutableStringView{*this}.trimmedSuffix();
+}
+
+StringView String::trimmedSuffix() const & {
+    return StringView{*this}.trimmedSuffix();
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

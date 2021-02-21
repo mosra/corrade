@@ -137,6 +137,21 @@ inline const char* findFirstOf(const char* begin, const char* const end, const c
     return end;
 }
 
+/* Variants of the above. Not sure if those even have any vaguely corresponding
+   C lib API. Probably not. */
+
+inline const char* findFirstNotOf(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
+    for(; begin != end; ++begin)
+        if(!std::memchr(characters, *begin, characterCount)) return begin;
+    return end;
+}
+
+inline const char* findLastNotOf(const char* const begin, const char* end, const char* const characters, std::size_t characterCount) {
+    for(; end != begin; --end)
+        if(!std::memchr(characters, *(end - 1), characterCount)) return end;
+    return begin;
+}
+
 }
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
@@ -300,6 +315,30 @@ template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const Stri
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
     return prefix(size() - suffix.size());
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringView characters) const {
+    return trimmedPrefix(characters).trimmedSuffix(characters);
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
+    return trimmed(Whitespace);
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
+    return suffix(const_cast<T*>(findFirstNotOf(_data, end(), characters.data(), characters.size())));
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
+    return trimmedPrefix(Whitespace);
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
+    return prefix(const_cast<T*>(findLastNotOf(_data, end(), characters.data(), characters.size())));
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
+    return trimmedSuffix(Whitespace);
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

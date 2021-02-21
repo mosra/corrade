@@ -693,6 +693,72 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
+         * @brief View with given characters trimmed from prefix and suffix
+         *
+         * Equivalent to @ref BasicStringView::trimmed(StringView) const. Not
+         * allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref trimmedPrefix(), @ref trimmedSuffix()
+         */
+        MutableStringView trimmed(StringView characters) &;
+        StringView trimmed(StringView characters) const &; /**< @overload */
+
+        /**
+         * @brief View with whitespace trimmed from prefix and suffix
+         *
+         * Equivalent to @ref BasicStringView::trimmed() const. Not allowed to
+         * be called on a r-value since the returned view would become
+         * dangling.
+         * @see @ref trimmedPrefix(), @ref trimmedSuffix()
+         */
+        MutableStringView trimmed() &;
+        StringView trimmed() const &; /**< @overload */
+
+        /**
+         * @brief View with given characters trimmed from prefix
+         *
+         * Equivalent to @ref BasicStringView::trimmedPrefix(StringView) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref trimmed(), @ref trimmedSuffix()
+         */
+        MutableStringView trimmedPrefix(StringView characters) &;
+        StringView trimmedPrefix(StringView characters) const &; /**< @overload */
+
+        /**
+         * @brief View with whitespace trimmed from prefix
+         *
+         * Equivalent to @ref BasicStringView::trimmedPrefix() const. Not
+         * allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref trimmed(), @ref trimmedSuffix()
+         */
+        MutableStringView trimmedPrefix() &;
+        StringView trimmedPrefix() const &; /**< @overload */
+
+        /**
+         * @brief View with given characters trimmed from suffix
+         *
+         * Equivalent to @ref BasicStringView::trimmedSuffix(StringView) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref trimmed(), @ref trimmedPrefix()
+         */
+        MutableStringView trimmedSuffix(StringView characters) &;
+        StringView trimmedSuffix(StringView characters) const &; /**< @overload */
+
+        /**
+         * @brief View with whitespace trimmed from suffix
+         *
+         * Equivalent to @ref BasicStringView::trimmedSuffix() const. Not
+         * allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref trimmed(), @ref trimmedPrefix()
+         */
+        MutableStringView trimmedSuffix() &;
+        StringView trimmedSuffix() const &; /**< @overload */
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

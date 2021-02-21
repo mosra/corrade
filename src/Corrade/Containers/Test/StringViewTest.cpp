@@ -153,6 +153,10 @@ struct StringViewTest: TestSuite::Tester {
     void exceptSuffixFlags();
     void exceptSuffixInvalid();
 
+    void trimmed();
+    void trimmedFlags();
+    void trimmedNullView();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -219,6 +223,10 @@ StringViewTest::StringViewTest() {
               &StringViewTest::exceptSuffix,
               &StringViewTest::exceptSuffixFlags,
               &StringViewTest::exceptSuffixInvalid,
+
+              &StringViewTest::trimmed,
+              &StringViewTest::trimmedFlags,
+              &StringViewTest::trimmedNullView,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -1157,6 +1165,57 @@ void StringViewTest::exceptSuffixInvalid() {
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptSuffix("over");
     CORRADE_COMPARE(out.str(), "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+}
+
+void StringViewTest::trimmed() {
+    /* Spaces at the end */
+    CORRADE_COMPARE("abc \n "_s.trimmedPrefix(), "abc \n ");
+    CORRADE_COMPARE("abc \n "_s.trimmedSuffix(), "abc");
+
+    /* Spaces at the beginning */
+    CORRADE_COMPARE(" \t abc"_s.trimmedPrefix(), "abc");
+    CORRADE_COMPARE(" \t abc"_s.trimmedSuffix(), " \t abc");
+
+    /* Spaces on both beginning and end */
+    CORRADE_COMPARE(" \r abc \f "_s.trimmed(), "abc");
+
+    /* No spaces */
+    CORRADE_COMPARE("abc"_s.trimmed(), "abc");
+
+    /* All spaces */
+    CORRADE_COMPARE("\t\r\n\f\v "_s.trimmed(), "");
+
+    /* Special characters */
+    CORRADE_COMPARE("oubya"_s.trimmedPrefix("aeiyou"), "bya");
+    CORRADE_COMPARE("oubya"_s.trimmedSuffix("aeiyou"), "oub");
+    CORRADE_COMPARE("oubya"_s.trimmed("aeiyou"), "b");
+}
+
+void StringViewTest::trimmedFlags() {
+    /* Characters at the end -- only trimmed prefix should stay NullTerminated */
+    CORRADE_COMPARE("abc "_s.trimmedPrefix().flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE("abc "_s.trimmedSuffix().flags(), StringViewFlag::Global);
+    CORRADE_COMPARE("abc "_s.trimmed().flags(), StringViewFlag::Global);
+
+    /* Characters at the front -- all should stay NullTerminated */
+    CORRADE_COMPARE(" abc"_s.trimmedPrefix().flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(" abc"_s.trimmedSuffix().flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(" abc"_s.trimmed().flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null pointer -- should inherit just the Global flag */
+    CORRADE_COMPARE(StringView{nullptr}.trimmed().flags(), StringViewFlag::Global);
+}
+
+void StringViewTest::trimmedNullView() {
+    /* Trimmed empty string is non-null */
+    CORRADE_VERIFY(""_s.trimmedPrefix().data());
+    CORRADE_VERIFY(""_s.trimmedSuffix().data());
+    CORRADE_VERIFY(""_s.trimmed().data());
+
+    /* Trimmed nullptr string is null */
+    CORRADE_VERIFY(!StringView{nullptr}.trimmedPrefix().data());
+    CORRADE_VERIFY(!StringView{nullptr}.trimmedSuffix().data());
+    CORRADE_VERIFY(!StringView{nullptr}.trimmed().data());
 }
 
 void StringViewTest::debugFlag() {

@@ -577,6 +577,69 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         }
         #endif
 
+        /**
+         * @brief View with given characters trimmed from prefix and suffix
+         *
+         * The function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting view is
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref trimmed() const, @ref trimmedPrefix(StringView) const,
+         *      @ref trimmedSuffix(StringView) const
+         */
+        BasicStringView<T> trimmed(StringView characters) const;
+
+        /**
+         * @brief View with whitespace trimmed from prefix and suffix
+         *
+         * Equivalent to calling @ref trimmed(StringView) const with
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @see @ref trimmedPrefix() const, @ref trimmedSuffix() const
+         */
+        BasicStringView<T> trimmed() const;
+
+        /**
+         * @brief View with given characters trimmed from prefix
+         *
+         * The function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting view is
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref trimmedPrefix() const, @ref trimmed(StringView) const,
+         *      @ref trimmedSuffix(StringView) const
+         */
+        BasicStringView<T> trimmedPrefix(StringView characters) const;
+
+        /**
+         * @brief View with whitespace trimmed from prefix
+         *
+         * Equivalent to calling @ref trimmedPrefix(StringView) const with
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @see @ref trimmed() const, @ref trimmedSuffix() const
+         */
+        BasicStringView<T> trimmedPrefix() const;
+
+        /**
+         * @brief View with given characters trimmed from suffix
+         *
+         * The function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting view is
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref trimmedSuffix() const, @ref trimmed(StringView) const,
+         *      @ref trimmedPrefix(StringView) const
+         */
+        BasicStringView<T> trimmedSuffix(StringView characters) const;
+
+        /**
+         * @brief View with whitespace trimmed from suffix
+         *
+         * Equivalent to calling @ref trimmedSuffix(StringView) const with
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @see @ref trimmed() const, @ref trimmedPrefix() const
+         */
+        BasicStringView<T> trimmedSuffix() const;
+
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;

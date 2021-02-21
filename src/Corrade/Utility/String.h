@@ -131,7 +131,8 @@ CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
 @param characters   Characters which will be trimmed
 
 Implemented using @ref rtrimInPlace().
-@see @ref ltrim(), @ref trim()
+@see @ref ltrim(), @ref trim(),
+    @ref Containers::StringView::trimmedSuffix(StringView) const
 */
 inline std::string rtrim(std::string string, const std::string& characters) {
     return Implementation::rtrim(std::move(string), {characters.data(), characters.size()});
@@ -147,7 +148,8 @@ template<std::size_t size> inline std::string rtrim(std::string string, const ch
 
 Equivalent to calling @ref rtrim(std::string, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
-@see @ref ltrim(), @ref trim()
+@see @ref ltrim(), @ref trim(),
+    @ref Containers::StringView::trimmedSuffix() const
 */
 CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 
@@ -158,6 +160,7 @@ CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 
 Equivalent to @cpp ltrim(rtrim(string, characters), characters) @ce.
 Implemented using @ref trimInPlace().
+@see @ref Containers::StringView::trimmed(StringView) const
 */
 inline std::string trim(std::string string, const std::string& characters) {
     return Implementation::trim(std::move(string), {characters.data(), characters.size()});
@@ -172,7 +175,9 @@ template<std::size_t size> inline std::string trim(std::string string, const cha
 @brief Trim leading and trailing whitespace from string
 
 Equivalent to calling @ref trim(std::string, const char(&)[size]) with
-@cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
+@cpp " \t\f\v\r\n" @ce as second parameter. Implemented using
+@ref trimInPlace().
+@see @ref Containers::StringView::trimmed() const
 */
 CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 
@@ -181,7 +186,8 @@ CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 @param string       String to be trimmed in place
 @param characters   Characters which will be trimmed
 
-@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace()
+@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
+    @ref Containers::StringView::trimmedPrefix(StringView) const
 */
 inline void ltrimInPlace(std::string& string, const std::string& characters) {
     Implementation::ltrimInPlace(string, {characters.data(), characters.size()});
@@ -197,7 +203,8 @@ template<std::size_t size> inline void ltrimInPlace(std::string& string, const c
 
 Equivalent to calling @ref ltrimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace()
+@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
+    @ref Containers::StringView::trimmedPrefix() const
 */
 CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
 
@@ -206,7 +213,8 @@ CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
-@see @ref rtrim(), @ref ltrimInPlace(), @ref trimInPlace()
+@see @ref rtrim(), @ref ltrimInPlace(), @ref trimInPlace(),
+    @ref Containers::StringView::trimmedSuffix(StringView) const
 */
 inline void rtrimInPlace(std::string& string, const std::string& characters) {
     Implementation::rtrimInPlace(string, {characters.data(), characters.size()});
@@ -222,7 +230,8 @@ template<std::size_t size> inline void rtrimInPlace(std::string& string, const c
 
 Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref rtrim(), @ref ltrim(), @ref trim()
+@see @ref rtrim(), @ref ltrim(), @ref trim(),
+    @ref Containers::StringView::trimmedSuffix() const
 */
 CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
 
@@ -232,7 +241,7 @@ CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
 @param characters   Characters which will be trimmed
 
 Equivalent to calling both @ref ltrimInPlace() and @ref rtrimInPlace().
-@see @ref trim()
+@see @ref trim(), @ref Containers::StringView::trimmed(StringView) const
 */
 inline void trimInPlace(std::string& string, const std::string& characters) {
     return Implementation::trimInPlace(string, {characters.data(), characters.size()});
@@ -248,7 +257,7 @@ template<std::size_t size> inline void trimInPlace(std::string& string, const ch
 
 Equivalent to calling @ref trimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref trim()
+@see @ref trim(), @ref Containers::StringView::trimmed() const
 */
 CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string);
 

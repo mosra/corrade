@@ -152,6 +152,8 @@ struct StringTest: TestSuite::Tester {
     template<class T> void exceptSuffix();
     void exceptSuffixInvalid();
 
+    template<class T> void trimmed();
+
     void release();
 
     void releaseDeleterSmall();
@@ -241,6 +243,9 @@ StringTest::StringTest() {
               &StringTest::exceptSuffix<String>,
               &StringTest::exceptSuffix<const String>,
               &StringTest::exceptSuffixInvalid,
+
+              &StringTest::trimmed<String>,
+              &StringTest::trimmed<const String>,
 
               &StringTest::release,
 
@@ -1534,6 +1539,43 @@ void StringTest::exceptSuffixInvalid() {
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+}
+
+template<class T> void StringTest::trimmed() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    T a{" \t abc \n "};
+    {
+        typename ConstTraits<T>::ViewType trimmed = a.trimmedPrefix();
+        CORRADE_COMPARE(trimmed, "abc \n "_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType trimmed = a.trimmedSuffix();
+        CORRADE_COMPARE(trimmed, " \t abc"_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType trimmed = a.trimmed();
+        CORRADE_COMPARE(trimmed, "abc"_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlags{});
+    }
+
+    T b{"oubya"};
+    {
+        typename ConstTraits<T>::ViewType trimmed = b.trimmedPrefix("aeiyou");
+        CORRADE_COMPARE(trimmed, "bya"_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType trimmed = b.trimmedSuffix("aeiyou");
+        CORRADE_COMPARE(trimmed, "oub"_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType trimmed = b.trimmed("aeiyou");
+        CORRADE_COMPARE(trimmed, "b"_s);
+        CORRADE_COMPARE(trimmed.flags(), StringViewFlags{});
+    }
 }
 
 void StringTest::release() {
