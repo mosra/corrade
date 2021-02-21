@@ -1082,33 +1082,42 @@ auto b = Containers::pointer<std::string>('a', 'b');
 }
 
 {
-/* [StringView-literal] */
+/* [StringView-usage-literal] */
 using namespace Containers::Literals;
 
 Containers::StringView a = "hello world!";
 Containers::StringView b = "hello world!"_s;
-/* [StringView-literal] */
+/* [StringView-usage-literal] */
 static_cast<void>(a);
 static_cast<void>(b);
 }
 
 {
 using namespace Containers::Literals;
-/* [StringView-literal-null] */
+/* [StringView-usage-literal-null] */
 Containers::StringView a = "hello\0world!";     // a.size() == 5
 Containers::StringView b = "hello\0world!"_s;   // a.size() == 12
-/* [StringView-literal-null] */
+/* [StringView-usage-literal-null] */
 static_cast<void>(a);
 static_cast<void>(b);
 }
 
 {
-/* [StringView-mutable] */
+/* [StringView-usage-mutable] */
 char a[] = "hello world!";
 Containers::MutableStringView view = a;
 view[5] = '\0';
-/* [StringView-mutable] */
+/* [StringView-usage-mutable] */
 static_cast<void>(a);
+}
+
+{
+using namespace Containers::Literals;
+/* [StringView-usage-slicing] */
+Containers::StringView file = "Master Of Puppets.mp3";
+Containers::StringView name = file.exceptSuffix(".mp3"); // "Master Of Puppets"
+/* [StringView-usage-slicing] */
+static_cast<void>(name);
 }
 
 {
@@ -1121,10 +1130,10 @@ Containers::String a = ", "_s.join({"hello", "world"});
 
 {
 using namespace Containers::Literals;
-/* [String-literal-null] */
+/* [String-usage-literal-null] */
 Containers::String a = "hello\0world!";         // a.size() == 5
 Containers::String b = "hello\0world!"_s;       // a.size() == 12
-/* [String-literal-null] */
+/* [String-usage-literal-null] */
 static_cast<void>(a);
 static_cast<void>(b);
 }

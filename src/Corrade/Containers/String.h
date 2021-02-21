@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::String
+ * @brief Class @ref Corrade::Containers::String, tag type @ref Corrade::Containers::AllocatedInitT, tag @ref Corrade::Containers::AllocatedInit
  * @m_since_latest
  */
 
@@ -56,7 +56,7 @@ namespace Implementation {
 
 Used to distinguish @ref String construction that bypasses small string
 optimization.
-@see @ref AllocatedInit, @ref Containers-String-sso
+@see @ref AllocatedInit, @ref Containers-String-usage-sso
 */
 /* Explicit constructor to avoid ambiguous calls when using {} */
 struct AllocatedInitT {
@@ -71,7 +71,7 @@ struct AllocatedInitT {
 @m_since_latest
 
 Use for @ref String construction that bypasses small string optimization.
-@ref Containers-String-sso
+@ref Containers-String-usage-sso
 */
 constexpr AllocatedInitT AllocatedInit{AllocatedInitT::Init{}};
 
@@ -80,7 +80,8 @@ constexpr AllocatedInitT AllocatedInit{AllocatedInitT::Init{}};
 @m_since_latest
 
 A lightweight non-templated alternative to @ref std::string with support for
-custom deleters. Owning counterpart to @ref BasicStringView "StringView".
+custom deleters. A non-owning version of this container is a
+@ref BasicStringView "StringView".
 
 @section Containers-String-usage Usage
 
@@ -92,7 +93,7 @@ literals, but the designated way to instantiate a string is using the
 equivalent, the implicit conversion has some runtime impact due to
 @ref std::strlen(), and it won't preserve zero bytes inside the string:
 
-@snippet Containers.cpp String-literal-null
+@snippet Containers.cpp String-usage-literal-null
 
 @ref String instances are implicitly convertible from and to
 (mutable) @ref BasicStringView "StringView", all instances (including an empty
@@ -107,7 +108,7 @@ guarantee null termination of the input @ref Array --- use the explicit
 @ref String(char*, std::size_t, Deleter) constructor together with
 @ref Array::release() in that case.
 
-@section Containers-String-sso Small string optimization
+@subsection Containers-String-usage-sso Small string optimization
 
 The class stores data size, data pointer and a deleter pointer, which is 24
 bytes on 64-bit platforms (and 12 bytes on 32-bit). To avoid allocations for
@@ -129,7 +130,7 @@ always allocates.
     should be more than enough for real-world strings (as opposed to arbitrary
     binary data), if you need more please use an @ref Array instead.
 
-@section Containers-String-initialization String initialization
+@subsection Containers-String-usage-initialization String initialization
 
 In addition to creating a @ref String from an existing string (literal) or
 wrapping an externally allocated memory as mentioned above, explicit
@@ -223,7 +224,8 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p view is allowed to be
          * @cpp nullptr @ce, but only if it's size is zero. Depending on the
          * size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, StringView)
+         * @see @ref Containers-String-usage-sso,
+         *      @ref String(AllocatedInitT, StringView)
          */
         /*implicit*/ String(StringView view);
         /*implicit*/ String(Containers::ArrayView<const char> view); /**< @overload */
@@ -239,7 +241,8 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p data is allowed to be
          * @cpp nullptr @ce --- in that case an empty string is constructed.
          * Depending on the size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, const char*)
+         * @see @ref Containers-String-usage-sso,
+         *      @ref String(AllocatedInitT, const char*)
          */
         /*implicit*/ String(const char* data);
 
@@ -250,7 +253,8 @@ class CORRADE_UTILITY_EXPORT String {
          * behavior of @ref std::string, @p data is allowed to be
          * @cpp nullptr @ce, but only if @p size is zero. Depending on the
          * size, it's either stored allocated or in a SSO.
-         * @see @ref Containers-String-sso, @ref String(AllocatedInitT, const char*, std::size_t)
+         * @see @ref Containers-String-usage-sso,
+         *      @ref String(AllocatedInitT, const char*, std::size_t)
          */
         /*implicit*/ String(const char* data, std::size_t size);
 
@@ -258,7 +262,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Construct from a string view, bypassing SSO
          *
          * Compared to @ref String(StringView) the data is always allocated.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-usage-sso
          */
         explicit String(AllocatedInitT, StringView view);
         explicit String(AllocatedInitT, Containers::ArrayView<const char> view); /**< @overload */
@@ -271,7 +275,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Construct from a null-terminated C string, bypassing SSO
          *
          * Compared to @ref String(const char*) the data is always allocated.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-usage-sso
          */
         explicit String(AllocatedInitT, const char* data);
 
@@ -280,7 +284,7 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Compared to @ref String(const char*, std::size_t) the data is always
          * allocated.
-         * @see @ref Containers-String-sso
+         * @see @ref Containers-String-usage-sso
          */
         explicit String(AllocatedInitT, const char* data, std::size_t size);
 
@@ -372,7 +376,7 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Calls @ref deleter() on the owned @ref data(); in case of a SSO does
          * nothing.
-         * @see @ref Containers-String-sso, @ref isSmall()
+         * @see @ref Containers-String-usage-sso, @ref isSmall()
          */
         ~String();
 
@@ -422,7 +426,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string is stored using small string optimization
          *
          * It's not allowed to call @ref deleter() or @ref release() on a SSO
-         * instance. See @ref Containers-String-sso for more information.
+         * instance. See @ref Containers-String-usage-sso for more information.
          */
         bool isSmall() const { return _small.size & 0x80; }
 
@@ -441,7 +445,7 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * If set to @cpp nullptr @ce, the contents are deleted using standard
          * @cpp operator delete[] @ce. Can be called only if the string is not
-         * stored using SSO --- see @ref Containers-String-sso for more
+         * stored using SSO --- see @ref Containers-String-usage-sso for more
          * information.
          * @see @ref String(char*, std::size_t, Deleter)
          */
@@ -764,7 +768,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Returns the data pointer and resets data pointer, size and deleter
          * to be equivalent to a default-constructed instance. Can be called
          * only if the string is not stored using SSO --- see
-         * @ref Containers-String-sso for more information. Deleting the
+         * @ref Containers-String-usage-sso for more information. Deleting the
          * returned array is user responsibility --- note the string might have
          * a custom @ref deleter() and so @cpp delete[] @ce might not be always
          * appropriate.

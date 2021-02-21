@@ -105,7 +105,7 @@ CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringV
 
 A lighter alternative to C++17 @ref std::string_view that has also a mutable
 variant and additional optimizations for reducing unnecessary copies and
-allocations.
+allocations. An owning version of this container is a @ref String.
 
 @section Containers-BasicStringView-usage Usage
 
@@ -114,7 +114,7 @@ The class is meant to be used through either the @ref StringView or
 literals, but the recommended way is using the @link operator""_s() @endlink
 literal:
 
-@snippet Containers.cpp StringView-literal
+@snippet Containers.cpp StringView-usage-literal
 
 While both expressions are *mostly* equivalent, the literal is
 @cpp constexpr @ce so you can use it in a compile-time context (and on the
@@ -127,14 +127,14 @@ dealing with APIs that expect null-terminated strings. Additionally, the
 literal will also preserve zero bytes inside the string, while implicit
 conversion from a C string won't:
 
-@snippet Containers.cpp StringView-literal-null
+@snippet Containers.cpp StringView-usage-literal-null
 
 C string literals are implicitly immutable, in order to create a mutable one
 you need to assign the literal to a @cpp char[] @ce (instead of
 @cpp const char* @ce) and then create a @ref MutableStringView in a second
 step. For example:
 
-@snippet Containers.cpp StringView-mutable
+@snippet Containers.cpp StringView-usage-mutable
 
 This class is implicitly convertible from and to @ref ArrayView, however note
 that the conversion will not preserve the global / null-terminated annotations.
@@ -143,6 +143,32 @@ that the conversion will not preserve the global / null-terminated annotations.
     systems the size is limited to 1 GB. That should be more than enough for
     real-world strings (as opposed to arbitrary binary data), if you need more
     please use an @ref ArrayView instead.
+
+@subsection Containers-BasicStringView-usage-slicing String view slicing
+
+The string view class inherits the slicing APIs of @ref ArrayView ---
+@ref slice(), @ref prefix(), @ref suffix() and @ref except() --- and in
+addition it provides string-specific utilities. These are are all derived from
+the slicing APIs, which means they also return sub-views of the original
+string:
+
+<ul>
+<li>@ref split() and @ref splitWithoutEmptyParts() split the view on given set
+of delimiter characters</li>
+<li>@ref join() and @ref joinWithoutEmptyParts() is an inverse of the
+above</li>
+<li>@ref partition() is similar to @ref split(), but always returning three
+elements with a clearly defined behavio, which can make certain code more
+robust while reducing the amount of possible error states</li>
+<li>@ref trimmed() (and its variants @ref trimmedPrefix() /
+@ref trimmedSuffix()), commonly used to remove leading and trailing
+whitespace</li>
+<li>@ref exceptPrefix() / @ref exceptSuffix() checks that a view starts (or
+ends) with given string and then removes it:
+
+@snippet Containers.cpp StringView-usage-slicing
+</li>
+</ul>
 
 @section Containers-BasicStringView-stl STL compatibility
 
