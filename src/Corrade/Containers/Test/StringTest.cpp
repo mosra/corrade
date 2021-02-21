@@ -147,9 +147,9 @@ struct StringTest: TestSuite::Tester {
     void hasPrefix();
     void hasSuffix();
 
-    void exceptPrefix();
+    template<class T> void exceptPrefix();
     void exceptPrefixInvalid();
-    void exceptSuffix();
+    template<class T> void exceptSuffix();
     void exceptSuffixInvalid();
 
     void release();
@@ -235,15 +235,27 @@ StringTest::StringTest() {
               &StringTest::hasPrefix,
               &StringTest::hasSuffix,
 
-              &StringTest::exceptPrefix,
+              &StringTest::exceptPrefix<String>,
+              &StringTest::exceptPrefix<const String>,
               &StringTest::exceptPrefixInvalid,
-              &StringTest::exceptSuffix,
+              &StringTest::exceptSuffix<String>,
+              &StringTest::exceptSuffix<const String>,
               &StringTest::exceptSuffixInvalid,
 
               &StringTest::release,
 
               &StringTest::releaseDeleterSmall});
 }
+
+template<class T> struct ConstTraits;
+template<> struct ConstTraits<String> {
+    typedef MutableStringView ViewType;
+    static const char* name() { return "String"; }
+};
+template<> struct ConstTraits<const String> {
+    typedef StringView ViewType;
+    static const char* name() { return "const String"; }
+};
 
 using namespace Literals;
 
@@ -1463,16 +1475,16 @@ void StringTest::hasSuffix() {
     CORRADE_VERIFY(!String{"overcomplicated"}.hasSuffix("somplicated"));
 }
 
-void StringTest::exceptPrefix() {
+template<class T> void StringTest::exceptPrefix() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    String a{"overcomplicated"};
-    CORRADE_COMPARE(a.exceptPrefix("over"), "complicated"_s);
-    CORRADE_COMPARE(a.exceptPrefix("over").flags(), StringViewFlag::NullTerminated);
-
-    const String ca{"overcomplicated"};
-    CORRADE_COMPARE(ca.exceptPrefix("over"), "complicated");
+    T a{"overcomplicated"};
+    typename ConstTraits<T>::ViewType stripped = a.exceptPrefix("over");
+    CORRADE_COMPARE(stripped, "complicated"_s);
+    CORRADE_COMPARE(stripped.flags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::exceptPrefixInvalid() {
@@ -1493,18 +1505,17 @@ void StringTest::exceptPrefixInvalid() {
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
 }
 
-void StringTest::exceptSuffix() {
+template<class T> void StringTest::exceptSuffix() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
     String a{"overcomplicated"};
-
-    CORRADE_COMPARE(a.exceptSuffix("complicated"), "over"_s);
-    CORRADE_COMPARE(a.exceptSuffix("complicated").flags(), StringViewFlags{});
+    typename ConstTraits<T>::ViewType stripped = a.exceptSuffix("complicated");
+    CORRADE_COMPARE(stripped, "over"_s);
+    CORRADE_COMPARE(stripped.flags(), StringViewFlags{});
     CORRADE_COMPARE(a.exceptSuffix("").flags(), StringViewFlag::NullTerminated);
-
-    const String ca{"overcomplicated"};
-    CORRADE_COMPARE(ca.exceptSuffix("complicated"), "over");
 }
 
 void StringTest::exceptSuffixInvalid() {
