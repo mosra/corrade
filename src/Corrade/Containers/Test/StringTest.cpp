@@ -154,6 +154,8 @@ struct StringTest: TestSuite::Tester {
 
     template<class T> void trimmed();
 
+    template<class T> void find();
+
     void release();
 
     void releaseDeleterSmall();
@@ -246,6 +248,9 @@ StringTest::StringTest() {
 
               &StringTest::trimmed<String>,
               &StringTest::trimmed<const String>,
+
+              &StringTest::find<String>,
+              &StringTest::find<const String>,
 
               &StringTest::release,
 
@@ -1575,6 +1580,36 @@ template<class T> void StringTest::trimmed() {
         typename ConstTraits<T>::ViewType trimmed = b.trimmed("aeiyou");
         CORRADE_COMPARE(trimmed, "b"_s);
         CORRADE_COMPARE(trimmed.flags(), StringViewFlags{});
+    }
+}
+
+template<class T> void StringTest::find() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    T a{"hello world"};
+    {
+        CORRADE_VERIFY(a.contains("hello"));
+
+        typename ConstTraits<T>::ViewType found = a.find("hello");
+        CORRADE_COMPARE(found, "hello"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        CORRADE_VERIFY(a.contains("world"));
+
+        typename ConstTraits<T>::ViewType found = a.find("world");
+        CORRADE_COMPARE(found, "world"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        CORRADE_VERIFY(!a.contains("cursed"));
+
+        typename ConstTraits<T>::ViewType found = a.find("cursed");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!(static_cast<const void*>(found.data())));
     }
 }
 

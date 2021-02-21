@@ -555,6 +555,18 @@ StringView String::trimmedSuffix() const & {
     return StringView{*this}.trimmedSuffix();
 }
 
+MutableStringView String::find(const StringView substring) & {
+    return MutableStringView{*this}.find(substring);
+}
+
+StringView String::find(const StringView substring) const & {
+    return StringView{*this}.find(substring);
+}
+
+bool String::contains(const StringView substring) const {
+    return StringView{*this}.contains(substring);
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

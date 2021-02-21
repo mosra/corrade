@@ -157,6 +157,10 @@ struct StringViewTest: TestSuite::Tester {
     void trimmedFlags();
     void trimmedNullView();
 
+    void find();
+    void findEmpty();
+    void findFlags();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -227,6 +231,10 @@ StringViewTest::StringViewTest() {
               &StringViewTest::trimmed,
               &StringViewTest::trimmedFlags,
               &StringViewTest::trimmedNullView,
+
+              &StringViewTest::find,
+              &StringViewTest::findEmpty,
+              &StringViewTest::findFlags,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -1215,6 +1223,153 @@ void StringViewTest::trimmedNullView() {
     CORRADE_VERIFY(!StringView{nullptr}.trimmedPrefix().data());
     CORRADE_VERIFY(!StringView{nullptr}.trimmedSuffix().data());
     CORRADE_VERIFY(!StringView{nullptr}.trimmed().data());
+}
+
+void StringViewTest::find() {
+    StringView a = "hello cursed world"_s;
+
+    /* Right at the start */
+    {
+        CORRADE_VERIFY(a.contains("hello"));
+
+        StringView found = a.find("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* In the middle */
+    } {
+        CORRADE_VERIFY(a.contains("cursed"));
+
+        StringView found = a.find("cursed");
+        CORRADE_COMPARE(found, "cursed");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* Right at the end */
+    } {
+        CORRADE_VERIFY(a.contains("world"));
+
+        StringView found = a.find("world");
+        CORRADE_COMPARE(found, "world");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 13);
+
+    /* Almost, but not quite */
+    } {
+        CORRADE_VERIFY(!a.contains("worlds"));
+
+        StringView found = a.find("worlds");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Should not read the null terminator either */
+    } {
+        CORRADE_VERIFY(!a.contains("world\0"_s));
+
+        StringView found = a.find("world\0"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+
+    StringView b = "so, hello hell hello! hello"_s;
+
+    /* Multiple occurences */
+    {
+        CORRADE_VERIFY(b.contains("hello"));
+
+        StringView found = b.find("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 4);
+
+    /* First occurences almost but not quite complete */
+    } {
+        CORRADE_VERIFY(b.contains("hello!"));
+
+        StringView found = b.find("hello!");
+        CORRADE_COMPARE(found, "hello!");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 15);
+    }
+
+    StringView c = "hell"_s;
+
+    /* Finding a substring that's the whole string should success */
+    {
+        CORRADE_VERIFY(c.contains("hell"));
+
+        StringView found = c.find("hell");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), c.data());
+
+    /* But a larger string should fail */
+    } {
+        CORRADE_VERIFY(!c.contains("hello"));
+
+        StringView found = c.find("hello");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findEmpty() {
+    /* Finding an empty string inside a string should return a zero-sized view
+       to the first byte */
+    {
+        StringView a = "hello";
+        CORRADE_VERIFY(a.contains("hello"));
+
+        StringView found = a.find("");
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Finding an empty string inside an empty string should do the same */
+    } {
+        StringView a = "";
+        CORRADE_VERIFY(a.contains(""));
+
+        StringView found = a.find("");
+        CORRADE_VERIFY(a.data());
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Finding an empty string inside a null view should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a{nullptr};
+        CORRADE_VERIFY(!a.contains(""));
+
+        StringView found = a.find("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding an arbitrary string inside a null view should not crash or do
+       anything crazy either */
+    } {
+        StringView a{nullptr};
+        CORRADE_VERIFY(!a.contains("hello"));
+
+        StringView found = a.find("hello");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+    }
+}
+
+void StringViewTest::findFlags() {
+    StringView a = "hello world"_s;
+
+    /* Right at the start should preserve just the global flag */
+    {
+        StringView found = a.find("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* At the end also null-terminated */
+    } {
+        StringView found = a.find("world");
+        CORRADE_COMPARE(found, "world");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be just global */
+    } {
+        CORRADE_COMPARE(StringView{nullptr}.find("").flags(), StringViewFlag::Global);
+    }
 }
 
 void StringViewTest::debugFlag() {

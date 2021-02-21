@@ -666,6 +666,34 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          */
         BasicStringView<T> trimmedSuffix() const;
 
+        /**
+         * @brief Find a substring
+         *
+         * Returns a view pointing to the first found substring. If not found,
+         * an empty @cpp nullptr @ce view is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate.
+         *
+         * Note that the function operates with a @f$ \mathcal{O}(nm) @f$
+         * complexity and as such is meant mainly for one-time searches in
+         * non-performance-critical code. For repeated searches or searches of
+         * large substrings it's recommended to use the @ref std::search()
+         * algorithms, especially @ref std::boyer_moore_searcher and its
+         * variants. Those algorithms on the other hand have to perform certain
+         * preprocessing of the input and keep extra state and due to that
+         * overhead aren't generally suited for one-time searches.
+         * @see @ref contains()
+         */
+        BasicStringView<T> find(StringView substring) const;
+
+        /**
+         * @brief Whether the view contains a substring
+         *
+         * A slightly lighter variant of @ref find() useful when you only want
+         * to know if a substring was found or not.
+         */
+        bool contains(StringView substring) const;
+
     private:
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;

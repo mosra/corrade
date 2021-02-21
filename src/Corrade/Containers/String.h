@@ -763,6 +763,23 @@ class CORRADE_UTILITY_EXPORT String {
         StringView trimmedSuffix() const &; /**< @overload */
 
         /**
+         * @brief Find a substring
+         *
+         * Equivalent to @ref BasicStringView::find(). Not allowed to be called
+         * on a r-value since the returned view would become dangling.
+         * @see @ref contains()
+         */
+        MutableStringView find(StringView substring) &;
+        StringView find(StringView substring) const &; /**< @overload */
+
+        /**
+         * @brief Whether the view contains a substring
+         *
+         * Equivalent to @ref BasicStringView::contains().
+         */
+        bool contains(StringView substring) const;
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter
