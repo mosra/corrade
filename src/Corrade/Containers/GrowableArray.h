@@ -29,6 +29,8 @@
 /** @file
  * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
  * @m_since{2020,06}
+ *
+ * See @ref Containers-Array-growable for more information.
  */
 
 #include <cstdlib>
@@ -1323,6 +1325,14 @@ template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& arr
     return {it, valueCount};
 }
 
+template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
+    return arrayAppend<T, ArrayAllocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
+}
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
     /* No helper function as there's no way we could memcpy such a thing. */
@@ -1330,14 +1340,6 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
        overload docs for details */
     Implementation::construct(*it, std::forward<Args>(args)...);
     return *it;
-}
-
-/* This crap tool can't distinguish between this and above overload, showing
-   just one with the docs melted together. More useless than showing nothing
-   at all, so hiding this one from it until it improves. */
-#ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T, class... Args> inline T& arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
-    return arrayAppend<T, ArrayAllocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
 }
 #endif
 
