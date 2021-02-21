@@ -171,7 +171,7 @@ path name.
 
 @subsection corrade-coding-style-cpp-format Code format
 
-@subsubsection corrade-coding-style-cpp-naming Naming
+@subsubsection corrade-coding-style-cpp-naming-style Naming style
 
 Namespaces, classes and structs, enums, type template names and static
 constants should be named with `CamelCase`, i.e. first letter of the name and
@@ -208,6 +208,50 @@ thread safety etc.). If there is no other option, try to reduce its scope as
 much as possible --- anonymous namespace or `constexpr` function-local
 variable, using `CamelCase` naming. If the variable is a numberic constant, put
 it in an typed enum instead. Don't use the `g_` prefix.
+
+@subsubsection corrade-coding-style-cpp-naming-clarity API usability and naming clarity
+
+Where performance concerns doesn't make it impractical, immutable APIs that
+return modified data are preferred to APIs that mutate itself. For example, in
+the following example, the hypothetical matrix class API actually mutates the
+original instance --- [similar to GLM's design, in a way](https://glm.g-truc.net/0.9.2/api/a00245.html):
+
+@code{.cpp}
+Matrix 4 a;
+a.translate({3.0f, 1.0f, 2.0f});
+a.rotate(Deg(35.0));
+@endcode
+
+The reason this is bad is that you need two expressions to create a rotation
+matrix (first create the instance, then mutate it), or write unintuitive code
+like @cb{.cpp} Matrix4{}.translate(…) @ce. Not to mention issues where it's not
+clear from which side the transformations get combined. To fix that, with an
+API written in an immutable design, the above would be instead:
+
+@code{.cpp}
+Matrix 4 a =
+    Matrix4::rotation(Deg(35.0f))*
+    Matrix4::translation({3.0f, 1.0f, 2.0f});
+@endcode
+
+Note the different naming --- the functions now say "this is what you get on
+output" instead of "this is what I will do on the instance", and also note the
+different order --- with the above it had to be assumed (or checked in the docs
+or source code) that translation happens first and rotation after, with this
+the order is clearly given by how the matrix multiplication happens.
+
+To prevent mutability/immutability confusion, immutable functions shouldn't
+use verbs. For example the following @ref Containers::String API existed
+originally and had to be renamed to avoid confusion:
+
+@code{.cpp}
+Containers::String a = "not confused!";
+
+a.stripPrefix("not "); // does nothing -- the function actually returns a view
+@endcode
+
+Now it's @ref Containers::String::exceptSuffix() which makes it clearer that
+the user gets a result back and nothing is mutated.
 
 @subsubsection corrade-coding-style-cpp-forward-declarations Forward declarations and forward declaration headers
 
