@@ -738,7 +738,7 @@ void StringTest::convertMutableStringViewSmall() {
 }
 
 void StringTest::convertArrayView() {
-    const String a = Containers::arrayView("Allocated hello\0for a verbose world").except(1);
+    const String a = arrayView("Allocated hello\0for a verbose world").except(1);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a[0], 'A');
@@ -753,7 +753,7 @@ void StringTest::convertArrayView() {
 }
 
 void StringTest::convertArrayViewSmall() {
-    const String a = Containers::arrayView("this\0world").except(1);
+    const String a = arrayView("this\0world").except(1);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_COMPARE(a.size(), 10);
     CORRADE_COMPARE(a[0], 't');
@@ -767,7 +767,7 @@ void StringTest::convertArrayViewSmall() {
     CORRADE_COMPARE(aVoidView.data(), a.data());
 
     /* Bypassing SSO */
-    const String aa{AllocatedInit, Containers::arrayView("this\0world").except(1)};
+    const String aa{AllocatedInit, arrayView("this\0world").except(1)};
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_COMPARE(aa.size(), 10);
     CORRADE_COMPARE(aa[0], 't');
@@ -1338,7 +1338,7 @@ void StringTest::split() {
 }
 
 void StringTest::splitMultipleCharacters() {
-    constexpr Containers::StringView delimiters = ".:;"_s;
+    constexpr StringView delimiters = ".:;"_s;
 
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */

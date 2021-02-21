@@ -932,7 +932,7 @@ void StringViewTest::splitFlags() {
 }
 
 void StringViewTest::splitMultipleCharacters() {
-    constexpr Containers::StringView delimiters = ".:;"_s;
+    constexpr StringView delimiters = ".:;"_s;
 
     /* Empty */
     CORRADE_COMPARE_AS(""_s.splitWithoutEmptyParts(delimiters),
@@ -966,7 +966,7 @@ void StringViewTest::splitMultipleCharacters() {
 }
 
 void StringViewTest::splitMultipleCharactersFlags() {
-    constexpr Containers::StringView delimiters = ".:;"_s;
+    constexpr StringView delimiters = ".:;"_s;
 
     /* All flags come from the slice() implementation, so just verify the edge
        cases */
@@ -1382,7 +1382,7 @@ void StringViewTest::debugFlag() {
 void StringViewTest::debugFlags() {
     std::ostringstream out;
 
-    Debug{&out} << (Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated) << Containers::StringViewFlags{};
+    Debug{&out} << (StringViewFlag::Global|StringViewFlag::NullTerminated) << StringViewFlags{};
     CORRADE_COMPARE(out.str(), "Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated Containers::StringViewFlags{}\n");
 }
 
