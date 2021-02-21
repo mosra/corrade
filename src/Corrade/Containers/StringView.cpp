@@ -290,15 +290,15 @@ template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) co
     return std::strncmp(_data + size - suffixSize, suffix.data(), suffixSize) == 0;
 }
 
-template<class T> BasicStringView<T> BasicStringView<T>::stripPrefix(const StringView prefix) const {
+template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const StringView prefix) const {
     CORRADE_ASSERT(hasPrefix(prefix),
-        "Containers::StringView::stripPrefix(): string doesn't begin with" << prefix, {});
+        "Containers::StringView::exceptPrefix(): string doesn't begin with" << prefix, {});
     return suffix(prefix.size());
 }
 
-template<class T> BasicStringView<T> BasicStringView<T>::stripSuffix(const StringView suffix) const {
+template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const StringView suffix) const {
     CORRADE_ASSERT(hasSuffix(suffix),
-        "Containers::StringView::stripSuffix(): string doesn't end with" << suffix, {});
+        "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
     return prefix(size() - suffix.size());
 }
 

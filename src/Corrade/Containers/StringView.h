@@ -516,7 +516,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * For an empty string returns @cpp true @ce only if @p prefix is empty
          * as well.
-         * @see @ref stripPrefix()
+         * @see @ref exceptPrefix()
          */
         bool hasPrefix(StringView prefix) const;
 
@@ -525,12 +525,12 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * For an empty string returns @cpp true @ce only if @p suffix is empty
          * as well.
-         * @see @ref stripSuffix()
+         * @see @ref exceptSuffix()
          */
         bool hasSuffix(StringView suffix) const;
 
         /**
-         * @brief Strip given prefix
+         * @brief View with given prefix stripped
          *
          * Expects that the string actually begins with given prefix. The
          * function uses @ref slice() internally, meaning it propagates the
@@ -539,10 +539,22 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * the view always points to existing memory.
          * @see @ref hasPrefix()
          */
-        BasicStringView<T> stripPrefix(StringView prefix) const;
+        BasicStringView<T> exceptPrefix(StringView prefix) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") BasicStringView<T> stripPrefix(StringView prefix) const {
+            return exceptPrefix(prefix);
+        }
+        #endif
 
         /**
-         * @brief Strip given suffix
+         * @brief View with given suffix stripped
          *
          * Expects that the string actually ends with given suffix. The
          * function uses @ref slice() internally, meaning it propagates the
@@ -551,7 +563,19 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * the view always points to existing memory.
          * @see @ref hasSuffix()
          */
-        BasicStringView<T> stripSuffix(StringView suffix) const;
+        BasicStringView<T> exceptSuffix(StringView suffix) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") BasicStringView<T> stripSuffix(StringView suffix) const {
+            return exceptSuffix(suffix);
+        }
+        #endif
 
     private:
         /* Needed for mutable/immutable conversion */

@@ -147,10 +147,10 @@ struct StringTest: TestSuite::Tester {
     void hasPrefix();
     void hasSuffix();
 
-    void stripPrefix();
-    void stripPrefixInvalid();
-    void stripSuffix();
-    void stripSuffixInvalid();
+    void exceptPrefix();
+    void exceptPrefixInvalid();
+    void exceptSuffix();
+    void exceptSuffixInvalid();
 
     void release();
 
@@ -235,10 +235,10 @@ StringTest::StringTest() {
               &StringTest::hasPrefix,
               &StringTest::hasSuffix,
 
-              &StringTest::stripPrefix,
-              &StringTest::stripPrefixInvalid,
-              &StringTest::stripSuffix,
-              &StringTest::stripSuffixInvalid,
+              &StringTest::exceptPrefix,
+              &StringTest::exceptPrefixInvalid,
+              &StringTest::exceptSuffix,
+              &StringTest::exceptSuffixInvalid,
 
               &StringTest::release,
 
@@ -1463,19 +1463,19 @@ void StringTest::hasSuffix() {
     CORRADE_VERIFY(!String{"overcomplicated"}.hasSuffix("somplicated"));
 }
 
-void StringTest::stripPrefix() {
+void StringTest::exceptPrefix() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
     String a{"overcomplicated"};
-    CORRADE_COMPARE(a.stripPrefix("over"), "complicated"_s);
-    CORRADE_COMPARE(a.stripPrefix("over").flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(a.exceptPrefix("over"), "complicated"_s);
+    CORRADE_COMPARE(a.exceptPrefix("over").flags(), StringViewFlag::NullTerminated);
 
     const String ca{"overcomplicated"};
-    CORRADE_COMPARE(ca.stripPrefix("over"), "complicated");
+    CORRADE_COMPARE(ca.exceptPrefix("over"), "complicated");
 }
 
-void StringTest::stripPrefixInvalid() {
+void StringTest::exceptPrefixInvalid() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
@@ -1485,29 +1485,29 @@ void StringTest::stripPrefixInvalid() {
 
     std::ostringstream out;
     Error redirectOutput{&out};
-    a.stripPrefix("complicated");
-    ca.stripPrefix("complicated");
+    a.exceptPrefix("complicated");
+    ca.exceptPrefix("complicated");
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
-        "Containers::StringView::stripPrefix(): string doesn't begin with complicated\n"
-        "Containers::StringView::stripPrefix(): string doesn't begin with complicated\n");
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
 }
 
-void StringTest::stripSuffix() {
+void StringTest::exceptSuffix() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
     String a{"overcomplicated"};
 
-    CORRADE_COMPARE(a.stripSuffix("complicated"), "over"_s);
-    CORRADE_COMPARE(a.stripSuffix("complicated").flags(), StringViewFlags{});
-    CORRADE_COMPARE(a.stripSuffix("").flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(a.exceptSuffix("complicated"), "over"_s);
+    CORRADE_COMPARE(a.exceptSuffix("complicated").flags(), StringViewFlags{});
+    CORRADE_COMPARE(a.exceptSuffix("").flags(), StringViewFlag::NullTerminated);
 
     const String ca{"overcomplicated"};
-    CORRADE_COMPARE(ca.stripSuffix("complicated"), "over");
+    CORRADE_COMPARE(ca.exceptSuffix("complicated"), "over");
 }
 
-void StringTest::stripSuffixInvalid() {
+void StringTest::exceptSuffixInvalid() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
@@ -1517,12 +1517,12 @@ void StringTest::stripSuffixInvalid() {
 
     std::ostringstream out;
     Error redirectOutput{&out};
-    a.stripSuffix("over");
-    ca.stripSuffix("over");
+    a.exceptSuffix("over");
+    ca.exceptSuffix("over");
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
-        "Containers::StringView::stripSuffix(): string doesn't end with over\n"
-        "Containers::StringView::stripSuffix(): string doesn't end with over\n");
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
 }
 
 void StringTest::release() {

@@ -614,7 +614,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string begins with given prefix
          *
          * Equivalent to @ref BasicStringView::hasPrefix().
-         * @see @ref stripPrefix()
+         * @see @ref exceptPrefix()
          */
         bool hasPrefix(StringView prefix) const;
 
@@ -622,29 +622,75 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string ends with given suffix
          *
          * Equivalent to @ref BasicStringView::hasSuffix().
-         * @see @ref stripSuffix()
+         * @see @ref exceptSuffix()
          */
         bool hasSuffix(StringView suffix) const;
 
         /**
-         * @brief Strip given prefix
+         * @brief View with given prefix stripped
          *
-         * Equivalent to @ref BasicStringView::stripPrefix(). Not allowed to be
-         * called on a rvalue since the returned view would become dangling.
+         * Equivalent to @ref BasicStringView::exceptPrefix(). Not allowed to
+         * be called on a r-value since the returned view would become
+         * dangling.
          * @see @ref hasPrefix()
          */
-        MutableStringView stripPrefix(StringView prefix) &;
-        StringView stripPrefix(StringView prefix) const &; /**< @overload */
+        MutableStringView exceptPrefix(StringView prefix) &;
+        StringView exceptPrefix(StringView prefix) const &; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") MutableStringView stripPrefix(StringView prefix) & {
+            return exceptPrefix(prefix);
+        }
 
         /**
-         * @brief Strip given prefix
+         * @brief @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") StringView stripPrefix(StringView prefix) const & {
+            return exceptPrefix(prefix);
+        }
+        #endif
+
+        /**
+         * @brief View with given suffix stripped
          *
-         * Equivalent to @ref BasicStringView::stripSuffix(). Not allowed to be
-         * called on a rvalue since the returned view would become dangling.
+         * Equivalent to @ref BasicStringView::exceptSuffix(). Not allowed to
+         * be called on a r-value since the returned view would become
+         * dangling.
          * @see @ref hasSuffix()
          */
-        MutableStringView stripSuffix(StringView suffix) &;
-        StringView stripSuffix(StringView suffix) const &; /**< @overload */
+        MutableStringView exceptSuffix(StringView suffix) &;
+        StringView exceptSuffix(StringView suffix) const &; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") MutableStringView stripSuffix(StringView suffix) & {
+            return exceptSuffix(suffix);
+        }
+
+        /**
+         * @brief @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Deprecated due to confusing naming that
+         *      could imply the original instance gets modified. Use
+         *      @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") StringView stripSuffix(StringView suffix) const & {
+            return exceptSuffix(suffix);
+        }
+        #endif
 
         /**
          * @brief Release data storage

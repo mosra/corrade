@@ -145,12 +145,12 @@ struct StringViewTest: TestSuite::Tester {
     void hasSuffix();
     void hasSuffixEmpty();
 
-    void stripPrefix();
-    void stripPrefixFlags();
-    void stripPrefixInvalid();
-    void stripSuffix();
-    void stripSuffixFlags();
-    void stripSuffixInvalid();
+    void exceptPrefix();
+    void exceptPrefixFlags();
+    void exceptPrefixInvalid();
+    void exceptSuffix();
+    void exceptSuffixFlags();
+    void exceptSuffixInvalid();
 
     void debugFlag();
     void debugFlags();
@@ -211,12 +211,12 @@ StringViewTest::StringViewTest() {
               &StringViewTest::hasSuffix,
               &StringViewTest::hasSuffixEmpty,
 
-              &StringViewTest::stripPrefix,
-              &StringViewTest::stripPrefixFlags,
-              &StringViewTest::stripPrefixInvalid,
-              &StringViewTest::stripSuffix,
-              &StringViewTest::stripSuffixFlags,
-              &StringViewTest::stripSuffixInvalid,
+              &StringViewTest::exceptPrefix,
+              &StringViewTest::exceptPrefixFlags,
+              &StringViewTest::exceptPrefixInvalid,
+              &StringViewTest::exceptSuffix,
+              &StringViewTest::exceptSuffixFlags,
+              &StringViewTest::exceptSuffixInvalid,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -1101,58 +1101,58 @@ void StringViewTest::hasSuffixEmpty() {
     CORRADE_VERIFY(""_s.hasSuffix(""));
 }
 
-void StringViewTest::stripPrefix() {
-    CORRADE_COMPARE("overcomplicated"_s.stripPrefix("over"), "complicated");
-    CORRADE_COMPARE("overcomplicated"_s.stripPrefix(""), "overcomplicated");
+void StringViewTest::exceptPrefix() {
+    CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("over"), "complicated");
+    CORRADE_COMPARE("overcomplicated"_s.exceptPrefix(""), "overcomplicated");
 
     /* Only a null view results in a null output */
-    CORRADE_VERIFY(""_s.stripPrefix("").data());
-    CORRADE_VERIFY(!StringView{}.stripPrefix("").data());
+    CORRADE_VERIFY(""_s.exceptPrefix("").data());
+    CORRADE_VERIFY(!StringView{}.exceptPrefix("").data());
 }
 
-void StringViewTest::stripPrefixFlags() {
-    CORRADE_COMPARE("overcomplicated"_s.stripPrefix("over").flags(),
+void StringViewTest::exceptPrefixFlags() {
+    CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("over").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
-    CORRADE_COMPARE("overcomplicated"_s.stripPrefix("").flags(),
+    CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
 }
 
-void StringViewTest::stripPrefixInvalid() {
+void StringViewTest::exceptPrefixInvalid() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
     std::ostringstream out;
     Error redirectOutput{&out};
-    "overcomplicated"_s.stripPrefix("complicated");
-    CORRADE_COMPARE(out.str(), "Containers::StringView::stripPrefix(): string doesn't begin with complicated\n");
+    "overcomplicated"_s.exceptPrefix("complicated");
+    CORRADE_COMPARE(out.str(), "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
 }
 
-void StringViewTest::stripSuffix() {
-    CORRADE_COMPARE("overcomplicated"_s.stripSuffix("complicated"), "over");
-    CORRADE_COMPARE("overcomplicated"_s.stripSuffix(""), "overcomplicated");
+void StringViewTest::exceptSuffix() {
+    CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("complicated"), "over");
+    CORRADE_COMPARE("overcomplicated"_s.exceptSuffix(""), "overcomplicated");
 
     /* Only a null view results in a null output */
-    CORRADE_VERIFY(""_s.stripSuffix("").data());
-    CORRADE_VERIFY(!StringView{}.stripSuffix("").data());
+    CORRADE_VERIFY(""_s.exceptSuffix("").data());
+    CORRADE_VERIFY(!StringView{}.exceptSuffix("").data());
 }
 
-void StringViewTest::stripSuffixFlags() {
-    CORRADE_COMPARE("overcomplicated"_s.stripSuffix("complicated").flags(),
+void StringViewTest::exceptSuffixFlags() {
+    CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("complicated").flags(),
         StringViewFlag::Global);
-    CORRADE_COMPARE("overcomplicated"_s.stripSuffix("").flags(),
+    CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
 }
 
-void StringViewTest::stripSuffixInvalid() {
+void StringViewTest::exceptSuffixInvalid() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
     std::ostringstream out;
     Error redirectOutput{&out};
-    "overcomplicated"_s.stripSuffix("over");
-    CORRADE_COMPARE(out.str(), "Containers::StringView::stripSuffix(): string doesn't end with over\n");
+    "overcomplicated"_s.exceptSuffix("over");
+    CORRADE_COMPARE(out.str(), "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
 }
 
 void StringViewTest::debugFlag() {

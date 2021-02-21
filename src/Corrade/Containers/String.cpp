@@ -491,20 +491,20 @@ bool String::hasSuffix(const StringView suffix) const {
     return StringView{*this}.hasSuffix(suffix);
 }
 
-MutableStringView String::stripPrefix(const StringView prefix) & {
-    return MutableStringView{*this}.stripPrefix(prefix);
+MutableStringView String::exceptPrefix(const StringView prefix) & {
+    return MutableStringView{*this}.exceptPrefix(prefix);
 }
 
-StringView String::stripPrefix(const StringView prefix) const & {
-    return StringView{*this}.stripPrefix(prefix);
+StringView String::exceptPrefix(const StringView prefix) const & {
+    return StringView{*this}.exceptPrefix(prefix);
 }
 
-MutableStringView String::stripSuffix(const StringView suffix) & {
-    return MutableStringView{*this}.stripSuffix(suffix);
+MutableStringView String::exceptSuffix(const StringView suffix) & {
+    return MutableStringView{*this}.exceptSuffix(suffix);
 }
 
-StringView String::stripSuffix(const StringView suffix) const & {
-    return StringView{*this}.stripSuffix(suffix);
+StringView String::exceptSuffix(const StringView suffix) const & {
+    return StringView{*this}.exceptSuffix(suffix);
 }
 
 char* String::release() {
