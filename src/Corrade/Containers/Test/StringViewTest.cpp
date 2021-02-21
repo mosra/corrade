@@ -137,6 +137,7 @@ struct StringViewTest: TestSuite::Tester {
 
     void partition();
     void partitionFlags();
+    void partitionNullView();
 
     /* join() tested in StringTest */
 
@@ -205,6 +206,7 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::partition,
               &StringViewTest::partitionFlags,
+              &StringViewTest::partitionNullView,
 
               &StringViewTest::hasPrefix,
               &StringViewTest::hasPrefixEmpty,
@@ -1010,20 +1012,6 @@ void StringViewTest::partition() {
     CORRADE_COMPARE_AS("abc"_s.partition('='),
         (Array3<StringView>{"abc", "", ""}),
         TestSuite::Compare::Container);
-
-    /* Empty string -- all are non-null */
-    CORRADE_COMPARE_AS(""_s.partition('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: ""_s.partition('='))
-        CORRADE_VERIFY(a.data());
-
-    /* Nullptr string -- all are non-null */
-    CORRADE_COMPARE_AS(StringView{}.partition('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: StringView{}.partition('='))
-        CORRADE_VERIFY(!a.data());
 }
 
 void StringViewTest::partitionFlags() {
@@ -1076,6 +1064,22 @@ void StringViewTest::partitionFlags() {
         CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global);
     }
+}
+
+void StringViewTest::partitionNullView() {
+    /* Empty string -- all are non-null */
+    CORRADE_COMPARE_AS(""_s.partition('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
+    for(StringView a: ""_s.partition('='))
+        CORRADE_VERIFY(a.data());
+
+    /* Nullptr string -- all are null */
+    CORRADE_COMPARE_AS(StringView{}.partition('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
+    for(StringView a: StringView{}.partition('='))
+        CORRADE_VERIFY(!a.data());
 }
 
 void StringViewTest::hasPrefix() {
