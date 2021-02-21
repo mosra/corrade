@@ -43,6 +43,8 @@ equivalent to @cpp #include <string> @ce.
     you need to @cpp #include <string> @ce in its complete form. You can detect
     this case using the @ref CORRADE_TARGET_LIBCXX macro.
 
+<b></b>
+
 @m_class{m-block m-success}
 
 @par Single-header version
