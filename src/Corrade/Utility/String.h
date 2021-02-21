@@ -345,7 +345,7 @@ is the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns the input string followed by
 two empty strings.
 @see @ref rpartition(), @ref Directory::splitExtension(),
-    @ref Containers::BasicStringView::partition()
+    @ref Containers::StringView::partition()
 */
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
 
