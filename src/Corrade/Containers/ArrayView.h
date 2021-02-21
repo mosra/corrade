@@ -952,7 +952,9 @@ template<std::size_t size_, class T> class StaticArrayView {
         #else
         template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
+        constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+        }
 
         /**
          * @brief Construct a static view on an @ref StaticArrayView
