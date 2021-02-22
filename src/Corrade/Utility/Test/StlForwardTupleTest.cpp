@@ -24,22 +24,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/TestSuite/Tester.h" /* This doesn't include <string> */
+#include "Corrade/TestSuite/Tester.h" /* This doesn't include <tuple> */
 #include "Corrade/Utility/StlForwardTuple.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
-struct StlForwardStringTest: TestSuite::Tester {
-    explicit StlForwardStringTest();
+struct StlForwardTupleTest: TestSuite::Tester {
+    explicit StlForwardTupleTest();
 
     void test();
 };
 
-StlForwardStringTest::StlForwardStringTest() {
-    addTests({&StlForwardStringTest::test});
+StlForwardTupleTest::StlForwardTupleTest() {
+    addTests({&StlForwardTupleTest::test});
 }
 
-void StlForwardStringTest::test() {
+void StlForwardTupleTest::test() {
     /* Just verify that this compiles without error */
     std::tuple<int, int>* a = nullptr;
     CORRADE_VERIFY(!a);
@@ -47,4 +47,4 @@ void StlForwardStringTest::test() {
 
 }}}}
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::StlForwardStringTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::StlForwardTupleTest)
