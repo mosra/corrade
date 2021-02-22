@@ -24,8 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/TestSuite/Tester.h" /* This doesn't include <array> */
 #include "Corrade/Utility/StlForwardArray.h"
+
+/* Use the type ASAP to avoid Tester actually dragging the definition in */
+namespace {
+    std::array<int, 3>* foo() {
+        return nullptr;
+    }
+}
+
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -41,8 +49,7 @@ StlForwardArrayTest::StlForwardArrayTest() {
 
 void StlForwardArrayTest::test() {
     /* Just verify that this compiles without error */
-    std::array<int, 3>* a = nullptr;
-    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!foo());
 }
 
 }}}}

@@ -24,8 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/TestSuite/Tester.h" /* This doesn't include <tuple> */
 #include "Corrade/Utility/StlForwardTuple.h"
+
+/* Use the type ASAP to avoid Tester actually dragging the definition in */
+namespace {
+    std::tuple<int, float, bool>* foo() {
+        return nullptr;
+    }
+}
+
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -41,8 +49,7 @@ StlForwardTupleTest::StlForwardTupleTest() {
 
 void StlForwardTupleTest::test() {
     /* Just verify that this compiles without error */
-    std::tuple<int, int>* a = nullptr;
-    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!foo());
 }
 
 }}}}

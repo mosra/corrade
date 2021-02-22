@@ -24,8 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/TestSuite/Tester.h" /* This doesn't include <string> */
 #include "Corrade/Utility/StlForwardString.h"
+
+/* Use the type ASAP to avoid Tester actually dragging the definition in */
+namespace {
+    std::string* foo() {
+        return nullptr;
+    }
+}
+
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -41,8 +49,7 @@ StlForwardStringTest::StlForwardStringTest() {
 
 void StlForwardStringTest::test() {
     /* Just verify that this compiles without error */
-    std::string* a = nullptr;
-    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!foo());
 }
 
 }}}}

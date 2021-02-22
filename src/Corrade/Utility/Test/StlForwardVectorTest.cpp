@@ -24,8 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/TestSuite/Tester.h" /* This doesn't include <vector> */
 #include "Corrade/Utility/StlForwardVector.h"
+
+/* Use the type ASAP to avoid Tester actually dragging the definition in */
+namespace {
+    std::vector<int>* foo() {
+        return nullptr;
+    }
+}
+
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -41,8 +49,7 @@ StlForwardVectorTest::StlForwardVectorTest() {
 
 void StlForwardVectorTest::test() {
     /* Just verify that this compiles without error */
-    std::vector<int>* a = nullptr;
-    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!foo());
 }
 
 }}}}
