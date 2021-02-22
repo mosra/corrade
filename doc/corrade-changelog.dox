@@ -161,6 +161,9 @@ namespace Corrade {
     @ref Utility::copy(), @ref Utility::format() and @ref Utility::Sha1 was
     fixed to not call @ref std::memcpy() with @cpp nullptr @ce when size is
     zero (see [mosra/corrade#102](https://github.com/mosra/corrade/issues/102))
+-   @ref Corrade/Utility/StlForwardTuple.h was fixed to do a full
+    @cpp #include <tuple> @ce on libstdc++ before version 7 as there a forward
+    declaration is not available
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

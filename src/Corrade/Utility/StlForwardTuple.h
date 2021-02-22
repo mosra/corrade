@@ -31,7 +31,7 @@
 @m_since{2019,10}
 
 On @ref CORRADE_TARGET_LIBCXX "libc++", @ref CORRADE_TARGET_LIBSTDCXX "libstdc++"
-and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
+7+ and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
 implementation-specific STL header containing just the forward declaration of
 @ref std::tuple. On other implementations where forward declaration is unknown
 is equivalent to @cpp #include <tuple> @ce.
@@ -57,8 +57,8 @@ is equivalent to @cpp #include <tuple> @ce.
 #ifdef CORRADE_TARGET_LIBCXX
 /* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163 */
 #include <__tuple>
-#elif defined(CORRADE_TARGET_LIBSTDCXX)
-/* https://github.com/gcc-mirror/gcc/blob/c014d57d57a03e6061a57fa8534e90979567392b/libstdc%2B%2B-v3/include/std/type_traits#L2465-L2466 */
+#elif defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE >= 7
+/* https://github.com/gcc-mirror/gcc/blob/releases/gcc-7.1.0/libstdc++-v3/include/std/type_traits#L2557-L2558 */
 #include <type_traits>
 #elif defined(CORRADE_TARGET_DINKUMWARE)
 /* MSVC has it defined next to std::pair */
