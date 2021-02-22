@@ -362,12 +362,21 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
 namespace {
 
 inline const char* findFirst(const char* data, const std::size_t size, const char* substring, const std::size_t substringSize) {
-    /* If the substring is not larger than the string we search in, compare it
-       with the string at all possible positions in the string until we have
-       a match. */
-    if(substringSize <= size) for(const char* const max = data + size - substringSize; data <= max; ++data) {
-        if(std::memcmp(data, substring, substringSize) == 0)
-            return data;
+    /* If the substring is not larger than the string we search in */
+    if(substringSize <= size) {
+        /* If these are both empty (substringSize <= size, so it's also 0),
+           return a pointer to the first character. This also avoids some
+           potential "this is UB so I can whatever YOLO!" misoptimizations and
+           implementation differences when calling memcmp() with zero size and
+           potentially null pointers also. */
+        if(!size) return data;
+
+        /* Otherwise compare it with the string at all possible positions in
+           the string until we have a match. */
+        for(const char* const max = data + size - substringSize; data <= max; ++data) {
+            if(std::memcmp(data, substring, substringSize) == 0)
+                return data;
+        }
     }
 
     /* If the substring is larger or no match was found, fail */
