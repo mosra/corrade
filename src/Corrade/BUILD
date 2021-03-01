@@ -27,61 +27,9 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "headers",
+    name = "config",
     hdrs = [
-        "Array.h",
-        "ArrayTuple.h",
-        "ArrayView.h",
-        "ArrayViewStl.h",
-        "ArrayViewStlSpan.h",
-        "BigEnumSet.h",
-        "BigEnumSet.hpp",
-        "constructHelpers.h",
-        "Containers.h",
-        "EnumSet.h",
-        "EnumSet.hpp",
-        "GrowableArray.h",
-        "LinkedList.h",
-        "Optional.h",
-        "OptionalStl.h",
-        "Pointer.h",
-        "PointerStl.h",
-        "Reference.h",
-        "ScopeGuard.h",
-        "sequenceHelpers.h",
-        "StaticArray.h",
-        "StridedArrayView.h",
-        "String.h",
-        "StringStl.h",
-        "StringView.h",
-        "Tags.h",
-        "Implementation/RawForwardList.h",
-    ],
-    copts = ["-Isrc"],
-    deps = [
-        "//src/Corrade:config",
-        "//src/Corrade/Utility:headers",
-    ],
-)
-
-## Incomplete target, for reference to utility
-cc_library(
-    name = "__containers_internal",
-    srcs = [
-        "ArrayTuple.cpp",
-        "String.cpp",
-        "StringView.cpp",
-    ],
-    copts = ["-Isrc"],
-    deps = [":headers"],
-    # TODO: fix visibility to utility only?
-)
-
-# TODO: perhaps alias to utility is better?
-cc_library(
-    name = "containers",
-    deps = [
-        "//src/Corrade/Containers:headers",
-        "//src/Corrade/Utility:utility",
+        "configure.h",
+        "version.h",
     ],
 )

@@ -26,12 +26,42 @@
 
 package(default_visibility = ["//visibility:public"])
 
-filegroup(
-    name = "hdrs",
-    srcs = glob([
+cc_library(
+    name = "headers",
+    hdrs = glob([
         "**/*.h",
         "**/*.hpp",
     ]),
+)
+
+cc_library(
+    name = "utility",
+    srcs = [
+        # UTILITY SRCS
+        "Debug.cpp",
+        "Directory.cpp",
+        "Configuration.cpp",
+        "ConfigurationValue.cpp",
+        "MurmurHash2.cpp",
+        "Sha1.cpp",
+        "System.cpp",
+        # GRACEFUL ASSERT
+        "Algorithms.cpp",
+        "Arguments.cpp",
+        "ConfigurationGroup.cpp",
+        "Format.cpp",
+        "Resource.cpp",
+        "String.cpp",
+        "Unicode.cpp",
+        # TODO: this is selectable
+        "FileWatcher.cpp",
+        "Tweakable.cpp",
+        "TweakableParser.cpp",
+    ],
+    copts = ["-Isrc"],
+    deps = [
+        "//src/Corrade/Containers:__containers_internal",
+    ],
 )
 
 cc_binary(
@@ -49,17 +79,16 @@ cc_binary(
         "FileWatcher.cpp",
         "Tweakable.cpp",
         "TweakableParser.cpp",
-        "//src/Corrade/Containers:hdrs",
-        "//src/Corrade/Containers:string",
-        "//src/Corrade/Utility:hdrs",
-        "//src:hdrs",
     ],
     #TODO: linux
     linkopts = [
         "-ldl",
     ],
-    copts = [
-        "-Isrc",
+    copts = ["-Isrc"],
+    deps = [
+        "//src/Corrade:config",
+        "//src/Corrade/Utility:headers",
+        "//src/Corrade/Containers:headers",
     ],
 )
 
