@@ -31,3 +31,27 @@ cc_test(
     copts = ["-Isrc"],
 )
 
+cc_test(
+    name = "compare_sorted_container_test",
+    srcs = ["SortedContainerTest.cpp"],
+    deps = ["//:test_suite"],
+    copts = ["-Isrc"],
+)
+
+cc_test(
+    name = "compare_file_test",
+    srcs = [
+        "FileTest.cpp",
+        # TODO: config genrule
+        "configure.h",
+    ],
+    deps = ["//:test_suite"],
+    data = [
+        "FileTestFiles/base.txt",
+        "FileTestFiles/different.txt",
+        "FileTestFiles/empty.txt",
+        "FileTestFiles/hýždě.txt",
+        "FileTestFiles/smaller.txt",
+    ],
+    copts = ["-Isrc"],
+)
