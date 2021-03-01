@@ -24,12 +24,56 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "config",
     hdrs = [
         "configure.h",
         "version.h",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "common_utility_containers",
+    hdrs = [
+        "//src/Corrade/Containers:Array.h",
+        "//src/Corrade/Containers:ArrayView.h",
+        "//src/Corrade/Containers:ArrayTuple.h",
+        "//src/Corrade/Containers:EnumSet.h",
+        "//src/Corrade/Containers:EnumSet.hpp",
+        "//src/Corrade/Containers:GrowableArray.h",
+        "//src/Corrade/Containers:constructHelpers.h",
+        "//src/Corrade/Containers:Containers.h",
+        "//src/Corrade/Containers:StaticArray.h",
+        "//src/Corrade/Containers:String.h",
+        "//src/Corrade/Containers:StringStl.h",
+        "//src/Corrade/Containers:StringView.h",
+        "//src/Corrade/Containers:Tags.h",
+        "//src/Corrade/Utility:Assert.h",
+        "//src/Corrade/Utility:Debug.h",
+        "//src/Corrade/Utility:DebugStl.h",
+        "//src/Corrade/Utility:Macros.h",
+        "//src/Corrade/Utility:StlForwardString.h",
+        "//src/Corrade/Utility:TypeTraits.h",
+        "//src/Corrade/Utility:Utility.h",
+        "//src/Corrade/Utility:visibility.h",
+        "//src/Corrade/Utility:VisibilityMacros.h",
+    ],
+    srcs = [
+        "//src/Corrade/Containers:ArrayTuple.cpp",
+        "//src/Corrade/Containers:String.cpp",
+        "//src/Corrade/Containers:StringView.cpp",
+        "//src/Corrade/Utility:Debug.cpp",
+    ],
+    visibility = [
+        "//src/Corrade/Containers:__pkg__",
+        "//src/Corrade/Utility:__pkg__",
+    ],
+    copts = ["-Isrc"],
+    # TODO: appropriate flags per compiler.
+    # Well, actually, just need to run this analysis once, right
+    linkopts = ["--no-undefined"],
+    deps = [
+        ":config",
     ],
 )
