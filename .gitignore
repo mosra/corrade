@@ -11,3 +11,5 @@ CMakeLists.txt.user*
 *.swp
 *~
 user.bazelrc
+
+bazel-*
