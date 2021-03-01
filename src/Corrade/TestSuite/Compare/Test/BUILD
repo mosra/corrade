@@ -33,7 +33,7 @@ filegroup(
 [cc_test(
     name = "TestSuiteCompare%s" % t,
     srcs = ["%s.cpp" % t, ":config"],
-    deps = ["//:test_suite"],
+    deps = ["//:TestSuite"],
     copts = ["-Isrc"],
     data = [
         "FileTestFiles/base.txt",

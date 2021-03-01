@@ -27,7 +27,7 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "test_suite",
+    name = "TestSuite",
     srcs = [
         "Comparator.cpp",
         "Tester.cpp",
@@ -60,7 +60,7 @@ cc_library(
         "CORRADE_BUILD_STATIC",
     ],
     deps = [
-        "//:utility",
+        "//:Utility",
     ],
 )
 

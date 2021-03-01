@@ -27,7 +27,7 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "utility",
+    name = "Utility",
     srcs = [
         # UTILITY SRCS
         "Debug.cpp",
@@ -139,6 +139,6 @@ cc_binary(
         "CORRADE_BUILD_STATIC",
     ],
     copts = ["-Isrc"],
-    deps = [":utility"],
+    deps = [":Utility"],
 )
 

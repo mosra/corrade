@@ -32,11 +32,11 @@ alias(
 )
 
 alias(
-    name = "utility",
-    actual = "//src/Corrade/Utility:utility",
+    name = "Utility",
+    actual = "//src/Corrade/Utility:Utility",
 )
 
 alias(
-    name = "test_suite",
-    actual = "//src/Corrade/TestSuite:test_suite",
+    name = "TestSuite",
+    actual = "//src/Corrade/TestSuite:TestSuite",
 )
