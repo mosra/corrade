@@ -24,28 +24,17 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cc_test(
-    name = "compare_container_test",
-    srcs = ["ContainerTest.cpp"],
-    deps = ["//:test_suite"],
-    copts = ["-Isrc"],
+# TODO: config genrule
+filegroup(
+    name = "config",
+    srcs = ["configure.h"],
 )
 
-cc_test(
-    name = "compare_sorted_container_test",
-    srcs = ["SortedContainerTest.cpp"],
+[cc_test(
+    name = "TestSuiteCompare%s" % t,
+    srcs = ["%s.cpp" % t, ":config"],
     deps = ["//:test_suite"],
     copts = ["-Isrc"],
-)
-
-cc_test(
-    name = "compare_file_test",
-    srcs = [
-        "FileTest.cpp",
-        # TODO: config genrule
-        "configure.h",
-    ],
-    deps = ["//:test_suite"],
     data = [
         "FileTestFiles/base.txt",
         "FileTestFiles/different.txt",
@@ -53,5 +42,13 @@ cc_test(
         "FileTestFiles/hýždě.txt",
         "FileTestFiles/smaller.txt",
     ],
-    copts = ["-Isrc"],
 )
+for t in [
+    "ContainerTest",
+    "SortedContainerTest",
+    "FileTest",
+    "FileToStringTest",
+    "FloatingPointTest",
+    "NumericTest",
+    "StringToFileTest",
+]]
