@@ -26,17 +26,43 @@
 
 package(default_visibility = ["//visibility:public"])
 
-alias(
-    name = "corrade-rc",
-    actual = "//src/Corrade/Utility:corrade-rc",
-)
-
-alias(
-    name = "utility",
-    actual = "//src/Corrade/Utility:utility",
-)
-
-alias(
+cc_library(
     name = "test_suite",
-    actual = "//src/Corrade/TestSuite:test_suite",
+    srcs = [
+        "Comparator.cpp",
+        "Tester.cpp",
+        "Compare/Container.h",
+        "Compare/File.h",
+        "Compare/FileToString.h",
+        "Compare/Numeric.h",
+        "Compare/SortedContainer.h",
+        "Compare/StringToFile.h",
+        "Compare/File.cpp",
+        "Compare/FileToString.cpp",
+        "Compare/FloatingPoint.cpp",
+        "Compare/StringToFile.cpp",
+        "Implementation/BenchmarkCounters.h",
+        "Implementation/BenchmarkStats.h",
+    ],
+    hdrs = [
+        "Comparator.h",
+        "Tester.h",
+        "TestSuite.h",
+        "visibility.h",
+        # TODO: this is included in Tester.h, is that a mistake?
+        "Compare/FloatingPoint.h",
+    ],
+    copts = ["-Isrc"],
+    linkstatic = True,
+    linkopts = [
+        "--no-undefined",
+    ],
+    local_defines = [
+        "CORRADE_BUILD_STATIC",
+    ],
+    deps = [
+        "//:utility",
+    ],
 )
+
+
