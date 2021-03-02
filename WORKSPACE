@@ -34,4 +34,4 @@ rbe_autoconfig(
 )
 
 # TODO: move to defs of some sort
-register_toolchains("//bazel:configure_file_toolchain")
+register_toolchains("//bazel:configure_header_toolchain")

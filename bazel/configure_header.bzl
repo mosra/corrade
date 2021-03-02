@@ -24,11 +24,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-def _configure_file_toolchain_impl(ctx):
+def _configure_header_toolchain_impl(ctx):
     exe = ctx.attr.executable.files.to_list()[0]
     return platform_common.ToolchainInfo(executable = exe)
 
-configure_file_toolchain = rule(
+configure_header_toolchain = rule(
     attrs = {
         "executable": attr.label(
             mandatory=True,
@@ -36,11 +36,11 @@ configure_file_toolchain = rule(
             cfg="host",
             allow_single_file=True),
     },
-    implementation = _configure_file_toolchain_impl,
+    implementation = _configure_header_toolchain_impl,
 )
 
-def _configure_file_impl(ctx):
-    cfg_file = ctx.toolchains["@corrade//bazel:configure_file_toolchain_type"].executable
+def _configure_header_impl(ctx):
+    cfg_file = ctx.toolchains["@corrade//bazel:configure_header_toolchain_type"].executable
     in_file = ctx.attr.src.files.to_list()[0]
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
@@ -54,13 +54,10 @@ def _configure_file_impl(ctx):
     ]
 
     for k, v in ctx.attr.defines.items():
-        v_expanded = ctx.expand_location(v)
-        if (v_expanded != v):
-            v = "\"{}\"".format(v_expanded)
-        args.append("-D{}={}".format(k, v))
+        args.append("-D{}={}".format(k, ctx.expand_location(v)))
 
     ctx.actions.run(
-        mnemonic = "ConfigureFile",
+        mnemonic = "ConfigureFileDotH",
         inputs = depset(deps),
         outputs = [out_file],
         use_default_shell_env = True,
@@ -70,17 +67,39 @@ def _configure_file_impl(ctx):
         execution_requirements = {"block-network": ""},
     )
 
-    return [DefaultInfo(files = depset([out_file]))]
+    return [
+        DefaultInfo(
+            files = depset([out_file]),
+            runfiles = ctx.runfiles(transitive_files = depset([out_file]))
+        )
+    ]
 
-configure_file = rule(
+_configure_header = rule(
     attrs = {
         "src": attr.label(mandatory = True, allow_single_file=True),
         "output": attr.string(mandatory = True),
         "defines": attr.string_dict(mandatory = True),
         "deps": attr.label_list(allow_files=True),
     },
-    implementation = _configure_file_impl,
+    implementation = _configure_header_impl,
     toolchains = [
-        "@corrade//bazel:configure_file_toolchain_type",
+        "@corrade//bazel:configure_header_toolchain_type",
     ],
 )
+
+def configure_header(name, src, output, defines, deps):
+    n = "__{}_h".format(name);
+    _configure_header(
+        name = n,
+        src = src,
+        output = output,
+        defines = defines,
+        deps = deps,
+    )
+
+    native.cc_library(
+        name = name,
+        hdrs = [":{}".format(n)],
+        include_prefix = ".",
+        visibility = ["//visibility:public"],
+    )

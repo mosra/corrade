@@ -34,8 +34,8 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
-load("//bazel:configure_file.bzl", "configure_file")
-configure_file(
+load("//bazel:configure_header.bzl", "configure_header")
+configure_header(
     name = "version",
     src = "version.h.cmake",
     output = "version.h",

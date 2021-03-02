@@ -33,6 +33,7 @@
 #include "Corrade/Utility/FormatStl.h"
 
 #include "configure.h"
+//#include "../../../../../../../../bazel-out/k8-fastbuild/bin/src/Corrade/TestSuite/Compare/Test/configure.h"
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 

@@ -23,18 +23,34 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("//bazel:configure_file.bzl", "configure_file")
+load("//bazel:configure_header.bzl", "configure_header")
 
-# TODO: config genrule
-filegroup(
-    name = "config",
-    srcs = ["configure.h"],
+configure_header(
+    name = "configure",
+    src = "configure.h.cmake",
+    output = "configure.h",
+    defines = {
+        "FILETEST_DIR": "$(execpath FileTestFiles)",
+        "FILETEST_SAVE_DIR": "$(execpath FileTestFiles)Temp",
+    },
+    deps = ["FileTestFiles"],
 )
+
+#genrule(
+#    name = "configure",
+#    outs = ["configure.h"],
+#    cmd = "echo \"huj\" > $@",
+#)
 
 [cc_test(
     name = "TestSuiteCompare%s" % t,
-    srcs = ["%s.cpp" % t, ":config"],
-    deps = ["//:TestSuite"],
+    srcs = [
+        "%s.cpp" % t,
+    ],
+    deps = [
+        "//:TestSuite",
+        ":configure",
+    ],
     copts = ["-Isrc"],
     data = [
         "FileTestFiles/base.txt",
@@ -47,23 +63,9 @@ filegroup(
 for t in [
     "ContainerTest",
     "SortedContainerTest",
-    "FileTest",
-    "FileToStringTest",
     "FloatingPointTest",
     "NumericTest",
-    "StringToFileTest",
+    "FileTest",
+    #"FileToStringTest",
+    #"StringToFileTest",
 ]]
-
-configure_file(
-    name = "cfg",
-    srcs = [
-        "configure.h.cmake",
-        "FileTestFiles",
-    ],
-    path = "$(execpath configure.h.cmake)",
-    out = "cfg.h",
-    defines = {
-        "FILETEST_DIR": "src/Corrade/TestSuite/Compare/Test/FileTestFiles",
-        "FILETEST_SAVE_DIR": "src/Corrade/TestSuite/Compare/Test/FileTestFilesTemp",
-    },
-)
