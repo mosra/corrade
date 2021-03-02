@@ -25,18 +25,18 @@
 #
 
 def _configure_file_toolchain_impl(ctx):
-  exe = ctx.attr.executable.files.to_list()[0]
-  return platform_common.ToolchainInfo(executable = exe)
+    exe = ctx.attr.executable.files.to_list()[0]
+    return platform_common.ToolchainInfo(executable = exe)
 
 configure_file_toolchain = rule(
-  attrs = {
-      "executable": attr.label(
-          mandatory=True,
-          executable=True,
-          cfg="host",
-          allow_single_file=True),
-  },
-  implementation = _configure_file_toolchain_impl,
+    attrs = {
+        "executable": attr.label(
+            mandatory=True,
+            executable=True,
+            cfg="host",
+            allow_single_file=True),
+    },
+    implementation = _configure_file_toolchain_impl,
 )
 
 def _configure_file_impl(ctx):
@@ -44,17 +44,24 @@ def _configure_file_impl(ctx):
     in_file = ctx.attr.src.files.to_list()[0]
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
+    deps = [in_file]
+    for target in ctx.attr.deps:
+        deps += target.files.to_list()
+
     args = [
         "{}".format(in_file.path),
         "{}".format(out_file.path),
     ]
 
     for k, v in ctx.attr.defines.items():
-      args.append("-D{}={}".format(k, v))
+        v_expanded = ctx.expand_location(v)
+        if (v_expanded != v):
+            v = "\"{}\"".format(v_expanded)
+        args.append("-D{}={}".format(k, v))
 
     ctx.actions.run(
         mnemonic = "ConfigureFile",
-        inputs = [in_file],
+        inputs = depset(deps),
         outputs = [out_file],
         use_default_shell_env = True,
         executable = cfg_file,
@@ -70,6 +77,7 @@ configure_file = rule(
         "src": attr.label(mandatory = True, allow_single_file=True),
         "output": attr.string(mandatory = True),
         "defines": attr.string_dict(mandatory = True),
+        "deps": attr.label_list(allow_files=True),
     },
     implementation = _configure_file_impl,
     toolchains = [

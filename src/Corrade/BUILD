@@ -41,10 +41,13 @@ configure_file(
     output = "version.h",
     defines = {
         "CORRADE_VERSION_YEAR": "2020",
-        "CORRADE_VERSION_MONTH": "6",
-        #"CORRADE_VERSION_COMMIT": " 252",
+        "CORRADE_VERSION_MONTH": "$(execpath configure.h)",
+        "CORRADE_VERSION_COMMIT": " 252",
         "CORRADE_VERSION_HASH": "ga1038a9b",
         "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
     },
+    deps = [
+      "configure.h",
+    ],
 )
 
