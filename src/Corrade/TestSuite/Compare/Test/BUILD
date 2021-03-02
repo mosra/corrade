@@ -36,12 +36,6 @@ configure_header(
     deps = ["FileTestFiles"],
 )
 
-#genrule(
-#    name = "configure",
-#    outs = ["configure.h"],
-#    cmd = "echo \"huj\" > $@",
-#)
-
 [cc_test(
     name = "TestSuiteCompare%s" % t,
     srcs = [
@@ -66,6 +60,6 @@ for t in [
     "FloatingPointTest",
     "NumericTest",
     "FileTest",
-    #"FileToStringTest",
-    #"StringToFileTest",
+    "FileToStringTest",
+    "StringToFileTest",
 ]]

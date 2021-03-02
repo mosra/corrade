@@ -97,6 +97,7 @@ def configure_header(name, src, output, defines, deps):
         deps = deps,
     )
 
+    # Note: this should instead be provided with CcInfo
     native.cc_library(
         name = name,
         hdrs = [":{}".format(n)],
