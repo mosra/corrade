@@ -38,9 +38,7 @@ configure_header(
 
 [cc_test(
     name = "TestSuiteCompare%s" % t,
-    srcs = [
-        "%s.cpp" % t,
-    ],
+    srcs = ["%s.cpp" % t],
     deps = [
         "//:TestSuite",
         ":configure",
@@ -55,11 +53,20 @@ configure_header(
     ],
 )
 for t in [
+    "FileTest",
+    "FileToStringTest",
+    "StringToFileTest",
+]]
+
+[cc_test(
+    name = "TestSuiteCompare%s" % t,
+    srcs = ["%s.cpp" % t],
+    copts = ["-Isrc"],
+    deps = ["//:TestSuite"],
+)
+for t in [
     "ContainerTest",
     "SortedContainerTest",
     "FloatingPointTest",
     "NumericTest",
-    "FileTest",
-    "FileToStringTest",
-    "StringToFileTest",
 ]]
