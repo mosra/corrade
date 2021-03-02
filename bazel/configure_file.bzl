@@ -24,27 +24,19 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cc_library(
-    name = "config",
-    hdrs = [
-        # TODO: this should be genrule generated, fix this dirty hack
-        "configure.h",
-        "version.h",
-    ],
-    visibility = ["//visibility:public"],
-)
+def configure_file(name, srcs, path, out, defines):
+    sed = ""
+    for k, v in defines.items():
+      sed+=";s/\\$${" + k + "}/" + "\\/".join(v.split("/")) + "/g"
+    for k in defines.keys():
+      sed+=";s/#cmakedefine {}\\(.\\+\\)/#define {}\\1/g".format(k,k)
+    sed+=";s/#cmakedefine \\(.\\+\\)/\\/* #undef \\1 *\\//g"
 
-load("//bazel:configure_file.bzl", "configure_file")
-configure_file(
-    name = "version",
-    srcs = ["version.h.cmake"],
-    path = "$(execpath version.h.cmake)",
-    out = "version.h",
-    defines = {
-        "CORRADE_VERSION_YEAR": "2020",
-        "CORRADE_VERSION_MONTH": "6",
-        "CORRADE_VERSION_COMMIT": " 252",
-        "CORRADE_VERSION_HASH": "ga1038a9b",
-        "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
-    },
-)
+    native.genrule(
+        name = name,
+        srcs = srcs,
+        outs = [out],
+        cmd = "cat {} | sed \"{}\" > $@".format(path, sed),
+    )
+
+

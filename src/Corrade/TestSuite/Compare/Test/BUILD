@@ -23,6 +23,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
+load("//bazel:configure_file.bzl", "configure_file")
 
 # TODO: config genrule
 filegroup(
@@ -52,3 +53,17 @@ for t in [
     "NumericTest",
     "StringToFileTest",
 ]]
+
+configure_file(
+    name = "cfg",
+    srcs = [
+        "configure.h.cmake",
+        "FileTestFiles",
+    ],
+    path = "$(execpath configure.h.cmake)",
+    out = "cfg.h",
+    defines = {
+        "FILETEST_DIR": "src/Corrade/TestSuite/Compare/Test/FileTestFiles",
+        "FILETEST_SAVE_DIR": "src/Corrade/TestSuite/Compare/Test/FileTestFilesTemp",
+    },
+)

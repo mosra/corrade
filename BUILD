@@ -40,3 +40,4 @@ alias(
     name = "TestSuite",
     actual = "//src/Corrade/TestSuite:TestSuite",
 )
+
