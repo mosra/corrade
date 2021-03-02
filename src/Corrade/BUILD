@@ -37,14 +37,14 @@ cc_library(
 load("//bazel:configure_file.bzl", "configure_file")
 configure_file(
     name = "version",
-    srcs = ["version.h.cmake"],
-    path = "$(execpath version.h.cmake)",
-    out = "version.h",
+    src = "version.h.cmake",
+    output = "version.h",
     defines = {
         "CORRADE_VERSION_YEAR": "2020",
         "CORRADE_VERSION_MONTH": "6",
-        "CORRADE_VERSION_COMMIT": " 252",
+        #"CORRADE_VERSION_COMMIT": " 252",
         "CORRADE_VERSION_HASH": "ga1038a9b",
         "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
     },
 )
+
