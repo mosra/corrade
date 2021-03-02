@@ -67,14 +67,20 @@ def _configure_header_impl(ctx):
         execution_requirements = {"block-network": ""},
     )
 
+    compilation_context = cc_common.create_compilation_context(
+        headers = depset([out_file]),
+        includes = depset(["%s" % out_file.dirname]),
+    )
+
     return [
         DefaultInfo(
             files = depset([out_file]),
             runfiles = ctx.runfiles(transitive_files = depset([out_file]))
-        )
+        ),
+        CcInfo(compilation_context = compilation_context),
     ]
 
-_configure_header = rule(
+configure_header = rule(
     attrs = {
         "src": attr.label(mandatory = True, allow_single_file=True),
         "output": attr.string(mandatory = True),
@@ -86,21 +92,3 @@ _configure_header = rule(
         "@corrade//bazel:configure_header_toolchain_type",
     ],
 )
-
-def configure_header(name, src, output, defines, deps):
-    n = "__{}_h".format(name);
-    _configure_header(
-        name = n,
-        src = src,
-        output = output,
-        defines = defines,
-        deps = deps,
-    )
-
-    # Note: this should instead be provided with CcInfo
-    native.cc_library(
-        name = name,
-        hdrs = [":{}".format(n)],
-        include_prefix = ".",
-        visibility = ["//visibility:public"],
-    )
