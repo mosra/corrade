@@ -4,7 +4,8 @@
     This file is part of Corrade.
 
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
-                2017, 2018, 2019, 2020 Vladimír Vondruš <mosra@centrum.cz>
+                2017, 2018, 2019, 2020, 2021
+              Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -30,8 +31,8 @@
 /* #undef CORRADE_MSVC2015_COMPATIBILITY */
 
 #define CORRADE_BUILD_DEPRECATED
-/* #undef CORRADE_BUILD_STATIC */
-/* #undef CORRADE_BUILD_STATIC_UNIQUE_GLOBALS */
+#define CORRADE_BUILD_STATIC
+#define CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
 #define CORRADE_BUILD_MULTITHREADED
 
 /* #undef CORRADE_TARGET_APPLE */
@@ -185,7 +186,7 @@
 #endif
 
 /* Documented in Utility/TypeTraits.h */
-#if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || (defined(CORRADE_TARGET_EMSCRIPTEN) && __LDBL_DIG__ == __DBL_DIG__)
+#if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif
 
