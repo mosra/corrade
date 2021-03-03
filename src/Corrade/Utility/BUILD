@@ -122,9 +122,7 @@ cc_library(
     local_defines = [
         "CORRADE_BUILD_STATIC",
     ],
-    deps = [
-        "//src/Corrade:config",
-    ],
+    deps = ["@corrade//:config"],
 )
 
 cc_library(
@@ -146,6 +144,7 @@ cc_library(
     hdrs = [
         "//src/Corrade/Containers:ArrayViewStl.h",
     ],
+    # probably don't need this one?
     deps = [":Utility"],
     local_defines = [
         "CORRADE_BUILD_STATIC",

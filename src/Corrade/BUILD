@@ -23,31 +23,41 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-
-cc_library(
-    name = "config",
-    hdrs = [
-        # TODO: this should be genrule generated, fix this dirty hack
-        "configure.h",
-        "version.h",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 load("//bazel:configure_header.bzl", "configure_header")
+
 configure_header(
     name = "version",
     src = "version.h.cmake",
     output = "version.h",
     defines = {
         "CORRADE_VERSION_YEAR": "2020",
-        "CORRADE_VERSION_MONTH": "$(execpath configure.h)",
+        "CORRADE_VERSION_MONTH": "6",
         "CORRADE_VERSION_COMMIT": " 252",
         "CORRADE_VERSION_HASH": "ga1038a9b",
         "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
     },
-    deps = [
-      "configure.h",
-    ],
+    includes = ["src"],
 )
 
+configure_header(
+    name = "configure",
+    src = "configure.h.cmake",
+    output = "configure.h",
+    defines = {
+        "CORRADE_BUILD_DEPRECATED": "",
+        "CORRADE_BUILD_STATIC": "",
+        "CORRADE_BUILD_STATIC_UNIQUE_GLOBALS": "",
+        "CORRADE_BUILD_MULTITHREADED": "",
+        "CORRADE_TARGET_UNIX": "",
+    },
+    includes = ["src"],
+)
+
+cc_library(
+    name = "config",
+    deps = [
+        ":configure",
+        ":version",
+    ],
+    visibility = ["//visibility:public"],
+)

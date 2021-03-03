@@ -71,8 +71,8 @@ cc_library(
 cc_library(
     name = "Containers",
     deps = [
-        "//src/Corrade:config",
         ":headers",
         "@corrade//:Utility",
+        "@corrade//:config",
     ],
 )

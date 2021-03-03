@@ -34,6 +34,7 @@ configure_header(
         "UTILITY_BINARY_TEST_DIR": "$(execpath .)",
     },
     deps = ["."],
+    local = True,
 )
 
 # depends on containers too, oddly enough

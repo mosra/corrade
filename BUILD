@@ -46,3 +46,7 @@ alias(
     actual = "//src/Corrade/TestSuite:TestSuite",
 )
 
+alias(
+    name = "config",
+    actual = "//src/Corrade:config",
+)

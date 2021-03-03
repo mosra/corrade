@@ -35,6 +35,7 @@ configure_header(
         "TESTER_TEST_DIR": "$(execpath .)/TesterTestFiles",
     },
     deps = ["."],
+    local = True,
 )
 
 cc_test(

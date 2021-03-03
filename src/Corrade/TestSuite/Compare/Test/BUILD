@@ -34,6 +34,7 @@ configure_header(
         "FILETEST_SAVE_DIR": "$(execpath FileTestFiles)Temp",
     },
     deps = ["FileTestFiles"],
+    local = True,
 )
 
 [cc_test(
