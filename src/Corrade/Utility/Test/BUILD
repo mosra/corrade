@@ -30,8 +30,9 @@ configure_header(
     src = "configure.h.cmake",
     output = "configure.h",
     defines = {
+        # these have to be different
         "UTILITY_TEST_DIR": "$(execpath .)",
-        "UTILITY_BINARY_TEST_DIR": "$(execpath .)",
+        "UTILITY_BINARY_TEST_DIR": "$(execpath .)/write",
     },
     deps = ["."],
     local = True,
@@ -158,9 +159,8 @@ cc_test(
     deps = ["@corrade//:TestSuite"],
 )
 
-# These two fail miserably. The weird thing is how inplace array init
-# works incorrectly
-
+# NOTE: reports not sandboxed, whereas bazel actually runs it sandboxed.
+# meaning goes wrong in a bunch of places - writing to root, finding rc, etc.
 cc_test(
     name = "UtilityDirectoryTest",
     srcs = ["DirectoryTest.cpp"],
@@ -177,7 +177,8 @@ cc_test(
     ],
 )
 
-
+# NOTE: everything passes but names() which
+# seems to abort every step of the way
 cc_test(
     name = "UtilityConfigurationTest",
     srcs = ["ConfigurationTest.cpp"],
@@ -214,3 +215,5 @@ cc_test(
         "ConfigurationTestFiles/whitespaces-saved.conf",
     ],
 )
+
+# TODO: UtilityResourceTest

@@ -31,7 +31,7 @@ configure_header(
     output = "configure.h",
     defines = {
         "FILETEST_DIR": "$(execpath FileTestFiles)",
-        "FILETEST_SAVE_DIR": "$(execpath FileTestFiles)Temp",
+        "FILETEST_SAVE_DIR": "$(execpath FileTestFiles)/write",
     },
     deps = ["FileTestFiles"],
     local = True,
