@@ -67,25 +67,30 @@ def _configure_header_impl(ctx):
         execution_requirements = {"block-network": ""},
     )
 
-    compilation_context = cc_common.create_compilation_context(
-        headers = depset([out_file]),
-        system_includes = depset(
-            ["%s" % out_file.root.path] +
-            ["{}/{}".format(out_file.root.path, i) for i in ctx.attr.includes]
-        ),
-        quote_includes = depset(
-            (["%s" % out_file.dirname] if ctx.attr.local else []),
-        ),
-    )
     return [
         DefaultInfo(
             files = depset([out_file]),
             runfiles = ctx.runfiles(transitive_files = depset([out_file]))
         ),
-        CcInfo(compilation_context = compilation_context),
+        CcInfo(
+            compilation_context = cc_common.create_compilation_context(
+                headers = depset([out_file]),
+                system_includes = depset(["%s" % out_file.root.path]),
+                quote_includes = (
+                    depset(["%s" % out_file.dirname]) if ctx.attr.local else None
+                ),
+            ),
+        )
     ]
 
 configure_header = rule(
+    doc = (
+        "Rule for configuring .h.cmake headers\n" +
+        "WARNING! Experimental, will change without notice\n" +
+        "WARNING! Generated files have tricky lookup semantics in bazel " +
+        "so look up `local` attribute for in-place include, and look up " +
+        "@corrade//:Main for example of correct pathing for system includes."
+    ),
     attrs = {
         "src": attr.label(
             mandatory = True,
@@ -111,27 +116,17 @@ configure_header = rule(
             allow_files=True,
             doc = ("Dependencies for $(location dep) expansion"),
         ),
-        "includes": attr.string_list(
-            doc = (
-                "List of paths where the output .h file should be foundable. " +
-                "This one is tricky as bazel plays difficult with file " +
-                "locations, especially so if they are generated.\n" +
-                "For generated files, these are different from repo root, " +
-                "it will place them relative to execution root, where source " +
-                "files will have a hard time looking it up.\n" +
-                "Full path as-if it was in repo is set to work, and " +
-                "additional values provided here will be appended to full " +
-                "path to make it findable at those locations.\n" +
-                "Note these are system includes."
-            ),
-        ),
         "local": attr.bool(
             default=False,
             doc = (
                 "Controls whether the target is findable locally with " +
-                "#include \"file.h\" or not. Default is off because it " +
-                "makes every dependant be able to include it locally whether " +
-                "they would be as-if in the same directory or not."
+                "#include \"file.h\" or not.\n" +
+                "WARNING: This makes the header available globally " +
+                "whether dependants would-be in the same folder or not.\n" +
+                "Default is False.\n" +
+                "This one is tricky as bazel plays difficult with file " +
+                "locations for generated files, as they are not placed in " +
+                "repo root, hence the need for additional custom lookup.\n"
             ),
         ),
     },

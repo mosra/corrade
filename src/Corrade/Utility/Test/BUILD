@@ -46,7 +46,6 @@ cc_test(
         "@corrade//:TestSuite",
         "//src/Corrade/Utility:UtilityTestLib",
     ],
-    copts = ["-Isrc"],
 )
 
 cc_test(
@@ -56,7 +55,6 @@ cc_test(
         "@corrade//:TestSuite",
         "//src/Corrade/Utility:UtilityTestLib",
     ],
-    copts = ["-Isrc"],
     env = {
         "ARGUMENTSTEST_SIZE": "1337",
         "ARGUMENTSTEST_VERBOSE": "ON",
@@ -70,22 +68,22 @@ cc_library(
     srcs = ["AssertTest.cpp"],
     testonly = True,
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
 )
 
 
 cc_test(
     name = "UtilityAssertTest",
     srcs = ["//src:dummy.cpp"],
-    deps = [":AssertTestObjects"],
-    copts = ["-Isrc"],
+    deps = [
+        "@corrade//:TestSuite",
+        ":AssertTestObjects",
+    ],
 )
 
 cc_test(
     name = "UtilityAssertStandardTest",
     srcs = ["AssertTest.cpp"],
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
     local_defines = [
         "CORRADE_STANDARD_ASSERT",
     ],
@@ -95,7 +93,6 @@ cc_test(
     name = "UtilityAssertStandardDisabledTest",
     srcs = ["AssertDisabledTest.cpp"],
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
     local_defines = [
         "CORRADE_STANDARD_ASSERT",
         "NDEBUG",
@@ -106,7 +103,6 @@ cc_test(
     name = "Utility%s" % t,
     srcs = ["%s.cpp" % t],
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
 )
 for t in [
     "AssertDisabledTest",
@@ -129,7 +125,6 @@ for t in [
     name = "Utility%s" % t,
     srcs = ["%s.cpp" % t],
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
     # TODO: selectable
     linkopts = ["-pthread"],
 )
@@ -146,7 +141,6 @@ for t in [
         "//src/Corrade/Utility:UtilityTestLib",
         ":configure",
     ],
-    copts = ["-Isrc"],
 )
 for t in [
     "FormatTest",
@@ -162,7 +156,6 @@ cc_test(
         "//src/Corrade/Containers:LinkedList.h",
     ],
     deps = ["@corrade//:TestSuite"],
-    copts = ["-Isrc"],
 )
 
 # These two fail miserably. The weird thing is how inplace array init
@@ -176,7 +169,6 @@ cc_test(
 #        ":configure",
 #    ],
 #    includes = ["."],
-#    copts = ["-Isrc"],
 #    data = [
 #        "DirectoryTestFiles/dir/dummy",
 #        "DirectoryTestFiles/file",
@@ -194,7 +186,6 @@ cc_test(
 #        "//src/Corrade/Utility:UtilityTestLib",
 #        ":configure",
 #    ],
-#    copts = ["-Isrc"],
 #    data = [
 #        "ConfigurationTestFiles/bom.conf",
 #        "ConfigurationTestFiles/comments.conf",

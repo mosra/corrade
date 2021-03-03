@@ -61,7 +61,6 @@ cc_library(
     ],
     deps = [
         "@corrade//:Utility",
-        "@corrade//:config",
     ],
 )
 

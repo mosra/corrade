@@ -30,7 +30,6 @@
         "@corrade//:TestSuite",
         "//src/Corrade/Containers:headers",
     ],
-    copts = ["-Isrc"],
 ) for t in [
     "ArrayStlSpanTest",
     "ArrayViewStlSpanTest",
@@ -59,7 +58,6 @@
         "@corrade//:TestSuite",
         "//src/Corrade/Containers:headers",
     ],
-    copts = ["-Isrc"],
     local_defines = ["CORRADE_GRACEFUL_ASSERT"]
 ) for t in [
     "LinkedListTest",
@@ -82,7 +80,6 @@
         "//src/Corrade/Containers:headers",
         "//src/Corrade/Utility:UtilityTestLib",
     ],
-    copts = ["-Isrc"],
     local_defines = ["CORRADE_GRACEFUL_ASSERT"]
 ) for t in [
     "StringTest",
@@ -97,7 +94,6 @@
         "//src/Corrade/Containers:headers",
         "//src/Corrade/Utility:UtilityTestLib",
     ],
-    copts = ["-Isrc"],
 ) for t in [
     "ArrayTupleTest",
 ]]

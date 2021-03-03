@@ -46,7 +46,13 @@ alias(
     actual = "//src/Corrade/TestSuite:TestSuite",
 )
 
-alias(
-    name = "config",
-    actual = "//src/Corrade:config",
+cc_library(
+    name = "Main",
+    includes = [
+        "src",
+    ],
+    deps = [
+        "//src/Corrade:configure",
+        "//src/Corrade:version",
+    ],
 )

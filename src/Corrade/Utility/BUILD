@@ -112,7 +112,6 @@ cc_library(
         "//src/Corrade/Containers:StringView.h",
         "//src/Corrade/Containers:Tags.h",
     ],
-    copts = ["-Isrc"],
     linkstatic = True,
     linkopts = [
         # TODO: this is selectable
@@ -122,7 +121,9 @@ cc_library(
     local_defines = [
         "CORRADE_BUILD_STATIC",
     ],
-    deps = ["@corrade//:config"],
+    deps = [
+        "@corrade//:Main",
+    ],
 )
 
 cc_library(
@@ -150,7 +151,6 @@ cc_library(
         "CORRADE_BUILD_STATIC",
         "CORRADE_GRACEFUL_ASSERT",
     ],
-    copts = ["-Isrc"],
     testonly = True,
 )
 
@@ -165,7 +165,6 @@ cc_binary(
     local_defines = [
         "CORRADE_BUILD_STATIC",
     ],
-    copts = ["-Isrc"],
     deps = ["@corrade//:Utility"],
 )
 

@@ -27,11 +27,3 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files(["dummy.cpp"])
-
-filegroup(
-    name = "hdrs",
-    srcs = glob([
-        "Corrade/**/*.h",
-        "Corrade/**/*.hpp",
-    ]),
-)

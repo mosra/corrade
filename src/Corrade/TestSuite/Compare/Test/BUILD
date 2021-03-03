@@ -44,7 +44,6 @@ configure_header(
         "@corrade//:TestSuite",
         ":configure",
     ],
-    copts = ["-Isrc"],
     data = [
         "FileTestFiles/base.txt",
         "FileTestFiles/different.txt",
@@ -62,7 +61,6 @@ for t in [
 [cc_test(
     name = "TestSuiteCompare%s" % t,
     srcs = ["%s.cpp" % t],
-    copts = ["-Isrc"],
     deps = ["@corrade//:TestSuite"],
 )
 for t in [

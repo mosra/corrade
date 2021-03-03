@@ -65,7 +65,7 @@ cc_library(
         # TODO: figure out where to put it
         "Implementation/RawForwardList.h",
     ],
-    copts = ["-Isrc"],
+    visibility = ["//src/Corrade:__subpackages__"]
 )
 
 cc_library(
@@ -73,6 +73,5 @@ cc_library(
     deps = [
         ":headers",
         "@corrade//:Utility",
-        "@corrade//:config",
     ],
 )

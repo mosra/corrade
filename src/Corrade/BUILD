@@ -36,7 +36,7 @@ configure_header(
         "CORRADE_VERSION_HASH": "ga1038a9b",
         "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
     },
-    includes = ["src"],
+    visibility = ["//:__pkg__"]
 )
 
 configure_header(
@@ -50,14 +50,5 @@ configure_header(
         "CORRADE_BUILD_MULTITHREADED": "",
         "CORRADE_TARGET_UNIX": "",
     },
-    includes = ["src"],
-)
-
-cc_library(
-    name = "config",
-    deps = [
-        ":configure",
-        ":version",
-    ],
-    visibility = ["//visibility:public"],
+    visibility = ["//:__pkg__"]
 )

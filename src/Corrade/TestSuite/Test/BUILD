@@ -45,14 +45,12 @@ cc_test(
         "--arguments-value",
         "hello",
     ],
-    copts = ["-Isrc"],
     deps = ["@corrade//:TestSuite"],
 )
 
 cc_test(
     name = "TestSuiteTesterTest",
     srcs = ["TesterTest.cpp"],
-    copts = ["-Isrc"],
     deps = [
         "@corrade//:TestSuite",
         ":configure",
@@ -99,7 +97,6 @@ cc_test(
 cc_test(
     name = "TestSuiteBundledFilesTest",
     srcs = ["BundledFilesTest.cpp"],
-    copts = ["-Isrc"],
     deps = [
         "@corrade//:TestSuite",
         ":configure",
@@ -117,7 +114,6 @@ cc_test(
 [cc_test(
     name = "TestSuite%s" % t,
     srcs = ["%s.cpp" % t],
-    copts = ["-Isrc"],
     deps = ["@corrade//:TestSuite"],
 )
 for t in [
