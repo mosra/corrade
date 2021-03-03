@@ -49,6 +49,7 @@ struct LinkedListTest: TestSuite::Tester {
     void moveItem();
 
     void rangeBasedFor();
+    void accessListInDestructor();
     void overrideErase();
     void overrideEraseVirtual();
 };
@@ -85,6 +86,7 @@ LinkedListTest::LinkedListTest() {
               &LinkedListTest::moveItem,
 
               &LinkedListTest::rangeBasedFor,
+              &LinkedListTest::accessListInDestructor,
               &LinkedListTest::overrideErase,
               &LinkedListTest::overrideEraseVirtual});
 }
@@ -458,6 +460,59 @@ void LinkedListTest::rangeBasedFor() {
         for(auto&& i: clist) items.push_back(&i);
         CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
     }
+}
+
+void LinkedListTest::accessListInDestructor() {
+    struct UpdatesListOnDestruction;
+
+    struct UpdateableLinkedList: Containers::LinkedList<UpdatesListOnDestruction> {
+        explicit UpdateableLinkedList(int& insertedDestructedItemCount): insertedDestructedItemCount(insertedDestructedItemCount) {}
+
+        int& insertedDestructedItemCount;
+    };
+
+    struct UpdatesListOnDestruction: LinkedListItem<UpdatesListOnDestruction, UpdateableLinkedList> {
+        explicit UpdatesListOnDestruction(int& disconnectedDestructedItemCount): disconnectedDestructedItemCount(disconnectedDestructedItemCount) {}
+
+        ~UpdatesListOnDestruction() {
+            /* If the item is in a list, list() should be non-null */
+            if(list()) ++list()->insertedDestructedItemCount;
+            else ++disconnectedDestructedItemCount;
+        }
+
+        int& disconnectedDestructedItemCount;
+    };
+
+    int insertedDestructedItemCount = 0;
+    int disconnectedDestructedItemCount = 0;
+
+    {
+        UpdateableLinkedList list{insertedDestructedItemCount};
+        {
+            UpdatesListOnDestruction a{disconnectedDestructedItemCount};
+            UpdatesListOnDestruction b{disconnectedDestructedItemCount};
+
+            list.insert(new UpdatesListOnDestruction{disconnectedDestructedItemCount});
+            list.insert(new UpdatesListOnDestruction{disconnectedDestructedItemCount});
+            list.insert(&a);
+
+            /* Verify initial state */
+            CORRADE_COMPARE(insertedDestructedItemCount, 0);
+            CORRADE_COMPARE(disconnectedDestructedItemCount, 0);
+        }
+
+        /* `a`'s destructor got called at the time it was still in a list,
+           but `b` wasn't inserted to it at all */
+        CORRADE_COMPARE(insertedDestructedItemCount, 1);
+        CORRADE_COMPARE(disconnectedDestructedItemCount, 1);
+    }
+
+    /* At this point, the list gets deleted, which causes it to delete its
+       items as well. That in turn means their destructors get called and at
+       the point when they get called they should still have access to the
+       list. */
+    CORRADE_COMPARE(disconnectedDestructedItemCount, 1);
+    CORRADE_COMPARE(insertedDestructedItemCount, 3);
 }
 
 void LinkedListTest::overrideErase() {
