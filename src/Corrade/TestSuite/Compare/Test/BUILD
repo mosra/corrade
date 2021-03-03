@@ -23,7 +23,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("//bazel:configure_header.bzl", "configure_header")
+load("@corrade//bazel:configure_header.bzl", "configure_header")
 
 configure_header(
     name = "configure",
@@ -40,7 +40,7 @@ configure_header(
     name = "TestSuiteCompare%s" % t,
     srcs = ["%s.cpp" % t],
     deps = [
-        "//:TestSuite",
+        "@corrade//:TestSuite",
         ":configure",
     ],
     copts = ["-Isrc"],
@@ -62,7 +62,7 @@ for t in [
     name = "TestSuiteCompare%s" % t,
     srcs = ["%s.cpp" % t],
     copts = ["-Isrc"],
-    deps = ["//:TestSuite"],
+    deps = ["@corrade//:TestSuite"],
 )
 for t in [
     "ContainerTest",

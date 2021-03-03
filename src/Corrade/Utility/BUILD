@@ -23,7 +23,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -139,6 +138,6 @@ cc_binary(
         "CORRADE_BUILD_STATIC",
     ],
     copts = ["-Isrc"],
-    deps = [":Utility"],
+    deps = ["@corrade//:Utility"],
 )
 

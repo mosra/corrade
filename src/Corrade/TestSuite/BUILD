@@ -60,7 +60,7 @@ cc_library(
         "CORRADE_BUILD_STATIC",
     ],
     deps = [
-        "//:Utility",
+        "@corrade//:Utility",
     ],
 )
 
