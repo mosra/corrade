@@ -44,10 +44,6 @@ def _configure_header_impl(ctx):
     in_file = ctx.attr.src.files.to_list()[0]
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
-    deps = [in_file]
-    for target in ctx.attr.deps:
-        deps += target.files.to_list()
-
     args = [
         "{}".format(in_file.path),
         "{}".format(out_file.path),
@@ -58,7 +54,7 @@ def _configure_header_impl(ctx):
 
     ctx.actions.run(
         mnemonic = "ConfigureFileDotH",
-        inputs = depset(deps),
+        inputs = depset([in_file]),
         outputs = [out_file],
         use_default_shell_env = True,
         executable = cfg_file,
