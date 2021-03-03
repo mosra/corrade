@@ -82,6 +82,9 @@ namespace Corrade {
     initializer lists
 -   @ref Containers::ScopeGuard now has a @ref Containers::NoCreate constructor
     and is movable in order to support deferred creation
+-   @ref Containers::LinkedList destruction was changed in a way that makes
+    @ref Containers::LinkedListItem::list() still accessible in a destructor
+    of @ref Containers::LinkedListItem subclasses
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
@@ -197,6 +200,11 @@ namespace Corrade {
     explicitly @cmake include(UseEmscripten) @ce or update the `toolchains`
     submodule, which now includes the file implicitly. See
     [mosra/corrade#104](https://github.com/mosra/corrade/issues/104).
+-   @ref Containers::LinkedList destruction was changed in a way that makes
+    @ref Containers::LinkedListItem::list() still accessible in a destructor
+    of @ref Containers::LinkedListItem subclasses. This behavior didn't make
+    sense and so it's not assumed any existing code relied on it, nevertheless
+    it's a subtle change in behavior that is worth mentioning.
 
 @subsection corrade-changelog-latest-documentation Documentation
 
