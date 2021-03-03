@@ -62,6 +62,15 @@ bool define(std::string& in, const std::string& what) {
   return substitute(in, cmakedefine, with);
 }
 
+bool strip(std::string& in) {
+    std::regex re(".*\(\\$\\{.*\\}\).*");
+    std::smatch m;
+    if (std::regex_match(in, m, re)) {
+      return substitute(in, m[1].str(), "");
+    }
+    return false;
+}
+
 void undef(std::string& in) {
   if (substitute(in, "#cmakedefine", "#undef")) {
     in = wrap(in, "/* ", " */");
@@ -94,10 +103,12 @@ int main(int argc, char* argv[]) {
         substitute(line, wrap(p.first, "${", "}"), p.second);
         define(line, p.first);
       }
+      strip(line);
       undef(line);
       out << line << "\n";
     }
   }
+  out.close();
 
   return EXIT_SUCCESS;
 }
