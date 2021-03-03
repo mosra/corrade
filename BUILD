@@ -32,6 +32,11 @@ alias(
 )
 
 alias(
+    name = "Containers",
+    actual = "//src/Corrade/Containers:Containers",
+)
+
+alias(
     name = "Utility",
     actual = "//src/Corrade/Utility:Utility",
 )

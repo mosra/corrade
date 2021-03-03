@@ -23,8 +23,13 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-
 package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "ArrayTuple.cpp",
+    "String.cpp",
+    "StringView.cpp",
+])
 
 cc_library(
     name = "headers",
@@ -55,33 +60,19 @@ cc_library(
         "StringStl.h",
         "StringView.h",
         "Tags.h",
+        # This one isn't in cmake
+        "ReferenceStl.h",
+        # TODO: figure out where to put it
         "Implementation/RawForwardList.h",
     ],
     copts = ["-Isrc"],
+)
+
+cc_library(
+    name = "Containers",
     deps = [
         "//src/Corrade:config",
-        "//src/Corrade/Utility:headers",
-    ],
-)
-
-## Incomplete target, for reference to utility
-cc_library(
-    name = "__containers_internal",
-    srcs = [
-        "ArrayTuple.cpp",
-        "String.cpp",
-        "StringView.cpp",
-    ],
-    copts = ["-Isrc"],
-    deps = [":headers"],
-    # TODO: fix visibility to utility only?
-)
-
-# TODO: perhaps alias to utility is better?
-cc_library(
-    name = "containers",
-    deps = [
-        "//src/Corrade/Containers:headers",
-        "//src/Corrade/Utility:utility",
+        ":headers",
+        "@corrade//:Utility",
     ],
 )
