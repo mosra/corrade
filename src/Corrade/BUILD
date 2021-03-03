@@ -30,10 +30,11 @@ configure_header(
     src = "version.h.cmake",
     output = "version.h",
     defines = {
+        # just some sample data i suppose
         "CORRADE_VERSION_YEAR": "2020",
         "CORRADE_VERSION_MONTH": "6",
         "CORRADE_VERSION_COMMIT": " 252",
-        "CORRADE_VERSION_HASH": "ga1038a9b",
+        "CORRADE_VERSION_HASH": "b329d056",
         "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
     },
     visibility = ["//:__pkg__"]
