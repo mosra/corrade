@@ -45,6 +45,9 @@ cc_library(
         "Implementation/Resource.h",
         "String.cpp",
         "Unicode.cpp",
+        "//src/Corrade/Containers:ArrayTuple.cpp",
+        "//src/Corrade/Containers:String.cpp",
+        "//src/Corrade/Containers:StringView.cpp",
         # TODO: this is selectable
         "FileWatcher.cpp",
         "Tweakable.cpp",
@@ -57,9 +60,6 @@ cc_library(
         "//src/Corrade/Containers:StaticArray.h",
         "//src/Corrade/Containers:ScopeGuard.h",
         "//src/Corrade/Containers:Implementation/RawForwardList.h",
-        "//src/Corrade/Containers:ArrayTuple.cpp",
-        "//src/Corrade/Containers:String.cpp",
-        "//src/Corrade/Containers:StringView.cpp",
     ],
     hdrs = [
         "Algorithms.h",
@@ -126,6 +126,35 @@ cc_library(
         "//src/Corrade:config",
     ],
 )
+
+cc_library(
+    name = "UtilityTestLib",
+    srcs = [
+        # GRACEFUL ASSERT
+        "Algorithms.cpp",
+        "Arguments.cpp",
+        "ConfigurationGroup.cpp",
+        "Format.cpp",
+        "Resource.cpp",
+        "Implementation/Resource.h",
+        "String.cpp",
+        "Unicode.cpp",
+        "//src/Corrade/Containers:ArrayTuple.cpp",
+        "//src/Corrade/Containers:String.cpp",
+        "//src/Corrade/Containers:StringView.cpp",
+    ],
+    hdrs = [
+        "//src/Corrade/Containers:ArrayViewStl.h",
+    ],
+    deps = [":Utility"],
+    local_defines = [
+        "CORRADE_BUILD_STATIC",
+        "CORRADE_GRACEFUL_ASSERT",
+    ],
+    copts = ["-Isrc"],
+    testonly = True,
+)
+
 
 cc_binary(
     name = "corrade-rc",
