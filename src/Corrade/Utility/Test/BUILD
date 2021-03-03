@@ -161,56 +161,56 @@ cc_test(
 # These two fail miserably. The weird thing is how inplace array init
 # works incorrectly
 
-#cc_test(
-#    name = "UtilityDirectoryTest",
-#    srcs = ["DirectoryTest.cpp"],
-#    deps = [
-#        "@corrade//:TestSuite",
-#        ":configure",
-#    ],
-#    includes = ["."],
-#    data = [
-#        "DirectoryTestFiles/dir/dummy",
-#        "DirectoryTestFiles/file",
-#        "DirectoryTestFilesUtf8/šňůra/dummy",
-#        "DirectoryTestFilesUtf8/hýždě",
-#    ],
-#)
+cc_test(
+    name = "UtilityDirectoryTest",
+    srcs = ["DirectoryTest.cpp"],
+    deps = [
+        "@corrade//:TestSuite",
+        ":configure",
+    ],
+    includes = ["."],
+    data = [
+        "DirectoryTestFiles/dir/dummy",
+        "DirectoryTestFiles/file",
+        "DirectoryTestFilesUtf8/šňůra/dummy",
+        "DirectoryTestFilesUtf8/hýždě",
+    ],
+)
 
 
-#cc_test(
-#    name = "UtilityConfigurationTest",
-#    srcs = ["ConfigurationTest.cpp"],
-#    deps = [
-#        "@corrade//:TestSuite",
-#        "//src/Corrade/Utility:UtilityTestLib",
-#        ":configure",
-#    ],
-#    data = [
-#        "ConfigurationTestFiles/bom.conf",
-#        "ConfigurationTestFiles/comments.conf",
-#        "ConfigurationTestFiles/comments-saved.conf",
-#        "ConfigurationTestFiles/eol-mixed.conf",
-#        "ConfigurationTestFiles/eol-unix.conf",
-#        "ConfigurationTestFiles/eol-windows.conf",
-#        "ConfigurationTestFiles/hierarchic.conf",
-#        "ConfigurationTestFiles/hierarchic-empty-group.conf",
-#        "ConfigurationTestFiles/hierarchic-empty-subgroup.conf",
-#        "ConfigurationTestFiles/hierarchic-missing-bracket.conf",
-#        "ConfigurationTestFiles/hierarchic-modified.conf",
-#        "ConfigurationTestFiles/hierarchic-shortcuts.conf",
-#        "ConfigurationTestFiles/hierarchic-shortcuts-modified.conf",
-#        "ConfigurationTestFiles/hýždě.conf",
-#        "ConfigurationTestFiles/missing-equals.conf",
-#        "ConfigurationTestFiles/missing-quote.conf",
-#        "ConfigurationTestFiles/missing-multiline-quote.conf",
-#        "ConfigurationTestFiles/multiLine.conf",
-#        "ConfigurationTestFiles/multiLine-crlf.conf",
-#        "ConfigurationTestFiles/multiLine-crlf-saved.conf",
-#        "ConfigurationTestFiles/multiLine-saved.conf",
-#        "ConfigurationTestFiles/parse.conf",
-#        "ConfigurationTestFiles/parse-modified.conf",
-#        "ConfigurationTestFiles/whitespaces.conf",
-#        "ConfigurationTestFiles/whitespaces-saved.conf",
-#    ],
-#)
+cc_test(
+    name = "UtilityConfigurationTest",
+    srcs = ["ConfigurationTest.cpp"],
+    deps = [
+        "@corrade//:TestSuite",
+        "//src/Corrade/Utility:UtilityTestLib",
+        ":configure",
+    ],
+    data = [
+        "ConfigurationTestFiles/bom.conf",
+        "ConfigurationTestFiles/comments.conf",
+        "ConfigurationTestFiles/comments-saved.conf",
+        "ConfigurationTestFiles/eol-mixed.conf",
+        "ConfigurationTestFiles/eol-unix.conf",
+        "ConfigurationTestFiles/eol-windows.conf",
+        "ConfigurationTestFiles/hierarchic.conf",
+        "ConfigurationTestFiles/hierarchic-empty-group.conf",
+        "ConfigurationTestFiles/hierarchic-empty-subgroup.conf",
+        "ConfigurationTestFiles/hierarchic-missing-bracket.conf",
+        "ConfigurationTestFiles/hierarchic-modified.conf",
+        "ConfigurationTestFiles/hierarchic-shortcuts.conf",
+        "ConfigurationTestFiles/hierarchic-shortcuts-modified.conf",
+        "ConfigurationTestFiles/hýždě.conf",
+        "ConfigurationTestFiles/missing-equals.conf",
+        "ConfigurationTestFiles/missing-quote.conf",
+        "ConfigurationTestFiles/missing-multiline-quote.conf",
+        "ConfigurationTestFiles/multiLine.conf",
+        "ConfigurationTestFiles/multiLine-crlf.conf",
+        "ConfigurationTestFiles/multiLine-crlf-saved.conf",
+        "ConfigurationTestFiles/multiLine-saved.conf",
+        "ConfigurationTestFiles/parse.conf",
+        "ConfigurationTestFiles/parse-modified.conf",
+        "ConfigurationTestFiles/whitespaces.conf",
+        "ConfigurationTestFiles/whitespaces-saved.conf",
+    ],
+)
