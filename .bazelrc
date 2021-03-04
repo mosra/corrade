@@ -15,4 +15,7 @@ build:docker-sandbox --define=EXECUTOR=remote
 build:docker-sandbox --experimental_docker_verbose
 build:docker-sandbox --experimental_enable_docker_sandbox
 
+test --nocache_test_results
+test --test_output=errors
+
 try-import %workspace%/user.bazelrc

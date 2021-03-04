@@ -53,13 +53,6 @@ cc_library(
         "Tweakable.cpp",
         "Implementation/tweakable.h",
         "TweakableParser.cpp",
-        # prereqs from containers only included in .cpp
-        "//src/Corrade/Containers:ArrayTuple.h",
-        "//src/Corrade/Containers:EnumSet.hpp",
-        "//src/Corrade/Containers:GrowableArray.h",
-        "//src/Corrade/Containers:StaticArray.h",
-        "//src/Corrade/Containers:ScopeGuard.h",
-        "//src/Corrade/Containers:Implementation/RawForwardList.h",
     ],
     hdrs = [
         "Algorithms.h",
@@ -97,38 +90,21 @@ cc_library(
         "FileWatcher.h",
         "Tweakable.h",
         "TweakableParser.h",
-        # prereqs from containers included in .cpp or .h
-        "//src/Corrade/Containers:Array.h",
-        "//src/Corrade/Containers:ArrayView.h",
-        "//src/Corrade/Containers:constructHelpers.h",
-        "//src/Corrade/Containers:Containers.h",
-        "//src/Corrade/Containers:EnumSet.h",
-        "//src/Corrade/Containers:Optional.h",
-        "//src/Corrade/Containers:Pointer.h",
-        "//src/Corrade/Containers:sequenceHelpers.h",
-        "//src/Corrade/Containers:StridedArrayView.h",
-        "//src/Corrade/Containers:String.h",
-        "//src/Corrade/Containers:StringStl.h",
-        "//src/Corrade/Containers:StringView.h",
-        "//src/Corrade/Containers:Tags.h",
     ],
     linkstatic = True,
+    # TODO: this is selectable
     linkopts = [
-        # TODO: this is selectable
         "-ldl",
-    ],
-    local_defines = [
-        "CORRADE_BUILD_STATIC",
     ],
     deps = [
         "@corrade//:Main",
+        "//src/Corrade/Containers:headers",
     ],
 )
 
 cc_library(
     name = "UtilityTestLib",
     srcs = [
-        # GRACEFUL ASSERT
         "Algorithms.cpp",
         "Arguments.cpp",
         "ConfigurationGroup.cpp",
@@ -141,17 +117,11 @@ cc_library(
         "//src/Corrade/Containers:String.cpp",
         "//src/Corrade/Containers:StringView.cpp",
     ],
-    hdrs = [
-        "//src/Corrade/Containers:ArrayViewStl.h",
-    ],
-    # probably don't need this one?
     linkstatic = True,
     deps = [":Utility"],
-    local_defines = [
-        "CORRADE_BUILD_STATIC",
-        "CORRADE_GRACEFUL_ASSERT",
-    ],
+    local_defines = ["CORRADE_GRACEFUL_ASSERT"],
     testonly = True,
+    visibility = ["//src/Corrade:__subpackages__"],
 )
 
 
@@ -159,9 +129,6 @@ cc_binary(
     name = "corrade-rc",
     srcs = ["rc.cpp"],
     linkstatic = True,
-    local_defines = [
-        "CORRADE_BUILD_STATIC",
-    ],
     deps = ["@corrade//:Utility"],
 )
 

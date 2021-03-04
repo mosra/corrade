@@ -51,14 +51,7 @@ cc_library(
         "Compare/SortedContainer.h",
         "Compare/StringToFile.h",
     ],
-    copts = ["-Isrc"],
     linkstatic = True,
-    linkopts = [
-        "--no-undefined",
-    ],
-    local_defines = [
-        "CORRADE_BUILD_STATIC",
-    ],
     deps = [
         "@corrade//:Utility",
     ],
