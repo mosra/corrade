@@ -177,8 +177,7 @@ cc_test(
     ],
 )
 
-# NOTE: everything passes but names() which
-# seems to abort every step of the way
+# NOTE: interestingly enough, fails with UtilityTestLib linkstatic=False
 cc_test(
     name = "UtilityConfigurationTest",
     srcs = ["ConfigurationTest.cpp"],

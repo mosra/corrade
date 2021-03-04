@@ -116,7 +116,6 @@ cc_library(
     linkopts = [
         # TODO: this is selectable
         "-ldl",
-        "--no-undefined",
     ],
     local_defines = [
         "CORRADE_BUILD_STATIC",
@@ -146,6 +145,7 @@ cc_library(
         "//src/Corrade/Containers:ArrayViewStl.h",
     ],
     # probably don't need this one?
+    linkstatic = True,
     deps = [":Utility"],
     local_defines = [
         "CORRADE_BUILD_STATIC",
@@ -158,9 +158,6 @@ cc_library(
 cc_binary(
     name = "corrade-rc",
     srcs = ["rc.cpp"],
-    linkopts = [
-        "--no-undefined",
-    ],
     linkstatic = True,
     local_defines = [
         "CORRADE_BUILD_STATIC",
