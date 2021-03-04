@@ -42,6 +42,11 @@ alias(
 )
 
 alias(
+    name = "Interconnect",
+    actual = "//src/Corrade/Interconnect:Interconnect",
+)
+
+alias(
     name = "TestSuite",
     actual = "//src/Corrade/TestSuite:TestSuite",
 )
