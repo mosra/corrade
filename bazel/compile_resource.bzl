@@ -32,10 +32,11 @@
 # NOTE: bloody fuck
 def _compile_resource_impl(ctx):
     conf = ctx.attr.conf.files.to_list()[0]
+    name = ctx.label.name
 
-    out_depends = ctx.actions.declare_file("%s.depends" % ctx.label.name)
+    out_depends = ctx.actions.declare_file("resource_%s.depends" % name)
     ctx.actions.run_shell(
-        mnemonic = "CorradeCompileResourceDepends",
+        mnemonic = "CorradeCompileDepends",
         inputs = depset([conf]),
         outputs = [out_depends],
         command = "cp '{}' '{}'".format(
@@ -48,16 +49,16 @@ def _compile_resource_impl(ctx):
     for target in ctx.attr.deps:
       rc_inputs += target.files.to_list()
 
-    out_cpp = ctx.actions.declare_file("%s.cpp" % ctx.label.name)
+    out_cpp = ctx.actions.declare_file("resource_%s.cpp" % name)
     ctx.actions.run(
         mnemonic = "CorradeCompileResource",
         inputs = depset(rc_inputs),
         outputs = [out_cpp],
         executable = ctx.executable._tool,
         arguments = [
-            ctx.label.name,
+            name,
             conf.path,
-            out_cpp.path
+            out_cpp.path,
         ],
         execution_requirements = {"block-network": ""},
     )

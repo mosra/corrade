@@ -25,6 +25,11 @@
 #
 load("//bazel:configure_header.bzl", "configure_header")
 
+exports_files([
+    "Corrade.h",
+    "Corrade.cpp",
+])
+
 configure_header(
     name = "version",
     src = "version.h.cmake",

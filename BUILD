@@ -53,6 +53,9 @@ alias(
 
 cc_library(
     name = "Main",
+    hdrs = [
+        "//src/Corrade:Corrade.h",
+    ],
     includes = [
         "src",
     ],
