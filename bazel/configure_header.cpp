@@ -63,7 +63,7 @@ bool define(std::string& in, const std::string& what) {
 }
 
 bool strip(std::string& in) {
-    std::regex re(".*\(\\$\\{.*\\}\).*");
+    std::regex re(".*(\\$\\{.*\\}).*");
     std::smatch m;
     if (std::regex_match(in, m, re)) {
       return substitute(in, m[1].str(), "");

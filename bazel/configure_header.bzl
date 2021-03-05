@@ -42,7 +42,6 @@ def _configure_header_impl(ctx):
         progress_message = "Configuring %s" % ctx.attr.output,
         inputs = depset([in_file]),
         outputs = [out_file],
-        use_default_shell_env = True,
         executable = ctx.executable._tool,
         arguments = args,
         execution_requirements = {"block-network": ""},
