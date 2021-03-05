@@ -1,0 +1,106 @@
+#
+#   This file is part of Corrade.
+#
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+#               2017, 2018, 2019, 2020, 2021
+#             Vladimír Vondruš <mosra@centrum.cz>
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+#
+
+# TODO:
+# Needs to compile resource, figure out transitive deps,
+# then create a library off of that (*static*?)
+# with conf file in data and correct dependencies on corrade
+# NOTE: name must be resource_%NAME%
+# NOTE: bloody fuck
+def _compile_resource_impl(ctx):
+    conf = ctx.attr.conf.files.to_list()[0]
+
+    out_depends = ctx.actions.declare_file("%s.depends" % ctx.label.name)
+    ctx.actions.run_shell(
+        mnemonic = "CorradeCompileResourceDepends",
+        inputs = depset([conf]),
+        outputs = [out_depends],
+        command = "cp '{}' '{}'".format(
+            conf.path,
+            out_depends.path,
+        ),
+    )
+
+    rc_inputs = [conf]
+    for target in ctx.attr.deps:
+      rc_inputs += target.files.to_list()
+
+    out_cpp = ctx.actions.declare_file("%s.cpp" % ctx.label.name)
+    ctx.actions.run(
+        mnemonic = "CorradeCompileResource",
+        inputs = depset(rc_inputs),
+        outputs = [out_cpp],
+        executable = ctx.executable._tool,
+        arguments = [
+            ctx.label.name,
+            conf.path,
+            out_cpp.path
+        ],
+        execution_requirements = {"block-network": ""},
+    )
+
+    outputs = depset([out_cpp, out_depends])
+
+    return [
+        DefaultInfo(
+            files = outputs,
+            runfiles = ctx.runfiles(transitive_files = outputs)
+        ),
+    ]
+
+compile_resource = rule(
+    doc = (
+        "Rule for configuring .h.cmake headers\n" +
+        "WARNING! Experimental, will change without notice\n" +
+        "WARNING! Generated files have tricky lookup semantics in bazel " +
+        "so look up `local` attribute for in-place include, and look up " +
+        "@corrade//:Main for example of correct pathing for system includes."
+    ),
+    attrs = {
+        "conf": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+            doc = ("Source .conf file to pass to corrade-rc"),
+        ),
+        "deps": attr.label_list(
+            mandatory = True,
+            allow_files = True,
+            doc = (
+                "Full list of files required to run this rule.\n" +
+                "Note that unlike cmake, bazel requires those to be " +
+                "declared explicitly."
+            ),
+        ),
+        "_tool": attr.label(
+            doc = ("Private, touch at your own risk."),
+            executable = True,
+            cfg = "host",
+            allow_single_file = True,
+            default = Label("@corrade//:corrade-rc"),
+        ),
+    },
+    implementation = _compile_resource_impl,
+)

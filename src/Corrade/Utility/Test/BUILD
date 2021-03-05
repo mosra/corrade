@@ -24,6 +24,17 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 load("@corrade//bazel:configure_header.bzl", "configure_header")
+load("@corrade//bazel:compile_resource.bzl", "compile_resource")
+
+compile_resource(
+    name = "ResourceTestData",
+    conf = "ResourceTestFiles/resources.conf",
+    deps = [
+        "ResourceTestFiles/predisposition.bin",
+        "ResourceTestFiles/consequence.bin",
+    ],
+)
+
 
 configure_header(
     name = "configure",
