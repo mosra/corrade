@@ -24,12 +24,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-# TODO:
-# Needs to compile resource, figure out transitive deps,
-# then create a library off of that (*static*?)
-# with conf file in data and correct dependencies on corrade
-# NOTE: name must be resource_%NAME%
-# NOTE: bloody fuck
 def _compile_resource_impl(ctx):
     conf = ctx.attr.conf.files.to_list()[0]
     name = ctx.label.name
@@ -73,13 +67,7 @@ def _compile_resource_impl(ctx):
     ]
 
 compile_resource = rule(
-    doc = (
-        "Rule for configuring .h.cmake headers\n" +
-        "WARNING! Experimental, will change without notice\n" +
-        "WARNING! Generated files have tricky lookup semantics in bazel " +
-        "so look up `local` attribute for in-place include, and look up " +
-        "@corrade//:Main for example of correct pathing for system includes."
-    ),
+    doc = ("Rule for invoking corrade-rc, similar to corrade_add_resource()\n"),
     attrs = {
         "conf": attr.label(
             mandatory = True,
