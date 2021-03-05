@@ -26,16 +26,6 @@
 load("@corrade//bazel:configure_header.bzl", "configure_header")
 load("@corrade//bazel:compile_resource.bzl", "compile_resource")
 
-compile_resource(
-    name = "ResourceTestData",
-    conf = "ResourceTestFiles/resources.conf",
-    deps = [
-        "ResourceTestFiles/predisposition.bin",
-        "ResourceTestFiles/consequence.bin",
-    ],
-)
-
-
 configure_header(
     name = "configure",
     src = "configure.h.cmake",
@@ -226,4 +216,145 @@ cc_test(
     ],
 )
 
-# TODO: UtilityResourceTest
+compile_resource(
+    name = "ResourceTestData",
+    conf = "ResourceTestFiles/resources.conf",
+    deps = [
+        "ResourceTestFiles/predisposition.bin",
+        "ResourceTestFiles/consequence.bin",
+    ],
+)
+
+compile_resource(
+    name = "ResourceTestEmptyFileData",
+    conf = "ResourceTestFiles/resources-empty-file.conf",
+    deps = [
+        "ResourceTestFiles/empty.bin",
+    ],
+)
+
+compile_resource(
+    name = "ResourceTestNothingData",
+    conf = "ResourceTestFiles/resources-nothing.conf",
+    deps = [],
+)
+
+cc_test(
+    name = "UtilityResourceTest",
+    srcs = [
+        "ResourceTest.cpp",
+        ":ResourceTestData",
+        ":ResourceTestEmptyFileData",
+        ":ResourceTestNothingData",
+    ],
+    data = [
+        "ResourceTestFiles/compiled.cpp",
+        "ResourceTestFiles/compiled-empty.cpp",
+        "ResourceTestFiles/compiled-nothing.cpp",
+        "ResourceTestFiles/compiled-unicode.cpp",
+        "ResourceTestFiles/consequence.bin",
+        "ResourceTestFiles/consequence2.txt",
+        "ResourceTestFiles/empty.bin",
+        "ResourceTestFiles/hýždě.bin",
+        "ResourceTestFiles/hýždě.conf",
+        "ResourceTestFiles/predisposition.bin",
+        "ResourceTestFiles/predisposition2.txt",
+        "ResourceTestFiles/resources.conf",
+        "ResourceTestFiles/resources-empty-alias.conf",
+        "ResourceTestFiles/resources-empty-file.conf",
+        "ResourceTestFiles/resources-empty-filename.conf",
+        "ResourceTestFiles/resources-empty-group.conf",
+        "ResourceTestFiles/resources-no-group.conf",
+        "ResourceTestFiles/resources-nonexistent.conf",
+        "ResourceTestFiles/resources-nothing.conf",
+        "ResourceTestFiles/resources-overriden.conf",
+        "ResourceTestFiles/resources-overriden-different.conf",
+        "ResourceTestFiles/resources-overriden-none.conf",
+        "ResourceTestFiles/resources-overriden-nonexistent-file.conf",
+    ],
+    deps = [
+        "@corrade//:TestSuite",
+        "//src/Corrade/Utility:UtilityTestLib",
+        ":configure",
+    ],
+)
+
+cc_library(
+    name = "ResourceTestDataLib",
+    srcs = [
+        ":ResourceTestData",
+        ":ResourceTestNothingData",
+    ],
+    deps = ["@corrade//:Utility"],
+    linkstatic = True,
+    local_defines = [
+        "CORRADE_AUTOMATIC_INITIALIZER=CORRADE_NOOP",
+        "CORRADE_AUTOMATIC_FINALIZER=CORRADE_NOOP",
+    ],
+)
+
+cc_test(
+    name = "UtilityResourceStaticTest",
+    srcs = ["ResourceStaticTest.cpp"],
+    data = [
+        "ResourceTestFiles/consequence.bin",
+        "ResourceTestFiles/predisposition.bin",
+    ],
+    deps = [
+        "@corrade//:TestSuite",
+        ":ResourceTestDataLib",
+        ":configure",
+    ],
+)
+
+# this one is tricky because bazel doesn't deal in shared libraries easily
+# NOTE: cc_binary with linkshared=True is a shared object but with one caveat:
+# it does not link automatically, have to include it manually in srcs
+cc_binary(
+    name = "UtilityGlobalStateAcrossLibrariesLibrary",
+    srcs = [
+        "GlobalStateAcrossLibrariesLibrary.cpp",
+        "GlobalStateAcrossLibrariesLibrary.h",
+        ":ResourceTestData",
+    ],
+    deps = [
+        "@corrade//:Utility",
+    ],
+    linkshared = True,
+)
+
+cc_test(
+    name = "UtilityGlobalStateAcrossLibrariesTest",
+    srcs = [
+        "GlobalStateAcrossLibrariesTest.cpp",
+        "GlobalStateAcrossLibrariesLibrary.h",
+        ":UtilityGlobalStateAcrossLibrariesLibrary",
+    ],
+    deps = ["@corrade//:TestSuite"],
+)
+
+# TODO: unix only
+cc_test(
+    name = "UtilityFileWatcherTest",
+    srcs = ["FileWatcherTest.cpp"],
+    deps = [
+        "@corrade//:TestSuite",
+        ":configure",
+    ],
+)
+
+cc_test(
+    name = "UtilityTweakableTest",
+    srcs = ["TweakableTest.cpp"],
+    deps = ["@corrade//:TestSuite"],
+)
+
+cc_test(
+    name = "UtilityTweakableIntegrationTest",
+    srcs = ["TweakableIntegrationTest.cpp"],
+    deps = [
+        "@corrade//:TestSuite",
+        ":configure",
+    ],
+    data = ["TweakableIntegrationTest.cpp"],
+)
