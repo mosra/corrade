@@ -23,8 +23,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load(":configure_header.bzl", "configure_header_toolchain")
-
 package(default_visibility = ["//visibility:public"])
 
 cc_binary(
@@ -32,17 +30,9 @@ cc_binary(
     srcs = ["configure_header.cpp"],
 )
 
-configure_header_toolchain(
-    name = "corrade_configure_header",
-    executable = ":configure_header",
-)
-
-toolchain_type(name = "configure_header_toolchain_type")
-
-toolchain(
-    name = "configure_header_toolchain",
-    toolchain = ":corrade_configure_header",
-    toolchain_type = ":configure_header_toolchain_type"
-)
+# TODO: corrade_configure_file instead of configure_file
+# TODO: corrade_add_test
+# TODO: corrade_add_plugin ?static?
+# TODO: corrade_add_resource
 
 

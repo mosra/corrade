@@ -24,41 +24,26 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-def _configure_header_toolchain_impl(ctx):
-    exe = ctx.attr.executable.files.to_list()[0]
-    return platform_common.ToolchainInfo(executable = exe)
-
-configure_header_toolchain = rule(
-    attrs = {
-        "executable": attr.label(
-            mandatory=True,
-            executable=True,
-            cfg="host",
-            allow_single_file=True),
-    },
-    implementation = _configure_header_toolchain_impl,
-)
-
 def _configure_header_impl(ctx):
-    cfg_file = ctx.toolchains["@corrade//bazel:configure_header_toolchain_type"].executable
     in_file = ctx.attr.src.files.to_list()[0]
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
     args = [
-        "{}".format(in_file.path),
-        "{}".format(out_file.path),
+        in_file.path,
+        out_file.path,
     ]
 
+    # ctx.expand_location below resolves $(location //pkg:target) strings
     for k, v in ctx.attr.defines.items():
         args.append("-D{}={}".format(k, ctx.expand_location(v)))
 
     ctx.actions.run(
-        mnemonic = "ConfigureFileDotH",
+        mnemonic = "CorradeConfigureHeader",
+        progress_message = "Configuring %s" % ctx.attr.output,
         inputs = depset([in_file]),
         outputs = [out_file],
         use_default_shell_env = True,
-        executable = cfg_file,
-        tools = [cfg_file],
+        executable = ctx.executable._tool,
         arguments = args,
         execution_requirements = {"block-network": ""},
     )
@@ -90,9 +75,11 @@ configure_header = rule(
     attrs = {
         "src": attr.label(
             mandatory = True,
-            allow_single_file=True,
+            allow_single_file = True,
             doc = ("Source .h.cmake file to configure"),
         ),
+        # NOTE: we can infer this from rule name instead
+        # but this replicates CMake command better.
         "output": attr.string(
             mandatory = True,
             doc = ("Output .h file to produce"),
@@ -109,11 +96,11 @@ configure_header = rule(
             ),
         ),
         "deps": attr.label_list(
-            allow_files=True,
+            allow_files = True,
             doc = ("Dependencies for $(location dep) expansion"),
         ),
         "local": attr.bool(
-            default=False,
+            default = False,
             doc = (
                 "Controls whether the target is findable locally with " +
                 "#include \"file.h\" or not.\n" +
@@ -125,9 +112,13 @@ configure_header = rule(
                 "repo root, hence the need for additional custom lookup.\n"
             ),
         ),
+        "_tool": attr.label(
+            doc = ("Private, touch at your own risk."),
+            executable = True,
+            cfg = "host",
+            allow_single_file = True,
+            default = Label("@corrade//bazel:configure_header"),
+        )
     },
     implementation = _configure_header_impl,
-    toolchains = [
-        "@corrade//bazel:configure_header_toolchain_type",
-    ],
 )

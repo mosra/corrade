@@ -57,6 +57,3 @@ rbe_autoconfig(
     repository = "google/rbe-ubuntu18-04",
     digest = "sha256:48b67b41118dbcdfc265e7335f454fbefa62681ab8d47200971fc7a52fb32054",
 )
-
-# TODO: move to defs of some sort
-register_toolchains("//bazel:configure_header_toolchain")
