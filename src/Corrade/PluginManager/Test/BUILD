@@ -25,12 +25,6 @@
 #
 load("@corrade//bazel:configure_header.bzl", "configure_header")
 load("@corrade//bazel:static_plugin.bzl", "static_plugin")
-load("@corrade//bazel:dynamic_plugin.bzl", "dynamic_plugin")
-
-package(default_visibility = ["//src/Corrade/PluginManager/Test:__subpackages__"])
-exports_files([
-    "AbstractAnimal.h",
-])
 
 configure_header(
     name = "configure",
@@ -38,16 +32,9 @@ configure_header(
     output = "configure.h",
     defines = {
         # TODO: fix
-        #"PLUGINS_DIR": "bazel-out/k8-fastbuild/bin/src/Corrade/PluginManager/Test",
         "PLUGINS_DIR": "",
-        #"DOG_PLUGIN_FILENAME": "$(rootpath //src/Corrade/PluginManager/Test/animals:Dog)",
-        #"DOGGO_PLUGIN_FILENAME": "$(rootpath //src/Corrade/PluginManager/Test/doggo:Doggo)",
-        #"PITBULL_PLUGIN_FILENAME": "$(rootpath //src/Corrade/PluginManager/Test/animals:PitBull)",
     },
     deps = [
-        "//src/Corrade/PluginManager/Test/animals:Dog",
-        "//src/Corrade/PluginManager/Test/animals:PitBull",
-        "//src/Corrade/PluginManager/Test/doggo:Doggo",
     ],
     local = True,
 )
@@ -75,6 +62,32 @@ static_plugin(
     ],
 )
 
+static_plugin(
+    name = "Canary",
+    metadata_file = "animals/Canary.conf",
+    srcs = [
+        "animals/Canary.cpp",
+        "//src/Corrade/PluginManager:PluginManagerTestLib",
+    ],
+    hdrs = [
+        "animals/Canary.h",
+        "AbstractAnimal.h",
+    ],
+    copts = ["-fPIC"],
+)
+
+static_plugin(
+    name = "Dird",
+    metadata_file = "animals/Dird.conf",
+    srcs = [
+        "animals/Dird.cpp",
+        "//src/Corrade/PluginManager:PluginManagerTestLib",
+    ],
+    hdrs = [
+        "AbstractAnimal.h",
+    ],
+)
+
 cc_test(
     name = "PluginManagerManagerTest",
     srcs = [
@@ -89,22 +102,14 @@ cc_test(
         "AbstractDeletable.h",
         "AbstractDisabledMetadata.h",
         "AbstractFood.h",
-        "wrong-metadata/WrongMetadata.h",
     ],
     deps = [
         "@corrade//:TestSuite",
         "//src/Corrade/PluginManager:PluginManagerTestLib",
-        "//src/Corrade/PluginManager/Test/animals:Canary",
+        ":Canary",
         ":CustomSuffixStatic",
         ":DisabledMetadataStatic",
         ":configure",
-    ],
-    data = [
-        "//src/Corrade/PluginManager/Test/animals:Snail",
-        "//src/Corrade/PluginManager/Test/animals:Dog",
-        "//src/Corrade/PluginManager/Test/animals:Bulldog",
-        "//src/Corrade/PluginManager/Test/animals:PitBull",
-        "//src/Corrade/PluginManager/Test/doggo:Doggo",
     ],
 )
 
@@ -118,8 +123,8 @@ cc_test(
     deps = [
         "@corrade//:TestSuite",
         "//src/Corrade/PluginManager:PluginManagerTestLib",
-        "//src/Corrade/PluginManager/Test/animals:Canary",
-        "//src/Corrade/PluginManager/Test/animals:Dird",
+        ":Canary",
+        ":Dird",
         ":configure",
     ],
 )
