@@ -26,7 +26,7 @@
 
 def _compile_resource_impl(ctx):
     conf = ctx.attr.conf.files.to_list()[0]
-    name = ctx.label.name
+    name = ctx.label.name if ctx.attr.override_name == "" else ctx.attr.override_name
 
     out_depends = ctx.actions.declare_file("resource_%s.depends" % name)
     ctx.actions.run_shell(
@@ -41,7 +41,7 @@ def _compile_resource_impl(ctx):
 
     rc_inputs = [conf]
     for target in ctx.attr.deps:
-      rc_inputs += target.files.to_list()
+        rc_inputs += target.files.to_list()
 
     out_cpp = ctx.actions.declare_file("resource_%s.cpp" % name)
     ctx.actions.run(
@@ -81,6 +81,12 @@ compile_resource = rule(
                 "Full list of files required to run this rule.\n" +
                 "Note that unlike cmake, bazel requires those to be " +
                 "declared explicitly."
+            ),
+        ),
+        "override_name": attr.string(
+            doc = (
+                "Optional override for name argument of corrade-rc, " +
+                "default name is taken from rule name."
             ),
         ),
         "_tool": attr.label(
