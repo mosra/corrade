@@ -67,4 +67,5 @@ cc_library(
     deps = [":PluginManager"],
     defines = ["CORRADE_GRACEFUL_ASSERT"],
     linkstatic = True,
+    visibility = ["//src/Corrade:__subpackages__"],
 )
