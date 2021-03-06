@@ -23,21 +23,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//bazel:configure_header.bzl", "configure_header")
 load("@corrade//bazel:static_plugin.bzl", "static_plugin")
-
-configure_header(
-    name = "configure",
-    src = "configure.h.cmake",
-    output = "configure.h",
-    defines = {
-        # TODO: fix
-        "PLUGINS_DIR": "",
-    },
-    deps = [
-    ],
-    local = True,
-)
 
 static_plugin(
     name = "CustomSuffixStatic",
@@ -88,6 +74,18 @@ static_plugin(
     ],
 )
 
+static_plugin(
+    name = "InitFiniStatic",
+    metadata_file = "dummy.conf",
+    srcs = [
+        "init-fini/InitFiniStatic.cpp",
+    ],
+    hdrs = [
+        "init-fini/InitFiniStatic.h",
+        "init-fini/InitFini.h",
+    ],
+)
+
 cc_test(
     name = "PluginManagerManagerTest",
     srcs = [
@@ -109,7 +107,16 @@ cc_test(
         ":Canary",
         ":CustomSuffixStatic",
         ":DisabledMetadataStatic",
-        ":configure",
+    ],
+)
+
+cc_test(
+    name = "PluginManagerInitFiniTest",
+    srcs = ["ManagerInitFiniTest.cpp"],
+    deps = [
+        "@corrade//:TestSuite",
+        "@corrade//:PluginManager",
+        ":InitFiniStatic",
     ],
 )
 
@@ -125,6 +132,53 @@ cc_test(
         "//src/Corrade/PluginManager:PluginManagerTestLib",
         ":Canary",
         ":Dird",
-        ":configure",
+    ],
+)
+
+cc_test(
+    name = "PluginManagerAbstractPluginTest",
+    srcs = [
+        "AbstractPluginTest.cpp",
+        "AbstractAnimal.cpp",
+        "AbstractAnimal.h",
+    ],
+    deps = [
+        "@corrade//:TestSuite",
+        "//src/Corrade/PluginManager:PluginManagerTestLib",
+        ":Canary",
+    ],
+)
+
+# this one is tricky because bazel doesn't deal in shared libraries easily
+# NOTE: cc_binary with linkshared=True is a shared object but with one caveat:
+# it does not link automatically, have to include it manually in srcs
+cc_binary(
+    name = "PluginManagerGlobalStateAcrossLibrariesLibrary",
+    srcs = [
+        "GlobalStateAcrossLibrariesLibrary.cpp",
+        "GlobalStateAcrossLibrariesLibrary.h",
+        "AbstractAnimal.cpp",
+        "AbstractAnimal.h",
+        ":Canary",
+    ],
+    deps = [
+        "//src/Corrade/PluginManager:PluginManagerTestLib",
+    ],
+    linkshared = True,
+)
+
+# TODO: platform compatibility
+cc_test(
+    name = "PluginManagerGlobalStateAcrossLi___Test",
+    srcs = [
+        "GlobalStateAcrossLibrariesTest.cpp",
+        "GlobalStateAcrossLibrariesLibrary.h",
+        "AbstractAnimal.cpp",
+        "AbstractAnimal.h",
+        ":PluginManagerGlobalStateAcrossLibrariesLibrary",
+    ],
+    deps = [
+        "@corrade//:TestSuite",
+        "//src/Corrade/PluginManager:PluginManagerTestLib",
     ],
 )
