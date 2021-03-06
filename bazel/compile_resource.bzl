@@ -67,7 +67,7 @@ def _compile_resource_impl(ctx):
     ]
 
 compile_resource = rule(
-    doc = ("Rule for invoking corrade-rc, similar to corrade_add_resource()\n"),
+    doc = ("Rule for invoking corrade-rc, similar to corrade_add_resource()"),
     attrs = {
         "conf": attr.label(
             mandatory = True,
