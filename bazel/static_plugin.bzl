@@ -44,7 +44,7 @@ def _write_conf_impl(ctx):
         conf_content += "alias=%s.%s" % (name, metadata.extension)
 
     ctx.actions.run_shell(
-        mnemonic = "CorradeCompileDepends",
+        mnemonic = "CorradeWriteConf",
         inputs = [],
         outputs = [out],
         command = "echo -e '{}' > '{}'".format(
