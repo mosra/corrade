@@ -23,10 +23,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//bazel:configure_header.bzl", "configure_header")
-load("@corrade//bazel:compile_resource.bzl", "compile_resource")
+load("@corrade//:index.bzl", "corrade_configure_header", "corrade_resource")
 
-configure_header(
+corrade_configure_header(
     name = "configure",
     src = "configure.h.cmake",
     output = "configure.h",
@@ -216,7 +215,7 @@ cc_test(
     ],
 )
 
-compile_resource(
+corrade_resource(
     name = "ResourceTestData",
     conf = "ResourceTestFiles/resources.conf",
     deps = [
@@ -225,7 +224,7 @@ compile_resource(
     ],
 )
 
-compile_resource(
+corrade_resource(
     name = "ResourceTestEmptyFileData",
     conf = "ResourceTestFiles/resources-empty-file.conf",
     deps = [
@@ -233,7 +232,7 @@ compile_resource(
     ],
 )
 
-compile_resource(
+corrade_resource(
     name = "ResourceTestNothingData",
     conf = "ResourceTestFiles/resources-nothing.conf",
     deps = [],

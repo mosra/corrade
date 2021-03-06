@@ -23,39 +23,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//:index.bzl", "corrade_configure_header")
+load("@corrade//bazel:compile_resource.bzl", _compile_resource = "compile_resource")
+load("@corrade//bazel:configure_header.bzl", _configure_header = "configure_header")
+load("@corrade//bazel:static_plugin.bzl", _static_plugin = "static_plugin")
 
-exports_files([
-    "Corrade.h",
-    "Corrade.cpp",
-])
-
-corrade_configure_header(
-    name = "version",
-    src = "version.h.cmake",
-    output = "version.h",
-    defines = {
-        # just some sample data i suppose
-        "CORRADE_VERSION_YEAR": "2020",
-        "CORRADE_VERSION_MONTH": "6",
-        "CORRADE_VERSION_COMMIT": " 252",
-        "CORRADE_VERSION_HASH": "b329d056",
-        "CORRADE_VERSION_STRING": "v2020.06-252-ga1038a9b",
-    },
-    visibility = ["//:__pkg__"]
-)
-
-corrade_configure_header(
-    name = "configure",
-    src = "configure.h.cmake",
-    output = "configure.h",
-    defines = {
-        "CORRADE_BUILD_DEPRECATED": "",
-        "CORRADE_BUILD_STATIC": "",
-        "CORRADE_BUILD_STATIC_UNIQUE_GLOBALS": "",
-        "CORRADE_BUILD_MULTITHREADED": "",
-        "CORRADE_TARGET_UNIX": "",
-        "CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT": "",
-    },
-    visibility = ["//:__pkg__"]
-)
+corrade_resource = _compile_resource
+corrade_configure_header = _configure_header
+corrade_static_plugin = _static_plugin

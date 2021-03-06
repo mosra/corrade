@@ -23,7 +23,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//bazel:compile_resource.bzl", "compile_resource")
+load(":compile_resource.bzl", "compile_resource")
 
 # NOTE: requires bash; here we assume that anyone smart enough to use bazel
 # on windows have also read their manual on how to install it with MSYS2

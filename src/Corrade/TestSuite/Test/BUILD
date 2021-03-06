@@ -23,9 +23,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//bazel:configure_header.bzl", "configure_header")
+load("@corrade//:index.bzl", "corrade_configure_header")
 
-configure_header(
+corrade_configure_header(
     name = "configure",
     src = "configure.h.cmake",
     output = "configure.h",

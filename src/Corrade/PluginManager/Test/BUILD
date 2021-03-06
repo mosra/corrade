@@ -23,9 +23,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//bazel:static_plugin.bzl", "static_plugin")
+load("@corrade//:index.bzl", "corrade_static_plugin")
 
-static_plugin(
+corrade_static_plugin(
     name = "CustomSuffixStatic",
     metadata_file = "custom-suffix/CustomSuffixStatic.modconf",
     srcs = [
@@ -37,7 +37,7 @@ static_plugin(
     ],
 )
 
-static_plugin(
+corrade_static_plugin(
     name = "DisabledMetadataStatic",
     srcs = [
         "disabled-metadata/DisabledMetadataStatic.cpp",
@@ -48,7 +48,7 @@ static_plugin(
     ],
 )
 
-static_plugin(
+corrade_static_plugin(
     name = "Canary",
     metadata_file = "animals/Canary.conf",
     srcs = [
@@ -62,7 +62,7 @@ static_plugin(
     copts = ["-fPIC"],
 )
 
-static_plugin(
+corrade_static_plugin(
     name = "Dird",
     metadata_file = "animals/Dird.conf",
     srcs = [
@@ -74,7 +74,7 @@ static_plugin(
     ],
 )
 
-static_plugin(
+corrade_static_plugin(
     name = "InitFiniStatic",
     metadata_file = "dummy.conf",
     srcs = [
