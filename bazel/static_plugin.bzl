@@ -25,9 +25,8 @@
 #
 load("@corrade//bazel:compile_resource.bzl", "compile_resource")
 
-# NOTE: it would perhaps be better to use @bazel_skylib's write_file rule
-# instead of making up our own, but we also need to resolve source metadata
-# file in the process, that calls for writing our own rule instead
+# NOTE: requires bash; here we assume that anyone smart enough to use bazel
+# on windows have also read their manual on how to install it with MSYS2
 def _write_conf_impl(ctx):
     name = ctx.attr.plugin_name
     conf_content = "group=CorradeStaticPlugin_%s\n" % name
@@ -67,7 +66,11 @@ _write_conf = rule(
     implementation = _write_conf_impl,
 )
 
-# TODO: document
+"""             Macro for declaring corrade static plugin             """
+""" Arguments:                                                        """
+"""   - name                final library label                       """
+"""   - metadata_file       same as in cmake                          """
+"""   - resources           labels/files to pass to resource compiler """
 def static_plugin(name, metadata_file = None, resources = [],
                   srcs = [], copts = [], deps = [], local_defines = [],
                   **kwargs):

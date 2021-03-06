@@ -24,6 +24,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# NOTE: requires bash. here we assume that anyone smart enough to use bazel
+# on windows have also read their manual on how to install it with MSYS2
 def _compile_resource_impl(ctx):
     conf = ctx.file.conf
     name = ctx.label.name if ctx.attr.override_name == "" else ctx.attr.override_name
