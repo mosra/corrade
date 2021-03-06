@@ -37,6 +37,8 @@ def _configure_header_impl(ctx):
     for k, v in ctx.attr.defines.items():
         args.append("-D{}={}".format(k, ctx.expand_location(v)))
 
+    # NOTE: it would be amazing to use ctx.actions.expand_template instead
+    # but it does not support wildcards and we do need them for stripping
     ctx.actions.run(
         mnemonic = "CorradeConfigureHeader",
         progress_message = "Configuring %s" % ctx.attr.output,
