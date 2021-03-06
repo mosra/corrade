@@ -103,7 +103,7 @@ def static_plugin(name, metadata_file = None, resources = [],
         copts = copts + ["-std=c++11"],
         linkstatic = True,
         srcs = srcs + [":%s" % resource],
-        deps = deps + ["@corrade//:PluginManager"],
+        deps = deps + ["@corrade//src/Corrade/PluginManager:headers"],
         local_defines = local_defines + ["CORRADE_STATIC_PLUGIN"],
         **kwargs
     )

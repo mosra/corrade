@@ -31,9 +31,27 @@ configure_header(
     name = "configure",
     src = "configure.h.cmake",
     output = "configure.h",
+    # TODO: this is selectable
     defines = {
         "PLUGIN_FILENAME_SUFFIX": ".so",
     },
+)
+
+cc_library(
+    name = "headers",
+    hdrs = [
+        "AbstractPlugin.h",
+        "AbstractManager.h",
+        "AbstractManagingPlugin.h",
+        "Manager.h",
+        "PluginManager.h",
+        "PluginMetadata.h",
+        "visibility.h",
+    ],
+    deps = [
+        "//src/Corrade/Utility:headers",
+        ":configure",
+    ],
 )
 
 cc_library(
@@ -45,18 +63,9 @@ cc_library(
         "AbstractManager.cpp",
         "//src/Corrade/Containers:Reference.h",
     ],
-    hdrs = [
-        "AbstractPlugin.h",
-        "AbstractManager.h",
-        "AbstractManagingPlugin.h",
-        "Manager.h",
-        "PluginManager.h",
-        "PluginMetadata.h",
-        "visibility.h",
-    ],
     deps = [
         "@corrade//:Utility",
-        ":configure",
+        ":headers",
     ],
     linkstatic = True,
 )

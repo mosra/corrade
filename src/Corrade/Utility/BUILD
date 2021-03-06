@@ -26,34 +26,7 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "Utility",
-    srcs = [
-        # UTILITY SRCS
-        "Debug.cpp",
-        "Directory.cpp",
-        "Configuration.cpp",
-        "ConfigurationValue.cpp",
-        "MurmurHash2.cpp",
-        "Sha1.cpp",
-        "System.cpp",
-        # GRACEFUL ASSERT
-        "Algorithms.cpp",
-        "Arguments.cpp",
-        "ConfigurationGroup.cpp",
-        "Format.cpp",
-        "Resource.cpp",
-        "Implementation/Resource.h",
-        "String.cpp",
-        "Unicode.cpp",
-        "//src/Corrade/Containers:ArrayTuple.cpp",
-        "//src/Corrade/Containers:String.cpp",
-        "//src/Corrade/Containers:StringView.cpp",
-        # TODO: this is selectable
-        "FileWatcher.cpp",
-        "Tweakable.cpp",
-        "Implementation/tweakable.h",
-        "TweakableParser.cpp",
-    ],
+    name = "headers",
     hdrs = [
         "Algorithms.h",
         "Arguments.h",
@@ -91,15 +64,45 @@ cc_library(
         "Tweakable.h",
         "TweakableParser.h",
     ],
-    linkstatic = True,
-    # TODO: this is selectable
-    linkopts = [
-        "-ldl",
-    ],
     deps = [
         "@corrade//:Main",
         "//src/Corrade/Containers:headers",
     ],
+)
+
+cc_library(
+    name = "Utility",
+    srcs = [
+        # UTILITY SRCS
+        "Debug.cpp",
+        "Directory.cpp",
+        "Configuration.cpp",
+        "ConfigurationValue.cpp",
+        "MurmurHash2.cpp",
+        "Sha1.cpp",
+        "System.cpp",
+        # GRACEFUL ASSERT
+        "Algorithms.cpp",
+        "Arguments.cpp",
+        "ConfigurationGroup.cpp",
+        "Format.cpp",
+        "Resource.cpp",
+        "Implementation/Resource.h",
+        "String.cpp",
+        "Unicode.cpp",
+        "//src/Corrade/Containers:ArrayTuple.cpp",
+        "//src/Corrade/Containers:String.cpp",
+        "//src/Corrade/Containers:StringView.cpp",
+        # TODO: this is selectable
+        "FileWatcher.cpp",
+        "Tweakable.cpp",
+        "Implementation/tweakable.h",
+        "TweakableParser.cpp",
+    ],
+    linkstatic = True,
+    # TODO: this is selectable
+    linkopts = ["-ldl"],
+    deps = [":headers"],
 )
 
 cc_library(
