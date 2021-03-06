@@ -71,7 +71,8 @@ _write_conf = rule(
 
 # TODO: document
 def static_plugin(name, metadata_file = None, resources = [],
-                  srcs = [], deps = [], local_defines = [], **kwargs):
+                  srcs = [], copts = [], deps = [], local_defines = [],
+                  **kwargs):
     conf = "%s_static_plugin_conf" % name
     resource = "%s_static_plugin_resource" % name
 
@@ -95,7 +96,7 @@ def static_plugin(name, metadata_file = None, resources = [],
 
     native.cc_library(
         name = name,
-        copts = ["-std=c++11"],
+        copts = copts + ["-std=c++11"],
         linkstatic = True,
         srcs = srcs + [":%s" % resource],
         deps = deps + ["@corrade//:PluginManager"],
