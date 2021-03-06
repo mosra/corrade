@@ -95,7 +95,7 @@ _assemble_plugin = rule(
 # NOTE: doesn't work.
 # There is something in bazel pathing logic / dynamic plugins logic
 # that does not go together
-def dynamic_plugin(name, metadata_file = None, srcs = [], hdrs = [],
+def _dynamic_plugin(name, metadata_file = None, srcs = [], hdrs = [],
                    copts = [], deps = [], local_defines = [],
                    **kwargs):
     conf = "%s_dynamic_plugin_conf" % name
