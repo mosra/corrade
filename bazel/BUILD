@@ -27,12 +27,5 @@ package(default_visibility = ["//visibility:public"])
 
 cc_binary(
     name = "configure_header",
-    srcs = ["configure_header.cpp"],
+    srcs = ["src/configure_header.cpp"],
 )
-
-# TODO: corrade_configure_file instead of configure_file
-# TODO: corrade_add_test
-# TODO: corrade_add_plugin ?static?
-# TODO: corrade_add_resource
-
-
