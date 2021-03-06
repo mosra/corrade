@@ -25,7 +25,7 @@
 #
 
 def _configure_header_impl(ctx):
-    in_file = ctx.attr.src.files.to_list()[0]
+    in_file = ctx.file.src
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
     args = [
