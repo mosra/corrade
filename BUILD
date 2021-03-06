@@ -47,6 +47,11 @@ alias(
 )
 
 alias(
+    name = "PluginManager",
+    actual = "//src/Corrade/PluginManager:PluginManager",
+)
+
+alias(
     name = "TestSuite",
     actual = "//src/Corrade/TestSuite:TestSuite",
 )
