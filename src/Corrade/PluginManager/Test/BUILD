@@ -32,9 +32,9 @@ corrade_configure_header(
     output = "configure.h",
     defines = {
         "PLUGINS_DIR": "plugins",
-        "DOG_PLUGIN_FILENAME": "$(location :Dog__bin)",
-        "DOGGO_PLUGIN_FILENAME": "$(location :Doggo__bin)",
-        "PITBULL_PLUGIN_FILENAME": "$(location :PitBull__bin)",
+        "DOG_PLUGIN_FILENAME": "$(rootpath :Dog__bin)",
+        "DOGGO_PLUGIN_FILENAME": "$(rootpath :Doggo__bin)",
+        "PITBULL_PLUGIN_FILENAME": "$(rootpath :PitBull__bin)",
     },
     deps = [
         ":Dog__bin",
@@ -375,18 +375,18 @@ cc_library(
 )
 
 # TODO: platform compatibility
-cc_test(
-    name = "PluginManagerGlobalStateAcrossLi___Test",
-    srcs = [
-        "GlobalStateAcrossLibrariesTest.cpp",
-        "GlobalStateAcrossLibrariesLibrary.h",
-        "AbstractAnimal.cpp",
-        "AbstractAnimal.h",
-    ],
-    deps = [
-        ":PluginManagerGlobalStateAcrossLibrariesLibrary",
-        "@corrade//:TestSuite",
-        "//src/Corrade/PluginManager:PluginManagerTestLib",
-        ":configure",
-    ],
-)
+#cc_test(
+#    name = "PluginManagerGlobalStateAcrossLi___Test",
+#    srcs = [
+#        "GlobalStateAcrossLibrariesTest.cpp",
+#        "GlobalStateAcrossLibrariesLibrary.h",
+#        "AbstractAnimal.cpp",
+#        "AbstractAnimal.h",
+#    ],
+#    deps = [
+#        ":PluginManagerGlobalStateAcrossLibrariesLibrary",
+#        "@corrade//:TestSuite",
+#        "//src/Corrade/PluginManager:PluginManagerTestLib",
+#        ":configure",
+#    ],
+#)

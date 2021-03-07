@@ -30,9 +30,9 @@ corrade_configure_header(
     src = "configure.h.cmake",
     output = "configure.h",
     defines = {
-        "RELATIVE_TEST_DIR": "$(execpath .)",
-        "ABSOLUTE_TEST_DIR": "$(execpath .)/BundledFilesTestFiles",
-        "TESTER_TEST_DIR": "$(execpath .)/TesterTestFiles",
+        "RELATIVE_TEST_DIR": "$(rootpath .)",
+        "ABSOLUTE_TEST_DIR": "$(rootpath .)/BundledFilesTestFiles",
+        "TESTER_TEST_DIR": "$(rootpath .)/TesterTestFiles",
     },
     deps = ["."],
     local = True,

@@ -30,8 +30,8 @@ corrade_configure_header(
     src = "configure.h.cmake",
     output = "configure.h",
     defines = {
-        "FILETEST_DIR": "$(execpath FileTestFiles)",
-        "FILETEST_SAVE_DIR": "$(execpath FileTestFiles)/write",
+        "FILETEST_DIR": "$(rootpath FileTestFiles)",
+        "FILETEST_SAVE_DIR": "$(rootpath FileTestFiles)/write",
     },
     deps = ["FileTestFiles"],
     local = True,
