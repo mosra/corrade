@@ -23,8 +23,12 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//:index.bzl", "corrade_configure_header", "corrade_static_plugin")
-load("@corrade//bazel:dynamic_plugin.bzl", "dynamic_plugin")
+load(
+    "@corrade//:index.bzl",
+    "corrade_configure_header",
+    "corrade_static_plugin",
+    "corrade_dynamic_plugin",
+)
 
 corrade_configure_header(
     name = "configure",
@@ -109,7 +113,7 @@ corrade_static_plugin(
     ],
 )
 
-[dynamic_plugin(
+[corrade_dynamic_plugin(
     name = "%s" % dog,
     metadata_file = "animals/%s.conf" % dog,
     subdir = "plugins/animals",
@@ -126,7 +130,7 @@ for dog in [
     "PitBull",
 ]]
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "Snail",
     metadata_file = "animals/Snail.conf",
     subdir = "plugins/animals",
@@ -137,7 +141,7 @@ dynamic_plugin(
     deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
 )
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "CustomSuffix",
     metadata_file = "custom-suffix/CustomSuffix.modconf",
     subdir = "plugins/custom-suffix",
@@ -148,7 +152,7 @@ dynamic_plugin(
     override_suffix = "mod",
 )
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "Deletable",
     metadata_file = "deletable/Deletable.conf",
     subdir = "plugins/deletable",
@@ -158,7 +162,7 @@ dynamic_plugin(
     ],
 )
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "DisabledMetadata",
     subdir = "plugins/disabled-metadata",
     srcs = [
@@ -167,7 +171,7 @@ dynamic_plugin(
     ],
 )
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "Doggo",
     metadata_file = "doggo/Doggo.conf",
     subdir = "plugins/doggo",
@@ -178,7 +182,7 @@ dynamic_plugin(
     deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
 )
 
-[dynamic_plugin(
+[corrade_dynamic_plugin(
     name = "%s" % food,
     metadata_file = "food/%s.conf" % food,
     subdir = "plugins/food",
@@ -195,7 +199,7 @@ for food in [
     "HotDogWithSnail",
 ]]
 
-[dynamic_plugin(
+[corrade_dynamic_plugin(
     name = "%s" % food,
     metadata_file = "food/%s.conf" % food,
     subdir = "plugins/food",
@@ -210,7 +214,7 @@ for food in [
     "RottenTomato",
 ]]
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "InitFiniDynamic",
     metadata_file = "init-fini/InitFiniDynamic.conf",
     subdir = "plugins/init-fini",
@@ -225,7 +229,7 @@ dynamic_plugin(
     ]
 )
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "WrongMetadata",
     metadata_file = "wrong-metadata/WrongMetadata.conf",
     subdir = "plugins/wrong-metadata",
@@ -238,7 +242,7 @@ dynamic_plugin(
     ]
 )
 
-[dynamic_plugin(
+[corrade_dynamic_plugin(
     name = "%s" % wrong,
     metadata_file = "dummy.conf",
     subdir = "plugins/wrong",
@@ -254,7 +258,7 @@ for wrong in [
     "NoPluginVersion",
 ]]
 
-dynamic_plugin(
+corrade_dynamic_plugin(
     name = "UnresolvedReference",
     metadata_file = "dummy.conf",
     subdir = "plugins/wrong",

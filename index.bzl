@@ -26,7 +26,9 @@
 load("@corrade//bazel:compile_resource.bzl", _compile_resource = "compile_resource")
 load("@corrade//bazel:configure_header.bzl", _configure_header = "configure_header")
 load("@corrade//bazel:static_plugin.bzl", _static_plugin = "static_plugin")
+load("@corrade//bazel:dynamic_plugin.bzl", _dynamic_plugin = "dynamic_plugin")
 
 corrade_resource = _compile_resource
 corrade_configure_header = _configure_header
 corrade_static_plugin = _static_plugin
+corrade_dynamic_plugin = _dynamic_plugin
