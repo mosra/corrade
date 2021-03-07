@@ -152,7 +152,6 @@ def dynamic_plugin(name, metadata_file = None, subdir = "",
         copts = copts + ["-std=c++11"],
         srcs = srcs,
         linkshared = True,
-        linkstatic = False,
         deps = deps + ["@corrade//src/Corrade/PluginManager:headers"],
         **kwargs,
     )
