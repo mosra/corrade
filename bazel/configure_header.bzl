@@ -28,14 +28,13 @@ def _configure_header_impl(ctx):
     in_file = ctx.file.src
     out_file = ctx.actions.declare_file(ctx.attr.output)
 
-    args = [
-        in_file.path,
-        out_file.path,
-    ]
-
-    # ctx.expand_location below resolves $(location //pkg:target) strings
-    for k, v in ctx.attr.defines.items():
-        args.append("-D{}={}".format(k, ctx.expand_location(v)))
+    args = ctx.actions.args()
+    args.add_all([in_file.path, out_file.path])
+    args.add_all([
+        # ctx.expand_location below resolves $(location //pkg:target) strings
+        "-D{}={}".format(k, ctx.expand_location(v))
+        for k, v in ctx.attr.defines.items()
+    ])
 
     # NOTE: it would be amazing to use ctx.actions.expand_template instead
     # but it does not support wildcards and we do need them for stripping
@@ -45,7 +44,7 @@ def _configure_header_impl(ctx):
         inputs = depset([in_file]),
         outputs = [out_file],
         executable = ctx.executable._tool,
-        arguments = args,
+        arguments = [args],
         execution_requirements = {"block-network": ""},
     )
 
