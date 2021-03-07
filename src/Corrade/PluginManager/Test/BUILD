@@ -145,7 +145,7 @@ dynamic_plugin(
         "custom-suffix/CustomSuffix.cpp",
         "AbstractCustomSuffix.h",
     ],
-    override_bin_suffix = "mod",
+    override_suffix = "mod",
 )
 
 dynamic_plugin(

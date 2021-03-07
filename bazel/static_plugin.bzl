@@ -25,6 +25,56 @@
 #
 load(":compile_resource.bzl", "compile_resource")
 
+"""             Macro for declaring corrade static plugin             """
+""" Arguments:                                                        """
+"""   - name                final library label                       """
+"""   - metadata_file       same as in cmake                          """
+"""   - resources           labels/files to pass to resource compiler """
+"""   - **kwargs            everything else gets passed to resulting  """
+"""                         cc_library inside macro                   """
+def static_plugin(name, metadata_file = None, resources = [], **kwargs):
+    conf = "%s_static_plugin_conf" % name
+    resource = "%s_static_plugin_resource" % name
+
+    srcs = kwargs.pop("srcs", default = [])
+    copts = kwargs.pop("copts", default = [])
+    deps = kwargs.pop("deps", default = [])
+    local_defines = kwargs.pop("local_defines", default = [])
+    # use alwayslink by default
+    alwayslink = kwargs.pop("alwayslink", default = True)
+
+    if kwargs.pop("linkstatic", default = None) != None:
+        fail("corrade_static_plugin is static, do not touch this field")
+
+    _write_conf(
+        name = conf,
+        plugin_name = name,
+        metadata = metadata_file,
+    )
+
+    rc_deps = []
+    rc_deps += resources
+    if metadata_file:
+        rc_deps += [metadata_file]
+
+    compile_resource(
+        name = resource,
+        conf = ":%s" % conf,
+        deps = rc_deps,
+        override_name = name,
+    )
+
+    native.cc_library(
+        name = name,
+        copts = copts + ["-std=c++11"],
+        linkstatic = True,
+        alwayslink = alwayslink,
+        srcs = srcs + [":%s" % resource],
+        deps = deps + ["@corrade//src/Corrade/PluginManager:headers"],
+        local_defines = local_defines + ["CORRADE_STATIC_PLUGIN"],
+        **kwargs
+    )
+
 # NOTE: requires bash; here we assume that anyone smart enough to use bazel
 # on windows have also read their manual on how to install it with MSYS2
 def _write_conf_impl(ctx):
@@ -68,43 +118,3 @@ _write_conf = rule(
     },
     implementation = _write_conf_impl,
 )
-
-"""             Macro for declaring corrade static plugin             """
-""" Arguments:                                                        """
-"""   - name                final library label                       """
-"""   - metadata_file       same as in cmake                          """
-"""   - resources           labels/files to pass to resource compiler """
-def static_plugin(name, metadata_file = None, resources = [],
-                  srcs = [], copts = [], deps = [], local_defines = [],
-                  **kwargs):
-    conf = "%s_static_plugin_conf" % name
-    resource = "%s_static_plugin_resource" % name
-
-    _write_conf(
-        name = conf,
-        plugin_name = name,
-        metadata = metadata_file,
-    )
-
-    rc_deps = []
-    rc_deps += resources
-    if metadata_file:
-        rc_deps += [metadata_file]
-
-    compile_resource(
-        name = resource,
-        conf = ":%s" % conf,
-        deps = rc_deps,
-        override_name = name,
-    )
-
-    native.cc_library(
-        name = name,
-        copts = copts + ["-std=c++11"],
-        linkstatic = True,
-        alwayslink = True,
-        srcs = srcs + [":%s" % resource],
-        deps = deps + ["@corrade//src/Corrade/PluginManager:headers"],
-        local_defines = local_defines + ["CORRADE_STATIC_PLUGIN"],
-        **kwargs
-    )
