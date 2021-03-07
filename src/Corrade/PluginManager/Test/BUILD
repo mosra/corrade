@@ -104,6 +104,9 @@ corrade_static_plugin(
         "init-fini/InitFiniStatic.h",
         "init-fini/InitFini.h",
     ],
+    deps = [
+        ":configure",
+    ],
 )
 
 [dynamic_plugin(
@@ -217,8 +220,8 @@ dynamic_plugin(
         "init-fini/InitFiniStatic.h",
     ],
     deps = [
-        ":configure",
         "@corrade//:PluginManager",
+        ":configure",
     ]
 )
 
@@ -310,12 +313,15 @@ cc_test(
 )
 
 cc_test(
-    name = "PluginManagerInitFiniTest",
+    name = "PluginManagerManagerInitFiniTest",
     srcs = ["ManagerInitFiniTest.cpp"],
     deps = [
         "@corrade//:TestSuite",
         "@corrade//:PluginManager",
         ":InitFiniStatic",
+    ],
+    data = [
+        ":InitFiniDynamic",
     ],
 )
 
@@ -331,6 +337,7 @@ cc_test(
         "//src/Corrade/PluginManager:PluginManagerTestLib",
         ":Canary",
         ":Dird",
+        ":configure",
     ],
 )
 
@@ -345,6 +352,7 @@ cc_test(
         "@corrade//:TestSuite",
         "//src/Corrade/PluginManager:PluginManagerTestLib",
         ":Canary",
+        ":configure",
     ],
 )
 
@@ -356,12 +364,13 @@ cc_binary(
     srcs = [
         "GlobalStateAcrossLibrariesLibrary.cpp",
         "GlobalStateAcrossLibrariesLibrary.h",
-        "AbstractAnimal.cpp",
         "AbstractAnimal.h",
         ":Canary",
+        ":configure",
     ],
     deps = [
         "//src/Corrade/PluginManager:PluginManagerTestLib",
+        ":configure",
     ],
     linkshared = True,
 )
@@ -379,5 +388,6 @@ cc_test(
     deps = [
         "@corrade//:TestSuite",
         "//src/Corrade/PluginManager:PluginManagerTestLib",
+        ":configure",
     ],
 )
