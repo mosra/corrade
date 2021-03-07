@@ -55,7 +55,7 @@ corrade_configure_header(
         "CORRADE_BUILD_STATIC_UNIQUE_GLOBALS": "",
         "CORRADE_BUILD_MULTITHREADED": "",
         "CORRADE_TARGET_UNIX": "",
-        "CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT": "",
+        #"CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT": "",
     },
     visibility = ["//:__pkg__"]
 )
