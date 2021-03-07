@@ -32,14 +32,14 @@ corrade_configure_header(
     output = "configure.h",
     defines = {
         "PLUGINS_DIR": "plugins",
-        "DOG_PLUGIN_FILENAME": "$(rootpath :Dog__bin)",
-        "DOGGO_PLUGIN_FILENAME": "$(rootpath :Doggo__bin)",
-        "PITBULL_PLUGIN_FILENAME": "$(rootpath :PitBull__bin)",
+        "DOG_PLUGIN_FILENAME": "$(rootpath :Dog)",
+        "DOGGO_PLUGIN_FILENAME": "$(rootpath :Doggo)",
+        "PITBULL_PLUGIN_FILENAME": "$(rootpath :PitBull)",
     },
     deps = [
-        ":Dog__bin",
-        ":Doggo__bin",
-        ":PitBull__bin",
+        ":Dog",
+        ":Doggo",
+        ":PitBull",
     ],
     local = True,
 )

@@ -88,9 +88,8 @@ def _assemble_plugin_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset(outputs),
+            files = depset([out_bin]),
             runfiles = ctx.runfiles(
-                files = outputs,
                 transitive_files = depset(outputs),
             )
         ),
@@ -107,27 +106,8 @@ _assemble_plugin = rule(
     implementation = _assemble_plugin_impl,
 )
 
-def _subtarget_impl(ctx):
-    out = depset([ctx.files.input[ctx.attr.which]])
-    return [
-        DefaultInfo(
-            files = out,
-            runfiles = ctx.runfiles(transitive_files = out)
-        ),
-    ]
-
-_subtarget = rule(
-    doc = ("Helper rule to provide aliases"),
-    attrs = {
-        "input": attr.label(allow_files = True),
-        "which": attr.int(mandatory = True),
-    },
-    implementation = _subtarget_impl,
-)
-
-# NOTE: doesn't work.
-# There is something in bazel pathing logic / dynamic plugins logic
-# that does not go together
+# NOTE: doesn't work with static builds correctly - shared global symbols
+# are not correctly shared, and each binary keeps its own copy
 def dynamic_plugin(name, metadata_file = None, subdir = "",
                    override_bin_suffix = "", srcs = [], hdrs = None,
                    copts = [], deps = [], local_defines = [],
@@ -146,8 +126,9 @@ def dynamic_plugin(name, metadata_file = None, subdir = "",
             metadata = metadata_file,
         )
 
+    lib = "%s_dynamic_plugin" % name
     native.cc_binary(
-        name = "%s_dynamic_plugin" % name,
+        name = lib,
         local_defines = local_defines + ["CORRADE_DYNAMIC_PLUGIN"],
         copts = copts + ["-std=c++11"],
         srcs = srcs,
@@ -158,21 +139,8 @@ def dynamic_plugin(name, metadata_file = None, subdir = "",
 
     _assemble_plugin(
         name = name,
-        binary = ":%s_dynamic_plugin" % name,
+        binary = ":%s" % lib,
         metadata = ":%s" % conf if metadata_file else None,
         subdir = subdir,
         override_bin_suffix = override_bin_suffix,
     )
-
-    _subtarget(
-        name = "%s__bin" % name,
-        input = name,
-        which = 0,
-    )
-    if metadata_file:
-        _subtarget(
-            name = "%s__conf" % name,
-            input = name,
-            which = 1,
-        )
-
