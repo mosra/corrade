@@ -33,7 +33,7 @@ corrade_configure_header(
     output = "configure.h",
     # TODO: this is selectable
     defines = {
-        "PLUGIN_FILENAME_SUFFIX": ".so",
+        "CMAKE_SHARED_MODULE_SUFFIX": ".so",
     },
 )
 
