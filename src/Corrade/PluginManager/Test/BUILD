@@ -359,20 +359,19 @@ cc_test(
 # this one is tricky because bazel doesn't deal in shared libraries easily
 # NOTE: cc_binary with linkshared=True is a shared object but with one caveat:
 # it does not link automatically, have to include it manually in srcs
-cc_binary(
+cc_library(
     name = "PluginManagerGlobalStateAcrossLibrariesLibrary",
     srcs = [
         "GlobalStateAcrossLibrariesLibrary.cpp",
         "GlobalStateAcrossLibrariesLibrary.h",
         "AbstractAnimal.h",
-        ":Canary",
         ":configure",
+        ":Canary",
     ],
     deps = [
         "//src/Corrade/PluginManager:PluginManagerTestLib",
         ":configure",
     ],
-    linkshared = True,
 )
 
 # TODO: platform compatibility
@@ -383,9 +382,9 @@ cc_test(
         "GlobalStateAcrossLibrariesLibrary.h",
         "AbstractAnimal.cpp",
         "AbstractAnimal.h",
-        ":PluginManagerGlobalStateAcrossLibrariesLibrary",
     ],
     deps = [
+        ":PluginManagerGlobalStateAcrossLibrariesLibrary",
         "@corrade//:TestSuite",
         "//src/Corrade/PluginManager:PluginManagerTestLib",
         ":configure",
