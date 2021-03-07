@@ -59,27 +59,40 @@ _copy_conf = rule(
 )
 
 def _assemble_plugin_impl(ctx):
-    binary = ctx.file.binary
+    dir = ctx.attr.subdir
+    name = ctx.label.name
+    bin = ctx.file.binary
+    conf = ctx.file.metadata
+    override = ctx.attr.override_bin_suffix
+    ext = bin.extension if not override else override
 
-    out = ctx.actions.declare_file("%s.%s" % (ctx.label.name, binary.extension))
-    ctx.actions.run_shell(
-        mnemonic = "CorradeAssembleDynamicPlugin",
-        inputs = [binary],
-        outputs = [out],
-        command = "cp '{}' '{}'".format(
-            binary.path,
-            out.path,
-        ),
-    )
+    out_bin = ctx.actions.declare_file("%s/%s.%s" % (dir, name, ext))
 
-    transitive = [out]
-    if ctx.file.metadata:
-        transitive.append(ctx.file.metadata)
+    inputs = [(bin, out_bin)]
+    outputs = [out_bin]
+    if conf:
+        out_conf = ctx.actions.declare_file("%s/%s.%s" % (dir, name, conf.extension))
+        inputs.append((conf, out_conf))
+        outputs.append(out_conf)
+
+    for _in, _out in inputs:
+        ctx.actions.run_shell(
+            mnemonic = "CorradeAssembleDynamicPlugin",
+            inputs = [_in],
+            outputs = [_out],
+            command = "cp '{}' '{}'".format(
+                _in.path,
+                _out.path,
+            ),
+        )
 
     return [
         DefaultInfo(
-            files = depset([out]),
-            runfiles = ctx.runfiles(transitive_files = depset(transitive))
+            files = depset(outputs),
+            runfiles = ctx.runfiles(
+                files = outputs,
+                transitive_files = depset(outputs),
+            )
         ),
     ]
 
@@ -87,17 +100,44 @@ _assemble_plugin = rule(
     doc = ("Internal rule to de-prefix automatic lib* prefixes."),
     attrs = {
         "binary": attr.label(mandatory = True, allow_single_file = True),
+        "subdir": attr.string(mandatory = True),
         "metadata": attr.label(allow_single_file = True),
+        "override_bin_suffix": attr.string(),
     },
     implementation = _assemble_plugin_impl,
+)
+
+def _subtarget_impl(ctx):
+    out = depset([ctx.files.input[ctx.attr.which]])
+    return [
+        DefaultInfo(
+            files = out,
+            runfiles = ctx.runfiles(transitive_files = out)
+        ),
+    ]
+
+_subtarget = rule(
+    doc = ("Helper rule to provide aliases"),
+    attrs = {
+        "input": attr.label(allow_files = True),
+        "which": attr.int(mandatory = True),
+    },
+    implementation = _subtarget_impl,
 )
 
 # NOTE: doesn't work.
 # There is something in bazel pathing logic / dynamic plugins logic
 # that does not go together
-def _dynamic_plugin(name, metadata_file = None, srcs = [], hdrs = [],
+def dynamic_plugin(name, metadata_file = None, subdir = "",
+                   override_bin_suffix = "", srcs = [], hdrs = None,
                    copts = [], deps = [], local_defines = [],
                    **kwargs):
+    if hdrs:
+        fail(
+            "corrade_dynamic_plugin hdrs field is prohibited, " +
+            "put everything in srcs."
+        )
+
     conf = "%s_dynamic_plugin_conf" % name
     if metadata_file:
         _copy_conf(
@@ -110,7 +150,7 @@ def _dynamic_plugin(name, metadata_file = None, srcs = [], hdrs = [],
         name = "%s_dynamic_plugin" % name,
         local_defines = local_defines + ["CORRADE_DYNAMIC_PLUGIN"],
         copts = copts + ["-std=c++11"],
-        srcs = srcs + hdrs,
+        srcs = srcs,
         linkshared = True,
         linkstatic = False,
         deps = deps + ["@corrade//src/Corrade/PluginManager:headers"],
@@ -121,4 +161,19 @@ def _dynamic_plugin(name, metadata_file = None, srcs = [], hdrs = [],
         name = name,
         binary = ":%s_dynamic_plugin" % name,
         metadata = ":%s" % conf if metadata_file else None,
+        subdir = subdir,
+        override_bin_suffix = override_bin_suffix,
     )
+
+    _subtarget(
+        name = "%s__bin" % name,
+        input = name,
+        which = 0,
+    )
+    if metadata_file:
+        _subtarget(
+            name = "%s__conf" % name,
+            input = name,
+            which = 1,
+        )
+
