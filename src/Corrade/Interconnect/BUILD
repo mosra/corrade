@@ -49,7 +49,6 @@ cc_library(
         "Receiver.cpp",
         "Implementation/ReceiverConnection.h",
     ],
-    linkstatic = True,
     deps = [
         "@corrade//:Utility",
         ":headers",

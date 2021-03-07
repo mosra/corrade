@@ -67,7 +67,6 @@ cc_library(
         "@corrade//:Utility",
         ":headers",
     ],
-    linkstatic = True,
 )
 
 cc_library(
@@ -75,6 +74,5 @@ cc_library(
     srcs = ["AbstractManager.cpp"],
     deps = [":PluginManager"],
     defines = ["CORRADE_GRACEFUL_ASSERT"],
-    linkstatic = True,
     visibility = ["//src/Corrade:__subpackages__"],
 )

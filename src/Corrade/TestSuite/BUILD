@@ -51,7 +51,6 @@ cc_library(
         "Compare/SortedContainer.h",
         "Compare/StringToFile.h",
     ],
-    linkstatic = True,
     deps = [
         "@corrade//:Utility",
     ],

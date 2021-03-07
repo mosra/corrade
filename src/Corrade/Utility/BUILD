@@ -100,7 +100,6 @@ cc_library(
         "Implementation/tweakable.h",
         "TweakableParser.cpp",
     ],
-    linkstatic = True,
     # TODO: this is selectable
     linkopts = ["-ldl"],
     deps = [":headers"],
@@ -121,7 +120,6 @@ cc_library(
         "//src/Corrade/Containers:String.cpp",
         "//src/Corrade/Containers:StringView.cpp",
     ],
-    linkstatic = True,
     deps = [":Utility"],
     local_defines = ["CORRADE_GRACEFUL_ASSERT"],
     testonly = True,
