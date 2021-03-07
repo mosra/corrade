@@ -23,7 +23,27 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 #
-load("@corrade//:index.bzl", "corrade_static_plugin")
+load("@corrade//:index.bzl", "corrade_configure_header", "corrade_static_plugin")
+load("@corrade//bazel:dynamic_plugin.bzl", "dynamic_plugin")
+
+corrade_configure_header(
+    name = "configure",
+    src = "configure.h.cmake",
+    output = "configure.h",
+    defines = {
+        "PLUGINS_DIR": "plugins",
+        "DOG_PLUGIN_FILENAME": "$(location :Dog__bin)",
+        "DOGGO_PLUGIN_FILENAME": "$(location :Doggo__bin)",
+        "PITBULL_PLUGIN_FILENAME": "$(location :PitBull__bin)",
+    },
+    deps = [
+        ":Dog__bin",
+        ":Doggo__bin",
+        ":PitBull__bin",
+    ],
+    local = True,
+)
+
 
 corrade_static_plugin(
     name = "CustomSuffixStatic",
@@ -86,6 +106,161 @@ corrade_static_plugin(
     ],
 )
 
+[dynamic_plugin(
+    name = "%s" % dog,
+    metadata_file = "animals/%s.conf" % dog,
+    subdir = "plugins/animals",
+    srcs = [
+        "animals/%s.cpp" % dog,
+        "animals/Dog.h",
+        "AbstractAnimal.h",
+    ],
+    deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
+)
+for dog in [
+    "Dog",
+    "Bulldog",
+    "PitBull",
+]]
+
+dynamic_plugin(
+    name = "Snail",
+    metadata_file = "animals/Snail.conf",
+    subdir = "plugins/animals",
+    srcs = [
+        "animals/Snail.cpp",
+        "AbstractAnimal.h",
+    ],
+    deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
+)
+
+dynamic_plugin(
+    name = "CustomSuffix",
+    metadata_file = "custom-suffix/CustomSuffix.modconf",
+    subdir = "plugins/custom-suffix",
+    srcs = [
+        "custom-suffix/CustomSuffix.cpp",
+        "AbstractCustomSuffix.h",
+    ],
+    override_bin_suffix = "mod",
+)
+
+dynamic_plugin(
+    name = "Deletable",
+    metadata_file = "deletable/Deletable.conf",
+    subdir = "plugins/deletable",
+    srcs = [
+        "deletable/Deletable.cpp",
+        "AbstractDeletable.h",
+    ],
+)
+
+dynamic_plugin(
+    name = "DisabledMetadata",
+    subdir = "plugins/disabled-metadata",
+    srcs = [
+        "disabled-metadata/DisabledMetadata.cpp",
+        "AbstractDisabledMetadata.h",
+    ],
+)
+
+dynamic_plugin(
+    name = "Doggo",
+    metadata_file = "doggo/Doggo.conf",
+    subdir = "plugins/doggo",
+    srcs = [
+        "doggo/Doggo.cpp",
+        "AbstractAnimal.h",
+    ],
+    deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
+)
+
+[dynamic_plugin(
+    name = "%s" % food,
+    metadata_file = "food/%s.conf" % food,
+    subdir = "plugins/food",
+    srcs = [
+        "food/HotDog.cpp",
+        "animals/Dog.h",
+        "AbstractAnimal.h",
+        "AbstractFood.h",
+    ],
+    deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
+)
+for food in [
+    "HotDog",
+    "HotDogWithSnail",
+]]
+
+[dynamic_plugin(
+    name = "%s" % food,
+    metadata_file = "food/%s.conf" % food,
+    subdir = "plugins/food",
+    srcs = [
+        "food/%s.cpp" % food,
+        "AbstractFood.h",
+    ],
+    deps = ["//src/Corrade/PluginManager:PluginManagerTestLib"],
+)
+for food in [
+    "OldBread",
+    "RottenTomato",
+]]
+
+dynamic_plugin(
+    name = "InitFiniDynamic",
+    metadata_file = "init-fini/InitFiniDynamic.conf",
+    subdir = "plugins/init-fini",
+    srcs = [
+        "init-fini/InitFiniDynamic.cpp",
+        "init-fini/InitFini.h",
+        "init-fini/InitFiniStatic.h",
+    ],
+    deps = [
+        ":configure",
+        "@corrade//:PluginManager",
+    ]
+)
+
+dynamic_plugin(
+    name = "WrongMetadata",
+    metadata_file = "wrong-metadata/WrongMetadata.conf",
+    subdir = "plugins/wrong-metadata",
+    srcs = [
+        "wrong-metadata/WrongMetadata.cpp",
+        "wrong-metadata/WrongMetadata.h",
+    ],
+    deps = [
+        ":configure",
+    ]
+)
+
+[dynamic_plugin(
+    name = "%s" % wrong,
+    metadata_file = "dummy.conf",
+    subdir = "plugins/wrong",
+    srcs = [
+        "wrong/%s.cpp" % wrong,
+    ],
+)
+for wrong in [
+    "NoPluginFinalizer",
+    "NoPluginInitializer",
+    "NoPluginInstancer",
+    "NoPluginInterface",
+    "NoPluginVersion",
+]]
+
+dynamic_plugin(
+    name = "UnresolvedReference",
+    metadata_file = "dummy.conf",
+    subdir = "plugins/wrong",
+    srcs = [
+        "wrong/UnresolvedReference.cpp",
+    ],
+    deps = ["//src/Corrade/Interconnect:headers"],
+)
+
 cc_test(
     name = "PluginManagerManagerTest",
     srcs = [
@@ -100,6 +275,7 @@ cc_test(
         "AbstractDeletable.h",
         "AbstractDisabledMetadata.h",
         "AbstractFood.h",
+        "wrong-metadata/WrongMetadata.h",
     ],
     deps = [
         "@corrade//:TestSuite",
@@ -107,7 +283,30 @@ cc_test(
         ":Canary",
         ":CustomSuffixStatic",
         ":DisabledMetadataStatic",
+        ":configure",
     ],
+    data = [
+        ":Dog",
+        ":Bulldog",
+        ":PitBull",
+        ":Snail",
+        ":CustomSuffix",
+        ":Deletable",
+        ":DisabledMetadata",
+        ":Doggo",
+        ":HotDog",
+        ":HotDogWithSnail",
+        ":OldBread",
+        ":RottenTomato",
+        ":InitFiniDynamic",
+        ":WrongMetadata",
+        ":NoPluginFinalizer",
+        ":NoPluginInitializer",
+        ":NoPluginInstancer",
+        ":NoPluginInterface",
+        ":NoPluginVersion",
+        ":UnresolvedReference",
+    ]
 )
 
 cc_test(
