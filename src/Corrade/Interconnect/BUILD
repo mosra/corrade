@@ -26,13 +26,7 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "Interconnect",
-    srcs = [
-        "Connection.cpp",
-        "Emitter.cpp",
-        "Receiver.cpp",
-        "Implementation/ReceiverConnection.h",
-    ],
+    name = "headers",
     hdrs = [
         "Connection.h",
         "Emitter.h",
@@ -40,6 +34,20 @@ cc_library(
         "Receiver.h",
         "StateMachine.h",
         "visibility.h",
+    ],
+    deps = [
+        "//src/Corrade/Utility:headers",
+    ],
+    visibility = ["//src/Corrade:__subpackages__"],
+)
+
+cc_library(
+    name = "Interconnect",
+    srcs = [
+        "Connection.cpp",
+        "Emitter.cpp",
+        "Receiver.cpp",
+        "Implementation/ReceiverConnection.h",
     ],
     linkstatic = True,
     deps = ["@corrade//:Utility"],

@@ -68,6 +68,7 @@ cc_library(
         "@corrade//:Main",
         "//src/Corrade/Containers:headers",
     ],
+    visibility = ["//src/Corrade:__subpackages__"]
 )
 
 cc_library(
