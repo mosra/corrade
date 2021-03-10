@@ -132,9 +132,9 @@ void MoveReferenceTest::constructFromLvalue() {
 void MoveReferenceTest::constructIncomplete() {
     struct Foo;
     int a = 5;
-    int& refA = a;
+    Foo& refA = reinterpret_cast<Foo&>(a);
 
-    MoveReference<Foo> b{reinterpret_cast<Foo&&>(static_cast<int&&>(refA))};
+    MoveReference<Foo> b{reinterpret_cast<Foo&&>(refA)};
     MoveReference<Foo> c = b;
     CORRADE_COMPARE(&b.get(), static_cast<void*>(&a));
     CORRADE_COMPARE(&c.get(), static_cast<void*>(&a));
