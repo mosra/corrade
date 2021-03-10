@@ -112,18 +112,7 @@ void ReferenceTest::construct() {
     CORRADE_COMPARE(cb, 3);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Reference<int>, int&>::value);
-    #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
-    /* https://gcc.gnu.org/onlinedocs/gcc-4.9.2/libstdc++/manual/manual/status.html#status.iso.2011
-       vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011.
-       Also, until GCC 7 it's not possible to detect what libstdc++ version
-       is used when on Clang, because __GLIBCXX__ is a RELEASE DATE that
-       has absolutely no relation to the version and is completely useless:
-       https://gcc.gnu.org/onlinedocs/libstdc++/manual/abi.html#abi.versioning.__GLIBCXX__
-       So in case of Clang I'm trying to use _GLIBCXX_RELEASE, but that
-       cuts off libstdc++ 5 or libstdc++ 6 because these don't have this
-       macro yet. */
     CORRADE_VERIFY(std::is_trivially_destructible<Reference<int>>::value);
-    #endif
 }
 
 void ReferenceTest::constructConst() {
