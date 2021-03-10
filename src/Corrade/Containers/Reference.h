@@ -105,7 +105,7 @@ template<class T> class Reference {
          *
          * Expects that @p T is a base of @p U.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> constexpr /*implicit*/ Reference(Reference<U> other) noexcept: _reference{&*other} {}
+        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> constexpr /*implicit*/ Reference(Reference<U> other) noexcept: _reference{other._reference} {}
 
         /**
          * @brief Convert the reference to external representation
@@ -139,6 +139,9 @@ template<class T> class Reference {
         constexpr T& operator*() const { return *_reference; }
 
     private:
+        /* For the conversion constructor */
+        template<class U> friend class Reference;
+
         T* _reference;
 };
 
