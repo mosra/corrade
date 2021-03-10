@@ -24,6 +24,7 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+corrade_add_test(ContainersAnyReferenceTest AnyReferenceTest.cpp)
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
@@ -66,6 +67,7 @@ corrade_add_test(ContainersStringViewStlTest StringViewStlTest.cpp)
 corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
 set_property(TARGET
+    ContainersAnyReferenceTest
     ContainersLinkedListTest
     ContainersArrayTest
     ContainersArrayViewTest

@@ -56,8 +56,9 @@ class is trivially copyable (@ref std::reference_wrapper is guaranteed to be so
 only since C++17) and also works on incomplete types, which
 @ref std::reference_wrapper knows since C++20.
 
-This class is exclusively for l-value references, if you want to accept r-value
-references instead, use a @ref MoveReference.
+This class is exclusively for l-value references. If you want to accept r-value
+references instead, use a @ref MoveReference; if you want to accept both, use
+an @ref AnyReference.
 
 @section Containers-Reference-stl STL compatibility
 

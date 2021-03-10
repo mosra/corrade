@@ -70,6 +70,7 @@ template<class> class Optional;
 template<class> class Pointer;
 template<class> class Reference;
 template<class> class MoveReference;
+template<class> class AnyReference;
 
 class ScopeGuard;
 

@@ -50,6 +50,10 @@ needs to take a list of instances to take over ownership of. Use in a
 @cpp constexpr @ce context is not envisioned for this class and so compared to
 a @ref Reference the class is not @cpp constexpr @ce.
 
+This class is exclusively for r-value references. If you want to accept only
+l-value references, use a @ref Reference; if you want to accept both, use an
+@ref AnyReference.
+
 Unlike a @ref Reference, which corresponds to a @ref std::reference_wrapper,
 this class doesn't have a STL equivalent. For that reason there's also no
 interface to do a conversion from/to an external representation.

@@ -44,8 +44,9 @@ namespace Corrade {
     alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a
     lightweight but more flexible alternative to C++17 @ref std::string_view
--   New @ref Containers::MoveReference type for a copyable r-value reference
-    wrapping
+-   New @ref Containers::MoveReference and @ref Containers::AnyReference
+    counterparts to @ref Containers::Reference for exclusively r-value
+    references and both l-value and r-value references
 -   Added a @ref Containers::StridedArrayView::slice() overload for slicing
     into @cpp struct @ce members
 -   New @ref Containers::Array2, @ref Containers::Array3 and
