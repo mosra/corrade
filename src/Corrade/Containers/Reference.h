@@ -144,7 +144,7 @@ template<class T> class Reference {
 
 #ifndef CORRADE_NO_DEBUG
 /** @debugoperator{Reference} */
-template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Reference<T>& value) {
+template<class T> Utility::Debug& operator<<(Utility::Debug& debug, Reference<T> value) {
     return debug << value.get();
 }
 #endif
