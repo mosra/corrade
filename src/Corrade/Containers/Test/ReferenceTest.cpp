@@ -29,6 +29,7 @@
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
 
 namespace {
 
@@ -151,7 +152,7 @@ void ReferenceTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<Reference<int>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Reference<int>>::value);
-    #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Reference<int>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Reference<int>>::value);
     #endif
