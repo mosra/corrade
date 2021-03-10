@@ -46,6 +46,7 @@ if(CMAKE_CXX_FLAGS MATCHES "fsanitize=address")
 endif()
 
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
+corrade_add_test(ContainersMoveReferenceTest MoveReferenceTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
 corrade_add_test(ContainersPointerTest PointerTest.cpp)
 corrade_add_test(ContainersPointerStlTest PointerStlTest.cpp)
@@ -86,6 +87,7 @@ set_target_properties(
     ContainersBigEnumSetTest
     ContainersEnumSetTest
     ContainersLinkedListTest
+    ContainersMoveReferenceTest
     ContainersPointerTest
     ContainersPointerStlTest
     ContainersRawForwardListTest
