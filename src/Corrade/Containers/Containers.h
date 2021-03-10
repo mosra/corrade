@@ -66,9 +66,9 @@ template<class T, typename std::underlying_type<T>::type fullValue = typename st
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
-template<class T> class Optional;
-template<class T> class Pointer;
-template<class T> class Reference;
+template<class> class Optional;
+template<class> class Pointer;
+template<class> class Reference;
 
 class ScopeGuard;
 
