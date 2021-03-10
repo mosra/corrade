@@ -229,10 +229,10 @@ class LinkedListItem {
         /**
          * @brief Destructor
          *
-         * If the item is a part of any list, it is removed from it using
-         * @ref cut() during the call of this destructor. At the point when
-         * subclass destructors are called, the item is still connected to the
-         * list, allowing the subclasses to access it.
+         * If the item is a part of a list, it is removed from it using
+         * @ref LinkedList::cut() during the call of this destructor. At the
+         * point when subclass destructors are called, the item is still
+         * connected to the list, allowing the subclasses to access it.
          */
         virtual ~LinkedListItem() = 0;
 
@@ -254,10 +254,10 @@ class LinkedListItem {
          * Called from @ref LinkedList destructor, @ref LinkedList::clear() and
          * @ref LinkedList::erase(). By default, calls @ref doErase(), which
          * then calls @cpp delete this @ce, which in turn calls
-         * @ref LinkedList::cut() from within @ref ~LinkedListItem(). For cases
-         * where this is not desired (for example when providing bindings to
-         * reference-counted languages), it's possible to provide a different
-         * behavior by either:
+         * @ref LinkedList::cut() from within @link ~LinkedListItem() @endlink.
+         * For cases where this is not desired (for example when providing
+         * bindings to reference-counted languages), it's possible to provide a
+         * different behavior by either:
          *
          * -    *replacing* this non-virtual function in your derived class
          *      (faster, doesn't involve a @cpp virtual @ce call, but requires

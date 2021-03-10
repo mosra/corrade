@@ -1447,7 +1447,7 @@ either a hardcoded name or e.g. @ref CORRADE_FUNCTION.
 @see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_COMPARE_AS(expression...)
+#define CORRADE_VERIFY(expression...)
 #else
 #define CORRADE_VERIFY(...)                                                 \
     do {                                                                    \
