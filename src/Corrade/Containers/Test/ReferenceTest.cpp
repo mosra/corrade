@@ -92,6 +92,7 @@ ReferenceTest::ReferenceTest() {
 
               &ReferenceTest::convertToReference,
               &ReferenceTest::convertToConst,
+
               &ReferenceTest::access,
               &ReferenceTest::unambiguousOverloadWithTypeConvertibleFromInt,
 

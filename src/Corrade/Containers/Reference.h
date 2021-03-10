@@ -118,7 +118,8 @@ template<class T> class Reference {
 
         /** @brief Underlying reference */
         constexpr /*implicit*/ operator T&() const { return *_reference; }
-        constexpr /*implicit*/ operator Reference<const T>() const { return *_reference; } /**< @overload */
+        /** @overload */
+        constexpr /*implicit*/ operator Reference<const T>() const { return *_reference; }
 
         /** @brief Underlying reference */
         constexpr T& get() const { return *_reference; }
@@ -128,18 +129,14 @@ template<class T> class Reference {
          *
          * @ref get(), @ref operator*()
          */
-        constexpr T* operator->() const {
-            return _reference;
-        }
+        constexpr T* operator->() const { return _reference; }
 
         /**
          * @brief Access the underlying reference
          *
          * @see @ref get(), @ref operator->()
          */
-        constexpr T& operator*() const {
-            return *_reference;
-        }
+        constexpr T& operator*() const { return *_reference; }
 
     private:
         T* _reference;
