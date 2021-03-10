@@ -27,7 +27,6 @@
 */
 
 #include <type_traits>
-#include <utility>
 
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
@@ -78,17 +77,13 @@ template<class T> class MoveReference {
         template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ MoveReference(MoveReference<U> other) noexcept: _reference{other._reference} {}
 
         /** @brief Underlying reference */
-        /*implicit*/ operator T&&() const && { return std::move(*_reference); }
-        /** @overload */
-        /*implicit*/ operator T&() const & { return *_reference; }
+        /*implicit*/ operator T&() const { return *_reference; }
 
         /* No conversion to MoveReference<const T> because const&& references
            are basically useless in practice */
 
         /** @brief Underlying reference */
-        T&& get() const && { return std::move(*_reference); }
-        /** @overload */
-        T& get() const & { return *_reference; }
+        T& get() const { return *_reference; }
 
         /**
          * @brief Access the underlying reference
@@ -102,9 +97,7 @@ template<class T> class MoveReference {
          *
          * @see @ref get(), @ref operator->()
          */
-        T&& operator*() const && { return std::move(*_reference); }
-        /** @overload */
-        T& operator*() const & { return *_reference; }
+        T& operator*() const { return *_reference; }
 
     private:
         /* For the conversion constructor */

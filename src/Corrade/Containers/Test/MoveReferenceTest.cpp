@@ -45,10 +45,8 @@ struct MoveReferenceTest: TestSuite::Tester {
     void constructDerived();
 
     void convertToReference();
-    void convertToRvalueReference();
 
     void access();
-    void accessRvalue();
 
     void debug();
 };
@@ -63,10 +61,8 @@ MoveReferenceTest::MoveReferenceTest() {
               &MoveReferenceTest::constructDerived,
 
               &MoveReferenceTest::convertToReference,
-              &MoveReferenceTest::convertToRvalueReference,
 
               &MoveReferenceTest::access,
-              &MoveReferenceTest::accessRvalue,
 
               &MoveReferenceTest::debug});
 }
@@ -134,7 +130,7 @@ void MoveReferenceTest::constructIncomplete() {
     int a = 5;
     Foo& refA = reinterpret_cast<Foo&>(a);
 
-    MoveReference<Foo> b{reinterpret_cast<Foo&&>(refA)};
+    MoveReference<Foo> b{static_cast<Foo&&>(refA)};
     MoveReference<Foo> c = b;
     CORRADE_COMPARE(&b.get(), static_cast<void*>(&a));
     CORRADE_COMPARE(&c.get(), static_cast<void*>(&a));
@@ -172,16 +168,6 @@ void MoveReferenceTest::convertToReference() {
     CORRADE_COMPARE(cc, 32);
 }
 
-void MoveReferenceTest::convertToRvalueReference() {
-    int a = 32;
-    MoveReference<int> b = std::move(a);
-
-    int&& c = std::move(b);
-    const int&& cc = std::move(b);
-    CORRADE_COMPARE(c, 32);
-    CORRADE_COMPARE(cc, 32);
-}
-
 void MoveReferenceTest::access() {
     struct Foo {
         int a;
@@ -192,21 +178,6 @@ void MoveReferenceTest::access() {
     CORRADE_COMPARE(b->a, 15);
     CORRADE_COMPARE((*b).a, 15);
     CORRADE_COMPARE(b.get().a, 15);
-}
-
-void MoveReferenceTest::accessRvalue() {
-    struct Foo {
-        int a;
-    };
-
-    Foo a{15};
-    MoveReference<Foo> b = std::move(a);
-
-    Foo&& a1 = *std::move(b);
-    CORRADE_COMPARE(a1.a, 15);
-
-    Foo&& a2 = std::move(b).get();
-    CORRADE_COMPARE(a2.a, 15);
 }
 
 void MoveReferenceTest::debug() {

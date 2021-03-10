@@ -49,11 +49,6 @@ of instances to *optionally* take over the ownership of --- each instance
 remembers whether a l-value or a r-value reference was used to construct it and
 exposes that through @ref isRvalue().
 
-Compared to @ref MoveReference, all accessors always return a l-value
-reference to avoid accidents, and a conversion to r-value references is
-expected to be done explicitly via @ref std::move() on the returned reference
-* *only* if @ref isRvalue() returns @cpp true @ce.
-
 Like with @ref MoveReference, use in a @cpp constexpr @ce context is not
 envisioned for this class and so the API is not @cpp constexpr @ce. There's no
 STL equivalent and thus no conversion interface from/to an external
