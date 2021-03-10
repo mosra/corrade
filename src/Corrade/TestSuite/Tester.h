@@ -1446,11 +1446,15 @@ in a helper function or a lambda. To circumvent that, either call a dummy
 either a hardcoded name or e.g. @ref CORRADE_FUNCTION.
 @see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
-#define CORRADE_VERIFY(expression)                                          \
+#ifdef DOXYGEN_GENERATING_OUTPUT
+#define CORRADE_COMPARE_AS(expression...)
+#else
+#define CORRADE_VERIFY(...)                                                 \
     do {                                                                    \
         Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
-        Corrade::TestSuite::Tester::instance().verify(#expression, expression); \
+        Corrade::TestSuite::Tester::instance().verify(#__VA_ARGS__, __VA_ARGS__); \
     } while(false)
+#endif
 
 /** @hideinitializer
 @brief Compare two values in a test case
@@ -1472,6 +1476,13 @@ It's possible to also call it in a helper function or lambda called from inside
 a test case with some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_COMPARE_AS()
 */
+/* Unlike CORRADE_VERIFY(), while `expected` could be `...` as well and thus
+   avoid the need to wrap the second value in parentheses (which is exceedingly
+   common with {}-constructed values), it's not done as accidental use of a
+   comma in the first value could lead to very cryptic errors -- for example
+   `CORRADE_COMPARE(foo<T, U>(), b)` would treat `foo<T` as the first and
+   `U>(), b` as the second argument and I don't even want to know what the
+   compiler will yell about when seeing that. */
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
         Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
@@ -1500,6 +1511,13 @@ with some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_VERIFY(),
     @ref Corrade::TestSuite::Comparator "TestSuite::Comparator"
 */
+/* Similarly as above, doing `CORRADE_COMPARE_AS(foo<T, U>(), b, int)` would
+   lead to `foo<T` being the first argument, `U>()` the second and `b, int` the
+   third and lead to extemely cryptic compiler errors. However there's no
+   other way how to pass templated types such as `std::map<int, bool>` (except
+   for forcing people to do a typedef and pass that) so we have to leave that
+   here even with the risk of the arguments being understood wrong in
+   pathological cases. C preprocessor FTW. */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 #define CORRADE_COMPARE_AS(actual, expected, Type...)
 #else

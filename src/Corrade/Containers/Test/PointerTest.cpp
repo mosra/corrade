@@ -196,8 +196,8 @@ void PointerTest::construct() {
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<int>, int*>::value));
-    CORRADE_VERIFY(!(std::is_assignable<Pointer<int>, int*>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<int>, int*>::value);
+    CORRADE_VERIFY(!std::is_assignable<Pointer<int>, int*>::value);
 }
 
 void PointerTest::constructDefault() {
@@ -209,7 +209,7 @@ void PointerTest::constructDefault() {
     CORRADE_COMPARE(Immovable::constructed, 0);
     CORRADE_COMPARE(Immovable::destructed, 0);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<int>>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<int>>::value);
 }
 
 void PointerTest::constructNullptr() {
@@ -221,8 +221,8 @@ void PointerTest::constructNullptr() {
     CORRADE_COMPARE(Immovable::constructed, 0);
     CORRADE_COMPARE(Immovable::destructed, 0);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<int>, std::nullptr_t>::value));
-    CORRADE_VERIFY((std::is_nothrow_assignable<Pointer<int>, std::nullptr_t>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<int>, std::nullptr_t>::value);
+    CORRADE_VERIFY(std::is_nothrow_assignable<Pointer<int>, std::nullptr_t>::value);
 }
 
 void PointerTest::constructCopy() {
@@ -282,10 +282,10 @@ void PointerTest::constructInPlace() {
     CORRADE_COMPARE(Immovable::destructed, 1);
 
     /* This is never noexcept since we allocate (duh) */
-    CORRADE_VERIFY((std::is_constructible<Pointer<Immovable>, InPlaceInitT, int>::value));
-    CORRADE_VERIFY(!(std::is_nothrow_constructible<Pointer<Immovable>, InPlaceInitT, int, int&&>::value));
-    CORRADE_VERIFY((std::is_constructible<Pointer<Throwable>, InPlaceInitT, int>::value));
-    CORRADE_VERIFY(!(std::is_nothrow_constructible<Pointer<Throwable>, InPlaceInitT, int>::value));
+    CORRADE_VERIFY(std::is_constructible<Pointer<Immovable>, InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Immovable>, InPlaceInitT, int, int&&>::value);
+    CORRADE_VERIFY(std::is_constructible<Pointer<Throwable>, InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Throwable>, InPlaceInitT, int>::value);
 }
 
 void PointerTest::constructInPlaceMake() {
@@ -347,12 +347,12 @@ void PointerTest::constructDerived() {
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 36);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value);
 
-    CORRADE_VERIFY((std::is_constructible<Pointer<Base>, Derived*>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Pointer<Derived>, Base*>::value));
-    CORRADE_VERIFY((std::is_constructible<Pointer<Base>, Pointer<Derived>>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Pointer<Derived>, Pointer<Base>>::value));
+    CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Derived*>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Base*>::value);
+    CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Pointer<Derived>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Pointer<Base>>::value);
 }
 
 void PointerTest::convert() {
@@ -372,21 +372,21 @@ void PointerTest::convert() {
     CORRADE_VERIFY(!b);
 
     auto d = pointer(IntPtr{new int{72}});
-    CORRADE_VERIFY((std::is_same<decltype(d), Pointer<int>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), Pointer<int>>::value);
     CORRADE_VERIFY(d);
     CORRADE_COMPARE(*d, 72);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_constructible<Pointer<int>, IntPtr>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Pointer<float>, IntPtr>::value));
-    CORRADE_VERIFY((std::is_constructible<IntPtr, Pointer<int>>::value));
-    CORRADE_VERIFY(!(std::is_constructible<IntPtr, Pointer<float>>::value));
+    CORRADE_VERIFY(std::is_constructible<Pointer<int>, IntPtr>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<float>, IntPtr>::value);
+    CORRADE_VERIFY(std::is_constructible<IntPtr, Pointer<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<IntPtr, Pointer<float>>::value);
 
     /* Non-move conversion is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntPtr&&, Pointer<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const IntPtr&, Pointer<int>>::value));
-    CORRADE_VERIFY((std::is_convertible<Pointer<int>&&, IntPtr>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const Pointer<int>&, IntPtr>::value));
+    CORRADE_VERIFY(std::is_convertible<IntPtr&&, Pointer<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const IntPtr&, Pointer<int>>::value);
+    CORRADE_VERIFY(std::is_convertible<Pointer<int>&&, IntPtr>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Pointer<int>&, IntPtr>::value);
 }
 
 void PointerTest::boolConversion() {
@@ -397,8 +397,8 @@ void PointerTest::boolConversion() {
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!!b);
 
-    CORRADE_VERIFY(!(std::is_convertible<Pointer<int>, int>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Pointer<int>, bool>::value));
+    CORRADE_VERIFY(!std::is_convertible<Pointer<int>, int>::value);
+    CORRADE_VERIFY(!std::is_convertible<Pointer<int>, bool>::value);
 }
 
 void PointerTest::compareToNullptr() {

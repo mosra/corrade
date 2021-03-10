@@ -52,24 +52,24 @@ SequenceHelpersTest::SequenceHelpersTest() {
 }
 
 void SequenceHelpersTest::generateSequenceEmpty() {
-    CORRADE_VERIFY((std::is_same<
+    CORRADE_VERIFY(std::is_same<
         Implementation::GenerateSequence<0>::Type,
         Implementation::Sequence<>
-    >::value));
+    >::value);
 }
 
 void SequenceHelpersTest::generateSequenceEven() {
-    CORRADE_VERIFY((std::is_same<
+    CORRADE_VERIFY(std::is_same<
         Implementation::GenerateSequence<8>::Type,
         Implementation::Sequence<0, 1, 2, 3, 4, 5, 6, 7>
-    >::value));
+    >::value);
 }
 
 void SequenceHelpersTest::generateSequenceOdd() {
-    CORRADE_VERIFY((std::is_same<
+    CORRADE_VERIFY(std::is_same<
         Implementation::GenerateSequence<7>::Type,
         Implementation::Sequence<0, 1, 2, 3, 4, 5, 6>
-    >::value));
+    >::value);
 }
 
 }}}}

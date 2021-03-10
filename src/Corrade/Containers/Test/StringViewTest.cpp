@@ -260,7 +260,7 @@ template<class T> void StringViewTest::constructDefault() {
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 
-    CORRADE_VERIFY((std::is_nothrow_default_constructible<BasicStringView<T>>::value));
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicStringView<T>>::value);
 }
 
 void StringViewTest::constructDefaultConstexpr() {
@@ -285,7 +285,7 @@ template<class T> void StringViewTest::construct() {
     CORRADE_COMPARE(view.flags(), StringViewFlags{});
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<BasicStringView<T>, T*, std::size_t, StringViewFlags>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, T*, std::size_t, StringViewFlags>::value);
 }
 
 void StringViewTest::constructConstexpr() {
@@ -315,7 +315,7 @@ template<class T> void StringViewTest::constructPointer() {
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<BasicStringView<T>, T*>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, T*>::value);
 }
 
 void StringViewTest::constructPointerNull() {
@@ -363,11 +363,11 @@ void StringViewTest::constructFromMutable() {
     CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(b.data()), &string[0]);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<StringView, MutableStringView>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<StringView, MutableStringView>::value);
 
     /* It shouldn't be possible the other way around */
-    CORRADE_VERIFY((std::is_convertible<MutableStringView, StringView>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StringView, MutableStringView>::value));
+    CORRADE_VERIFY(std::is_convertible<MutableStringView, StringView>::value);
+    CORRADE_VERIFY(!std::is_convertible<StringView, MutableStringView>::value);
 }
 
 void StringViewTest::constructLiteral() {

@@ -111,7 +111,7 @@ void ReferenceTest::construct() {
     CORRADE_COMPARE(&cb.get(), &Int);
     CORRADE_COMPARE(cb, 3);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Reference<int>, int&>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Reference<int>, int&>::value);
     #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
     /* https://gcc.gnu.org/onlinedocs/gcc-4.9.2/libstdc++/manual/manual/status.html#status.iso.2011
        vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011.
@@ -135,7 +135,7 @@ void ReferenceTest::constructConst() {
 }
 
 void ReferenceTest::constructDefault() {
-    CORRADE_VERIFY((std::is_constructible<Reference<int>, int&>::value));
+    CORRADE_VERIFY(std::is_constructible<Reference<int>, int&>::value);
     CORRADE_VERIFY(!std::is_default_constructible<Reference<int>>::value);
 }
 
@@ -175,12 +175,12 @@ void ReferenceTest::constructFromRvalue() {
     //Reference<int> a{1337};
     //Reference<const int> b{42};
 
-    CORRADE_VERIFY((std::is_constructible<Reference<int>, int&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<int>, int>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<int>, int&&>::value));
-    CORRADE_VERIFY((std::is_constructible<Reference<const int>, const int&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<const int>, const int>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<const int>, const int&&>::value));
+    CORRADE_VERIFY(std::is_constructible<Reference<int>, int&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<int>, int>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<int>, int&&>::value);
+    CORRADE_VERIFY(std::is_constructible<Reference<const int>, const int&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<const int>, const int>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<const int>, const int&&>::value);
 }
 
 void ReferenceTest::constructIncomplete() {
@@ -218,12 +218,12 @@ void ReferenceTest::constructDerived() {
     Reference<const Base> cc = cb;
     CORRADE_COMPARE(cc->a, 42);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Reference<Base>, Reference<Derived>>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Reference<Base>, Reference<Derived>>::value);
 
-    CORRADE_VERIFY((std::is_constructible<Reference<Base>, Derived&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<Derived>, Base&>::value));
-    CORRADE_VERIFY((std::is_constructible<Reference<Base>, Reference<Derived>>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Reference<Derived>, Reference<Base>>::value));
+    CORRADE_VERIFY(std::is_constructible<Reference<Base>, Derived&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<Derived>, Base&>::value);
+    CORRADE_VERIFY(std::is_constructible<Reference<Base>, Reference<Derived>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<Derived>, Reference<Base>>::value);
 }
 
 void ReferenceTest::convert() {
@@ -250,10 +250,10 @@ void ReferenceTest::convert() {
     CORRADE_COMPARE(*cd.a, 3);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<Reference<const int>, IntRef>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Reference<const float>, IntRef>::value));
-    CORRADE_VERIFY((std::is_convertible<IntRef, Reference<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntRef, Reference<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<Reference<const int>, IntRef>::value);
+    CORRADE_VERIFY(!std::is_convertible<Reference<const float>, IntRef>::value);
+    CORRADE_VERIFY(std::is_convertible<IntRef, Reference<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntRef, Reference<const float>>::value);
 }
 
 void ReferenceTest::convertToReference() {

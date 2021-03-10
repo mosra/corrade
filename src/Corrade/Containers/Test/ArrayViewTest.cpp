@@ -303,12 +303,12 @@ void ArrayViewTest::construct() {
         CORRADE_COMPARE(b.size(), 20);
     } {
         auto b = arrayView(a, 20);
-        CORRADE_VERIFY((std::is_same<decltype(b), ArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), ArrayView>::value);
         CORRADE_VERIFY(b == a);
         CORRADE_COMPARE(b.size(), 20);
 
         auto c = arrayView(b);
-        CORRADE_VERIFY((std::is_same<decltype(c), ArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(c), ArrayView>::value);
         CORRADE_VERIFY(c == a);
         CORRADE_COMPARE(c.size(), 20);
     }
@@ -319,12 +319,12 @@ void ArrayViewTest::construct() {
         CORRADE_COMPARE(b.size(), 20);
     } {
         constexpr auto b = arrayView(Array30, 20);
-        CORRADE_VERIFY((std::is_same<decltype(b), const ConstArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), const ConstArrayView>::value);
         CORRADE_VERIFY(b == Array30);
         CORRADE_COMPARE(b.size(), 20);
 
         constexpr auto c = arrayView(b);
-        CORRADE_VERIFY((std::is_same<decltype(c), const ConstArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(c), const ConstArrayView>::value);
         CORRADE_VERIFY(c == Array30);
         CORRADE_COMPARE(c.size(), 20);
     }
@@ -415,7 +415,7 @@ void ArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(b.size(), 13);
     } {
         auto b = arrayView(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), ArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), ArrayView>::value);
         CORRADE_VERIFY(b == a);
         CORRADE_COMPARE(b.size(), 13);
     }
@@ -426,13 +426,13 @@ void ArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(b.size(), 13);
     } {
         constexpr auto b = arrayView(Array13);
-        CORRADE_VERIFY((std::is_same<decltype(b), const ConstArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), const ConstArrayView>::value);
         CORRADE_VERIFY(b == Array13);
         CORRADE_COMPARE(b.size(), 13);
     }
 
     /* Implicit construction from pointer should not be allowed */
-    CORRADE_VERIFY(!(std::is_convertible<int*, ArrayView>::value));
+    CORRADE_VERIFY(!std::is_convertible<int*, ArrayView>::value);
 }
 
 void ArrayViewTest::constructFixedSizeVoid() {
@@ -469,7 +469,7 @@ void ArrayViewTest::constructFromStatic() {
         CORRADE_COMPARE(b.size(), 13);
     } {
         auto b = arrayView(av);
-        CORRADE_VERIFY((std::is_same<decltype(b), ArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), ArrayView>::value);
         CORRADE_VERIFY(b == a);
         CORRADE_COMPARE(b.size(), 13);
     }
@@ -480,7 +480,7 @@ void ArrayViewTest::constructFromStatic() {
         CORRADE_COMPARE(b.size(), 13);
     } {
         constexpr auto b = arrayView(cav);
-        CORRADE_VERIFY((std::is_same<decltype(b), const ConstArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), const ConstArrayView>::value);
         CORRADE_VERIFY(b == cav);
         CORRADE_COMPARE(b.size(), 13);
     }
@@ -598,12 +598,12 @@ void ArrayViewTest::convertBool() {
     CORRADE_VERIFY(!boolCvc);
 
     /* Explicit conversion to bool is allowed, but not to int */
-    CORRADE_VERIFY((std::is_constructible<bool, ArrayView>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, VoidArrayView>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, ConstVoidArrayView>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, ArrayView>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, VoidArrayView>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, ConstVoidArrayView>::value));
+    CORRADE_VERIFY(std::is_constructible<bool, ArrayView>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, VoidArrayView>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, ConstVoidArrayView>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, ArrayView>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, VoidArrayView>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, ConstVoidArrayView>::value);
 }
 
 void ArrayViewTest::convertPointer() {
@@ -657,7 +657,7 @@ void ArrayViewTest::convertExternalView() {
     CORRADE_COMPARE(c.size, 5);
 
     auto d = arrayView(c);
-    CORRADE_VERIFY((std::is_same<decltype(d), Containers::ArrayView<const int>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), Containers::ArrayView<const int>>::value);
     CORRADE_COMPARE(d.data(), data);
     CORRADE_COMPARE(d.size(), 5);
 
@@ -691,15 +691,15 @@ void ArrayViewTest::convertExternalView() {
     const
     #endif
     auto cd = arrayView(cc);
-    CORRADE_VERIFY((std::is_same<decltype(cd), const Containers::ArrayView<const int>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(cd), const Containers::ArrayView<const int>>::value);
     CORRADE_COMPARE(cd.data(), Array13);
     CORRADE_COMPARE(cd.size(), 13);
 
     /* Conversion from/to a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<ConstIntView, Containers::ArrayView<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ConstIntView, Containers::ArrayView<const float>>::value));
-    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<const int>, ConstIntView>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<const float>, ConstIntView>::value));
+    CORRADE_VERIFY(std::is_convertible<ConstIntView, Containers::ArrayView<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<ConstIntView, Containers::ArrayView<const float>>::value);
+    CORRADE_VERIFY(std::is_convertible<Containers::ArrayView<const int>, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::ArrayView<const float>, ConstIntView>::value);
 }
 
 void ArrayViewTest::convertConstFromExternalView() {
@@ -713,8 +713,8 @@ void ArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.size(), 5);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, Containers::ArrayView<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, Containers::ArrayView<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::ArrayView<const float>>::value);
 }
 
 void ArrayViewTest::convertToConstExternalView() {
@@ -728,8 +728,8 @@ void ArrayViewTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.size, 5);
 
     /* Conversion to a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<int>, ConstIntView>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<float>, ConstIntView>::value));
+    CORRADE_VERIFY(std::is_convertible<Containers::ArrayView<int>, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::ArrayView<float>, ConstIntView>::value);
 }
 
 void ArrayViewTest::convertVoidFromExternalView() {
@@ -1166,12 +1166,12 @@ void ArrayViewTest::cast() {
     auto cv = Containers::arrayCast<std::uint16_t>(av);
     auto ccv = Containers::arrayCast<const std::uint16_t>(cav);
 
-    CORRADE_VERIFY((std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(bv), Containers::ArrayView<std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cbv), Containers::ArrayView<const std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(c), Containers::ArrayView<std::uint16_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cv), Containers::ArrayView<std::uint16_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(ccv), Containers::ArrayView<const std::uint16_t>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(bv), Containers::ArrayView<std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cbv), Containers::ArrayView<const std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(c), Containers::ArrayView<std::uint16_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cv), Containers::ArrayView<std::uint16_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(ccv), Containers::ArrayView<const std::uint16_t>>::value);
     CORRADE_COMPARE(static_cast<void*>(b.begin()), static_cast<void*>(a.begin()));
     CORRADE_COMPARE(static_cast<void*>(bv.begin()), static_cast<void*>(a.begin()));
     CORRADE_COMPARE(static_cast<const void*>(cbv.begin()), static_cast<const void*>(a.begin()));

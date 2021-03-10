@@ -99,8 +99,8 @@ void StringViewStlTest::convertMutableFromStlString() {
     CORRADE_COMPARE(b, "hello\0!!!"_s);
 
     /* Only a mutable string instance should be convertible to a mutable view */
-    CORRADE_VERIFY((std::is_convertible<std::string&, MutableStringView>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const std::string&, MutableStringView>::value));
+    CORRADE_VERIFY(std::is_convertible<std::string&, MutableStringView>::value);
+    CORRADE_VERIFY(!std::is_convertible<const std::string&, MutableStringView>::value);
 }
 
 void StringViewStlTest::convertMutableFromStlStringEmpty() {

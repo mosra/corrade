@@ -480,10 +480,10 @@ void StridedArrayViewTest::dimensionsConstructDefault() {
     CORRADE_COMPARE(ca2[2], 0);
 
     CORRADE_VERIFY(std::is_nothrow_default_constructible<Size3D>::value);
-    CORRADE_VERIFY((std::is_nothrow_constructible<Size3D, ValueInitT>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, ValueInitT>::value);
 
     /* Implicit conversion from ValueInitT not allowed */
-    CORRADE_VERIFY(!(std::is_convertible<ValueInitT, Size3D>::value));
+    CORRADE_VERIFY(!std::is_convertible<ValueInitT, Size3D>::value);
 }
 
 void StridedArrayViewTest::dimensionsConstruct() {
@@ -493,7 +493,7 @@ void StridedArrayViewTest::dimensionsConstruct() {
     constexpr Size1D ca = 37;
     CORRADE_COMPARE(ca[0], 37);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Size1D, std::size_t>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size1D, std::size_t>::value);
 }
 
 void StridedArrayViewTest::dimensionsConstruct3D() {
@@ -507,7 +507,7 @@ void StridedArrayViewTest::dimensionsConstruct3D() {
     CORRADE_COMPARE(ca[1], 37);
     CORRADE_COMPARE(ca[2], 4564);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Size3D, std::size_t, std::size_t, std::size_t>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, std::size_t, std::size_t, std::size_t>::value);
 }
 
 constexpr std::size_t SizeData[]{34, 67, 98989};
@@ -525,7 +525,7 @@ void StridedArrayViewTest::dimensionsConstructView() {
     CORRADE_COMPARE(ca[1], 67);
     CORRADE_COMPARE(ca[2], 98989);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Size3D, Containers::StaticArrayView<3, const std::size_t>>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, Containers::StaticArrayView<3, const std::size_t>>::value);
 }
 
 void StridedArrayViewTest::dimensionsConstructNoInit() {
@@ -541,10 +541,10 @@ void StridedArrayViewTest::dimensionsConstructNoInit() {
         CORRADE_COMPARE(a[2], 4564);
     }
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Size1D, NoInitT>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size1D, NoInitT>::value);
 
     /* Implicit conversion from NoInitT not allowed */
-    CORRADE_VERIFY(!(std::is_convertible<NoInitT, Size1D>::value));
+    CORRADE_VERIFY(!std::is_convertible<NoInitT, Size1D>::value);
 }
 
 constexpr Size3D Sizes{34, 67, 98989};
@@ -574,8 +574,8 @@ void StridedArrayViewTest::dimensionsConvertScalar() {
 }
 
 void StridedArrayViewTest::dimensionsConvertScalar3D() {
-    CORRADE_VERIFY((std::is_convertible<Size1D, std::size_t>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Size3D, std::size_t>::value));
+    CORRADE_VERIFY(std::is_convertible<Size1D, std::size_t>::value);
+    CORRADE_VERIFY(!std::is_convertible<Size3D, std::size_t>::value);
 }
 
 void StridedArrayViewTest::dimensionsCompare() {
@@ -777,7 +777,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(b[4], 234810);
 
         auto c = stridedArrayView(a, &a[0].value, 10, 8);
-        CORRADE_VERIFY((std::is_same<decltype(c), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(c), StridedArrayView1Di>::value);
         CORRADE_VERIFY(c.data() == a);
         CORRADE_VERIFY(!c.empty());
         CORRADE_COMPARE(c.size(), 10);
@@ -786,7 +786,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(c[4], 234810);
 
         auto c2 = stridedArrayView(b);
-        CORRADE_VERIFY((std::is_same<decltype(c2), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(c2), StridedArrayView1Di>::value);
         CORRADE_VERIFY(c2.data() == a);
         CORRADE_VERIFY(!c2.empty());
         CORRADE_COMPARE(c2.size(), 10);
@@ -805,7 +805,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cb[4], 234810);
 
         constexpr auto cc = stridedArrayView(Struct, &Struct[0].value, 10, 8);
-        CORRADE_VERIFY((std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cc.data() == Struct);
         CORRADE_VERIFY(!cc.empty());
         CORRADE_COMPARE(cc.size(), 10);
@@ -814,7 +814,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cc[4], 234810);
 
         constexpr auto cc2 = stridedArrayView(cb);
-        CORRADE_VERIFY((std::is_same<decltype(cc2), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cc2), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cc2.data() == Struct);
         CORRADE_VERIFY(!cc2.empty());
         CORRADE_COMPARE(cc2.size(), 10);
@@ -1042,7 +1042,7 @@ void StridedArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(b[4], 234810);
     } {
         auto b = stridedArrayView(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), StridedArrayView1Di>::value);
         CORRADE_VERIFY(b.data() == a);
         CORRADE_COMPARE(b.size(), 10);
         CORRADE_COMPARE(b.stride(), 4);
@@ -1059,7 +1059,7 @@ void StridedArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(cb[4], 234810);
     } {
         constexpr auto cb = stridedArrayView(Array10);
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cb.data() == Array10);
         CORRADE_COMPARE(cb.size(), 10);
         CORRADE_COMPARE(cb.stride(), 4);
@@ -1157,7 +1157,7 @@ void StridedArrayViewTest::constructView() {
         CORRADE_COMPARE(b[4], 234810);
     } {
         auto b = stridedArrayView(view);
-        CORRADE_VERIFY((std::is_same<decltype(b), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), StridedArrayView1Di>::value);
         CORRADE_VERIFY(b.data() == a);
         CORRADE_COMPARE(b.size(), 10);
         CORRADE_COMPARE(b.stride(), 4);
@@ -1176,7 +1176,7 @@ void StridedArrayViewTest::constructView() {
         CORRADE_COMPARE(cb[4], 234810);
     } {
         constexpr auto cb = stridedArrayView(cview);
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cb.data() == Array10);
         CORRADE_COMPARE(cb.size(), 10);
         CORRADE_COMPARE(cb.stride(), 4);
@@ -1226,7 +1226,7 @@ void StridedArrayViewTest::constructStaticView() {
         CORRADE_COMPARE(b[4], 234810);
     } {
         auto b = stridedArrayView(view);
-        CORRADE_VERIFY((std::is_same<decltype(b), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), StridedArrayView1Di>::value);
         CORRADE_VERIFY(b.data() == a);
         CORRADE_COMPARE(b.size(), 10);
         CORRADE_COMPARE(b.stride(), 4);
@@ -1245,7 +1245,7 @@ void StridedArrayViewTest::constructStaticView() {
         CORRADE_COMPARE(cb[4], 234810);
     } {
         constexpr auto cb = stridedArrayView(cview);
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cb.data() == Array10);
         CORRADE_COMPARE(cb.size(), 10);
         CORRADE_COMPARE(cb.stride(), 4);
@@ -1699,18 +1699,18 @@ void StridedArrayViewTest::construct3DInvalidConstVoid() {
 }
 
 void StridedArrayViewTest::construct3DFixedSize() {
-    CORRADE_VERIFY((std::is_convertible<int(&)[10], StridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_convertible<int(&)[10], StridedArrayView3Di>::value));
+    CORRADE_VERIFY(std::is_convertible<int(&)[10], StridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_convertible<int(&)[10], StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DFixedSizeVoid() {
-    CORRADE_VERIFY((std::is_convertible<int(&)[10], VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<int(&)[10], VoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<int(&)[10], VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<int(&)[10], VoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DFixedSizeConstVoid() {
-    CORRADE_VERIFY((std::is_convertible<int(&)[10], ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<int(&)[10], ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<int(&)[10], ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<int(&)[10], ConstVoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DDerived() {
@@ -1753,33 +1753,33 @@ void StridedArrayViewTest::construct3DDerived() {
 }
 
 void StridedArrayViewTest::construct3DView() {
-    CORRADE_VERIFY((std::is_convertible<ArrayView<int>, StridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ArrayView<int>, StridedArrayView3Di>::value));
+    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DViewVoid() {
-    CORRADE_VERIFY((std::is_convertible<ArrayView<int>, VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ArrayView<int>, VoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, VoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DViewConstVoid() {
-    CORRADE_VERIFY((std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticView() {
-    CORRADE_VERIFY((std::is_convertible<StaticArrayView<10, int>, StridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<10, int>, StridedArrayView3Di>::value));
+    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticViewVoid() {
-    CORRADE_VERIFY((std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticViewConstVoid() {
-    CORRADE_VERIFY((std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::convertBool() {
@@ -1809,12 +1809,12 @@ void StridedArrayViewTest::convertBool() {
     constexpr bool boolCvc = !!cvc;
     CORRADE_VERIFY(!boolCvc);
 
-    CORRADE_VERIFY((std::is_constructible<bool, StridedArrayView1Di>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, StridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, ConstVoidStridedArrayView1D>::value));
+    CORRADE_VERIFY(std::is_constructible<bool, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, ConstVoidStridedArrayView1D>::value);
 }
 
 void StridedArrayViewTest::convertConst() {
@@ -1838,7 +1838,7 @@ void StridedArrayViewTest::convertFromExternalView() {
         CORRADE_COMPARE(b.size(), 5);
     } {
         auto b = stridedArrayView(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), StridedArrayView1Di>::value);
         CORRADE_COMPARE(b.data(), &data[0]);
         CORRADE_COMPARE(b.size(), 5);
     }
@@ -1866,14 +1866,14 @@ void StridedArrayViewTest::convertFromExternalView() {
         const
         #endif
         auto cb = stridedArrayView(ca);
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
         CORRADE_COMPARE(cb.data(), Array10);
         CORRADE_COMPARE(cb.size(), 10);
     }
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView1D<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView1D<float>>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, Containers::StridedArrayView1D<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::StridedArrayView1D<float>>::value);
 }
 
 void StridedArrayViewTest::convertConstFromExternalView() {
@@ -1887,8 +1887,8 @@ void StridedArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.size(), 5);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView1D<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView1D<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, Containers::StridedArrayView1D<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::StridedArrayView1D<const float>>::value);
 }
 
 void StridedArrayViewTest::convertVoidFromExternalView() {
@@ -1953,16 +1953,16 @@ void StridedArrayViewTest::convert3DBool() {
     CORRADE_COMPARE(emptyCb, (Bools3D{false, true, false}));
 
     /* Explicit conversion to bool is allowed, but not to int */
-    CORRADE_VERIFY((std::is_constructible<bool, StridedArrayView3Di>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, VoidStridedArrayView3D>::value));
-    CORRADE_VERIFY((std::is_constructible<bool, ConstVoidStridedArrayView3D>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, StridedArrayView3Di>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, VoidStridedArrayView3D>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_constructible<bool, StridedArrayView3Di>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, VoidStridedArrayView3D>::value);
+    CORRADE_VERIFY(std::is_constructible<bool, ConstVoidStridedArrayView3D>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, StridedArrayView3Di>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, VoidStridedArrayView3D>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, ConstVoidStridedArrayView3D>::value);
 
     /* Implicit conversion to bool from empty is allowed only for 1D */
-    CORRADE_VERIFY((std::is_convertible<Bools1D, bool>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Bools3D, bool>::value));
+    CORRADE_VERIFY(std::is_convertible<Bools1D, bool>::value);
+    CORRADE_VERIFY(!std::is_convertible<Bools3D, bool>::value);
 }
 
 void StridedArrayViewTest::convert3DConst() {
@@ -1976,32 +1976,32 @@ void StridedArrayViewTest::convert3DConst() {
 
 void StridedArrayViewTest::convert3DFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, StridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, StridedArrayView3Di>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::convert3DConstFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, ConstStridedArrayView1Di>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, ConstStridedArrayView3Di>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, ConstStridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, ConstStridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::convert3DVoidFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, VoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, VoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, VoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, VoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::convert3DConstVoidFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<IntView, ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<IntView, ConstVoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::convert3DConstVoidFromConstExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<ConstIntView, ConstVoidStridedArrayView1D>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ConstIntView, ConstVoidStridedArrayView3D>::value));
+    CORRADE_VERIFY(std::is_convertible<ConstIntView, ConstVoidStridedArrayView1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<ConstIntView, ConstVoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::emptyCheck() {
@@ -2073,9 +2073,9 @@ void StridedArrayViewTest::isContiguous() {
     CORRADE_VERIFY(!b.flipped<2>().isContiguous<2>());
     CORRADE_VERIFY(!b.flipped<2>().isContiguous<1>());
     CORRADE_VERIFY(!b.flipped<2>().isContiguous<0>());
-    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<2>()));
-    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<1>()));
-    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<0>()));
+    CORRADE_VERIFY(!b.transposed<1, 2>().isContiguous<2>());
+    CORRADE_VERIFY(!b.transposed<1, 2>().isContiguous<1>());
+    CORRADE_VERIFY(!b.transposed<1, 2>().isContiguous<0>());
 }
 
 void StridedArrayViewTest::asContiguous() {
@@ -3215,9 +3215,9 @@ void StridedArrayViewTest::cast() {
     auto b = Containers::arrayCast<int>(a);
     auto bv = Containers::arrayCast<int>(av);
     auto cbv = Containers::arrayCast<const int>(cav);
-    CORRADE_VERIFY((std::is_same<decltype(b), Containers::StridedArrayView1D<int>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(bv), Containers::StridedArrayView1D<int>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cbv), Containers::StridedArrayView1D<const int>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(b), Containers::StridedArrayView1D<int>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(bv), Containers::StridedArrayView1D<int>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cbv), Containers::StridedArrayView1D<const int>>::value);
     CORRADE_COMPARE(static_cast<void*>(b.data()), static_cast<void*>(a.data()));
     CORRADE_COMPARE(static_cast<void*>(bv.data()), static_cast<void*>(a.data()));
     CORRADE_COMPARE(static_cast<const void*>(cbv.data()), static_cast<const void*>(a.data()));

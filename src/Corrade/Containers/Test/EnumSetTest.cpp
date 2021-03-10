@@ -118,7 +118,7 @@ void EnumSetTest::construct() {
        either */
     /** @todo this should be for all the operators as well, sigh */
     CORRADE_VERIFY(std::is_nothrow_default_constructible<Features>::value);
-    CORRADE_VERIFY((std::is_nothrow_constructible<Features, Feature>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Features, Feature>::value);
 }
 
 void EnumSetTest::constructNoInit() {

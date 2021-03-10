@@ -599,12 +599,14 @@ struct TesterTest: Tester {
 
     void testName();
 
+    void verifyVarargs();
+    void verifyExplicitBool();
+
     void compareNoCommonType();
     void compareAsOverload();
     void compareAsVarargs();
     void compareWithDereference();
     void compareNonCopyable();
-    void verifyExplicitBool();
     void expectFailIfExplicitBool();
 
     void macrosInALambda();
@@ -666,12 +668,14 @@ TesterTest::TesterTest() {
 
               &TesterTest::testName,
 
+              &TesterTest::verifyVarargs,
+              &TesterTest::verifyExplicitBool,
+
               &TesterTest::compareNoCommonType,
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
               &TesterTest::compareWithDereference,
               &TesterTest::compareNonCopyable,
-              &TesterTest::verifyExplicitBool,
               &TesterTest::expectFailIfExplicitBool,
 
               &TesterTest::macrosInALambda});
@@ -1508,6 +1512,27 @@ void TesterTest::testName() {
         Compare::StringToFile);
 }
 
+void TesterTest::verifyVarargs() {
+    /* Shouldn't need to have braces around */
+    CORRADE_VERIFY(std::is_constructible<Containers::StringView, const char*>::value);
+}
+
+void TesterTest::verifyExplicitBool() {
+    struct ExplicitTrue { explicit operator bool() const { return true; } };
+    ExplicitTrue t;
+    CORRADE_VERIFY(t);
+    CORRADE_VERIFY(ExplicitTrue());
+
+    struct ExplicitTrueNonConst { explicit operator bool() { return true; } };
+    ExplicitTrueNonConst tc;
+    CORRADE_VERIFY(tc);
+    CORRADE_VERIFY(ExplicitTrueNonConst());
+
+    struct ExplicitFalse { explicit operator bool() const { return false; } };
+    ExplicitFalse f;
+    CORRADE_VERIFY(!f);
+}
+
 void TesterTest::compareNoCommonType() {
     /* Test that this compiles well */
     struct A {
@@ -1555,22 +1580,6 @@ void TesterTest::compareNonCopyable() {
     /* Just to verify that there is no need to copy anything anywhere */
     NonCopyable a, b;
     CORRADE_COMPARE(a, b);
-}
-
-void TesterTest::verifyExplicitBool() {
-    struct ExplicitTrue { explicit operator bool() const { return true; } };
-    ExplicitTrue t;
-    CORRADE_VERIFY(t);
-    CORRADE_VERIFY(ExplicitTrue());
-
-    struct ExplicitTrueNonConst { explicit operator bool() { return true; } };
-    ExplicitTrueNonConst tc;
-    CORRADE_VERIFY(tc);
-    CORRADE_VERIFY(ExplicitTrueNonConst());
-
-    struct ExplicitFalse { explicit operator bool() const { return false; } };
-    ExplicitFalse f;
-    CORRADE_VERIFY(!f);
 }
 
 void TesterTest::expectFailIfExplicitBool() {

@@ -88,13 +88,13 @@ void ArrayViewStlTest::convertFromArray() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
-    CORRADE_VERIFY((std::is_same<decltype(c), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<float>>::value);
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 
     auto d = arrayView(std::array<float, 3>{});
-    CORRADE_VERIFY((std::is_same<decltype(d), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), ArrayView<float>>::value);
     CORRADE_COMPARE(c.size(), 3);
     /* The rest is a dangling pointer, can't test */
 }
@@ -117,7 +117,7 @@ void ArrayViewStlTest::convertFromConstArray() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
-    CORRADE_VERIFY((std::is_same<decltype(c), ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<const float>>::value);
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
@@ -212,13 +212,13 @@ void ArrayViewStlTest::convertFromVector() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
-    CORRADE_VERIFY((std::is_same<decltype(c), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<float>>::value);
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 
     auto d = arrayView(std::vector<float>(3));
-    CORRADE_VERIFY((std::is_same<decltype(d), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), ArrayView<float>>::value);
     CORRADE_COMPARE(c.size(), 3);
     /* The rest is a dangling pointer, can't test */
 }
@@ -240,7 +240,7 @@ void ArrayViewStlTest::convertFromConstVector() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
-    CORRADE_VERIFY((std::is_same<decltype(c), ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<const float>>::value);
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);

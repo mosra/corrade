@@ -190,7 +190,7 @@ void AssertTest::expressionExplicitBoolMoveOnly() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertion evaluation");
     #endif
 
-    CORRADE_VERIFY((!std::is_convertible<Containers::Pointer<int>, bool>::value));
+    CORRADE_VERIFY(!std::is_convertible<Containers::Pointer<int>, bool>::value);
     CORRADE_VERIFY(!std::is_copy_constructible<Containers::Pointer<int>>::value);
     CORRADE_VERIFY(!std::is_copy_assignable<Containers::Pointer<int>>::value);
 

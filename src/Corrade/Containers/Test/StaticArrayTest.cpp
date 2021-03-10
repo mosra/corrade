@@ -417,16 +417,16 @@ void StaticArrayTest::copy() {
     CORRADE_COMPARE(Copyable::moved, 0);
 
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Copyable>::value);
-    CORRADE_VERIFY((std::is_nothrow_copy_constructible<Containers::StaticArray<3, Copyable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Containers::StaticArray<3, Copyable>>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Copyable>::value);
-    CORRADE_VERIFY((std::is_nothrow_copy_assignable<Containers::StaticArray<3, Copyable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Containers::StaticArray<3, Copyable>>::value);
 
     CORRADE_VERIFY(std::is_copy_constructible<Throwable>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_copy_constructible<Throwable>::value));
-    CORRADE_VERIFY(!(std::is_nothrow_copy_constructible<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Containers::StaticArray<3, Throwable>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Throwable>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_copy_assignable<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Containers::StaticArray<3, Throwable>>::value);
 }
 
 
@@ -454,31 +454,31 @@ void StaticArrayTest::move() {
     CORRADE_VERIFY(!std::is_copy_assignable<Movable>::value);
     {
         CORRADE_EXPECT_FAIL("StaticArray currently doesn't propagate deleted copy constructor/assignment correctly.");
-        CORRADE_VERIFY(!(std::is_copy_constructible<Containers::StaticArray<3, Movable>>::value));
-        CORRADE_VERIFY(!(std::is_copy_assignable<Containers::StaticArray<3, Movable>>::value));
+        CORRADE_VERIFY(!std::is_copy_constructible<Containers::StaticArray<3, Movable>>::value);
+        CORRADE_VERIFY(!std::is_copy_assignable<Containers::StaticArray<3, Movable>>::value);
     }
 
-    CORRADE_VERIFY((std::is_move_constructible<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY(std::is_move_constructible<Containers::StaticArray<3, Movable>>::value);
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
-    CORRADE_VERIFY((std::is_nothrow_move_constructible<Containers::StaticArray<3, Movable>>::value));
-    CORRADE_VERIFY((std::is_move_assignable<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Containers::StaticArray<3, Movable>>::value);
+    CORRADE_VERIFY(std::is_move_assignable<Containers::StaticArray<3, Movable>>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Movable>::value);
-    CORRADE_VERIFY((std::is_nothrow_move_assignable<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Containers::StaticArray<3, Movable>>::value);
 
     CORRADE_VERIFY(std::is_move_constructible<Throwable>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_move_constructible<Throwable>::value));
-    CORRADE_VERIFY(!(std::is_nothrow_move_constructible<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(!std::is_nothrow_move_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_constructible<Containers::StaticArray<3, Throwable>>::value);
     CORRADE_VERIFY(std::is_move_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_assignable<Throwable>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_move_assignable<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(!std::is_nothrow_move_assignable<Containers::StaticArray<3, Throwable>>::value);
 }
 
 void StaticArrayTest::convertBool() {
     CORRADE_VERIFY(StaticArray{});
 
     /* Explicit conversion to bool is allowed, but not to int */
-    CORRADE_VERIFY((std::is_constructible<bool, StaticArray>::value));
-    CORRADE_VERIFY(!(std::is_constructible<int, StaticArray>::value));
+    CORRADE_VERIFY(std::is_constructible<bool, StaticArray>::value);
+    CORRADE_VERIFY(!std::is_constructible<int, StaticArray>::value);
 }
 
 void StaticArrayTest::convertPointer() {
@@ -496,10 +496,10 @@ void StaticArrayTest::convertPointer() {
     CORRADE_COMPARE(f, &e[2]);
 
     /* Verify that we can't convert rvalues */
-    CORRADE_VERIFY((std::is_convertible<StaticArray&, int*>::value));
-    CORRADE_VERIFY((std::is_convertible<const StaticArray&, const int*>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StaticArray, int*>::value));
-    CORRADE_VERIFY(!(std::is_convertible<StaticArray&&, int*>::value));
+    CORRADE_VERIFY(std::is_convertible<StaticArray&, int*>::value);
+    CORRADE_VERIFY(std::is_convertible<const StaticArray&, const int*>::value);
+    CORRADE_VERIFY(!std::is_convertible<StaticArray, int*>::value);
+    CORRADE_VERIFY(!std::is_convertible<StaticArray&&, int*>::value);
 
     /* Deleting const&& overload and leaving only const& one will not, in fact,
        disable conversion of const Array&& to pointer, but rather make the
@@ -507,8 +507,8 @@ void StaticArrayTest::convertPointer() {
        rvalueArrayAccess() test. */
     {
         CORRADE_EXPECT_FAIL("I don't know how to properly disable conversion of const Array&& to pointer.");
-        CORRADE_VERIFY(!(std::is_convertible<const StaticArray, const int*>::value));
-        CORRADE_VERIFY(!(std::is_convertible<const StaticArray&&, const int*>::value));
+        CORRADE_VERIFY(!std::is_convertible<const StaticArray, const int*>::value);
+        CORRADE_VERIFY(!std::is_convertible<const StaticArray&&, const int*>::value);
     }
 }
 
@@ -536,10 +536,10 @@ void StaticArrayTest::convertView() {
         const auto cb = arrayView(ca);
         const auto bc = arrayView(ac);
         const auto cbc = arrayView(cac);
-        CORRADE_VERIFY((std::is_same<decltype(b), const ArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(bc), const ConstArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(cbc), const ConstArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), const ArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(bc), const ConstArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cbc), const ConstArrayView>::value);
         CORRADE_VERIFY(b.begin() == a.begin());
         CORRADE_VERIFY(bc.begin() == ac.begin());
         CORRADE_VERIFY(cb.begin() == ca.begin());
@@ -605,10 +605,10 @@ void StaticArrayTest::convertStaticView() {
         const auto cb = staticArrayView(ca);
         const auto bc = staticArrayView(ac);
         const auto cbc = staticArrayView(cac);
-        CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstStaticArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(bc), const ConstStaticArrayView>::value));
-        CORRADE_VERIFY((std::is_same<decltype(cbc), const ConstStaticArrayView>::value));
+        CORRADE_VERIFY(std::is_same<decltype(b), const StaticArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStaticArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(bc), const ConstStaticArrayView>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cbc), const ConstStaticArrayView>::value);
         CORRADE_VERIFY(b.begin() == a.begin());
         CORRADE_VERIFY(bc.begin() == ac.begin());
         CORRADE_VERIFY(cb.begin() == ca.begin());
@@ -678,12 +678,12 @@ void StaticArrayTest::convertToExternalView() {
     CORRADE_COMPARE(cb.data, a.data());
 
     /* Conversion to a different size or type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, int>, IntView5>::value));
-    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, int>, ConstIntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<6, int>, IntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<6, int>, ConstIntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, float>, IntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, float>, ConstIntView5>::value));
+    CORRADE_VERIFY(std::is_convertible<Containers::StaticArray<5, int>, IntView5>::value);
+    CORRADE_VERIFY(std::is_convertible<Containers::StaticArray<5, int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::StaticArray<6, int>, IntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::StaticArray<6, int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::StaticArray<5, float>, IntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::StaticArray<5, float>, ConstIntView5>::value);
 }
 
 void StaticArrayTest::convertToConstExternalView() {
@@ -693,9 +693,9 @@ void StaticArrayTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.data, a.data());
 
     /* Conversion to a different size or type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<const Containers::StaticArray<5, int>, ConstIntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const Containers::StaticArray<6, int>, ConstIntView5>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const Containers::StaticArray<5, float>, ConstIntView5>::value));
+    CORRADE_VERIFY(std::is_convertible<const Containers::StaticArray<5, int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Containers::StaticArray<6, int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Containers::StaticArray<5, float>, ConstIntView5>::value);
 }
 
 void StaticArrayTest::access() {
@@ -930,15 +930,15 @@ void StaticArrayTest::cast() {
     auto cd = Containers::arrayCast<const std::uint16_t>(ca);
     auto cdc = Containers::arrayCast<const std::uint16_t>(cac);
 
-    CORRADE_VERIFY((std::is_same<decltype(b), Containers::StaticArrayView<3, std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(bc), Containers::StaticArrayView<3, const std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cb), Containers::StaticArrayView<3, const std::uint64_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cbc), Containers::StaticArrayView<3, const std::uint64_t>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(b), Containers::StaticArrayView<3, std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(bc), Containers::StaticArrayView<3, const std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cb), Containers::StaticArrayView<3, const std::uint64_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cbc), Containers::StaticArrayView<3, const std::uint64_t>>::value);
 
-    CORRADE_VERIFY((std::is_same<decltype(d), Containers::StaticArrayView<12,  std::uint16_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cd), Containers::StaticArrayView<12, const std::uint16_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(dc), Containers::StaticArrayView<12, const std::uint16_t>>::value));
-    CORRADE_VERIFY((std::is_same<decltype(cdc), Containers::StaticArrayView<12, const std::uint16_t>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), Containers::StaticArrayView<12,  std::uint16_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cd), Containers::StaticArrayView<12, const std::uint16_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(dc), Containers::StaticArrayView<12, const std::uint16_t>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cdc), Containers::StaticArrayView<12, const std::uint16_t>>::value);
 
     CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
     CORRADE_COMPARE(reinterpret_cast<const void*>(cb.begin()), reinterpret_cast<const void*>(ca.begin()));

@@ -92,6 +92,8 @@ namespace Corrade {
     tests to provide application name for each executable
 -   New @ref TestSuite::Tester::setTestCaseTemplateName() overload taking a
     list of strings for test cases templated by more than one parameter
+-   The @ref CORRADE_VERIFY() macro now now accepts varargs, meaning that you
+    no longer need to wrap expressions containing commas in extra parentheses
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

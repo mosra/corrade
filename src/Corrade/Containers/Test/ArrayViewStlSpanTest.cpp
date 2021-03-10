@@ -103,7 +103,7 @@ void ArrayViewStlSpanTest::convertSpan() {
     CORRADE_COMPARE(c[0], 42.0f);
 
     auto d = arrayView(c);
-    CORRADE_VERIFY((std::is_same<decltype(d), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), ArrayView<float>>::value);
     CORRADE_COMPARE(d.data(), static_cast<void*>(data));
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 42.0f);
@@ -120,19 +120,19 @@ void ArrayViewStlSpanTest::convertSpan() {
     CORRADE_COMPARE(cc[0], 42.0f);
 
     constexpr auto cd = arrayView(cc);
-    CORRADE_VERIFY((std::is_same<decltype(cd), const ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(cd), const ArrayView<const float>>::value);
     CORRADE_COMPARE(cd.data(), static_cast<const void*>(Data));
     CORRADE_COMPARE(cd.size(), 3);
     CORRADE_COMPARE(cd[0], 42.0f);
 
     /* Conversion from a different type not allowed */
-    CORRADE_VERIFY((std::is_convertible<std::span<int>, Containers::ArrayView<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<std::span<int>, Containers::ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_convertible<std::span<int>, Containers::ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<std::span<int>, Containers::ArrayView<float>>::value);
 
     /* Because we're using builtin std::span conversion constructor here, check
        that conversion to a different size or type is correctly not allowed */
-    CORRADE_VERIFY((std::is_convertible<const Containers::ArrayView<int>&, std::span<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const Containers::ArrayView<int>&, std::span<float>>::value));
+    CORRADE_VERIFY(std::is_convertible<const Containers::ArrayView<int>&, std::span<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Containers::ArrayView<int>&, std::span<float>>::value);
     #endif
 }
 
@@ -164,8 +164,8 @@ void ArrayViewStlSpanTest::convertConstFromSpan() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Conversion from a different type not allowed */
-    CORRADE_VERIFY((std::is_convertible<std::span<int>, Containers::ArrayView<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<std::span<int>, Containers::ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<std::span<int>, Containers::ArrayView<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<std::span<int>, Containers::ArrayView<const float>>::value);
     #endif
 }
 
@@ -195,8 +195,8 @@ void ArrayViewStlSpanTest::convertToConstSpan() {
 
     /* Because we're using builtin std::span conversion constructor here, check
        that conversion to a different size or type is correctly not allowed */
-    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<int>, std::span<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<int>, std::span<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<Containers::ArrayView<int>, std::span<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Containers::ArrayView<int>, std::span<const float>>::value);
     #endif
 }
 
@@ -280,7 +280,7 @@ void ArrayViewStlSpanTest::convertFromSpanSized() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
-    CORRADE_VERIFY((std::is_same<decltype(b), ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(b), ArrayView<float>>::value);
     CORRADE_COMPARE(c.data(), static_cast<void*>(data));
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
@@ -292,14 +292,14 @@ void ArrayViewStlSpanTest::convertFromSpanSized() {
     CORRADE_COMPARE(cb[0], 42.0f);
 
     constexpr auto cc = arrayView(ca);
-    CORRADE_VERIFY((std::is_same<decltype(cb), const ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(cb), const ArrayView<const float>>::value);
     CORRADE_COMPARE(cc.data(), static_cast<const void*>(Data));
     CORRADE_COMPARE(cc.size(), 3);
     CORRADE_COMPARE(cc[0], 42.0f);
 
     /* Conversion from a different type not allowed */
-    CORRADE_VERIFY((std::is_convertible<std::span<int, 37>, Containers::ArrayView<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<std::span<int, 37>, Containers::ArrayView<float>>::value));
+    CORRADE_VERIFY(std::is_convertible<std::span<int, 37>, Containers::ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<std::span<int, 37>, Containers::ArrayView<float>>::value);
     #endif
 }
 
@@ -319,12 +319,12 @@ void ArrayViewStlSpanTest::convertToSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    CORRADE_VERIFY((std::is_convertible<ArrayView<float>&, std::span<float>>::value));
+    CORRADE_VERIFY(std::is_convertible<ArrayView<float>&, std::span<float>>::value);
     {
         #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
-        CORRADE_VERIFY(!(std::is_convertible<ArrayView<float>&, std::span<float, 3>>::value));
+        CORRADE_VERIFY(!std::is_convertible<ArrayView<float>&, std::span<float, 3>>::value);
     }
     #endif
 }
@@ -342,8 +342,8 @@ void ArrayViewStlSpanTest::convertConstFromSpanSized() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Conversion from a different type not allowed */
-    CORRADE_VERIFY((std::is_convertible<std::span<int, 37>, Containers::ArrayView<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<std::span<int, 37>, Containers::ArrayView<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<std::span<int, 37>, Containers::ArrayView<const int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<std::span<int, 37>, Containers::ArrayView<const float>>::value);
     #endif
 }
 
@@ -363,14 +363,14 @@ void ArrayViewStlSpanTest::convertToConstSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    CORRADE_VERIFY((std::is_convertible<ArrayView<float>&, std::span<const float>>::value));
-    CORRADE_VERIFY((std::is_convertible<ArrayView<const float>&, std::span<const float>>::value));
+    CORRADE_VERIFY(std::is_convertible<ArrayView<float>&, std::span<const float>>::value);
+    CORRADE_VERIFY(std::is_convertible<ArrayView<const float>&, std::span<const float>>::value);
     {
         #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
-        CORRADE_VERIFY(!(std::is_convertible<ArrayView<float>&, std::span<const float, 3>>::value));
-        CORRADE_VERIFY(!(std::is_convertible<ArrayView<const float>&, std::span<const float, 3>>::value));
+        CORRADE_VERIFY(!std::is_convertible<ArrayView<float>&, std::span<const float, 3>>::value);
+        CORRADE_VERIFY(!std::is_convertible<ArrayView<const float>&, std::span<const float, 3>>::value);
     }
     #endif
 }

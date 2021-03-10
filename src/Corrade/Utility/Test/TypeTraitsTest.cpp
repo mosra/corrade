@@ -95,11 +95,11 @@ void TypeTraitsTest::longDoubleSize() {
 void TypeTraitsTest::isTriviallyTraitsSupported() {
     #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
     Debug{} << "std::is_trivially_* traits supported";
-    CORRADE_VERIFY((std::is_trivially_constructible<int, int>::value));
+    CORRADE_VERIFY(std::is_trivially_constructible<int, int>::value);
     CORRADE_VERIFY(std::is_trivially_default_constructible<int>::value);
     CORRADE_VERIFY(std::is_trivially_copy_constructible<int>::value);
     CORRADE_VERIFY(std::is_trivially_move_constructible<int>::value);
-    CORRADE_VERIFY((std::is_trivially_assignable<int&, int>::value));
+    CORRADE_VERIFY(std::is_trivially_assignable<int&, int>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<int>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<int>::value);
     #else
@@ -118,12 +118,12 @@ CORRADE_HAS_TYPE(HasBegin, decltype(std::begin(std::declval<T>())));
 
 void TypeTraitsTest::hasType() {
     /* Member type */
-    CORRADE_VERIFY((HasKeyType<std::map<int, int>>::value));
+    CORRADE_VERIFY(HasKeyType<std::map<int, int>>::value);
     CORRADE_VERIFY(!HasKeyType<std::vector<int>>::value);
 
     /* Member function */
     CORRADE_VERIFY(HasSize<std::vector<int>>::value);
-    CORRADE_VERIFY(!(HasSize<std::pair<int, int>>::value));
+    CORRADE_VERIFY(!HasSize<std::pair<int, int>>::value);
 
     /* Non-member function */
     CORRADE_VERIFY(HasBegin<std::string>::value);

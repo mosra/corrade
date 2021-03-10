@@ -217,7 +217,7 @@ void OptionalTest::nullOptNoDefaultConstructor() {
 }
 
 void OptionalTest::nullOptInlineDefinition() {
-    CORRADE_VERIFY((std::is_same<decltype(NullOpt), const NullOptT>::value));
+    CORRADE_VERIFY(std::is_same<decltype(NullOpt), const NullOptT>::value);
 }
 
 struct Throwable {
@@ -343,8 +343,8 @@ void OptionalTest::constructNullOpt() {
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 0);
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Copyable>, NullOptT>::value));
-    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Throwable>, NullOptT>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Copyable>, NullOptT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Throwable>, NullOptT>::value);
 }
 
 void OptionalTest::constructCopy() {
@@ -364,19 +364,19 @@ void OptionalTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Copyable>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Optional<Copyable>>::value);
-    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Copyable>, const Copyable&>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Copyable>, const Copyable&>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Copyable>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Optional<Copyable>>::value);
-    CORRADE_VERIFY((std::is_nothrow_assignable<Optional<Copyable>, const Copyable&>::value));
+    CORRADE_VERIFY(std::is_nothrow_assignable<Optional<Copyable>, const Copyable&>::value);
 
     CORRADE_VERIFY(std::is_copy_constructible<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Optional<Throwable>>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, const Throwable&>::value));
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Optional<Throwable>, const Throwable&>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Optional<Throwable>>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_assignable<Optional<Throwable>, const Throwable&>::value));
+    CORRADE_VERIFY(!std::is_nothrow_assignable<Optional<Throwable>, const Throwable&>::value);
 }
 
 void OptionalTest::constructCopyMake() {
@@ -384,7 +384,7 @@ void OptionalTest::constructCopyMake() {
         Copyable v{32};
         auto a = optional(v);
         CORRADE_VERIFY(a);
-        CORRADE_VERIFY((std::is_same<decltype(a), Optional<Copyable>>::value));
+        CORRADE_VERIFY(std::is_same<decltype(a), Optional<Copyable>>::value);
         CORRADE_COMPARE(a->a, 32);
     }
 
@@ -417,19 +417,19 @@ void OptionalTest::constructMove() {
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Movable>>::value);
-    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Movable>, Movable&&>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Movable>, Movable&&>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Movable>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Optional<Movable>>::value);
-    CORRADE_VERIFY((std::is_nothrow_assignable<Optional<Movable>, Movable&&>::value));
+    CORRADE_VERIFY(std::is_nothrow_assignable<Optional<Movable>, Movable&&>::value);
 
     CORRADE_VERIFY(std::is_move_constructible<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_constructible<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_constructible<Optional<Throwable>>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, Throwable&&>::value));
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Optional<Throwable>, Throwable&&>::value);
     CORRADE_VERIFY(std::is_move_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_assignable<Optional<Throwable>>::value);
-    CORRADE_VERIFY(!(std::is_nothrow_assignable<Optional<Throwable>, Throwable&&>::value));
+    CORRADE_VERIFY(!std::is_nothrow_assignable<Optional<Throwable>, Throwable&&>::value);
 }
 
 void OptionalTest::constructMoveMake() {
@@ -468,9 +468,9 @@ void OptionalTest::constructInPlace() {
         CORRADE_VERIFY(!std::is_move_assignable<Optional<Immovable>>::value);
     }
 
-    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Immovable>, InPlaceInitT, int, int&&>::value));
-    CORRADE_VERIFY((std::is_constructible<Optional<Throwable>, InPlaceInitT, int>::value));
-    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, InPlaceInitT, int>::value));
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Immovable>, InPlaceInitT, int, int&&>::value);
+    CORRADE_VERIFY(std::is_constructible<Optional<Throwable>, InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Optional<Throwable>, InPlaceInitT, int>::value);
 }
 
 void OptionalTest::constructInPlaceMake() {
@@ -535,19 +535,19 @@ void OptionalTest::convertCopy() {
     CORRADE_COMPARE(c.a, 5);
 
     auto d = optional(MaybeInt{35});
-    CORRADE_VERIFY((std::is_same<decltype(d), Optional<int>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), Optional<int>>::value);
     CORRADE_VERIFY(d);
     CORRADE_COMPARE(*d, 35);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_constructible<Optional<int>, MaybeInt>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Optional<float>, MaybeInt>::value));
-    CORRADE_VERIFY((std::is_constructible<MaybeInt, Optional<int>>::value));
-    CORRADE_VERIFY(!(std::is_constructible<MaybeInt, Optional<float>>::value));
+    CORRADE_VERIFY(std::is_constructible<Optional<int>, MaybeInt>::value);
+    CORRADE_VERIFY(!std::is_constructible<Optional<float>, MaybeInt>::value);
+    CORRADE_VERIFY(std::is_constructible<MaybeInt, Optional<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<MaybeInt, Optional<float>>::value);
 
     /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!(std::is_convertible<const MaybeInt&, Optional<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<const Optional<int>&, MaybeInt>::value));
+    CORRADE_VERIFY(!std::is_convertible<const MaybeInt&, Optional<int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Optional<int>&, MaybeInt>::value);
 }
 
 void OptionalTest::convertMove() {
@@ -567,26 +567,26 @@ void OptionalTest::convertMove() {
 
     int dv = 17; /* to avoid a leak */
     auto d = optional(MaybePtr{&dv});
-    CORRADE_VERIFY((std::is_same<decltype(d), Optional<int*>>::value));
+    CORRADE_VERIFY(std::is_same<decltype(d), Optional<int*>>::value);
     CORRADE_VERIFY(d);
     CORRADE_VERIFY(*d);
     CORRADE_COMPARE(**d, 17);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY((std::is_constructible<Optional<int*>, MaybePtr&&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Optional<float*>, MaybePtr&&>::value));
-    CORRADE_VERIFY((std::is_constructible<MaybePtr, Optional<int*>&&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, Optional<float*>&&>::value));
+    CORRADE_VERIFY(std::is_constructible<Optional<int*>, MaybePtr&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Optional<float*>, MaybePtr&&>::value);
+    CORRADE_VERIFY(std::is_constructible<MaybePtr, Optional<int*>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<MaybePtr, Optional<float*>&&>::value);
 
     /* Copy construction is not allowed */
-    CORRADE_VERIFY(!(std::is_constructible<Optional<int*>, MaybePtr&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<Optional<int*>, const MaybePtr&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, Optional<int*>&>::value));
-    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, const Optional<int*>&>::value));
+    CORRADE_VERIFY(!std::is_constructible<Optional<int*>, MaybePtr&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Optional<int*>, const MaybePtr&>::value);
+    CORRADE_VERIFY(!std::is_constructible<MaybePtr, Optional<int*>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<MaybePtr, const Optional<int*>&>::value);
 
     /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!(std::is_convertible<MaybePtr&&, Optional<int*>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Optional<int*>&&, MaybePtr>::value));
+    CORRADE_VERIFY(!std::is_convertible<MaybePtr&&, Optional<int*>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Optional<int*>&&, MaybePtr>::value);
 }
 
 void OptionalTest::constructCopyFromNull() {
@@ -658,8 +658,8 @@ void OptionalTest::boolConversion() {
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!!b);
 
-    CORRADE_VERIFY(!(std::is_convertible<Optional<int>, int>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Optional<int>, bool>::value));
+    CORRADE_VERIFY(!std::is_convertible<Optional<int>, int>::value);
+    CORRADE_VERIFY(!std::is_convertible<Optional<int>, bool>::value);
 }
 
 void OptionalTest::compareToOptional() {

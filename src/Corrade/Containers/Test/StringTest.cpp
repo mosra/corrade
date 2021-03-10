@@ -275,7 +275,7 @@ void StringTest::allocatedInitTagNoDefaultConstructor() {
 }
 
 void StringTest::allocatedInitTagInlineDefinition() {
-    CORRADE_VERIFY((std::is_same<decltype(AllocatedInit), const AllocatedInitT>::value));
+    CORRADE_VERIFY(std::is_same<decltype(AllocatedInit), const AllocatedInitT>::value);
 }
 
 void StringTest::constructDefault() {
@@ -1609,7 +1609,7 @@ template<class T> void StringTest::find() {
 
         typename ConstTraits<T>::ViewType found = a.find("cursed");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!(static_cast<const void*>(found.data())));
+        CORRADE_VERIFY(!static_cast<const void*>(found.data()));
     }
 }
 
