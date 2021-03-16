@@ -236,13 +236,13 @@ Defined if the library is built for Android.
 
 Defined if the library is built for x86 platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC and
-@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
-unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
-@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
-@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
-yet.
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM
+and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
+is unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -252,13 +252,13 @@ yet.
 
 Defined if the library is built for ARM platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC and
-@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
-unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
-@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
-@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
-yet.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM
+and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
+is unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM
@@ -269,17 +269,34 @@ yet.
 
 Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_WASM and
 @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
 unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
-@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
-@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
-yet.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 @see @ref CORRADE_TARGET_BIG_ENDIAN
 */
 #define CORRADE_TARGET_POWERPC
 #undef CORRADE_TARGET_POWERPC
+
+/**
+@brief WebAssembly target
+@m_since_latest
+
+Defined if the library is built for WebAssembly (32 or 64-bit). Note that
+unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
+is unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
+*/
+#define CORRADE_TARGET_WASM
+#undef CORRADE_TARGET_WASM
 
 /**
 @brief Big-Endian target

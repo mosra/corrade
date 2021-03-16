@@ -124,9 +124,9 @@ void TargetTest::architecture() {
     Debug{&out} << "CORRADE_TARGET_POWERPC";
     #endif
 
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    #ifdef CORRADE_TARGET_WASM
     ++unique;
-    Debug{&out} << "CORRADE_TARGET_EMSCRIPTEN";
+    Debug{&out} << "CORRADE_TARGET_WASM";
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();

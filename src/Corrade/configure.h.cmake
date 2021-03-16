@@ -66,9 +66,13 @@
 #elif defined(__powerpc64__) || defined(_M_PPC)
 #define CORRADE_TARGET_POWERPC
 
-/* Otherwise one should expect CORRADE_TARGET_EMSCRIPTEN. No other platforms
-   are currently tested for, but that's okay -- a runtime test for this is in
-   Utility/Test/SystemTest.cpp */
+/* WebAssembly (on Emscripten). Old pure asm.js toolchains did not define this,
+   recent Emscripten does that even with `-s WASM=0`. */
+#elif defined(__wasm__)
+#define CORRADE_TARGET_WASM
+
+/* No other platforms are currently tested for, but that's okay -- a runtime
+   test for this is in Utility/Test/SystemTest.cpp */
 #endif
 
 /* Sanity checks. This might happen when using Emscripten-compiled code with

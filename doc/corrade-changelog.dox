@@ -34,6 +34,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   New @ref CORRADE_TARGET_WASM preprocessor variable for any (even
+    non-Emscripten) WebAssembly target, as a complement to
+    @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
+    @ref CORRADE_TARGET_POWERPC
+
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::ArrayTuple class for coalescing arrays of homogeneous
