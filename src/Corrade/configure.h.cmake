@@ -71,8 +71,9 @@
    Utility/Test/SystemTest.cpp */
 #endif
 
-/* Sanity checks */
-#if defined(CORRADE_TARGET_EMSCRIPTEN) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM))
+/* Sanity checks. This might happen when using Emscripten-compiled code with
+   native compilers, at which point we should just die. */
+#if defined(CORRADE_TARGET_EMSCRIPTEN) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM) || defined(CORRADE_TARGET_POWERPC))
 #error CORRADE_TARGET_X86 / _ARM / _POWERPC defined on Emscripten
 #endif
 
