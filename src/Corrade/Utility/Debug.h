@@ -839,6 +839,11 @@ template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
+    /* True if the values themselves are also containers. A string is
+       technically a container too, but printing it as separate chars would be
+       silly. */
+    constexpr bool hasNestedContainer = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value;
+
     /* Nested containers should get printed with the same flags, so make all
        immediate flags temporarily global -- except NoSpace, unless it's also
        set globally */
@@ -848,11 +853,11 @@ template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<It
     const char *beg, *sep, *end;
     if(debug.immediateFlags() & Debug::Flag::Packed) {
         beg = end = "";
-        sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? "\n" : "";
+        sep = hasNestedContainer ? "\n" : "";
     } else {
         beg = "{";
         end = "}";
-        sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? ",\n " : ", ";
+        sep = hasNestedContainer ? ",\n " : ", ";
     }
 
     debug << beg << Debug::nospace;
