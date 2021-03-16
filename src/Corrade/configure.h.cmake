@@ -176,17 +176,69 @@
 #define CORRADE_BIG_ENDIAN
 #endif
 
-/* SIMD extensions. Not much here yet. */
+/* Compile-time SIMD detection */
+#ifdef CORRADE_TARGET_X86
+
+/* SSE on GCC: https://stackoverflow.com/a/28939692 */
 #ifdef CORRADE_TARGET_GCC
 #ifdef __SSE2__
 #define CORRADE_TARGET_SSE2
 #endif
+#ifdef __SSE3__
+#define CORRADE_TARGET_SSE3
+#endif
+#ifdef __SSSE3__
+#define CORRADE_TARGET_SSSE3
+#endif
+#ifdef __SSE4_1__
+#define CORRADE_TARGET_SSE41
+#endif
+#ifdef __SSE4_2__
+#define CORRADE_TARGET_SSE42
+#endif
 
+/* On MSVC: https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros */
 #elif defined(CORRADE_TARGET_MSVC)
 /* _M_IX86_FP is defined only on 32bit, 64bit has SSE2 always (so we need to
    detect 64bit instead: https://stackoverflow.com/a/18570487) */
 #if (defined(_M_IX86_FP) && _M_IX86_FP == 2) || defined(_M_AMD64) || defined(_M_X64)
 #define CORRADE_TARGET_SSE2
+#endif
+/* On MSVC there's no way to detect SSE3 and newer, these are only implied by
+   AVX as far as I can tell */
+#ifdef __AVX__
+#define CORRADE_TARGET_SSE3
+#define CORRADE_TARGET_SSSE3
+#define CORRADE_TARGET_SSE41
+#define CORRADE_TARGET_SSE42
+#endif
+#endif
+
+/* Both GCC and MSVC have the same macros for AVX */
+#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)
+#ifdef __AVX__
+#define CORRADE_TARGET_AVX
+#endif
+#ifdef __AVX2__
+#define CORRADE_TARGET_AVX2
+#endif
+#endif
+
+/* https://stackoverflow.com/a/37056771, confirmed on Android NDK Clang that
+   __ARM_NEON is indeed still set. For MSVC, according to
+   https://docs.microsoft.com/en-us/cpp/intrinsics/arm-intrinsics I would
+   assume that since they use a standard header, they also expose the standard
+   macro name, even though not listed among their predefined macros? Needs
+   testing, though. */
+#elif defined(CORRADE_TARGET_ARM)
+#if (defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)) && defined(__ARM_NEON)
+#define CORRADE_TARGET_NEON
+#endif
+
+/* Undocumented, checked via `echo | em++ -x c++ -dM -E - -msimd128` */
+#elif defined(CORRADE_TARGET_WASM)
+#ifdef __wasm_simd128__
+#define CORRADE_TARGET_SIMD128
 #endif
 #endif
 

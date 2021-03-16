@@ -237,8 +237,70 @@ void TargetTest::stl() {
 void TargetTest::simd() {
     std::ostringstream out;
 
+    #ifdef CORRADE_TARGET_X86
     #ifdef CORRADE_TARGET_SSE2
     Debug{&out} << "CORRADE_TARGET_SSE2";
+    #endif
+
+    #ifdef CORRADE_TARGET_SSE3
+    Debug{&out} << "CORRADE_TARGET_SSE3";
+    #ifndef CORRADE_TARGET_SSE2
+    CORRADE_VERIFY(!"CORRADE_TARGET_SSE3 defined but CORRADE_TARGET_SSE2 not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_SSSE3
+    Debug{&out} << "CORRADE_TARGET_SSSE3";
+    #ifndef CORRADE_TARGET_SSE3
+    CORRADE_VERIFY(!"CORRADE_TARGET_SSSE3 defined but CORRADE_TARGET_SSE3 not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_SSE41
+    Debug{&out} << "CORRADE_TARGET_SSSE41";
+    #ifndef CORRADE_TARGET_SSSE3
+    CORRADE_VERIFY(!"CORRADE_TARGET_SSE41 defined but CORRADE_TARGET_SSSE3 not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_SSE42
+    Debug{&out} << "CORRADE_TARGET_SSSE42";
+    #ifndef CORRADE_TARGET_SSE41
+    CORRADE_VERIFY(!"CORRADE_TARGET_SSE42 defined but CORRADE_TARGET_SSE41 not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_AVX
+    Debug{&out} << "CORRADE_TARGET_AVX";
+    #ifndef CORRADE_TARGET_SSE42
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX defined but CORRADE_TARGET_SSE42 not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_AVX2
+    Debug{&out} << "CORRADE_TARGET_AVX2";
+    #ifndef CORRADE_TARGET_AVX
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX not");
+    #endif
+    #endif
+    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX2)
+    CORRADE_VERIFY(!"CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
+    #endif
+
+    #ifdef CORRADE_TARGET_ARM
+    #ifdef CORRADE_TARGET_NEON
+    Debug{&out} << "CORRADE_TARGET_NEON";
+    #endif
+    #elif defined(CORRADE_TARGET_NEON)
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON defined but CORRADE_TARGET_ARM not");
+    #endif
+
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    #ifdef CORRADE_TARGET_SIMD128
+    Debug{&out} << "CORRADE_TARGET_SIMD128";
+    #endif
+    #elif defined(CORRADE_TARGET_SIMD128)
+    CORRADE_VERIFY(!"CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_EMSCRIPTEN not");
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();

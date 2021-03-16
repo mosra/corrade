@@ -236,13 +236,18 @@ Defined if the library is built for Android.
 
 Defined if the library is built for x86 platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM
-and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
-is unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
-nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
-old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
-library doesn't know about yet.
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM,
+@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
+exposed in CMake because the meaning is unclear on platforms with
+multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
+@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
+pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
+@see @ref CORRADE_TARGET_SSE2, @ref CORRADE_TARGET_SSE3,
+    @ref CORRADE_TARGET_SSSE3, @ref CORRADE_TARGET_SSE41,
+    @ref CORRADE_TARGET_SSE42, @ref CORRADE_TARGET_AVX,
+    @ref CORRADE_TARGET_AVX2
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -252,13 +257,15 @@ library doesn't know about yet.
 
 Defined if the library is built for ARM platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM
-and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
-is unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
-nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
-old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
-library doesn't know about yet.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM,
+@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
+exposed in CMake because the meaning is unclear on platforms with
+multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
+@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
+pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
+@see @ref CORRADE_TARGET_NEON
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM
@@ -269,13 +276,14 @@ library doesn't know about yet.
 
 Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_WASM and
-@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
-unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
-nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
-old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
-library doesn't know about yet.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_WASM,
+@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
+exposed in CMake because the meaning is unclear on platforms with
+multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
+@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
+pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
 @see @ref CORRADE_TARGET_BIG_ENDIAN
 */
 #define CORRADE_TARGET_POWERPC
@@ -287,13 +295,15 @@ library doesn't know about yet.
 
 Defined if the library is built for WebAssembly (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
-and @ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning
-is unclear on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
-nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
-old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
-library doesn't know about yet.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC,
+@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
+exposed in CMake because the meaning is unclear on platforms with
+multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
+@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
+pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
+@see @ref CORRADE_TARGET_SIMD128
 */
 #define CORRADE_TARGET_WASM
 #undef CORRADE_TARGET_WASM
@@ -474,13 +484,123 @@ exposed in CMake because the detection is non-trivial.
 @brief SSE2 target
 @m_since{2020,06}
 
-Defined on x86 if [SSE2](https://en.wikipedia.org/wiki/SSE2) instructions are
-enabled at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or
-higher on MSVC). Nowadays it can be assumed that all x86 targets support SSE2,
-so (unlike AVX and newer) this feature doesn't need any runtime detection.
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Streaming SIMD Extensions 2](https://en.wikipedia.org/wiki/SSE2) are enabled
+at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or higher on
+MSVC). All x86-64 targets support SSE2. Implied by @ref CORRADE_TARGET_SSE3.
 */
 #define CORRADE_TARGET_SSE2
 #undef CORRADE_TARGET_SSE2
+
+/**
+@brief SSE3 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Streaming SIMD Extensions 3](https://en.wikipedia.org/wiki/SSE3) are enabled
+at compile time (on GCC/Clang it's `-msse3` and higher, MSVC doesn't have a
+direct option and it's only implied by `/arch:AVX`). Superset of
+@ref CORRADE_TARGET_SSE2, implied by @ref CORRADE_TARGET_SSSE3.
+*/
+#define CORRADE_TARGET_SSE3
+#undef CORRADE_TARGET_SSE3
+
+/**
+@brief SSSE3 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Supplemental Streaming SIMD Extensions 3](https://en.wikipedia.org/wiki/SSE3)
+are enabled at compile time (on GCC/Clang it's `-mssse3` and higher, MSVC
+doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
+@ref CORRADE_TARGET_SSE3, implied by @ref CORRADE_TARGET_SSE41.
+
+Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wiki/SSE4#SSE4a)
+but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
+to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
+detect those.
+*/
+#define CORRADE_TARGET_SSSE3
+#undef CORRADE_TARGET_SSSE3
+
+/**
+@brief SSE4.1 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Streaming SIMD Extensions 4.1](https://en.wikipedia.org/wiki/SSE4#SSE4.1)
+are enabled at compile time (on GCC/Clang it's `-msse4.1` and higher, MSVC
+doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
+@ref CORRADE_TARGET_SSSE3, implied by @ref CORRADE_TARGET_SSE42.
+
+Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wiki/SSE4#SSE4a)
+but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
+to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
+detect those.
+*/
+#define CORRADE_TARGET_SSE41
+#undef CORRADE_TARGET_SSE41
+
+/**
+@brief SSE4.2 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Streaming SIMD Extensions 4.2](https://en.wikipedia.org/wiki/SSE4#SSE4.2)
+are enabled at compile time (on GCC/Clang it's `-msse4.2` and higher, MSVC
+doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
+@ref CORRADE_TARGET_SSE41, implied by @ref CORRADE_TARGET_AVX.
+*/
+#define CORRADE_TARGET_SSE42
+#undef CORRADE_TARGET_SSE42
+
+/**
+@brief AVX target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Advanced Vector Extensions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions)
+are enabled at compile time (`-mavx` and higher on GCC/Clang, `/arch:AVX` on
+MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
+@ref CORRADE_TARGET_AVX2.
+*/
+#define CORRADE_TARGET_AVX
+#undef CORRADE_TARGET_AVX
+
+/**
+@brief AVX2 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[Advanced Vector Extensions 2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2)
+are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
+MSVC). Superset of @ref CORRADE_TARGET_AVX.
+*/
+#define CORRADE_TARGET_AVX2
+#undef CORRADE_TARGET_AVX2
+
+/**
+@brief NEON target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_ARM "ARM" if
+[ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
+instructions are enabled at compile time (`-mfpu=neon` on GCC/Clang, implicitly
+supported on AArch64).
+*/
+#define CORRADE_TARGET_NEON
+#undef CORRADE_TARGET_NEON
+
+/**
+@brief SIMD128 target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_WASM "WebAssembly" if
+[128-bit SIMD](https://github.com/webassembly/simd) instructions are enabled at
+compile time (`-msimd128` passed to Clang).
+*/
+#define CORRADE_TARGET_SIMD128
+#undef CORRADE_TARGET_SIMD128
 
 /**
 @brief PluginManager doesn't have dynamic plugin support on this platform
