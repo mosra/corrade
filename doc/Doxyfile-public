@@ -38,7 +38,8 @@ ALIASES                = \
     "m_since{2}=@since @m_class{m-label m-success m-flat} @ref corrade-changelog-\1-\2 \"new&nbsp;in&nbsp;\1.\2\"" \
     "m_since_latest=@since @m_class{m-label m-success m-flat} @ref corrade-changelog-latest \"new&nbsp;in&nbsp;Git&nbsp;master\"" \
     "m_deprecated_since{2}=@since deprecated&nbsp;in&nbsp;\1.\2 @deprecated" \
-    "m_deprecated_since_latest=@since deprecated&nbsp;in&nbsp;Git&nbsp;master @deprecated"
+    "m_deprecated_since_latest=@since deprecated&nbsp;in&nbsp;Git&nbsp;master @deprecated" \
+    "relativeref{2}=@ref \1::\2 \"\2\""
 
 GENERATE_TODOLIST      = NO
 GENERATE_BUGLIST       = NO
