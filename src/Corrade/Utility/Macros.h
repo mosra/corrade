@@ -283,11 +283,22 @@ being unused. If possible, use @cpp static_cast<void>(var) @ce or nameless
 function parameters instead.
 
 @snippet Utility.cpp CORRADE_UNUSED
+
+Defined as the C++17 @cpp [[maybe_unused]] @ce attribute on GCC >= 7, with a
+compiler-specific variant on Clang, MSVC and older GCC. Clang and MSVC have
+their own specific macro always as they otherwise complain about use of a C++17
+feature when compiling as C++11 or C++14.
 */
-/* clang-cl doesn't understand MSVC warning numbers right now, so the
-   MSVC-specific variant below doesn't work */
-#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
+#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7)
+#define CORRADE_UNUSED [[maybe_unused]]
+/* Clang unfortunately warns that [[maybe_unused]] is a C++17 extension, so we
+   use this instead of attempting to suppress the warning like we had to do
+   with CORRADE_DEPRECATED_NAMESPACE(). Also, clang-cl doesn't understand MSVC
+   warning numbers right now, so the MSVC-specific variant below doesn't work. */
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_UNUSED __attribute__((__unused__))
+/* MSVC supports this since _MSC_VER >= 1911, unfortunately, the same as Clang,
+   only with /std:c++17. */
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
