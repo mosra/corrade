@@ -34,7 +34,7 @@
 #include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/DebugStl.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct AlgorithmsTest: TestSuite::Tester {
     explicit AlgorithmsTest();
@@ -784,6 +784,6 @@ template<class T> void AlgorithmsTest::copyBenchmark3DNonContiguous() {
     CORRADE_COMPARE(dstData[Size*Size*Size*4/sizeof(T) - 2].data[0], (Size*Size*Size*4/sizeof(T) + 10 - 2)%256);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::AlgorithmsTest)
