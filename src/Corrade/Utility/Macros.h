@@ -118,12 +118,6 @@ Marked enum or enum value will emit deprecation warning on supported compilers
 
 Note that this doesn't work on namespace aliases (i.e., marking
 @cpp namespace Bar = Foo; @ce with this macro will result in a compile error.
-
-GCC claims support since version 4.9, but even in version 8.2 it only emits an
-"attribute ignored" warning at the declaration location and no diagnostic when
-such namespace is used --- which is practically useless
-([source](https://stackoverflow.com/q/46052410)).
-
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
@@ -132,10 +126,9 @@ such namespace is used --- which is practically useless
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
    namespace attributes are a C++17 extension and deprecated attribute is a
    C++14 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
-   disable both in the same macro. Also, Apple has its own versioning of Clang
-   (even in __clang_major__, args) and at the moment (April 2018) latest Xcode
-   9.3 maps to Clang 5.1, so I assume Xcode 10 will be Clang 6. Yay? */
-#if (!defined(CORRADE_TARGET_APPLE) && __clang_major__ < 6) || (defined(CORRADE_TARGET_APPLE) && __clang_major__ < 10)
+   disable both in the same macro. Also, Apple has its own versioning and Clang
+   6 maps to AppleClang 10. */
+#if (!defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ < 6) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ < 10)
 #define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
