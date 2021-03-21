@@ -75,9 +75,9 @@ deprecated classes or typedefs, only when the type is instantiated --- i.e.,
 @cpp DeprecatedStruct a; @ce will warn, but @cpp DeprecatedStruct::Value @ce
 will not.
 */
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
 #else
 #define CORRADE_DEPRECATED(message)
@@ -100,9 +100,9 @@ will not.
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
-#elif defined(_MSC_VER) && _MSC_VER >= 1910
+#elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1910
 #define CORRADE_DEPRECATED_ALIAS(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ALIAS(message)
@@ -128,7 +128,7 @@ such namespace is used --- which is practically useless
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
-#if defined(__clang__)
+#if defined(CORRADE_TARGET_CLANG)
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
    namespace attributes are a C++17 extension and deprecated attribute is a
    C++14 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
@@ -168,9 +168,9 @@ the annotation, but ignores it for both enums and enum values.
    Qt. Not sure what version was it fixed in as the bugreports don't tell
    (https://bugreports.qt.io/browse/QTBUG-78820) so disabling it for MOC
    altogether */
-#if (defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
+#if (defined(CORRADE_TARGET_CLANG) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
-#elif defined(_MSC_VER) && !defined(Q_MOC_RUN)
+#elif defined(CORRADE_TARGET_MSVC) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
@@ -199,11 +199,11 @@ in any way.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
-#if defined(__clang__)
+#if defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
-#elif defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 408
+#elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED_FILE(_message) __pragma(message ("warning: " __FILE__ " is deprecated: " _message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
@@ -232,11 +232,11 @@ contribute to the warning log or warning count in any way.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_FILE()
 */
-#if defined(__clang__)
+#if defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
-#elif defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 408
+#elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
 #define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED_MACRO(macro,_message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
 #else
 #define CORRADE_DEPRECATED_MACRO(macro,message)
@@ -259,11 +259,11 @@ In particular, warnings from @ref CORRADE_DEPRECATED(),
 @ref CORRADE_DEPRECATED_FILE() and @ref CORRADE_DEPRECATED_MACRO() warnings are
 suppressed only on Clang.
 */
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") _Pragma("GCC diagnostic ignored \"-W#pragma-messages\"")
-#elif defined(__GNUC__)
+#elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_IGNORE_DEPRECATED_PUSH __pragma(warning(push)) __pragma(warning(disable: 4996))
 #else
 #define CORRADE_IGNORE_DEPRECATED_PUSH
@@ -274,9 +274,9 @@ suppressed only on Clang.
 
 See @ref CORRADE_IGNORE_DEPRECATED_PUSH for more information.
 */
-#ifdef __GNUC__
+#ifdef CORRADE_TARGET_GCC
 #define CORRADE_IGNORE_DEPRECATED_POP _Pragma("GCC diagnostic pop")
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_IGNORE_DEPRECATED_POP __pragma(warning(pop))
 #else
 #define CORRADE_IGNORE_DEPRECATED_POP
@@ -328,7 +328,7 @@ falls back to compiler-specific attribute. Example usage:
 
 @snippet Utility.cpp CORRADE_ALIGNAS
 */
-#if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
+#if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ < 408
 #define CORRADE_ALIGNAS(alignment) __attribute__((aligned(alignment)))
 #else
 #define CORRADE_ALIGNAS(alignment) alignas(alignment)
@@ -342,7 +342,7 @@ otherwise falls back to compiler-specific attribute. Example usage:
 
 @snippet Utility.cpp CORRADE_NORETURN
 */
-#if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
+#if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ < 408
 #define CORRADE_NORETURN __attribute__((noreturn))
 #else
 #define CORRADE_NORETURN [[noreturn]]
@@ -398,9 +398,9 @@ always suppresses all inlining. Example usage:
 
 @see @ref CORRADE_NEVER_INLINE
 */
-#ifdef __GNUC__
+#ifdef CORRADE_TARGET_GCC
 #define CORRADE_ALWAYS_INLINE __attribute__((always_inline)) inline
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ALWAYS_INLINE __forceinline
 #else
 #define CORRADE_ALWAYS_INLINE inline
@@ -421,9 +421,9 @@ elsewhere. Example usage:
 
 @see @ref CORRADE_ALWAYS_INLINE
 */
-#ifdef __GNUC__
+#ifdef CORRADE_TARGET_GCC
 #define CORRADE_NEVER_INLINE __attribute__((noinline))
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_NEVER_INLINE __declspec(noinline)
 #else
 #define CORRADE_NEVER_INLINE
