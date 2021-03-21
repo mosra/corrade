@@ -44,6 +44,7 @@ struct MacrosTest: TestSuite::Tester {
     void defer();
 
     void deprecated();
+    void unused();
     void fallthrough();
     void cxxStandard();
     void alwaysNeverInline();
@@ -59,6 +60,7 @@ MacrosTest::MacrosTest() {
     addTests({&MacrosTest::defer,
 
               &MacrosTest::deprecated,
+              &MacrosTest::unused,
               &MacrosTest::fallthrough,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
@@ -145,6 +147,12 @@ void MacrosTest::deprecated() {
 #ifndef ENABLE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_POP
 #endif
+
+int three(CORRADE_UNUSED int somenumber) { return 3; }
+
+void MacrosTest::unused() {
+    CORRADE_COMPARE(three(6), 3);
+}
 
 void MacrosTest::fallthrough() {
     int a = 2;
