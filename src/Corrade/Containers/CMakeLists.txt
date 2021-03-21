@@ -38,6 +38,7 @@ set(CorradeContainers_HEADERS
     EnumSet.h
     EnumSet.hpp
     GrowableArray.h
+    initializeHelpers.h
     LinkedList.h
     MoveReference.h
     Optional.h

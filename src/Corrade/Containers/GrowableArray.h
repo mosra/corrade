@@ -37,6 +37,7 @@
 #include <cstring>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/initializeHelpers.h"
 #include "Corrade/Utility/TypeTraits.h"
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
@@ -154,23 +155,6 @@ template<class T> struct ArrayNewAllocator {
         deallocate(data);
     }
 };
-
-#ifndef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-namespace Implementation {
-
-/* The std::has_trivial_default_constructor / std::has_trivial_copy_constructor
-   is deprecated in GCC 5+ but we can't detect libstdc++ version when using
-   Clang. The builtins aren't deprecated but for those GCC commits suicide with
-    error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-   so, well, i'm defining my own! See CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-   for even more fun stories. */
-template<class T> struct IsTriviallyConstructibleOnOldGcc: std::integral_constant<bool, __has_trivial_constructor(T)> {};
-/* Need also __has_trivial_destructor() otherwise it says true for types with
-   deleted copy and non-trivial destructors */
-template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T) && __has_trivial_destructor(T)> {};
-
-}
-#endif
 
 /**
 @brief Malloc-based allocator for growable arrays
@@ -910,49 +894,6 @@ template<class T> struct ArrayGuts {
     void(*deleter)(T*, std::size_t);
 };
 
-template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T*, T*, typename std::enable_if<
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
-    IsTriviallyConstructibleOnOldGcc<T>::value
-    #endif
->::type* = nullptr) {
-    /* Nothing to do */
-}
-
-template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T* const end, typename std::enable_if<!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
-    IsTriviallyConstructibleOnOldGcc<T>::value
-    #endif
->::type* = nullptr) {
-    /* Needs to be < because sometimes begin > end. No {}, we want trivial
-       types non-initialized */
-    for(; begin < end; ++begin) new(begin) T;
-}
-
-template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* const begin, T* const end, typename std::enable_if<
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
-    IsTriviallyConstructibleOnOldGcc<T>::value
-    #endif
->::type* = nullptr) {
-    if(begin < end) std::memset(begin, 0, (end - begin)*sizeof(T));
-}
-
-template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* begin, T* const end, typename std::enable_if<!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
-    IsTriviallyConstructibleOnOldGcc<T>::value
-    #endif
->::type* = nullptr) {
-    /* Needs to be < because sometimes begin > end */
-    for(; begin < end; ++begin) new(begin) T{};
-}
-
 template<class T> inline void arrayMoveConstruct(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
     #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
     std::is_trivially_copyable<T>::value
@@ -1048,14 +989,6 @@ template<class T> inline void arrayDestruct(T* begin, T* const end, typename std
 inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::size_t desiredCapacity, const std::size_t sizeOfT) {
     /** @todo pick a nice value when current = 0 and desired > 1 */
     const std::size_t currentCapacityInBytes = sizeOfT*currentCapacity + sizeof(std::size_t);
-
-    constexpr std::size_t MinAllocatedSize =
-        #ifdef __STDCPP_DEFAULT_NEW_ALIGNMENT__
-        __STDCPP_DEFAULT_NEW_ALIGNMENT__
-        #else
-        2*sizeof(std::size_t);
-        #endif
-        ;
 
     /* For small allocations we want to tightly fit into size buckets (8, 16,
        32, 64 bytes), so it's better to double the capacity every time. For
