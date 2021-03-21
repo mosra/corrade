@@ -128,6 +128,8 @@ namespace Corrade {
     Emscripten always, because even if it's @cpp long double @ce is 80-bit
     sometimes, it doesn't actually have the precision of a 80-bit
     representation
+-   The @ref CORRADE_FALLTHROUGH macro is implemented on MSVC 2019 16.6 if
+    compiling as C++17.
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

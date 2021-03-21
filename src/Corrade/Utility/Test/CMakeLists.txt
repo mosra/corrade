@@ -161,6 +161,20 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN)
     target_link_libraries(UtilityMacrosTest PRIVATE Threads::Threads)
 endif()
 
+# Build these only if there's no explicit -std= passed in the flags
+if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+    # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+        corrade_add_test(UtilityMacrosCpp17Test MacrosCpp17Test.cpp)
+        set_target_properties(UtilityMacrosCpp17Test PROPERTIES
+            CORRADE_CXX_STANDARD 17
+            FOLDER "Corrade/Utility/Test")
+    endif()
+endif()
+
 # It should return with a non-zero exit code
 corrade_add_test(UtilityFatalTest FatalTest.cpp)
 set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)

@@ -296,17 +296,29 @@ function parameters instead.
 
 /** @hideinitializer
 @brief Switch case fall-through
+@m_since{2020,06}
 
-Suppresses a warning about a @cpp case @ce fallthrough in a @cpp switch @ce on
-GCC >= 7 and Clang. GCC versions before 7 don't warn about the fallthrough, so
-there's no need to suppress anything; for the same reason the macro does
-nothing on MSVC. Expected to be put at a place where a @cpp break; @ce would
-usually be:
+Suppresses a warning about a @cpp case @ce fallthrough in a @cpp switch @ce.
+Expected to be put at a place where a @cpp break; @ce would usually be:
 
 @snippet Utility.cpp CORRADE_FALLTHROUGH
+
+@note Note that the semicolon is added by the macro itself --- it's done this
+    way to avoid warnings about superfluous semicolon on compilers where the
+    fallthrough attribute is unsupported.
+
+Defined as the C++17 @cpp [[fallthrough]] @ce attribute on GCC >= 7, Clang has
+its own specific macro as it complains about use of a C++17 feature when
+compiling as C++11 or C++14. On MSVC there's no pre-C++17 alternative so it's
+non-empty only on 2019 16.6+ and only if compiling under C++17, as it warns
+otherwise as well. Defined as empty on older GCC and MSVC --- these versions
+don't warn about the fallthrough, so there's no need to suppress anything.
 */
-#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7
-#define CORRADE_FALLTHROUGH __attribute__((fallthrough));
+#if (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926 && CORRADE_CXX_STANDARD >= 201703) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7)
+#define CORRADE_FALLTHROUGH [[fallthrough]];
+/* Clang unfortunately warns that [[fallthrough]] is a C++17 extension, so we
+   use this instead of attempting to suppress the warning like we had to do
+   with CORRADE_DEPRECATED_NAMESPACE() */
 #elif defined(CORRADE_TARGET_CLANG)
 #define CORRADE_FALLTHROUGH [[clang::fallthrough]];
 #else
