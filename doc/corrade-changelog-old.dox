@@ -254,8 +254,8 @@ a high-level overview.
     macros and CMake variables
 -   Added @ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM macros
 -   Added @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN and @ref CORRADE_CXX_STANDARD
-    macros
+    @cpp CORRADE_ALIGNAS() @ce, @cpp CORRADE_NORETURN @ce and
+    @ref CORRADE_CXX_STANDARD macros
 
 @subsection corrade-changelog-2018-02-changes Changes and improvements
 

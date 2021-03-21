@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -325,32 +325,22 @@ don't warn about the fallthrough, so there's no need to suppress anything.
 #define CORRADE_FALLTHROUGH
 #endif
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @hideinitializer
 @brief Type alignment specifier
-
-Expands to C++11 @cpp alignas() @ce specifier on supported compilers, otherwise
-falls back to compiler-specific attribute. Example usage:
-
-@snippet Utility.cpp CORRADE_ALIGNAS
+@m_deprecated_since_latest Use `alignas()` directly, as it's available on all
+    supported compilers.
 */
-#if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ < 408
-#define CORRADE_ALIGNAS(alignment) __attribute__((aligned(alignment)))
-#else
-#define CORRADE_ALIGNAS(alignment) alignas(alignment)
-#endif
+#define CORRADE_ALIGNAS(alignment) \
+    CORRADE_DEPRECATED_MACRO(CORRADE_ALIGNAS(),"use alignas() directly") alignas(alignment)
 
 /** @hideinitializer
 @brief Noreturn fuction attribute
-
-Expands to C++11 @cpp [[noreturn]] @ce attribute on supported compilers,
-otherwise falls back to compiler-specific attribute. Example usage:
-
-@snippet Utility.cpp CORRADE_NORETURN
+@m_deprecated_since_latest Use `[[noreturn]]` directly, as it's available on
+    all supported compilers.
 */
-#if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ < 408
-#define CORRADE_NORETURN __attribute__((noreturn))
-#else
-#define CORRADE_NORETURN [[noreturn]]
+#define CORRADE_NORETURN \
+    CORRADE_DEPRECATED_MACRO(CORRADE_NORETURN(),"use [[noreturn]] directly") [[noreturn]]
 #endif
 
 /** @hideinitializer

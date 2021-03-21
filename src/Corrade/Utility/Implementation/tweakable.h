@@ -41,7 +41,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
 struct TweakableVariable {
     /* Align so we can safely save 64bit types without worrying about unaligned
        access. */
-    CORRADE_ALIGNAS(8) char storage[TweakableStorageSize]{};
+    alignas(8) char storage[TweakableStorageSize]{};
     int line{};
     TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<TweakableStorageSize, char>);
     void(*scopeLambda)(void(*)(), void*){};

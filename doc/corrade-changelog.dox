@@ -200,6 +200,10 @@ namespace Corrade {
     deprecated in favor of @ref Containers::BasicStringView::hasPrefix() and
     @ref Containers::BasicStringView::hasSuffix(); the overloads taking
     @ref std::string are still kept
+-   @cpp CORRADE_ALIGNAS() @ce and @cpp CORRADE_NORETURN @ce macros are
+    deprecated as they were originally introduced for compatibility with GCC
+    4.7 and older and aren't needed anymore. Use the standard C++11
+    @cpp alignas() @ce and @cpp [[noreturn]] @ce attributes instead.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

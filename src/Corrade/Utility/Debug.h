@@ -1133,7 +1133,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /* http://stackoverflow.com/questions/38378693/did-visual-studio-2015-update-3-break-constructor-attributes */
-        CORRADE_NORETURN
+        [[noreturn]]
         #endif
         ~Fatal();
 

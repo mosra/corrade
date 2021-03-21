@@ -77,7 +77,7 @@ template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<boo
 #endif
 
 struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
-    union CORRADE_ALIGNAS(sizeof(std::size_t)) Storage {
+    union alignas(sizeof(std::size_t)) Storage {
         char data[FunctionPointerSize*sizeof(std::size_t) + sizeof(void*)];
         void(*function)();
         struct {

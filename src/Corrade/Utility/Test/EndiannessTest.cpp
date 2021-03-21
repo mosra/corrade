@@ -136,7 +136,7 @@ void EndiannessTest::inPlace() {
 }
 
 void EndiannessTest::inPlaceUnaligned() {
-    CORRADE_ALIGNAS(4) char data[] = {
+    alignas(4) char data[] = {
         '\x11', '\x22', '\x33', '\x44', '\x55', '\x66', '\x77', '\x88'
     };
 
@@ -229,7 +229,7 @@ void EndiannessTest::inPlaceList() {
 }
 
 void EndiannessTest::inPlaceListUnaligned() {
-    CORRADE_ALIGNAS(4) char data[] = {
+    alignas(4) char data[] = {
         '\x11', '\x22', '\x33', '\x44', '\x55', '\x66', '\x77', '\x88', '\x99'
     };
 

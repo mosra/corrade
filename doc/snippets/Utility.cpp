@@ -829,15 +829,6 @@ int foo(int a, CORRADE_UNUSED int b) {
 }
 /* [CORRADE_UNUSED] */
 
-/* [CORRADE_ALIGNAS] */
-CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
-/* [CORRADE_ALIGNAS] */
-
-CORRADE_NORETURN void exit42();
-/* [CORRADE_NORETURN] */
-CORRADE_NORETURN void exit42() { std::exit(42); }
-/* [CORRADE_NORETURN] */
-
 /* [CORRADE_ALWAYS_INLINE] */
 CORRADE_ALWAYS_INLINE int addOne(int a);
 /* [CORRADE_ALWAYS_INLINE] */

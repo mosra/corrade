@@ -43,9 +43,7 @@ struct MacrosTest: TestSuite::Tester {
 
     void defer();
 
-    void alignAs();
     void deprecated();
-    void noreturn();
     void fallthrough();
     void cxxStandard();
     void alwaysNeverInline();
@@ -60,9 +58,7 @@ struct MacrosTest: TestSuite::Tester {
 MacrosTest::MacrosTest() {
     addTests({&MacrosTest::defer,
 
-              &MacrosTest::alignAs,
               &MacrosTest::deprecated,
-              &MacrosTest::noreturn,
               &MacrosTest::fallthrough,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
@@ -87,11 +83,6 @@ void MacrosTest::defer() {
     #else
     CORRADE_SKIP("Defer functionality not available on this compiler.");
     #endif
-}
-
-void MacrosTest::alignAs() {
-    CORRADE_ALIGNAS(16) const char aligned[3]{};
-    CORRADE_COMPARE(reinterpret_cast<std::uintptr_t>(aligned) % 16, 0);
 }
 
 /* Declarations on their own shouldn't produce any compiler diagnostics */
@@ -154,13 +145,6 @@ void MacrosTest::deprecated() {
 #ifndef ENABLE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_POP
 #endif
-
-CORRADE_NORETURN void foo() { std::exit(42); }
-
-void MacrosTest::noreturn() {
-    if(false) foo();
-    CORRADE_VERIFY(true);
-}
 
 void MacrosTest::fallthrough() {
     int a = 2;

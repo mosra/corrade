@@ -1261,8 +1261,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void registerTest(const char* filename, const char* name, bool isDebugBuild = false);
 
         /* Called from CORRADE_SKIP() */
-        CORRADE_NORETURN void skip(const std::string& message);
-        CORRADE_NORETURN void skip(const char* message);
+        [[noreturn]] void skip(const std::string& message);
+        [[noreturn]] void skip(const char* message);
 
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:

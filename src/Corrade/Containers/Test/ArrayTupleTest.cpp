@@ -171,7 +171,7 @@ void ArrayTupleTest::constructEmptyArrays() {
     CORRADE_COMPARE(NonCopyable::destructed, 0);
 }
 
-template<int align> struct CORRADE_ALIGNAS(align) Aligned {
+template<int align> struct alignas(align) Aligned {
     Aligned() {
         ++constructed;
     }
@@ -375,7 +375,7 @@ void ArrayTupleTest::constructStatelessDeleter() {
     CORRADE_COMPARE(NonCopyable::destructed, 3);
 }
 
-struct CORRADE_ALIGNAS(16) StatefulAlignedNonTriviallyDestructibleDeleter {
+struct alignas(16) StatefulAlignedNonTriviallyDestructibleDeleter {
     explicit StatefulAlignedNonTriviallyDestructibleDeleter(void*& thisPointer, char*& usedDeleterPointer, std::size_t& usedDeleterSize, int& copyConstructorCallCount, int& destructorCallCount): _usedThisPointer{&thisPointer}, _usedDeleterPointer{&usedDeleterPointer}, _usedDeleterSize{&usedDeleterSize}, _copyConstructorCallCount{&copyConstructorCallCount}, _destructorCallCount{&destructorCallCount} {}
 
     void operator()(char* data, std::size_t size) {
@@ -692,7 +692,7 @@ template<int a> void ArrayTupleTest::allocatorAlignmentFromDeleter() {
 
     CORRADE_VERIFY(true); /* Just to register correct function name */
 
-    struct CORRADE_ALIGNAS(a) Deleter {
+    struct alignas(a) Deleter {
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* If this is not present on MSVC2015, the test segfaults. HEH */
         char aehhhhh;

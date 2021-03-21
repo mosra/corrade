@@ -3323,7 +3323,7 @@ void StridedArrayViewTest::castInvalid() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-     struct CORRADE_ALIGNAS(2) {
+     struct alignas(2) {
         char a;
         char b;
     } data[5] {{1, 10}, {2, 20}, {3, 30}, {4, 40}, {5, 50}};
