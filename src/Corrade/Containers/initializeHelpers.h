@@ -52,7 +52,10 @@ template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<boo
 
 enum: std::size_t {
     MinAllocatedSize =
-        #ifdef __STDCPP_DEFAULT_NEW_ALIGNMENT__
+        /* Emscripten has __STDCPP_DEFAULT_NEW_ALIGNMENT__ set to 16 but
+           actually does just 8, so don't use this macro there:
+           https://github.com/emscripten-core/emscripten/issues/10072 */
+        #if defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         __STDCPP_DEFAULT_NEW_ALIGNMENT__
         #else
         2*sizeof(std::size_t)
