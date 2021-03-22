@@ -64,8 +64,13 @@ MemoryTest::MemoryTest() {
         &MemoryTest::allocateAlignedTrivial<16>,
         &MemoryTest::allocateAlignedTrivial<32>,
         &MemoryTest::allocateAlignedTrivial<64>,
-        &MemoryTest::allocateAlignedTrivial<128>,
-        &MemoryTest::allocateAlignedTrivial<256>}, 100);
+        &MemoryTest::allocateAlignedTrivial<128>}, 100);
+
+    /* https://stackoverflow.com/q/48070361. I found nothing that would give
+       me the max allowed alignas value, std::max_align_t is useless. */
+    #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 7
+    addRepeatedTests<MemoryTest>({&MemoryTest::allocateAlignedTrivial<256>}, 100);
+    #endif
 
     addTests({&MemoryTest::allocateAlignedTrivialNoInit,
               &MemoryTest::allocateAlignedTrivialDefaultInit,
