@@ -137,7 +137,13 @@ returned version is:
 -   @cpp 201103 @ce when C++11 is used
 -   @cpp 201402 @ce when C++14 is used
 -   @cpp 201703 @ce when C++17 is used
--   greater than @cpp 201703 @ce when C++2a is used
+-   @cpp 202002 @ce when C++20 is used
+-   greater than @cpp 202002 @ce when C++2b is used
+
+Note that compilers that don't have full support for given standard may not
+return the exact value, in which case it's recommended to check that the
+reported value is *greater* than the previous standard, for example
+@cpp #if CORRADE_CXX_STANDARD > 201703 @ce to test whether compiling as C++20.
 
 Unlike most other `CORRADE_*` variables, this macro is not exposed to CMake as
 because the meaning is unclear in projects that combine more different C++
