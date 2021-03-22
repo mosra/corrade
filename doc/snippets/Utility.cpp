@@ -833,7 +833,6 @@ int foo(int a, CORRADE_UNUSED int b) {
 CORRADE_ALWAYS_INLINE int addOne(int a);
 /* [CORRADE_ALWAYS_INLINE] */
 
-int counter = 0;
 /* [CORRADE_NEVER_INLINE] */
 CORRADE_NEVER_INLINE void testFunctionCallOverhead();
 /* [CORRADE_NEVER_INLINE] */
