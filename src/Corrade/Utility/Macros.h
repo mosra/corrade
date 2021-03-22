@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -402,7 +402,7 @@ always suppresses all inlining. Example usage:
 
 @snippet Utility.cpp CORRADE_ALWAYS_INLINE
 
-@see @ref CORRADE_NEVER_INLINE
+@see @ref CORRADE_NEVER_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifdef CORRADE_TARGET_GCC
 #define CORRADE_ALWAYS_INLINE __attribute__((always_inline)) inline
@@ -425,7 +425,7 @@ elsewhere. Example usage:
 
 @snippet Utility.cpp CORRADE_NEVER_INLINE
 
-@see @ref CORRADE_ALWAYS_INLINE
+@see @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifdef CORRADE_TARGET_GCC
 #define CORRADE_NEVER_INLINE __attribute__((noinline))
@@ -433,6 +433,73 @@ elsewhere. Example usage:
 #define CORRADE_NEVER_INLINE __declspec(noinline)
 #else
 #define CORRADE_NEVER_INLINE
+#endif
+
+/** @hideinitializer
+@brief Mark an if condition as likely to happen
+@m_since_latest
+
+Since branch predictors of contemporary CPUs do a good enough job already, the
+main purpose of this macro is to affect assembly generation and instruction
+cache use in hot loops --- for example, when a certain condition is likely to
+happen each iteration, the compiler may put code of the @cpp else @ce branch in
+a "cold" section of the code, ensuring the more probable code path stays in the
+cache:
+
+@snippet Utility.cpp CORRADE_LIKELY
+
+Defined as the C++20 @cpp [[likely]] @ce attribute on GCC >= 9 (and on Clang 12
+and MSVC 2019 16.6+ if compiling under C++20). On older versions of GCC and on
+Clang in C++11/14/17 mode the macro expands to @cpp __builtin_expect() @ce; on
+older MSVC the macro is a pass-through.
+
+@attention
+@parblock
+Since the C++20 @cpp [[likely]] @ce attribute is expected to be put *after* the
+@cpp if() @ce parentheses while @cpp __builtin_expect() @ce is meant to be
+* *inside*, the macro has to be written as above. Doing
+@cpp if(CORRADE_LIKELY(condition)) @ce would work on compilers that don't
+understand the @cpp [[likely]] @ce attribute, but breaks in C++20 mode.
+@endparblock
+
+It's recommended to use this macro only if profiling shows its advantage. While
+it may have no visible effect in most cases,
+[wrong suggestion can lead to suboptimal performance](https://stackoverflow.com/a/35940041).
+Similar effect can be potentially achieved by
+[reordering the branches in a certain way](https://stackoverflow.com/q/46833310),
+but the behavior is highly dependent on compiler-specific heuristics.
+@see @ref CORRADE_UNLIKELY(), @ref CORRADE_ASSUME(),
+    @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE
+*/
+/* Using > 201703 because MSVC 16.6 reports 201705 when compiling as C++20 */
+#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 9) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+#define CORRADE_LIKELY(...) (__VA_ARGS__) [[likely]]
+#elif defined(CORRADE_TARGET_GCC)
+#define CORRADE_LIKELY(...) (__builtin_expect((__VA_ARGS__), 1))
+#else
+#define CORRADE_LIKELY(...) (__VA_ARGS__)
+#endif
+
+/** @hideinitializer
+@brief Mark an if condition as unlikely to happen
+@m_since_latest
+
+An inverse to @ref CORRADE_LIKELY(), see its documentation for more
+information about suggested use and expected impact on performance. Useful to
+mark boundary conditions in tight loops, for example:
+
+@snippet Utility.cpp CORRADE_UNLIKELY
+
+@see @ref CORRADE_ASSUME(), @ref CORRADE_ALWAYS_INLINE,
+    @ref CORRADE_NEVER_INLINE
+*/
+/* Using > 201703 because MSVC 16.6 reports 201705 when compiling as C++20 */
+#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 9) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+#define CORRADE_UNLIKELY(...) (__VA_ARGS__) [[unlikely]]
+#elif defined(CORRADE_TARGET_GCC)
+#define CORRADE_UNLIKELY(...) (__builtin_expect((__VA_ARGS__), 0))
+#else
+#define CORRADE_UNLIKELY(...) (__VA_ARGS__)
 #endif
 
 /** @hideinitializer

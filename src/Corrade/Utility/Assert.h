@@ -596,7 +596,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_ASSUME @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE()
+@see @ref CORRADE_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE(),
+    @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifndef CORRADE_ASSUME
 #ifdef __clang__

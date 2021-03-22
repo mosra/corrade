@@ -44,6 +44,7 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Sha1.h"
+#include "Corrade/Utility/StlMath.h"
 
 /* [Tweakable-disable-header] */
 #define CORRADE_TWEAKABLE
@@ -52,6 +53,8 @@
 
 /* [ConfigurationValue] */
 #include <Corrade/Utility/ConfigurationGroup.h>
+
+#define DOXYGEN_IGNORE(...) __VA_ARGS__
 
 struct Foo {
     int a, b;
@@ -665,6 +668,41 @@ switch(a) {
         *b++ = *c++;
 };
 /* [CORRADE_FALLTHROUGH] */
+}
+
+{
+std::size_t size{};
+/** @todo use Containers::BoolArray once it exists */
+/* [CORRADE_LIKELY] */
+float* in = DOXYGEN_IGNORE(nullptr);
+float* out = DOXYGEN_IGNORE(nullptr);
+std::vector<bool> mask = DOXYGEN_IGNORE({});
+for(std::size_t i = 0; i != size; ++i) {
+    if CORRADE_LIKELY(mask[i]) {
+        out[i] = in[i];
+    } else {
+        out[i] = std::acos(in[i]);
+    }
+}
+/* [CORRADE_LIKELY] */
+}
+
+{
+std::size_t size{};
+auto someComplexOperation = []() { return 0.0f; };
+/* [CORRADE_UNLIKELY] */
+float* data = DOXYGEN_IGNORE(nullptr);
+unsigned* indices = DOXYGEN_IGNORE(nullptr);
+unsigned previousIndex = ~unsigned{};
+float factor;
+for(std::size_t i = 0; i != size; ++i) {
+    if CORRADE_UNLIKELY(indices[i] != previousIndex) {
+        factor = someComplexOperation();
+    }
+
+    data[i] *= factor;
+}
+/* [CORRADE_UNLIKELY] */
 }
 
 {

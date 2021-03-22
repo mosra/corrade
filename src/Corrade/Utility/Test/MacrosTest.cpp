@@ -48,6 +48,7 @@ struct MacrosTest: TestSuite::Tester {
     void fallthrough();
     void cxxStandard();
     void alwaysNeverInline();
+    void likelyUnlikely();
     void function();
     void lineString();
 
@@ -64,6 +65,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::fallthrough,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
+              &MacrosTest::likelyUnlikely,
               &MacrosTest::function,
               &MacrosTest::lineString,
 
@@ -180,6 +182,22 @@ CORRADE_NEVER_INLINE int neverInline() { return 37; }
 
 void MacrosTest::alwaysNeverInline() {
     CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
+}
+
+void MacrosTest::likelyUnlikely() {
+    int a = 3;
+
+    /* Test that the macro can handle commas */
+    if CORRADE_LIKELY(std::is_same<decltype(a), int>::value && a < 5) {
+        a += 1;
+    }
+
+    /* Missugestion, but should still go through */
+    if CORRADE_UNLIKELY(std::is_same<decltype(a), int>::value && a < 5) {
+        a += 1;
+    }
+
+    CORRADE_COMPARE(a, 5);
 }
 
 /* Needs another inner anonymous namespace otherwise Clang complains about a
