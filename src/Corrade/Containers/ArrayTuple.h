@@ -76,6 +76,16 @@ only for as long as the instance exists. It's up to you what happens to the
 views after --- in the above case, all needed information is already contained
 in the `info` structure, so the views aren't needed after anymore.
 
+<b></b>
+
+@m_class{m-note m-success}
+
+@par Aligned allocations
+    Please note that @ref ArrayTuple allocations are by default only aligned to
+    @cpp 2*sizeof(void*) @ce. If you need overaligned memory for working with
+    SIMD types, use a @ref Containers-ArrayTuple-allocators-deleters "custom allocator"
+    together with a @ref Utility::allocateAligned() instead.
+
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
 
 The usage isn't limited to just trivial types --- by default (or if you

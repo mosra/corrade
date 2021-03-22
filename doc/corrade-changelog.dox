@@ -83,6 +83,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
+-   @ref Utility::allocateAligned() family of functions for overaligned
+    allocations, suitable for efficient SIMD operations
 -   Added @ref Utility::Arguments::addArrayArgument() as a positional
     counterpart to @ref Utility::Arguments::addArrayOption()
 -   @ref Utility::Configuration and @ref Utility::Arguments can now read and

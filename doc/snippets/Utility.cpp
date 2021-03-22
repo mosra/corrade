@@ -43,6 +43,7 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Sha1.h"
 #include "Corrade/Utility/StlMath.h"
 
@@ -352,6 +353,38 @@ args.addOption("input")
 };
 
 int main() {
+{
+typedef float __m256;
+std::size_t size{};
+/* [allocateAligned] */
+Containers::Array<__m256> avxVectors =
+    Utility::allocateAligned<__m256>(size);
+/* [allocateAligned] */
+}
+
+{
+typedef float Matrix4;
+std::size_t size{};
+/* [allocateAligned-explicit] */
+Containers::Array<Matrix4> avxMatrices =
+    Utility::allocateAligned<Matrix4, 32>(size);
+/* [allocateAligned-explicit] */
+}
+
+{
+/* [allocateAligned-NoInit] */
+struct Foo {
+    explicit Foo(int) {}
+    DOXYGEN_IGNORE()
+};
+
+Containers::Array<Foo> data = Utility::allocateAligned<Foo>(NoInit, 5);
+
+int index = 0;
+for(Foo& f: data) new(&f) Foo{index++};
+/* [allocateAligned-NoInit] */
+}
+
 {
 /* [Configuration-usage] */
 Utility::Configuration conf{"my.conf"};

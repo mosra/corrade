@@ -190,6 +190,9 @@ endif()
 corrade_add_test(UtilityFatalTest FatalTest.cpp)
 set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
 
+corrade_add_test(UtilityMemoryTest MemoryTest.cpp)
+target_compile_definitions(UtilityMemoryTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
+
 set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
 if(CORRADE_TARGET_IOS)
     set_source_files_properties(DirectoryTestFiles PROPERTIES
@@ -298,6 +301,7 @@ set_target_properties(
     UtilityFormatTest
     UtilityHashDigestTest
     UtilityMacrosTest
+    UtilityMemoryTest
     UtilityResourceTest
     UtilityResourceStaticTest
     UtilitySha1Test

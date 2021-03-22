@@ -63,6 +63,7 @@ if(WITH_UTILITY)
         Format.h
         FormatStl.h
         Macros.h
+        Memory.h
         MurmurHash2.h
         Resource.h
         Sha1.h

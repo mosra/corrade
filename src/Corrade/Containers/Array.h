@@ -138,6 +138,15 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 @snippet Containers.cpp Array-usage-initialization
 
+<b></b>
+
+@m_class{m-note m-success}
+
+@par Aligned allocations
+    Please note that @ref Array allocations are by default only aligned to
+    @cpp 2*sizeof(void*) @ce. If you need overaligned memory for working with
+    SIMD types, use @ref Utility::allocateAligned() instead.
+
 @subsection Containers-Array-usage-wrapping Wrapping externally allocated arrays
 
 By default the class makes all allocations using @cpp operator new[] @ce and
