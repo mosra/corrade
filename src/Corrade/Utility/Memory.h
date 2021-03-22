@@ -40,7 +40,11 @@
 #include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_TARGET_UNIX
+#ifdef CORRADE_TARGET_APPLE
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 #elif defined(CORRADE_TARGET_WINDOWS)
 /* <malloc.h> as well, but I don't want to include all the nasty shit */
 extern "C" void* __cdecl _aligned_malloc(size_t, size_t);
@@ -217,10 +221,12 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
        which seems weird and confusing. Handle that explicitly instead. */
     if(!size) return {};
 
-    /* aligned_alloc() needs _ISOC11_SOURCE, let's hope it just works. If you
-       get a compilation error here, please complain -- in that case I need to
-       switch to posix_memalign(). */
-    return Containers::Array<T>{static_cast<T*>(aligned_alloc(alignment, size*sizeof(T))), size, Implementation::alignedDeleter<T>};
+    /* I would use aligned_alloc() but then there's APPLE who comes and says
+       NO. And on top of everything they DARE to have posix_memalign() in a
+       different header. */
+    void* data{};
+    CORRADE_INTERNAL_ASSERT_OUTPUT(posix_memalign(&data, alignment, size*sizeof(T)) == 0);
+    return Containers::Array<T>{static_cast<T*>(data), size, Implementation::alignedDeleter<T>};
 
     /* Windows */
     #elif defined(CORRADE_TARGET_WINDOWS)
