@@ -83,9 +83,6 @@ cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-in
 cmake_dependent_option(BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
-set(CORRADE_INCLUDE_INSTALL_PREFIX "."
-    CACHE STRING "Prefix where to put platform-independent include and other files")
-
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
@@ -237,9 +234,17 @@ include(UseCorrade)
 include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR bin)
 set(CORRADE_LIBRARY_INSTALL_DIR lib${LIB_SUFFIX})
-set(CORRADE_DATA_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/corrade)
-set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/cmake/Corrade)
-set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/include/Corrade)
+set(CORRADE_DATA_INSTALL_DIR share/corrade)
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR share/cmake/Corrade)
+set(CORRADE_INCLUDE_INSTALL_DIR include/Corrade)
+# Prefix the non-binary paths with the obsolete CORRADE_INCLUDE_INSTALL_PREFIX,
+# if set
+if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_INCLUDE_INSTALL_PREFIX STREQUAL ".")
+    message(DEPRECATION "CORRADE_INCLUDE_INSTALL_PREFIX is obsolete as its primary use was for old Android NDK versions. Please switch to the NDK r19+ layout instead of using this variable and recreate your build directory to get rid of this warning.")
+    set(CORRADE_DATA_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_DATA_INSTALL_DIR})
+    set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_CMAKE_MODULE_INSTALL_DIR})
+    set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_INCLUDE_INSTALL_DIR})
+endif()
 
 # Library version. CORRADE_VERSION_YEAR/MONTH is used in
 # src/Corrade/CMakeLists.txt to generate the version.h header.

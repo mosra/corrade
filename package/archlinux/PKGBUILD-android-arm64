@@ -6,7 +6,7 @@ pkgdesc="C++11/C++14 multiplatform utility library (Android ARM64)"
 arch=('any')
 url="https://magnum.graphics/corrade/"
 license=('MIT')
-makedepends=('cmake' 'ninja' 'android-ndk')
+makedepends=('cmake>=3.20' 'ninja' 'android-ndk')
 options=(!strip !buildflags staticlibs)
 
 _rootdir=$startdir/../../
@@ -21,7 +21,7 @@ build() {
             -DCMAKE_SYSTEM_VERSION=24 \
             -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
             -DCMAKE_ANDROID_STL_TYPE=c++_static \
-            -DCMAKE_FIND_ROOT_PATH="/opt/android-ndk/platforms/android-24/arch-arm64;/opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot" \
+            -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr \
             -G Ninja
     fi
 
@@ -29,8 +29,6 @@ build() {
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-24/arch-arm64/usr \
-        -DCORRADE_INCLUDE_INSTALL_PREFIX=/opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr \
         -DBUILD_TESTS=ON
     ninja
 }

@@ -28,12 +28,24 @@
 #
 
 if(NOT DEFINED LIB_SUFFIX)
-    message(STATUS "LIB_SUFFIX variable is not defined. It will be autodetected now.")
-    message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example)")
+    message(STATUS "The LIB_SUFFIX variable is not defined. It will be autodetected now.")
+    message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example).")
+
+    # Android. Given a CMAKE_INSTALL_PREFIX, check if the expected lib
+    # subdirectory exists. If it does, we assume CMAKE_INSTALL_PREFIX is
+    # pointing inside the NDK and so we set LIB_SUFFIX accordingly. If it
+    # doesn't, we don't attempt any desktop-system-like lib64 detection, as
+    # that is irrelevant for Android.
+    if(CMAKE_SYSTEM_NAME STREQUAL Android)
+        if(EXISTS "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}")
+            set(LIB_SUFFIX "/${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}")
+        else()
+            set(LIB_SUFFIX "")
+        endif()
 
     # All 32bit systems and OSX have empty lib suffix, decide based on
     # FIND_LIBRARY_USE_LIB64_PATHS on other 64bit systems
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE)
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE)
         # CMake might be right most of the time, but if /usr/lib64 is symlink
         # to somewhere else, it means that we should *really* not install there
         # (that's the case with ArchLinux)
