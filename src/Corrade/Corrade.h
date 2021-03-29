@@ -615,10 +615,22 @@ having FMA support F16C as well, and all CPUs supporting AVX2 have FMA.
 Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Advanced Vector Extensions 2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2)
 are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
-MSVC). Superset of @ref CORRADE_TARGET_AVX_FMA.
+MSVC). Superset of @ref CORRADE_TARGET_AVX_FMA, implied by
+@ref CORRADE_TARGET_AVX512F.
 */
 #define CORRADE_TARGET_AVX2
 #undef CORRADE_TARGET_AVX2
+
+/**
+@brief AVX-512 Foundation target
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if [AVX-512](https://en.wikipedia.org/wiki/AVX-512)
+Foundation instructions are enabled at compile time (`-mavx512f` and higher on
+GCC/Clang, `/arch:AVX512` on MSVC). Superset of @ref CORRADE_TARGET_AVX2.
+*/
+#define CORRADE_TARGET_AVX512F
+#undef CORRADE_TARGET_AVX512F
 
 /**
 @brief NEON target

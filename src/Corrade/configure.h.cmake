@@ -214,13 +214,16 @@
 #endif
 #endif
 
-/* Both GCC and MSVC have the same macros for AVX */
+/* Both GCC and MSVC have the same macros for AVX, AVX2 and AVX512F */
 #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)
 #ifdef __AVX__
 #define CORRADE_TARGET_AVX
 #endif
 #ifdef __AVX2__
 #define CORRADE_TARGET_AVX2
+#endif
+#ifdef __AVX512F__
+#define CORRADE_TARGET_AVX512F
 #endif
 #endif
 

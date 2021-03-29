@@ -297,7 +297,14 @@ void TargetTest::simd() {
     CORRADE_VERIFY(!"CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX_FMA not");
     #endif
     #endif
-    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX_F16C) || defined(CORRADE_TARGET_AVX_FMA) || defined(CORRADE_TARGET_AVX2)
+
+    #ifdef CORRADE_TARGET_AVX512F
+    Debug{&out} << "CORRADE_TARGET_AVX512F";
+    #ifndef CORRADE_TARGET_AVX2
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX512F defined but CORRADE_TARGET_AVX2 not");
+    #endif
+    #endif
+    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX_F16C) || defined(CORRADE_TARGET_AVX_FMA) || defined(CORRADE_TARGET_AVX2) || defined(CORRADE_TARGET_AVX512F)
     CORRADE_VERIFY(!"CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
     #endif
 
