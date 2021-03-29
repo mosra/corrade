@@ -568,10 +568,45 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Advanced Vector Extensions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions)
 are enabled at compile time (`-mavx` and higher on GCC/Clang, `/arch:AVX` on
 MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
-@ref CORRADE_TARGET_AVX2.
+@ref CORRADE_TARGET_AVX_F16C.
 */
 #define CORRADE_TARGET_AVX
 #undef CORRADE_TARGET_AVX
+
+/**
+@brief AVX target with F16C
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if the
+[F16C instruction set](https://en.wikipedia.org/wiki/F16C) is enabled at
+compile time (`-mf16c` on GCC/Clang, MSVC doesn't have a direct option and it's
+only implied by `/arch:AVX2`). Superset of @ref CORRADE_TARGET_AVX, implied by
+@ref CORRADE_TARGET_AVX_FMA.
+
+Although there's no documented relation between AVX, F16C, FMA and AVX2,
+looking the history of released Intel and AMD CPUs it can be seen that all CPUs
+having F16C support plain AVX as well, and all CPUs supporting FMA have F16C.
+*/
+#define CORRADE_TARGET_AVX_F16C
+#undef CORRADE_TARGET_AVX_F16C
+
+/**
+@brief AVX target with FMA
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if the
+[FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set) is enabled at compile time (`-mfma` on GCC/Clang, MSVC doesn't have a direct
+option and it's only implied by `/arch:AVX2`). Superset of
+@ref CORRADE_TARGET_AVX_F16C, implied by @ref CORRADE_TARGET_AVX2.
+
+The FMA4 instruction set, which used to be supported only in certain range of
+AMD processors and isn't anymore, is not detected, and AMD switched to FMA3
+since. Although there's no documented relation between AVX, F16C, FMA and AVX2,
+looking the history of released Intel and AMD CPUs it can be seen that all CPUs
+having FMA support F16C as well, and all CPUs supporting AVX2 have FMA.
+*/
+#define CORRADE_TARGET_AVX_FMA
+#undef CORRADE_TARGET_AVX_FMA
 
 /**
 @brief AVX2 target
@@ -580,7 +615,7 @@ MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
 Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Advanced Vector Extensions 2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2)
 are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
-MSVC). Superset of @ref CORRADE_TARGET_AVX.
+MSVC). Superset of @ref CORRADE_TARGET_AVX_FMA.
 */
 #define CORRADE_TARGET_AVX2
 #undef CORRADE_TARGET_AVX2
@@ -592,10 +627,47 @@ MSVC). Superset of @ref CORRADE_TARGET_AVX.
 Defined on @ref CORRADE_TARGET_ARM "ARM" if
 [ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
 instructions are enabled at compile time (`-mfpu=neon` on GCC/Clang, implicitly
-supported on AArch64).
+supported on AArch64). Implied by @ref CORRADE_TARGET_NEON_FP16.
+
+Apart from NEON, there's several other mutually incompatible ARM instruction
+sets. Detection for these will be added when the platforms become more
+widespread:
+
+-   Helium, which is a low-power alternative to NEON
+-   SVE, which is a HPC-focused alternative to NEON, in 2021 found mostly just
+    on [AWS Graviton](https://aws.amazon.com/ec2/graviton/)
+-   SVE2, which is a next-generation vector instruction set designed to be a
+    successor to both NEON and SVE, scheduled to appear in production in around
+    2022
 */
 #define CORRADE_TARGET_NEON
 #undef CORRADE_TARGET_NEON
+
+/**
+@brief NEON target with half-floats
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_ARM "ARM" if NEON IEEE
+[half-precision floating-point](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
+support is enabled at compile time (`-mfpu=neon-fp16` or higher on GCC/Clang).
+Not defined if only the ARM alternative half-float representation is available,
+which trades one extra exponent value for a lack of infinity and NaN support.
+Superset of @ref CORRADE_TARGET_NEON, implied by @ref CORRADE_TARGET_NEON_FMA.
+*/
+#define CORRADE_TARGET_NEON_FP16
+#undef CORRADE_TARGET_NEON_FP16
+
+/**
+@brief NEON target with FMA
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_ARM "ARM" if NEON FMA instructions are enabled
+at compile time (`-mfpu=neon-vfpv4` on GCC/Clang). Not defined if FMA is only
+available for scalar code and not for NEON. Superset of
+@ref CORRADE_TARGET_NEON_FP16.
+*/
+#define CORRADE_TARGET_NEON_FMA
+#undef CORRADE_TARGET_NEON_FMA
 
 /**
 @brief SIMD128 target

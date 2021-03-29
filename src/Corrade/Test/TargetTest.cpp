@@ -277,13 +277,27 @@ void TargetTest::simd() {
     #endif
     #endif
 
+    #ifdef CORRADE_TARGET_AVX_F16C
+    Debug{&out} << "CORRADE_TARGET_AVX_F16C";
+    #ifndef CORRADE_TARGET_AVX
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX_F16C defined but CORRADE_TARGET_AVX not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_AVX_FMA
+    Debug{&out} << "CORRADE_TARGET_AVX_FMA";
+    #ifndef CORRADE_TARGET_AVX_F16C
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX_FMA defined but CORRADE_TARGET_AVX_F16C not");
+    #endif
+    #endif
+
     #ifdef CORRADE_TARGET_AVX2
     Debug{&out} << "CORRADE_TARGET_AVX2";
-    #ifndef CORRADE_TARGET_AVX
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX not");
+    #ifndef CORRADE_TARGET_AVX_FMA
+    CORRADE_VERIFY(!"CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX_FMA not");
     #endif
     #endif
-    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX2)
+    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX_F16C) || defined(CORRADE_TARGET_AVX_FMA) || defined(CORRADE_TARGET_AVX2)
     CORRADE_VERIFY(!"CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
     #endif
 
@@ -291,8 +305,23 @@ void TargetTest::simd() {
     #ifdef CORRADE_TARGET_NEON
     Debug{&out} << "CORRADE_TARGET_NEON";
     #endif
-    #elif defined(CORRADE_TARGET_NEON)
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON defined but CORRADE_TARGET_ARM not");
+
+    #ifdef CORRADE_TARGET_NEON_FP16
+    Debug{&out} << "CORRADE_TARGET_NEON_FP16";
+    #ifndef CORRADE_TARGET_NEON
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FP16 defined but CORRADE_TARGET_NEON not");
+    #endif
+    #endif
+
+    #ifdef CORRADE_TARGET_NEON_FMA
+    Debug{&out} << "CORRADE_TARGET_NEON_FMA";
+    #ifndef CORRADE_TARGET_NEON_FP16
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FMA defined but CORRADE_TARGET_NEON_FP16 not");
+    #endif
+    #endif
+
+    #elif defined(CORRADE_TARGET_NEON) || defined(CORRADE_TARGET_NEON_FP16) || defined(CORRADE_TARGET_NEON_FMA)
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON* defined but CORRADE_TARGET_ARM not");
     #endif
 
     #ifdef CORRADE_TARGET_EMSCRIPTEN

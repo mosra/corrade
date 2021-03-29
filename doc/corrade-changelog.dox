@@ -40,10 +40,12 @@ namespace Corrade {
     @ref CORRADE_TARGET_POWERPC
 -   New @ref CORRADE_TARGET_SSE3, @ref CORRADE_TARGET_SSSE3,
     @ref CORRADE_TARGET_SSE41, @ref CORRADE_TARGET_SSE42,
-    @ref CORRADE_TARGET_AVX, @ref CORRADE_TARGET_AVX2, @ref CORRADE_TARGET_NEON
-    and @ref CORRADE_TARGET_SIMD128 preprocessor variables added to the already
-    existing @ref CORRADE_TARGET_SSE2 for detecting enabled instruction sets on
-    x86, ARM and WebAssembly
+    @ref CORRADE_TARGET_AVX, @ref CORRADE_TARGET_AVX_F16C,
+    @ref CORRADE_TARGET_AVX_FMA, @ref CORRADE_TARGET_AVX2,
+    @ref CORRADE_TARGET_NEON, @ref CORRADE_TARGET_NEON_FP16,
+    @ref CORRADE_TARGET_NEON_FMA and @ref CORRADE_TARGET_SIMD128 preprocessor
+    variables added to the already existing @ref CORRADE_TARGET_SSE2 for
+    detecting enabled instruction sets on x86, ARM and WebAssembly
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 

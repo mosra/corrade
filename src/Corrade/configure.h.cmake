@@ -224,6 +224,21 @@
 #endif
 #endif
 
+/* On GCC, F16C and FMA have its own define, on MSVC it's implied by /arch:AVX2
+   (source: https://docs.microsoft.com/en-us/cpp/build/reference/arch-x86 ...
+   or at least the FMA instructions, no word about F16C). */
+#ifdef CORRADE_TARGET_GCC
+#ifdef __F16C__
+#define CORRADE_TARGET_AVX_F16C
+#endif
+#ifdef __FMA__
+#define CORRADE_TARGET_AVX_FMA
+#endif
+#elif defined(CORRADE_TARGET_MSVC) && defined(__AVX2__)
+#define CORRADE_TARGET_AVX_F16C
+#define CORRADE_TARGET_AVX_FMA
+#endif
+
 /* https://stackoverflow.com/a/37056771, confirmed on Android NDK Clang that
    __ARM_NEON is indeed still set. For MSVC, according to
    https://docs.microsoft.com/en-us/cpp/intrinsics/arm-intrinsics I would
@@ -231,8 +246,21 @@
    macro name, even though not listed among their predefined macros? Needs
    testing, though. */
 #elif defined(CORRADE_TARGET_ARM)
-#if (defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)) && defined(__ARM_NEON)
+#ifdef __ARM_NEON
 #define CORRADE_TARGET_NEON
+/* Conservatively mark half-floats as supported only if the IEEE variant is
+   supported and not the ARM-specific variant that trades one extra exponent
+   value for a lack of inf and NaN support (ARM C Language Extensions 1.1,
+   §6.5.2: https://developer.arm.com/documentation/ihi0053/b/) */
+#if __ARM_FP16_FORMAT_IEEE && (__ARM_NEON_FP & 0x02)
+#define CORRADE_TARGET_NEON_FP16
+#endif
+/* NEON FMA is available only if __ARM_FEATURE_FMA is defined and some bits of
+   __ARM_NEON_FP as well (ARM C Language Extensions 1.1, §6.5.5:
+   https://developer.arm.com/documentation/ihi0053/b/) */
+#if defined(__ARM_FEATURE_FMA) && __ARM_NEON_FP
+#define CORRADE_TARGET_NEON_FMA
+#endif
 #endif
 
 /* Undocumented, checked via `echo | em++ -x c++ -dM -E - -msimd128` */
