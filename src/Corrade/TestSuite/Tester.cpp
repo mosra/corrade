@@ -865,11 +865,15 @@ void Tester::setBenchmarkName(const char* name) {
     _state->benchmarkName = name;
 }
 
-void Tester::registerTestCase(const char* name, int line) {
+void Tester::registerTestCase(const char* name) {
     CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
     if(_state->testCaseName.empty()) _state->testCaseName = std::move(name);
+}
+
+void Tester::registerTestCase(const char* name, int line) {
+    registerTestCase(name);
     _state->testCaseLine = line;
 }
 

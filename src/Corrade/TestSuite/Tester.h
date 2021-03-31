@@ -117,8 +117,11 @@ via a command-line option `--no-xfail` or via environment variable,
 The only reason why those are macros and not member functions is the ability to
 gather class/function/file/line/expression information via the preprocessor for
 printing the test output and exact location of possible test failure. If none
-of these macros is encountered when running the test case, the test case is
-reported as invalid, with @cb{.ansi} [1;33m? @ce in the output.
+of the @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() plus variants or
+@ref CORRADE_SKIP()  macros is encountered when running the test case, the test
+case is reported as invalid, with @cb{.ansi} [1;33m? @ce in the output, and
+that causes the whole test run to fail as well. This is done in order to
+prevent accidents where nothing actually gets verified.
 
 The test cases are numbered in the output and those numbers can be used on the
 command-line to whitelist/blacklist the test cases with `--only`/`--skip`,
@@ -1294,8 +1297,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 Containers::Pointer<Data> _data;
         };
 
-        /* Called from all CORRADE_*() verification/skip/xfail macros through
-           _CORRADE_REGISTER_TEST_CASE() */
+        /* Called from all CORRADE_*() verification/skip/... macros. The
+           variant without line info is for macros that shouldn't count as
+           checks (such as CORRADE_ITERATION()) and thus if a test case
+           contains only those, it should be reported as an error. */
+        void registerTestCase(const char* name);
         void registerTestCase(const char* name, int line);
 
     private:
@@ -1578,7 +1584,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_EXPECT_FAIL_IF()
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){message}
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), message)}
 
 /** @hideinitializer
 @brief Conditionally expect failure in a test case in all following checks in the same scope
@@ -1607,7 +1613,7 @@ also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(message, condition)
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)((Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), message), condition)
 
 /** @hideinitializer
 @brief Skip a test case
@@ -1649,7 +1655,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 #define CORRADE_ITERATION(...)                                              \
     Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__); \
     do {                                                                    \
-        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
+        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION); \
         _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__).debug() << __VA_ARGS__; \
     } while(false)
 
