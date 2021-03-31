@@ -1,4 +1,4 @@
 Starting TesterTest::Test with 2 test cases...
- BENCH [48]   0.00          ns benchmarkDefault()@1x1000000000 (wall time)
- BENCH [50] 348.36          kB benchmarkOnce()@1x1
+ BENCH [53]   0.00          ns benchmarkDefault()@1x1000000000 (wall time)
+ BENCH [55] 348.36          kB benchmarkOnce()@1x1
 Finished TesterTest::Test with 0 errors out of 0 checks.

@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
+ * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_SKIP(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
  */
 
 #include <initializer_list>
@@ -114,14 +114,23 @@ in the tests don't get stale. Expected failures can be also disabled globally
 via a command-line option `--no-xfail` or via environment variable,
 @ref TestSuite-Tester-command-line "see below".
 
+Finally, while it's possible to use @ref Utility::Debug and any other APIs for
+printing to the standard output, using the @ref CORRADE_INFO() or
+@ref CORRADE_WARN() macros will make the output prefixed with
+@cb{.ansi} [1;39mINFO @ce or @cb{.ansi} [1;33mWARN @ce, name of the test case
+as well as file/line information. The @ref CORRADE_FAIL() macro is then useful
+as an alternative to @ref CORRADE_VERIFY() / @ref CORRADE_COMPARE() when the
+implicit diagnostic message is insufficient --- it'll just print given message
+prefixed with @cb{.ansi} [1;31mFAIL @ce and the test case is exited.
+
 The only reason why those are macros and not member functions is the ability to
 gather class/function/file/line/expression information via the preprocessor for
 printing the test output and exact location of possible test failure. If none
-of the @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() plus variants or
-@ref CORRADE_SKIP()  macros is encountered when running the test case, the test
-case is reported as invalid, with @cb{.ansi} [1;33m? @ce in the output, and
-that causes the whole test run to fail as well. This is done in order to
-prevent accidents where nothing actually gets verified.
+of the @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() plus variants,
+@ref CORRADE_FAIL() or @ref CORRADE_SKIP()  macros is encountered when running
+the test case, the test case is reported as invalid, with @cb{.ansi} [1;33m? @ce
+in the output, and that causes the whole test run to fail as well. This is done
+in order to prevent accidents where nothing actually gets verified.
 
 The test cases are numbered in the output and those numbers can be used on the
 command-line to whitelist/blacklist the test cases with `--only`/`--skip`,
@@ -1268,6 +1277,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /* Called from CORRADE_SKIP() */
         [[noreturn]] void skip(const Printer& printer);
 
+        /* Called from CORRADE_INFO(), CORRADE_WARN(). The line is passed this
+           way and not through registerTestCase() as there it's used to detect
+           if any checks were made (failing the test if not) and these two
+           macros don't actually check anything. */
+        void infoOrWarn(const Printer& printer, std::size_t line, bool warn);
+        /* Called from CORRADE_FAIL(), not marked as [[noreturn]] because with
+           CORRADE_EXPECT_FAIL() this won't throw an exception */
+        void fail(const Printer& printer);
+
         class CORRADE_TESTSUITE_EXPORT Printer {
             public:
                 template<class F> Printer(F&& printer): Printer{} {
@@ -1395,6 +1413,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         CORRADE_TESTSUITE_LOCAL void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
         CORRADE_TESTSUITE_LOCAL void printFileLineInfo(Debug& out);
+        /* Used from CORRADE_INFO() / CORRADE_WARN() which don't count as
+           checks and thus don't record line info (which is then used to detect
+           whether any checks were made, yeah I know, abusing irrelevant state
+           for this) so it has to be supplied in a different way */
+        CORRADE_TESTSUITE_LOCAL void printFileLineInfo(Debug& out, std::size_t line);
         void verifyInternal(const char* expression, bool value);
         void printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const std::string&), void* comparator);
 
@@ -1475,7 +1498,7 @@ in a helper function or a lambda. To circumvent that, either call a dummy
 @cpp CORRADE_VERIFY(true) @ce at the top of your test case, or explicitly call
 @ref Corrade::TestSuite::Tester::setTestCaseName() "setTestCaseName()" with
 either a hardcoded name or e.g. @ref CORRADE_FUNCTION.
-@see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
+@see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_FAIL()
 */
 #define CORRADE_VERIFY(...)                                                 \
     do {                                                                    \
@@ -1503,7 +1526,7 @@ Note that this macro is usable only if the type passed to it is printable via
 test case in a @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass.
 It's possible to also call it in a helper function or lambda called from inside
 a test case with some caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_COMPARE_AS()
+@see @ref CORRADE_COMPARE_AS(), @ref CORRADE_FAIL()
 */
 /* Unlike CORRADE_VERIFY(), while `expected` could be `...` as well and thus
    avoid the need to wrap the second value in parentheses (which is exceedingly
@@ -1540,7 +1563,7 @@ This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible
 to also call it in a helper function or lambda called from inside a test case
 with some caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_VERIFY(),
+@see @ref CORRADE_VERIFY(), @ref CORRADE_FAIL(),
     @ref Corrade::TestSuite::Comparator "TestSuite::Comparator"
 */
 /* Similarly as above, doing `CORRADE_COMPARE_AS(foo<T, U>(), b, int)` would
@@ -1578,7 +1601,7 @@ This macro is meant to be called in a test case in
 a @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible
 to also call it in a helper function or lambda called from inside a test case
 with some caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), ,
+@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_FAIL(),
     @ref Corrade::TestSuite::Comparator "TestSuite::Comparator"
 */
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
@@ -1593,11 +1616,11 @@ with some caveats. See @ref CORRADE_VERIFY() for details.
     failure
 
 Expects a failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
-@ref CORRADE_COMPARE_AS() and @ref CORRADE_COMPARE_WITH() checks in the same
-scope. Implicitly it will be until the end of the function, but you can limit
-the scope by placing relevant checks in a separate block. If any check
-following the macro in the same scope passes, an error will be printed to the
-output.
+@ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() and @ref CORRADE_FAIL()
+checks in the same scope. Implicitly it will be until the end of the function,
+but you can limit the scope by placing relevant checks in a separate block. If
+any check following the macro in the same scope passes, an error will be
+printed to the output.
 
 @snippet TestSuite.cpp CORRADE_EXPECT_FAIL
 
@@ -1658,6 +1681,79 @@ some caveats. See @ref CORRADE_VERIFY() for details.
     }), condition)
 
 /** @hideinitializer
+@brief Print an info message
+@param ...      Message to print
+@m_since_latest
+
+Compared to using @relativeref{Corrade,Utility::Debug} directly, the message
+will be prefixed with @cb{.ansi} [1;39mINFO @ce, test case name and file/line
+info to be clear where the message comes from. This then replaces the usual
+@cb{.ansi} [1;39mOK @ce, which isn't printed to avoid redundancy in the
+output. The message can be formatted in the same way as in
+@ref CORRADE_ASSERT(), including stream output operators:
+
+@snippet TestSuite.cpp CORRADE_INFO
+
+This macro is meant to be called in a test case in a
+@relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
+in a helper function or lambda called from inside a test case with some
+caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_SKIP()
+*/
+#define CORRADE_INFO(...)                                                   \
+    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
+    })}, __LINE__, false)
+
+/** @hideinitializer
+@brief Print a warning message
+@param ...      Warning to print
+@m_since_latest
+
+Like @ref CORRADE_INFO(), but prefixes the output with @cb{.ansi} [1;33mWARN @ce
+instead, replacing the usual @cb{.ansi} [1;39mOK @ce message as well. A
+warning has no effect on the test result and doesn't end execution of the test
+case either. The message can be formatted in the same way as in
+@ref CORRADE_ASSERT(), including stream output operators:
+
+@snippet TestSuite.cpp CORRADE_WARN
+
+This macro is meant to be called in a test case in a
+@relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
+in a helper function or lambda called from inside a test case with some
+caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_FAIL(), @ref CORRADE_SKIP()
+*/
+#define CORRADE_WARN(...)                                                   \
+    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
+    })}, __LINE__, true)
+
+/** @hideinitializer
+@brief Explicitly fail a test case
+@param ...      Failure message to print
+@m_since_latest
+
+Useful when the implicit failure diagnostic from @ref CORRADE_VERIFY() or
+@ref CORRADE_COMPARE() isn't descriptive enough. The message is prefixed with
+@cb{.ansi} [1;31mFAIL @ce including a file and line where the failure happened
+and execution of given test case is terminated. The message can be formatted in
+the same way as in @ref CORRADE_ASSERT(), including stream output operators:
+
+@snippet TestSuite.cpp CORRADE_FAIL
+
+This macro is meant to be called in a test case in a
+@relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
+in a helper function or lambda called from inside a test case with some
+caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_SKIP()
+*/
+#define CORRADE_FAIL(...)                                                   \
+    Corrade::TestSuite::Tester::instance().fail(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
+    })})
+
+/** @hideinitializer
 @brief Skip a test case
 @param ...      Message which will be printed as an indication of a skipped
     test
@@ -1674,6 +1770,7 @@ This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL()
 */
 #define CORRADE_SKIP(...)                                                   \
     Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \

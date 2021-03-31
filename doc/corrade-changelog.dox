@@ -73,6 +73,12 @@ namespace Corrade {
     @ref Containers::ArrayView4 convenience aliases for
     @ref Containers::StaticArrayView
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL() macros
+    for printing formatted information to the output and explicitly failing a
+    test
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Added @ref Utility::Arguments::addArrayArgument() as a positional

@@ -1,7 +1,7 @@
 Starting TesterTest::Test with 4 test cases...
-  SKIP [19] skip()
+  SKIP [24] skip()
         This testcase is skipped.
     OK [02] trueExpression()
-  FAIL [03] falseExpression() at here.cpp:283
+  FAIL [03] falseExpression() at here.cpp:293
         Expression 5 != 5 failed.
 Aborted TesterTest::Test after first failure out of 2 checks so far.

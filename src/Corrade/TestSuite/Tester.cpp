@@ -648,8 +648,8 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
     out << Debug::resetColor;
 }
 
-void Tester::printFileLineInfo(Debug& out) {
-    out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << _state->testCaseLine;
+void Tester::printFileLineInfo(Debug& out, std::size_t line) {
+    out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << line;
 
     /* If we have checks annotated with an iteration macro, print those. These
        are linked in reverse order so we have to reverse the vector before
@@ -664,6 +664,10 @@ void Tester::printFileLineInfo(Debug& out) {
     }
 
     out << Debug::newline;
+}
+
+void Tester::printFileLineInfo(Debug& out) {
+    printFileLineInfo(out, _state->testCaseLine);
 }
 
 void Tester::verifyInternal(const char* expression, bool expressionValue) {
@@ -709,6 +713,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
     /* Otherwise, in case of an unexpected failure or an unexpected pass, print
        an error message */
     } else if(bool(_state->expectedFailure) != bool(flags & ComparisonStatusFlag::Failed)) {
+        /** @todo deduplicate this with fail()? */
         Error out{_state->errorOutput, _state->useColor};
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
         printFileLineInfo(out);
@@ -721,6 +726,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
     /** @todo print also in case of XFAIL or XPASS? those currently get just a
         static message and printer is never called */
     } else if(flags & (ComparisonStatusFlag::Warning|ComparisonStatusFlag::Message|ComparisonStatusFlag::Verbose)) {
+        /** @todo deduplicate this with infoOrWarn()? */
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out,
             flags & ComparisonStatusFlag::Warning ? "  WARN" : "  INFO",
@@ -760,6 +766,35 @@ void Tester::registerTest(const char* filename, const char* name, bool isDebugBu
     _state->testFilename = std::move(filename);
     if(_state->testName.empty()) _state->testName = std::move(name);
     _state->isDebugBuild = isDebugBuild;
+}
+
+void Tester::infoOrWarn(const Printer& printer, std::size_t line, bool warn) {
+    Debug out{_state->logOutput, _state->useColor};
+    printTestCaseLabel(out,
+        warn ? "  WARN" : "  INFO",
+        warn ? Debug::Color::Yellow : Debug::Color::Default,
+        Debug::Color::Default);
+    printFileLineInfo(out, line);
+    out << "       " << printer._data->out.str();
+}
+
+void Tester::fail(const Printer& printer) {
+    if(_state->expectedFailure) {
+        Debug out{_state->logOutput, _state->useColor};
+        printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
+        printFileLineInfo(out);
+        /** @todo this is extremely uninformative, implement the verbose output
+            for XFAIL/XPASS at least, or figure out a better way to report
+            this; there's also no way to trigger an XPASS here */
+        out << "       " << _state->expectedFailure->_data->out.str() << "Failure was expected to happen.";
+        return;
+    }
+
+    Error out{_state->errorOutput, _state->useColor};
+    printTestCaseLabel(out, "  FAIL", Debug::Color::Red, Debug::Color::Default);
+    printFileLineInfo(out);
+    out << "       " << printer._data->out.str();
+    throw Exception{};
 }
 
 void Tester::skip(const Printer& printer) {

@@ -1,3 +1,3 @@
 Starting TesterTest::Test with 1 test cases...
- BENCH [50] 348.36          kB benchmarkOnce()@1x1
+ BENCH [55] 348.36          kB benchmarkOnce()@1x1
 Finished TesterTest::Test with 0 errors out of 0 checks.
