@@ -1,4 +1,4 @@
 Starting TesterTest::Test with 1 test cases...
-  INFO [15] compareMessage() at here.cpp:342
+  INFO [17] compareMessage() at here.cpp:361
         This is a verbose note when comparing "a.txt" and "b.txt"
 Finished TesterTest::Test with 0 errors out of 1 checks.

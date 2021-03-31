@@ -4,13 +4,13 @@ Starting TesterTest::Test with 4 test cases...
 2
 3
 4
-    OK [37] repeatedTest()@5
+    OK [40] repeatedTest()@5
     OK [04] equal()
 0
 1
 2
 3
 4
-    OK [37] repeatedTest()@5
+    OK [40] repeatedTest()@5
     OK [04] equal()
 Finished TesterTest::Test with 0 errors out of 12 checks.
