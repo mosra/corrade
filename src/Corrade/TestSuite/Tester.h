@@ -105,8 +105,8 @@ can not only see that they differ, but also *how* they differ.
 Additionally there are @ref CORRADE_SKIP(), @ref CORRADE_EXPECT_FAIL() and
 @ref CORRADE_EXPECT_FAIL_IF() control flow helpers that allow you to say for
 example that a particular test was skipped due to missing functionality on
-given platform (printing a @cb{.ansi} [1;39mSKIP @ce on output and exiting the
-test case right after the statement) or documenting that some algorithm
+given platform (printing a @cb{.ansi} [1;39mSKIP @ce in the output and exiting
+the test case right after the statement) or documenting that some algorithm
 produces incorrect result due to a bug, printing an @cb{.ansi} [1;33mXFAIL @ce.
 Passing a test while failure is expected is treated as an error
 (@cb{.ansi} [1;31mXPASS @ce), which can be helpful to ensure the assumptions
@@ -118,9 +118,9 @@ The only reason why those are macros and not member functions is the ability to
 gather class/function/file/line/expression information via the preprocessor for
 printing the test output and exact location of possible test failure. If none
 of these macros is encountered when running the test case, the test case is
-reported as invalid, with @cb{.ansi} [1;33m? @ce on output.
+reported as invalid, with @cb{.ansi} [1;33m? @ce in the output.
 
-The test cases are numbered on the output and those numbers can be used on the
+The test cases are numbered in the output and those numbers can be used on the
 command-line to whitelist/blacklist the test cases with `--only`/`--skip`,
 randomly reorder them using `--shuffle` and more,
 @ref TestSuite-Tester-command-line "see below" for details. In total, when all
@@ -202,8 +202,8 @@ A complementary feature to instanced tests are repeated tests using
 difference from instanced tests is that all repeats are treated as executing
 the same code and thus only the overall result is reported in the output. Also
 unlike instanced tests, if a particular repeat fails, no further repeats are
-executed. The test output contains number of executed repeats after the test
-case name, prefixed by @cb{.ansi} [1;39m@ @ce. Example of testing race
+executed. The test output contains the number of executed repeats after the
+test case name, prefixed by @cb{.ansi} [1;39m@ @ce. Example of testing race
 conditions with multiple threads accessing the same variable:
 
 @snippet testsuite-repeated.cpp 0
@@ -320,8 +320,8 @@ benchmarks. The default benchmark type can be also overriden
 
 It's possible to use all @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc.
 verification macros inside the benchmark to check pre/post-conditions. If one
-of them fails, the benchmark is treated on output just like failing test, with
-no benchmark results being printed out. Keep in mind, however, that those
+of them fails, the benchmark is treated in the output just like a failing test,
+with no benchmark results being printed out. Keep in mind, however, that those
 macros have some overhead, so try to not use them inside the benchmark loop.
 
 The benchmark output is calculated from all samples except the first discarded
@@ -605,7 +605,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  *
                  * Running benchmarks on a system with dynamic CPU scaling
                  * makes the measurements very noisy. If that's detected, a
-                 * warning is printed on output. Defaults to
+                 * warning is printed in the output. Defaults to
                  * `/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor`,
                  * where `{}` is replaced with CPU ID; if the file doesn't
                  * exist, no check is done.
@@ -1423,6 +1423,7 @@ namespace.
 
 /** @hideinitializer
 @brief Verify an expression in a test case
+@param ...      Expression to verify
 
 If the expression is not true, the expression is printed and execution of given
 test case is terminated. Example usage:
@@ -1446,18 +1447,16 @@ in a helper function or a lambda. To circumvent that, either call a dummy
 either a hardcoded name or e.g. @ref CORRADE_FUNCTION.
 @see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_VERIFY(expression...)
-#else
 #define CORRADE_VERIFY(...)                                                 \
     do {                                                                    \
         Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
         Corrade::TestSuite::Tester::instance().verify(#__VA_ARGS__, __VA_ARGS__); \
     } while(false)
-#endif
 
 /** @hideinitializer
 @brief Compare two values in a test case
+@param actual       Calculated value
+@param expected     Ground truth value
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -1491,6 +1490,9 @@ a test case with some caveats. See @ref CORRADE_VERIFY() for details.
 
 /** @hideinitializer
 @brief Compare two values in a test case with explicitly specified type
+@param actual       Calculated value
+@param expected     Ground truth value
+@param ...          Type to compare as
 
 Casts the values to a specified typ first and then continues the same as
 @ref CORRADE_COMPARE(). If the values are not the same, they are printed for
@@ -1518,18 +1520,17 @@ with some caveats. See @ref CORRADE_VERIFY() for details.
    for forcing people to do a typedef and pass that) so we have to leave that
    here even with the risk of the arguments being understood wrong in
    pathological cases. C preprocessor FTW. */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_COMPARE_AS(actual, expected, Type...)
-#else
 #define CORRADE_COMPARE_AS(actual, expected, ...)                           \
     do {                                                                    \
         Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
         Corrade::TestSuite::Tester::instance().compareAs<__VA_ARGS__>(#actual, actual, #expected, expected); \
     } while(false)
-#endif
 
 /** @hideinitializer
 @brief Compare two values in a test case with explicitly specified comparator
+@param actual               Calculated value
+@param expected             Ground truth value
+@param comparatorInstance   Instance of a comparator to compare with
 
 A variant of @ref CORRADE_COMPARE_AS() that takes a comparator instance instead
 of type, useful when you need to pass additional parameters to the comparator.
@@ -1558,14 +1559,15 @@ with some caveats. See @ref CORRADE_VERIFY() for details.
 
 /** @hideinitializer
 @brief Expect failure in a test case in all following checks in the same scope
-@param message Message which will be printed into output as indication of
-    expected failure
+@param message Message which will be printed as an indication of an expected
+    failure
 
-Expects failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE()
-and @ref CORRADE_COMPARE_AS() checks in the same scope. In most cases it will
-be until the end of the function, but you can limit the scope by placing
-relevant checks in a separate block. If any check following the macro in the
-same scope passes, an error will be printed to output.
+Expects a failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
+@ref CORRADE_COMPARE_AS() and @ref CORRADE_COMPARE_WITH() checks in the same
+scope. Implicitly it will be until the end of the function, but you can limit
+the scope by placing relevant checks in a separate block. If any check
+following the macro in the same scope passes, an error will be printed to the
+output.
 
 @snippet TestSuite.cpp CORRADE_EXPECT_FAIL
 
@@ -1580,10 +1582,10 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 
 /** @hideinitializer
 @brief Conditionally expect failure in a test case in all following checks in the same scope
-@param message      Message which will be printed into output as indication of
-    expected failure
 @param condition    The failure is expected only if the condition evaluates to
     @cpp true @ce
+@param message      Message which will be printed as an indication of an
+    expected failure
 
 With @ref CORRADE_EXPECT_FAIL() it's not possible to write code such as this,
 because the scope of expected failure will end at the end of the @cpp if @ce
@@ -1609,8 +1611,8 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 
 /** @hideinitializer
 @brief Skip a test case
-@param message Message which will be printed into output as indication of
-    skipped test
+@param message Message which will be printed as an indication of a skipped
+    test
 
 Skips all following checks in given test case. Useful for e.g. indicating that
 given feature can't be tested on given platform:
