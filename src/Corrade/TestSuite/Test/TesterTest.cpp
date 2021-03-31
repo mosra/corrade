@@ -295,7 +295,8 @@ void Test::nonEqual() {
 
 void Test::expectFail() {
     {
-        CORRADE_EXPECT_FAIL("The world is not mad yet.");
+        const char* world = "world"; /* should behave like Debug */
+        CORRADE_EXPECT_FAIL("The" << world << "is not mad yet.");
         CORRADE_COMPARE(2 + 2, 5);
         CORRADE_VERIFY(false == true);
     }
@@ -303,7 +304,8 @@ void Test::expectFail() {
     CORRADE_VERIFY(true);
 
     {
-        CORRADE_EXPECT_FAIL_IF(6*7 == 49, "This is not our universe");
+        const char* our = "our"; /* should behave like Debug */
+        CORRADE_EXPECT_FAIL_IF(6*7 == 49, "This is not" << our << "universe");
         CORRADE_VERIFY(true);
     }
 
@@ -373,13 +375,14 @@ void Test::compareSaveDiagnostic() {
 }
 
 void Test::skip() {
-    CORRADE_SKIP("This testcase is skipped.");
+    const char* is = "is"; /* should behave like Debug */
+    CORRADE_SKIP("This testcase" << is << "skipped.");
     CORRADE_VERIFY(false);
 }
 
 void Test::iteration() {
     for(std::string name: {"Lucy", "JOHN", "Ed"}) {
-        CORRADE_ITERATION(name);
+        CORRADE_ITERATION(name << "is the name"); /* should behave like Debug */
         for(std::size_t i = 1; i != name.size(); ++i) {
             CORRADE_ITERATION(i);
             CORRADE_VERIFY(!std::isupper(name[i]));

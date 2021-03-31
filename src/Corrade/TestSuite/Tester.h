@@ -1209,6 +1209,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #else
     public:
     #endif
+        class Printer;
+
         /* Called from CORRADE_TEST_MAIN(). argc is grabbed via a mutable
            reference and argv is grabbed as non-const in order to allow the
            users modifying the argument list (and GLUT requires that) */
@@ -1264,24 +1266,46 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void registerTest(const char* filename, const char* name, bool isDebugBuild = false);
 
         /* Called from CORRADE_SKIP() */
-        [[noreturn]] void skip(const std::string& message);
-        [[noreturn]] void skip(const char* message);
+        [[noreturn]] void skip(const Printer& printer);
 
-        class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
+        class CORRADE_TESTSUITE_EXPORT Printer {
             public:
-                explicit ExpectedFailure(const std::string& message, bool enabled = true);
-                explicit ExpectedFailure(std::string&& message, bool enabled = true);
-                explicit ExpectedFailure(const char* message, bool enabled = true);
+                template<class F> Printer(F&& printer): Printer{} {
+                    printer(debug());
+                }
 
-                /* For types with explicit bool conversion */
-                template<class T> explicit ExpectedFailure(const std::string& message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
-                template<class T> explicit ExpectedFailure(std::string&& message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
-                template<class T> explicit ExpectedFailure(const char* message, T&& enabled): ExpectedFailure{message, enabled ? true : false} {}
+                ~Printer();
 
-                ~ExpectedFailure();
+            private:
+                friend Tester;
+
+                Printer();
+                Debug debug();
+
+                /* There's a std::ostringstream inside (yes, ew); don't want
+                   that in a header */
+                struct Data;
+                Containers::Pointer<Data> _data;
         };
 
-        class CORRADE_TESTSUITE_EXPORT IterationPrinter {
+        class CORRADE_TESTSUITE_EXPORT ExpectedFailure: public Printer {
+            public:
+                template<class F> explicit ExpectedFailure(F&& printer, bool enabled = true): ExpectedFailure{enabled} {
+                    printer(debug());
+                }
+
+                /* For types with explicit bool conversion */
+                template<class F, class T> explicit ExpectedFailure(F&& printer, T&& enabled): ExpectedFailure{enabled ? true : false} {
+                    printer(debug());
+                }
+
+                ~ExpectedFailure();
+
+            private:
+                explicit ExpectedFailure(bool enabled);
+        };
+
+        class CORRADE_TESTSUITE_EXPORT IterationPrinter: public Printer {
             public:
                 template<class F> IterationPrinter(F&& printer): IterationPrinter{} {
                     printer(debug());
@@ -1293,12 +1317,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 friend Tester;
 
                 IterationPrinter();
-                Debug debug();
 
-                /* There's a std::ostringstream inside (yes, ew); don't want
-                   that in a header */
-                struct Data;
-                Containers::Pointer<Data> _data;
+                IterationPrinter* _parent;
         };
 
         /* Called from all CORRADE_*() verification/skip/... macros. The
@@ -1581,14 +1601,22 @@ output.
 
 @snippet TestSuite.cpp CORRADE_EXPECT_FAIL
 
+The @p message can be formatted in the same way as in @ref CORRADE_ASSERT(),
+including stream output operators.
+
 This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_EXPECT_FAIL_IF()
 */
+/* Although message could be a `...` like with CORRADE_ITERATION(), it's not
+   done for consistency with CORRADE_EXPECT_FAIL_IF(), see the notice there
+   for more info. */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), message)}
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(expectFailDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(expectFailDebug, __LINE__) << message;        \
+    })}
 
 /** @hideinitializer
 @brief Conditionally expect failure in a test case in all following checks in the same scope
@@ -1611,17 +1639,27 @@ Similarly to @ref CORRADE_VERIFY(), it is possible to use
 @ref CORRADE_EXPECT_FAIL_IF() also on objects with @cpp explicit operator bool @ce
 without doing explicit conversion (e.g. using @cpp !! @ce).
 
+The @p message can be formatted in the same way as in @ref CORRADE_ASSERT(),
+including stream output operators.
+
 This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
+/* Although message could be a `...` like with CORRADE_ITERATION(), it's not
+   done in order to avoid CORRADE_EXPECT_FAIL_IF(std::is_same<T, int>{}, "...")
+   being interpreted in a wrong way (in particular, the __VA_ARGS__ being
+   `int>{}, "..."`. Same is done in CORRADE_COMPARE(), for example, but not
+   in CORRADE_SKIP() or CORRADE_ITERATION() as those have just one argument. */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)((Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), message), condition)
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)((Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(expectFailIfDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(expectFailIfDebug, __LINE__) << message;      \
+    }), condition)
 
 /** @hideinitializer
 @brief Skip a test case
-@param message Message which will be printed as an indication of a skipped
+@param ...      Message which will be printed as an indication of a skipped
     test
 
 Skips all following checks in given test case. Useful for e.g. indicating that
@@ -1629,16 +1667,18 @@ given feature can't be tested on given platform:
 
 @snippet TestSuite.cpp CORRADE_SKIP
 
+The message can be formatted in the same way as in @ref CORRADE_ASSERT(),
+including stream output operators.
+
 This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
-#define CORRADE_SKIP(message)                                               \
-    do {                                                                    \
-        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
-        Corrade::TestSuite::Tester::instance().skip(message); \
-    } while(false)
+#define CORRADE_SKIP(...)                                                   \
+    Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(skipDebug, __LINE__) << __VA_ARGS__;          \
+    })})
 
 /** @hideinitializer
 @brief Annotate an iteration in a test case
@@ -1650,6 +1690,9 @@ to the file/line info. Doesn't print anything if there was no failure. Applies
 to all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc. checks in
 the same scope, multiple calls in the same scope (or nested scopes) are joined
 together. See @ref TestSuite-Tester-iteration-annotations for an example.
+
+The value can be formatted in the same way as in @ref CORRADE_ASSERT(),
+including stream output operators.
 
 This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to

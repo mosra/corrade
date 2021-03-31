@@ -111,6 +111,10 @@ namespace Corrade {
     list of strings for test cases templated by more than one parameter
 -   The @ref CORRADE_VERIFY() macro now now accepts varargs, meaning that you
     no longer need to wrap expressions containing commas in extra parentheses
+-   The @ref CORRADE_SKIP(), @ref CORRADE_EXPECT_FAIL() and
+    @ref CORRADE_EXPECT_FAIL_IF() macros now accept messages in the same form
+    as @ref CORRADE_ASSERT(), that is anything that can be printed with
+    @ref Utility::Debug as well as chaining the pieces with @cpp << @ce.
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

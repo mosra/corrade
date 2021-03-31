@@ -1,5 +1,5 @@
 Starting TesterTest::Test with 1 test cases...
-  FAIL [18] compareSaveDiagnostic() at here.cpp:372
+  FAIL [18] compareSaveDiagnostic() at here.cpp:374
         Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
  SAVED [18] compareSaveDiagnostic() -> /some/path/b.txt
 Finished TesterTest::Test with 1 errors out of 1 checks. 1 checks saved diagnostic files.

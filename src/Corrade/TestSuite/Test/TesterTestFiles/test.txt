@@ -9,37 +9,37 @@ Starting TesterTest::Test with 53 test cases...
         5
         but expected
         3
- XFAIL [06] expectFail() at here.cpp:299
-        The world is not mad yet. 2 + 2 and 5 failed the comparison.
  XFAIL [06] expectFail() at here.cpp:300
+        The world is not mad yet. 2 + 2 and 5 failed the comparison.
+ XFAIL [06] expectFail() at here.cpp:301
         The world is not mad yet. Expression false == true failed.
      ? [07] expectFailNoChecks()
      ? [08] expectFailIfNoChecks()
- XPASS [09] unexpectedPassExpression() at here.cpp:328
+ XPASS [09] unexpectedPassExpression() at here.cpp:330
         Expression true == true was expected to fail.
- XPASS [10] unexpectedPassEqual() at here.cpp:333
+ XPASS [10] unexpectedPassEqual() at here.cpp:335
         2 + 2 and 4 were expected to fail the comparison.
     OK [11] compareAs()
-  FAIL [12] compareAsFail() at here.cpp:341
+  FAIL [12] compareAsFail() at here.cpp:343
         Length of actual "meh" doesn't match length of expected "hello" with epsilon 0
     OK [13] compareWith()
-  FAIL [14] compareWithFail() at here.cpp:349
+  FAIL [14] compareWithFail() at here.cpp:351
         Length of actual "You rather GTFO" doesn't match length of expected "hello" with epsilon 9
-  FAIL [15] compareImplicitConversionFail() at here.cpp:354
+  FAIL [15] compareImplicitConversionFail() at here.cpp:356
         Values "holla" and hello are not the same, actual is
         holla
         but expected
         hello
-  WARN [16] compareWarning() at here.cpp:365
+  WARN [16] compareWarning() at here.cpp:367
         This is a warning when comparing "a.txt" and "b.txt"
-  INFO [17] compareMessage() at here.cpp:361
+  INFO [17] compareMessage() at here.cpp:363
         This is a message when comparing "a.txt" and "b.txt"
     OK [18] compareSaveDiagnostic()
   SKIP [19] skip()
         This testcase is skipped.
-  FAIL [20] iteration() at here.cpp:385 (iteration JOHN, 1)
+  FAIL [20] iteration() at here.cpp:388 (iteration JOHN is the name, 1)
         Expression !std::isupper(name[i]) failed.
-  FAIL [21] iterationScope() at here.cpp:404
+  FAIL [21] iterationScope() at here.cpp:407
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected
@@ -62,7 +62,7 @@ Starting TesterTest::Test with 53 test cases...
        [32] tearing down...
      ? [32] <unknown>()
        [33] setting up...
-  FAIL [33] setupTeardownFail() at here.cpp:465
+  FAIL [33] setupTeardownFail() at here.cpp:468
         Expression false failed.
        [33] tearing down...
        [34] setting up...
@@ -71,7 +71,7 @@ Starting TesterTest::Test with 53 test cases...
        [34] tearing down...
     OK [35] instancedTest(zero)
     OK [36] instancedTest(1)
-  FAIL [37] instancedTest(two) at here.cpp:488
+  FAIL [37] instancedTest(two) at here.cpp:491
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
@@ -85,7 +85,7 @@ Starting TesterTest::Test with 53 test cases...
 4
     OK [40] repeatedTest()@5
      ? [41] <unknown>()@50
-  FAIL [42] repeatedTestFail()@18 at here.cpp:499
+  FAIL [42] repeatedTestFail()@18 at here.cpp:502
         Expression _i++ < 17 failed.
   SKIP [43] repeatedTestSkip()@29
         Too late.
@@ -100,7 +100,7 @@ Starting TesterTest::Test with 53 test cases...
        [45] tearing down...
      ? [45] <unknown>()@2
        [46] setting up...
-  FAIL [46] repeatedTestSetupTeardownFail()@1 at here.cpp:513
+  FAIL [46] repeatedTestSetupTeardownFail()@1 at here.cpp:516
         Expression false failed.
        [46] tearing down...
        [47] setting up...

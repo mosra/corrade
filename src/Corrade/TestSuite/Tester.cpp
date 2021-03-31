@@ -110,9 +110,8 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorF
 }
 #endif
 
-struct Tester::IterationPrinter::IterationPrinter::Data {
+struct Tester::Printer::Printer::Data {
     std::ostringstream out;
-    IterationPrinter* parent;
 };
 
 struct Tester::TesterState {
@@ -143,7 +142,6 @@ struct Tester::TesterState {
     bool testCaseLabelPrinted{};
     bool isDebugBuild{};
     ExpectedFailure* expectedFailure{};
-    std::string expectedFailureMessage;
     IterationPrinter* iterationPrinter{};
     TesterConfiguration configuration;
 
@@ -658,7 +656,7 @@ void Tester::printFileLineInfo(Debug& out) {
        printing. */
     if(_state->iterationPrinter) {
         std::vector<std::string> iterations;
-        for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_data->parent) {
+        for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_parent) {
             iterations.push_back(iterationPrinter->_data->out.str());
         }
         std::reverse(iterations.begin(), iterations.end());
@@ -678,7 +676,7 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         printFileLineInfo(out);
-        out << "       " << _state->expectedFailureMessage << "Expression"
+        out << "       " << _state->expectedFailure->_data->out.str() << "Expression"
             << expression << "failed.";
         return;
     }
@@ -705,7 +703,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         printFileLineInfo(out);
-        out << "       " << _state->expectedFailureMessage << actual << "and"
+        out << "       " << _state->expectedFailure->_data->out.str() << actual << "and"
             << expected << "failed the comparison.";
 
     /* Otherwise, in case of an unexpected failure or an unexpected pass, print
@@ -764,14 +762,10 @@ void Tester::registerTest(const char* filename, const char* name, bool isDebugBu
     _state->isDebugBuild = isDebugBuild;
 }
 
-void Tester::skip(const char* message) {
-    skip(std::string{message});
-}
-
-void Tester::skip(const std::string& message) {
+void Tester::skip(const Printer& printer) {
     Debug out{_state->logOutput, _state->useColor};
     printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
-    out << Debug::newline << "       " << message;
+    out << Debug::newline << "       " << printer._data->out.str();
     throw SkipException();
 }
 
@@ -917,25 +911,28 @@ void Tester::addTestCaseInternal(const TestCase& testCase) {
     _state->testCases.push_back(testCase);
 }
 
-Tester::ExpectedFailure::ExpectedFailure(std::string&& message, const bool enabled) {
+Utility::Debug Tester::Printer::debug() {
+    return Debug{&_data->out, Debug::Flag::NoNewlineAtTheEnd};
+}
+
+Tester::Printer::Printer(): _data{Containers::InPlaceInit} {}
+
+Tester::Printer::~Printer() = default;
+
+Tester::ExpectedFailure::ExpectedFailure(const bool enabled) {
     Tester& instance = Tester::instance();
     if(!enabled || instance._state->expectedFailuresDisabled) return;
-    instance._state->expectedFailureMessage = message;
     instance._state->expectedFailure = this;
 }
 
-Tester::ExpectedFailure::ExpectedFailure(const std::string& message, const bool enabled): ExpectedFailure{std::string{message}, enabled} {}
-
-Tester::ExpectedFailure::ExpectedFailure(const char* message, const bool enabled): ExpectedFailure{std::string{message}, enabled} {}
-
 Tester::ExpectedFailure::~ExpectedFailure() {
-    instance()._state->expectedFailure = nullptr;
+    Tester::instance()._state->expectedFailure = nullptr;
 }
 
 Tester::IterationPrinter::IterationPrinter() {
     Tester& instance = Tester::instance();
     /* Insert itself into the list of iteration printers */
-    _data.emplace().parent = instance._state->iterationPrinter;
+    _parent = instance._state->iterationPrinter;
     instance._state->iterationPrinter = this;
 }
 
@@ -943,11 +940,7 @@ Tester::IterationPrinter::~IterationPrinter() {
     /* Remove itself from the list of iteration printers (assuming destruction
        of those goes in inverse order) */
     CORRADE_INTERNAL_ASSERT(instance()._state->iterationPrinter == this);
-    instance()._state->iterationPrinter = _data->parent;
-}
-
-Utility::Debug Tester::IterationPrinter::debug() {
-    return Debug{&_data->out, Debug::Flag::NoNewlineAtTheEnd};
+    instance()._state->iterationPrinter = _parent;
 }
 
 Tester::BenchmarkRunner::~BenchmarkRunner() {
