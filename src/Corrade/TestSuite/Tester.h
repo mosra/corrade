@@ -1283,17 +1283,21 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         class CORRADE_TESTSUITE_EXPORT IterationPrinter {
             public:
-                IterationPrinter();
-                ~IterationPrinter();
+                template<class F> IterationPrinter(F&& printer): IterationPrinter{} {
+                    printer(debug());
+                }
 
-                Debug debug();
+                ~IterationPrinter();
 
             private:
                 friend Tester;
-                struct Data;
+
+                IterationPrinter();
+                Debug debug();
 
                 /* There's a std::ostringstream inside (yes, ew); don't want
                    that in a header */
+                struct Data;
                 Containers::Pointer<Data> _data;
         };
 
@@ -1653,11 +1657,9 @@ also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_ITERATION(...)                                              \
-    Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__); \
-    do {                                                                    \
-        Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION); \
-        _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__).debug() << __VA_ARGS__; \
-    } while(false)
+    Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(iterationPrinterDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(iterationPrinterDebug, __LINE__) << __VA_ARGS__; \
+    })}
 
 /** @hideinitializer
 @brief Run a benchmark in a test case

@@ -637,6 +637,7 @@ struct TesterTest: Tester {
     void expectFailIfExplicitBool();
 
     void macrosInALambda();
+    void macrosInASingleExpressionBlock();
 };
 
 class EmptyTest: public Tester {};
@@ -705,7 +706,8 @@ TesterTest::TesterTest() {
               &TesterTest::compareNonCopyable,
               &TesterTest::expectFailIfExplicitBool,
 
-              &TesterTest::macrosInALambda});
+              &TesterTest::macrosInALambda,
+              &TesterTest::macrosInASingleExpressionBlock});
 }
 
 void TesterTest::configurationCopy() {
@@ -1651,6 +1653,38 @@ void TesterTest::macrosInALambda() {
         CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
         CORRADE_BENCHMARK(3) std::puts("a");
     }();
+}
+
+void TesterTest::macrosInASingleExpressionBlock() {
+    /* All this should compile fine even though the ITERATION and EXPECT_FAIL
+       variants make no sense this way and are basically no-ops */
+
+    if(true)
+        CORRADE_VERIFY(true);
+
+    if(true)
+        CORRADE_COMPARE(true, true);
+
+    if(true)
+        CORRADE_COMPARE_AS(true, true, bool);
+
+    if(true)
+        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+
+    if(true)
+        CORRADE_EXPECT_FAIL("This makes no sense.");
+
+    if(true)
+        CORRADE_EXPECT_FAIL_IF(true, "This makes no sense either.");
+
+    if(false)
+        CORRADE_SKIP("This is not skipped.");
+
+    const char* yes = "This is a no-op.";
+    if(true)
+        CORRADE_ITERATION(yes);
+
+    /* CORRADE_BENCHMARK() doesn't work this way */
 }
 
 }}}}
