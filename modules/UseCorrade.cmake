@@ -423,7 +423,7 @@ function(corrade_add_test test_name)
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
-            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}> ${arguments})
+            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
             foreach(file ${files})
