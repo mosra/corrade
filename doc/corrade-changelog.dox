@@ -254,6 +254,10 @@ namespace Corrade {
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make
     sense and so it's not assumed any existing code relied on it, nevertheless
     it's a subtle change in behavior that is worth mentioning.
+-   Due to changes to @ref CORRADE_SKIP() internals, passing a @ref std::string
+    to it now requires an explicit @cpp #include <Corrade/Utility/DebugStl.h> @ce.
+    Alternatively, if string concatenation was used, you can compose the
+    message by chaining @ref Utility::Debug output operators instead.
 
 @subsection corrade-changelog-latest-documentation Documentation
 
