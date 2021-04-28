@@ -40,11 +40,7 @@ if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 1
     message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
 endif()
 
-# Configuration fails on < 3.9 if only C++ is enabled (TestBigEndian macro)
-if(NOT CMAKE_VERSION VERSION_LESS 3.9.0)
-    set(LANG CXX)
-endif()
-project(Corrade ${LANG})
+project(Corrade CXX)
 
 # Use folders for nice tree in Visual Studio and XCode
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
