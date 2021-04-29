@@ -43,6 +43,13 @@ corrade_add_test(Cpp11StandardTest CppStandardTest.cpp)
 set_target_properties(Cpp11StandardTest PROPERTIES
     COMPILE_DEFINITIONS COMPILING_AS_CPP11)
 
+set_target_properties(
+    CorradeTagsTest
+    TargetTest
+    CorradeVersionTest
+    Cpp11StandardTest
+    PROPERTIES FOLDER "Corrade/Test")
+
 # Test for C++14:
 # - GCC reports proper __cplusplus since 5.0 (had to test manually, thought
 #   it's since 4.9, but nope, that one returns 201103, at least on Android)
@@ -56,7 +63,9 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
     corrade_add_test(Cpp14StandardTest CppStandardTest.cpp)
-    set_target_properties(Cpp14StandardTest PROPERTIES CORRADE_CXX_STANDARD 14)
+    set_target_properties(Cpp14StandardTest PROPERTIES
+        CORRADE_CXX_STANDARD 14
+        FOLDER "Corrade/Test")
     target_compile_definitions(Cpp14StandardTest PRIVATE
         COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTest\"")
 
@@ -64,7 +73,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
     corrade_add_test(Cpp14StandardTestCMakeStandard CppStandardTest.cpp)
     set_target_properties(Cpp14StandardTestCMakeStandard PROPERTIES
         CORRADE_CXX_STANDARD 17 # This should get ignored even tho it's higher
-        CXX_STANDARD 14)
+        CXX_STANDARD 14
+        FOLDER "Corrade/Test")
     target_compile_definitions(Cpp14StandardTestCMakeStandard PRIVATE
         COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTestCMakeStandard\"")
 
@@ -72,7 +82,9 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
     if(NOT CMAKE_VERSION VERSION_LESS 3.8)
         corrade_add_test(Cpp14StandardTestCMakeFeatures CppStandardTest.cpp)
          # This should get ignored even tho it's higher
-        set_target_properties(Cpp14StandardTestCMakeFeatures PROPERTIES CORRADE_CXX_STANDARD 17)
+        set_target_properties(Cpp14StandardTestCMakeFeatures
+            PROPERTIES CORRADE_CXX_STANDARD 17
+            FOLDER "Corrade/Test")
         target_compile_features(Cpp14StandardTestCMakeFeatures PRIVATE cxx_std_14)
         target_compile_definitions(Cpp14StandardTestCMakeFeatures PRIVATE
             COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTestCMakeFeatures\"")
@@ -95,7 +107,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
     corrade_add_test(Cpp17StandardTest CppStandardTest.cpp)
     set_target_properties(Cpp17StandardTest PROPERTIES
         CORRADE_CXX_STANDARD 17
-        COMPILE_DEFINITIONS COMPILING_AS_CPP17)
+        COMPILE_DEFINITIONS COMPILING_AS_CPP17
+        FOLDER "Corrade/Test")
 endif()
 
 # Test for C++2a (__cplusplus larger than for C++17):
@@ -113,5 +126,6 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
     corrade_add_test(Cpp2aStandardTest CppStandardTest.cpp)
     set_target_properties(Cpp2aStandardTest PROPERTIES
         CORRADE_CXX_STANDARD 20
-        COMPILE_DEFINITIONS COMPILING_AS_CPP2A)
+        COMPILE_DEFINITIONS COMPILING_AS_CPP2A
+        FOLDER "Corrade/Test")
 endif()
