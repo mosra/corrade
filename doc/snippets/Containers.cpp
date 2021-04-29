@@ -230,20 +230,20 @@ c[3] = 25;                      // c == {3, 18, -157, 25}
 /* [Array-usage-initialization] */
 /* These two are equivalent */
 Containers::Array<int> a1{5};
-Containers::Array<int> a2{Containers::ValueInit, 5};
+Containers::Array<int> a2{ValueInit, 5};
 
 /* Array of 100 integers, uninitialized */
-Containers::Array<int> b{Containers::NoInit, 100};
+Containers::Array<int> b{NoInit, 100};
 
 /* Array of a type with no default constructor. All five elements will be
    initialized to {5.2f, 0.5f, 1.0f}. */
 struct Vec3 {
     explicit Vec3(float, float, float) {}
 };
-Containers::Array<Vec3> c{Containers::DirectInit, 5, 5.2f, 0.4f, 1.0f};
+Containers::Array<Vec3> c{DirectInit, 5, 5.2f, 0.4f, 1.0f};
 
 /* Array from an initializer list. These two are equivalent. */
-Containers::Array<int> d1{Containers::InPlaceInit, {1, 2, 3, 4, -5, 0, 42}};
+Containers::Array<int> d1{InPlaceInit, {1, 2, 3, 4, -5, 0, 42}};
 auto d2 = Containers::array<int>({1, 2, 3, 4, -5, 0, 42});
 /* [Array-usage-initialization] */
 }
@@ -321,7 +321,7 @@ struct Foo {
     explicit Foo(int) {}
 };
 
-Containers::Array<Foo> e{Containers::NoInit, 5};
+Containers::Array<Foo> e{NoInit, 5};
 
 int index = 0;
 for(Foo& f: e) new(&f) Foo{index++};
@@ -539,8 +539,8 @@ static_cast<void>(info);
 Containers::ArrayView<std::string> strings;
 Containers::ArrayView<Containers::Reference<std::string>> references;
 Containers::ArrayTuple data{
-    {Containers::ValueInit, 15, strings},
-    {Containers::NoInit, 15, references}
+    {ValueInit, 15, strings},
+    {NoInit, 15, references}
 };
 
 /* Initialize all references to point to the strings */
@@ -555,8 +555,8 @@ for(std::size_t i = 0; i != strings.size(); ++i)
 Containers::ArrayView<std::uint64_t> latencies;
 Containers::ArrayView<float> averages;
 Containers::ArrayTuple data{
-    {{Containers::NoInit, 200*1024*1024, latencies},
-     {Containers::NoInit, 200*1024*1024, averages}},
+    {{NoInit, 200*1024*1024, latencies},
+     {NoInit, 200*1024*1024, averages}},
     [](std::size_t size, std::size_t)
         -> std::pair<char*, Utility::Directory::MapDeleter>
     {
@@ -733,7 +733,7 @@ auto b = Containers::optional(value);
 
 {
 /* [optional-inplace] */
-auto a = Containers::Optional<std::string>{Containers::InPlaceInit, 'a', 'b'};
+auto a = Containers::Optional<std::string>{InPlaceInit, 'a', 'b'};
 auto b = Containers::optional<std::string>('a', 'b');
 /* [optional-inplace] */
 }
@@ -749,7 +749,7 @@ auto b = Containers::optional<std::string>('a', 'b');
 {
 Containers::StringView filename;
 /* [ScopeGuard-deferred] */
-Containers::ScopeGuard e{Containers::NoCreate};
+Containers::ScopeGuard e{NoCreate};
 
 /* Read from stdin if desired, otherwise scope-guard an opened file */
 int fd;
@@ -815,21 +815,21 @@ c[3] = 25;                          // c == {3, 18, -157, 25}
 /* [StaticArray-usage-initialization] */
 /* These two are equivalent */
 Containers::StaticArray<5, int> a1;
-Containers::StaticArray<5, int> a2{Containers::DefaultInit};
+Containers::StaticArray<5, int> a2{DefaultInit};
 
 /* Array of 100 integers, uninitialized */
-Containers::StaticArray<100, int> b{Containers::NoInit};
+Containers::StaticArray<100, int> b{NoInit};
 
 /* Array of 4 values initialized in-place. These two are equivalent. */
 Containers::StaticArray<4, int> c1{3, 18, -157, 0};
-Containers::StaticArray<4, int> c2{Containers::InPlaceInit, 3, 18, -157, 0};
+Containers::StaticArray<4, int> c2{InPlaceInit, 3, 18, -157, 0};
 
 /* Array of a type with no default constructor. All five elements will be
    initialized to {5.2f, 0.5f, 1.0f}. */
 struct Vec3 {
     explicit Vec3(float, float, float) {}
 };
-Containers::StaticArray<5, Vec3> d{Containers::DirectInit, 5.2f, 0.4f, 1.0f};
+Containers::StaticArray<5, Vec3> d{DirectInit, 5.2f, 0.4f, 1.0f};
 /* [StaticArray-usage-initialization] */
 }
 
@@ -839,7 +839,7 @@ struct Foo {
     explicit Foo(int) {}
 };
 
-Containers::StaticArray<5, Foo> e{Containers::NoInit};
+Containers::StaticArray<5, Foo> e{NoInit};
 
 int index = 0;
 for(Foo& f: e) new(&f) Foo{index++};
@@ -1076,7 +1076,7 @@ auto b = Containers::pointer(ptr);
 
 {
 /* [pointer-inplace] */
-auto a = Containers::Pointer<std::string>{Containers::InPlaceInit, 'a', 'b'};
+auto a = Containers::Pointer<std::string>{InPlaceInit, 'a', 'b'};
 auto b = Containers::pointer<std::string>('a', 'b');
 /* [pointer-inplace] */
 }

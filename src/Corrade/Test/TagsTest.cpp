@@ -24,10 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/Tags.h"
+#include "Corrade/Tags.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace Corrade { namespace Test { namespace {
 
 struct TagsTest: TestSuite::Tester {
     explicit TagsTest();
@@ -57,6 +57,6 @@ void TagsTest::inlineDefinition() {
     CORRADE_VERIFY(std::is_same<decltype(DirectInit), const DirectInitT>::value);
 }
 
-}}}}
+}}}
 
-CORRADE_TEST_MAIN(Corrade::Containers::Test::TagsTest)
+CORRADE_TEST_MAIN(Corrade::Test::TagsTest)

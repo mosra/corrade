@@ -448,7 +448,7 @@ void OptionalTest::constructMoveMake() {
 void OptionalTest::constructInPlace() {
     {
         /* Using int{} to test perfect forwarding */
-        Optional<Immovable> a{InPlaceInit, 32, int{}};
+        Optional<Immovable> a{Corrade::InPlaceInit, 32, int{}};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 32);
     }
@@ -468,9 +468,9 @@ void OptionalTest::constructInPlace() {
         CORRADE_VERIFY(!std::is_move_assignable<Optional<Immovable>>::value);
     }
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Immovable>, InPlaceInitT, int, int&&>::value);
-    CORRADE_VERIFY(std::is_constructible<Optional<Throwable>, InPlaceInitT, int>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Optional<Throwable>, InPlaceInitT, int>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Immovable>, Corrade::InPlaceInitT, int, int&&>::value);
+    CORRADE_VERIFY(std::is_constructible<Optional<Throwable>, Corrade::InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Optional<Throwable>, Corrade::InPlaceInitT, int>::value);
 }
 
 void OptionalTest::constructInPlaceMake() {
@@ -511,7 +511,7 @@ void OptionalTest::constructInPlaceMakeAmbiguous() {
     auto d = optional<Ambiguous>(Ambiguous{});
     auto e = optional<Ambiguous>();
     auto f = optional<Ambiguous>(parent, 32);
-    auto g = Optional<Ambiguous>{InPlaceInit, parent};
+    auto g = Optional<Ambiguous>{Corrade::InPlaceInit, parent};
     auto h = Optional<Ambiguous>{parent};
     CORRADE_COMPARE(a->parent, nullptr); /* wrong, but we can't disambiguate */
     CORRADE_COMPARE(b->parent, nullptr);
@@ -606,7 +606,7 @@ void OptionalTest::constructCopyFromNull() {
 
 void OptionalTest::constructCopyFromSet() {
     {
-        Optional<Copyable> a{InPlaceInit, 32};
+        Optional<Copyable> a{Corrade::InPlaceInit, 32};
         Optional<Copyable> b{a};
 
         CORRADE_VERIFY(a);
@@ -636,7 +636,7 @@ void OptionalTest::constructMoveFromNull() {
 
 void OptionalTest::constructMoveFromSet() {
     {
-        Optional<Copyable> a{InPlaceInit, 32};
+        Optional<Copyable> a{Corrade::InPlaceInit, 32};
         Optional<Copyable> b{std::move(a)};
 
         /* A is still set, because the type destructor needs to be called */
@@ -717,7 +717,7 @@ void OptionalTest::copyNullToNull() {
 void OptionalTest::copyNullToSet() {
     {
         Optional<Copyable> a;
-        Optional<Copyable> b{InPlaceInit, 32};
+        Optional<Copyable> b{Corrade::InPlaceInit, 32};
         b = a;
 
         CORRADE_VERIFY(!a);
@@ -732,7 +732,7 @@ void OptionalTest::copyNullToSet() {
 
 void OptionalTest::copySetToNull() {
     {
-        Optional<Copyable> a{InPlaceInit, 32};
+        Optional<Copyable> a{Corrade::InPlaceInit, 32};
         Optional<Copyable> b;
         b = a;
 
@@ -749,8 +749,8 @@ void OptionalTest::copySetToNull() {
 
 void OptionalTest::copySetToSet() {
     {
-        Optional<Copyable> a{InPlaceInit, 32};
-        Optional<Copyable> b{InPlaceInit, 78};
+        Optional<Copyable> a{Corrade::InPlaceInit, 32};
+        Optional<Copyable> b{Corrade::InPlaceInit, 78};
         b = a;
 
         CORRADE_VERIFY(a);
@@ -782,7 +782,7 @@ void OptionalTest::moveNullToNull() {
 void OptionalTest::moveNullToSet() {
     {
         Optional<Movable> a;
-        Optional<Movable> b{InPlaceInit, 32};
+        Optional<Movable> b{Corrade::InPlaceInit, 32};
         b = std::move(a);
 
         CORRADE_VERIFY(!a);
@@ -796,7 +796,7 @@ void OptionalTest::moveNullToSet() {
 
 void OptionalTest::moveSetToNull() {
     {
-        Optional<Movable> a{InPlaceInit, 32};
+        Optional<Movable> a{Corrade::InPlaceInit, 32};
         Optional<Movable> b;
         b = std::move(a);
 
@@ -812,8 +812,8 @@ void OptionalTest::moveSetToNull() {
 
 void OptionalTest::moveSetToSet() {
     {
-        Optional<Copyable> a{InPlaceInit, 32};
-        Optional<Copyable> b{InPlaceInit, 78};
+        Optional<Copyable> a{Corrade::InPlaceInit, 32};
+        Optional<Copyable> b{Corrade::InPlaceInit, 78};
         b = std::move(a);
 
         CORRADE_VERIFY(a);
@@ -829,8 +829,8 @@ void OptionalTest::moveSetToSet() {
     CORRADE_COMPARE(Copyable::moved, 3);
 
     {
-        Optional<Movable> a{InPlaceInit, 32};
-        Optional<Movable> b{InPlaceInit, 78};
+        Optional<Movable> a{Corrade::InPlaceInit, 32};
+        Optional<Movable> b{Corrade::InPlaceInit, 78};
         b = std::move(a);
 
         CORRADE_VERIFY(a);
@@ -859,7 +859,7 @@ void OptionalTest::moveNullOptToNull() {
 
 void OptionalTest::moveNullOptToSet() {
     {
-        Optional<Immovable> a{InPlaceInit, 32};
+        Optional<Immovable> a{Corrade::InPlaceInit, 32};
         a = NullOpt;
 
         CORRADE_VERIFY(!a);
@@ -885,7 +885,7 @@ void OptionalTest::emplaceNull() {
 
 void OptionalTest::emplaceSet() {
     {
-        Optional<Immovable> a{InPlaceInit, 32};
+        Optional<Immovable> a{Corrade::InPlaceInit, 32};
         /* Using int{} to test perfect forwarding */
         a.emplace(76, int{});
 
@@ -916,7 +916,7 @@ void OptionalTest::access() {
 }
 
 void OptionalTest::accessRvalue() {
-    Movable b = *Optional<Movable>{InPlaceInit, 42};
+    Movable b = *Optional<Movable>{Corrade::InPlaceInit, 42};
     CORRADE_COMPARE(b.a, 42);
 
     #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
@@ -980,7 +980,7 @@ void OptionalTest::emplaceConstructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
-    Optional<ContainingExplicitDefaultWithImplicitConstructor> b{InPlaceInit};
+    Optional<ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::InPlaceInit};
     Optional<ContainingExplicitDefaultWithImplicitConstructor> c;
     c.emplace();
     CORRADE_VERIFY(b);

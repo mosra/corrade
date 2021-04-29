@@ -1285,7 +1285,7 @@ void DirectoryTest::prepareFileToCopy() {
     if(Directory::exists(Directory::join(_writeTestDir, "copySource.dat")))
         return;
 
-    Containers::Array<int> data{Containers::NoInit, 150000};
+    Containers::Array<int> data{NoInit, 150000};
     for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
 
     Directory::write(Directory::join(_writeTestDir, "copySource.dat"), data);
@@ -1353,7 +1353,7 @@ void DirectoryTest::prepareFileToBenchmarkCopy() {
         return;
 
     /* Append a megabyte file 50 times to create a 50MB file */
-    Containers::Array<int> data{Containers::ValueInit, 256*1024};
+    Containers::Array<int> data{ValueInit, 256*1024};
     for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
 
     for(std::size_t i = 0; i != 50; ++i)
@@ -1453,8 +1453,7 @@ void DirectoryTest::mapRead() {
     {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
-            (Containers::Array<char>{Containers::InPlaceInit,
-                {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
+            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
     }
     #else
@@ -1480,8 +1479,7 @@ void DirectoryTest::mapReadUtf8() {
     {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
-            (Containers::Array<char>{Containers::InPlaceInit,
-                {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
+            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
     }
     #else

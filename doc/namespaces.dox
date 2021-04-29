@@ -31,9 +31,9 @@
 @brief Root namespace
 
 THe root namespace alone doesn't contain any functionality except for the
-@ref Corrade/Corrade.h header, see subnamespaces for more information. To use
-the base from CMake, request the `Corrade` package and link to the
-`Corrade::Corrade` target:
+@ref Corrade/Corrade.h and @ref Corrade/Tags.h headers, see subnamespaces for
+more information. To use the base from CMake, request the `Corrade` package and
+link to the `Corrade::Corrade` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED)

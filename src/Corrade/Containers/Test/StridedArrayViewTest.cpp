@@ -462,7 +462,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
 
 void StridedArrayViewTest::dimensionsConstructDefault() {
     Size3D a1;
-    Size3D a2{ValueInit};
+    Size3D a2{Corrade::ValueInit};
     CORRADE_COMPARE(a1[0], 0);
     CORRADE_COMPARE(a1[1], 0);
     CORRADE_COMPARE(a1[2], 0);
@@ -471,7 +471,7 @@ void StridedArrayViewTest::dimensionsConstructDefault() {
     CORRADE_COMPARE(a2[2], 0);
 
     constexpr Size3D ca1;
-    constexpr Size3D ca2{ValueInit};
+    constexpr Size3D ca2{Corrade::ValueInit};
     CORRADE_COMPARE(ca1[0], 0);
     CORRADE_COMPARE(ca1[1], 0);
     CORRADE_COMPARE(ca1[2], 0);
@@ -480,10 +480,10 @@ void StridedArrayViewTest::dimensionsConstructDefault() {
     CORRADE_COMPARE(ca2[2], 0);
 
     CORRADE_VERIFY(std::is_nothrow_default_constructible<Size3D>::value);
-    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, ValueInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, Corrade::ValueInitT>::value);
 
     /* Implicit conversion from ValueInitT not allowed */
-    CORRADE_VERIFY(!std::is_convertible<ValueInitT, Size3D>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, Size3D>::value);
 }
 
 void StridedArrayViewTest::dimensionsConstruct() {
@@ -531,7 +531,7 @@ void StridedArrayViewTest::dimensionsConstructView() {
 void StridedArrayViewTest::dimensionsConstructNoInit() {
     Size3D a{1, 37, 4564};
 
-    new(&a)Size3D{NoInit};
+    new(&a)Size3D{Corrade::NoInit};
     {
         #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL("GCC 10+ misoptimizes and overwrites the value.");
@@ -541,10 +541,10 @@ void StridedArrayViewTest::dimensionsConstructNoInit() {
         CORRADE_COMPARE(a[2], 4564);
     }
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<Size1D, NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size1D, Corrade::NoInitT>::value);
 
     /* Implicit conversion from NoInitT not allowed */
-    CORRADE_VERIFY(!std::is_convertible<NoInitT, Size1D>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Size1D>::value);
 }
 
 constexpr Size3D Sizes{34, 67, 98989};

@@ -58,7 +58,7 @@ void ArrayStlSpanTest::toSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Array<float> a{InPlaceInit, {42.0f, 13.37f, -25.0f}};
+    Array<float> a{Corrade::InPlaceInit, {42.0f, 13.37f, -25.0f}};
 
     std::span<float> b = a;
     CORRADE_COMPARE(b.data(), a.data());
@@ -88,7 +88,7 @@ void ArrayStlSpanTest::toSpanConst() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Array<float> a{InPlaceInit, {42.0f, 13.37f, -25.0f}};
+    Array<float> a{Corrade::InPlaceInit, {42.0f, 13.37f, -25.0f}};
 
     std::span<const float> b = a;
     CORRADE_COMPARE(b.data(), a.data());

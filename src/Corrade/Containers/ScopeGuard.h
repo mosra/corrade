@@ -32,7 +32,7 @@
 
 #include <utility>
 
-#include "Corrade/Containers/Tags.h"
+#include "Corrade/Tags.h"
 
 namespace Corrade { namespace Containers {
 
@@ -108,7 +108,7 @@ class ScopeGuard {
          * another object over it to make it useful.
          * @see @ref Containers-ScopeGuard-deferred
          */
-        explicit ScopeGuard(NoCreateT) noexcept: _deleterWrapper{}, _deleter{}, _handle{} {}
+        explicit ScopeGuard(Corrade::NoCreateT) noexcept: _deleterWrapper{}, _deleter{}, _handle{} {}
 
         /** @brief Copying is not allowed */
         ScopeGuard(const ScopeGuard&) = delete;

@@ -155,9 +155,9 @@ void ContainerTest::floatingPoint() {
 }
 
 void ContainerTest::nonCopyableArray() {
-    Containers::Array<int> a{Containers::InPlaceInit, {1, 2, 3, 4, 5}};
-    Containers::Array<int> b{Containers::InPlaceInit, {1, 2, 3, 4, 5}};
-    Containers::Array<int> c{Containers::InPlaceInit, {1, 2, 3, 5, 5}};
+    Containers::Array<int> a{InPlaceInit, {1, 2, 3, 4, 5}};
+    Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4, 5}};
+    Containers::Array<int> c{InPlaceInit, {1, 2, 3, 5, 5}};
 
     CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>()(a, a), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>()(a, b), ComparisonStatusFlags{});

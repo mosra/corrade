@@ -1635,7 +1635,7 @@ void TesterTest::compareAsVarargs() {
 }
 
 void TesterTest::compareWithDereference() {
-    Containers::Optional<StringLength> comparator{Containers::InPlaceInit};
+    Containers::Optional<StringLength> comparator{InPlaceInit};
 
     CORRADE_COMPARE_WITH("hello", "olleh", *comparator);
 }

@@ -223,7 +223,7 @@ void ArrayTest::constructFromExisting() {
 }
 
 void ArrayTest::constructDefaultInit() {
-    const Array a{DefaultInit, 5};
+    const Array a{Corrade::DefaultInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
 
@@ -231,7 +231,7 @@ void ArrayTest::constructDefaultInit() {
 }
 
 void ArrayTest::constructValueInit() {
-    const Array a{ValueInit, 5};
+    const Array a{Corrade::ValueInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
 
@@ -244,7 +244,7 @@ void ArrayTest::constructValueInit() {
 }
 
 void ArrayTest::constructNoInitTrivial() {
-    const Array a{NoInit, 5};
+    const Array a{Corrade::NoInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
     CORRADE_VERIFY(!a.deleter());
@@ -258,18 +258,18 @@ struct Foo {
 int Foo::constructorCallCount = 0;
 
 void ArrayTest::constructNoInitNonTrivial() {
-    const Containers::Array<Foo> a{NoInit, 5};
+    const Containers::Array<Foo> a{Corrade::NoInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
     CORRADE_VERIFY(a.deleter());
     CORRADE_COMPARE(Foo::constructorCallCount, 0);
 
-    const Containers::Array<Foo> b{DefaultInit, 7};
+    const Containers::Array<Foo> b{Corrade::DefaultInit, 7};
     CORRADE_COMPARE(Foo::constructorCallCount, 7);
 }
 
 void ArrayTest::constructDirectInit() {
-    const Array a{DirectInit, 2, -37};
+    const Array a{Corrade::DirectInit, 2, -37};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 2);
     CORRADE_COMPARE(a[0], -37);
@@ -277,7 +277,7 @@ void ArrayTest::constructDirectInit() {
 }
 
 void ArrayTest::constructInPlaceInit() {
-    Array a1{InPlaceInit, {1, 3, 127, -48}};
+    Array a1{Corrade::InPlaceInit, {1, 3, 127, -48}};
     CORRADE_VERIFY(a1);
     CORRADE_COMPARE(a1.size(), 4);
     CORRADE_COMPARE(a1[0], 1);
@@ -293,7 +293,7 @@ void ArrayTest::constructInPlaceInit() {
     CORRADE_COMPARE(a2[2], 127);
     CORRADE_COMPARE(a2[3], -48);
 
-    Array b1{InPlaceInit, {}};
+    Array b1{Corrade::InPlaceInit, {}};
     CORRADE_VERIFY(!b1);
 
     Array b2 = array<int>({});
@@ -348,7 +348,7 @@ void ArrayTest::constructDirectReferences() {
         Reference(NonCopyable&) {}
     };
 
-    const Containers::Array<Reference> b{Containers::DirectInit, 5, a};
+    const Containers::Array<Reference> b{Corrade::DirectInit, 5, a};
     CORRADE_COMPARE(b.size(), 5);
 }
 
@@ -488,7 +488,7 @@ void ArrayTest::convertConstVoid() {
 }
 
 void ArrayTest::convertToExternalView() {
-    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     IntView b = a;
     CORRADE_COMPARE(b.data, a);
@@ -506,7 +506,7 @@ void ArrayTest::convertToExternalView() {
 }
 
 void ArrayTest::convertToConstExternalView() {
-    const Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     ConstIntView b = a;
     CORRADE_COMPARE(b.data, a);
@@ -541,7 +541,7 @@ void ArrayTest::access() {
     CORRADE_COMPARE(a.cbegin(), a.begin());
     CORRADE_COMPARE(a.cend(), a.end());
 
-    const Array b{InPlaceInit, {7, 3, 5, 4}};
+    const Array b{Corrade::InPlaceInit, {7, 3, 5, 4}};
     CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
     CORRADE_COMPARE(b[2], 5);
 }
@@ -579,7 +579,7 @@ void ArrayTest::accessInvalid() {
 }
 
 void ArrayTest::rvalueArrayAccess() {
-    CORRADE_COMPARE((Array{InPlaceInit, {1, 2, 3, 4}}[2]), 3);
+    CORRADE_COMPARE((Array{Corrade::InPlaceInit, {1, 2, 3, 4}}[2]), 3);
 }
 
 void ArrayTest::rangeBasedFor() {
@@ -600,8 +600,8 @@ void ArrayTest::rangeBasedFor() {
 }
 
 void ArrayTest::slice() {
-    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
-    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     ArrayView b = a.slice(1, 4);
     CORRADE_COMPARE(b.size(), 3);
@@ -653,8 +653,8 @@ void ArrayTest::slice() {
 }
 
 void ArrayTest::slicePointer() {
-    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
-    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     ArrayView b = a.slice(a + 1, a + 4);
     CORRADE_COMPARE(b.size(), 3);
@@ -694,8 +694,8 @@ void ArrayTest::slicePointer() {
 }
 
 void ArrayTest::sliceToStatic() {
-    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
-    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     StaticArrayView<3, int> b1 = a.slice<3>(1);
     CORRADE_COMPARE(b1[0], 2);
@@ -731,8 +731,8 @@ void ArrayTest::sliceToStatic() {
 }
 
 void ArrayTest::sliceToStaticPointer() {
-    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
-    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     StaticArrayView<3, int> b = a.slice<3>(a + 1);
     CORRADE_COMPARE(b[0], 2);
@@ -886,7 +886,7 @@ void ArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
-    Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit, 5};
+    Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DirectInit, 5};
     CORRADE_COMPARE(b.size(), 5);
 }
 
@@ -899,11 +899,11 @@ void ArrayTest::copyConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
        attempts to convert ExtremelyTrivial to int to initialize the first
        argument and fails miserably. */
-    Containers::Array<ExtremelyTrivial> a{DirectInit, 2, 3, 'a'};
+    Containers::Array<ExtremelyTrivial> a{Corrade::DirectInit, 2, 3, 'a'};
     CORRADE_COMPARE(a.size(), 2);
 
     /* This copy-constructs the new values */
-    Containers::Array<ExtremelyTrivial> b{InPlaceInit, {
+    Containers::Array<ExtremelyTrivial> b{Corrade::InPlaceInit, {
         {4, 'b'},
         {5, 'c'},
         {6, 'd'}
@@ -921,7 +921,7 @@ void ArrayTest::moveConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
        to convert MoveOnlyStruct to int to initialize the first argument and
        fails miserably. */
-    Containers::Array<MoveOnlyStruct> a{DirectInit, 2, 3, 'a', nullptr};
+    Containers::Array<MoveOnlyStruct> a{Corrade::DirectInit, 2, 3, 'a', nullptr};
     CORRADE_COMPARE(a.size(), 2);
 
     /* Unlike with copyConstructPlainStruct(), the InPlaceInit doesn't use

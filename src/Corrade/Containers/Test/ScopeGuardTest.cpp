@@ -57,13 +57,13 @@ ScopeGuardTest::ScopeGuardTest() {
 
 void ScopeGuardTest::constructNoCreate() {
     {
-        ScopeGuard e{NoCreate};
+        ScopeGuard e{Corrade::NoCreate};
     }
 
     /* Implicit construction from NoCreateT is not allowed, neither should be
        default construction (because such instance is too easy to create by
        accident but makes no sense, so prevent that) */
-    CORRADE_VERIFY(!std::is_convertible<NoCreateT, ScopeGuard>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoCreateT, ScopeGuard>::value);
     CORRADE_VERIFY(!std::is_default_constructible<ScopeGuard>::value);
 }
 
@@ -79,7 +79,7 @@ void ScopeGuardTest::constructMove() {
         ScopeGuard b = std::move(a);
         CORRADE_COMPARE(v, 0);
 
-        ScopeGuard c{NoCreate};
+        ScopeGuard c{Corrade::NoCreate};
         CORRADE_COMPARE(v, 0);
 
         c = std::move(a);

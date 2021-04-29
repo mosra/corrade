@@ -69,9 +69,8 @@ namespace Corrade {
 -   New @ref Containers::Array2, @ref Containers::Array3 and
     @ref Containers::Array4 convenience aliases for
     @ref Containers::StaticArray, together with @ref Containers::Array1 that's
-    useful in case you want to take advantage of the @ref Containers::NoInit
-    tag on an arbitrary type and @ref Containers::Optional doesn't suit the use
-    case.
+    useful in case you want to take advantage of the @ref NoInit tag on an
+    arbitrary type and @ref Containers::Optional doesn't suit the use case.
 -   New @ref Containers::ArrayView2, @ref Containers::ArrayView3 and
     @ref Containers::ArrayView4 convenience aliases for
     @ref Containers::StaticArrayView
@@ -106,8 +105,8 @@ namespace Corrade {
 -   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     constructor is no longer @cpp explicit @ce to allow for easier use in
     initializer lists
--   @ref Containers::ScopeGuard now has a @ref Containers::NoCreate constructor
-    and is movable in order to support deferred creation
+-   @ref Containers::ScopeGuard now has a @ref NoCreate constructor and is
+    movable in order to support deferred creation
 -   @ref Containers::LinkedList destruction was changed in a way that makes
     @ref Containers::LinkedListItem::list() still accessible in a destructor
     of @ref Containers::LinkedListItem subclasses
@@ -241,6 +240,14 @@ namespace Corrade {
     however you'll get a deprecation notice. Since the variable got saved to
     CMake cache, to get rid of the message, you may need to either recreate
     your build directory or explicitly delete it from the cache.
+-   The @cpp Corrade/Containers/Tags.h @ce header,
+    @cpp Containers::DefaultInit @ce, @cpp Containers::ValueInit @ce,
+    @cpp Containers::NoInit @ce, @cpp Containers::NoCreate @ce,
+    @cpp Containers::DirectInit @ce, @cpp Containers::InPlaceInit @ce and
+    related tag types were moved to @ref Corrade/Tags.h and the root
+    @ref Corrade namespace, available  as @ref DefaultInit, @ref ValueInit,
+    @ref NoInit, @ref NoCreate, @ref DirectInit, @ref InPlaceInit and related
+    tag types
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
@@ -529,12 +536,12 @@ Released 2020-06-27, tagged as
     compile when used with an empty argument list. The original functionality
     is provided by @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() instead.
 -   @ref Containers::Array and @ref Containers::StaticArray was switched to
-    do the @ref Containers::ValueInit construction by default instead of
-    @ref Containers::DefaultInit, i.e. zero-initializing trivial types instead
-    of keeping them uninitialized. Apart from introducing potential slowdowns
-    due to the additional zero-ininitialization this isn't really breaking,
-    just makes the default safer; and you still have the option to choose a
-    different initialization.
+    do the @cpp Containers::ValueInit @ce construction by default instead of
+    @cpp Containers::DefaultInit @ce, i.e. zero-initializing trivial types
+    instead of keeping them uninitialized. Apart from introducing potential
+    slowdowns due to the additional zero-ininitialization this isn't really
+    breaking, just makes the default safer; and you still have the option to
+    choose a different initialization.
 -   @ref Utility::Debug and @ref Utility::format() now prints @cpp long double @ce
     with 15 significant digits instead of 18 on platforms where it is 64-bit
     instead of 80-bit
@@ -1002,7 +1009,7 @@ Released 2019-02-04, tagged as
     @ref std::unique_ptr
 -   New @ref Containers::Reference class, a lightweight equivalent to
     @ref std::reference_wrapper
--   New @ref Containers::NoCreate tag for constructing instances
+-   New @cpp Containers::NoCreate @ce tag for constructing instances
     equivalent to a moved-from state. This tag was used in Magnum already,
     moving it here to make it available to a wider set of APIs.
 -   New @ref Containers::optional(Args&&... args) overload for in-place

@@ -240,9 +240,9 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
 AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginMetadataSuffix):
 #endif
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    _state{Containers::InPlaceInit, std::move(pluginInterface), std::move(pluginSuffix), std::move(pluginMetadataSuffix)}
+    _state{InPlaceInit, std::move(pluginInterface), std::move(pluginSuffix), std::move(pluginMetadataSuffix)}
     #else
-    _state{Containers::InPlaceInit, std::move(pluginInterface), std::move(pluginMetadataSuffix)}
+    _state{InPlaceInit, std::move(pluginInterface), std::move(pluginMetadataSuffix)}
     #endif
 {
     /* Add static plugins which have the same interface and don't have a

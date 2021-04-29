@@ -950,7 +950,7 @@ Utility::Debug Tester::Printer::debug() {
     return Debug{&_data->out, Debug::Flag::NoNewlineAtTheEnd};
 }
 
-Tester::Printer::Printer(): _data{Containers::InPlaceInit} {}
+Tester::Printer::Printer(): _data{InPlaceInit} {}
 
 Tester::Printer::~Printer() = default;
 

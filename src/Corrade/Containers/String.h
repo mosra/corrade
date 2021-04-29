@@ -334,7 +334,7 @@ class CORRADE_UTILITY_EXPORT String {
          * its behavior would be the same to @ref String(NoInitT, std::size_t).
          * @see @ref String(DirectInitT, std::size_t, char)
          */
-        explicit String(ValueInitT, std::size_t size);
+        explicit String(Corrade::ValueInitT, std::size_t size);
 
         /**
          * @brief Create a string initialized to a particular character
@@ -344,7 +344,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @see @ref String(ValueInitT, std::size_t),
          *      @ref String(NoInitT, std::size_t)
          */
-        explicit String(DirectInitT, std::size_t size, char c);
+        explicit String(Corrade::DirectInitT, std::size_t size, char c);
 
         /**
          * @brief Create an uninitialized string
@@ -354,7 +354,7 @@ class CORRADE_UTILITY_EXPORT String {
          * *does* get initialized to @cpp '\0' @ce. Useful if you're going to
          * overwrite the contents anyway.
          */
-        explicit String(NoInitT, std::size_t size);
+        explicit String(Corrade::NoInitT, std::size_t size);
 
         /** @todo combined AllocatedInit + Value/Direct/NoInit constructors */
 
@@ -793,7 +793,7 @@ class CORRADE_UTILITY_EXPORT String {
         char* release();
 
     private:
-        CORRADE_UTILITY_LOCAL void construct(NoInitT, std::size_t size);
+        CORRADE_UTILITY_LOCAL void construct(Corrade::NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();
         CORRADE_UTILITY_LOCAL std::pair<const char*, std::size_t> dataInternal() const;

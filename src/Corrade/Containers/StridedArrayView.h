@@ -30,9 +30,9 @@
  * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator, alias @ref Corrade::Containers::StridedArrayView1D, @ref Corrade::Containers::StridedArrayView2D, @ref Corrade::Containers::StridedArrayView3D, @ref Corrade::Containers::StridedArrayView4D
  */
 
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/sequenceHelpers.h"
-#include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
@@ -116,10 +116,10 @@ template<unsigned dimensions, class T> class StridedDimensions {
         constexpr /*implicit*/ StridedDimensions() noexcept: _data{} {}
 
         /** @brief Construct with zero-initialized data */
-        constexpr explicit StridedDimensions(ValueInitT) noexcept: _data{} {}
+        constexpr explicit StridedDimensions(Corrade::ValueInitT) noexcept: _data{} {}
 
         /** @brief Construct without initializing the contents */
-        explicit StridedDimensions(NoInitT) noexcept {}
+        explicit StridedDimensions(Corrade::NoInitT) noexcept {}
 
         /** @brief Constructor */
         template<class ...Args> constexpr /*implicit*/ StridedDimensions(T first, Args... next) noexcept: _data{T(first), T(next)...} {
@@ -1759,8 +1759,8 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Size& begin, const Size& end) const {
     constexpr unsigned minDimensions = dimensions < newDimensions ? dimensions : newDimensions;
-    StridedDimensions<newDimensions, std::size_t> size{NoInit};
-    StridedDimensions<newDimensions, std::ptrdiff_t> stride{NoInit};
+    StridedDimensions<newDimensions, std::size_t> size{Corrade::NoInit};
+    StridedDimensions<newDimensions, std::ptrdiff_t> stride{Corrade::NoInit};
     auto data = static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data);
 
     /* Adjust data pointer based on offsets of all source dimensions */
@@ -1791,7 +1791,7 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::except(const Size& count) const {
-    Size end{NoInit};
+    Size end{Corrade::NoInit};
     for(std::size_t i = 0; i != dimensions; ++i)
         end._data[i] = _size._data[i] - count._data[i];
     return slice<newDimensions>({}, end);

@@ -33,8 +33,8 @@
 
 #include <type_traits>
 
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h" /* for template default args */
-#include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
@@ -110,7 +110,7 @@ class EnumSet {
          *
          * The contents are left in an undefined state.
          */
-        explicit EnumSet(NoInitT) {}
+        explicit EnumSet(Corrade::NoInitT) {}
 
         /** @brief Equality comparison */
         constexpr bool operator==(EnumSet<T, fullValue> other) const {

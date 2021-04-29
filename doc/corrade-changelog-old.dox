@@ -177,10 +177,10 @@ a high-level overview.
     but with compile-time size information
 -   New @ref Containers::Optional class, providing a subset of functionality
     from C++17 @ref std::optional (see [mosra/corrade#36](https://github.com/mosra/corrade/pull/36))
--   Added @ref Containers::NoInit, @ref Containers::DirectInit,
-    @ref Containers::DefaultInit, @ref Containers::ValueInit and
-    @ref Containers::InPlaceInit tags for better control over initialization of
-    @ref Containers::Array and @ref Containers::StaticArray
+-   Added @cpp Containers::NoInit @ce, @cpp Containers::DirectInit @ce,
+    @cpp Containers::DefaultInit @ce, @cpp Containers::ValueInit @ce and
+    @cpp Containers::InPlaceInit @ce tags for better control over
+    initialization of @ref Containers::Array and @ref Containers::StaticArray
 -   Added @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     to create @ref Containers::Array from an initializer list
 -   New @ref Containers::Array::Array(T*, std::size_t, D) "Containers::Array::Array(T*, std::size_t, D)"
@@ -264,7 +264,7 @@ a high-level overview.
 
 @subsubsection corrade-changelog-2018-02-changes-containers Containers library
 
--   @ref Containers::EnumSet now can take a @ref Containers::NoInit tag to
+-   @ref Containers::EnumSet now can take a @cpp Containers::NoInit @ce tag to
     create an uninitialized value
 -   Exposed @ref Containers::EnumSet::FullValue constant
 

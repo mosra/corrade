@@ -120,7 +120,7 @@ class BigEnumSet {
          *
          * The contents are left in an undefined state.
          */
-        explicit BigEnumSet(NoInitT) {}
+        explicit BigEnumSet(Corrade::NoInitT) {}
 
         /** @brief Equality comparison */
         constexpr bool operator==(const BigEnumSet<T, size>& other) const {

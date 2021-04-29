@@ -35,9 +35,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "Corrade/configure.h"
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
-#include "Corrade/Containers/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 
 namespace Corrade { namespace Containers {
@@ -334,7 +333,7 @@ class Array {
          * @ref Array(NoInitT, std::size_t) variant instead.
          * @see @ref DefaultInit, @ref std::is_trivial
          */
-        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
+        explicit Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
          * @brief Construct a value-initialized array
@@ -345,7 +344,7 @@ class Array {
          * is zero, no allocation is done.
          * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
          */
-        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
+        explicit Array(Corrade::ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
          * @brief Construct an array without initializing its contents
@@ -373,7 +372,7 @@ class Array {
          *      @ref array(std::initializer_list<T>), @ref deleter(),
          *      @ref std::is_trivial
          */
-        explicit Array(NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
+        explicit Array(Corrade::NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
 
         /**
          * @brief Construct a direct-initialized array
@@ -382,7 +381,7 @@ class Array {
          * constructor and then initializes each element with placement new
          * using forwarded @p args.
          */
-        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args&&... args);
+        template<class... Args> explicit Array(Corrade::DirectInitT, std::size_t size, Args&&... args);
 
         /**
          * @brief Construct a list-initialized array
@@ -397,7 +396,7 @@ class Array {
          * @ref Containers-Array-initializer-list "class documentation" for
          * more information.
          */
-        /*implicit*/ Array(InPlaceInitT, std::initializer_list<T> list);
+        /*implicit*/ Array(Corrade::InPlaceInitT, std::initializer_list<T> list);
 
         /**
          * @brief Construct a value-initialized array
@@ -405,7 +404,7 @@ class Array {
          * Alias to @ref Array(ValueInitT, std::size_t).
          * @see @ref Array(DefaultInitT, std::size_t)
          */
-        explicit Array(std::size_t size): Array{ValueInit, size} {}
+        explicit Array(std::size_t size): Array{Corrade::ValueInit, size} {}
 
         /**
          * @brief Wrap an existing array
@@ -694,7 +693,7 @@ usability issues as with @ref std::vector --- see the
 information.
 */
 template<class T> inline Array<T> array(std::initializer_list<T> list) {
-    return Array<T>{InPlaceInit, list};
+    return Array<T>{Corrade::InPlaceInit, list};
 }
 
 /** @relatesalso ArrayView
@@ -750,7 +749,7 @@ template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexce
     other._deleter = D{};
 }
 
-template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args&&... args): Array{NoInit, size} {
+template<class T, class D> template<class ...Args> Array<T, D>::Array(Corrade::DirectInitT, std::size_t size, Args&&... args): Array{Corrade::NoInit, size} {
     for(std::size_t i = 0; i != size; ++i)
         /* This works around a featurebug in C++ where new T{} doesn't work for
            an explicit defaulted constructor. Additionally it works around GCC
@@ -759,7 +758,7 @@ template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInit
         Implementation::construct(_data[i], std::forward<Args>(args)...);
 }
 
-template<class T, class D> Array<T, D>::Array(InPlaceInitT, std::initializer_list<T> list): Array{NoInit, list.size()} {
+template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initializer_list<T> list): Array{Corrade::NoInit, list.size()} {
     std::size_t i = 0;
     for(const T& item: list)
         /* Can't use {}, see the GCC 4.8-specific overload for details */

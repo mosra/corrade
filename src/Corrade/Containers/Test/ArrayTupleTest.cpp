@@ -268,10 +268,10 @@ void ArrayTupleTest::constructNoInit() {
         ArrayView<NonCopyable> noncopyable;
         ArrayView<NonCopyable> initializedNoncopyable;
         ArrayTuple data{
-            {{NoInit, 15, chars},
-             {ValueInit, 15, initializedChars},
-             {NoInit, 3, noncopyable},
-             {ValueInit, 2, initializedNoncopyable}},
+            {{Corrade::NoInit, 15, chars},
+             {Corrade::ValueInit, 15, initializedChars},
+             {Corrade::NoInit, 3, noncopyable},
+             {Corrade::ValueInit, 2, initializedNoncopyable}},
             [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 return {storage, [](char*, std::size_t) { }};
             }

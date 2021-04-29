@@ -784,7 +784,7 @@ void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't fully test assertions");
     #endif
 
-    Containers::Optional<PluginManager::Manager<AbstractAnimal>> manager{Containers::InPlaceInit};
+    Containers::Optional<PluginManager::Manager<AbstractAnimal>> manager{InPlaceInit};
     PluginManager::Manager<AbstractFood> foodManager;
     foodManager.registerExternalManager(*manager);
 

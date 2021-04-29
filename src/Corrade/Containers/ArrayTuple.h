@@ -34,9 +34,9 @@
 #include <initializer_list>
 #include <utility>
 
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/constructHelpers.h"
-#include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Containers {
@@ -288,7 +288,7 @@ class ArrayTuple::Item {
          * use @ref Item(NoInitT, std::size_t, ArrayView<T>&) instead and then
          * manually construct each item in-place.
          */
-        template<class T> /*implicit*/ Item(ValueInitT, std::size_t size, ArrayView<T>& outputView): Item{NoInit, size, outputView} {
+        template<class T> /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, ArrayView<T>& outputView): Item{Corrade::NoInit, size, outputView} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
             _constructor = [](void* data) {
@@ -303,7 +303,7 @@ class ArrayTuple::Item {
          *
          * Alias to @ref Item(ValueInitT, std::size_t, ArrayView<T>&).
          */
-        template<class T> /*implicit*/ Item(std::size_t size, ArrayView<T>& outputView): Item{ValueInit, size, outputView} {}
+        template<class T> /*implicit*/ Item(std::size_t size, ArrayView<T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /**
          * @brief Construct a view without initializing its elements
@@ -317,7 +317,7 @@ class ArrayTuple::Item {
          * gets finally called on *all elements*, regardless of whether they
          * were properly constructed or not.
          */
-        template<class T> /*implicit*/ Item(NoInitT, std::size_t size, ArrayView<T>& outputView):
+        template<class T> /*implicit*/ Item(Corrade::NoInitT, std::size_t size, ArrayView<T>& outputView):
             _elementSize{sizeof(T)}, _elementAlignment{alignof(T)}, _elementCount{size},
             _constructor{},
             _destructor{std::is_trivially_destructible<T>::value ? static_cast<void(*)(char*, std::size_t)>(nullptr) :

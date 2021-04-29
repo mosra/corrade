@@ -190,14 +190,14 @@ void StaticArrayTest::construct() {
 }
 
 void StaticArrayTest::constructDefaultInit() {
-    const StaticArray a{DefaultInit};
+    const StaticArray a{Corrade::DefaultInit};
     CORRADE_VERIFY(a);
 
     /* Values are random memory */
 }
 
 void StaticArrayTest::constructValueInit() {
-    const StaticArray a{ValueInit};
+    const StaticArray a{Corrade::ValueInit};
     CORRADE_VERIFY(a);
 
     /* Values should be zero-initialized (same as the default constructor) */
@@ -307,10 +307,10 @@ void StaticArrayTest::resetCounters() {
 
 void StaticArrayTest::constructNoInit() {
     {
-        const Containers::StaticArray<5, Copyable> a{NoInit};
+        const Containers::StaticArray<5, Copyable> a{Corrade::NoInit};
         CORRADE_COMPARE(Copyable::constructed, 0);
 
-        const Containers::StaticArray<5, Copyable> b{DefaultInit};
+        const Containers::StaticArray<5, Copyable> b{Corrade::DefaultInit};
         CORRADE_COMPARE(Copyable::constructed, 5);
     }
 
@@ -319,7 +319,7 @@ void StaticArrayTest::constructNoInit() {
 
 void StaticArrayTest::constructInPlaceInit() {
     const StaticArray a{1, 2, 3, 4, 5};
-    const StaticArray b{InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray b{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
     CORRADE_COMPARE(a[0], 1);
     CORRADE_COMPARE(b[0], 1);
@@ -339,7 +339,7 @@ void StaticArrayTest::constructInPlaceInitOneArgument() {
 }
 
 void StaticArrayTest::constructDirectInit() {
-    const StaticArray a{DirectInit, -37};
+    const StaticArray a{Corrade::DirectInit, -37};
     CORRADE_COMPARE(a[0], -37);
     CORRADE_COMPARE(a[1], -37);
     CORRADE_COMPARE(a[2], -37);
@@ -350,7 +350,7 @@ void StaticArrayTest::constructDirectInit() {
 void StaticArrayTest::constructNonCopyable() {
     /* Can't use ValueInit because that apparently copy-constructs the array
        elements (huh?) */
-    const Containers::StaticArray<5, Immovable> a{DefaultInit};
+    const Containers::StaticArray<5, Immovable> a{Corrade::DefaultInit};
     CORRADE_VERIFY(a);
 }
 
@@ -361,7 +361,7 @@ void StaticArrayTest::constructNoImplicitConstructor() {
         int i;
     };
 
-    const Containers::StaticArray<5, NoImplicitConstructor> a{Containers::DirectInit, 5};
+    const Containers::StaticArray<5, NoImplicitConstructor> a{Corrade::DirectInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a[0].i, 5);
     CORRADE_COMPARE(a[1].i, 5);
@@ -369,7 +369,7 @@ void StaticArrayTest::constructNoImplicitConstructor() {
     CORRADE_COMPARE(a[3].i, 5);
     CORRADE_COMPARE(a[4].i, 5);
 
-    const Containers::StaticArray<5, NoImplicitConstructor> b{Containers::InPlaceInit, 1, 2, 3, 4, 5};
+    const Containers::StaticArray<5, NoImplicitConstructor> b{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b[0].i, 1);
     CORRADE_COMPARE(b[1].i, 2);
@@ -391,13 +391,13 @@ void StaticArrayTest::constructDirectReferences() {
         Reference(NonCopyable&) {}
     };
 
-    const Containers::StaticArray<5, Reference> b{Containers::DirectInit, a};
+    const Containers::StaticArray<5, Reference> b{Corrade::DirectInit, a};
     CORRADE_VERIFY(b);
 }
 
 void StaticArrayTest::copy() {
     {
-        Containers::StaticArray<3, Copyable> a{Containers::InPlaceInit, 1, 2, 3};
+        Containers::StaticArray<3, Copyable> a{Corrade::InPlaceInit, 1, 2, 3};
 
         Containers::StaticArray<3, Copyable> b{a};
         CORRADE_COMPARE(b[0].a, 1);
@@ -432,7 +432,7 @@ void StaticArrayTest::copy() {
 
 void StaticArrayTest::move() {
     {
-        Containers::StaticArray<3, Movable> a{Containers::InPlaceInit, 1, 2, 3};
+        Containers::StaticArray<3, Movable> a{Corrade::InPlaceInit, 1, 2, 3};
 
         Containers::StaticArray<3, Movable> b{std::move(a)};
         CORRADE_COMPARE(b[0].a, 1);
@@ -730,7 +730,7 @@ void StaticArrayTest::accessConst() {
 }
 
 void StaticArrayTest::rvalueArrayAccess() {
-    CORRADE_COMPARE((StaticArray{DirectInit, 3})[2], 3);
+    CORRADE_COMPARE((StaticArray{Corrade::DirectInit, 3})[2], 3);
 }
 
 void StaticArrayTest::rangeBasedFor() {
@@ -751,8 +751,8 @@ void StaticArrayTest::rangeBasedFor() {
 }
 
 void StaticArrayTest::slice() {
-    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
-    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+    StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
     ArrayView b = a.slice(1, 4);
     CORRADE_COMPARE(b.size(), 3);
@@ -804,8 +804,8 @@ void StaticArrayTest::slice() {
 }
 
 void StaticArrayTest::slicePointer() {
-    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
-    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+    StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
     ArrayView b = a.slice(a + 1, a + 4);
     CORRADE_COMPARE(b.size(), 3);
@@ -845,8 +845,8 @@ void StaticArrayTest::slicePointer() {
 }
 
 void StaticArrayTest::sliceToStatic() {
-    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
-    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+    StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
     Containers::StaticArrayView<3, int> b1 = a.slice<3>(1);
     CORRADE_COMPARE(b1[0], 2);
@@ -900,8 +900,8 @@ void StaticArrayTest::sliceToStatic() {
 }
 
 void StaticArrayTest::sliceToStaticPointer() {
-    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
-    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+    StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
     Containers::StaticArrayView<3, int> b = a.slice<3>(a + 1);
     CORRADE_COMPARE(b[0], 2);
@@ -972,7 +972,7 @@ void StaticArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
-    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{DirectInit};
+    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DirectInit};
     CORRADE_COMPARE(b.size(), 3);
 }
 
@@ -985,7 +985,7 @@ void StaticArrayTest::copyConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
        attempts to convert ExtremelyTrivial to int to initialize the first
        argument and fails miserably. */
-    Containers::StaticArray<3, ExtremelyTrivial> a{DirectInit, 3, 'a'};
+    Containers::StaticArray<3, ExtremelyTrivial> a{Corrade::DirectInit, 3, 'a'};
     CORRADE_COMPARE(a.front().a, 3);
 
     /* This copy-constructs new values */
@@ -1017,7 +1017,7 @@ void StaticArrayTest::moveConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
        to convert MoveOnlyStruct to int to initialize the first argument and
        fails miserably. */
-    Containers::StaticArray<3, MoveOnlyStruct> a{DirectInit, 3, 'a', nullptr};
+    Containers::StaticArray<3, MoveOnlyStruct> a{Corrade::DirectInit, 3, 'a', nullptr};
     CORRADE_COMPARE(a.front().a, 3);
 
     /* This move-constructs new values */

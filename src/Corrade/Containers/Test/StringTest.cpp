@@ -471,7 +471,7 @@ void StringTest::constructPointerSizeTooLarge() {
 }
 
 void StringTest::constructValueInit() {
-    String a{ValueInit, 35};
+    String a{Corrade::ValueInit, 35};
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -480,7 +480,7 @@ void StringTest::constructValueInit() {
 }
 
 void StringTest::constructValueInitSmall() {
-    String a{ValueInit, 10};
+    String a{Corrade::ValueInit, 10};
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -500,14 +500,14 @@ void StringTest::constructValueInitTooLarge() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    String a{ValueInit, ~std::size_t{}};
+    String a{Corrade::ValueInit, ~std::size_t{}};
     CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
 }
 
 void StringTest::constructDirectInit() {
-    String a{DirectInit, 35, 'X'};
+    String a{Corrade::DirectInit, 35, 'X'};
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], 'X');
@@ -516,7 +516,7 @@ void StringTest::constructDirectInit() {
 }
 
 void StringTest::constructDirectInitSmall() {
-    String a{DirectInit, 10, 'X'};
+    String a{Corrade::DirectInit, 10, 'X'};
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -536,14 +536,14 @@ void StringTest::constructDirectInitTooLarge() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    String a{DirectInit, ~std::size_t{}, 'X'};
+    String a{Corrade::DirectInit, ~std::size_t{}, 'X'};
     CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
 }
 
 void StringTest::constructNoInit() {
-    String a{NoInit, 35};
+    String a{Corrade::NoInit, 35};
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_COMPARE(a.size(), 35);
     /* Contents can be just anything */
@@ -551,7 +551,7 @@ void StringTest::constructNoInit() {
 }
 
 void StringTest::constructNoInitSmall() {
-    String a{NoInit, 10};
+    String a{Corrade::NoInit, 10};
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -570,7 +570,7 @@ void StringTest::constructNoInitTooLarge() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    String a{NoInit, ~std::size_t{}};
+    String a{Corrade::NoInit, ~std::size_t{}};
     CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
         "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");

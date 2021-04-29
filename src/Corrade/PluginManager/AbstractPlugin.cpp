@@ -58,16 +58,16 @@ void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}
 
-AbstractPlugin::AbstractPlugin(): _state{Containers::InPlaceInit} {}
+AbstractPlugin::AbstractPlugin(): _state{InPlaceInit} {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _state{Containers::InPlaceInit} {
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _state{InPlaceInit} {
     _state->manager = &manager;
     _state->plugin = plugin;
     manager.registerInstance(plugin, *this, _state->metadata);
     _state->configuration = _state->metadata->configuration();
 }
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{Containers::InPlaceInit} {
+AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{InPlaceInit} {
     _state->manager = &manager;
 }
 

@@ -26,6 +26,8 @@
 
 corrade_add_test(MainTest MainTest.cpp
     ARGUMENTS --arg-utf hýždě --arg-another šňůra)
+# Prefixed with project name to avoid conflicts with TagsTest in Magnum
+corrade_add_test(CorradeTagsTest TagsTest.cpp)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)

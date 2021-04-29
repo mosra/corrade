@@ -127,7 +127,7 @@ void Benchmark::destructBaseline() {
         }
     };
 
-    Containers::Optional<E> emitter{Containers::InPlaceInit};
+    Containers::Optional<E> emitter{InPlaceInit};
 
     CORRADE_BENCHMARK(1)
         emitter = Containers::NullOpt;
@@ -140,7 +140,7 @@ void Benchmark::destruct1kFunctions() {
         }
     };
 
-    Containers::Optional<E> emitter{Containers::InPlaceInit};
+    Containers::Optional<E> emitter{InPlaceInit};
 
     for(std::size_t i = 0; i != 1000; ++i)
         connect(*emitter, &E::fire, freeFunctionSlot);
@@ -156,7 +156,7 @@ void Benchmark::destruct1kMembersEmitterFirst() {
         }
     };
 
-    Containers::Optional<E> emitter{Containers::InPlaceInit};
+    Containers::Optional<E> emitter{InPlaceInit};
 
     struct R: Receiver {
         int output = 0;
@@ -184,7 +184,7 @@ void Benchmark::destruct1kMembersReceiverFirst() {
         void receive() { ++output; }
     };
 
-    Containers::Optional<R> receiver{Containers::InPlaceInit};
+    Containers::Optional<R> receiver{InPlaceInit};
 
     for(std::size_t i = 0; i != 1000; ++i)
         connect(emitter, &E::fire, *receiver, &R::receive);

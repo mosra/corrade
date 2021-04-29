@@ -224,7 +224,7 @@ template<class T> String BasicStringView<T>::join(const ArrayView<const StringVi
     for(const StringView& s: strings) totalSize += s.size();
 
     /* Reserve memory for the resulting string */
-    String result{NoInit, totalSize};
+    String result{Corrade::NoInit, totalSize};
 
     /* Join strings */
     char* out = result.data();
@@ -263,7 +263,7 @@ template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const ArrayVi
     if(totalSize) totalSize -= delimiterSize;
 
     /* Reserve memory for the resulting string */
-    String result{NoInit, totalSize};
+    String result{Corrade::NoInit, totalSize};
 
     /* Join strings */
     char* out = result.data();

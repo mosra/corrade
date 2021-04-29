@@ -273,7 +273,7 @@ void PointerTest::constructMake() {
 void PointerTest::constructInPlace() {
     {
         /* Using int{} to test perfect forwarding */
-        Pointer<Immovable> a{InPlaceInit, -13, int{}};
+        Pointer<Immovable> a{Corrade::InPlaceInit, -13, int{}};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, -13);
     }
@@ -282,10 +282,10 @@ void PointerTest::constructInPlace() {
     CORRADE_COMPARE(Immovable::destructed, 1);
 
     /* This is never noexcept since we allocate (duh) */
-    CORRADE_VERIFY(std::is_constructible<Pointer<Immovable>, InPlaceInitT, int>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Immovable>, InPlaceInitT, int, int&&>::value);
-    CORRADE_VERIFY(std::is_constructible<Pointer<Throwable>, InPlaceInitT, int>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Throwable>, InPlaceInitT, int>::value);
+    CORRADE_VERIFY(std::is_constructible<Pointer<Immovable>, Corrade::InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Immovable>, Corrade::InPlaceInitT, int, int&&>::value);
+    CORRADE_VERIFY(std::is_constructible<Pointer<Throwable>, Corrade::InPlaceInitT, int>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pointer<Throwable>, Corrade::InPlaceInitT, int>::value);
 }
 
 void PointerTest::constructInPlaceMake() {
@@ -318,7 +318,7 @@ void PointerTest::constructInPlaceMakeAmbiguous() {
     //auto d = pointer<Ambiguous>(new Ambiguous);
     auto e = pointer<Ambiguous>();
     auto f = pointer<Ambiguous>(&parent, 32);
-    auto g = Pointer<Ambiguous>{InPlaceInit, &parent};
+    auto g = Pointer<Ambiguous>{Corrade::InPlaceInit, &parent};
     auto h = Pointer<Ambiguous>{new Ambiguous};
     //CORRADE_COMPARE(a->parent, &parent);
     //CORRADE_COMPARE(b->parent, nullptr);
@@ -336,14 +336,14 @@ void PointerTest::constructDerived() {
         Derived(int a): Base{a} {}
     };
 
-    Pointer<Derived> a{InPlaceInit, 42};
+    Pointer<Derived> a{Corrade::InPlaceInit, 42};
     Pointer<Base> b = std::move(a);
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);
 
     /* Test assign as well */
-    b = Pointer<Derived>{InPlaceInit, 36};
+    b = Pointer<Derived>{Corrade::InPlaceInit, 36};
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 36);
 
@@ -411,8 +411,8 @@ void PointerTest::compareToNullptr() {
 
 void PointerTest::access() {
     {
-        Pointer<Immovable> a{InPlaceInit, 5};
-        const Pointer<Immovable> ca{InPlaceInit, 8};
+        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
+        const Pointer<Immovable> ca{Corrade::InPlaceInit, 8};
 
         CORRADE_COMPARE(a->a, 5);
         CORRADE_COMPARE(ca->a, 8);
@@ -458,7 +458,7 @@ void PointerTest::accessInvalid() {
 
 void PointerTest::reset() {
     {
-        Pointer<Immovable> a{InPlaceInit, 5};
+        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 5);
 
@@ -473,7 +473,7 @@ void PointerTest::reset() {
 
 void PointerTest::emplace() {
     {
-        Pointer<Immovable> a{InPlaceInit, 5};
+        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 5);
 
@@ -490,7 +490,7 @@ void PointerTest::emplace() {
 void PointerTest::release() {
     Immovable* ptr;
     {
-        Pointer<Immovable> a{InPlaceInit, 5};
+        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 5);
 
@@ -534,7 +534,7 @@ void PointerTest::emplaceConstructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
-    Pointer<ContainingExplicitDefaultWithImplicitConstructor> b{InPlaceInit};
+    Pointer<ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::InPlaceInit};
     Pointer<ContainingExplicitDefaultWithImplicitConstructor> c;
     c.emplace();
     CORRADE_VERIFY(b);
@@ -552,7 +552,7 @@ void PointerTest::copyConstructPlainStruct() {
        argument and fails miserably -- a{InPlaceInit, 3, 'a'} would in-place
        initialize them, which is fine and doesn't need workarounds */
     const ExtremelyTrivial value{3, 'a'};
-    Pointer<ExtremelyTrivial> a{InPlaceInit, value};
+    Pointer<ExtremelyTrivial> a{Corrade::InPlaceInit, value};
     CORRADE_COMPARE(a->a, 3);
 
     /* This copy-constructs new values -- emplace(4, 'b') would in-place
@@ -573,7 +573,7 @@ void PointerTest::moveConstructPlainStruct() {
        to convert MoveOnlyStruct to int to initialize the first argument and
        fails miserably -- a{InPlaceInit, 3, 'a', nullptr} would in-place
        initialize them, which is fine and doesn't need workarounds */
-    Pointer<MoveOnlyStruct> a{InPlaceInit, MoveOnlyStruct{3, 'a', nullptr}};
+    Pointer<MoveOnlyStruct> a{Corrade::InPlaceInit, MoveOnlyStruct{3, 'a', nullptr}};
     CORRADE_COMPARE(a->a, 3);
 
     /* This copy-constructs new values -- emplace(4, 'b', nullptr) would

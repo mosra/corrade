@@ -34,7 +34,7 @@
 #include <type_traits>
 #include <utility> /* std::forward() */
 
-#include "Corrade/Containers/Tags.h"
+#include "Corrade/Tags.h"
 #include "Corrade/Utility/Assert.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
@@ -133,7 +133,7 @@ template<class T> class Pointer {
          * Allocates a new object by passing @p args to its constructor.
          * @see @ref operator bool(), @ref operator->()
          */
-        template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{
+        template<class ...Args> explicit Pointer(Corrade::InPlaceInitT, Args&&... args): _pointer{
             /* This works around a featurebug in C++ where new T{} doesn't work
                for an explicit defaulted constructor. Additionally it works
                around GCC 4.8 bugs where copy/move construction can't be done
@@ -394,7 +394,7 @@ equivalent:
 */
 template<class T, class ...Args> inline Pointer<T> pointer(Args&&... args) {
     static_assert(!Implementation::IsFirstAPointer<T, Args...>::value || !std::is_constructible<T, T*>::value, "attempt to construct a type from its own pointer, which is ambiguous --  explicitly use the constructor instead");
-    return Pointer<T>{InPlaceInit, std::forward<Args>(args)...};
+    return Pointer<T>{Corrade::InPlaceInit, std::forward<Args>(args)...};
 }
 
 #ifndef CORRADE_NO_DEBUG

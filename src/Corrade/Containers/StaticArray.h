@@ -34,9 +34,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "Corrade/configure.h"
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
-#include "Corrade/Containers/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 
 namespace Corrade { namespace Containers {
@@ -160,7 +159,7 @@ template<std::size_t size_, class T> class StaticArray {
          * variant instead.
          * @see @ref DefaultInit, @ref std::is_trivial
          */
-        explicit StaticArray(DefaultInitT): StaticArray{DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
+        explicit StaticArray(Corrade::DefaultInitT): StaticArray{Corrade::DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
 
         /**
          * @brief Construct a value-initialized array
@@ -170,7 +169,7 @@ template<std::size_t size_, class T> class StaticArray {
          * called otherwise). This is the same as @ref StaticArray().
          * @see @ref ValueInit, @ref StaticArray(DefaultInitT)
          */
-        explicit StaticArray(ValueInitT): _data{} {}
+        explicit StaticArray(Corrade::ValueInitT): _data{} {}
 
         /**
          * @brief Construct an array without initializing its contents
@@ -193,7 +192,7 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */
-        explicit StaticArray(NoInitT) {}
+        explicit StaticArray(Corrade::NoInitT) {}
 
         /**
          * @brief Construct a direct-initialized array
@@ -203,7 +202,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @p args.
          * @see @ref StaticArray(InPlaceInitT, Args&&... args)
          */
-        template<class ...Args> explicit StaticArray(DirectInitT, Args&&... args);
+        template<class ...Args> explicit StaticArray(Corrade::DirectInitT, Args&&... args);
 
         /**
          * @brief Construct an in-place-initialized array
@@ -212,7 +211,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @ref StaticArray(Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
-        template<class ...Args> explicit StaticArray(InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {
+        template<class ...Args> explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {
             static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
         }
 
@@ -222,7 +221,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Alias to @ref StaticArray(ValueInitT).
          * @see @ref StaticArray(DefaultInitT)
          */
-        explicit StaticArray(): StaticArray{ValueInit} {}
+        explicit StaticArray(): StaticArray{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an in-place-initialized array
@@ -233,7 +232,7 @@ template<std::size_t size_, class T> class StaticArray {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
+        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{Corrade::InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
         #endif
 
         /** @brief Copy constructor */
@@ -491,14 +490,14 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
     private:
-        explicit StaticArray(DefaultInitT, std::true_type) {}
+        explicit StaticArray(Corrade::DefaultInitT, std::true_type) {}
         /* GCC 5.3 is not able to initialize non-movable types inside
            constructor initializer list. Reported here:
            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395 */
         #if !defined(__GNUC__) || defined(__clang__)
-        explicit StaticArray(DefaultInitT, std::false_type): _data{} {}
+        explicit StaticArray(Corrade::DefaultInitT, std::false_type): _data{} {}
         #else
-        explicit StaticArray(DefaultInitT, std::false_type) {
+        explicit StaticArray(Corrade::DefaultInitT, std::false_type) {
             for(T& i: _data) new(&i) T{};
         }
         #endif
@@ -630,7 +629,7 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(const Stati
     return size_;
 }
 
-template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
+template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(Corrade::DirectInitT, Args&&... args): StaticArray{Corrade::NoInit} {
     for(T& i: _data)
         /* This works around a featurebug in C++ where new T{} doesn't work for
            an explicit defaulted constructor. Additionally it works around GCC
@@ -639,7 +638,7 @@ template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, 
         Implementation::construct(i, std::forward<Args>(args)...);
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{NoInit} {
+template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{Corrade::NoInit} {
     for(std::size_t i = 0; i != other.size(); ++i)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
@@ -649,7 +648,7 @@ template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const St
         #endif
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArray{NoInit} {
+template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArray{Corrade::NoInit} {
     for(std::size_t i = 0; i != other.size(); ++i)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5

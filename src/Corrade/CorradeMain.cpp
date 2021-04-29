@@ -55,7 +55,7 @@ namespace {
 
 Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Containers::Array<char>& storage) {
     /* Calculate total length of all arguments, save the relative offsets */
-    Containers::Array<char*> argv{Containers::ValueInit, argc + 1};
+    Containers::Array<char*> argv{ValueInit, argc + 1};
     std::size_t totalSize = 0;
     for(std::size_t i = 0; i != argc; ++i) {
         totalSize += WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, nullptr, 0, nullptr, nullptr);

@@ -246,22 +246,22 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::resizeValueInit<Movable>,
               &GrowableArrayTest::resizeDirectInit,
 
-              &GrowableArrayTest::resizeFromNonGrowableToLess<int, NoInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, NoInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<int, DefaultInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, DefaultInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<int, ValueInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, ValueInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<int, DirectInitT>,
-              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, DirectInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<int, NoInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<Movable, NoInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<int, DefaultInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<Movable, DefaultInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<int, ValueInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<Movable, ValueInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<int, NoInitT>,
-              &GrowableArrayTest::resizeFromGrowableToLess<Movable, NoInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::NoInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::NoInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::DefaultInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::DefaultInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::ValueInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::ValueInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::DirectInitT>,
+              &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::DirectInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::NoInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::NoInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::DefaultInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::DefaultInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::ValueInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::ValueInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::NoInitT>,
+              &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::NoInitT>,
 
               &GrowableArrayTest::appendFromEmpty<int>,
               &GrowableArrayTest::appendFromEmpty<Movable>,
@@ -794,7 +794,7 @@ template<class T> void GrowableArrayTest::resizeNoInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     Array<int> a;
-    arrayResize(a, NoInit, 3);
+    arrayResize(a, Corrade::NoInit, 3);
     CORRADE_COMPARE(a.size(), 3);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
@@ -805,7 +805,7 @@ template<class T> void GrowableArrayTest::resizeDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     Array<T> a;
-    arrayResize(a, DefaultInit, 3);
+    arrayResize(a, Corrade::DefaultInit, 3);
     CORRADE_COMPARE(a.size(), 3);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
@@ -821,7 +821,7 @@ template<class T> void GrowableArrayTest::resizeValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     Array<T> a;
-    arrayResize(a, ValueInit, 3);
+    arrayResize(a, Corrade::ValueInit, 3);
     CORRADE_COMPARE(a.size(), 3);
     CORRADE_COMPARE(int(a[0]), 0);
     CORRADE_COMPARE(int(a[1]), 0);
@@ -834,7 +834,7 @@ void GrowableArrayTest::resizeDirectInit() {
        need to test twice */
 
     Array<int> a;
-    arrayResize(a, DirectInit, 3, 754831);
+    arrayResize(a, Corrade::DirectInit, 3, 754831);
     CORRADE_COMPARE(a.size(), 3);
     CORRADE_COMPARE(a[0], 754831);
     CORRADE_COMPARE(a[1], 754831);
@@ -843,16 +843,16 @@ void GrowableArrayTest::resizeDirectInit() {
 }
 
 template<class> struct InitTagName;
-template<> struct InitTagName<NoInitT> {
+template<> struct InitTagName<Corrade::NoInitT> {
     static const char* name() { return "NoInit"; }
 };
-template<> struct InitTagName<DefaultInitT> {
+template<> struct InitTagName<Corrade::DefaultInitT> {
     static const char* name() { return "DefaultInitT"; }
 };
-template<> struct InitTagName<ValueInitT> {
+template<> struct InitTagName<Corrade::ValueInitT> {
     static const char* name() { return "ValueInitT"; }
 };
-template<> struct InitTagName<DirectInitT> {
+template<> struct InitTagName<Corrade::DirectInitT> {
     static const char* name() { return "DirectInitT"; }
 };
 
@@ -1175,7 +1175,7 @@ void GrowableArrayTest::appendListEmpty() {
 
 void GrowableArrayTest::appendCountNoInit() {
     Array<int> a;
-    Containers::ArrayView<int> appended = arrayAppend(a, Containers::NoInit, 4);
+    Containers::ArrayView<int> appended = arrayAppend(a, Corrade::NoInit, 4);
     CORRADE_COMPARE(a.size(), 4);
     CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
     CORRADE_COMPARE(appended.data(), a.data());
@@ -1186,7 +1186,7 @@ void GrowableArrayTest::appendCountNoInit() {
 void GrowableArrayTest::appendCountNoInitEmpty() {
     Array<int> a{3};
     int* prev = a.data();
-    Containers::ArrayView<int> appended = arrayAppend(a, Containers::NoInit, 0);
+    Containers::ArrayView<int> appended = arrayAppend(a, Corrade::NoInit, 0);
 
     /* Should be a no-op, not reallocating the (non-growable) array */
     CORRADE_COMPARE(a.size(), 3);
@@ -1351,10 +1351,10 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         Array<T> a;
         arrayReserve(a, 10);
         T* prev = a.data();
-        arrayAppend(a, InPlaceInit, 2);
-        arrayAppend(a, InPlaceInit, 7);
-        arrayAppend(a, InPlaceInit, -1);
-        arrayAppend(a, InPlaceInit, 35786);
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        arrayAppend(a, Corrade::InPlaceInit, -1);
+        arrayAppend(a, Corrade::InPlaceInit, 35786);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         /* Gets converted to growable as otherwise we can't ensure the
@@ -1446,7 +1446,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit() {
         Array<T> a;
 
         /* Should do no nuthin' */
-        arrayShrink(a, DefaultInit);
+        arrayShrink(a, Corrade::DefaultInit);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_VERIFY(!a.data());
@@ -1502,7 +1502,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
         a[2] = -1;
 
         /* Should do no nuthin' */
-        arrayShrink(a, DefaultInit);
+        arrayShrink(a, Corrade::DefaultInit);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_VERIFY(a.data() == prev);
@@ -1526,7 +1526,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyNoInit() {
 
     {
         Array<T> a;
-        arrayAppend(a, InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 2);
         arrayRemoveSuffix(a, 1);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_VERIFY(a.empty());
@@ -1549,13 +1549,13 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
 
     {
         Array<T> a;
-        arrayAppend(a, InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 2);
         arrayRemoveSuffix(a, 1);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_VERIFY(a.empty());
         CORRADE_VERIFY(arrayCapacity(a));
 
-        arrayShrink(a, DefaultInit);
+        arrayShrink(a, Corrade::DefaultInit);
     }
 
     /* Nothing extra should be done by the shrink */
@@ -1574,9 +1574,9 @@ template<class T> void GrowableArrayTest::shrinkGrowableNoInit() {
         Array<T> a;
         arrayReserve(a, 10);
         T* prev = a.data();
-        arrayAppend(a, InPlaceInit, 2);
-        arrayAppend(a, InPlaceInit, 7);
-        arrayAppend(a, InPlaceInit, -1);
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        arrayAppend(a, Corrade::InPlaceInit, -1);
 
         /* Should convert to non-growable */
         arrayShrink(a);
@@ -1606,12 +1606,12 @@ template<class T> void GrowableArrayTest::shrinkGrowableDefaultInit() {
         Array<T> a;
         arrayReserve(a, 10);
         T* prev = a.data();
-        arrayAppend(a, InPlaceInit, 2);
-        arrayAppend(a, InPlaceInit, 7);
-        arrayAppend(a, InPlaceInit, -1);
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        arrayAppend(a, Corrade::InPlaceInit, -1);
 
         /* Should convert to non-growable */
-        arrayShrink(a, DefaultInit);
+        arrayShrink(a, Corrade::DefaultInit);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 3);
@@ -1735,11 +1735,11 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);
 
-    arrayResize<ArrayNewAllocator>(a, DefaultInit, 1);
-    arrayResize<ArrayNewAllocator>(a, ValueInit, 2);
+    arrayResize<ArrayNewAllocator>(a, Corrade::DefaultInit, 1);
+    arrayResize<ArrayNewAllocator>(a, Corrade::ValueInit, 2);
     arrayResize<ArrayNewAllocator>(a, 3);
-    arrayResize<ArrayNewAllocator>(a, NoInit, 4);
-    arrayResize<ArrayNewAllocator>(a, DirectInit, 5, 6);
+    arrayResize<ArrayNewAllocator>(a, Corrade::NoInit, 4);
+    arrayResize<ArrayNewAllocator>(a, Corrade::DirectInit, 5, 6);
     CORRADE_VERIFY(!arrayIsGrowable(a));
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(a.size(), 5);
@@ -1749,7 +1749,7 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         int& value = arrayAppend<ArrayNewAllocator>(a, six);
         CORRADE_COMPARE(value, 6);
     } {
-        int& value = arrayAppend<ArrayNewAllocator>(a, InPlaceInit, 7);
+        int& value = arrayAppend<ArrayNewAllocator>(a, Corrade::InPlaceInit, 7);
         CORRADE_COMPARE(value, 7);
     } {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
@@ -1761,7 +1761,7 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[1], 12);
     } {
-        Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, NoInit, 2);
+        Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, Corrade::NoInit, 2);
         CORRADE_COMPARE(view.size(), 2);
         view[0] = 14;
         view[1] = 15;
@@ -1774,9 +1774,9 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_COMPARE(a.size(), 14);
 
     Array<Movable> b;
-    arrayResize<ArrayNewAllocator>(b, DirectInit, 5, Movable{6});
+    arrayResize<ArrayNewAllocator>(b, Corrade::DirectInit, 5, Movable{6});
     arrayAppend<ArrayNewAllocator>(b, Movable{1});
-    arrayAppend<ArrayNewAllocator>(b, InPlaceInit, 2);
+    arrayAppend<ArrayNewAllocator>(b, Corrade::InPlaceInit, 2);
     CORRADE_COMPARE(b.size(), 7);
 }
 
@@ -1796,8 +1796,8 @@ void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
 
     /* So this should too */
     Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b;
-    arrayResize(b, DirectInit, 1);
-    arrayAppend(b, InPlaceInit);
+    arrayResize(b, Corrade::DirectInit, 1);
+    arrayAppend(b, Corrade::InPlaceInit);
     CORRADE_COMPARE(b.size(), 2);
 }
 
@@ -1815,7 +1815,7 @@ void GrowableArrayTest::copyConstructPlainStruct() {
     arrayAppend(a, ExtremelyTrivial{3, 'a'});
 
     /* This copy-constructs the new values */
-    arrayResize(a, DirectInit, 10, ExtremelyTrivial{4, 'b'});
+    arrayResize(a, Corrade::DirectInit, 10, ExtremelyTrivial{4, 'b'});
 
     /* And this also */
     const ExtremelyTrivial data[2]{
@@ -1839,9 +1839,9 @@ void GrowableArrayTest::moveConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
        to convert MoveOnlyStruct to int to initialize the first argument and
        fails miserably. */
-    arrayAppend(a, InPlaceInit, 3, 'a', nullptr);
-    arrayAppend(a, InPlaceInit, 4, 'b', nullptr);
-    arrayAppend(a, InPlaceInit, 5, 'c', nullptr);
+    arrayAppend(a, Corrade::InPlaceInit, 3, 'a', nullptr);
+    arrayAppend(a, Corrade::InPlaceInit, 4, 'b', nullptr);
+    arrayAppend(a, Corrade::InPlaceInit, 5, 'c', nullptr);
 
     /* This is another case where move constructors get called */
     arrayResize(a, 15);
@@ -1869,7 +1869,7 @@ void GrowableArrayTest::benchmarkAppendArray() {
     Array<Movable> array;
     CORRADE_BENCHMARK(1) {
         for(std::size_t i = 0; i != 1000000; ++i)
-            arrayAppend(array, InPlaceInit, int(i));
+            arrayAppend(array, Corrade::InPlaceInit, int(i));
     }
 
     CORRADE_COMPARE(array.size(), 1000000);
@@ -1894,7 +1894,7 @@ void GrowableArrayTest::benchmarkAppendReservedArray() {
     Movable* data = array.data();
     CORRADE_BENCHMARK(1) {
         for(std::size_t i = 0; i != 1000000; ++i)
-            arrayAppend(array, InPlaceInit, int(i));
+            arrayAppend(array, Corrade::InPlaceInit, int(i));
     }
 
     CORRADE_COMPARE(array.size(), 1000000);

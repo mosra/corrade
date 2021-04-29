@@ -26,150 +26,25 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
- * @brief Tag type @ref Corrade::Containers::ValueInitT, @ref Corrade::Containers::DefaultInitT, @ref Corrade::Containers::NoInitT, @ref Corrade::Containers::DirectInitT, tag @ref Corrade::Containers::ValueInit, @ref Corrade::Containers::DefaultInit, @ref Corrade::Containers::NoInit, @ref Corrade::Containers::DirectInit
+ * @deprecated Tag types and tags
+ * @m_deprecated_since_latest Use @ref Corrade/Tags.h instead.
  */
+#endif
 
 #include "Corrade/configure.h"
 
-namespace Corrade { namespace Containers {
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Tags.h"
 
-/**
-@brief Default initialization tag type
+CORRADE_DEPRECATED_FILE("use Corrade/Tags.h and tags in the Corrade namespace instead")
 
-Used to distinguish construction with default initialization. The actual
-meaning of "default" may vary, see documentation of a particular API using this
-tag for a detailed behavior description.
-@see @ref DefaultInit
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct DefaultInitT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit DefaultInitT(Init) {}
-    #endif
-};
-
-/**
-@brief Value initialization tag type
-
-Used to distinguish construction with value initialization (builtin types are
-zeroed out, others are default-constructed).
-@see @ref ValueInit
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct ValueInitT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit ValueInitT(Init) {}
-    #endif
-};
-
-/**
-@brief No initialization tag type
-
-Used to distinguish construction with no initialization at all, which leaves
-the data with whatever random values the memory had before.
-@see @ref NoInit, @ref NoCreateT
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct NoInitT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit NoInitT(Init) {}
-    #endif
-};
-
-/**
-@brief No creation tag type
-
-Used to distinguish construction with initialization but not creation. Contrary
-to @ref NoInitT this doesn't keep random values, but makes the instance empty
-(usually equivalent to a moved-out state).
-@see @ref NoCreate
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct NoCreateT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit NoCreateT(Init) {}
-    #endif
-};
-
-/**
-@brief Direct initialization tag type
-
-Used to distinguish construction with direct initialization.
-@see @ref DirectInit
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct DirectInitT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit DirectInitT(Init) {}
-    #endif
-};
-
-/**
-@brief In-place initialization tag type
-
-Used to distinguish construction with in-place initialization.
-@see @ref DirectInit
-*/
-/* Explicit constructor to avoid ambiguous calls when using {} */
-struct InPlaceInitT {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
-    constexpr explicit InPlaceInitT(Init) {}
-    #endif
-};
-
-/**
-@brief Default initialization tag
-
-Use for construction with default initialization. The actual meaning of
-"default" may vary, see documentation of a particular API using this tag for
-a detailed behavior description.
-*/
-constexpr DefaultInitT DefaultInit{DefaultInitT::Init{}};
-
-/**
-@brief Value initialization tag
-
-Use for construction using value initialization (builtin types are zeroed out,
-others are default-constructed).
-*/
-constexpr ValueInitT ValueInit{ValueInitT::Init{}};
-
-/**
-@brief No initialization tag
-
-Use for construction with no initialization at all.
-*/
-constexpr NoInitT NoInit{NoInitT::Init{}};
-
-/**
-@brief No creation tag
-
-Use for construction with initialization, but keeping the instance empty
-(usually equivalent to a moved-out state).
-*/
-constexpr NoCreateT NoCreate{NoCreateT::Init{}};
-
-/**
-@brief Direct initialization tag
-
-Use for construction with direct initialization.
-*/
-constexpr DirectInitT DirectInit{DirectInitT::Init{}};
-
-/**
-@brief In-place initialization tag
-
-Use for construction in-place.
-*/
-constexpr InPlaceInitT InPlaceInit{InPlaceInitT::Init{}};
-
-}}
+/* Deprecated aliases defined in Corrade/Tags.h and not here since most code
+   relies on the header being included transitively and so the aliases wouldn't
+   be found if we'd switch to the new header everywhere */
+#else
+#error use Corrade/Tags.h and tags in the Corrade namespace instead
+#endif
 
 #endif

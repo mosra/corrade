@@ -225,8 +225,8 @@ Arguments& Arguments::addArgument(std::string key) {
     _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
-    arrayAppend(_entries, Containers::InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
-    arrayAppend(_values, Containers::InPlaceInit);
+    arrayAppend(_entries, InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
+    arrayAppend(_values, InPlaceInit);
     return *this;
 }
 
@@ -252,8 +252,8 @@ Arguments& Arguments::addArrayArgument(std::string key) {
 
     _arrayArgument = _entries.size();
     std::string helpKey = key;
-    arrayAppend(_entries, Containers::InPlaceInit, Type::ArrayArgument, '\0', std::move(key), std::move(helpKey), std::string(), _arrayValues.size());
-    arrayAppend(_arrayValues, Containers::InPlaceInit);
+    arrayAppend(_entries, InPlaceInit, Type::ArrayArgument, '\0', std::move(key), std::move(helpKey), std::string(), _arrayValues.size());
+    arrayAppend(_arrayValues, InPlaceInit);
     return *this;
 }
 
@@ -272,8 +272,8 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
-    arrayAppend(_entries, Containers::InPlaceInit, Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
-    arrayAppend(_values, Containers::InPlaceInit);
+    arrayAppend(_entries, InPlaceInit, Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
+    arrayAppend(_values, InPlaceInit);
     return *this;
 }
 
@@ -292,7 +292,7 @@ void Arguments::addOptionInternal(const char shortKey, std::string key, std::str
        then ask for values without parsing again */
     _flags &= ~InternalFlag::Parsed;
 
-    arrayAppend(_entries, Containers::InPlaceInit, type, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), id);
+    arrayAppend(_entries, InPlaceInit, type, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), id);
 }
 
 Arguments& Arguments::addOption(const char shortKey, std::string key, std::string defaultValue) {
@@ -309,7 +309,7 @@ Arguments& Arguments::addOption(const char shortKey, std::string key, std::strin
     }
 
     addOptionInternal(shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), Type::Option, _values.size(), "Utility::Arguments::addOption():");
-    arrayAppend(_values, Containers::InPlaceInit);
+    arrayAppend(_values, InPlaceInit);
     return *this;
 }
 
@@ -327,7 +327,7 @@ Arguments& Arguments::addArrayOption(const char shortKey, std::string key) {
     }
 
     addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::ArrayOption, _arrayValues.size(), "Utility::Arguments::addArrayOption():");
-    arrayAppend(_arrayValues, Containers::InPlaceInit);
+    arrayAppend(_arrayValues, InPlaceInit);
     return *this;
 }
 
@@ -373,8 +373,8 @@ Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defa
 
     _finalOptionalArgument = _entries.size();
     std::string helpKey = key;
-    arrayAppend(_entries, Containers::InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
-    arrayAppend(_values, Containers::InPlaceInit);
+    arrayAppend(_entries, InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
+    arrayAppend(_values, InPlaceInit);
     return *this;
 }
 
@@ -393,7 +393,7 @@ Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
        `--prefix` */
     prefix += '-';
 
-    arrayAppend(_skippedPrefixes, Containers::InPlaceInit, std::move(prefix), std::move(help));
+    arrayAppend(_skippedPrefixes, InPlaceInit, std::move(prefix), std::move(help));
     return *this;
 }
 
@@ -587,7 +587,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 _values[valueFor->id] = argv[i] + shortOptionPackOffset;
             } else if(valueFor->type == Type::ArrayOption) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _arrayValues.size());
-                arrayAppend(_arrayValues[valueFor->id], Containers::InPlaceInit, argv[i] + shortOptionPackOffset);
+                arrayAppend(_arrayValues[valueFor->id], InPlaceInit, argv[i] + shortOptionPackOffset);
             } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 
             /* The value always eats everything until the end, so there's
@@ -791,7 +791,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                last one, move to the next entry in the following iteration. */
             } else {
                 CORRADE_INTERNAL_ASSERT(e->type == Type::ArrayArgument);
-                arrayAppend(_arrayValues[e->id], Containers::InPlaceInit, argumentValue);
+                arrayAppend(_arrayValues[e->id], InPlaceInit, argumentValue);
                 if(!--arrayArgumentCount) ++e;
             }
         }

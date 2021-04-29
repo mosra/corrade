@@ -63,7 +63,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 set(Corrade_HEADERS
-    Corrade.h)
+    Corrade.h
+    Tags.h)
 
 # Force IDEs to display all header files in project view
 add_custom_target(Corrade SOURCES ${Corrade_HEADERS})

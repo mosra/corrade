@@ -59,7 +59,7 @@ String String::nullTerminatedGlobalView(StringView view) {
     return String{view};
 }
 
-inline void String::construct(NoInitT, const std::size_t size) {
+inline void String::construct(Corrade::NoInitT, const std::size_t size) {
     if(size < Implementation::SmallStringSize) {
         _small.data[size] = '\0';
         _small.size = size | SmallSize;
@@ -72,7 +72,7 @@ inline void String::construct(NoInitT, const std::size_t size) {
 }
 
 inline void String::construct(const char* const data, const std::size_t size) {
-    construct(NoInit, size);
+    construct(Corrade::NoInit, size);
 
     /* If the size is small enough for SSO, use that. Not using <= because we
        need to store the null terminator as well. */
@@ -178,7 +178,7 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     _large.deleter = deleter;
 }
 
-String::String(ValueInitT, const std::size_t size): _large{} {
+String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
 
@@ -192,7 +192,7 @@ String::String(ValueInitT, const std::size_t size): _large{} {
     }
 }
 
-String::String(DirectInitT, const std::size_t size, const char c): String{NoInit, size} {
+String::String(Corrade::DirectInitT, const std::size_t size, const char c): String{Corrade::NoInit, size} {
     #ifdef CORRADE_GRACEFUL_ASSERT
     /* If the NoInit constructor asserted, don't attempt to memset */
     if(size >= Implementation::SmallStringSize && !_large.data) return;
@@ -201,7 +201,7 @@ String::String(DirectInitT, const std::size_t size, const char c): String{NoInit
     std::memset(size < Implementation::SmallStringSize ? _small.data : _large.data, c, size);
 }
 
-String::String(NoInitT, const std::size_t size)
+String::String(Corrade::NoInitT, const std::size_t size)
     #ifdef CORRADE_GRACEFUL_ASSERT
     /* Zero-init the contents so the destructor doesn't crash if we assert here */
     : _large{}
@@ -210,7 +210,7 @@ String::String(NoInitT, const std::size_t size)
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
 
-    construct(NoInit, size);
+    construct(Corrade::NoInit, size);
 }
 
 String::~String() { destruct(); }

@@ -35,7 +35,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "Corrade/Containers/Tags.h"
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Utility/Assert.h"
 #ifndef CORRADE_NO_DEBUG
@@ -163,7 +163,7 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*(),
          *      @ref emplace()
          */
-        template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
+        template<class ...Args> /*implicit*/ Optional(Corrade::InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
             Implementation::construct(_value, std::forward<Args>(args)...);
         }
 
@@ -445,7 +445,7 @@ The following two lines are equivalent:
 @see @ref optional(T&&), @ref pointer(Args&&... args)
 */
 template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
-    return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
+    return Optional<T>{Corrade::InPlaceInit, std::forward<Args>(args)...};
 }
 
 /** @relatesalso Optional
