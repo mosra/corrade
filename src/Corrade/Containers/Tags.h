@@ -37,8 +37,9 @@ namespace Corrade { namespace Containers {
 /**
 @brief Default initialization tag type
 
-Used to distinguish construction using default initialization (builtin types
-are not initialized, others are default-constructed).
+Used to distinguish construction with default initialization. The actual
+meaning of "default" may vary, see documentation of a particular API using this
+tag for a detailed behavior description.
 @see @ref DefaultInit
 */
 /* Explicit constructor to avoid ambiguous calls when using {} */
@@ -52,7 +53,7 @@ struct DefaultInitT {
 /**
 @brief Value initialization tag type
 
-Used to distinguish construction using value initialization (builtin types are
+Used to distinguish construction with value initialization (builtin types are
 zeroed out, others are default-constructed).
 @see @ref ValueInit
 */
@@ -126,8 +127,9 @@ struct InPlaceInitT {
 /**
 @brief Default initialization tag
 
-Use for construction using default initialization (builtin types are not
-initialized, others are default-constructed).
+Use for construction with default initialization. The actual meaning of
+"default" may vary, see documentation of a particular API using this tag for
+a detailed behavior description.
 */
 constexpr DefaultInitT DefaultInit{DefaultInitT::Init{}};
 
