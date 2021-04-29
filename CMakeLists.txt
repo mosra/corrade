@@ -40,6 +40,12 @@ if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 1
     message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
 endif()
 
+# If CMAKE_AUTOMOC is set, all uses of corrade_add_resource() would otherwise
+# complain on 3.10 that AUTOMOC is not processing GENERATED files
+if(POLICY CMP0071)
+    cmake_policy(SET CMP0071 NEW)
+endif()
+
 project(Corrade CXX)
 
 # Use folders for nice tree in Visual Studio and XCode
