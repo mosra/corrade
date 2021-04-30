@@ -52,6 +52,8 @@ namespace Corrade {
 
 -   New @ref Containers::ArrayTuple class for coalescing arrays of homogeneous
     types and varying lengths into a single allocation. See also
+    [mosra/magnum#505](https://github.com/mosra/magnum/issues/505),
+    [mosra/corrade#116](https://github.com/mosra/corrade/issues/116) and
     [mosra/corrade#117](https://github.com/mosra/corrade/pull/117).
 -   New @ref Containers::BigEnumSet class for storing enum sets with more than
     64 values
