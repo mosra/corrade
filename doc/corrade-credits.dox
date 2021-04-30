@@ -128,8 +128,8 @@ Is the below list missing your name or something's wrong?
 -   **Marco Melorio** ([\@Melix19](https://github.com/Melix19)) --- iOS
     crosscompiling and other fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
-    @ref Utility::Debug scoped output redirection and coloring, documentation
-    fixes
+    @ref Utility::Debug scoped output redirection and coloring, bug and
+    documentation fixes
 -   **Michael "Croydon" Keck** ([\@Croydon](https://github.com/Croydon)) ---
     Conan package
 -   **Michael Dietschi** ([\@mdietsch](https://github.com/mdietsch)) ---

@@ -51,7 +51,8 @@ namespace Corrade {
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::ArrayTuple class for coalescing arrays of homogeneous
-    types and varying lengths into a single allocation.
+    types and varying lengths into a single allocation. See also
+    [mosra/corrade#117](https://github.com/mosra/corrade/pull/117).
 -   New @ref Containers::BigEnumSet class for storing enum sets with more than
     64 values
 -   New @ref Containers::String class as a lightweight but more flexible
