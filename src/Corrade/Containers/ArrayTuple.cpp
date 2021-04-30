@@ -280,7 +280,7 @@ void ArrayTuple::create(const ArrayView<const Item>& items, const Item& arrayDel
         /* If the item has a default constructor, call it on each element */
         if(items[i]._constructor)
             for(std::size_t j = 0; j != items[i]._elementCount; ++j)
-                items[i]._constructor(_data + offset + j*items[i]._elementAlignment);
+                items[i]._constructor(_data + offset + j*items[i]._elementSize);
 
         /* If the item has a destructor and there's not zero elements, populate
            the DestructibleItem instance */
