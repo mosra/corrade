@@ -1735,9 +1735,8 @@ void TesterTest::macrosInASingleExpressionBlock() {
     if(false)
         CORRADE_SKIP("This is not skipped.");
 
-    const char* yes = "This is a no-op.";
     if(true)
-        CORRADE_ITERATION(yes);
+        CORRADE_ITERATION("This is a no-op.");
 
     if(true)
         CORRADE_INFO("Expected here to test CORRADE_INFO().");
