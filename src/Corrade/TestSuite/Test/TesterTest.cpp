@@ -200,6 +200,11 @@ struct Test: Tester {
 
     void benchmarkSkip();
 
+    void macrosInALambda();
+    void benchmarkMacrosInALambda();
+    void macrosInASingleExpressionBlock();
+    /* CORRADE_BENCHMARK() doesn't work in a single expression block */
+
     std::ostream* _out;
     int _i = 0;
 };
@@ -281,6 +286,15 @@ Test::Test(std::ostream* const out, const TesterConfiguration& configuration): T
                          BenchmarkUnits::Bytes);
 
     addBenchmarks({&Test::benchmarkSkip}, 10);
+
+    addTests({&Test::macrosInALambda});
+
+    addCustomBenchmarks({&Test::benchmarkMacrosInALambda}, 1,
+                         &Test::benchmarkOnceBegin,
+                         &Test::benchmarkOnceEnd,
+                         BenchmarkUnits::Bytes);
+
+    addTests({&Test::macrosInASingleExpressionBlock});
 }
 
 void Test::noMacros() {}
@@ -617,6 +631,83 @@ void Test::benchmarkSkip() {
     CORRADE_SKIP("Can't verify the measurements anyway.");
 }
 
+void Test::macrosInALambda() {
+    setTestCaseName(CORRADE_FUNCTION);
+
+    []() {
+        CORRADE_COMPARE_AS(3, 3, float);
+        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+        {
+            CORRADE_EXPECT_FAIL_IF(false, "");
+            CORRADE_COMPARE(3, 3);
+        }
+        {
+            CORRADE_ITERATION("37");
+            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_EXPECT_FAIL().");
+            CORRADE_VERIFY(false);
+        }
+        CORRADE_INFO("Expected here to test CORRADE_INFO().");
+        CORRADE_WARN("Expected here to test CORRADE_WARN().");
+        {
+            /* Cannot fail, otherwise the SKIP wouldn't be tested */
+            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
+            CORRADE_FAIL("Yes.");
+        }
+
+        /* Has to be last! */
+        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
+    }();
+}
+
+void Test::benchmarkMacrosInALambda() {
+    setTestCaseName(CORRADE_FUNCTION);
+
+    []() {
+        CORRADE_BENCHMARK(1) {}
+    }();
+}
+
+void Test::macrosInASingleExpressionBlock() {
+    /* All this should compile fine even though the ITERATION and EXPECT_FAIL
+       variants make no sense this way and are basically no-ops */
+
+    if(true)
+        CORRADE_VERIFY(true);
+
+    if(true)
+        CORRADE_COMPARE(true, true);
+
+    if(true)
+        CORRADE_COMPARE_AS(true, true, bool);
+
+    if(true)
+        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+
+    if(true)
+        CORRADE_EXPECT_FAIL("This makes no sense.");
+
+    if(true)
+        CORRADE_EXPECT_FAIL_IF(true, "This makes no sense either.");
+
+    if(true)
+        CORRADE_ITERATION("This is a no-op.");
+
+    if(true)
+        CORRADE_INFO("Expected here to test CORRADE_INFO().");
+    if(true)
+        CORRADE_WARN("Expected here to test CORRADE_WARN().");
+    {
+        /* Cannot fail, otherwise the SKIP wouldn't be tested */
+        CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
+        if(true)
+            CORRADE_FAIL("Yes.");
+    }
+
+    /* Has to be last! */
+    if(true)
+        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
+}
+
 struct TesterTest: Tester {
     explicit TesterTest();
 
@@ -683,11 +774,6 @@ struct TesterTest: Tester {
     void compareWithDereference();
     void compareNonCopyable();
     void expectFailIfExplicitBool();
-
-    void macrosInALambda();
-    void benchmarkMacrosInALambda();
-    void macrosInASingleExpressionBlock();
-    /* CORRADE_BENCHMARK() doesn't work in a single expression block */
 };
 
 class EmptyTest: public Tester {};
@@ -754,13 +840,7 @@ TesterTest::TesterTest() {
               &TesterTest::compareAsVarargs,
               &TesterTest::compareWithDereference,
               &TesterTest::compareNonCopyable,
-              &TesterTest::expectFailIfExplicitBool,
-
-              &TesterTest::macrosInALambda});
-
-    addBenchmarks({&TesterTest::benchmarkMacrosInALambda}, 1);
-
-    addTests({&TesterTest::macrosInASingleExpressionBlock});
+              &TesterTest::expectFailIfExplicitBool});
 }
 
 void TesterTest::configurationCopy() {
@@ -1686,83 +1766,6 @@ void TesterTest::expectFailIfExplicitBool() {
         CORRADE_EXPECT_FAIL_IF(ExplicitTrue{}, "");
         CORRADE_VERIFY(false);
     }
-}
-
-void TesterTest::macrosInALambda() {
-    setTestCaseName(CORRADE_FUNCTION);
-
-    []() {
-        CORRADE_COMPARE_AS(3, 3, float);
-        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
-        {
-            CORRADE_EXPECT_FAIL_IF(false, "");
-            CORRADE_COMPARE(3, 3);
-        }
-        {
-            CORRADE_ITERATION("37");
-            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_EXPECT_FAIL().");
-            CORRADE_VERIFY(false);
-        }
-        CORRADE_INFO("Expected here to test CORRADE_INFO().");
-        CORRADE_WARN("Expected here to test CORRADE_WARN().");
-        {
-            /* Cannot fail, otherwise the SKIP wouldn't be tested */
-            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
-            CORRADE_FAIL("Yes.");
-        }
-
-        /* Has to be last! */
-        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
-    }();
-}
-
-void TesterTest::benchmarkMacrosInALambda() {
-    setTestCaseName(CORRADE_FUNCTION);
-
-    []() {
-        CORRADE_BENCHMARK(1) {}
-    }();
-}
-
-void TesterTest::macrosInASingleExpressionBlock() {
-    /* All this should compile fine even though the ITERATION and EXPECT_FAIL
-       variants make no sense this way and are basically no-ops */
-
-    if(true)
-        CORRADE_VERIFY(true);
-
-    if(true)
-        CORRADE_COMPARE(true, true);
-
-    if(true)
-        CORRADE_COMPARE_AS(true, true, bool);
-
-    if(true)
-        CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
-
-    if(true)
-        CORRADE_EXPECT_FAIL("This makes no sense.");
-
-    if(true)
-        CORRADE_EXPECT_FAIL_IF(true, "This makes no sense either.");
-
-    if(true)
-        CORRADE_ITERATION("This is a no-op.");
-
-    if(true)
-        CORRADE_INFO("Expected here to test CORRADE_INFO().");
-    if(true)
-        CORRADE_WARN("Expected here to test CORRADE_WARN().");
-    {
-        /* Cannot fail, otherwise the SKIP wouldn't be tested */
-        CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
-        if(true)
-            CORRADE_FAIL("Yes.");
-    }
-
-    /* Has to be last! */
-    if(true)
-        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
 }
 
 }}}}

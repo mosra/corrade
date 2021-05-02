@@ -1,58 +1,58 @@
-Starting TesterTest::Test with 58 test cases...
+Starting TesterTest::Test with 61 test cases...
      ? [01] <unknown>()
     OK [02] trueExpression()
-  FAIL [03] falseExpression() at here.cpp:293
+  FAIL [03] falseExpression() at here.cpp:306
         Expression 5 != 5 failed.
     OK [04] equal()
-  FAIL [05] nonEqual() at here.cpp:303
+  FAIL [05] nonEqual() at here.cpp:316
         Values a and b are not the same, actual is
         5
         but expected
         3
- XFAIL [06] expectFail() at here.cpp:310
+ XFAIL [06] expectFail() at here.cpp:323
         The world is not mad yet. 2 + 2 and 5 failed the comparison.
- XFAIL [06] expectFail() at here.cpp:311
+ XFAIL [06] expectFail() at here.cpp:324
         The world is not mad yet. Expression false == true failed.
      ? [07] expectFailNoChecks()
      ? [08] expectFailIfNoChecks()
- XPASS [09] unexpectedPassExpression() at here.cpp:340
+ XPASS [09] unexpectedPassExpression() at here.cpp:353
         Expression true == true was expected to fail.
- XPASS [10] unexpectedPassEqual() at here.cpp:345
+ XPASS [10] unexpectedPassEqual() at here.cpp:358
         2 + 2 and 4 were expected to fail the comparison.
     OK [11] compareAs()
-  FAIL [12] compareAsFail() at here.cpp:353
+  FAIL [12] compareAsFail() at here.cpp:366
         Length of actual "meh" doesn't match length of expected "hello" with epsilon 0
     OK [13] compareWith()
-  FAIL [14] compareWithFail() at here.cpp:361
+  FAIL [14] compareWithFail() at here.cpp:374
         Length of actual "You rather GTFO" doesn't match length of expected "hello" with epsilon 9
-  FAIL [15] compareImplicitConversionFail() at here.cpp:366
+  FAIL [15] compareImplicitConversionFail() at here.cpp:379
         Values "holla" and hello are not the same, actual is
         holla
         but expected
         hello
-  WARN [16] compareWarning() at here.cpp:377
+  WARN [16] compareWarning() at here.cpp:390
         This is a warning when comparing "a.txt" and "b.txt"
-  INFO [17] compareMessage() at here.cpp:373
+  INFO [17] compareMessage() at here.cpp:386
         This is a message when comparing "a.txt" and "b.txt"
     OK [18] compareSaveDiagnostic()
-  INFO [19] info() at here.cpp:389
+  INFO [19] info() at here.cpp:402
         The value is 7
-  WARN [20] warn() at here.cpp:396
+  WARN [20] warn() at here.cpp:409
         The value 7 is higher than 5
-  INFO [21] infoWarnNoChecks() at here.cpp:404
+  INFO [21] infoWarnNoChecks() at here.cpp:417
         This test talks
-  WARN [21] infoWarnNoChecks() at here.cpp:405
+  WARN [21] infoWarnNoChecks() at here.cpp:418
         Instead of testing!!!
      ? [21] infoWarnNoChecks()
-  FAIL [22] fail() at here.cpp:411
+  FAIL [22] fail() at here.cpp:424
         The value 7 is higher than 5
- XFAIL [23] failExpected() at here.cpp:419
+ XFAIL [23] failExpected() at here.cpp:432
         Our values are high. Failure was expected to happen.
   SKIP [24] skip()
         This testcase is skipped.
-  FAIL [25] iteration() at here.cpp:433 (iteration JOHN is the name, 1)
+  FAIL [25] iteration() at here.cpp:446 (iteration JOHN is the name, 1)
         Expression !std::isupper(name[i]) failed.
-  FAIL [26] iterationScope() at here.cpp:452
+  FAIL [26] iterationScope() at here.cpp:465
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected
@@ -75,7 +75,7 @@ Starting TesterTest::Test with 58 test cases...
        [37] tearing down...
      ? [37] <unknown>()
        [38] setting up...
-  FAIL [38] setupTeardownFail() at here.cpp:513
+  FAIL [38] setupTeardownFail() at here.cpp:526
         Expression false failed.
        [38] tearing down...
        [39] setting up...
@@ -84,7 +84,7 @@ Starting TesterTest::Test with 58 test cases...
        [39] tearing down...
     OK [40] instancedTest(zero)
     OK [41] instancedTest(1)
-  FAIL [42] instancedTest(two) at here.cpp:536
+  FAIL [42] instancedTest(two) at here.cpp:549
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
@@ -98,7 +98,7 @@ Starting TesterTest::Test with 58 test cases...
 4
     OK [45] repeatedTest()@5
      ? [46] <unknown>()@50
-  FAIL [47] repeatedTestFail()@18 at here.cpp:547
+  FAIL [47] repeatedTestFail()@18 at here.cpp:560
         Expression _i++ < 17 failed.
   SKIP [48] repeatedTestSkip()@29
         Too late.
@@ -113,7 +113,7 @@ Starting TesterTest::Test with 58 test cases...
        [50] tearing down...
      ? [50] <unknown>()@2
        [51] setting up...
-  FAIL [51] repeatedTestSetupTeardownFail()@1 at here.cpp:561
+  FAIL [51] repeatedTestSetupTeardownFail()@1 at here.cpp:574
         Expression false failed.
        [51] tearing down...
        [52] setting up...
@@ -139,4 +139,23 @@ Benchmark end: 500
  BENCH [57] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
   SKIP [58] benchmarkSkip()@1
         Can't verify the measurements anyway.
-Finished TesterTest::Test with 16 errors out of 65 checks. 10 test cases didn't contain any checks!
+ XFAIL [59] macrosInALambda() at here.cpp:646 (iteration 37)
+        Expected here to test CORRADE_EXPECT_FAIL(). Expression false failed.
+  INFO [59] macrosInALambda() at here.cpp:648
+        Expected here to test CORRADE_INFO().
+  WARN [59] macrosInALambda() at here.cpp:649
+        Expected here to test CORRADE_WARN().
+ XFAIL [59] macrosInALambda() at here.cpp:652
+        Expected here to test CORRADE_FAIL(). Failure was expected to happen.
+  SKIP [59] macrosInALambda()
+        Expected here to test CORRADE_SKIP().
+ BENCH [60] 348.36          kB benchmarkMacrosInALambda()@1x1
+  INFO [61] macrosInASingleExpressionBlock() at here.cpp:694
+        Expected here to test CORRADE_INFO().
+  WARN [61] macrosInASingleExpressionBlock() at here.cpp:696
+        Expected here to test CORRADE_WARN().
+ XFAIL [61] macrosInASingleExpressionBlock() at here.cpp:702
+        Expected here to test CORRADE_FAIL(). Failure was expected to happen.
+  SKIP [61] macrosInASingleExpressionBlock()
+        Expected here to test CORRADE_SKIP().
+Finished TesterTest::Test with 16 errors out of 73 checks. 10 test cases didn't contain any checks!
