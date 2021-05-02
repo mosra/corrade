@@ -1698,6 +1698,13 @@ void TesterTest::macrosInALambda() {
             CORRADE_EXPECT_FAIL("Expected here to test CORRADE_EXPECT_FAIL().");
             CORRADE_VERIFY(false);
         }
+        CORRADE_INFO("Expected here to test CORRADE_INFO().");
+        CORRADE_WARN("Expected here to test CORRADE_WARN().");
+        {
+            /* Cannot fail, otherwise the SKIP wouldn't be tested */
+            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
+            CORRADE_FAIL("Yes.");
+        }
         CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
         CORRADE_BENCHMARK(3) std::puts("a");
     }();
@@ -1731,6 +1738,16 @@ void TesterTest::macrosInASingleExpressionBlock() {
     const char* yes = "This is a no-op.";
     if(true)
         CORRADE_ITERATION(yes);
+
+    if(true)
+        CORRADE_INFO("Expected here to test CORRADE_INFO().");
+    if(true)
+        CORRADE_WARN("Expected here to test CORRADE_WARN().");
+    {
+        CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
+        if(true)
+            CORRADE_FAIL("Yes.");
+    }
 
     /* CORRADE_BENCHMARK() doesn't work this way */
 }
