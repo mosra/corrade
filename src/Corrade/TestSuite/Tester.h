@@ -1294,7 +1294,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         class CORRADE_TESTSUITE_EXPORT Printer {
             public:
-                template<class F> Printer(F&& printer): Printer{} {
+                /* Used as implicit from Magnum's OpenGLTester, watch out */
+                template<class F> /*implicit*/ Printer(F&& printer): Printer{} {
                     printer(debug());
                 }
 
