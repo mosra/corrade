@@ -910,6 +910,9 @@ Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSiz
     CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using benchmark macros outside of test cases is not allowed",
         (BenchmarkRunner{nullptr, nullptr}));
+    CORRADE_ASSERT(_state->testCase->benchmarkBegin && _state->testCase->benchmarkEnd,
+        "TestSuite::Tester: CORRADE_BENCHMARK() can be called only inside a benchmark",
+        (BenchmarkRunner{nullptr, nullptr}));
 
     _state->benchmarkBatchSize = batchSize;
     return BenchmarkRunner{_state->testCase->benchmarkBegin, _state->testCase->benchmarkEnd};
