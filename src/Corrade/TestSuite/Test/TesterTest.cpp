@@ -685,7 +685,9 @@ struct TesterTest: Tester {
     void expectFailIfExplicitBool();
 
     void macrosInALambda();
+    void benchmarkMacrosInALambda();
     void macrosInASingleExpressionBlock();
+    /* CORRADE_BENCHMARK() doesn't work in a single expression block */
 };
 
 class EmptyTest: public Tester {};
@@ -754,8 +756,11 @@ TesterTest::TesterTest() {
               &TesterTest::compareNonCopyable,
               &TesterTest::expectFailIfExplicitBool,
 
-              &TesterTest::macrosInALambda,
-              &TesterTest::macrosInASingleExpressionBlock});
+              &TesterTest::macrosInALambda});
+
+    addBenchmarks({&TesterTest::benchmarkMacrosInALambda}, 1);
+
+    addTests({&TesterTest::macrosInASingleExpressionBlock});
 }
 
 void TesterTest::configurationCopy() {
@@ -1705,8 +1710,17 @@ void TesterTest::macrosInALambda() {
             CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
             CORRADE_FAIL("Yes.");
         }
+
+        /* Has to be last! */
         CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
-        CORRADE_BENCHMARK(3) std::puts("a");
+    }();
+}
+
+void TesterTest::benchmarkMacrosInALambda() {
+    setTestCaseName(CORRADE_FUNCTION);
+
+    []() {
+        CORRADE_BENCHMARK(1) {}
     }();
 }
 
@@ -1732,9 +1746,6 @@ void TesterTest::macrosInASingleExpressionBlock() {
     if(true)
         CORRADE_EXPECT_FAIL_IF(true, "This makes no sense either.");
 
-    if(false)
-        CORRADE_SKIP("This is not skipped.");
-
     if(true)
         CORRADE_ITERATION("This is a no-op.");
 
@@ -1743,12 +1754,15 @@ void TesterTest::macrosInASingleExpressionBlock() {
     if(true)
         CORRADE_WARN("Expected here to test CORRADE_WARN().");
     {
+        /* Cannot fail, otherwise the SKIP wouldn't be tested */
         CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
         if(true)
             CORRADE_FAIL("Yes.");
     }
 
-    /* CORRADE_BENCHMARK() doesn't work this way */
+    /* Has to be last! */
+    if(true)
+        CORRADE_SKIP("Expected here to test CORRADE_SKIP().");
 }
 
 }}}}
