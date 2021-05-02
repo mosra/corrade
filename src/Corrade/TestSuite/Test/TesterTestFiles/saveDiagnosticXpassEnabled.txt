@@ -1,5 +1,5 @@
 Starting TesterTest::Test with 1 test cases...
- XPASS [18] compareSaveDiagnostic() at here.cpp:397
+ XPASS [18] compareSaveDiagnostic() at here.cpp:402
         "a.txt" and "b.txt" were expected to fail the comparison.
  SAVED [18] compareSaveDiagnostic() -> /some/path/b.txt
 Finished TesterTest::Test with 1 errors out of 1 checks. 1 checks saved diagnostic files.

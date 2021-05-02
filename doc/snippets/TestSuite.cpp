@@ -263,8 +263,8 @@ CORRADE_VERIFY(delta < 0.1f);
 bool extremelyStable = false;
 float delta{};
 /* [CORRADE_FAIL] */
-if(delta > 0.05f && !extremelyStable)
-    CORRADE_FAIL("Low precision due to system instability, delta is" << delta);
+CORRADE_FAIL_IF(delta > 0.05f && !extremelyStable,
+    "Low precision due to system instability, delta is" << delta);
 
 CORRADE_VERIFY(delta < 0.1f);
 /* [CORRADE_FAIL] */

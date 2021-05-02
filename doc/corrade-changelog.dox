@@ -77,9 +77,9 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
--   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL() macros
-    for printing formatted information to the output and explicitly failing a
-    test
+-   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL_IF()
+    macros for printing formatted information to the output and explicitly
+    failing a test
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

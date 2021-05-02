@@ -778,23 +778,27 @@ void Tester::infoOrWarn(const Printer& printer, std::size_t line, bool warn) {
     out << "       " << printer._data->out.str();
 }
 
-void Tester::fail(const Printer& printer) {
-    if(_state->expectedFailure) {
+void Tester::failIf(const Printer& printer, const bool fail) {
+    if(_state->expectedFailure && fail) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         printFileLineInfo(out);
         /** @todo this is extremely uninformative, implement the verbose output
             for XFAIL/XPASS at least, or figure out a better way to report
-            this; there's also no way to trigger an XPASS here */
-        out << "       " << _state->expectedFailure->_data->out.str() << "Failure was expected to happen.";
+            this */
+        out << "       " << _state->expectedFailure->_data->out.str() << "Condition failed.";
         return;
     }
 
-    Error out{_state->errorOutput, _state->useColor};
-    printTestCaseLabel(out, "  FAIL", Debug::Color::Red, Debug::Color::Default);
-    printFileLineInfo(out);
-    out << "       " << printer._data->out.str();
-    throw Exception{};
+    if(bool(_state->expectedFailure) != fail) {
+        Error out{_state->errorOutput, _state->useColor};
+        printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+        printFileLineInfo(out);
+        out << "       ";
+        if(!_state->expectedFailure) out << printer._data->out.str();
+        else out << "Failure was expected to happen.";
+        throw Exception{};
+    }
 }
 
 void Tester::skip(const Printer& printer) {

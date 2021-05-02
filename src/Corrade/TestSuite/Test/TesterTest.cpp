@@ -150,7 +150,9 @@ struct Test: Tester {
     void warn();
     void infoWarnNoChecks();
     void fail();
+    void failNot();
     void failExpected();
+    void failUnexpectedlyNot();
     void skip();
     void iteration();
     void iterationScope();
@@ -234,7 +236,9 @@ Test::Test(std::ostream* const out, const TesterConfiguration& configuration): T
               &Test::warn,
               &Test::infoWarnNoChecks,
               &Test::fail,
+              &Test::failNot,
               &Test::failExpected,
+              &Test::failUnexpectedlyNot,
               &Test::skip,
               &Test::iteration,
               &Test::iterationScope,
@@ -421,16 +425,27 @@ void Test::infoWarnNoChecks() {
 
 void Test::fail() {
     int value = 7;
-    if(value > 5)
-        CORRADE_FAIL("The value" << value << "is higher than 5");
+    CORRADE_FAIL_IF(value > 5, "The value" << value << "is higher than 5");
+}
+
+
+void Test::failNot() {
+    int value = 5;
+    CORRADE_FAIL_IF(value > 5, "The value" << value << "is higher than 5");
 }
 
 void Test::failExpected() {
     int value = 7;
 
     CORRADE_EXPECT_FAIL("Our values are high.");
-    if(value > 5)
-        CORRADE_FAIL("The value" << value << "is higher than 5");
+    CORRADE_FAIL_IF(value > 5, "The value" << value << "is higher than 5");
+}
+
+void Test::failUnexpectedlyNot() {
+    int value = 5;
+
+    CORRADE_EXPECT_FAIL("Our values are high.");
+    CORRADE_FAIL_IF(value > 5, "The value" << value << "is higher than 5");
 }
 
 void Test::skip() {
@@ -650,8 +665,8 @@ void Test::macrosInALambda() {
         CORRADE_WARN("Expected here to test CORRADE_WARN().");
         {
             /* Cannot fail, otherwise the SKIP wouldn't be tested */
-            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
-            CORRADE_FAIL("Yes.");
+            CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL_IF().");
+            CORRADE_FAIL_IF(true, "Yes.");
         }
 
         /* Has to be last! */
@@ -698,9 +713,9 @@ void Test::macrosInASingleExpressionBlock() {
         CORRADE_WARN("Expected here to test CORRADE_WARN().");
     {
         /* Cannot fail, otherwise the SKIP wouldn't be tested */
-        CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL().");
+        CORRADE_EXPECT_FAIL("Expected here to test CORRADE_FAIL_IF().");
         if(true)
-            CORRADE_FAIL("Yes.");
+            CORRADE_FAIL_IF(true, "Yes.");
     }
 
     /* Has to be last! */
@@ -774,6 +789,7 @@ struct TesterTest: Tester {
     void compareWithDereference();
     void compareNonCopyable();
     void expectFailIfExplicitBool();
+    void failIfExplicitBool();
 };
 
 class EmptyTest: public Tester {};
@@ -840,7 +856,8 @@ TesterTest::TesterTest() {
               &TesterTest::compareAsVarargs,
               &TesterTest::compareWithDereference,
               &TesterTest::compareNonCopyable,
-              &TesterTest::expectFailIfExplicitBool});
+              &TesterTest::expectFailIfExplicitBool,
+              &TesterTest::failIfExplicitBool});
 }
 
 void TesterTest::configurationCopy() {
@@ -944,7 +961,7 @@ void TesterTest::emptyTest() {
 void TesterTest::skipOnly() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "13 24 4 11", "--skip", "24" };
+    const char* argv[] = { "", "--color", "off", "--only", "13 26 4 11", "--skip", "26" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -961,7 +978,7 @@ void TesterTest::skipOnly() {
 void TesterTest::skipAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "24", "--skip", "24" };
+    const char* argv[] = { "", "--color", "off", "--only", "26", "--skip", "26" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -976,7 +993,7 @@ void TesterTest::skipAll() {
 void TesterTest::skipTests() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "13 55 11", "--skip-tests" };
+    const char* argv[] = { "", "--color", "off", "--only", "13 57 11", "--skip-tests" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -997,7 +1014,7 @@ void TesterTest::skipTests() {
 void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "13 55 11", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "13 57 11", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1029,7 +1046,7 @@ void TesterTest::skipTestsNothingElse() {
 void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "55", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "57", "--skip-benchmarks" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1078,7 +1095,7 @@ void TesterTest::shuffleOne() {
 void TesterTest::repeatEvery() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "45 4", "--repeat-every", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "47 4", "--repeat-every", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1095,7 +1112,7 @@ void TesterTest::repeatEvery() {
 void TesterTest::repeatAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "45 4", "--repeat-all", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "47 4", "--repeat-all", "2" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1129,7 +1146,7 @@ void TesterTest::abortOnFail() {
 void TesterTest::abortOnFailSkip() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "24 2 3 4", "--abort-on-fail" };
+    const char* argv[] = { "", "--color", "off", "--only", "26 2 3 4", "--abort-on-fail" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1146,7 +1163,7 @@ void TesterTest::abortOnFailSkip() {
 void TesterTest::noXfail() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "6 23", "--no-xfail" };
+    const char* argv[] = { "", "--color", "off", "--only", "6 24", "--no-xfail" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1163,7 +1180,7 @@ void TesterTest::noXfail() {
 void TesterTest::noCatch() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "28", "--no-catch" };
+    const char* argv[] = { "", "--color", "off", "--only", "30", "--no-catch" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1490,7 +1507,7 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "--benchmark", "wall-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "wall-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1511,7 +1528,7 @@ void TesterTest::benchmarkWallClock() {
 void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "--benchmark", "cpu-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "cpu-time" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1532,7 +1549,7 @@ void TesterTest::benchmarkCpuClock() {
 void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "--benchmark", "cpu-cycles" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "cpu-cycles" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1553,7 +1570,7 @@ void TesterTest::benchmarkCpuCycles() {
 void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "--benchmark-discard", "100" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark-discard", "100" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1574,7 +1591,7 @@ void TesterTest::benchmarkDiscardAll() {
 void TesterTest::benchmarkDebugBuildNote() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1597,7 +1614,7 @@ void TesterTest::benchmarkDebugBuildNote() {
 void TesterTest::benchmarkCpuScalingNoWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1617,7 +1634,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
 void TesterTest::benchmarkCpuScalingWarning() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1637,7 +1654,7 @@ void TesterTest::benchmarkCpuScalingWarning() {
 void TesterTest::benchmarkCpuScalingWarningVerbose() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "53 55", "-v" };
+    const char* argv[] = { "", "--color", "off", "--only", "55 57", "-v" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -1765,6 +1782,28 @@ void TesterTest::expectFailIfExplicitBool() {
     {
         CORRADE_EXPECT_FAIL_IF(ExplicitTrue{}, "");
         CORRADE_VERIFY(false);
+    }
+}
+
+void TesterTest::failIfExplicitBool() {
+    struct ExplicitFalse { explicit operator bool() const { return false; } };
+    {
+        ExplicitFalse t;
+        CORRADE_FAIL_IF(t, "");
+        CORRADE_FAIL_IF(ExplicitFalse{}, "");
+    }
+
+    struct ExplicitFalseNonConst { explicit operator bool() { return false; } };
+    {
+        ExplicitFalseNonConst t;
+        CORRADE_FAIL_IF(t, "");
+        CORRADE_FAIL_IF(ExplicitFalseNonConst{}, "");
+    }
+
+    struct ExplicitTrue { explicit operator bool() const { return true; } };
+    {
+        CORRADE_EXPECT_FAIL("");
+        CORRADE_FAIL_IF(ExplicitTrue{}, "");
     }
 }
 
