@@ -251,6 +251,8 @@ bool rm(const std::string& path) {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* std::remove() can't remove directories on Emscripten */
     struct stat st;
+    /* using lstat() and not stat() as we care about the symlink, not the
+       file/dir it points to */
     if(lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode))
         return rmdir(path.data()) == 0;
     #endif
@@ -355,12 +357,15 @@ Containers::Optional<std::size_t> fileSize(const std::string& filename) {
 
 bool isDirectory(const std::string& path) {
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /** @todo symlink support */
     const DWORD fileAttributes = GetFileAttributesW(widen(path).data());
     return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 
     #elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* using stat() instead of lstat() as that follows symlinks and that's what
+       is desired in most cases */
     struct stat st;
-    return lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode);
+    return stat(path.data(), &st) == 0 && S_ISDIR(st.st_mode);
     #else
     static_cast<void>(path);
     Warning() << "Utility::Directory::isDirectory(): not implemented on this platform";

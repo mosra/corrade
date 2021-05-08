@@ -393,6 +393,10 @@ CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
 Returns @cpp true @ce if the path exists, is accessible (i.e., user has a
 permission to open it) and is a directory, @cpp false @ce otherwise. Expects
 that the filename is in UTF-8.
+@partialsupport On @ref CORRADE_TARGET_UNIX "Unix" platforms and
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed, so this
+    function will return @cpp true @ce for a symlink that points to a
+    directory. This behavior is not implemented on Windows at the moment.
 @see @ref exists(), @ref list()
 */
 CORRADE_UTILITY_EXPORT bool isDirectory(const std::string& path);

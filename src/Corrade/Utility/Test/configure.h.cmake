@@ -28,6 +28,7 @@
 #define CONFIGURATION_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/ConfigurationTestFiles/"
 
 #define DIRECTORY_TEST_DIR "${UTILITY_TEST_DIR}/DirectoryTestFiles"
+#define DIRECTORY_TEST_DIR_SYMLINK "${UTILITY_TEST_DIR}/DirectoryTestFilesSymlink"
 #define DIRECTORY_TEST_DIR_UTF8 "${UTILITY_TEST_DIR}/DirectoryTestFilesUtf8"
 #define DIRECTORY_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/DirectoryTestFiles"
 

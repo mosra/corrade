@@ -72,6 +72,7 @@ struct DirectoryTest: TestSuite::Tester {
     void existsUtf8();
 
     void isDirectory();
+    void isDirectorySymlink();
     void isDirectoryUtf8();
 
     void removeFile();
@@ -168,6 +169,7 @@ struct DirectoryTest: TestSuite::Tester {
     void mapWriteUtf8();
 
     std::string _testDir,
+        _testDirSymlink,
         _testDirUtf8,
         _writeTestDir;
 };
@@ -192,6 +194,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::existsUtf8,
 
               &DirectoryTest::isDirectory,
+              &DirectoryTest::isDirectorySymlink,
               &DirectoryTest::isDirectoryUtf8,
 
               &DirectoryTest::removeFile,
@@ -300,12 +303,14 @@ DirectoryTest::DirectoryTest() {
         #endif
     ) {
         _testDir = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFiles");
+        _testDirSymlink = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFilesSymlink");
         _testDirUtf8 = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFilesUtf8");
         _writeTestDir = Directory::join(Directory::home(), "Library/Caches");
     } else
     #endif
     {
         _testDir = DIRECTORY_TEST_DIR;
+        _testDirSymlink = DIRECTORY_TEST_DIR_SYMLINK;
         _testDirUtf8 = DIRECTORY_TEST_DIR_UTF8;
         _writeTestDir = DIRECTORY_WRITE_TEST_DIR;
     }
@@ -466,6 +471,22 @@ void DirectoryTest::isDirectory() {
 
     /* Nonexistent file */
     CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDir, "nonexistentFile")));
+}
+
+void DirectoryTest::isDirectorySymlink() {
+
+    CORRADE_VERIFY(Directory::exists(Directory::join(_testDirSymlink, "file-symlink")));
+    CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDirSymlink, "file-symlink")));
+
+    CORRADE_VERIFY(Directory::exists(Directory::join(_testDirSymlink, "dir-symlink")));
+    {
+        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Possible on Windows too, but there we'd need to first detect if the
+           Git clone has the symlinks preserved */
+        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        #endif
+        CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirSymlink, "dir-symlink")));
+    }
 }
 
 void DirectoryTest::isDirectoryUtf8() {

@@ -189,6 +189,10 @@ corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
     FILES
         DirectoryTestFiles/dir/dummy
         DirectoryTestFiles/file
+        DirectoryTestFilesSymlink/dir/dummy
+        DirectoryTestFilesSymlink/dir-symlink
+        DirectoryTestFilesSymlink/file
+        DirectoryTestFilesSymlink/file-symlink
         DirectoryTestFilesUtf8/šňůra/dummy
         DirectoryTestFilesUtf8/hýždě)
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
