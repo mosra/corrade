@@ -616,7 +616,9 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
         #else
-        if((flags >= Flag::SkipFiles || flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR)
+        /* Emscripten doesn't set DT_REG for files, so we treat everything
+           that's not a DT_DIR as a file. SkipSpecial has no effect here. */
+        if(flags >= Flag::SkipFiles && entry->d_type != DT_DIR)
             continue;
         #endif
 

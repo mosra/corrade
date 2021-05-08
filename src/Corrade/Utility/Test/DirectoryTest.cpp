@@ -1010,9 +1010,6 @@ void DirectoryTest::listSkipFiles() {
 }
 
 void DirectoryTest::listSkipSpecial() {
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_EXPECT_FAIL("Files are treated as special in Emscripten.");
-    #endif
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
         "CTest is not able to run XCTest executables properly in the simulator.");

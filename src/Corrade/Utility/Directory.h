@@ -84,9 +84,9 @@ enum class Flag: unsigned char {
 
     /**
      * Skip regular files
-     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and in
+     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
-     *      directories.
+     *      directories, as there's no concept of a special file.
      */
     SkipFiles = 1 << 1,
 
@@ -95,9 +95,9 @@ enum class Flag: unsigned char {
 
     /**
      * Skip everything that is not a file or directory
-     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows".
-     *      In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything
-     *      except directories.
+     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows"
+     *      and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", as these platforms
+     *      don't have a concept of a special file.
      */
     SkipSpecial = 1 << 3,
 
