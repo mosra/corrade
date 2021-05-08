@@ -701,7 +701,7 @@ void DirectoryTest::isSandboxed() {
 
 void DirectoryTest::current() {
     const std::string current = Directory::current();
-    Debug() << "Current directory found as:" << current;
+    CORRADE_INFO("Current directory found as:" << current);
 
     /* Ensure the test is not accidentally false positive due to stale files */
     if(Directory::exists("currentDir.mark"))
@@ -730,7 +730,7 @@ void DirectoryTest::libraryLocation() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     const std::string libraryLocation = Directory::libraryLocation(&Utility::Directory::rm);
 
-    Debug{} << "Corrade::Utility library location found as:" << libraryLocation;
+    CORRADE_INFO("Corrade::Utility library location found as:" << libraryLocation);
 
     /* Shouldn't be empty */
     CORRADE_VERIFY(!libraryLocation.empty());
@@ -796,7 +796,7 @@ void DirectoryTest::libraryLocationUtf8() {
 
 void DirectoryTest::executableLocation() {
     const std::string executableLocation = Directory::executableLocation();
-    Debug() << "Executable location found as:" << executableLocation;
+    CORRADE_INFO("Executable location found as:" << executableLocation);
 
     /* On sandboxed macOS and iOS verify that the directory contains Info.plist
        file */
@@ -846,7 +846,7 @@ void DirectoryTest::executableLocationUtf8() {
 
 void DirectoryTest::home() {
     const std::string home = Directory::home();
-    Debug() << "Home dir found as:" << home;
+    CORRADE_INFO("Home dir found as:" << home);
 
     /* On macOS and iOS verify that the home dir contains `Library` directory */
     #ifdef CORRADE_TARGET_APPLE
@@ -886,7 +886,7 @@ void DirectoryTest::homeUtf8() {
 
 void DirectoryTest::configurationDir() {
     const std::string dir = Directory::configurationDir("Corrade");
-    Debug() << "Configuration dir found as:" << dir;
+    CORRADE_INFO("Configuration dir found as:" << dir);
 
     #ifdef CORRADE_TARGET_APPLE
     CORRADE_COMPARE(dir.substr(dir.size() - 7), "Corrade");
@@ -936,7 +936,7 @@ void DirectoryTest::configurationDirUtf8() {
 
 void DirectoryTest::tmp() {
     const std::string dir = Directory::tmp();
-    Debug() << "Temporary dir found as:" << dir;
+    CORRADE_INFO("Temporary dir found as:" << dir);
 
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     {
