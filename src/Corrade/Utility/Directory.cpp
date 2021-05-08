@@ -613,7 +613,7 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
             continue;
-        if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
+        if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG && entry->d_type != DT_LNK)
             continue;
         #else
         /* Emscripten doesn't set DT_REG for files, so we treat everything
@@ -621,6 +621,26 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         if(flags >= Flag::SkipFiles && entry->d_type != DT_DIR)
             continue;
         #endif
+
+        /* For symlinks we have to deref the link and ask there again. If that
+           fails for whatever reason, we leave the file in the list -- it can
+           be thought of as "neither a file nor directory" and we're told to
+           skip files/directories, not "include only files/directories".
+
+           Also do this only if we're told to skip certain entry types, for a
+           plain list this is unnecessary overhead. */
+        if((flags & (Flag::SkipDirectories|Flag::SkipFiles|Flag::SkipSpecial)) && entry->d_type == DT_LNK) {
+            /* stat() follows the symlink, lstat() doesn't */
+            struct stat st;
+            if(stat((join(path, entry->d_name)).data(), &st) == 0) {
+                if(flags >= Flag::SkipDirectories && S_ISDIR(st.st_mode))
+                    continue;
+                if(flags >= Flag::SkipFiles && S_ISREG(st.st_mode))
+                    continue;
+                if(flags >= Flag::SkipSpecial && !S_ISDIR(st.st_mode) && !S_ISREG(st.st_mode))
+                    continue;
+            }
+        }
 
         std::string file{entry->d_name};
         if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
@@ -653,6 +673,7 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
             continue;
         if((flags >= Flag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             continue;
+        /** @todo symlink support */
         /** @todo are there any special files in WINAPI? */
 
         std::string file{narrow(data.cFileName)};

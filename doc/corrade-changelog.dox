@@ -134,6 +134,11 @@ namespace Corrade {
     compilers
 -   @ref Utility::Directory::isDirectory() now follows symlinks on Unix
     platforms
+-   @ref Utility::Directory::Flag::SkipFiles and
+    @ref Utility::Directory::Flag::SkipDirectories passed to
+    @ref Utility::Directory::list() now affects symlinks as well --- previously
+    they were treated as neither, now they get correctly skipped based on
+    whether the target is a file or a directory
 -   @ref Utility::Directory::Flag::SkipSpecial passed to
     @ref Utility::Directory::list() now has no effect on Emscripten, the same
     as on Windows, as those two platforms have no notion of a special file.

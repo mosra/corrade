@@ -108,8 +108,11 @@ struct DirectoryTest: TestSuite::Tester {
 
     void list();
     void listSkipDirectories();
+    void listSkipDirectoriesSymlinks();
     void listSkipFiles();
+    void listSkipFilesSymlinks();
     void listSkipSpecial();
+    void listSkipSpecialSymlink();
     void listSkipDotAndDotDot();
     void listSort();
     void listSortPrecedence();
@@ -230,8 +233,11 @@ DirectoryTest::DirectoryTest() {
 
               &DirectoryTest::list,
               &DirectoryTest::listSkipDirectories,
+              &DirectoryTest::listSkipDirectoriesSymlinks,
               &DirectoryTest::listSkipFiles,
+              &DirectoryTest::listSkipFilesSymlinks,
               &DirectoryTest::listSkipSpecial,
+              &DirectoryTest::listSkipSpecialSymlink,
               &DirectoryTest::listSkipDotAndDotDot,
               &DirectoryTest::listSort,
               &DirectoryTest::listSortPrecedence,
@@ -998,6 +1004,22 @@ void DirectoryTest::listSkipDirectories() {
         TestSuite::Compare::SortedContainer);
 }
 
+void DirectoryTest::listSkipDirectoriesSymlinks() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Possible on Windows too, but there we'd need to first detect if the
+       Git clone has the symlinks preserved */
+    CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+    #endif
+    CORRADE_COMPARE_AS(Directory::list(_testDirSymlink, Directory::Flag::SkipDirectories),
+        (std::vector<std::string>{"file", "file-symlink"}),
+        TestSuite::Compare::SortedContainer);
+}
+
 void DirectoryTest::listSkipFiles() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -1009,6 +1031,22 @@ void DirectoryTest::listSkipFiles() {
         TestSuite::Compare::SortedContainer);
 }
 
+void DirectoryTest::listSkipFilesSymlinks() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Possible on Windows too, but there we'd need to first detect if the
+       Git clone has the symlinks preserved */
+    CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+    #endif
+    CORRADE_COMPARE_AS(Directory::list(_testDirSymlink, Directory::Flag::SkipFiles),
+        (std::vector<std::string>{".", "..", "dir", "dir-symlink"}),
+        TestSuite::Compare::SortedContainer);
+}
+
 void DirectoryTest::listSkipSpecial() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -1017,6 +1055,18 @@ void DirectoryTest::listSkipSpecial() {
 
     CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipSpecial),
         (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+}
+
+void DirectoryTest::listSkipSpecialSymlink() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    /* Symlinks should not be treated as special files, so they're shown */
+    CORRADE_COMPARE_AS(Directory::list(_testDirSymlink, Directory::Flag::SkipSpecial),
+        (std::vector<std::string>{".", "..", "dir", "dir-symlink", "file", "file-symlink"}),
         TestSuite::Compare::SortedContainer);
 }
 
