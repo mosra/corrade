@@ -40,10 +40,18 @@ if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 1
     message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
 endif()
 
+# Don't restrict INTERPROCEDURAL_OPTIMIZATION only for icc on Linux
+if(POLICY CMP0069)
+    cmake_policy(SET CMP0069 NEW)
+endif()
 # If CMAKE_AUTOMOC is set, all uses of corrade_add_resource() would otherwise
 # complain on 3.10 that AUTOMOC is not processing GENERATED files
 if(POLICY CMP0071)
     cmake_policy(SET CMP0071 NEW)
+endif()
+# Superprojects can use just set(WITH_BLAH ON) without FORCE CACHE on 3.13+
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
 endif()
 
 project(Corrade CXX)
