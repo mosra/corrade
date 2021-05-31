@@ -32,7 +32,16 @@ if(WITH_UTILITY)
         ConfigurationValue.cpp
         MurmurHash2.cpp
         Sha1.cpp
-        System.cpp)
+        System.cpp
+
+        ../Simd.cpp)
+
+    # TODO: probably not robust enough, we actually need CORRADE_TARGET_X86
+    # in CMake as well!
+    if(CORRADE_TARGET_GCC AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86|X86|amd64|AMD64")
+        # GCC 10 complains otherwise, however 4.8 doesn't
+        set_property(SOURCE ../Simd.cpp APPEND PROPERTY COMPILE_OPTIONS -mxsave)
+    endif()
 
     set(CorradeUtility_GracefulAssert_SRCS
         Algorithms.cpp

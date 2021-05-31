@@ -64,6 +64,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake
 
 set(Corrade_HEADERS
     Corrade.h
+    Simd.h
     Tags.h)
 
 # Force IDEs to display all header files in project view
