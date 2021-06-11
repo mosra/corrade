@@ -67,6 +67,29 @@
 #include "Corrade/Utility/Assert.h"
 #endif
 
+#if defined(CORRADE_TARGET_ANDROID)
+#include <Corrade/Utility/AndroidLogStreamBuffer.h>
+
+const char * tag = "magnum";
+
+Corrade::Utility::AndroidLogStreamBuffer bufferDebug {Corrade::Utility::AndroidLogStreamBuffer::LogPriority::Debug, tag};
+std::ostream androidLogStreamDebug {&bufferDebug};
+
+Corrade::Utility::AndroidLogStreamBuffer bufferWarning {Corrade::Utility::AndroidLogStreamBuffer::LogPriority::Warning, tag};
+std::ostream androidLogStreamWarning {&bufferWarning};
+
+Corrade::Utility::AndroidLogStreamBuffer bufferError {Corrade::Utility::AndroidLogStreamBuffer::LogPriority::Error, tag};
+std::ostream androidLogStreamError {&bufferError};
+
+#define DEFAULT_STREAM_D &androidLogStreamDebug
+#define DEFAULT_STREAM_W &androidLogStreamWarning
+#define DEFAULT_STREAM_E &androidLogStreamError
+#else
+#define DEFAULT_STREAM_D &std::cout
+#define DEFAULT_STREAM_W &std::cerr
+#define DEFAULT_STREAM_E DEFAULT_STREAM_W
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -93,8 +116,8 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 HANDLE streamOutputHandle(const std::ostream* s) {
-    return s == &std::cout ? GetStdHandle(STD_OUTPUT_HANDLE) :
-           s == &std::cerr ? GetStdHandle(STD_ERROR_HANDLE) :
+    return s == DEFAULT_STREAM_D ? GetStdHandle(STD_OUTPUT_HANDLE) :
+           s == DEFAULT_STREAM_E ? GetStdHandle(STD_ERROR_HANDLE) :
            INVALID_HANDLE_VALUE;
 }
 #endif
@@ -136,7 +159,7 @@ DebugGlobals debugGlobals{
     /* Referencing the globals directly makes MinGW Clang segfault for some reason */
     Debug::defaultOutput(), Warning::defaultOutput(), Error::defaultOutput(),
     #else
-    &std::cout, &std::cerr, &std::cerr,
+    DEFAULT_STREAM_D, DEFAULT_STREAM_W, DEFAULT_STREAM_E,
     #endif
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color::Default, false
@@ -294,9 +317,9 @@ void Debug::setImmediateFlags(Flags flags) {
     _immediateFlags = InternalFlag(static_cast<unsigned char>(flags));
 }
 
-std::ostream* Debug::defaultOutput() { return &std::cout; }
-std::ostream* Warning::defaultOutput() { return &std::cerr; }
-std::ostream* Error::defaultOutput() { return &std::cerr; }
+std::ostream* Debug::defaultOutput() { return DEFAULT_STREAM_D; }
+std::ostream* Warning::defaultOutput() { return DEFAULT_STREAM_W; }
+std::ostream* Error::defaultOutput() { return DEFAULT_STREAM_E; }
 
 std::ostream* Debug::output() { return debugGlobals.output; }
 std::ostream* Warning::output() { return debugGlobals.warningOutput; }
@@ -321,8 +344,8 @@ bool Debug::isTty(std::ostream* const output) {
         #pragma warning(push)
         #pragma warning(disable: 4996)
         #endif
-        ((output == &std::cout && isatty(1)) ||
-         (output == &std::cerr && isatty(2)))
+        ((output == DEFAULT_STREAM_D && isatty(1)) ||
+         (output == DEFAULT_STREAM_E && isatty(2)))
         #ifdef CORRADE_TARGET_CLANG_CL
         #pragma clang diagnostic pop
         #elif defined(CORRADE_TARGET_MSVC)
@@ -349,9 +372,9 @@ bool Debug::isTty(std::ostream* const output) {
        triggering a Clang warning and everything is just fucking ugly. */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     int out = 0;
-    if(output == &std::cout)
+    if(output == DEFAULT_STREAM_D)
         out = 1;
-    else if(output == &std::cerr)
+    else if(output == DEFAULT_STREAM_E)
         out = 2;
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
