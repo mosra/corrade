@@ -127,6 +127,9 @@ namespace Corrade {
     @ref CORRADE_EXPECT_FAIL_IF() macros now accept messages in the same form
     as @ref CORRADE_ASSERT(), that is anything that can be printed with
     @ref Utility::Debug as well as chaining the pieces with @cpp << @ce.
+-   Test executables now accept `-X` and `-S` as a shorthand to often used
+    `--abort-on-fail` and `--save-diagnostic`
+    @ref TestSuite-Tester-command-line "command-line options"
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

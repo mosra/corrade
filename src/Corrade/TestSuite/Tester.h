@@ -447,13 +447,13 @@ Arguments:
     `CORRADE_TEST_REPEAT_EVERY`, default: `1`)
 -   `--repeat-all N` --- repeat all test cases N times (environment:
     `CORRADE_TEST_REPEAT_ALL`, default: `1`)
--   `--abort-on-fail` --- abort after first failure (environment:
+-   `-X`, `--abort-on-fail` --- abort after first failure (environment:
     `CORRADE_TEST_ABORT_ON_FAIL=ON|OFF`)
 -   `--no-xfail` --- disallow expected failures (environment:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
 -   `--no-catch` --- don't catch standard exceptions (environment:
     `CORRADE_TEST_NO_CATCH=ON|OFF`)
--   `--save-diagnostic PATH` --- save diagnostic files to given path
+-   `-S`, `--save-diagnostic PATH` --- save diagnostic files to given path
     (environment: `CORRADE_TEST_SAVE_DIAGNOSTIC`)
 -   `-v`, `--verbose` --- enable verbose output (environment:
     `CORRADE_TEST_VERBOSE`)

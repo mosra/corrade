@@ -1,4 +1,4 @@
 Starting TesterTest::Test with 1 test cases...
  XPASS [18] compareSaveDiagnostic() at here.cpp:402
         "a.txt" and "b.txt" were expected to fail the comparison.
-Finished TesterTest::Test with 1 errors out of 1 checks. 1 failed checks are able to save diagnostic files, enable --save-diagnostic to get them.
+Finished TesterTest::Test with 1 errors out of 1 checks. 1 failed checks are able to save diagnostic files, enable -S / --save-diagnostic to get them.

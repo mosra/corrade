@@ -206,13 +206,13 @@ int Tester::exec(Tester* const previousTester, std::ostream* const logOutput, st
             .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
         .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
             .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
-        .addBooleanOption("abort-on-fail").setHelp("abort-on-fail", "abort after first failure")
+        .addBooleanOption('X', "abort-on-fail").setHelp("abort-on-fail", "abort after first failure")
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
         .addBooleanOption("no-catch").setHelp("no-catch", "don't catch standard exceptions")
             .setFromEnvironment("no-catch", "CORRADE_TEST_NO_CATCH")
-        .addOption("save-diagnostic", "").setHelp("save-diagnostic", "save diagnostic files to given path", "PATH")
+        .addOption('S', "save-diagnostic", "").setHelp("save-diagnostic", "save diagnostic files to given path", "PATH")
             .setFromEnvironment("save-diagnostic", "CORRADE_TEST_SAVE_DIAGNOSTIC")
         .addBooleanOption('v', "verbose").setHelp("verbose", "enable verbose output")
             .setFromEnvironment("verbose", "CORRADE_TEST_VERBOSE")
@@ -610,7 +610,7 @@ benchmark types:
         } else {
             out << Debug::boldColor(Debug::Color::Green) << _state->diagnosticCount
                 << "failed checks are able to save diagnostic files, enable "
-                   "--save-diagnostic to get them.";
+                   "-S / --save-diagnostic to get them.";
         }
     }
     if(noCheckCount)
