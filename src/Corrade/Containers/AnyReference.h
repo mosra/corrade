@@ -57,6 +57,12 @@ representation exists either.
 template<class T> class AnyReference {
     public:
         /**
+         * @brief Value type
+         * @m_since_latest
+         */
+        typedef T Type;
+
+        /**
          * @brief Construct from a l-value
          *
          * When this constructor is used, @ref isRvalue() returns @cpp false @ce.

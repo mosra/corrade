@@ -117,6 +117,10 @@ namespace Corrade {
 -   @ref Containers::LinkedList destruction was changed in a way that makes
     @ref Containers::LinkedListItem::list() still accessible in a destructor
     of @ref Containers::LinkedListItem subclasses
+-   @ref Containers::Pointer, @ref Containers::Optional,
+    @ref Containers::Reference, @ref Containers::MoveReference and
+    @ref Containers::AnyReference gained a @relativeref{Containers::Pointer,Type}
+    member typedef for consistency with other containers
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 

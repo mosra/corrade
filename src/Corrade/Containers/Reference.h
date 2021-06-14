@@ -88,6 +88,12 @@ Example:
 */
 template<class T> class Reference {
     public:
+        /**
+         * @brief Value type
+         * @m_since_latest
+         */
+        typedef T Type;
+
         /** @brief Constructor */
         constexpr /*implicit*/ Reference(T& reference) noexcept: _reference{&reference} {}
 

@@ -118,6 +118,12 @@ overload also allows for such a conversion. Example:
 template<class T> class Optional {
     public:
         /**
+         * @brief Value type
+         * @m_since_latest
+         */
+        typedef T Type;
+
+        /**
          * @brief Default constructor
          *
          * Creates an optional object in empty state.

@@ -112,6 +112,12 @@ template<class T> class Pointer {
 
     public:
         /**
+         * @brief Value type
+         * @m_since_latest
+         */
+        typedef T Type;
+
+        /**
          * @brief Default constructor
          *
          * Creates a @cpp nullptr @ce unique pointer.

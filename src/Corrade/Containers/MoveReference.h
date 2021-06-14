@@ -59,6 +59,12 @@ interface to do a conversion from/to an external representation.
 */
 template<class T> class MoveReference {
     public:
+        /**
+         * @brief Value type
+         * @m_since_latest
+         */
+        typedef T Type;
+
         /** @brief Constructor */
         /*implicit*/ MoveReference(T&& reference) noexcept: _reference{&reference} {}
 
