@@ -81,12 +81,12 @@ void OptionalStlTest::convertMove() {
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(**a, 15);
 
-    Optional<Pointer<int>> b(std::move(a));
+    Optional<Pointer<int>> b(Utility::move(a));
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!*a);
     CORRADE_COMPARE(**b, 15);
 
-    std::optional<Pointer<int>> c(std::move(b));
+    std::optional<Pointer<int>> c(Utility::move(b));
     CORRADE_VERIFY(c);
     CORRADE_VERIFY(!*b);
     CORRADE_COMPARE(**c, 15);
@@ -101,10 +101,10 @@ void OptionalStlTest::convertMoveNull() {
     std::optional<Pointer<int>> a;
     CORRADE_VERIFY(!a);
 
-    Optional<Pointer<int>> b(std::move(a));
+    Optional<Pointer<int>> b(Utility::move(a));
     CORRADE_VERIFY(!b);
 
-    std::optional<Pointer<int>> c(std::move(b));
+    std::optional<Pointer<int>> c(Utility::move(b));
     CORRADE_VERIFY(!c);
 }
 

@@ -33,7 +33,7 @@
 #include <initializer_list>
 #include <new>
 #include <type_traits>
-#include <utility>
+#include <utility> /* std::swap() */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
@@ -764,7 +764,7 @@ template<class T, class D> template<class ...Args> Array<T, D>::Array(Corrade::D
            an explicit defaulted constructor. Additionally it works around GCC
            4.8 bugs where copy/move construction can't be done with {} for
            plain structs. */
-        Implementation::construct(_data[i], std::forward<Args>(args)...);
+        Implementation::construct(_data[i], Utility::forward<Args>(args)...);
 }
 
 template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initializer_list<T> list): Array{Corrade::NoInit, list.size()} {

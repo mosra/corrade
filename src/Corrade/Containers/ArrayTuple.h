@@ -32,7 +32,7 @@
  */
 
 #include <initializer_list>
-#include <utility>
+#include <utility> /* std::pair() */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h"

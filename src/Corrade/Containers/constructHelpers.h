@@ -27,9 +27,8 @@
 */
 
 #include <new>
-#include <utility>
 
-#include "Corrade/configure.h"
+#include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers { namespace Implementation {
 
@@ -64,7 +63,7 @@ namespace Corrade { namespace Containers { namespace Implementation {
 
    This might be fixed in more recent versions of the C++ standard. */
 template<class T, class First, class ...Next> inline void construct(T& value, First&& first, Next&& ...next) {
-    new(&value) T{std::forward<First>(first), std::forward<Next>(next)...};
+    new(&value) T{Utility::forward<First>(first), Utility::forward<Next>(next)...};
 }
 template<class T> inline void construct(T& value) {
     new(&value) T();
@@ -79,7 +78,7 @@ template<class T> inline void construct(T& value, const T& b) {
     new(&value) T(b);
 }
 template<class T> inline void construct(T& value, T&& b) {
-    new(&value) T(std::move(b));
+    new(&value) T(Utility::move(b));
 }
 #endif
 

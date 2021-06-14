@@ -34,7 +34,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-#include <utility>
+#include <utility> /* std::pair */
 
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/StringView.h" /* needs to be included for
@@ -369,7 +369,7 @@ class CORRADE_UTILITY_EXPORT String {
            returns a std::vector. Besides that, to simplify the implementation,
            there's no const-adding conversion. Instead, the implementer is
            supposed to add an ArrayViewConverter variant for that. */
-        template<class T, class = decltype(Implementation::StringConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> /*implicit*/ String(T&& other) noexcept: String{Implementation::StringConverter<typename std::decay<T&&>::type>::from(std::forward<T>(other))} {}
+        template<class T, class = decltype(Implementation::StringConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> /*implicit*/ String(T&& other) noexcept: String{Implementation::StringConverter<typename std::decay<T&&>::type>::from(Utility::forward<T>(other))} {}
 
         /**
          * @brief Destructor

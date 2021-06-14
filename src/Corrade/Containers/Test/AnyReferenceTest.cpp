@@ -84,7 +84,7 @@ void AnyReferenceTest::constructLvalue() {
 void AnyReferenceTest::constructRvalue() {
     int a = 3;
 
-    AnyReference<int> b = std::move(a);
+    AnyReference<int> b = Utility::move(a);
     CORRADE_COMPARE(&b.get(), &a);
     CORRADE_VERIFY(b.isRvalue());
     CORRADE_COMPARE(b, 3);
@@ -97,7 +97,7 @@ void AnyReferenceTest::constructConst() {
     int a = 3;
 
     AnyReference<const int> cbl = a;
-    AnyReference<const int> cbr = std::move(a);
+    AnyReference<const int> cbr = Utility::move(a);
     CORRADE_COMPARE(&cbl.get(), &a);
     CORRADE_COMPARE(&cbr.get(), &a);
     CORRADE_COMPARE(cbl, 3);
@@ -114,7 +114,7 @@ void AnyReferenceTest::constructDefault() {
 void AnyReferenceTest::constructCopy() {
     int a = 3;
     AnyReference<int> bl = a;
-    AnyReference<int> br = std::move(a);
+    AnyReference<int> br = Utility::move(a);
     CORRADE_COMPARE(bl, 3);
     CORRADE_VERIFY(!bl.isRvalue());
     CORRADE_COMPARE(br, 3);
@@ -159,7 +159,7 @@ void AnyReferenceTest::constructIncomplete() {
     Foo& refFoo = reinterpret_cast<Foo&>(refA);
 
     AnyReference<Foo> bl{refFoo};
-    AnyReference<Foo> br{std::move(refFoo)};
+    AnyReference<Foo> br{Utility::move(refFoo)};
     AnyReference<Foo> cl = bl;
     AnyReference<Foo> cr = br;
     CORRADE_COMPARE(&bl.get(), static_cast<void*>(&a));
@@ -183,7 +183,7 @@ void AnyReferenceTest::constructDerived() {
 
     Derived a{42};
     AnyReference<Derived> bl = a;
-    AnyReference<Derived> br = std::move(a);
+    AnyReference<Derived> br = Utility::move(a);
     AnyReference<Base> cl = bl;
     AnyReference<Base> cr = br;
     CORRADE_COMPARE(cl->a, 42);
@@ -204,7 +204,7 @@ void AnyReferenceTest::constructDerived() {
 void AnyReferenceTest::convertToReference() {
     int a = 32;
     AnyReference<int> bl = a;
-    AnyReference<int> br = std::move(a);
+    AnyReference<int> br = Utility::move(a);
     CORRADE_VERIFY(!bl.isRvalue());
     CORRADE_VERIFY(br.isRvalue());
 
@@ -226,7 +226,7 @@ void AnyReferenceTest::convertToReference() {
 void AnyReferenceTest::convertToConst() {
     int a = 18;
     AnyReference<int> bl = a;
-    AnyReference<int> br = std::move(a);
+    AnyReference<int> br = Utility::move(a);
 
     AnyReference<const int> cl = bl;
     AnyReference<const int> cr = br;

@@ -395,7 +395,7 @@ template<class U, template<class> class Allocator, class T> Array<U> arrayAlloca
 }
 
 template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
-    return arrayAllocatorCast<U, ArrayAllocator, T>(std::move(array));
+    return arrayAllocatorCast<U, ArrayAllocator, T>(Utility::move(array));
 }
 
 /**
@@ -633,7 +633,7 @@ Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
 template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args) {
-    arrayResize<T, Allocator<T>>(array, Corrade::DirectInit, size, std::forward<Args>(args)...);
+    arrayResize<T, Allocator<T>>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
 }
 #endif
 
@@ -695,7 +695,7 @@ Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
 template<template<class> class Allocator, class T, class... Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
-    return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, std::forward<Args>(args)...);
+    return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, Utility::forward<Args>(args)...);
 }
 #endif
 
@@ -707,7 +707,7 @@ template<template<class> class Allocator, class T, class... Args> inline T& arra
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, T&& value) {
-    return arrayAppend<T, Allocator>(array, Corrade::InPlaceInit, std::move(value));
+    return arrayAppend<T, Allocator>(array, Corrade::InPlaceInit, Utility::move(value));
 }
 
 /* This crap tool can't distinguish between this and above overload, showing
@@ -722,7 +722,7 @@ Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
 template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, T&& value) {
-    return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, std::move(value));
+    return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, Utility::move(value));
 }
 #endif
 
@@ -918,9 +918,9 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
     for(T* end = src + count; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        Implementation::construct(*dst, std::move(*src));
+        Implementation::construct(*dst, Utility::move(*src));
         #else
-        new(dst) T{std::move(*src)};
+        new(dst) T{Utility::move(*src)};
         #endif
 }
 
@@ -946,7 +946,7 @@ template<class T> inline void arrayMoveAssign(T* src, T* dst, const std::size_t 
     static_assert(std::is_nothrow_move_assignable<T>::value,
         "noexcept move-assignable type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
-        *dst = std::move(*src);
+        *dst = Utility::move(*src);
 }
 
 template<class T> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count, typename std::enable_if<
@@ -1017,9 +1017,9 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
     for(T *src = array, *end = src + prevSize, *dst = newArray; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
-        Implementation::construct(*dst, std::move(*src));
+        Implementation::construct(*dst, Utility::move(*src));
         #else
-        new(dst) T{std::move(*src)};
+        new(dst) T{Utility::move(*src)};
         #endif
     for(T *it = array, *end = array + prevSize; it < end; ++it) it->~T();
     deallocate(array);
@@ -1169,11 +1169,11 @@ template<class T, class Allocator, class... Args> void arrayResize(Array<T>& arr
     /* In-place construct the new elements. No helper function for this as
        there's no way we could memcpy such a thing. */
     for(T* it = array + prevSize; it < array.end(); ++it)
-        Implementation::construct(*it, std::forward<Args>(args)...);
+        Implementation::construct(*it, Utility::forward<Args>(args)...);
 }
 
 template<class T, class... Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
-    arrayResize<T, ArrayAllocator<T>, Args...>(array, Corrade::DirectInit, size, std::forward<Args>(args)...);
+    arrayResize<T, ArrayAllocator<T>, Args...>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
 }
 
 namespace Implementation {
@@ -1259,7 +1259,7 @@ template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& arr
 }
 
 template<class T, class... Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
-    return arrayAppend<T, ArrayAllocator<T>>(array, Corrade::InPlaceInit, std::forward<Args>(args)...);
+    return arrayAppend<T, ArrayAllocator<T>>(array, Corrade::InPlaceInit, Utility::forward<Args>(args)...);
 }
 
 /* This crap tool can't distinguish between this and above overload, showing
@@ -1271,7 +1271,7 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
     /* No helper function as there's no way we could memcpy such a thing. */
     /* On GCC 4.8 this includes another workaround, see the 4.8-specific
        overload docs for details */
-    Implementation::construct(*it, std::forward<Args>(args)...);
+    Implementation::construct(*it, Utility::forward<Args>(args)...);
     return *it;
 }
 #endif
@@ -1336,7 +1336,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::No
        common deleters to avoid surprises */
     Array<T> newArray{Corrade::NoInit, arrayGuts.size};
     Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
-    array = std::move(newArray);
+    array = Utility::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
     /* Nothing to do (not annotating the arrays with default deleter) */
@@ -1356,7 +1356,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::De
        common deleters to avoid surprises */
     Array<T> newArray{Corrade::DefaultInit, arrayGuts.size};
     Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
-    array = std::move(newArray);
+    array = Utility::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
     /* Nothing to do (not annotating the arrays with default deleter) */

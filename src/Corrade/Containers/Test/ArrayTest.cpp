@@ -313,7 +313,7 @@ void ArrayTest::constructMove() {
     CORRADE_VERIFY(a);
     const int* const ptr = a;
 
-    Array b(std::move(a));
+    Array b(Utility::move(a));
     CORRADE_VERIFY(a == nullptr);
     CORRADE_VERIFY(b == ptr);
     CORRADE_COMPARE(a.size(), 0);
@@ -323,7 +323,7 @@ void ArrayTest::constructMove() {
 
     auto noDeleter = [](int*, std::size_t) {};
     Array c{reinterpret_cast<int*>(0x3), 3, noDeleter};
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_VERIFY(b == reinterpret_cast<int*>(0x3));
     CORRADE_VERIFY(c == ptr);
     CORRADE_COMPARE(b.size(), 3);

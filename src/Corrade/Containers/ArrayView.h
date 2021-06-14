@@ -32,9 +32,9 @@
 
 #include <initializer_list>
 #include <type_traits>
-#include <utility>
 
 #include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/Move.h"
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
@@ -325,7 +325,7 @@ template<class T> class ArrayView {
            returns a std::vector. Besides that, to simplify the implementation,
            there's no const-adding conversion. Instead, the implementer is
            supposed to add an ArrayViewConverter variant for that. */
-        template<class U, class = decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ ArrayView(U&& other) noexcept: ArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+        template<class U, class = decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ ArrayView(U&& other) noexcept: ArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
 
         /**
          * @brief Convert the view to external representation
@@ -797,7 +797,7 @@ template<class T> constexpr ArrayView<T> arrayView(ArrayView<T> view) {
    e.g. std::vector<T>&& because that would break uses like `consume(foo());`,
    where `consume()` expects a view but `foo()` returns a std::vector. */
 template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> constexpr U arrayView(T&& other) {
-    return Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::forward<T>(other));
+    return Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(Utility::forward<T>(other));
 }
 
 /** @relatesalso ArrayView
@@ -982,7 +982,7 @@ template<std::size_t size_, class T> class StaticArrayView {
            returns a std::vector. Besides that, to simplify the implementation,
            there's no const-adding conversion. Instead, the implementer is
            supposed to add a StaticArrayViewConverter variant for that. */
-        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StaticArrayView(U&& other) noexcept: StaticArrayView{Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StaticArrayView(U&& other) noexcept: StaticArrayView{Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
 
         /**
          * @brief Convert the view to external representation
@@ -1211,7 +1211,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
    e.g. std::array<T>&& because that would break uses like `consume(foo());`,
    where `consume()` expects a view but `foo()` returns a std::array. */
 template<class T, class U = decltype(Implementation::ErasedStaticArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> constexpr U staticArrayView(T&& other) {
-    return Implementation::ErasedStaticArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::forward<T>(other));
+    return Implementation::ErasedStaticArrayViewConverter<typename std::remove_reference<T&&>::type>::from(Utility::forward<T>(other));
 }
 
 /** @relatesalso StaticArrayView

@@ -236,7 +236,7 @@ void PointerTest::constructMove() {
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 32);
 
-        Pointer<Immovable> b = std::move(a);
+        Pointer<Immovable> b = Utility::move(a);
         CORRADE_VERIFY(!a);
         CORRADE_VERIFY(b);
         CORRADE_COMPARE(b->a, 32);
@@ -245,7 +245,7 @@ void PointerTest::constructMove() {
         CORRADE_VERIFY(c);
         CORRADE_COMPARE(c->a, 56);
 
-        c = std::move(b);
+        c = Utility::move(b);
         CORRADE_VERIFY(c);
         CORRADE_COMPARE(c->a, 32);
     }
@@ -337,7 +337,7 @@ void PointerTest::constructDerived() {
     };
 
     Pointer<Derived> a{Corrade::InPlaceInit, 42};
-    Pointer<Base> b = std::move(a);
+    Pointer<Base> b = Utility::move(a);
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);
@@ -361,12 +361,12 @@ void PointerTest::convert() {
     CORRADE_VERIFY(ptr);
     CORRADE_COMPARE(*ptr, 5);
 
-    Pointer<int> b = std::move(a); /* implicit conversion *is* allowed */
+    Pointer<int> b = Utility::move(a); /* implicit conversion *is* allowed */
     CORRADE_COMPARE(b.get(), ptr);
     CORRADE_COMPARE(*b, 5);
     CORRADE_VERIFY(!a.a);
 
-    IntPtr c = std::move(b); /* implicit conversion *is* allowed */
+    IntPtr c = Utility::move(b); /* implicit conversion *is* allowed */
     CORRADE_COMPARE(c.a, ptr);
     CORRADE_COMPARE(*c.a, 5);
     CORRADE_VERIFY(!b);
@@ -513,7 +513,7 @@ void PointerTest::cast() {
     };
 
     Pointer<Base> a{new Derived{42}};
-    Pointer<Derived> b = pointerCast<Derived>(std::move(a));
+    Pointer<Derived> b = pointerCast<Derived>(Utility::move(a));
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);

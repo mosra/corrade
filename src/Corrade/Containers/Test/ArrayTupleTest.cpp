@@ -634,7 +634,7 @@ void ArrayTupleTest::constructMove() {
         }
     };
 
-    ArrayTuple b{std::move(a)};
+    ArrayTuple b{Utility::move(a)};
     CORRADE_VERIFY(!a.data());
     CORRADE_VERIFY(!a.size());
     CORRADE_VERIFY(!a.deleter());
@@ -643,7 +643,7 @@ void ArrayTupleTest::constructMove() {
     CORRADE_VERIFY(b.deleter() == deleter);
 
     ArrayTuple c;
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_VERIFY(!b.data());
     CORRADE_VERIFY(!b.size());
     CORRADE_VERIFY(!b.deleter());
@@ -853,8 +853,8 @@ void ArrayTupleTest::convertArrayInvalid() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    Array<char> a = std::move(nonTrivialData);
-    Array<char> b = std::move(nonTrivialDeleter);
+    Array<char> a = Utility::move(nonTrivialData);
+    Array<char> b = Utility::move(nonTrivialDeleter);
     CORRADE_COMPARE(out.str(),
         "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n"
         "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n");

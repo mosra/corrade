@@ -76,13 +76,13 @@ void ScopeGuardTest::constructMove() {
         ScopeGuard a{&v, increment};
         CORRADE_COMPARE(v, 0);
 
-        ScopeGuard b = std::move(a);
+        ScopeGuard b = Utility::move(a);
         CORRADE_COMPARE(v, 0);
 
         ScopeGuard c{Corrade::NoCreate};
         CORRADE_COMPARE(v, 0);
 
-        c = std::move(a);
+        c = Utility::move(a);
         CORRADE_COMPARE(v, 0);
     }
 

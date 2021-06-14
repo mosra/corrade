@@ -30,7 +30,7 @@
  * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
-#include "Corrade/configure.h"
+#include "Corrade/Utility/Move.h"
 #if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT_UNREACHABLE) || !defined(CORRADE_ASSUME))
 #ifndef CORRADE_STANDARD_ASSERT
 #include <cstdlib>
@@ -478,7 +478,7 @@ namespace Implementation {
     #ifdef CORRADE_STANDARD_ASSERT
     template<class T> T assertExpression(T&& value) {
         assert(value);
-        return std::forward<T>(value);
+        return Corrade::Utility::forward<T>(value);
     }
     #else
     template<class T> T assertExpression(T&& value, const char* message) {
@@ -487,7 +487,7 @@ namespace Implementation {
             std::abort();
         }
 
-        return std::forward<T>(value);
+        return Corrade::Utility::forward<T>(value);
     }
     #endif
 }

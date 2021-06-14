@@ -434,13 +434,13 @@ void StaticArrayTest::move() {
     {
         Containers::StaticArray<3, Movable> a{Corrade::InPlaceInit, 1, 2, 3};
 
-        Containers::StaticArray<3, Movable> b{std::move(a)};
+        Containers::StaticArray<3, Movable> b{Utility::move(a)};
         CORRADE_COMPARE(b[0].a, 1);
         CORRADE_COMPARE(b[1].a, 2);
         CORRADE_COMPARE(b[2].a, 3);
 
         Containers::StaticArray<3, Movable> c;
-        c = std::move(b); /* this uses the swap() specialization -> no move */
+        c = Utility::move(b); /* this uses the swap() specialization -> no move */
         CORRADE_COMPARE(c[0].a, 1);
         CORRADE_COMPARE(c[1].a, 2);
         CORRADE_COMPARE(c[2].a, 3);
@@ -1021,7 +1021,7 @@ void StaticArrayTest::moveConstructPlainStruct() {
     CORRADE_COMPARE(a.front().a, 3);
 
     /* This move-constructs new values */
-    Containers::StaticArray<3, MoveOnlyStruct> b{std::move(a)};
+    Containers::StaticArray<3, MoveOnlyStruct> b{Utility::move(a)};
     CORRADE_COMPARE(b.front().a, 3);
 }
 

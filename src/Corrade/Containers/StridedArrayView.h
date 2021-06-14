@@ -30,6 +30,8 @@
  * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator, alias @ref Corrade::Containers::StridedArrayView1D, @ref Corrade::Containers::StridedArrayView2D, @ref Corrade::Containers::StridedArrayView3D, @ref Corrade::Containers::StridedArrayView4D
  */
 
+#include <utility> /* std::swap() */
+
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/sequenceHelpers.h"
@@ -493,7 +495,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
            StaticArrayViewConverter overload as we wouldn't be able to infer
            the size parameter. Since ArrayViewConverter is supposed to handle
            conversion from statically sized arrays as well, this is okay. */
-        template<class U, unsigned d = dimensions, class = typename std::enable_if<d == 1, decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))>::type> constexpr /*implicit*/ StridedArrayView(U&& other) noexcept: StridedArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+        template<class U, unsigned d = dimensions, class = typename std::enable_if<d == 1, decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))>::type> constexpr /*implicit*/ StridedArrayView(U&& other) noexcept: StridedArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
 
         /** @brief Whether the array is non-empty */
         constexpr explicit operator bool() const { return _data; }
@@ -1364,7 +1366,7 @@ template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>
    e.g. std::vector<T>&& because that would break uses like `consume(foo());`,
    where `consume()` expects a view but `foo()` returns a std::vector. */
 template<class T, class U = decltype(stridedArrayView(Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>())))> constexpr U stridedArrayView(T&& other) {
-    return Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::forward<T>(other));
+    return Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(Utility::forward<T>(other));
 }
 
 /** @relatesalso StridedArrayView

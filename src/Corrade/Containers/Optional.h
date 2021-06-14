@@ -33,7 +33,6 @@
 
 #include <new>
 #include <type_traits>
-#include <utility>
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
@@ -150,9 +149,9 @@ template<class T> class Optional {
         /*implicit*/ Optional(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value): _set{true} {
             /* Can't use {}, see the GCC 4.8-specific overload for details */
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-            Implementation::construct(_value, std::move(value));
+            Implementation::construct(_value, Utility::move(value));
             #else
-            new(&_value) T{std::move(value)};
+            new(&_value) T{Utility::move(value)};
             #endif
         }
 
@@ -164,7 +163,7 @@ template<class T> class Optional {
          *      @ref emplace()
          */
         template<class ...Args> /*implicit*/ Optional(Corrade::InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
-            Implementation::construct(_value, std::forward<Args>(args)...);
+            Implementation::construct(_value, Utility::forward<Args>(args)...);
         }
 
         /**
@@ -179,7 +178,7 @@ template<class T> class Optional {
          *
          * @see @ref Containers-Optional-stl, @ref optional(T&&)
          */
-        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(std::move(other))} {}
+        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(Utility::move(other))} {}
 
         /** @brief Copy constructor */
         Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
@@ -220,7 +219,7 @@ template<class T> class Optional {
          * @see @ref Containers-Optional-stl
          */
         template<class U, class = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<Optional<T>&&>()))> explicit operator U() && {
-            return Implementation::OptionalConverter<T, U>::to(std::move(*this));
+            return Implementation::OptionalConverter<T, U>::to(Utility::move(*this));
         }
 
         /**
@@ -331,8 +330,8 @@ template<class T> class Optional {
 
         /** @overload */
         T&& operator*() && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value));
-            return std::move(_value);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
+            return Utility::move(_value);
         }
 
         /** @overload */
@@ -346,8 +345,8 @@ template<class T> class Optional {
         /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
            well), so disabling it there. See also the corresponding test. */
         const T&& operator*() const && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value));
-            return std::move(_value);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
+            return Utility::move(_value);
         }
         #endif
 
@@ -425,7 +424,7 @@ Optional<typename std::decay<T>::type>
 Optional<typename Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::Type>
 #endif
 optional(T&& value) {
-    return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
+    return Optional<typename std::decay<T>::type>{Utility::forward<T>(value)};
 }
 
 /** @relatesalso Optional
@@ -445,7 +444,7 @@ The following two lines are equivalent:
 @see @ref optional(T&&), @ref pointer(Args&&... args)
 */
 template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
-    return Optional<T>{Corrade::InPlaceInit, std::forward<Args>(args)...};
+    return Optional<T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...};
 }
 
 /** @relatesalso Optional
@@ -453,8 +452,8 @@ template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
 
 @see @ref Containers-Optional-stl
 */
-template<class T> inline auto optional(T&& other) -> decltype(Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(std::forward<T>(other))) {
-    return Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(std::forward<T>(other));
+template<class T> inline auto optional(T&& other) -> decltype(Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(Utility::forward<T>(other))) {
+    return Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(Utility::forward<T>(other));
 }
 
 #ifndef CORRADE_NO_DEBUG
@@ -484,9 +483,9 @@ template<class T> Optional<T>::Optional(Optional<T>&& other) noexcept(std::is_no
     if(_set)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        Implementation::construct(_value, std::move(other._value));
+        Implementation::construct(_value, Utility::move(other._value));
         #else
-        new(&_value) T{std::move(other._value)};
+        new(&_value) T{Utility::move(other._value)};
         #endif
 }
 
@@ -511,9 +510,9 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
         if((_set = other._set))
             /* Can't use {}, see the GCC 4.8-specific overload for details */
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-            Implementation::construct(_value, std::move(other._value));
+            Implementation::construct(_value, Utility::move(other._value));
             #else
-            new(&_value) T{std::move(other._value)};
+            new(&_value) T{Utility::move(other._value)};
             #endif
     }
     return *this;
@@ -530,7 +529,7 @@ template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args
        non-copyable types as well. */
     if(_set) _value.~T();
     _set = true;
-    Implementation::construct<T>(_value, std::forward<Args>(args)...);
+    Implementation::construct<T>(_value, Utility::forward<Args>(args)...);
     return _value;
 }
 

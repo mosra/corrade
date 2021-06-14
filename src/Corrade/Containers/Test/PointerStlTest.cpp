@@ -45,12 +45,12 @@ void PointerStlTest::convert() {
     CORRADE_VERIFY(ptr);
     CORRADE_COMPARE(*ptr, 5);
 
-    Pointer<int> b = std::move(a); /* implicit conversion *is* allowed */
+    Pointer<int> b = Utility::move(a); /* implicit conversion *is* allowed */
     CORRADE_COMPARE(b.get(), ptr);
     CORRADE_COMPARE(*b, 5);
     CORRADE_VERIFY(!a);
 
-    std::unique_ptr<int> c = std::move(b); /* implicit conversion *is* allowed */
+    std::unique_ptr<int> c = Utility::move(b); /* implicit conversion *is* allowed */
     CORRADE_COMPARE(c.get(), ptr);
     CORRADE_COMPARE(*c, 5);
     CORRADE_VERIFY(!b);

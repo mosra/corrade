@@ -1650,7 +1650,7 @@ template<class T> void GrowableArrayTest::move() {
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 
-    Array<T> b = std::move(a);
+    Array<T> b = Utility::move(a);
     CORRADE_VERIFY(arrayIsGrowable(b));
     CORRADE_VERIFY(!arrayIsGrowable(a));
     if(std::is_same<T, Movable>::value) {
@@ -1661,7 +1661,7 @@ template<class T> void GrowableArrayTest::move() {
     }
 
     Array<T> c{10};
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_VERIFY(arrayIsGrowable(c));
     CORRADE_VERIFY(!arrayIsGrowable(b));
     if(std::is_same<T, Movable>::value) {
@@ -1676,7 +1676,7 @@ void GrowableArrayTest::cast() {
     Array<char> a;
     arrayResize(a, 10);
 
-    auto b = arrayAllocatorCast<std::uint16_t>(std::move(a));
+    auto b = arrayAllocatorCast<std::uint16_t>(Utility::move(a));
     CORRADE_COMPARE(b.size(), 5);
     CORRADE_COMPARE(a.data(), nullptr);
 }
@@ -1685,7 +1685,7 @@ void GrowableArrayTest::castEmpty() {
     Array<char> a;
 
     /* Shouldn't complain about any allocator, we're empty anyway */
-    auto b = arrayAllocatorCast<std::uint16_t>(std::move(a));
+    auto b = arrayAllocatorCast<std::uint16_t>(Utility::move(a));
     CORRADE_COMPARE(b.size(), 0);
 }
 
@@ -1699,7 +1699,7 @@ void GrowableArrayTest::castNonTrivial() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    arrayAllocatorCast<std::uint16_t>(std::move(a));
+    arrayAllocatorCast<std::uint16_t>(Utility::move(a));
     CORRADE_COMPARE(out.str(),
         "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
 }
@@ -1713,7 +1713,7 @@ void GrowableArrayTest::castNonGrowable() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    arrayAllocatorCast<std::uint16_t>(std::move(a));
+    arrayAllocatorCast<std::uint16_t>(Utility::move(a));
     CORRADE_COMPARE(out.str(),
         "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
 }
@@ -1728,7 +1728,7 @@ void GrowableArrayTest::castInvalid() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    arrayAllocatorCast<std::uint32_t>(std::move(a));
+    arrayAllocatorCast<std::uint32_t>(Utility::move(a));
     CORRADE_COMPARE(out.str(),
         "Containers::arrayAllocatorCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
 }

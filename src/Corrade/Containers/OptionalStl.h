@@ -49,7 +49,7 @@ template<class T> struct OptionalConverter<T, std::optional<T>> {
     }
 
     static Optional<T> from(std::optional<T>&& other) {
-        return other ? Optional<T>{*std::move(other)} : Containers::NullOpt;
+        return other ? Optional<T>{*Utility::move(other)} : Containers::NullOpt;
     }
 
     static std::optional<T> to(const Optional<T>& other) {
@@ -57,7 +57,7 @@ template<class T> struct OptionalConverter<T, std::optional<T>> {
     }
 
     static std::optional<T> to(Optional<T>&& other) {
-        return other ? std::optional<T>{*std::move(other)} : std::nullopt;
+        return other ? std::optional<T>{*Utility::move(other)} : std::nullopt;
     }
 };
 

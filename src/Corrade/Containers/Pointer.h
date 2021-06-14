@@ -32,10 +32,10 @@
  */
 
 #include <type_traits>
-#include <utility> /* std::forward() */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Move.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
@@ -48,7 +48,7 @@ namespace Implementation {
     /* Same as construct() utils in constructHelpers.h but not in-place. See
        their docs for more information. */
     template<class T, class First, class ...Next> T* allocate(First&& first, Next&& ...next) {
-        return new T{std::forward<First>(first), std::forward<Next>(next)...};
+        return new T{Utility::forward<First>(first), Utility::forward<Next>(next)...};
     }
     template<class T> T* allocate() {
         return new T();
@@ -58,7 +58,7 @@ namespace Implementation {
         return new T(b);
     }
     template<class T> inline T* allocate(T&& b) {
-        return new T(std::move(b));
+        return new T(Utility::move(b));
     }
     #endif
 }
@@ -138,7 +138,7 @@ template<class T> class Pointer {
                for an explicit defaulted constructor. Additionally it works
                around GCC 4.8 bugs where copy/move construction can't be done
                with {} for plain structs. */
-            Implementation::allocate<T>(std::forward<Args>(args)...)
+            Implementation::allocate<T>(Utility::forward<Args>(args)...)
         } {}
 
         /**
@@ -154,7 +154,7 @@ template<class T> class Pointer {
          *
          * @see @ref Containers-Pointer-stl, @ref pointer(T&&)
          */
-        template<class U, class = decltype(Implementation::PointerConverter<T, U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<T, U>::from(std::move(other))} {}
+        template<class U, class = decltype(Implementation::PointerConverter<T, U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<T, U>::from(Utility::move(other))} {}
 
         /** @brief Copying is not allowed */
         Pointer(const Pointer<T>&) = delete;
@@ -179,7 +179,7 @@ template<class T> class Pointer {
          * @see @ref Containers-Pointer-stl
          */
         template<class U, class = decltype(Implementation::PointerConverter<T, U>::to(std::declval<Pointer<T>&&>()))> /*implicit*/ operator U() && {
-            return Implementation::PointerConverter<T, U>::to(std::move(*this));
+            return Implementation::PointerConverter<T, U>::to(Utility::move(*this));
         }
 
         /**
@@ -283,7 +283,7 @@ template<class T> class Pointer {
                for an explicit defaulted constructor. Additionally it works
                around GCC 4.8 bugs where copy/move construction can't be done
                with {} for plain structs. */
-            _pointer = Implementation::allocate<T>(std::forward<Args>(args)...);
+            _pointer = Implementation::allocate<T>(Utility::forward<Args>(args)...);
             return *_pointer;
         }
 
@@ -348,8 +348,8 @@ namespace Implementation {
 
 @see @ref Containers-Pointer-stl
 */
-template<class T> inline auto pointer(T&& other) -> decltype(Implementation::DeducedPointerConverter<T>::from(std::move(other))) {
-    return Implementation::DeducedPointerConverter<T>::from(std::move(other));
+template<class T> inline auto pointer(T&& other) -> decltype(Implementation::DeducedPointerConverter<T>::from(Utility::move(other))) {
+    return Implementation::DeducedPointerConverter<T>::from(Utility::move(other));
 }
 
 /** @relatesalso Pointer
@@ -394,7 +394,7 @@ equivalent:
 */
 template<class T, class ...Args> inline Pointer<T> pointer(Args&&... args) {
     static_assert(!Implementation::IsFirstAPointer<T, Args...>::value || !std::is_constructible<T, T*>::value, "attempt to construct a type from its own pointer, which is ambiguous --  explicitly use the constructor instead");
-    return Pointer<T>{Corrade::InPlaceInit, std::forward<Args>(args)...};
+    return Pointer<T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...};
 }
 
 #ifndef CORRADE_NO_DEBUG

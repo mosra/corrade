@@ -70,7 +70,7 @@ MoveReferenceTest::MoveReferenceTest() {
 void MoveReferenceTest::construct() {
     int a = 3;
 
-    MoveReference<int> b = std::move(a);
+    MoveReference<int> b = Utility::move(a);
     CORRADE_COMPARE(&b.get(), &a);
     CORRADE_COMPARE(b, 3);
 
@@ -81,7 +81,7 @@ void MoveReferenceTest::construct() {
 void MoveReferenceTest::constructConst() {
     int a = 3;
 
-    MoveReference<const int> cb = std::move(a);
+    MoveReference<const int> cb = Utility::move(a);
     CORRADE_COMPARE(&cb.get(), &a);
     CORRADE_COMPARE(cb, 3);
 }
@@ -93,14 +93,14 @@ void MoveReferenceTest::constructDefault() {
 
 void MoveReferenceTest::constructCopy() {
     int a = 3;
-    MoveReference<int> b = std::move(a);
+    MoveReference<int> b = Utility::move(a);
     CORRADE_COMPARE(b, 3);
 
-    MoveReference<int> c = std::move(b);
+    MoveReference<int> c = Utility::move(b);
     CORRADE_COMPARE(c, 3);
 
     int aa = 33;
-    MoveReference<int> d = std::move(aa);
+    MoveReference<int> d = Utility::move(aa);
     CORRADE_COMPARE(d, 33);
 
     d = c;
@@ -146,7 +146,7 @@ void MoveReferenceTest::constructDerived() {
     };
 
     Derived a{42};
-    MoveReference<Derived> b = std::move(a);
+    MoveReference<Derived> b = Utility::move(a);
     MoveReference<Base> c = b;
     CORRADE_COMPARE(c->a, 42);
 
@@ -160,7 +160,7 @@ void MoveReferenceTest::constructDerived() {
 
 void MoveReferenceTest::convertToReference() {
     int a = 32;
-    MoveReference<int> b = std::move(a);
+    MoveReference<int> b = Utility::move(a);
 
     int& c = b;
     const int& cc = b;
@@ -174,7 +174,7 @@ void MoveReferenceTest::access() {
     };
 
     Foo a{15};
-    MoveReference<Foo> b = std::move(a);
+    MoveReference<Foo> b = Utility::move(a);
     CORRADE_COMPARE(b->a, 15);
     CORRADE_COMPARE((*b).a, 15);
     CORRADE_COMPARE(b.get().a, 15);
@@ -182,7 +182,7 @@ void MoveReferenceTest::access() {
 
 void MoveReferenceTest::debug() {
     int a = 18;
-    MoveReference<int> b = std::move(a);
+    MoveReference<int> b = Utility::move(a);
 
     std::ostringstream out;
     Debug{&out} << b;

@@ -1062,7 +1062,7 @@ void StringTest::moveConstructLarge() {
         CORRADE_VERIFY(a.deleter());
 
         /* Everything including the deleter is moved */
-        String b = std::move(a);
+        String b = Utility::move(a);
         CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
         CORRADE_VERIFY(b.data() == aData);
         CORRADE_VERIFY(!b.isSmall());
@@ -1093,7 +1093,7 @@ void StringTest::moveLargeToLarge() {
         CORRADE_VERIFY(b.deleter());
 
         /* The two are simply swapped */
-        b = std::move(a);
+        b = Utility::move(a);
         CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
         CORRADE_VERIFY(b.data() == aData);
         CORRADE_VERIFY(!b.isSmall());
@@ -1125,7 +1125,7 @@ void StringTest::moveLargeToSmall() {
         CORRADE_VERIFY(b.isSmall());
 
         /* The two are simply swapped */
-        b = std::move(a);
+        b = Utility::move(a);
         CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
         CORRADE_VERIFY(b.data() == aData);
         CORRADE_VERIFY(!b.isSmall());
@@ -1144,7 +1144,7 @@ void StringTest::moveConstructSmall() {
     CORRADE_VERIFY(a.isSmall());
 
     /* The two are simply swapped */
-    String b = std::move(a);
+    String b = Utility::move(a);
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
     CORRADE_VERIFY(b.isSmall());
@@ -1164,7 +1164,7 @@ void StringTest::moveSmallToLarge() {
         CORRADE_VERIFY(b.deleter());
 
         /* The two are simply swapped */
-        b = std::move(a);
+        b = Utility::move(a);
         CORRADE_COMPARE(b, "hello"_s);
         CORRADE_VERIFY(b.data() != a.data());
         CORRADE_VERIFY(b.isSmall());
