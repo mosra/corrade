@@ -64,6 +64,7 @@ if(WITH_UTILITY)
         FormatStl.h
         Macros.h
         Memory.h
+        Move.h
         MurmurHash2.h
         Resource.h
         Sha1.h

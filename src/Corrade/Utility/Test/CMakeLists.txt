@@ -193,6 +193,8 @@ set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
 corrade_add_test(UtilityMemoryTest MemoryTest.cpp)
 target_compile_definitions(UtilityMemoryTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 
+corrade_add_test(UtilityMoveTest MoveTest.cpp)
+
 set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
 if(CORRADE_TARGET_IOS)
     set_source_files_properties(DirectoryTestFiles PROPERTIES
@@ -302,6 +304,7 @@ set_target_properties(
     UtilityHashDigestTest
     UtilityMacrosTest
     UtilityMemoryTest
+    UtilityMoveTest
     UtilityResourceTest
     UtilityResourceStaticTest
     UtilitySha1Test
