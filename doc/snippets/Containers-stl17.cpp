@@ -36,7 +36,7 @@ int main() {
 std::optional<int> a{5};
 Containers::Optional<int> b(a);
 
-std::optional<std::string> c(Containers::optional<std::string>("hello"));
+std::optional<std::string> c(Containers::Optional<std::string>{"hello"});
 
 auto d = Containers::optional(std::optional<int>{17});
         // d is Containers::Optional<int>
