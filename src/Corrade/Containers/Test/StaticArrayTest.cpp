@@ -68,9 +68,8 @@ struct StaticArrayTest: TestSuite::Tester {
 
     void resetCounters();
 
-    void construct();
-    void constructDefaultInit();
     void constructValueInit();
+    void constructDefaultInit();
     void constructNoInit();
     void constructInPlaceInit();
     void constructInPlaceInitOneArgument();
@@ -122,9 +121,8 @@ typedef Containers::StaticArrayView<5, int> StaticArrayView;
 typedef Containers::StaticArrayView<5, const int> ConstStaticArrayView;
 
 StaticArrayTest::StaticArrayTest() {
-    addTests({&StaticArrayTest::construct,
-              &StaticArrayTest::constructDefaultInit,
-              &StaticArrayTest::constructValueInit});
+    addTests({&StaticArrayTest::constructValueInit,
+              &StaticArrayTest::constructDefaultInit});
 
     addTests({&StaticArrayTest::constructNoInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
@@ -174,19 +172,32 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::moveConstructPlainStruct});
 }
 
-void StaticArrayTest::construct() {
-    const StaticArray a;
-    CORRADE_VERIFY(a);
-    CORRADE_VERIFY(!a.empty());
-    CORRADE_COMPARE(a.size(), StaticArray::Size);
-    CORRADE_COMPARE(a.size(), 5);
+void StaticArrayTest::constructValueInit() {
+    const StaticArray a1;
+    const StaticArray a2{Corrade::ValueInit};
+    CORRADE_VERIFY(a1);
+    CORRADE_VERIFY(a2);
+    CORRADE_VERIFY(!a1.empty());
+    CORRADE_VERIFY(!a2.empty());
+    CORRADE_COMPARE(a1.size(), StaticArray::Size);
+    CORRADE_COMPARE(a2.size(), StaticArray::Size);
+    CORRADE_COMPARE(a1.size(), 5);
+    CORRADE_COMPARE(a2.size(), 5);
 
     /* Values should be zero-initialized (same as ValueInit) */
-    CORRADE_COMPARE(a[0], 0);
-    CORRADE_COMPARE(a[1], 0);
-    CORRADE_COMPARE(a[2], 0);
-    CORRADE_COMPARE(a[3], 0);
-    CORRADE_COMPARE(a[4], 0);
+    CORRADE_COMPARE(a1[0], 0);
+    CORRADE_COMPARE(a2[0], 0);
+    CORRADE_COMPARE(a1[1], 0);
+    CORRADE_COMPARE(a2[1], 0);
+    CORRADE_COMPARE(a1[2], 0);
+    CORRADE_COMPARE(a2[2], 0);
+    CORRADE_COMPARE(a1[3], 0);
+    CORRADE_COMPARE(a2[3], 0);
+    CORRADE_COMPARE(a1[4], 0);
+    CORRADE_COMPARE(a2[4], 0);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray>::value);
 }
 
 void StaticArrayTest::constructDefaultInit() {
@@ -194,18 +205,9 @@ void StaticArrayTest::constructDefaultInit() {
     CORRADE_VERIFY(a);
 
     /* Values are random memory */
-}
 
-void StaticArrayTest::constructValueInit() {
-    const StaticArray a{Corrade::ValueInit};
-    CORRADE_VERIFY(a);
-
-    /* Values should be zero-initialized (same as the default constructor) */
-    CORRADE_COMPARE(a[0], 0);
-    CORRADE_COMPARE(a[1], 0);
-    CORRADE_COMPARE(a[2], 0);
-    CORRADE_COMPARE(a[3], 0);
-    CORRADE_COMPARE(a[4], 0);
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray>::value);
 }
 
 struct Throwable {
@@ -315,6 +317,9 @@ void StaticArrayTest::constructNoInit() {
     }
 
     CORRADE_COMPARE(Copyable::destructed, 10);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, StaticArray>::value);
 }
 
 void StaticArrayTest::constructInPlaceInit() {
