@@ -125,6 +125,9 @@ struct PairTest: TestSuite::Tester {
     void accessRvalue();
 
     void debug();
+
+    void emplaceConstructorExplicitInCopyInitialization();
+    void copyMoveConstructPlainStruct();
 };
 
 PairTest::PairTest() {
@@ -155,7 +158,10 @@ PairTest::PairTest() {
               &PairTest::access,
               &PairTest::accessRvalue,
 
-              &PairTest::debug});
+              &PairTest::debug,
+
+              &PairTest::emplaceConstructorExplicitInCopyInitialization,
+              &PairTest::copyMoveConstructPlainStruct});
 }
 
 struct Throwable {
@@ -432,14 +438,7 @@ void PairTest::constructCopyMove() {
     CORRADE_COMPARE(Movable::moved, 1);
 
     constexpr float first = 35.0f;
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr Pair<float, Foo> ca = {first, Foo{7}};
     CORRADE_COMPARE(ca.first(), 35.0f);
     CORRADE_COMPARE(ca.second().a, 7);
@@ -477,14 +476,7 @@ void PairTest::constructCopyMoveMake() {
     CORRADE_COMPARE(Movable::moved, 1);
 
     constexpr float first = 35.0f;
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr auto ca = pair(first, Foo{7});
     CORRADE_VERIFY(std::is_same<decltype(ca), const Pair<float, Foo>>::value);
     CORRADE_COMPARE(ca.first(), 35.0f);
@@ -518,14 +510,7 @@ void PairTest::constructMoveCopy() {
     CORRADE_COMPARE(Movable::moved, 1);
 
     constexpr float second = 35.0f;
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr Pair<Foo, float> ca = {Foo{7}, second};
     CORRADE_COMPARE(ca.first().a, 7);
     CORRADE_COMPARE(ca.second(), 35.0f);
@@ -563,14 +548,7 @@ void PairTest::constructMoveCopyMake() {
     CORRADE_COMPARE(Movable::moved, 1);
 
     constexpr float second = 35.0f;
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr auto ca = pair(Foo{7}, second);
     CORRADE_VERIFY(std::is_same<decltype(ca), const Pair<Foo, float>>::value);
     CORRADE_COMPARE(ca.first().a, 7);
@@ -592,14 +570,7 @@ void PairTest::constructMoveMove() {
     CORRADE_COMPARE(Movable::destructed, 4);
     CORRADE_COMPARE(Movable::moved, 2);
 
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr Pair<Foo, Foo> ca = {Foo{5}, Foo{7}};
     CORRADE_COMPARE(ca.first().a, 5);
     CORRADE_COMPARE(ca.second().a, 7);
@@ -625,14 +596,7 @@ void PairTest::constructMoveMoveMake() {
     CORRADE_COMPARE(Movable::destructed, 4);
     CORRADE_COMPARE(Movable::moved, 2);
 
-    struct Foo {
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        /* otherwise GCC 4.8 dies when calling a copy constructor, trying to
-           initialize Foo::a with Foo */
-        constexpr Foo(int a): a{a} {}
-        #endif
-        int a;
-    };
+    struct Foo { int a; };
     constexpr auto ca = pair(Foo{5}, Foo{7});
     CORRADE_VERIFY(std::is_same<decltype(ca), const Pair<Foo, Foo>>::value);
     CORRADE_COMPARE(ca.first().a, 5);
@@ -841,6 +805,81 @@ void PairTest::debug() {
     std::stringstream out;
     Debug{&out} << pair(42.5f, 3);
     CORRADE_COMPARE(out.str(), "{42.5, 3}\n");
+}
+
+void PairTest::emplaceConstructorExplicitInCopyInitialization() {
+    /* See constructHelpers.h for details about this compiler-specific issue */
+    struct ExplicitDefault {
+        explicit ExplicitDefault() = default;
+    };
+
+    struct ContainingExplicitDefaultWithImplicitConstructor {
+        ExplicitDefault a;
+    };
+
+    /* This alone works */
+    ContainingExplicitDefaultWithImplicitConstructor a;
+    static_cast<void>(a);
+
+    /* So this should too */
+    Pair<ContainingExplicitDefaultWithImplicitConstructor, ContainingExplicitDefaultWithImplicitConstructor> b;
+    CORRADE_VERIFY(&b.first() != &b.second());
+}
+
+void PairTest::copyMoveConstructPlainStruct() {
+    struct ExtremelyTrivial {
+        int a;
+        char b;
+    };
+
+    /* Can't make MoveOnlyStruct directly non-copyable because then we'd hit
+       another GCC 4.8 bug where it can't be constructed using {} anymore. In
+       other tests I simply add a (move-only) Array or Pointer member, but here
+       I don't want to avoid a needless header dependency. */
+    struct MoveOnlyPointer {
+        MoveOnlyPointer(std::nullptr_t) {}
+        MoveOnlyPointer(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer(MoveOnlyPointer&&) = default;
+        MoveOnlyPointer& operator=(const MoveOnlyPointer&) = delete;
+        MoveOnlyPointer& operator=(MoveOnlyPointer&&) = default;
+
+        std::nullptr_t a;
+    };
+
+    struct MoveOnlyStruct {
+        int a;
+        char c;
+        MoveOnlyPointer b;
+    };
+
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert ExtremelyTrivial to int to initialize the first
+       argument and fails miserably, and similarly with MoveOnlyStruct. */
+    const ExtremelyTrivial value{3, 'a'};
+    Pair<ExtremelyTrivial, ExtremelyTrivial> aCC{value, value};
+    Pair<ExtremelyTrivial, MoveOnlyStruct> aCM{value, MoveOnlyStruct{3, 'a', nullptr}};
+    Pair<MoveOnlyStruct, ExtremelyTrivial> aMC{MoveOnlyStruct{3, 'a', nullptr}, value};
+    Pair<MoveOnlyStruct, MoveOnlyStruct> aMM{MoveOnlyStruct{3, 'a', nullptr}, MoveOnlyStruct{3, 'a', nullptr}};
+    CORRADE_COMPARE(aCC.second().a, 3);
+    CORRADE_COMPARE(aCM.second().a, 3);
+    CORRADE_COMPARE(aMC.second().a, 3);
+    CORRADE_COMPARE(aMM.second().a, 3);
+
+    /* This copy/move-constructs the wrapped value. No special handling needed
+       in the implementation as the constructor is implicit. */
+    Pair<ExtremelyTrivial, ExtremelyTrivial> bCC = aCC;
+    Pair<MoveOnlyStruct, MoveOnlyStruct> bMM = Utility::move(aMM);
+    CORRADE_COMPARE(bCC.second().a, 3);
+    CORRADE_COMPARE(bMM.second().a, 3);
+
+    /* This copy/move-assigns constructs the wrapped value. No special handling
+       needed in the implementation as the assignment is implicit. */
+    Pair<ExtremelyTrivial, ExtremelyTrivial> cCC;
+    Pair<MoveOnlyStruct, MoveOnlyStruct> cMM{MoveOnlyStruct{6, 'b', nullptr}, MoveOnlyStruct{6, 'b', nullptr}};
+    cCC = bCC;
+    cMM = Utility::move(bMM);
+    CORRADE_COMPARE(cCC.second().a, 3);
+    CORRADE_COMPARE(cMM.second().a, 3);
 }
 
 }}}}

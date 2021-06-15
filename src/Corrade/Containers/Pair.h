@@ -104,7 +104,10 @@ template<class F, class S> class Pair {
          * otherwise. This is the same as @ref Pair().
          * @see @ref ValueInit, @ref Pair(DefaultInitT)
          */
-        constexpr explicit Pair(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value): _first{}, _second{} {}
+        constexpr explicit Pair(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value):
+            /* Can't use {} here. See constructHelpers.h for details, test in
+               PairTest::emplaceConstructorExplicitInCopyInitialization(). */
+            _first(), _second() {}
 
         #ifdef DOXYGEN_GENERATING_OUTPUT
         /**
@@ -136,13 +139,45 @@ template<class F, class S> class Pair {
          *
          * @see @ref pair(F&&, S&&)
          */
-        constexpr /*implicit*/ Pair(const F& first, const S& second) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value): _first{first}, _second{second} {}
+        constexpr /*implicit*/ Pair(const F& first, const S& second) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value):
+            /* Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               PairTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(first), _second(second)
+            #else
+            _first{first}, _second{second}
+            #endif
+            {}
         /** @overload */
-        constexpr /*implicit*/ Pair(const F& first, S&& second) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_move_constructible<S>::value): _first{first}, _second{Utility::move(second)} {}
+        constexpr /*implicit*/ Pair(const F& first, S&& second) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_move_constructible<S>::value):
+            /* Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               PairTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(first), _second(Utility::move(second))
+            #else
+            _first{first}, _second{Utility::move(second)}
+            #endif
+            {}
         /** @overload */
-        constexpr /*implicit*/ Pair(F&& first, const S& second) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value): _first{Utility::move(first)}, _second{second} {}
+        constexpr /*implicit*/ Pair(F&& first, const S& second) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value):
+            /* Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               PairTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(Utility::move(first)), _second(second)
+            #else
+            _first{Utility::move(first)}, _second{second}
+            #endif
+            {}
         /** @overload */
-        constexpr /*implicit*/ Pair(F&& first, S&& second) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value): _first{Utility::move(first)}, _second{Utility::move(second)} {}
+        constexpr /*implicit*/ Pair(F&& first, S&& second) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value):
+            /* Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               PairTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(Utility::move(first)), _second(Utility::move(second))
+            #else
+            _first{Utility::move(first)}, _second{Utility::move(second)}
+            #endif
+            {}
 
         /**
          * @brief Copy-construct a pair from external representation
