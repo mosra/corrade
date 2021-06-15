@@ -31,6 +31,7 @@
 #include <cstring>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -95,7 +96,7 @@ inline void String::destruct() {
     else delete[] _large.data;
 }
 
-inline std::pair<const char*, std::size_t> String::dataInternal() const {
+inline Containers::Pair<const char*, std::size_t> String::dataInternal() const {
     if(_small.size & 0x80)
         return {_small.data, _small.size & ~SmallSizeMask};
     return {_large.data, _large.size & ~LargeSizeMask};
@@ -216,8 +217,8 @@ String::String(Corrade::NoInitT, const std::size_t size)
 String::~String() { destruct(); }
 
 String::String(const String& other) {
-    const std::pair<const char*, std::size_t> data = other.dataInternal();
-    construct(data.first, data.second);
+    const Containers::Pair<const char*, std::size_t> data = other.dataInternal();
+    construct(data.first(), data.second());
 }
 
 String::String(String&& other) noexcept {
@@ -235,8 +236,8 @@ String::String(String&& other) noexcept {
 String& String::operator=(const String& other) {
     destruct();
 
-    const std::pair<const char*, std::size_t> data = other.dataInternal();
-    construct(data.first, data.second);
+    const Containers::Pair<const char*, std::size_t> data = other.dataInternal();
+    construct(data.first(), data.second());
     return *this;
 }
 
@@ -261,23 +262,23 @@ String& String::operator=(String&& other) noexcept {
 }
 
 String::operator ArrayView<const char>() const noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return {data.first, data.second};
+    const Containers::Pair<const char*, std::size_t> data = dataInternal();
+    return {data.first(), data.second()};
 }
 
 String::operator ArrayView<const void>() const noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return {data.first, data.second};
+    const Containers::Pair<const char*, std::size_t> data = dataInternal();
+    return {data.first(), data.second()};
 }
 
 String::operator ArrayView<char>() noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return {const_cast<char*>(data.first), data.second};
+    const Containers::Pair<const char*, std::size_t> data = dataInternal();
+    return {const_cast<char*>(data.first()), data.second()};
 }
 
 String::operator ArrayView<void>() noexcept {
-    const std::pair<const char*, std::size_t> data = dataInternal();
-    return {const_cast<char*>(data.first), data.second};
+    const Containers::Pair<const char*, std::size_t> data = dataInternal();
+    return {const_cast<char*>(data.first()), data.second()};
 }
 
 const char* String::data() const {

@@ -34,7 +34,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-#include <utility> /* std::pair */
 
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/StringView.h" /* needs to be included for
@@ -796,7 +795,7 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_UTILITY_LOCAL void construct(Corrade::NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();
-        CORRADE_UTILITY_LOCAL std::pair<const char*, std::size_t> dataInternal() const;
+        CORRADE_UTILITY_LOCAL Containers::Pair<const char*, std::size_t> dataInternal() const;
 
         /* Small string optimization. Following size restrictions from
            StringView (which uses the top two bits for marking global and
