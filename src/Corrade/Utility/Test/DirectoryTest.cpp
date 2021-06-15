@@ -1162,7 +1162,7 @@ void DirectoryTest::fileSizeEarlyEof() {
     #ifdef __linux__
     constexpr const char* file = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
     if(!Directory::exists(file))
-        CORRADE_SKIP(file + std::string{" doesn't exist, can't test"});
+        CORRADE_SKIP(file << "doesn't exist, can't test");
     Containers::Optional<std::size_t> size = Directory::fileSize(file);
     CORRADE_VERIFY(size);
     CORRADE_COMPARE_AS(*size, Directory::read(file).size(),
