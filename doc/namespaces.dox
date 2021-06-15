@@ -69,6 +69,43 @@ target_link_libraries(your-app PRIVATE Corrade::Containers)
 Parts of this library are additionally available in a form of
 @ref corrade-singles "single-header libraries". See also
 @ref building-corrade and @ref corrade-cmake for more information.
+
+@section Containers-mapping Mapping between Corrade and STL containers
+
+Since the purpose of this library is to provide *alternatives* to STL
+containers that aim to not repeat the same design mistakes and provide more
+flexibility in certain areas, the naming and usage doesn't necessarily match
+what you expect from STL. The following table shows the mapping between common
+STL containers and the @ref Containers library:
+
+Corrade type            | STL equivalent
+----------------------- | -------------
+@ref Array              | @ref std::vector
+@m_class{m-label m-flat m-success} **planned** | @ref std::vector "std::vector<bool>"
+@ref Array with custom deleters | @ref std::unique_ptr "std::unique_ptr<T[]>" (no size info)
+@ref Array with @ref Utility::allocateAligned() "overaligned memory" | @ref std::valarray
+@ref ArrayView          | @ref std::span @m_class{m-label m-flat m-warning} **C++20**
+@ref EnumSet, \n @ref BigEnumSet | @ref std::bitset (no strong typing)
+@ref LinkedList         | *no equivalent*
+@m_class{m-label m-flat m-danger} **not planned** | @ref std::list, \n @ref std::forward_list
+@m_class{m-label m-flat m-danger} **not planned** | @ref std::map, \n @ref std::multimap, \n @ref std::set
+* *no equivalent*       | @ref std::unordered_map, \n @ref std::unordered_multimap, \n @ref std::unordered_set
+@ref Optional           | @ref std::optional @m_class{m-label m-flat m-primary} **C++17**
+@ref Pair               | @ref std::pair
+@ref Pointer            | @ref std::unique_ptr
+@m_class{m-label m-flat m-danger} **not planned** | @ref std::shared_ptr, \n @ref std::weak_ptr
+@ref Reference          | @ref std::reference_wrapper
+@ref MoveReference, \n @ref AnyReference | *no equivalent*
+@ref ScopeGuard         | *no equivalent*
+@ref StaticArray        | @ref std::array
+@ref StaticArrayView    | @ref std::span "std::span<T, size>" @m_class{m-label m-flat m-warning} **C++20**
+@ref StridedArrayView   | @m_class{m-doc-external} [std::mdspan](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p0009r10.html) @m_class{m-label m-flat m-danger} **C++23**
+* *no equivalent*       | @ref std::deque, \n @ref std::stack, \n @ref std::queue
+@ref String             | @ref std::string, \n @ref std::u8string
+@ref StringView         | @ref std::string_view, \n @ref std::u8string_view @m_class{m-label m-flat m-primary} **C++17**
+@ref MutableStringView  | *no equivalent*
+@m_class{m-label m-flat m-danger} **not planned** | @ref std::wstring, \n @ref std::u16string, \n @ref std::u32string, \n @ref std::wstring_view, \n @ref std::u16string_view, \n @ref std::u32string_view
+* *no equivalent*       | @ref std::any, \n @ref std::tuple, \n @ref std::variant
 */
 /** @namespace Corrade::Containers::Literals
 @brief Container literals

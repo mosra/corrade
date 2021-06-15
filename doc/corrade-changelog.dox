@@ -307,6 +307,7 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-documentation Documentation
 
+-   Added a @ref Containers-mapping "table mapping between STL and Corrade containers"
 -   Various fixes (see [mosra/corrade#108](https://github.com/mosra/corrade/pull/108))
 
 @section corrade-changelog-2020-06 2020.06
