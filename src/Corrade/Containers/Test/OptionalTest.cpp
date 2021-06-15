@@ -436,6 +436,7 @@ void OptionalTest::constructMoveMake() {
     {
         auto a = optional(Movable{32});
         CORRADE_VERIFY(a);
+        CORRADE_VERIFY(std::is_same<decltype(a), Optional<Movable>>::value);
         CORRADE_COMPARE(a->a, 32);
     }
 
