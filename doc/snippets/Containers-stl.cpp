@@ -28,6 +28,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayViewStl.h"
+#include "Corrade/Containers/PairStl.h"
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Containers/ReferenceStl.h"
@@ -52,6 +53,20 @@ std::vector<int> b{5};                  // b.size() == 1, b[0] == 5
 Containers::Array<int> c{5};            // c.size() == 5
 auto d = Containers::array<int>({5});   // d.size() == 1, d[0] == 5
 /* [Array-initializer-list] */
+}
+
+{
+/* [Pair] */
+std::pair<float, int> a{35.0f, 7};
+Containers::Pair<float, int> b{a};
+
+std::pair<bool, int*> c(Containers::pair(false, &b.second()));
+
+auto d = Containers::pair(std::pair<char, double>{'p', 3.14});
+    // d is Containers::pair<char, double>
+/* [Pair] */
+static_cast<void>(c);
+static_cast<void>(d);
 }
 
 {

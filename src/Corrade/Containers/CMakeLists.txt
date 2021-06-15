@@ -43,6 +43,8 @@ set(CorradeContainers_HEADERS
     MoveReference.h
     Optional.h
     OptionalStl.h
+    Pair.h
+    PairStl.h
     Pointer.h
     PointerStl.h
     Reference.h

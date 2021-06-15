@@ -57,6 +57,8 @@ namespace Corrade {
     [mosra/corrade#117](https://github.com/mosra/corrade/pull/117).
 -   New @ref Containers::BigEnumSet class for storing enum sets with more than
     64 values
+-   New @ref Containers::Pair class that fixes various issues and pitfalls of
+    @ref std::pair
 -   New @ref Containers::String class as a lightweight but more flexible
     alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a

@@ -38,6 +38,7 @@
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/ScopeGuard.h"
@@ -736,6 +737,15 @@ auto b = Containers::optional(value);
 auto a = Containers::Optional<std::string>{InPlaceInit, 'a', 'b'};
 auto b = Containers::optional<std::string>('a', 'b');
 /* [optional-inplace] */
+}
+
+{
+/* [pair] */
+auto a = Containers::Pair<float, int>{35.0f, 7};
+auto b = Containers::pair(35.0f, 7);
+/* [pair] */
+static_cast<void>(a);
+static_cast<void>(b);
 }
 
 {

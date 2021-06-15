@@ -67,6 +67,7 @@ template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
 template<class> class Optional;
+template<class, class> class Pair;
 template<class> class Pointer;
 template<class> class Reference;
 template<class> class MoveReference;
