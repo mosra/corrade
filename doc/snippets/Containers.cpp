@@ -738,6 +738,22 @@ auto b = Containers::optional<std::string>('a', 'b');
 /* [optional-inplace] */
 }
 
+{
+/* [pointer] */
+std::string* ptr = DOXYGEN_IGNORE({});
+
+auto a = Containers::Pointer<std::string>{ptr};
+auto b = Containers::pointer(ptr);
+/* [pointer] */
+}
+
+{
+/* [pointer-inplace] */
+auto a = Containers::Pointer<std::string>{InPlaceInit, 'a', 'b'};
+auto b = Containers::pointer<std::string>('a', 'b');
+/* [pointer-inplace] */
+}
+
 #ifdef __linux__
 /* [ScopeGuard-usage] */
 {
@@ -1053,32 +1069,6 @@ Containers::StridedArrayView3D<std::uint8_t> rgb =
     Containers::arrayCast<3, std::uint8_t>(view);
 /* [arrayCast-StridedArrayView-inflate] */
 static_cast<void>(rgb);
-}
-
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-{
-/* [pointer] */
-std::string* ptr;
-
-auto a = Containers::Pointer<std::string>{ptr};
-auto b = Containers::pointer(ptr);
-/* [pointer] */
-}
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-{
-/* [pointer-inplace] */
-auto a = Containers::Pointer<std::string>{InPlaceInit, 'a', 'b'};
-auto b = Containers::pointer<std::string>('a', 'b');
-/* [pointer-inplace] */
 }
 
 {
