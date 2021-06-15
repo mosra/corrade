@@ -95,7 +95,13 @@ template<class F, class S> class Pair {
          * @ref Pair(NoInitT) variant instead.
          * @see @ref DefaultInit, @ref std::is_trivial
          */
-        constexpr explicit Pair(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value) {}
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Not constexpr for this joke of a compiler because I don't explicitly
+           initialize _first and _second, which wouldn't be a default
+           initialization if I did that. */
+        constexpr
+        #endif
+        explicit Pair(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value) {}
 
         /**
          * @brief Construct a value-initialized pair
@@ -132,7 +138,17 @@ template<class F, class S> class Pair {
          *
          * Alias to @ref Pair(ValueInitT).
          */
-        constexpr /*implicit*/ Pair() noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value): Pair{Corrade::ValueInit} {}
+        constexpr /*implicit*/ Pair() noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value):
+            #ifdef CORRADE_MSVC2015_COMPATIBILITY
+            /* Otherwise it complains that _first and _second isn't initialized
+               in a constexpr context. Does it not see the delegation?! OTOH
+               MSVC doesn't seem to be affected by the emplaceConstructorExplicitInCopyInitialization() bug in GCC and
+               Clang, so I can use {} here I think. */
+            _first{}, _second{}
+            #else
+            Pair{Corrade::ValueInit}
+            #endif
+        {}
 
         /**
          * @brief Constructor

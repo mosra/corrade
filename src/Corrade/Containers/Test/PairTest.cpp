@@ -261,7 +261,12 @@ void PairTest::constructDefaultInit() {
     /* Can't test constexpr on trivial types because DefaultInit leaves them
        uninitialized */
     struct Foo { int a = 3; };
-    constexpr Pair<Foo, Foo> b{Corrade::DefaultInit};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't, because MSVC 2015 forces me to touch the members, which then
+       wouldn't be a default initialization. */
+    constexpr
+    #endif
+    Pair<Foo, Foo> b{Corrade::DefaultInit};
     CORRADE_COMPARE(b.first().a, 3);
     CORRADE_COMPARE(b.second().a, 3);
 
