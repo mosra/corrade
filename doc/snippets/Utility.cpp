@@ -389,7 +389,7 @@ for(Foo& f: data) new(&f) Foo{index++};
 /* [Configuration-usage] */
 Utility::Configuration conf{"my.conf"};
 
-/* Set value of third occurence of the key from some deep group */
+/* Set value of third occurrence of the key from some deep group */
 conf.addGroup("foo")->addGroup("bar")->setValue("myKey", "myValue");
 
 /* Get a value back */

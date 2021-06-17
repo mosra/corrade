@@ -551,7 +551,7 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                 }
 
                 /* Parse the variable. If a recompile is requested or an error
-                   occured, exit immediately. */
+                   occurred, exit immediately. */
                 const TweakableState variableState = v.parser(value, Containers::staticArrayView(v.storage));
                 if(variableState == TweakableState::Recompile) {
                     Warning{} << "Utility::Tweakable::update(): change of" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << "requested a recompile";
@@ -562,7 +562,7 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                     return TweakableState::Error;
                 }
 
-                /* If a change occured, add a corresponding scope to update */
+                /* If a change occurred, add a corresponding scope to update */
                 if(variableState != TweakableState::NoChange) {
                     CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
                     Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;

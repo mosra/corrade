@@ -590,7 +590,7 @@ compiler command line, see @ref CORRADE_NOOP().
 @param function Finalizer function name of type @cpp int(*)() @ce.
 
 Function passed as argument will be called after exiting the @cpp main() @ce
-function. This is usable in conjuction with @ref CORRADE_AUTOMATIC_INITIALIZER()
+function. This is usable in conjunction with @ref CORRADE_AUTOMATIC_INITIALIZER()
 when there is need to properly discard initialized data.
 
 @attention This macro does nothing in static libraries --- the global data

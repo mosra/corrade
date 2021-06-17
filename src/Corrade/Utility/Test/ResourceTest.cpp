@@ -427,12 +427,12 @@ void ResourceTest::overrideGroup() {
     std::ostringstream out;
     Debug redirectDebug{&out};
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden.conf"));
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
     Resource r("test");
 
-    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'test' overriden with '" + Directory::join(RESOURCE_TEST_DIR, "resources-overriden.conf") + "'\n");
-    CORRADE_COMPARE(r.get("predisposition.bin"), "overriden predisposition\n");
-    CORRADE_COMPARE(r.get("consequence2.txt"), "overriden consequence\n");
+    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'test' overridden with '" + Directory::join(RESOURCE_TEST_DIR, "resources-overridden.conf") + "'\n");
+    CORRADE_COMPARE(r.get("predisposition.bin"), "overridden predisposition\n");
+    CORRADE_COMPARE(r.get("consequence2.txt"), "overridden consequence\n");
 
     /* Test that two subsequent r.getRaw() point to the same location */
     const auto ptr = r.getRaw("predisposition.bin").begin();
@@ -447,13 +447,13 @@ void ResourceTest::overrideGroupFallback() {
     std::ostringstream out;
     Warning redirectWarning{&out};
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-none.conf"));
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
     Resource r("test");
 
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
                        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
                        TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
+    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
 }
 
 void ResourceTest::overrideNonexistentFile() {
@@ -465,15 +465,15 @@ void ResourceTest::overrideNonexistentFile() {
     Error redirectError{&out};
     Warning redirectWarning(&out);
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-nonexistent-file.conf"));
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
     Resource r("test");
 
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
                        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
                        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(out.str(),
-        "Utility::Resource::get(): cannot open file path/to/nonexistent.bin from overriden group\n"
-        "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
+        "Utility::Resource::get(): cannot open file path/to/nonexistent.bin from overridden group\n"
+        "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
 }
 
 void ResourceTest::overrideNonexistentGroup() {
@@ -491,11 +491,11 @@ void ResourceTest::overrideNonexistentGroup() {
 
 void ResourceTest::overrideDifferentGroup() {
     std::ostringstream out;
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-different.conf"));
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
 
     Warning redirectWarning{&out};
     Resource r("test");
-    CORRADE_COMPARE(out.str(), "Utility::Resource: overriden with different group, found 'wat' but expected 'test'\n");
+    CORRADE_COMPARE(out.str(), "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
 }
 
 }}}}

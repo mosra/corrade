@@ -82,10 +82,10 @@ Benchmark::Benchmark() {
                    &Benchmark::call1kSlotMembers}, 25);
 }
 
-int gloablOutput;
+int globalOutput;
 
 CORRADE_NEVER_INLINE void freeFunctionSlot() {
-    ++gloablOutput;
+    ++globalOutput;
 }
 
 void Benchmark::connect1kFunctions() {
@@ -194,18 +194,18 @@ void Benchmark::destruct1kMembersReceiverFirst() {
 }
 
 void Benchmark::call1kFunctions() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     CORRADE_BENCHMARK(100) {
         for(std::size_t i = 0; i != 1000; ++i)
             freeFunctionSlot();
     }
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kStdFunctions() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     std::function<void()> a{freeFunctionSlot};
 
@@ -214,11 +214,11 @@ void Benchmark::call1kStdFunctions() {
             a();
     }
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kFunctionConnectionData() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     struct: Emitter {} emitter;
 
@@ -229,7 +229,7 @@ void Benchmark::call1kFunctionConnectionData() {
             reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     }
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kLambdaConnectionData() {
@@ -250,7 +250,7 @@ void Benchmark::call1kLambdaConnectionData() {
 void Benchmark::call1kLambdaHeapConnectionData() {
     struct Destructor {
         int value = 1;
-        ~Destructor() { gloablOutput += 1; }
+        ~Destructor() { globalOutput += 1; }
     } a;
 
     int output = 0;
@@ -286,7 +286,7 @@ void Benchmark::call1kMemberConnectionData() {
 }
 
 void Benchmark::callSlotFunction1000x() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     struct E: Emitter {
         Signal fire() {
@@ -300,11 +300,11 @@ void Benchmark::callSlotFunction1000x() {
         for(std::size_t i = 0; i != 1000; ++i)
             emitter.fire();
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kSlotFunctions() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     struct E: Emitter {
         Signal fire() {
@@ -318,11 +318,11 @@ void Benchmark::call1kSlotFunctions() {
     CORRADE_BENCHMARK(100)
         emitter.fire();
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kSlotLambdas() {
-    gloablOutput = 0;
+    globalOutput = 0;
 
     struct E: Emitter {
         Signal fire() {
@@ -331,18 +331,18 @@ void Benchmark::call1kSlotLambdas() {
     } emitter;
 
     for(std::size_t i = 0; i != 1000; ++i)
-        connect(emitter, &E::fire, [](){ ++gloablOutput; });
+        connect(emitter, &E::fire, [](){ ++globalOutput; });
 
     CORRADE_BENCHMARK(100)
         emitter.fire();
 
-    CORRADE_COMPARE(gloablOutput, 1000*100);
+    CORRADE_COMPARE(globalOutput, 1000*100);
 }
 
 void Benchmark::call1kSlotLambdasHeap() {
     struct Destructor {
         int value = 1;
-        ~Destructor() { gloablOutput += 1; }
+        ~Destructor() { globalOutput += 1; }
     } a;
 
     int output = 0;

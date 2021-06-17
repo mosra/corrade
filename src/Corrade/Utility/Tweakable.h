@@ -196,7 +196,7 @@ literals on a single line) when the code is first executed, together with a
 compile time. Affected source files are then monitored with @ref FileWatcher
 for changes
 
-Upon calling @ref update(), modified files are parsed for occurences of the
+Upon calling @ref update(), modified files are parsed for occurrences of the
 defined macro and arguments of each macro call are parsed at runtime. If there
 is any change, @ref TweakableState::Success is returned and the next time code
 with given annotated literal is executed (either by the caller or directly

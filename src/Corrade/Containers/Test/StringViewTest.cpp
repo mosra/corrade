@@ -1019,7 +1019,7 @@ void StringViewTest::partition() {
         (Array3<StringView>{"ab", "=", "c"}),
         TestSuite::Compare::Container);
 
-    /* Two occurences */
+    /* Two occurrences */
     CORRADE_COMPARE_AS("ab=c=d"_s.partition('='),
         (Array3<StringView>{"ab", "=", "c=d"}),
         TestSuite::Compare::Container);
@@ -1271,7 +1271,7 @@ void StringViewTest::find() {
 
     StringView b = "so, hello hell hello! hello"_s;
 
-    /* Multiple occurences */
+    /* Multiple occurrences */
     {
         CORRADE_VERIFY(b.contains("hello"));
 
@@ -1279,7 +1279,7 @@ void StringViewTest::find() {
         CORRADE_COMPARE(found, "hello");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 4);
 
-    /* First occurences almost but not quite complete */
+    /* First occurrences almost but not quite complete */
     } {
         CORRADE_VERIFY(b.contains("hello!"));
 

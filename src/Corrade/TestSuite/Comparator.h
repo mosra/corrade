@@ -60,7 +60,7 @@ enum class ComparisonStatusFlag: std::uint8_t {
     /**
      * The comparison wants to print a message. If this is returned from
      * @ref Comparator::operator()(), @ref Tester then calls
-     * @ref Comparator::printMessage(). Should be used only seldomly to avoid
+     * @ref Comparator::printMessage(). Should be used only seldom to avoid
      * spamming the output, prefer to use @ref ComparisonStatusFlag::Verbose
      * instead.
      */

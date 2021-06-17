@@ -501,7 +501,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Partition
          *
          * Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
-         * Splits @p string at the first occurence of @p separator. First
+         * Splits @p string at the first occurrence of @p separator. First
          * returned value is the part before the separator, second the
          * separator, third a part after the separator. If the separator is not
          * found, returns the input string followed by two empty strings.

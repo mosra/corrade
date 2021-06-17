@@ -210,7 +210,7 @@ Edit the PKGBUILDs if you want to pass additional flags to CMake or
 @subsection building-corrade-packages-msys MSYS2 packages
 
 [MSYS2](https://www.msys2.org/) package for the latest stable release is
-mantained in the official repos. Installing is as simple as this:
+maintained in the official repos. Installing is as simple as this:
 
 @code{.sh}
 pacman -S mingw-w64-x86_64-corrade # or mingw-w64-i686-corrade

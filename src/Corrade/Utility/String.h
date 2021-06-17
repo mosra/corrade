@@ -340,7 +340,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWith
 @m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
-Splits @p string at the first occurence of @p separator. First returned value
+Splits @p string at the first occurrence of @p separator. First returned value
 is the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns the input string followed by
 two empty strings.
@@ -360,7 +360,7 @@ CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const s
 @m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.rpartition()](https://docs.python.org/3/library/stdtypes.html#str.rpartition).
-Splits @p string at the last occurence of @p separator. First returned value is
+Splits @p string at the last occurrence of @p separator. First returned value is
 the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns two empty strings followed by
 the input string.
@@ -561,7 +561,7 @@ inline std::string stripSuffix(std::string string, char suffix) {
 }
 
 /**
-@brief Replace first occurence in a string
+@brief Replace first occurrence in a string
 
 Returns @p string unmodified if it doesn't contain @p search. Having empty
 @p search causes @p replace to be prepended to @p string.
@@ -587,7 +587,7 @@ template<std::size_t replaceSize> inline std::string replaceFirst(std::string st
 }
 
 /**
-@brief Replace all occurences in a string
+@brief Replace all occurrences in a string
 
 Returns @p string unmodified if it doesn't contain @p search. Expects that
 @p search is not empty, as that would cause an infinite loop.

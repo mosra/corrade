@@ -24,4 +24,4 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* This file is purposedly empty to trigger an error on load. */
+/* This file is purposely empty to trigger an error on load. */

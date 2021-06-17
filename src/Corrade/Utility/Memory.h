@@ -68,7 +68,7 @@ usage:
 
 @snippet Utility.cpp allocateAligned
 
-The alignment is implicitly @cpp alignof(T) @ce, but can be overriden with the
+The alignment is implicitly @cpp alignof(T) @ce, but can be overridden with the
 @p alignment template parameter. When specified explicitly, it is expected to
 be a power-of-two value, at most @cpp 256 @ce bytes and the total byte size
 being a multiple of the alignment:

@@ -387,7 +387,7 @@ void Test::compareImplicitConversionFail() {
 void Test::compareMessage() {
     CORRADE_EXPECT_FAIL_IF(MessageDiagnostic::xfail, "Welp.");
 
-    /* Let the flags be overriden by TesterTest::compareMessage*() later */
+    /* Let the flags be overridden by TesterTest::compareMessage*() later */
     CORRADE_COMPARE_WITH("a.txt", "b.txt", MessageDiagnostic(MessageDiagnostic::flags ? MessageDiagnostic::flags : ComparisonStatusFlag::Message));
 }
 
@@ -398,7 +398,7 @@ void Test::compareWarning() {
 void Test::compareSaveDiagnostic() {
     CORRADE_EXPECT_FAIL_IF(MessageDiagnostic::xfail, "Welp.");
 
-    /* Let the flags be overriden by TesterTest::saveDiagnostic*() later */
+    /* Let the flags be overridden by TesterTest::saveDiagnostic*() later */
     CORRADE_COMPARE_WITH("a.txt", "b.txt", MessageDiagnostic(MessageDiagnostic::flags ? MessageDiagnostic::flags : ComparisonStatusFlag::Diagnostic));
 }
 
@@ -470,7 +470,7 @@ void Test::iterationScope() {
     {
         CORRADE_ITERATION("ahah");
 
-        /* Second occurence of the same macro in the same scope should work
+        /* Second occurrence of the same macro in the same scope should work
            too, using a different variable name */
         CORRADE_ITERATION("yay");
 

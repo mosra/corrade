@@ -236,7 +236,7 @@ portable alternative to multi-character literals:
 /* The shortest way to write FourCCs would be with an UDL (e.g. "WAVE"_4cc),
    but since it's impossible to have a `using` clause in an enum and I
    sometimes need to add non-character data to the FourCC, this is the best and
-   least compilcated way to go about it */
+   least complicated way to go about it */
 constexpr std::uint32_t fourCC(char a, char b, char c, char d) {
     #ifdef CORRADE_TARGET_BIG_ENDIAN
     return (std::uint32_t(a) << 24 |
