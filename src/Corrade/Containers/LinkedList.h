@@ -93,7 +93,7 @@ destructed, @ref clear() or @ref erase() is called,
 @ref LinkedListItem::erase() is called on each item, which in turn calls
 @cpp delete this @ce. For cases where such behavior is not desirable (e.g.
 items meant to be owned by something else than the list),
-@ref LinkedListItem::erase() can be overriden to prevent this behavior. See its
+@ref LinkedListItem::erase() can be overridden to prevent this behavior. See its
 documentation for more information.
 */
 template<class T> class LinkedList {
@@ -267,7 +267,7 @@ class LinkedListItem {
          *      to the @cpp virtual @ce call, but without imposing any
          *      restrictions on the @ref LinkedList type)
          *
-         * The overriden implementation has to call @ref LinkedList::cut() in
+         * The overridden implementation has to call @ref LinkedList::cut() in
          * order to correctly remove itself from the list; the @ref list() is
          * guaranteed to be non-@cpp nullptr @ce in this context.
          *

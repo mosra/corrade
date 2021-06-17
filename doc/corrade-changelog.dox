@@ -529,7 +529,7 @@ Released 2020-06-27, tagged as
     shared global state anymore, various corner cases and crashes on
     destruction are not happening anymore. In particular, it's now also
     possible to have two instances of the same manager type without the two
-    interferring with each other in any way.
+    interfering with each other in any way.
 
 @subsection corrade-changelog-2020-06-documentation Documentation
 
@@ -744,7 +744,7 @@ Released 2019-10-24, tagged as
 -   It's now possible to create @ref Containers::ScopeGuard without a handle
     in order to easily call a global function or lambda on scope end
 -   Implicit memory management of @ref Containers::LinkedList can be now
-    overriden by reimplementing @ref Containers::LinkedListItem::erase()
+    overridden by reimplementing @ref Containers::LinkedListItem::erase()
 -   The @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro now works with templated
     classes and doesn't need a corresponding @ref CORRADE_ENUMSET_OPERATORS()
     to be present anymore
@@ -810,7 +810,7 @@ Released 2019-10-24, tagged as
 -   @ref Utility::Configuration internals were rewritten to not use exceptions
     anymore
 -   The @ref CORRADE_AUTOMATIC_INITIALIZER() and
-    @ref CORRADE_AUTOMATIC_FINALIZER() macros can now be overriden for testing
+    @ref CORRADE_AUTOMATIC_FINALIZER() macros can now be overridden for testing
     purposes or when global constructors / destructors are not desired.
 -   @ref Utility::Resource internals now operate completely without heap
     access, its APIs now also have overloads taking plain C string literals
@@ -883,7 +883,7 @@ Released 2019-10-24, tagged as
     comparison for @cpp long double @ce
 -   Fixed @ref TestSuite::Compare::around() for types that don't have a total
     ordering (for example, for Magnum matrix and vector types, @cpp !(a < b) @ce
-    might not neccesarily imply that @cpp a >= b @ce).
+    might not necessarily imply that @cpp a >= b @ce).
 -   Fixed build on big-endian platforms (see
     [mosra/corrade#58](https://github.com/mosra/corrade/pull/58))
 -   Fixed @ref Utility::Sha1 calculation on big-endian platforms (see

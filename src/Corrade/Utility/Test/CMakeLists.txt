@@ -269,10 +269,10 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/resources-no-group.conf
         ResourceTestFiles/resources-nonexistent.conf
         ResourceTestFiles/resources-nothing.conf
-        ResourceTestFiles/resources-overriden.conf
-        ResourceTestFiles/resources-overriden-different.conf
-        ResourceTestFiles/resources-overriden-none.conf
-        ResourceTestFiles/resources-overriden-nonexistent-file.conf)
+        ResourceTestFiles/resources-overridden.conf
+        ResourceTestFiles/resources-overridden-different.conf
+        ResourceTestFiles/resources-overridden-none.conf
+        ResourceTestFiles/resources-overridden-nonexistent-file.conf)
 target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Static lib resource test

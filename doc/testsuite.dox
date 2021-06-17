@@ -109,7 +109,7 @@ macro to indicate that the particular feature can't be tested:
 Besides test cases providing a clear passed/failed result, it's possible to
 create benchmarks where the results are left up to user interpretation. The
 most valuable benchmarks are ones that are comparing various approaches against
-each other so one can immediatelly see the difference:
+each other so one can immediately see the difference:
 
 @skip MyTest::prepend1kItemsVector()
 @until }

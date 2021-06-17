@@ -56,14 +56,14 @@ constructor. This is needed for instance use checks, as described above. Plugin
 classes derived from that interface need to reimplement the constructor too, of
 course.
 
-Additionaly, an interface string should be provided by overriding the
+Additionally, an interface string should be provided by overriding the
 @ref PluginManager::AbstractPlugin::pluginInterface() function in order to have
 an additional safety check for interface compatibility. The macro takes a
 string which uniquely names that particular interface. A good practice is to
 use "Java package name"-style syntax because this makes the name as unique as
 possible. The interface name should also contain a version identifier to make
 sure the plugin will not be loaded with incompatible interface version. If this
-function is not overriden, the default implementation returns @cpp "" @ce and
+function is not overridden, the default implementation returns @cpp "" @ce and
 effectively makes the interface compatibility check a no-op.
 
 To make lives of the users easier, we can define a list of paths where the

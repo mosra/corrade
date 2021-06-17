@@ -232,7 +232,7 @@ also available as preprocessor variables if you include
     @ref PluginManager doesn't support dynamic plugin loading due to platform
     limitations
 -   `CORRADE_TESTSUITE_TARGET_XCTEST` --- Defined if @ref TestSuite is
-    targetting Xcode XCTest
+    targeting Xcode XCTest
 -   `CORRADE_UTILITY_USE_ANSI_COLORS` --- Defined if ANSI escape sequences are
     used for colored output with @ref Utility::Debug on Windows
 

@@ -65,7 +65,7 @@ saved and available through @ref pluginDirectory().
 Besides the above, it's possible to call @ref load() with a concrete path to a
 dynamic module file to load a plugin from outside of the plugin directory. The
 file is expected to be accompanied by its corresponding `*.conf` metadata file
-(unless overriden in the plugin interface using
+(unless overridden in the plugin interface using
 @ref AbstractPlugin::pluginMetadataSuffix())
 and no plugin with the same name is expected to be loaded at the same time. If
 loading succeeds, the module is exposed through the API under its basename

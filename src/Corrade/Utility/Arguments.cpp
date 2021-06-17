@@ -977,7 +977,7 @@ std::string Arguments::help() const {
         if(!entry.help.empty()) out << entry.help << '\n';
 
         /* Default value, put it on new indented line (two spaces from the
-           left and one from the right additionaly to key column width), if
+           left and one from the right additionally to key column width), if
            help text is also present */
         if(!entry.defaultValue.empty()) {
             CORRADE_INTERNAL_ASSERT(_finalOptionalArgument == i);
@@ -1017,7 +1017,7 @@ std::string Arguments::help() const {
         #endif
 
         /* Default value, put it on new indented line (two spaces from the
-           left and one from the right additionaly to key column width), if
+           left and one from the right additionally to key column width), if
            help text is also present */
         if(!entry.defaultValue.empty()) {
             if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');

@@ -62,7 +62,7 @@ struct ResourceGlobals {
        Containers/Implementation/RawForwardList.h, look there for more info. */
     Implementation::ResourceGroup* groups;
 
-    /* Overriden groups. This is only allocated if the user calls
+    /* Overridden groups. This is only allocated if the user calls
        Resource::overrideGroup() and stores a pointer to a function-local
        static variable from there. */
     std::map<std::string, std::string>* overrideGroups;
@@ -355,7 +355,7 @@ void Resource::overrideGroup(const std::string& group, const std::string& config
 
     CORRADE_ASSERT(findGroup({group.data(), group.size()}),
         "Utility::Resource::overrideGroup(): group" << '\'' + group + '\'' << "was not found", );
-    /* This group can be already overriden from before, so insert if not there
+    /* This group can be already overridden from before, so insert if not there
        yet and then update the filename */
     resourceGlobals.overrideGroups->emplace(group, std::string{}).first->second = configurationFile;
 }
@@ -375,14 +375,14 @@ Resource::Resource(const Containers::ArrayView<const char> group, void*): _group
 
     if(resourceGlobals.overrideGroups) {
         const std::string groupString{group.data(), group.size()};
-        auto overriden = resourceGlobals.overrideGroups->find(groupString);
-        if(overriden != resourceGlobals.overrideGroups->end()) {
+        auto overridden = resourceGlobals.overrideGroups->find(groupString);
+        if(overridden != resourceGlobals.overrideGroups->end()) {
             Debug{}
-                << "Utility::Resource: group '" << Debug::nospace << groupString << Debug::nospace << "' overriden with '" << Debug::nospace << overriden->second << Debug::nospace << "\'";
-            _overrideGroup = new OverrideData(overriden->second);
+                << "Utility::Resource: group '" << Debug::nospace << groupString << Debug::nospace << "' overridden with '" << Debug::nospace << overridden->second << Debug::nospace << "\'";
+            _overrideGroup = new OverrideData(overridden->second);
 
             if(_overrideGroup->conf.value("group") != groupString) Warning{}
-                << "Utility::Resource: overriden with different group, found '"
+                << "Utility::Resource: overridden with different group, found '"
                 << Debug::nospace << _overrideGroup->conf.value("group")
                 << Debug::nospace << "' but expected '" << Debug::nospace
                 << groupString << Debug::nospace << "'";
@@ -414,7 +414,7 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
 Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayView<const char> filename) const {
     CORRADE_INTERNAL_ASSERT(_group);
 
-    /* The group is overriden with live data */
+    /* The group is overridden with live data */
     if(_overrideGroup) {
         const std::string filenameString{filename.data(), filename.size()};
 
@@ -435,7 +435,7 @@ Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayV
             Containers::Array<char> data;
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_overrideGroup->conf.filename()), file->value("filename")));
             if(!success) {
-                Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overriden group";
+                Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overridden group";
                 break;
             }
 
@@ -446,7 +446,7 @@ Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayV
 
         /* The file was not found, fallback to compiled-in ones */
         Warning() << "Utility::Resource::get(): file '" << Debug::nospace
-            << filenameString << Debug::nospace << "' was not found in overriden group, fallback to compiled-in resources";
+            << filenameString << Debug::nospace << "' was not found in overridden group, fallback to compiled-in resources";
     }
 
     const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, filename);

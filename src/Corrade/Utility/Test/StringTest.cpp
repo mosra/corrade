@@ -305,7 +305,7 @@ void StringTest::partition() {
         (Containers::StaticArray<3, std::string>{"ab", "=", "c"}),
         TestSuite::Compare::Container);
 
-    /* Two occurences */
+    /* Two occurrences */
     CORRADE_COMPARE_AS(String::partition("ab=c=d", '='),
         (Containers::StaticArray<3, std::string>{"ab", "=", "c=d"}),
         TestSuite::Compare::Container);

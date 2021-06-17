@@ -329,7 +329,7 @@ measured value is then divided by that number to represent cost of a single
 iteration. The @ref testCaseRepeatId() returns current sample index and can be
 used to give some input variation to the test. By default the benchmarks
 measure wall clock time, see @ref BenchmarkType for other types of builtin
-benchmarks. The default benchmark type can be also overriden
+benchmarks. The default benchmark type can be also overridden
 @ref TestSuite-Tester-command-line "on the command-line" via `--benchmark`.
 
 It's possible to use all @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc.
@@ -359,7 +359,7 @@ and `GB`. In case of memory the prefixes are multiples of 1024 instead of 1000.
 For easier visual recognition of the values, by default the sample standard
 deviation is colored yellow if it is larger than 5% of the absolute value of
 the mean and red if it is larger than 25% of the absolute value of the mean.
-This can be overriden @ref TestSuite-Tester-command-line "on the command-line"
+This can be overridden @ref TestSuite-Tester-command-line "on the command-line"
 via `--benchmark-yellow` and `--benchmark-red`.
 
 It's possible to have instanced benchmarks as well, see
@@ -401,7 +401,7 @@ is printed on the output, together with a (platform-specific mangled) name of
 the exception type and contents of @ref std::exception::what(). No file/line
 info is provided in this case, as it's not easily possible to know where the
 exception originated from. Only exceptions derived from @ref std::exception are
-caught to avoid interferring with serious issues such as memory access errors.
+caught to avoid interfering with serious issues such as memory access errors.
 If catching unhandled exceptions is not desired (for example when you want to
 do a post-mortem debugging of the stack trace leading to the exception), it can
 be disabled with the `--no-catch` @ref TestSuite-Tester-command-line "command-line option".
@@ -674,7 +674,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
             /**
              * Default. Equivalent to @ref BenchmarkType::WallTime, but can be
-             * overriden on command-line using the `--benchmark` option.
+             * overridden on command-line using the `--benchmark` option.
              */
             Default = 1,
 
@@ -766,7 +766,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * leak checking. Each test case appears in the output log only once.
          * It's not an error to call this function multiple times or add a
          * particular test case more than once --- in that case it will appear
-         * in the output log once for each occurence in the list.
+         * in the output log once for each occurrence in the list.
          * @see @ref TestSuite-Tester-repeated, @ref addInstancedTests(),
          *      @ref addRepeatedInstancedTests()
          */
@@ -803,7 +803,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * again for each repeat of each test case. Each test case appears in
          * the output log only once. It's not an error to call this function
          * multiple times or add a particular test case more than once --- in
-         * that case it will appear in the output log once for each occurence
+         * that case it will appear in the output log once for each occurrence
          * in the list.
          * @see @ref TestSuite-Tester-repeated,
          *      @ref TestSuite-Tester-setup-teardown, @ref addInstancedTests(),
@@ -822,7 +822,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * appears in the output once for each instance. It's not an error to
          * call this function multiple times or add one test case more than
          * once --- in that case it will appear once for each instance of each
-         * occurence in the list.
+         * occurrence in the list.
          * @see @ref TestSuite-Tester-instanced, @ref testCaseInstanceId(),
          *      @ref setTestCaseDescription()
          */
@@ -838,7 +838,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * resource leak checking. Each test case appears in the output once
          * for each instance. It's not an error to call this function multiple
          * times or add one test case more than once --- in that case it will
-         * appear once for each instance of each occurence in the list.
+         * appear once for each instance of each occurrence in the list.
          * @see @ref TestSuite-Tester-repeated,
          *      @ref TestSuite-Tester-instanced, @ref addInstancedTests(),
          *      @ref addRepeatedInstancedTests()
@@ -861,7 +861,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * passed, failed or was skipped. Using verification macros in @p setup
          * or @p teardown function is not allowed. It's not an error to call
          * this function multiple times or add one test case more than once ---
-         * in that case it will appear once for each instance of each occurence
+         * in that case it will appear once for each instance of each occurrence
          * in the list.
          * @see @ref TestSuite-Tester-instanced,
          *      @ref TestSuite-Tester-setup-teardown
@@ -880,7 +880,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * test case appears in the output once for each instance. It's not an
          * error to call this function multiple times or add one test case more
          * than once --- in that case it will appear once for each instance of
-         * each occurence in the list.
+         * each occurrence in the list.
          * @see @ref TestSuite-Tester-repeated,
          *      @ref TestSuite-Tester-instanced,
          *      @ref TestSuite-Tester-setup-teardown, @ref addInstancedTests(),
@@ -993,7 +993,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Each test case appears in the output once for each instance. It's
          * not an error to call this function multiple times or add one
          * benchmark more than once --- in that case it will appear once for
-         * each instance of each occurence in the list.
+         * each instance of each occurrence in the list.
          * @see @ref TestSuite-Tester-benchmark,
          *      @ref TestSuite-Tester-instanced, @ref testCaseInstanceId(),
          *      @ref setTestCaseDescription()
@@ -1019,7 +1019,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @p setup or @p teardown function is not allowed. It's not an error
          * to call this function multiple times or add one benchmark more than
          * once --- in that case it will appear once for each instance of each
-         * occurence in the list.
+         * occurrence in the list.
          * @see @ref TestSuite-Tester-benchmark,
          *      @ref TestSuite-Tester-instanced,
          *      @ref TestSuite-Tester-setup-teardown
@@ -1042,7 +1042,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @p benchmarkEnd parameter ends the measurement and returns measured
          * value, which is in @p units. It's not an error to call this function
          * multiple times or add one benchmark more than once --- in that case
-         * it will appear once for each instance of each occurence in the list.
+         * it will appear once for each instance of each occurrence in the list.
          * @see @ref TestSuite-Tester-benchmark-custom,
          *      @ref TestSuite-Tester-instanced
          */
@@ -1068,7 +1068,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * or was skipped. Using verification macros in @p setup or @p teardown
          * function is not allowed. It's not an error to call this function
          * multiple times or add one benchmark more than once --- in that case
-         * it will appear once for each instance of each occurence in the list.
+         * it will appear once for each instance of each occurrence in the list.
          * @see @ref TestSuite-Tester-benchmark-custom,
          *      @ref TestSuite-Tester-instanced,
          *      @ref TestSuite-Tester-setup-teardown
@@ -1461,7 +1461,7 @@ with code based on the test results. This macro has to be used outside of any
 namespace.
 */
 #ifdef CORRADE_TESTSUITE_TARGET_XCTEST
-/* Needs to have a separate definiton to silence the -Wmissing-prototypes
+/* Needs to have a separate definition to silence the -Wmissing-prototypes
    warning */
 #define CORRADE_TEST_MAIN(Class)                                            \
     int CORRADE_VISIBILITY_EXPORT corradeTestMain(int, char**);             \
@@ -1575,7 +1575,7 @@ with some caveats. See @ref CORRADE_VERIFY() for details.
 */
 /* Similarly as above, doing `CORRADE_COMPARE_AS(foo<T, U>(), b, int)` would
    lead to `foo<T` being the first argument, `U>()` the second and `b, int` the
-   third and lead to extemely cryptic compiler errors. However there's no
+   third and lead to extremely cryptic compiler errors. However there's no
    other way how to pass templated types such as `std::map<int, bool>` (except
    for forcing people to do a typedef and pass that) so we have to leave that
    here even with the risk of the arguments being understood wrong in

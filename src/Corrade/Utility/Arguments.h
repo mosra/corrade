@@ -804,7 +804,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * The @p callback function receives a reference to this instance, a
          * @ref ParseError enum describing what exactly is wrong, and a
          * corresponding key name or command-line argument value on which the
-         * error occured. If the callback returns @cpp false @ce, an error
+         * error occurred. If the callback returns @cpp false @ce, an error
          * message is printed and the program exits. If the callback returns
          * @cpp true @ce, the error is ignored (assumed the application handles
          * it gracefully) and parsing continues. The callback is also allowed

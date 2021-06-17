@@ -87,7 +87,7 @@ local include paths) are sorted and placed on a line containing a
 @cpp // {{includes}} @ce placeholder. If the placeholder is not present, the
 includes are prepended before everything else.
 
-It's possible to have multiple occurences of the @cpp // {{includes}} @ce
+It's possible to have multiple occurrences of the @cpp // {{includes}} @ce
 placeholder, each of them will expand only to newly encountered includes that
 aren't already present before. This can be used to separate away implementation
 details or heavy parts of the library, for example:
@@ -161,7 +161,7 @@ statements are pasted directly on the same line, in specified order, like the C
 preprocessor does. However, for remaining files, to avoid messy nested include
 guards, the files are concatenated in the depth-first other they got included.
 
-If a local file is included multiple times, only the first occurence is taken
+If a local file is included multiple times, only the first occurrence is taken
 and other are ignored. Note that, to make the implementation simpler, this
 works similarly to the @cpp #pragma once @ce statement but without taking the
 actual @cpp #pragma once @ce or header guards into account.

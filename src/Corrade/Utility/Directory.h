@@ -216,7 +216,7 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Fl
 @brief Create path
 
 Returns @cpp true @ce if path was successfully created or already exists,
-@cpp false @ce otherwise. In particular, creating an empty path always suceeds.
+@cpp false @ce otherwise. In particular, creating an empty path always succeeds.
 Expects that the path is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);

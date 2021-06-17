@@ -470,7 +470,7 @@ automatic call:
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection. It's also safe to call this macro more than once.
+of application execution. It's also safe to call this macro more than once.
 
 @see @ref CORRADE_PLUGIN_EJECT()
 */
@@ -494,7 +494,7 @@ Deregisters a plugin previously registered using @ref CORRADE_PLUGIN_IMPORT().
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection. It's also safe to call this macro more than once.
+of application execution. It's also safe to call this macro more than once.
 */
 /* This "bundles" CORRADE_RESOURCE_FINALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_EJECT(name)                                          \

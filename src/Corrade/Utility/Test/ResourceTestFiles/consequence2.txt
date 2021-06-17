@@ -1,1 +1,1 @@
-overriden consequence
+overridden consequence

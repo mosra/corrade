@@ -174,7 +174,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief List of all resources in the group
          *
          * Note that the list contains only list of compiled-in files, no
-         * additional filenames from overriden group are included.
+         * additional filenames from overridden group are included.
          */
         std::vector<std::string> list() const;
 
@@ -257,7 +257,7 @@ macro for an automatic call:
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection. It's also safe to call this macro more than once.
+of application execution. It's also safe to call this macro more than once.
 
 @see @ref CORRADE_RESOURCE_FINALIZE()
 */
@@ -280,7 +280,7 @@ resource anymore.
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection. It's also safe to call this macro more than once.
+of application execution. It's also safe to call this macro more than once.
 */
 #define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \

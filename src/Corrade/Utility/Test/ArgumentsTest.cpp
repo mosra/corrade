@@ -540,7 +540,7 @@ void ArgumentsTest::setHelpKeyForBoolean() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    args.setHelp("help", "this very thing", "HALP");
+    args.setHelp("help", "this very thing", "HELP");
     CORRADE_COMPARE(out.str(), "Utility::Arguments::setHelp(): help key can't be set for boolean option help\n");
 }
 
@@ -655,12 +655,12 @@ void ArgumentsTest::disallowedCharacterShort() {
         .addNamedArgument('-', "dash")
         .addOption(' ', "bar")
         .addArrayOption('#', "hash")
-        .addBooleanOption('?', "halp");
+        .addBooleanOption('?', "help");
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addNamedArgument(): invalid key dash or its short variant\n"
         "Utility::Arguments::addOption(): invalid key bar or its short variant\n"
         "Utility::Arguments::addArrayOption(): invalid key hash or its short variant\n"
-        "Utility::Arguments::addBooleanOption(): invalid key halp or its short variant\n");
+        "Utility::Arguments::addBooleanOption(): invalid key help or its short variant\n");
 }
 
 void ArgumentsTest::disallowedIgnoreUnknown() {
@@ -1684,7 +1684,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
                     CORRADE_COMPARE(key, "v");
                     return true;
                 case Arguments::ParseError::UnknownArgument:
-                    CORRADE_COMPARE(key, "halp");
+                    CORRADE_COMPARE(key, "help");
                     return true;
                 case Arguments::ParseError::MissingValue:
                     CORRADE_COMPARE(key, "output");
@@ -1704,7 +1704,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
             return true;
         }, &count);
 
-    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--output" };
+    const char* argv[] = { "", "-?", "--!!", "-v", "--help", "-help", "--hello", "--output" };
     /* The parsing should ignore the errors, not die where it shouldn't, but
        still extracting the valid optionas */
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
