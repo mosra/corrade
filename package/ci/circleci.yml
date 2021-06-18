@@ -53,6 +53,15 @@ commands:
         default: ""
     steps:
     - run:
+        # ninja needs python@3.9 as a dependency FOR SOME FUCKING REASON and
+        # when THE DAMN THING installs it, it proceeds with reinstalling
+        # python@2. FROM SOURCES! FUCK! and then it fails to link it because
+        # NO SHIT, python@3.9 is already installed! HOW THE FUCK ARE PEOPLE
+        # ABLE TO DEAL WITH SUCH CURSED SHIT ALL THE TIME?! FUCK OFF
+        name: Remove Python 2 curse
+        command: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall python@2
+    - run:
         name: Install base packages
         # As usual, homebrew takes five minutes to update and then explodes in
         # a spectacular way. How is this acceptable?!
