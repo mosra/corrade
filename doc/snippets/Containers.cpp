@@ -494,7 +494,7 @@ static_cast<void>(b);
 /* [arraySize] */
 int data[15];
 
-std::size_t size = Containers::arraySize(data); // size == 5
+std::size_t size = Containers::arraySize(data); // size == 15
 /* [arraySize] */
 static_cast<void>(size);
 }
