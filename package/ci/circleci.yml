@@ -13,9 +13,12 @@ executors:
   ubuntu-16_04:
     docker:
     - image: ubuntu:xenial-20201014
-  xcode-9_4:
+  xcode-10_2:
     macos:
-      xcode: 9.4.1
+      # Since 2021-06-15, Homebrew proceeds with compiling Python by hand on
+      # macOS 10.13, as only 10.14 and up bottles are provided. So that forces
+      # me to drop testing for < 10.14 as well. FFS.
+      xcode: 10.2.1
   emscripten:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
@@ -233,7 +236,7 @@ jobs:
         script: unix-desktop.sh
 
   macos:
-    executor: xcode-9_4
+    executor: xcode-10_2
     environment:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
@@ -244,7 +247,7 @@ jobs:
     - lcov
 
   macos-static:
-    executor: xcode-9_4
+    executor: xcode-10_2
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
