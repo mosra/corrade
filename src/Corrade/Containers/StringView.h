@@ -159,7 +159,7 @@ of delimiter characters</li>
 <li>@ref join() and @ref joinWithoutEmptyParts() is an inverse of the
 above</li>
 <li>@ref partition() is similar to @ref split(), but always returning three
-elements with a clearly defined behavio, which can make certain code more
+elements with a clearly defined behavior, which can make certain code more
 robust while reducing the amount of possible error states</li>
 <li>@ref trimmed() (and its variants @ref trimmedPrefix() /
 @ref trimmedSuffix()), commonly used to remove leading and trailing
