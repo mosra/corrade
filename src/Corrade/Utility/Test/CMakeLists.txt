@@ -139,6 +139,8 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/hierarchic-shortcuts.conf
         ConfigurationTestFiles/hierarchic-shortcuts-modified.conf
         ConfigurationTestFiles/hýždě.conf
+        ConfigurationTestFiles/iterate.conf
+        ConfigurationTestFiles/iterate-modified.conf
         ConfigurationTestFiles/missing-equals.conf
         ConfigurationTestFiles/missing-quote.conf
         ConfigurationTestFiles/missing-multiline-quote.conf

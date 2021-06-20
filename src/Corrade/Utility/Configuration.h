@@ -192,6 +192,21 @@ class=AbstractFactoryListenerProviderDelegate
 class=BeanFactoryListenerProviderDelegateGarbageAllocator
 @endcode
 
+@section Utility-Configuration-iteration Iteration through groups and values
+
+Apart from accessing groups and values of known names using @ref group(),
+@ref value() and friends, it's also possible to groups through all groups and
+values in the configuration using @ref groups() and @ref values(). These
+functions return an iterable class that then returns key/value pairs (or, in
+case of groups, name/group). One possible use is to enumerate all group and
+value names in the file:
+
+@snippet Utility.cpp Configuration-iteration
+
+When iterating through values, comments and empty lines are skipped --- while
+those are preserved in the file, there's no possibility to access them in any
+way.
+
 @todo Renaming, copying groups
 @todo EOL autodetection according to system on unsure/new files (default is
     preserve)

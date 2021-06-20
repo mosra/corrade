@@ -26,10 +26,57 @@
 
 #include "ConfigurationGroup.h"
 
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 
 namespace Corrade { namespace Utility {
+
+/* Instantiated first to avoid warnings about the export macro being used too
+   late */
+template class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroups<ConfigurationGroup>;
+template class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroups<const ConfigurationGroup>;
+
+template<class T> Containers::Pair<Containers::StringView, Containers::Reference<T>> ConfigurationGroup::BasicGroupIterator<T>::operator*() const {
+    return {_group->name, *_group->group};
+}
+
+template<class T> auto ConfigurationGroup::BasicGroupIterator<T>::operator++(int) -> BasicGroupIterator<T> {
+    const BasicGroupIterator<T> out = *this;
+    ++_group;
+    return out;
+}
+
+template class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroupIterator<ConfigurationGroup>;
+template class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroupIterator<const ConfigurationGroup>;
+
+Containers::Pair<Containers::StringView, Containers::StringView> ConfigurationGroup::ValueIterator::operator*() const {
+    return {_value->key, _value->value};
+}
+
+auto ConfigurationGroup::ValueIterator::operator++() -> ValueIterator& {
+    /* Values with empty keys are comments, skip those. On the other hand be
+       sure to not skip past the end. */
+    do ++_value; while(_value != _end && _value->key.empty());
+    return *this;
+}
+
+auto ConfigurationGroup::ValueIterator::operator++(int) -> ValueIterator {
+    const ValueIterator out = *this;
+    /* Values with empty keys are comments, skip those. On the other hand be
+       sure to not skip past the end. */
+    do ++_value; while(_value != _end && _value->key.empty());
+    return out;
+}
+
+ConfigurationGroup::Values::Values(const Value* begin, const Value* end) noexcept: _begin{begin}, _end{end} {
+    /* Values with empty keys are comments, skip those and fake the begin to be
+       at the first real key/value pair. */
+    while(_begin != _end && _begin->key.empty())
+        ++_begin;
+}
 
 ConfigurationGroup::ConfigurationGroup(): _configuration(nullptr) {}
 
@@ -84,6 +131,18 @@ ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) {
 ConfigurationGroup::~ConfigurationGroup() {
     for(Group& group: _groups)
         delete group.group;
+}
+
+auto ConfigurationGroup::groups() -> BasicGroups<ConfigurationGroup> {
+    /* STL iterators. Only pain, nothing else. */
+    return _groups.empty() ? BasicGroups<ConfigurationGroup>{nullptr, nullptr} :
+        BasicGroups<ConfigurationGroup>{&_groups[0], &_groups[0] + _groups.size()};
+}
+
+auto ConfigurationGroup::groups() const -> BasicGroups<const ConfigurationGroup> {
+    /* STL iterators. Only pain, nothing else. */
+    return _groups.empty() ? BasicGroups<const ConfigurationGroup>{nullptr, nullptr} :
+        BasicGroups<const ConfigurationGroup>{&_groups[0], &_groups[0] + _groups.size()};
 }
 
 auto ConfigurationGroup::findGroup(const std::string& name, const unsigned int index) -> std::vector<Group>::iterator {
@@ -194,6 +253,12 @@ void ConfigurationGroup::removeAllGroups(const std::string& name) {
     }
 
     if(_configuration) _configuration->_flags |= Configuration::InternalFlag::Changed;
+}
+
+auto ConfigurationGroup::values() const -> Values {
+    /* STL iterators. Only pain, nothing else. */
+    return _values.empty() ? Values{nullptr, nullptr} :
+        Values{&_values[0], &_values[0] + _values.size()};
 }
 
 auto ConfigurationGroup::findValue(const std::string& key, const unsigned int index) const -> std::vector<Value>::const_iterator {

@@ -31,6 +31,8 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
@@ -405,6 +407,28 @@ conf.addValue("a", 3);
 
 conf.save();
 /* [Configuration-usage] */
+}
+
+{
+/* [Configuration-iteration] */
+Utility::ConfigurationGroup conf{DOXYGEN_IGNORE()};
+
+Utility::Debug{} << "Available subgroups:";
+for(Containers::Pair<Containers::StringView,
+                     Containers::Reference<Utility::ConfigurationGroup>> g:
+    conf.groups())
+{
+    Utility::Debug{} << g.first() << "with"
+                     << g.second()->valueCount() << "values";
+}
+
+Utility::Debug{} << Utility::Debug::newline << "Available values:";
+for(Containers::Pair<Containers::StringView, Containers::StringView> v:
+    conf.values())
+{
+    Utility::Debug{} << v.first() << "is set to" << v.second();
+}
+/* [Configuration-iteration] */
 }
 
 {

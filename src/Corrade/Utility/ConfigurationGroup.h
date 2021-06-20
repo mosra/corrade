@@ -52,6 +52,37 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
     friend Configuration;
 
     public:
+        template<class T> class BasicGroupIterator;
+
+        /**
+         * @brief Mutable configuration group iterator
+         * @m_since_latest
+         */
+        typedef BasicGroupIterator<ConfigurationGroup> MutableGroupIterator;
+
+        /**
+         * @brief Configuration group iterator
+         * @m_since_latest
+         */
+        typedef BasicGroupIterator<const ConfigurationGroup> GroupIterator;
+
+        template<class T> class BasicGroups;
+
+        /**
+         * @brief Mutable iterator access to configuration groups
+         * @m_since_latest
+         */
+        typedef BasicGroups<ConfigurationGroup> MutableGroups;
+
+        /**
+         * @brief Iterator access to configuration groups
+         * @m_since_latest
+         */
+        typedef BasicGroups<const ConfigurationGroup> Groups;
+
+        class ValueIterator;
+        class Values;
+
         /**
          * @brief Default constructor
          *
@@ -116,6 +147,19 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         bool isEmpty() const { return _values.empty() && _groups.empty(); }
 
         /** @{ @name Group operations */
+
+        /**
+         * @brief Iterate through subgroups
+         * @m_since_latest
+         *
+         * See @ref Utility-Configuration-iteration for more information.
+         */
+        MutableGroups groups();
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        Groups groups() const;
 
         /**
          * @brief Whether this group has subgroups
@@ -221,6 +265,14 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
 
         /** @{ @name Value operations */
+
+        /**
+         * @brief Iterate through values
+         * @m_since_latest
+         *
+         * See @ref Utility-Configuration-iteration for more information.
+         */
+        Values values() const;
 
         /**
          * @brief Whether this group has any values
@@ -429,6 +481,187 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         std::vector<Group> _groups;
 
         Configuration* _configuration;
+};
+
+/**
+@brief Base for configuration group iterators
+@m_since_latest
+
+Used through the @ref GroupIterator / @ref MutableGroupIterator typedefs and
+returned when iterating @ref ConfigurationGroup::groups(). See
+@ref Utility-Configuration-iteration for more information.
+*/
+template<class T> class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroupIterator {
+    public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
+
+        constexpr explicit BasicGroupIterator(Group* group) noexcept: _group{group} {}
+        #endif
+
+        /**
+         * @brief Dereference the iterator
+         *
+         * Returns a pair of a group name and a (mutable or @cpp const @ce)
+         * @ref ConfigurationGroup reference. The string view is owned by the
+         * originating @ref ConfigurationGroup, isn't guaranteed to be
+         * @ref Containers::StringViewFlag::NullTerminated and may get
+         * invalidated when groups are added or removed. The group reference is
+         * invalidated only if given group is removed.
+         */
+        Containers::Pair<Containers::StringView, Containers::Reference<T>> operator*() const;
+
+        /* Ah, C++, why the hell does operator->() have to return a pointer?!
+           I can't thus implement things like it->first() because the
+           ConfigurationGroup itself would need to store those pairs already.
+           FFS. */
+
+        /** @brief Equality comparison */
+        bool operator==(const BasicGroupIterator<T>& other) const {
+            return _group == other._group;
+        }
+
+        /** @brief Non-equality comparison */
+        bool operator!=(const BasicGroupIterator<T>& other) const {
+            return !operator==(other);
+        }
+
+        /** @brief Increment the iterator */
+        BasicGroupIterator<T>& operator++() {
+            ++_group;
+            return *this;
+        }
+
+        /** @brief Post-increment the iterator */
+        BasicGroupIterator<T> operator++(int);
+
+    private:
+        Group* _group;
+};
+
+/**
+@brief Base for iterator access to configuration groups
+@m_since_latest
+
+Used through the @ref GroupIterator / @ref MutableGroupIterator typedefs and
+returned from @ref ConfigurationGroup::groups(). See
+@ref Utility-Configuration-iteration for more information.
+*/
+template<class T> class ConfigurationGroup::BasicGroups {
+    public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
+
+        constexpr explicit BasicGroups(Group* begin, Group* end) noexcept: _begin{begin}, _end{end} {}
+        #endif
+
+        /** @brief First subgroup */
+        BasicGroupIterator<T> begin() const {
+            return BasicGroupIterator<T>{_begin};
+        }
+        /** @overload */
+        BasicGroupIterator<const T> cbegin() const {
+            return BasicGroupIterator<const T>{_begin};
+        }
+        /** @brief (One item after) last subgroup */
+        BasicGroupIterator<T> end() const {
+            return BasicGroupIterator<T>{_end};
+        }
+        /** @overload */
+        BasicGroupIterator<const T> cend() const {
+            return BasicGroupIterator<const T>{_end};
+        }
+
+    private:
+        Group* _begin;
+        Group* _end;
+};
+
+/**
+@brief Configuration value iterator
+@m_since_latest
+
+Returned when iterating @ref ConfigurationGroup::values(). See
+@ref Utility-Configuration-iteration for more information.
+*/
+class CORRADE_UTILITY_EXPORT ConfigurationGroup::ValueIterator {
+    public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        /* Needs to have the end pointer as well as it's skipping over comment
+           entries when iterating and needs to know when to stop */
+        constexpr explicit ValueIterator(const Value* value, const Value* end) noexcept: _value{value}, _end{end} {}
+        #endif
+
+        /**
+         * @brief Dereference the iterator
+         *
+         * Returns a key/value pair. The string views are owned by the
+         * originating @ref ConfigurationGroup, aren't guaranteed to be
+         * @ref Containers::StringViewFlag::NullTerminated and may get
+         * invalidated when values are added or removed.
+         */
+        Containers::Pair<Containers::StringView, Containers::StringView> operator*() const;
+
+        /* Ah, C++, why the hell does operator->() have to return a pointer?!
+           I can't thus implement things like it->first() because the
+           ConfigurationGroup itself would need to store those pairs already.
+           FFS. */
+
+        /** @brief Equality comparison */
+        bool operator==(const ValueIterator& other) const {
+            return _value == other._value;
+        }
+
+        /** @brief Non-equality comparison */
+        bool operator!=(const ValueIterator& other) const {
+            return !operator==(other);
+        }
+
+        /** @brief Pre-increment the iterator */
+        ValueIterator& operator++();
+
+        /** @brief Post-increment the iterator */
+        ValueIterator operator++(int);
+
+    private:
+        const Value* _value;
+        const Value* _end;
+};
+
+
+/**
+@brief Iterator access to configuration values
+@m_since_latest
+
+Returned from @ref ConfigurationGroup::values(). See
+@ref Utility-Configuration-iteration for more information.
+*/
+class ConfigurationGroup::Values {
+    public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        explicit Values(const Value* begin, const Value* end) noexcept;
+        #endif
+
+        /** @brief First value */
+        ValueIterator begin() const {
+            return ValueIterator{_begin, _end};
+        }
+        /** @overload */
+        ValueIterator cbegin() const {
+            return ValueIterator{_begin, _end};
+        }
+        /** @brief (One item after) last value */
+        ValueIterator end() const {
+            return ValueIterator{_end, _end};
+        }
+        /** @overload */
+        ValueIterator cend() const {
+            return ValueIterator{_end, _end};
+        }
+
+    private:
+        const Value* _begin;
+        const Value* _end;
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

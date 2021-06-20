@@ -29,6 +29,9 @@
 #include <utility>
 #include <vector>
 
+#include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
@@ -75,7 +78,18 @@ struct ConfigurationTest: TestSuite::Tester {
     void standaloneGroup();
     void copy();
     void move();
+
+    void iterateGroups();
+    void iterateGroupsRangeFor();
+    void iterateGroupsMutable();
+    void iterateGroupsEmpty();
+    void iterateValues();
+    void iterateValuesRangeFor();
+    void iterateValuesEmpty();
+    void iterateValuesCommentsOnly();
 };
+
+using namespace Containers::Literals;
 
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
@@ -108,7 +122,16 @@ ConfigurationTest::ConfigurationTest() {
 
               &ConfigurationTest::standaloneGroup,
               &ConfigurationTest::copy,
-              &ConfigurationTest::move});
+              &ConfigurationTest::move,
+
+              &ConfigurationTest::iterateGroups,
+              &ConfigurationTest::iterateGroupsRangeFor,
+              &ConfigurationTest::iterateGroupsMutable,
+              &ConfigurationTest::iterateGroupsEmpty,
+              &ConfigurationTest::iterateValues,
+              &ConfigurationTest::iterateValuesRangeFor,
+              &ConfigurationTest::iterateValuesEmpty,
+              &ConfigurationTest::iterateValuesCommentsOnly});
 
     /* Create testing dir */
     Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
@@ -616,6 +639,130 @@ void ConfigurationTest::move() {
     CORRADE_VERIFY(confConstructedMove.isEmpty());
     CORRADE_VERIFY(confAssignedMove.configuration() == &confAssignedMove);
     CORRADE_VERIFY(confAssignedMove.group("group")->configuration() == &confAssignedMove);
+}
+
+void ConfigurationTest::iterateGroups() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    /* No matter whether the originating ConfigurationGroup is const or not,
+       it should be possible to use the immutable type */
+    const ConfigurationGroup* groupsOnly = conf.group("groupsOnly");
+    CORRADE_VERIFY(groupsOnly);
+    ConfigurationGroup::Groups groups = groupsOnly->groups();
+    CORRADE_VERIFY(groups.begin() == groups.cbegin());
+    CORRADE_VERIFY(groups.end() == groups.cend());
+    CORRADE_VERIFY(groups.begin() != groups.end());
+
+    ConfigurationGroup::GroupIterator it = groups.begin();
+
+    /* Test post-increment, dereference and return value */
+    Containers::Pair<Containers::StringView, Containers::Reference<const ConfigurationGroup>> a = *(it++);
+    CORRADE_COMPARE(a.first(), "a");
+    CORRADE_COMPARE(a.second()->value("yes"), "yes");
+
+    Containers::Pair<Containers::StringView, Containers::Reference<const ConfigurationGroup>> b = *it;
+    CORRADE_COMPARE(b.first(), "b");
+    CORRADE_COMPARE(b.second()->value("yes"), "no");
+
+    /* Test pre-increment */
+    CORRADE_VERIFY(++it == groups.end());
+}
+
+void ConfigurationTest::iterateGroupsRangeFor() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    /* No matter whether the originating ConfigurationGroup is const or not,
+       it should be possible to use the immutable type */
+    const ConfigurationGroup* mixed = conf.group("mixed");
+    CORRADE_VERIFY(mixed);
+    Containers::Array<Containers::StringView> names;
+    for(Containers::Pair<Containers::StringView, Containers::Reference<const ConfigurationGroup>> g: mixed->groups()) {
+        arrayAppend(names, g.first());
+    }
+
+    CORRADE_COMPARE_AS(names,
+        Containers::arrayView({"first"_s, "subgroup"_s, "subgroup"_s, "last"_s}),
+        TestSuite::Compare::Container);
+}
+
+void ConfigurationTest::iterateGroupsMutable() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"));
+
+    ConfigurationGroup* mixed = conf.group("mixed");
+    CORRADE_VERIFY(mixed);
+    CORRADE_VERIFY(mixed->groups().begin() != mixed->groups().end());
+    CORRADE_COMPARE((*mixed->groups().begin()).first(), "first"_s);
+    (*mixed->groups().begin()).second()->setValue("psot", "frist!");
+
+    conf.save();
+
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"),
+        Directory::join(CONFIGURATION_TEST_DIR, "iterate-modified.conf"),
+        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::iterateGroupsEmpty() {
+    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* valuesOnly = conf.group("valuesOnly");
+    CORRADE_VERIFY(valuesOnly);
+    CORRADE_VERIFY(valuesOnly->groups().begin() == valuesOnly->groups().end());
+}
+
+void ConfigurationTest::iterateValues() {
+    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* valuesOnly = conf.group("valuesOnly");
+    CORRADE_VERIFY(valuesOnly);
+    ConfigurationGroup::Values values = valuesOnly->values();
+    CORRADE_VERIFY(values.begin() == values.cbegin());
+    CORRADE_VERIFY(values.end() == values.cend());
+    CORRADE_VERIFY(values.begin() != values.end());
+
+    ConfigurationGroup::ValueIterator it = values.begin();
+
+    /* Test pre-increment, dereference and return value */
+    Containers::Pair<Containers::StringView, Containers::StringView> a = *(it++);
+    CORRADE_COMPARE(a, pair("a"_s, "42"_s));
+
+    CORRADE_COMPARE(*it, pair("duplicate"_s, "this should be first"_s));
+    /* Test pre-increment */
+    CORRADE_COMPARE(*(++it), pair("duplicate"_s, "this second"_s));
+    CORRADE_COMPARE(*(++it), pair("multiline"_s, "ah\nwell"_s));
+
+    CORRADE_VERIFY(++it == values.end());
+}
+
+void ConfigurationTest::iterateValuesRangeFor() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* mixed = conf.group("mixed");
+    CORRADE_VERIFY(mixed);
+    Containers::Array<Containers::Pair<Containers::StringView, Containers::StringView>> values;
+    for(Containers::Pair<Containers::StringView, Containers::StringView> g: mixed->values()) {
+        arrayAppend(values, InPlaceInit, g.first(), g.second());
+    }
+
+    CORRADE_COMPARE_AS(values,
+        Containers::arrayView({pair("b"_s, "value"_s), pair("a"_s, "also"_s)}),
+        TestSuite::Compare::Container);
+}
+
+void ConfigurationTest::iterateValuesEmpty() {
+    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* groupsOnly = conf.group("groupsOnly");
+    CORRADE_VERIFY(groupsOnly);
+    CORRADE_VERIFY(groupsOnly->values().begin() == groupsOnly->values().end());
+}
+
+void ConfigurationTest::iterateValuesCommentsOnly() {
+    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* commentsOnly = conf.group("commentsOnly");
+    CORRADE_VERIFY(commentsOnly);
+    CORRADE_VERIFY(commentsOnly->values().begin() == commentsOnly->values().end());
 }
 
 }}}}
