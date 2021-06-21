@@ -531,13 +531,23 @@ void StridedArrayViewTest::dimensionsConstructView() {
 void StridedArrayViewTest::dimensionsConstructNoInit() {
     Size3D a{1, 37, 4564};
 
+    /* GCC 11 misoptimizes only if I don't expect it, so I have to check every
+       value this stupidly */
     new(&a)Size3D{Corrade::NoInit};
     {
         #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
-        CORRADE_EXPECT_FAIL("GCC 10+ misoptimizes and overwrites the value.");
+        CORRADE_EXPECT_FAIL_IF(a[0] != 1, "GCC 10+ misoptimizes and overwrites the value.");
         #endif
         CORRADE_COMPARE(a[0], 1);
+    } {
+        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        CORRADE_EXPECT_FAIL_IF(a[1] != 37, "GCC 10+ misoptimizes and overwrites the value.");
+        #endif
         CORRADE_COMPARE(a[1], 37);
+    } {
+        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        CORRADE_EXPECT_FAIL_IF(a[2] != 4564, "GCC 10+ misoptimizes and overwrites the value.");
+        #endif
         CORRADE_COMPARE(a[2], 4564);
     }
 

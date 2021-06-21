@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 
@@ -66,7 +67,13 @@ void CppStandardTest::test() {
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
     #endif
     #elif defined(COMPILING_AS_CPP14)
-    CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
+    {
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 11
+        CORRADE_EXPECT_FAIL_IF(testName() == "Cpp14StandardTestCMakeFeatures",
+            "CMake (3.20.4) doesn't properly set -std=c++14 for GCC 11, making it default to C++17 instead.");
+        #endif
+        CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
+    }
     #elif defined(COMPILING_AS_CPP17)
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201703L);
     #elif defined(COMPILING_AS_CPP2A)
