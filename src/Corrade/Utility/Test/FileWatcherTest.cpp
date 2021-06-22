@@ -283,10 +283,15 @@ void FileWatcherTest::changedCleared() {
     /* A change right after should not get detected, since it's too soon */
     CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
     bool changed = watcher.hasChanged();
-    #if !defined(CORRADE_TARGET_APPLE) && !defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    if(changed) CORRADE_SKIP("Gah! Your system is too fast.");
-    #endif
-    CORRADE_VERIFY(!changed); /* Nothing changed second time */
+    {
+        #if !defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Started happening on CircleCI macOS as well after an update to XCode
+        10.2 image on 2021-06-15, previously this was linux-specific. Maybe the
+        timer resolution got better there? Needs further investigation. */
+        CORRADE_EXPECT_FAIL_IF(changed, "Gah! Your system is too fast.");
+        #endif
+        CORRADE_VERIFY(!changed); /* Nothing changed second time */
+    }
 }
 
 void FileWatcherTest::changedClearedIgnoreEmpty() {
