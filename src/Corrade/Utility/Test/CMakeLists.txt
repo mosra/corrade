@@ -238,6 +238,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
 endif()
 
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp)
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
@@ -314,6 +315,7 @@ set_target_properties(
     UtilityStlForwardTupleTest
     UtilityStlForwardVectorTest
     UtilityStringTest
+    UtilityStringBenchmark
     UtilitySystemTest
     UtilityTypeTraitsTest
     UtilityUnicodeTest

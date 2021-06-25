@@ -423,17 +423,55 @@ inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings
 }
 
 /**
-@brief Convert string to lowercase
+@brief Convert ASCII characters in a string to lowercase, in place
+@m_since_latest
 
-@attention Doesn't work with UTF-8.
+Replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ` with a corresponding
+character from `abcdefghijklmnopqrstuvwxyz`. Deliberately supports only ASCII
+as Unicode-aware case conversion is a much more complex topic.
+@see @ref lowercase()
 */
+CORRADE_UTILITY_EXPORT void lowercaseInPlace(Containers::MutableStringView string);
+
+/**
+@brief Convert ASCII characters in a string to lowercase
+@m_since_latest
+
+Allocates a copy and replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+with a corresponding character from `abcdefghijklmnopqrstuvwxyz`. Deliberately
+supports only ASCII as Unicode-aware case conversion is a much more complex
+topic.
+@see @ref lowercaseInPlace()
+*/
+CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::StringView string);
+
+/** @overload */
 CORRADE_UTILITY_EXPORT std::string lowercase(std::string string);
 
 /**
-@brief Convert string to uppercase
+@brief Convert ASCII characters in a string to uppercase, in place
+@m_since_latest
 
-@attention Doesn't work with UTF-8.
+Replaces any character from `abcdefghijklmnopqrstuvwxyz` with a corresponding
+character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately supports only ASCII
+as Unicode-aware case conversion is a much more complex topic.
+@see @ref uppercase()
 */
+CORRADE_UTILITY_EXPORT void uppercaseInPlace(Containers::MutableStringView string);
+
+/**
+@brief Convert ASCII characters in a string to uppercase, in place
+@m_since_latest
+
+Allocates a copy and replaces any character from `abcdefghijklmnopqrstuvwxyz`
+with a corresponding character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately
+supports only ASCII as Unicode-aware case conversion is a much more complex
+topic.
+@see @ref uppercaseInPlace()
+*/
+CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::StringView string);
+
+/** @overload */
 CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 
 /**

@@ -29,6 +29,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -46,8 +47,8 @@ struct StringTest: TestSuite::Tester {
     void splitMultipleCharacters();
     void partition();
     void join();
-    void lowercase();
-    void uppercase();
+    void lowercaseUppercase();
+    void lowercaseUppercaseStl();
 
     void beginsWith();
     void beginsWithEmpty();
@@ -84,8 +85,8 @@ StringTest::StringTest() {
               &StringTest::splitMultipleCharacters,
               &StringTest::partition,
               &StringTest::join,
-              &StringTest::lowercase,
-              &StringTest::uppercase,
+              &StringTest::lowercaseUppercase,
+              &StringTest::lowercaseUppercaseStl,
 
               &StringTest::beginsWith,
               &StringTest::beginsWithEmpty,
@@ -113,6 +114,8 @@ StringTest::StringTest() {
               &StringTest::replaceAllEmptyReplace,
               &StringTest::replaceAllCycle});
 }
+
+using namespace Containers::Literals;
 
 void StringTest::fromArray() {
     CORRADE_COMPARE(String::fromArray(nullptr), "");
@@ -380,34 +383,68 @@ void StringTest::join() {
         "ab/c/def");
 }
 
-void StringTest::lowercase() {
-    /* Lowercase */
-    CORRADE_COMPARE(String::lowercase("hello"), "hello");
+void StringTest::lowercaseUppercase() {
+    /* Because the conversion is done using a bit operation on a range, check
+       that the conversion is done on all characters and there's no off-by-one
+       error at the bounds */
+    {
+        Containers::StringView lowercase = "`abcdefghijklmnopqrstuvwxyz{";
+        Containers::StringView uppercase = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[";
+        CORRADE_COMPARE(lowercase.size(), uppercase.size());
+        for(std::size_t i = 0; i != lowercase.size() - 1; ++i) {
+            CORRADE_ITERATION(i, lowercase[i], uppercase[i]);
+            /* The tested range should be contiguous */
+            CORRADE_COMPARE(lowercase[i] + 1, lowercase[i + 1]);
+            CORRADE_COMPARE(uppercase[i] + 1, uppercase[i + 1]);
+        }
 
-    /* Uppercase */
-    CORRADE_COMPARE(String::lowercase("QWERTZUIOP"), "qwertzuiop");
+        /* The conversion should NOT change the non-alpha characters before/
+           after! Have two checks for this to reduce the possibility of someone
+           "cleaning this up" in the future. */
+        CORRADE_COMPARE(String::uppercase(lowercase), "`ABCDEFGHIJKLMNOPQRSTUVWXYZ{");
+        CORRADE_COMPARE(String::lowercase(uppercase), "@abcdefghijklmnopqrstuvwxyz[");
+        CORRADE_VERIFY(String::uppercase(lowercase) != uppercase);
+        CORRADE_VERIFY(String::uppercase(uppercase) != lowercase);
+
+    /* No-op */
+    } {
+        CORRADE_COMPARE(String::lowercase("hello"_s), "hello");
+        CORRADE_COMPARE(String::uppercase("YEAH"_s), "YEAH");
+
+    /* Lowercase / uppercase */
+    } {
+        CORRADE_COMPARE(String::lowercase("YEAh!"_s), "yeah!");
+        CORRADE_COMPARE(String::uppercase("Hello!"_s), "HELLO!");
 
     /* Special chars */
-    CORRADE_COMPARE(String::lowercase(".,?- \"!/(98765%"), ".,?- \"!/(98765%");
+    } {
+        Containers::StringView a = ".,?- \"!/(98765%";
+        CORRADE_COMPARE(String::lowercase(a), a);
+        CORRADE_COMPARE(String::uppercase(a), a);
 
-    /* UTF-8 */
-    CORRADE_EXPECT_FAIL("UTF-8 lowercasing is not supported.");
-    CORRADE_COMPARE(String::lowercase("ĚŠČŘŽÝÁÍÉÚŮĎŤŇ"), "ěščřžýáíéúůďťň");
+    /* UTF-8 deliberately not changed in any way */
+    } {
+        CORRADE_COMPARE(String::lowercase("HÝŽDĚ"_s), "hÝŽdĚ");
+        CORRADE_COMPARE(String::uppercase("hýždě"_s), "HýžDě");
+
+    /* In-place. These are called from the copying functions so just verify
+       they're exported and callable, every */
+    } {
+        Containers::String yeah = "YEAh!"_s;
+        String::lowercaseInPlace(yeah);
+        CORRADE_COMPARE(yeah, "yeah!");
+
+        Containers::String hello = "Hello!"_s;
+        String::uppercaseInPlace(hello);
+        CORRADE_COMPARE(hello, "HELLO!");
+    }
 }
 
-void StringTest::uppercase() {
-    /* Lowercase */
-    CORRADE_COMPARE(String::uppercase("hello"), "HELLO");
-
-    /* Uppercase */
-    CORRADE_COMPARE(String::uppercase("QWERTZUIOP"), "QWERTZUIOP");
-
-    /* Special chars */
-    CORRADE_COMPARE(String::uppercase(".,?- \"!/(98765%"), ".,?- \"!/(98765%");
-
-    /* UTF-8 */
-    CORRADE_EXPECT_FAIL("UTF-8 uppercasing is not supported.");
-    CORRADE_COMPARE(String::uppercase("ěščřžýáíéúůďťň"), "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ");
+void StringTest::lowercaseUppercaseStl() {
+    /* These just call into the in-place implementations tested above, so
+       verify just basic functionality */
+    CORRADE_COMPARE(String::lowercase(std::string{"YEAh!"}), "yeah!");
+    CORRADE_COMPARE(String::uppercase(std::string{"Hello!"}), "HELLO!");
 }
 
 void StringTest::beginsWith() {

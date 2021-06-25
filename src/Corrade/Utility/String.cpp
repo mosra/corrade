@@ -232,13 +232,46 @@ Containers::StaticArray<3, std::string> rpartition(const std::string& string, co
     return rpartitionInternal(string, {separator.data(), separator.size()});
 }
 
+void lowercaseInPlace(const Containers::MutableStringView string) {
+    /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
+       std::tolower() / std::toupper() causes a mutex lock and a virtual
+       dispatch per character (!!). A proper Unicode-aware *and* locale-aware
+       solution would involve far more than iterating over bytes anyway --
+       multi-byte characters, composed characters (ä formed from ¨ and a),
+       SS -> ß in German but not elsewhere etc... */
+    for(char& c: string) if(c >= 'A' && c <= 'Z') c |= 0x20;
+}
+
+void uppercaseInPlace(const Containers::MutableStringView string) {
+    /* See above for why std::toupper() is banned here */
+    for(char& c: string) if(c >= 'a' && c <= 'z') c &= ~0x20;
+}
+
+Containers::String lowercase(const Containers::StringView string) {
+    /* Theoretically doing the copy in the same loop as case change could be
+       faster for *really long* strings due to cache reuse, but until that
+       proves to be a bottleneck I'll go with the simpler solution. */
+    Containers::String out{string};
+    lowercaseInPlace(out);
+    return out;
+}
+
 std::string lowercase(std::string string) {
-    std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
+    lowercaseInPlace(string);
     return string;
 }
 
+Containers::String uppercase(const Containers::StringView string) {
+    /* Theoretically doing the copy in the same loop as case change could be
+       faster for *really long* strings due to cache reuse, but until that
+       proves to be a bottleneck I'll go with the simpler solution. */
+    Containers::String out{string};
+    uppercaseInPlace(out);
+    return out;
+}
+
 std::string uppercase(std::string string) {
-    std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
+    uppercaseInPlace(string);
     return string;
 }
 

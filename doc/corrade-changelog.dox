@@ -99,6 +99,10 @@ namespace Corrade {
 -   @ref Utility::ConfigurationGroup gained an ability to iterate through its
     values and subgroups using @relativeref{Utility::ConfigurationGroup,values()}
     and @relativeref{Utility::ConfigurationGroup,groups()}
+-   Added @ref Utility::String::lowercaseInPlace() and @relativeref{Utility::String,uppercaseInPlace()}
+    together with @ref Utility::String::lowercase() and
+    @relativeref{Utility::String,uppercase()} overloads taking a
+    @ref Containers::StringView
 -   New @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() macro for assertions that can
     be evaluated directly inside larger expressions
 -   New @ref CORRADE_LIKELY() and @ref CORRADE_UNLIKELY() macros for
@@ -307,6 +311,12 @@ namespace Corrade {
     to it now requires an explicit @cpp #include <Corrade/Utility/DebugStl.h> @ce.
     Alternatively, if string concatenation was used, you can compose the
     message by chaining @ref Utility::Debug output operators instead.
+-   @ref Utility::String::lowercase() and @ref Utility::String::uppercase()
+    now has overloads for both @ref Containers::StringView and
+    @ref std::string, which may cause ambiguous overload errors for existing
+    code that passes @cpp const char* @ce to it. Given that either type is
+    valid now, the code has to be updated to explicitly pass that type to the
+    function.
 
 @subsection corrade-changelog-latest-documentation Documentation
 
