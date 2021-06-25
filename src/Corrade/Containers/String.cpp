@@ -564,8 +564,20 @@ StringView String::find(const StringView substring) const & {
     return StringView{*this}.find(substring);
 }
 
+MutableStringView String::find(const char character) & {
+    return MutableStringView{*this}.find(character);
+}
+
+StringView String::find(const char character) const & {
+    return StringView{*this}.find(character);
+}
+
 bool String::contains(const StringView substring) const {
     return StringView{*this}.contains(substring);
+}
+
+bool String::contains(const char character) const {
+    return StringView{*this}.contains(character);
 }
 
 char* String::release() {

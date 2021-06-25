@@ -683,17 +683,36 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * variants. Those algorithms on the other hand have to perform certain
          * preprocessing of the input and keep extra state and due to that
          * overhead aren't generally suited for one-time searches.
+         *
+         * Consider using @ref find(char) const for single-byte substrings.
          * @see @ref contains()
          */
         BasicStringView<T> find(StringView substring) const;
 
         /**
+         * @brief Find a character
+         *
+         * Faster than @ref find(StringView) const if the string has just one
+         * byte.
+         */
+        BasicStringView<T> find(char character) const;
+
+        /**
          * @brief Whether the view contains a substring
          *
          * A slightly lighter variant of @ref find() useful when you only want
-         * to know if a substring was found or not.
+         * to know if a substring was found or not. Consider using
+         * @ref contains(char) const for single-byte substrings.
          */
         bool contains(StringView substring) const;
+
+        /**
+         * @brief Whether the view contains a character
+         *
+         * Faster than @ref contains(StringView) const if the string has just
+         * one byte.
+         */
+        bool contains(char character) const;
 
     private:
         /* Needed for mutable/immutable conversion */

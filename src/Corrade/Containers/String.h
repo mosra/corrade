@@ -764,19 +764,38 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Find a substring
          *
-         * Equivalent to @ref BasicStringView::find(). Not allowed to be called
-         * on a r-value since the returned view would become dangling.
+         * Equivalent to @ref BasicStringView::find(StringView) const. Not
+         * allowed to be called on a r-value since the returned view would
+         * become dangling.
          * @see @ref contains()
          */
         MutableStringView find(StringView substring) &;
         StringView find(StringView substring) const &; /**< @overload */
 
         /**
+         * @brief Find a substring
+         *
+         * Equivalent to @ref BasicStringView::find(char) const. Not allowed to
+         * be called on a r-value since the returned view would become
+         * dangling.
+         * @see @ref contains()
+         */
+        MutableStringView find(char character) &;
+        StringView find(char character) const &; /**< @overload */
+
+        /**
          * @brief Whether the view contains a substring
          *
-         * Equivalent to @ref BasicStringView::contains().
+         * Equivalent to @ref BasicStringView::contains(StringView) const.
          */
         bool contains(StringView substring) const;
+
+        /**
+         * @brief Whether the view contains a character
+         *
+         * Equivalent to @ref BasicStringView::contains(char) const.
+         */
+        bool contains(char character) const;
 
         /**
          * @brief Release data storage

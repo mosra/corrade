@@ -1226,7 +1226,7 @@ void StringViewTest::trimmedNullView() {
 }
 
 void StringViewTest::find() {
-    StringView a = "hello cursed world"_s;
+    StringView a = "hello cursed world!"_s;
 
     /* Right at the start */
     {
@@ -1246,25 +1246,65 @@ void StringViewTest::find() {
 
     /* Right at the end */
     } {
-        CORRADE_VERIFY(a.contains("world"));
+        CORRADE_VERIFY(a.contains("world!"));
 
-        StringView found = a.find("world");
-        CORRADE_COMPARE(found, "world");
+        StringView found = a.find("world!");
+        CORRADE_COMPARE(found, "world!");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 13);
 
     /* Almost, but not quite */
     } {
-        CORRADE_VERIFY(!a.contains("worlds"));
+        CORRADE_VERIFY(!a.contains("world!!"));
 
-        StringView found = a.find("worlds");
+        StringView found = a.find("world!!");
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
 
     /* Should not read the null terminator either */
     } {
-        CORRADE_VERIFY(!a.contains("world\0"_s));
+        CORRADE_VERIFY(!a.contains("world!\0"_s));
 
-        StringView found = a.find("world\0"_s);
+        StringView found = a.find("world!\0"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Single character at the start */
+    } {
+        CORRADE_VERIFY(a.contains('h'));
+
+        StringView found = a.find('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data());
+
+    /* Single character in the middle */
+    } {
+        CORRADE_VERIFY(a.contains('c'));
+
+        StringView found = a.find('c');
+        CORRADE_COMPARE(found, "c");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 6);
+
+    /* Single character at the end */
+    } {
+        CORRADE_VERIFY(a.contains('!'));
+
+        StringView found = a.find('!');
+        CORRADE_COMPARE(found, "!");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 18);
+
+    /* No such character found */
+    } {
+        CORRADE_VERIFY(!a.contains('a'));
+
+        StringView found = a.find('a');
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Should not read the null terminator either */
+    } {
+        CORRADE_VERIFY(!a.contains('\0'));
+
+        StringView found = a.find('\0');
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
     }
@@ -1286,11 +1326,19 @@ void StringViewTest::find() {
         StringView found = b.find("hello!");
         CORRADE_COMPARE(found, "hello!");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 15);
+
+    /* Multiple character occurrences */
+    } {
+        CORRADE_VERIFY(b.contains('o'));
+
+        StringView found = b.find('o');
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 1);
     }
 
     StringView c = "hell"_s;
 
-    /* Finding a substring that's the whole string should success */
+    /* Finding a substring that's the whole string should succeed */
     {
         CORRADE_VERIFY(c.contains("hell"));
 
@@ -1305,6 +1353,17 @@ void StringViewTest::find() {
         StringView found = c.find("hello");
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
+    }
+
+    StringView d = "h"_s;
+
+    /* Finding a single character that's the whole string should succeed too */
+    {
+        CORRADE_VERIFY(d.contains('h'));
+
+        StringView found = d.find('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), d.data());
     }
 }
 
@@ -1348,6 +1407,16 @@ void StringViewTest::findEmpty() {
         StringView found = a.find("hello");
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_VERIFY(!found.data());
+
+    /* Finding an arbitrary character inside a null view should not crash or do
+       anything crazy either */
+    } {
+        StringView a{nullptr};
+        CORRADE_VERIFY(!a.contains('h'));
+
+        StringView found = a.find('h');
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
     }
 }
 
@@ -1360,15 +1429,31 @@ void StringViewTest::findFlags() {
         CORRADE_COMPARE(found, "hello");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
 
+    /* Same for chars */
+    } {
+        StringView found = a.find('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
     /* At the end also null-terminated */
     } {
         StringView found = a.find("world");
         CORRADE_COMPARE(found, "world");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
+    /* Same for chars */
+    } {
+        StringView found = a.find('d');
+        CORRADE_COMPARE(found, "d");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
     /* Null view should be just global */
     } {
         CORRADE_COMPARE(StringView{nullptr}.find("").flags(), StringViewFlag::Global);
+
+    /* Same for chars */
+    } {
+        CORRADE_COMPARE(StringView{nullptr}.find(' ').flags(), StringViewFlag::Global);
     }
 }
 

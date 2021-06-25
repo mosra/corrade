@@ -1610,6 +1610,26 @@ template<class T> void StringTest::find() {
         typename ConstTraits<T>::ViewType found = a.find("cursed");
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_VERIFY(!static_cast<const void*>(found.data()));
+    } {
+        CORRADE_VERIFY(a.contains('h'));
+
+        typename ConstTraits<T>::ViewType found = a.find('h');
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        CORRADE_VERIFY(a.contains('d'));
+
+        typename ConstTraits<T>::ViewType found = a.find('d');
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 10);
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        CORRADE_VERIFY(!a.contains('c'));
+
+        typename ConstTraits<T>::ViewType found = a.find('c');
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!static_cast<const void*>(found.data()));
     }
 }
 
