@@ -131,8 +131,9 @@ struct StringViewTest: TestSuite::Tester {
 
     void split();
     void splitFlags();
-    void splitMultipleCharacters();
-    void splitMultipleCharactersFlags();
+    void splitOnAny();
+    void splitOnAnyFlags();
+    void splitOnWhitespace();
     void splitNullView();
 
     void partition();
@@ -208,8 +209,9 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::split,
               &StringViewTest::splitFlags,
-              &StringViewTest::splitMultipleCharacters,
-              &StringViewTest::splitMultipleCharactersFlags,
+              &StringViewTest::splitOnAny,
+              &StringViewTest::splitOnAnyFlags,
+              &StringViewTest::splitOnWhitespace,
               &StringViewTest::splitNullView,
 
               &StringViewTest::partition,
@@ -931,41 +933,36 @@ void StringViewTest::splitFlags() {
     }
 }
 
-void StringViewTest::splitMultipleCharacters() {
+void StringViewTest::splitOnAny() {
     constexpr StringView delimiters = ".:;"_s;
 
     /* Empty */
-    CORRADE_COMPARE_AS(""_s.splitWithoutEmptyParts(delimiters),
+    CORRADE_COMPARE_AS(""_s.splitOnAnyWithoutEmptyParts(delimiters),
         Array<StringView>{},
         TestSuite::Compare::Container);
 
     /* Only delimiters */
-    CORRADE_COMPARE_AS(delimiters.splitWithoutEmptyParts(delimiters),
+    CORRADE_COMPARE_AS(delimiters.splitOnAnyWithoutEmptyParts(delimiters),
         Array<StringView>{},
         TestSuite::Compare::Container);
 
     /* No delimiters */
-    CORRADE_COMPARE_AS("abcdef"_s.splitWithoutEmptyParts(delimiters),
+    CORRADE_COMPARE_AS("abcdef"_s.splitOnAnyWithoutEmptyParts(delimiters),
         array({"abcdef"_s}),
         TestSuite::Compare::Container);
 
     /* Common case */
-    CORRADE_COMPARE_AS("ab:c;def"_s.splitWithoutEmptyParts(delimiters),
+    CORRADE_COMPARE_AS("ab:c;def"_s.splitOnAnyWithoutEmptyParts(delimiters),
         array({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
 
     /* Empty parts */
-    CORRADE_COMPARE_AS("ab:c;;def."_s.splitWithoutEmptyParts(delimiters),
-        array({"ab"_s, "c"_s, "def"_s}),
-        TestSuite::Compare::Container);
-
-    /* Default is whitespace */
-    CORRADE_COMPARE_AS("ab c  \t \ndef\r"_s.splitWithoutEmptyParts(),
+    CORRADE_COMPARE_AS("ab:c;;def."_s.splitOnAnyWithoutEmptyParts(delimiters),
         array({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
 }
 
-void StringViewTest::splitMultipleCharactersFlags() {
+void StringViewTest::splitOnAnyFlags() {
     constexpr StringView delimiters = ".:;"_s;
 
     /* All flags come from the slice() implementation, so just verify the edge
@@ -973,7 +970,7 @@ void StringViewTest::splitMultipleCharactersFlags() {
 
     /* Usual case -- all global, only the last null-terminated */
     {
-        Array<StringView> a = "a.:b;c"_s.splitWithoutEmptyParts(delimiters);
+        Array<StringView> a = "a.:b;c"_s.splitOnAnyWithoutEmptyParts(delimiters);
         CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s, "c"_s}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
@@ -983,7 +980,7 @@ void StringViewTest::splitMultipleCharactersFlags() {
     /* Found at the end -- last is not null-terminated because there are
        characters after */
     } {
-        Array<StringView> a = "a.b;::"_s.splitWithoutEmptyParts(delimiters);
+        Array<StringView> a = "a.b;::"_s.splitOnAnyWithoutEmptyParts(delimiters);
         CORRADE_COMPARE_AS(a, arrayView({"a"_s, "b"_s}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
@@ -991,11 +988,17 @@ void StringViewTest::splitMultipleCharactersFlags() {
 
     /* Not found -- the only item is null-terminated */
     } {
-        Array<StringView> a = "ab"_s.splitWithoutEmptyParts(delimiters);
+        Array<StringView> a = "ab"_s.splitOnAnyWithoutEmptyParts(delimiters);
         CORRADE_COMPARE_AS(a, arrayView({"ab"_s}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     }
+}
+
+void StringViewTest::splitOnWhitespace() {
+    CORRADE_COMPARE_AS("ab c  \t \ndef\r"_s.splitOnWhitespaceWithoutEmptyParts(),
+        array({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
 }
 
 void StringViewTest::splitNullView() {
@@ -1005,10 +1008,10 @@ void StringViewTest::splitNullView() {
     CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(' '),
         Array<StringView>{},
         TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(" "),
+    CORRADE_COMPARE_AS(StringView{}.splitOnAnyWithoutEmptyParts(" "),
         Array<StringView>{},
         TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(StringView{}.splitWithoutEmptyParts(),
+    CORRADE_COMPARE_AS(StringView{}.splitOnWhitespaceWithoutEmptyParts(),
         Array<StringView>{},
         TestSuite::Compare::Container);
 }

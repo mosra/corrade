@@ -440,21 +440,41 @@ Array<StringView> String::splitWithoutEmptyParts(const char delimiter) const & {
     return StringView{*this}.splitWithoutEmptyParts(delimiter);
 }
 
+Array<MutableStringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) & {
+    return MutableStringView{*this}.splitOnAnyWithoutEmptyParts(delimiters);
+}
+
+Array<StringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) const & {
+    return StringView{*this}.splitOnAnyWithoutEmptyParts(delimiters);
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
 Array<MutableStringView> String::splitWithoutEmptyParts(const StringView delimiters) & {
-    return MutableStringView{*this}.splitWithoutEmptyParts(delimiters);
+    return splitOnAnyWithoutEmptyParts(delimiters);
 }
 
 Array<StringView> String::splitWithoutEmptyParts(const StringView delimiters) const & {
-    return StringView{*this}.splitWithoutEmptyParts(delimiters);
+    return splitOnAnyWithoutEmptyParts(delimiters);
+}
+#endif
+
+Array<MutableStringView> String::splitOnWhitespaceWithoutEmptyParts() & {
+    return MutableStringView{*this}.splitOnWhitespaceWithoutEmptyParts();
 }
 
+Array<StringView> String::splitOnWhitespaceWithoutEmptyParts() const & {
+    return StringView{*this}.splitOnWhitespaceWithoutEmptyParts();
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
 Array<MutableStringView> String::splitWithoutEmptyParts() & {
-    return MutableStringView{*this}.splitWithoutEmptyParts();
+    return splitOnWhitespaceWithoutEmptyParts();
 }
 
 Array<StringView> String::splitWithoutEmptyParts() const & {
-    return StringView{*this}.splitWithoutEmptyParts();
+    return splitOnWhitespaceWithoutEmptyParts();
 }
+#endif
 
 Array3<MutableStringView> String::partition(const char separator) & {
     return MutableStringView{*this}.partition(separator);

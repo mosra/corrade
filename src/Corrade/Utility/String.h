@@ -302,7 +302,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWith
 @param string       String to split
 @param delimiters   Delimiter characters
 
-@see @ref Containers::StringView::splitWithoutEmptyParts(StringView) const
+@see @ref Containers::StringView::splitOnAnyWithoutEmptyParts(StringView) const
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters);
 
@@ -310,10 +310,10 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 /**
 @overload
 @m_deprecated_since_latest Use
-    @ref Containers::StringView::splitWithoutEmptyParts(StringView) const
+    @ref Containers::StringView::splitOnAnyWithoutEmptyParts(StringView) const
     instead.
 */
-CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, Containers::StringView delimiters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnAnyWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, Containers::StringView delimiters);
 #endif
 
 /**
@@ -322,7 +322,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWith
 Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const std::string&)
 with @cpp " \t\f\v\r\n" @ce as second parameter.
 
-@see @ref Containers::StringView::splitWithoutEmptyParts() const
+@see @ref Containers::StringView::splitOnAnyWithoutEmptyParts()
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 
@@ -330,9 +330,10 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 /**
 @overload
 @m_deprecated_since_latest Use
-    @ref Containers::StringView::splitWithoutEmptyParts() const instead.
+    @ref Containers::StringView::splitOnWhitespaceWithoutEmptyParts() const
+    instead.
 */
-CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnWhitespaceWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string);
 #endif
 
 /**

@@ -136,8 +136,8 @@ struct StringTest: TestSuite::Tester {
     void slicePointer();
 
     void split();
-    void splitMultipleCharacters();
-    void splitMultipleCharactersWhitespace();
+    void splitOnAny();
+    void splitOnWhitespace();
 
     void partition();
 
@@ -228,8 +228,8 @@ StringTest::StringTest() {
               &StringTest::slicePointer,
 
               &StringTest::split,
-              &StringTest::splitMultipleCharacters,
-              &StringTest::splitMultipleCharactersWhitespace,
+              &StringTest::splitOnAny,
+              &StringTest::splitOnWhitespace,
 
               &StringTest::partition,
 
@@ -1337,7 +1337,7 @@ void StringTest::split() {
     }
 }
 
-void StringTest::splitMultipleCharacters() {
+void StringTest::splitOnAny() {
     constexpr StringView delimiters = ".:;"_s;
 
     /* These rely on StringView conversion and then delegate there so we don't
@@ -1345,7 +1345,7 @@ void StringTest::splitMultipleCharacters() {
 
     const String ca = "ab.:c;def";
     {
-        Array<StringView> s = ca.splitWithoutEmptyParts(delimiters);
+        Array<StringView> s = ca.splitOnAnyWithoutEmptyParts(delimiters);
         CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
@@ -1359,19 +1359,19 @@ void StringTest::splitMultipleCharacters() {
         String s1 = "ab";
         String s2 = "c";
         String s3 = "def";
-        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts(delimiters),
+        CORRADE_COMPARE_AS(a.splitOnAnyWithoutEmptyParts(delimiters),
             array<MutableStringView>({s1, s2, s3}),
             TestSuite::Compare::Container);
     }
 }
 
-void StringTest::splitMultipleCharactersWhitespace() {
+void StringTest::splitOnWhitespace() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
     const String ca = "ab\n  c\t\rdef";
     {
-        Array<StringView> s = ca.splitWithoutEmptyParts();
+        Array<StringView> s = ca.splitOnWhitespaceWithoutEmptyParts();
         CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
@@ -1385,7 +1385,7 @@ void StringTest::splitMultipleCharactersWhitespace() {
         String s1 = "ab";
         String s2 = "c";
         String s3 = "def";
-        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts(),
+        CORRADE_COMPARE_AS(a.splitOnWhitespaceWithoutEmptyParts(),
             array<MutableStringView>({s1, s2, s3}),
             TestSuite::Compare::Container);
     }

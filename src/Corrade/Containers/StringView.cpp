@@ -154,7 +154,7 @@ inline const char* findLastNotOf(const char* const begin, const char* end, const
 
 }
 
-template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithoutEmptyParts(const Containers::StringView delimiters) const {
     Array<BasicStringView<T>> parts;
     const char* const characters = delimiters.begin();
     const std::size_t characterCount = delimiters.size();
@@ -171,6 +171,12 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
 
     return parts;
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
+    return splitOnAnyWithoutEmptyParts(delimiters);
+}
+#endif
 
 namespace {
     /* If I use an externally defined view in splitWithoutEmptyParts(),
@@ -193,14 +199,20 @@ namespace {
     #endif
 }
 
-template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnWhitespaceWithoutEmptyParts() const {
     #ifdef CORRADE_MSVC2019_COMPATIBILITY
     using namespace Containers::Literals;
-    return splitWithoutEmptyParts(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
+    return splitOnAnyWithoutEmptyParts(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #else
-    return splitWithoutEmptyParts(Whitespace);
+    return splitOnAnyWithoutEmptyParts(Whitespace);
     #endif
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts() const {
+    return splitOnWhitespaceWithoutEmptyParts();
+}
+#endif
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {
     /** @todo partition() using multiple characters, would need implementing

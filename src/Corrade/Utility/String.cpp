@@ -158,11 +158,11 @@ Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Container
 }
 
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters) {
-    return string.splitWithoutEmptyParts(delimiters);
+    return string.splitOnAnyWithoutEmptyParts(delimiters);
 }
 
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string) {
-    return string.splitWithoutEmptyParts();
+    return string.splitOnWhitespaceWithoutEmptyParts();
 }
 #endif
 
@@ -183,14 +183,14 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts(delimiters);
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnAnyWithoutEmptyParts(delimiters);
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string) {
     /* IDGAF that this has one extra allocation due to the Array being copied
        to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts();
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnWhitespaceWithoutEmptyParts();
     return std::vector<std::string>{parts.begin(), parts.end()};
 }
 

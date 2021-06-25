@@ -569,8 +569,22 @@ class CORRADE_UTILITY_EXPORT String {
          * Not allowed to be called on a rvalue since the returned views would
          * become dangling.
          */
-        Array<MutableStringView> splitWithoutEmptyParts(StringView delimiters) &;
-        Array<StringView> splitWithoutEmptyParts(StringView delimiters) const &; /**< @overload */
+        Array<MutableStringView> splitOnAnyWithoutEmptyParts(StringView delimiters) &;
+        Array<StringView> splitOnAnyWithoutEmptyParts(StringView delimiters) const &; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief splitOnAnyWithoutEmptyParts()
+         * @m_deprecated_since_latest Use @ref splitOnAnyWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts(StringView delimiters) &;
+
+        /** @overload
+         * @m_deprecated_since_latest Use @ref splitOnAnyWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts(StringView delimiters) const &;
+        #endif
 
         /**
          * @brief Split on whitespace, removing empty parts
@@ -579,8 +593,22 @@ class CORRADE_UTILITY_EXPORT String {
          * Not allowed to be called on a rvalue since the returned views would
          * become dangling.
          */
-        Array<MutableStringView> splitWithoutEmptyParts() &;
-        Array<StringView> splitWithoutEmptyParts() const &; /**< @overload */
+        Array<MutableStringView> splitOnWhitespaceWithoutEmptyParts() &;
+        Array<StringView> splitOnWhitespaceWithoutEmptyParts() const &; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief splitOnWhitespaceWithoutEmptyParts()
+         * @m_deprecated_since_latest Use @ref splitOnWhitespaceWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts() &;
+
+        /** @overload
+         * @m_deprecated_since_latest Use @ref splitOnWhitespaceWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts() const &;
+        #endif
 
         /**
          * @brief Partition

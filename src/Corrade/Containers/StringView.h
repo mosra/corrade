@@ -487,7 +487,15 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * propagates the @ref flags() as appropriate.
          * @see @ref split(), @ref splitWithoutEmptyParts() const
          */
-        Array<BasicStringView<T>> splitWithoutEmptyParts(StringView delimiters) const;
+        Array<BasicStringView<T>> splitOnAnyWithoutEmptyParts(StringView delimiters) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief splitOnAnyWithoutEmptyParts()
+         * @m_deprecated_since_latest Use @ref splitOnAnyWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<BasicStringView<T>> splitWithoutEmptyParts(StringView delimiters) const;
+        #endif
 
         /**
          * @brief Split on whitespace, removing empty parts
@@ -495,7 +503,15 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * Equivalent to calling @ref splitWithoutEmptyParts(StringView) const
          * with @cpp " \t\f\v\r\n" @ce passed to @p delimiters.
          */
-        Array<BasicStringView<T>> splitWithoutEmptyParts() const;
+        Array<BasicStringView<T>> splitOnWhitespaceWithoutEmptyParts() const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief splitOnWhitespaceWithoutEmptyParts()
+         * @m_deprecated_since_latest Use @ref splitOnWhitespaceWithoutEmptyParts()
+         *      instead.
+         */
+        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<BasicStringView<T>> splitWithoutEmptyParts() const;
+        #endif
 
         /**
          * @brief Partition
