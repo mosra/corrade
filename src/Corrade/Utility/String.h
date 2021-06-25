@@ -182,7 +182,7 @@ Equivalent to calling @ref trim(std::string, const char(&)[size]) with
 CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 
 /**
-@brief Trim leading characters from string, in place
+@brief Trim leading characters from a string, in place
 @param string       String to be trimmed in place
 @param characters   Characters which will be trimmed
 
@@ -199,7 +199,7 @@ template<std::size_t size> inline void ltrimInPlace(std::string& string, const c
 }
 
 /**
-@brief Trim leading whitespace from string
+@brief Trim leading whitespace from a string, in place
 
 Equivalent to calling @ref ltrimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
@@ -209,7 +209,7 @@ Equivalent to calling @ref ltrimInPlace(std::string&, const char(&)[size]) with
 CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
 
 /**
-@brief Trim trailing characters from string
+@brief Trim trailing characters from a string, in place
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
@@ -226,7 +226,7 @@ template<std::size_t size> inline void rtrimInPlace(std::string& string, const c
 }
 
 /**
-@brief Trim trailing whitespace from string
+@brief Trim trailing whitespace from a string, in place
 
 Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
@@ -236,7 +236,7 @@ Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size]) with
 CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
 
 /**
-@brief Trim leading and trailing characters from string
+@brief Trim leading and trailing characters from a string, in place
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
@@ -253,7 +253,7 @@ template<std::size_t size> inline void trimInPlace(std::string& string, const ch
 }
 
 /**
-@brief Trim leading and trailing whitespace from string
+@brief Trim leading and trailing whitespace from a string, in place
 
 Equivalent to calling @ref trimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
@@ -262,7 +262,7 @@ Equivalent to calling @ref trimInPlace(std::string&, const char(&)[size]) with
 CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string);
 
 /**
-@brief Split string on given character
+@brief Split a string on given character
 @param string       String to split
 @param delimiter    Delimiter
 
@@ -280,7 +280,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::split() i
 #endif
 
 /**
-@brief Split string on given character and remove empty parts
+@brief Split a string on given character and remove empty parts
 @param string       String to split
 @param delimiter    Delimiter
 
@@ -298,7 +298,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWith
 #endif
 
 /**
-@brief Split string on any character from given set and remove empty parts
+@brief Split a string on any character from given set and remove empty parts
 @param string       String to split
 @param delimiters   Delimiter characters
 
@@ -317,7 +317,7 @@ CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWith
 #endif
 
 /**
-@brief Split string on whitespaces and remove empty parts
+@brief Split a string on whitespace and remove empty parts
 
 Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const std::string&)
 with @cpp " \t\f\v\r\n" @ce as second parameter.

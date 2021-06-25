@@ -381,7 +381,7 @@ void StringTest::join() {
 }
 
 void StringTest::lowercase() {
-    /* Lowecase */
+    /* Lowercase */
     CORRADE_COMPARE(String::lowercase("hello"), "hello");
 
     /* Uppercase */
@@ -396,7 +396,7 @@ void StringTest::lowercase() {
 }
 
 void StringTest::uppercase() {
-    /* Lowecase */
+    /* Lowercase */
     CORRADE_COMPARE(String::uppercase("hello"), "HELLO");
 
     /* Uppercase */
