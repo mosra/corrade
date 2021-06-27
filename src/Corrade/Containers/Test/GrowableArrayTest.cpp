@@ -1894,6 +1894,14 @@ template<template<class> class Allocator, std::size_t alignment> void GrowableAr
     if(alignment > Implementation::DefaultAllocationAlignment)
         CORRADE_SKIP(alignment << Debug::nospace << "-byte alignment is larger than platform default allocation alignment, skipping");
 
+    /* Should always fit std::size_t, at least */
+    CORRADE_COMPARE_AS(Allocator<Aligned<alignment>>::AllocationOffset, sizeof(std::size_t),
+        TestSuite::Compare::GreaterOrEqual);
+
+    /* Offset should be aligned for the type */
+    CORRADE_COMPARE_AS(Allocator<Aligned<alignment>>::AllocationOffset, alignment,
+        TestSuite::Compare::Divisible);
+
     /* We're not stupid with the assumptions, hopefully */
     CORRADE_COMPARE(sizeof(Aligned<alignment>), alignof(Aligned<alignment>));
 

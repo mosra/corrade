@@ -59,6 +59,20 @@ extern "C" void __sanitizer_annotate_contiguous_container(const void *beg,
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+
+template<class T> struct AllocatorTraits {
+    /** @todo assert that this is not higher than platform default allocation
+        alignment once we have an alternative allocator */
+    enum: std::size_t {
+        Offset = alignof(T) < sizeof(std::size_t) ? sizeof(std::size_t) :
+            (alignof(T) < Implementation::DefaultAllocationAlignment ?
+                alignof(T) : Implementation::DefaultAllocationAlignment)
+    };
+};
+
+}
+
 /** @{ @name Growable array utilities
  *
  * See @ref Containers-Array-growable for more information.
@@ -77,16 +91,23 @@ move-constructible.
 template<class T> struct ArrayNewAllocator {
     typedef T Type; /**< Pointer type */
 
+    enum: std::size_t {
+        /** @copydoc ArrayMallocAllocator::AllocationOffset */
+        AllocationOffset = Implementation::AllocatorTraits<T>::Offset
+    };
+
     /**
      * @brief Allocate (but not construct) an array of given capacity
      *
      * @cpp new[] @ce-allocates a @cpp char @ce array with an extra space to
      * store @p capacity *before* the front, returning it cast to @cpp T* @ce.
+     * The allocation is guaranteed to follow `T` allocation requirements up to
+     * the platform default allocation alignment.
      */
     static T* allocate(std::size_t capacity) {
-        char* memory = new char[capacity*sizeof(T) + sizeof(std::size_t)];
+        char* const memory = new char[capacity*sizeof(T) + AllocationOffset];
         reinterpret_cast<std::size_t*>(memory)[0] = capacity;
-        return reinterpret_cast<T*>(memory + sizeof(std::size_t));
+        return reinterpret_cast<T*>(memory + AllocationOffset);
     }
 
     /**
@@ -95,7 +116,8 @@ template<class T> struct ArrayNewAllocator {
      * Calls @p allocate(), move-constructs @p prevSize elements from @p array
      * into the new array, calls destructors on the original elements, calls
      * @ref deallocate() and updates the @p array reference to point to the new
-     * array.
+     * array. The allocation is guaranteed to follow `T` allocation
+     * requirements up to the platform default allocation alignment.
      */
     static void reallocate(T*& array, std::size_t prevSize, std::size_t newCapacity);
 
@@ -106,7 +128,7 @@ template<class T> struct ArrayNewAllocator {
      * store its capacity.
      */
     static void deallocate(T* data) {
-        delete[] (reinterpret_cast<char*>(data) - sizeof(std::size_t));
+        delete[] (reinterpret_cast<char*>(data) - AllocationOffset);
     }
 
     /**
@@ -132,16 +154,16 @@ template<class T> struct ArrayNewAllocator {
      * Retrieves the capacity that's stored *before* the front of the @p array.
      */
     static std::size_t capacity(T* array) {
-        return *reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(array) - sizeof(std::size_t));
+        return *reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(array) - AllocationOffset);
     }
 
     /**
      * @brief Array base address
      *
-     * Returns the address with @cpp sizeof(std::size_t) @ce subtracted.
+     * Returns the address with @ref AllocationOffset subtracted.
      */
     static void* base(T* array) {
-        return reinterpret_cast<char*>(array) - sizeof(std::size_t);
+        return reinterpret_cast<char*>(array) - AllocationOffset;
     }
 
     /**
@@ -183,20 +205,33 @@ template<class T> struct ArrayMallocAllocator {
 
     typedef T Type; /**< Pointer type */
 
+    enum: std::size_t {
+        /**
+         * Offset at the beginning of the allocation to store allocation
+         * capacity. At least as large as @ref std::size_t. If the type
+         * alignment is larger than that (for example @cpp double @ce on a
+         * 32-bit platform), then it's equal to type alignment, but only at
+         * most as large as the default allocation alignment.
+         */
+        AllocationOffset = Implementation::AllocatorTraits<T>::Offset
+    };
+
     /**
      * @brief Allocate an array of given capacity
      *
      * @ref std::malloc()'s an @cpp char @ce array with an extra space to store
-     * @p capacity *before* the front, returning it cast to @cpp T* @ce.
+     * @p capacity *before* the front, returning it cast to @cpp T* @ce. The
+     * allocation is guaranteed to follow `T` allocation requirements up to the
+     * platform default allocation alignment.
      */
     static T* allocate(std::size_t capacity) {
         /* Compared to ArrayNewAllocator, here the capacity is stored in bytes
            so it's possible to "reinterpret" the array into a different type
            (as the deleter is a typeless std::free() in any case) */
-        const std::size_t inBytes = capacity*sizeof(T) + sizeof(std::size_t);
+        const std::size_t inBytes = capacity*sizeof(T) + AllocationOffset;
         char* const memory = static_cast<char*>(std::malloc(inBytes));
         reinterpret_cast<std::size_t*>(memory)[0] = inBytes;
-        return reinterpret_cast<T*>(memory + sizeof(std::size_t));
+        return reinterpret_cast<T*>(memory + AllocationOffset);
     }
 
     /**
@@ -206,7 +241,9 @@ template<class T> struct ArrayMallocAllocator {
      * capacity) and then updates the stored capacity to @p newCapacity and the
      * @p array reference to point to the new (offset) location, in case the
      * reallocation wasn't done in-place. The @p prevSize parameter is ignored,
-     * as @ref std::realloc() always copies the whole original capacity.
+     * as @ref std::realloc() always copies the whole original capacity. The
+     * allocation is guaranteed to follow `T` allocation requirements up to the
+     * platform default allocation alignment.
      */
     static void reallocate(T*& array, std::size_t prevSize, std::size_t newCapacity);
 
@@ -217,7 +254,7 @@ template<class T> struct ArrayMallocAllocator {
      * store its capacity.
      */
     static void deallocate(T* data) {
-        if(data) std::free(reinterpret_cast<char*>(data) - sizeof(std::size_t));
+        if(data) std::free(reinterpret_cast<char*>(data) - AllocationOffset);
     }
 
     /**
@@ -233,16 +270,16 @@ template<class T> struct ArrayMallocAllocator {
      * Retrieves the capacity that's stored *before* the front of the @p array.
      */
     static std::size_t capacity(T* array) {
-        return (*reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(array) - sizeof(std::size_t)) - sizeof(std::size_t))/sizeof(T);
+        return (*reinterpret_cast<std::size_t*>(reinterpret_cast<char*>(array) - AllocationOffset) - AllocationOffset)/sizeof(T);
     }
 
     /**
      * @brief Array base address
      *
-     * Returns the address with @cpp sizeof(std::size_t) @ce subtracted.
+     * Returns the address with @ref AllocationOffset subtracted.
      */
     static void* base(T* array) {
-        return reinterpret_cast<char*>(array) - sizeof(std::size_t);
+        return reinterpret_cast<char*>(array) - AllocationOffset;
     }
 
     /**
@@ -986,9 +1023,9 @@ template<class T> inline void arrayDestruct(T* begin, T* const end, typename std
     for(; begin < end; ++begin) begin->~T();
 }
 
-inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::size_t desiredCapacity, const std::size_t sizeOfT) {
+template<class T> inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::size_t desiredCapacity) {
     /** @todo pick a nice value when current = 0 and desired > 1 */
-    const std::size_t currentCapacityInBytes = sizeOfT*currentCapacity + sizeof(std::size_t);
+    const std::size_t currentCapacityInBytes = sizeof(T)*currentCapacity + Implementation::AllocatorTraits<T>::Offset;
 
     /* For small allocations we want to tightly fit into size buckets (8, 16,
        32, 64 bytes), so it's better to double the capacity every time. For
@@ -1004,7 +1041,7 @@ inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::siz
     else
         grown = currentCapacityInBytes + currentCapacityInBytes/2;
 
-    const std::size_t candidate = (grown - sizeof(std::size_t))/sizeOfT;
+    const std::size_t candidate = (grown - Implementation::AllocatorTraits<T>::Offset)/sizeof(T);
     return desiredCapacity > candidate ? desiredCapacity : candidate;
 }
 
@@ -1027,18 +1064,18 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
 }
 
 template<class T> void ArrayMallocAllocator<T>::reallocate(T*& array, std::size_t, const std::size_t newCapacity) {
-    const std::size_t inBytes = newCapacity*sizeof(T) + sizeof(std::size_t);
-    char* const memory = static_cast<char*>(std::realloc(reinterpret_cast<char*>(array) - sizeof(std::size_t), inBytes));
+    const std::size_t inBytes = newCapacity*sizeof(T) + AllocationOffset;
+    char* const memory = static_cast<char*>(std::realloc(reinterpret_cast<char*>(array) - AllocationOffset, inBytes));
     reinterpret_cast<std::size_t*>(memory)[0] = inBytes;
-    array = reinterpret_cast<T*>(memory + sizeof(std::size_t));
+    array = reinterpret_cast<T*>(memory + AllocationOffset);
 }
 
 template<class T> std::size_t ArrayNewAllocator<T>::grow(T* const array, const std::size_t desiredCapacity) {
-    return Implementation::arrayGrowth(array ? capacity(array) : 0, desiredCapacity, sizeof(T));
+    return Implementation::arrayGrowth<T>(array ? capacity(array) : 0, desiredCapacity);
 }
 
 template<class T> std::size_t ArrayMallocAllocator<T>::grow(T* const array, const std::size_t desiredCapacity) {
-    return Implementation::arrayGrowth(array ? capacity(array) : 0, desiredCapacity, sizeof(T));
+    return Implementation::arrayGrowth<T>(array ? capacity(array) : 0, desiredCapacity);
 }
 
 template<class T, class Allocator> bool arrayIsGrowable(Array<T>& array) {
