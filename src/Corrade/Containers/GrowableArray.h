@@ -115,14 +115,14 @@ template<class T> struct ArrayNewAllocator {
      * If current occupied size (including the space needed to store capacity)
      * is less than 64 bytes, the capacity always doubled, with the allocation
      * being at least as large as @cpp __STDCPP_DEFAULT_NEW_ALIGNMENT__ @ce
-     * (or @cpp 2*sizeof(std::size_t) @ce when the define is not available
-     * pre-C++17). After that, the capacity is increased to 1.5x of current
-     * capacity (again including the space needed to store capacity). This is
-     * similar to what MSVC STL does with @ref std::vector, except for libc++ /
-     * libstdc++, which both use a factor of 2. With a factor of 2 the
-     * allocation would crawl forward in memory, never able to reuse the holes
-     * after previous allocations, with a factor 1.5 it's possible after four
-     * reallocations. Further info in [Folly FBVector docs](https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md#memory-handling).
+     * (*usually* @cpp 2*sizeof(std::size_t) @ce). After that, the capacity is
+     * increased to 1.5x of current capacity (again including the space needed
+     * to store capacity). This is similar to what MSVC STL does with
+     * @ref std::vector, except for libc++ / libstdc++, which both use a factor
+     * of 2. With a factor of 2 the allocation would crawl forward in memory,
+     * never able to reuse the holes after previous allocations, with a factor
+     * 1.5 it's possible after four reallocations. Further info in
+     * [Folly FBVector docs](https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md#memory-handling).
      */
     static std::size_t grow(T* array, std::size_t desired);
 
@@ -997,8 +997,8 @@ inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::siz
        can store two ints, but when it's doubled to 32 bytes, it can store
        six of them). */
     std::size_t grown;
-    if(currentCapacityInBytes < MinAllocatedSize)
-        grown = MinAllocatedSize;
+    if(currentCapacityInBytes < DefaultAllocationAlignment)
+        grown = DefaultAllocationAlignment;
     else if(currentCapacityInBytes < 64)
         grown = currentCapacityInBytes*2;
     else

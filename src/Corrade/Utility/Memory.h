@@ -247,7 +247,7 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
        as well */
     std::uint8_t* pointer;
     std::ptrdiff_t offset;
-    if(alignment <= Containers::Implementation::MinAllocatedSize) {
+    if(alignment <= Containers::Implementation::DefaultAllocationAlignment) {
         pointer = static_cast<std::uint8_t*>(std::malloc(size*sizeof(T)));
         offset = 0;
     } else {

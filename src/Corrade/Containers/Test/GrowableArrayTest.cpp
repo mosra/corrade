@@ -949,7 +949,7 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
         else {
-            /** @todo expose Implementation::MinAllocatedSize instead */
+            /** @todo expose Implementation::DefaultAllocationAlignment instead */
             #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
             CORRADE_COMPARE(arrayCapacity(a), 1);
             #else
@@ -991,7 +991,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
         else {
-            /** @todo expose Implementation::MinAllocatedSize instead */
+            /** @todo expose Implementation::DefaultAllocationAlignment instead */
             #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
             CORRADE_COMPARE(arrayCapacity(a), 2);
             #else
@@ -1113,7 +1113,7 @@ void GrowableArrayTest::appendCopy() {
     if(sizeof(std::size_t) == 8)
         CORRADE_COMPARE(arrayCapacity(a), 2);
     else {
-        /** @todo expose Implementation::MinAllocatedSize instead */
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
         #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
         CORRADE_COMPARE(arrayCapacity(a), 1);
         #else
@@ -1133,7 +1133,7 @@ void GrowableArrayTest::appendMove() {
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
         else {
-            /** @todo expose Implementation::MinAllocatedSize instead */
+            /** @todo expose Implementation::DefaultAllocationAlignment instead */
             #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
             CORRADE_COMPARE(arrayCapacity(a), 1);
             #else
@@ -1241,7 +1241,7 @@ void GrowableArrayTest::appendGrowRatio() {
     } else {
         /* Double the size (minus sizeof(T)) until 64 bytes */
         arrayAppend(a, 1);
-        /** @todo expose Implementation::MinAllocatedSize instead */
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
         #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
         CORRADE_COMPARE(arrayCapacity(a), 1);
         #else
