@@ -29,7 +29,9 @@
 #include <vector>
 
 #include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
@@ -131,6 +133,8 @@ struct GrowableArrayTest: TestSuite::Tester {
     void emplaceConstructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
+
+    template<template<class> class Allocator, std::size_t alignment> void allocationAlignment();
 
     void benchmarkAppendVector();
     void benchmarkAppendArray();
@@ -321,6 +325,18 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization,
               &GrowableArrayTest::copyConstructPlainStruct,
               &GrowableArrayTest::moveConstructPlainStruct});
+
+    addRepeatedTests<GrowableArrayTest>({
+        &GrowableArrayTest::allocationAlignment<ArrayNewAllocator, 1>,
+        &GrowableArrayTest::allocationAlignment<ArrayNewAllocator, 2>,
+        &GrowableArrayTest::allocationAlignment<ArrayNewAllocator, 4>,
+        &GrowableArrayTest::allocationAlignment<ArrayNewAllocator, 8>,
+        &GrowableArrayTest::allocationAlignment<ArrayNewAllocator, 16>,
+        &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 1>,
+        &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 2>,
+        &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 4>,
+        &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 8>,
+        &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 16>}, 100);
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1860,6 +1876,37 @@ void GrowableArrayTest::moveConstructPlainStruct() {
     CORRADE_COMPARE(a.size(), 16);
 }
 
+template<template<class> class> struct AllocatorName;
+template<> struct AllocatorName<ArrayNewAllocator> {
+    static const char* name() { return "ArrayNewAllocator"; }
+};
+template<> struct AllocatorName<ArrayMallocAllocator> {
+    static const char* name() { return "ArrayMallocAllocator"; }
+};
+
+template<std::size_t alignment> struct alignas(alignment) Aligned {
+    char foo;
+};
+
+template<template<class> class Allocator, std::size_t alignment> void GrowableArrayTest::allocationAlignment() {
+    setTestCaseTemplateName({AllocatorName<Allocator>::name(), std::to_string(alignment)});
+
+    if(alignment > Implementation::DefaultAllocationAlignment)
+        CORRADE_SKIP(alignment << Debug::nospace << "-byte alignment is larger than platform default allocation alignment, skipping");
+
+    /* We're not stupid with the assumptions, hopefully */
+    CORRADE_COMPARE(sizeof(Aligned<alignment>), alignof(Aligned<alignment>));
+
+    /* All (re)allocations should be aligned */
+    Array<Aligned<alignment>> a;
+    for(std::size_t i = 0; i != 100; ++i) {
+        CORRADE_ITERATION(i);
+        arrayAppend<Allocator>(a, Corrade::InPlaceInit, 'a');
+        CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(a.data()), alignment,
+            TestSuite::Compare::Divisible);
+    }
+}
+
 void GrowableArrayTest::benchmarkAppendVector() {
     std::vector<Movable> vector;
     CORRADE_BENCHMARK(1) {
@@ -1915,14 +1962,6 @@ void GrowableArrayTest::benchmarkAppendTrivialVector() {
 
     CORRADE_COMPARE(vector.size(), 1000000);
 }
-
-template<template<class> class> struct AllocatorName;
-template<> struct AllocatorName<ArrayNewAllocator> {
-    static const char* name() { return "ArrayNewAllocator"; }
-};
-template<> struct AllocatorName<ArrayMallocAllocator> {
-    static const char* name() { return "ArrayMallocAllocator"; }
-};
 
 template<template<class> class Allocator> void GrowableArrayTest::benchmarkAppendTrivialArray() {
     setTestCaseTemplateName(AllocatorName<Allocator>::name());
