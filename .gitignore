@@ -10,3 +10,6 @@ CMakeLists.txt.user*
 .DS_Store
 *.swp
 *~
+user.bazelrc
+
+bazel-*

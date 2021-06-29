@@ -438,7 +438,7 @@ void ManagerTest::loadNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Nonexistent"), LoadState::NotFound);
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
     #else
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " PLUGINS_DIR "/animals\n");

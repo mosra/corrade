@@ -1,0 +1,21 @@
+# necessary for docker-sandbox to operate correctly
+startup --output_user_root=/tmp/bazel_docker_root
+
+build --cxxopt=-std=c++17
+
+build:docker-sandbox --crosstool_top=@rbe_ubuntu1804//cc:toolchain
+build:docker-sandbox --extra_execution_platforms=@rbe_ubuntu1804//config:platform
+build:docker-sandbox --host_platform=@rbe_ubuntu1804//config:platform
+build:docker-sandbox --platforms=@rbe_ubuntu1804//config:platform
+build:docker-sandbox --extra_toolchains=@rbe_ubuntu1804//config:cc-toolchain
+
+build:docker-sandbox --experimental_docker_image=l.gcr.io/google/rbe-ubuntu18-04@sha256:48b67b41118dbcdfc265e7335f454fbefa62681ab8d47200971fc7a52fb32054
+build:docker-sandbox --spawn_strategy=docker --genrule_strategy=docker
+build:docker-sandbox --define=EXECUTOR=remote
+build:docker-sandbox --experimental_docker_verbose
+build:docker-sandbox --experimental_enable_docker_sandbox
+
+test --nocache_test_results
+test --test_output=errors
+
+try-import %workspace%/user.bazelrc
