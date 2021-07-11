@@ -71,6 +71,7 @@ struct ResourceTest: TestSuite::Tester {
     void getEmptyFile();
     void getNonexistent();
     void getNothing();
+    void getUtf8Filename();
 
     void overrideGroup();
     void overrideGroupFallback();
@@ -106,6 +107,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::getEmptyFile,
               &ResourceTest::getNonexistent,
               &ResourceTest::getNothing,
+              &ResourceTest::getUtf8Filename,
 
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupFallback,
@@ -421,6 +423,17 @@ void ResourceTest::getNothing() {
     }
 
     CORRADE_COMPARE(r->list(), std::vector<std::string>{});
+}
+
+void ResourceTest::getUtf8Filename() {
+    #ifdef RESOURCETETST_NO_UNICODE
+    CORRADE_SKIP("CMake < 3.1 used, can't test compilation of resources with UTF-8 filenames.");
+    #else
+    Resource r("unicode");
+    CORRADE_COMPARE_AS(r.get("hýždě.bin"),
+        Directory::join(RESOURCE_TEST_DIR, "hýždě.bin"),
+        TestSuite::Compare::StringToFile);
+    #endif
 }
 
 void ResourceTest::overrideGroup() {

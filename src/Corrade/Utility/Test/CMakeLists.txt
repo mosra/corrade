@@ -248,11 +248,18 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeUtilityTest
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
 corrade_add_resource(ResourceTestEmptyFileData ResourceTestFiles/resources-empty-file.conf)
 corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resources-nothing.conf)
+
+# CMake < 3.1 can't handle UTF-8 in file(STRINGS)
+if(NOT CMAKE_VERSION VERSION_LESS 3.1)
+    corrade_add_resource(ResourceTestUtf8Data ResourceTestFiles/hýždě.conf)
+endif()
+
 corrade_add_test(UtilityResourceTest
     ResourceTest.cpp
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
+    ${ResourceTestUtf8Data}
     LIBRARIES CorradeUtilityTestLib
     FILES
         ResourceTestFiles/compiled.cpp
@@ -279,6 +286,11 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/resources-overridden-none.conf
         ResourceTestFiles/resources-overridden-nonexistent-file.conf)
 target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+# CMake < 3.1 can't handle UTF-8 in file(STRINGS), disable relevant test case
+if(CMAKE_VERSION VERSION_LESS 3.1)
+    target_compile_definitions(UtilityResourceTest PRIVATE "RESOURCETETST_NO_UNICODE")
+endif()
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData}
