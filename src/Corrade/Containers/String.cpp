@@ -234,6 +234,8 @@ String::String(String&& other) noexcept {
 }
 
 String& String::operator=(const String& other) {
+    if(other == *this) return *this;
+
     destruct();
 
     const Containers::Pair<const char*, std::size_t> data = other.dataInternal();
