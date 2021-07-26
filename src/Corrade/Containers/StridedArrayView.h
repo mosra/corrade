@@ -1443,7 +1443,7 @@ template<> struct ArrayCastFlattenOrInflate<-1> {
                 "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
         }
         #endif
-        CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
+        CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride._data[dimensions - 1]),
             "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] == sizeof(U),
             "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected" << sizeof(U) << "but got" << sizeof(T)*view._size._data[dimensions - 1], {});
@@ -1462,7 +1462,7 @@ template<> struct ArrayCastFlattenOrInflate<0> {
                 "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
         }
         #endif
-        CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
+        CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride._data[dimensions - 1]),
             "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] % sizeof(U) == 0,
             "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a" << sizeof(U) << Utility::Debug::nospace << "-byte type got" << sizeof(T)*view._size._data[dimensions - 1], {});
@@ -1702,8 +1702,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
     static_assert(dimension < dimensions, "dimension out of bounds");
     std::size_t nextDimensionSize = sizeof(T);
     for(std::size_t i = dimensions; i != dimension; --i) {
-        if(std::size_t(_stride[i - 1]) != nextDimensionSize) return false;
-        nextDimensionSize *= _size[i - 1];
+        if(std::size_t(_stride._data[i - 1]) != nextDimensionSize) return false;
+        nextDimensionSize *= _size._data[i - 1];
     }
 
     return true;
@@ -1711,8 +1711,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
 
 template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions, T>::asContiguous() const {
     CORRADE_ASSERT(isContiguous(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
-    std::size_t size = _size[0];
-    for(std::size_t i = 1; i != dimensions; ++i) size *= _size[i];
+    std::size_t size = 1;
+    for(std::size_t i = 0; i != dimensions; ++i) size *= _size._data[i];
     return {static_cast<T*>(_data), size};
 }
 
@@ -1738,12 +1738,12 @@ template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::ope
 }
 
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::front() const -> ElementType {
-    CORRADE_ASSERT(_size[0], "Containers::StridedArrayView::front(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0)));
+    CORRADE_ASSERT(_size._data[0], "Containers::StridedArrayView::front(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0);
 }
 
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::back() const -> ElementType {
-    CORRADE_ASSERT(_size[0], "Containers::StridedArrayView::back(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1)));
+    CORRADE_ASSERT(_size._data[0], "Containers::StridedArrayView::back(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1);
 }
 
@@ -1756,7 +1756,7 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
     Size size = _size;
     size._data[0] = std::size_t(end - begin);
     return StridedArrayView<dimensions, T>{size, _stride,
-        static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + begin*_stride[0]};
+        static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + begin*_stride._data[0]};
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Size& begin, const Size& end) const {
@@ -1773,7 +1773,7 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
             << Utility::Debug::nospace << end << Utility::Debug::nospace
             << "] out of range for" << _size << "elements in dimension" << i,
             {});
-        data += begin._data[i]*_stride[i];
+        data += begin._data[i]*_stride._data[i];
     }
 
     /* Set size and stride values for all destination dimensions that are in
