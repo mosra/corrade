@@ -437,8 +437,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @ref arrayValue().
          *
          * Only non-boolean options are allowed in the prefixed version, no
-         * arguments --- use @ref addArrayArgument() in that case instead.
-         * @see @ref addFinalOptionalArgument(), @ref addArrayOption()
+         * arguments --- use @ref addArrayOption() in that case instead.
          */
         Arguments& addArrayArgument(std::string key);
 
