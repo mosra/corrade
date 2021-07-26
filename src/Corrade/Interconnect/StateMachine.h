@@ -121,7 +121,8 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         /**
          * @brief Add transitions to the list
          *
-         * Expects that all states and inputs have
+         * Expects that all states have a value less than @ref StateCount and
+         * inputs a value less than @ref InputCount.
          */
         void addTransitions(std::initializer_list<StateTransition<State, Input>> transitions);
 
