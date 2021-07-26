@@ -43,8 +43,8 @@ namespace Implementation {
     template<int> struct ArrayCastFlattenOrInflate;
 
     /* Used in the assertion that data array is large enough. If any size
-       element is zero, the data can be zero-sized as well. Other we have to
-       compare against max stride. */
+       element is zero, the data can be zero-sized as well. Otherwise we have
+       to compare against max stride. */
     template<unsigned dimensions> constexpr bool isAnySizeZero(const StridedDimensions<dimensions, std::size_t>&, Sequence<>) {
         return false;
     }

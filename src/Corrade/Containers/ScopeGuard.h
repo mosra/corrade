@@ -193,7 +193,7 @@ inline ScopeGuard& ScopeGuard::operator=(ScopeGuard&& other) noexcept {
 /* MSVC 2015 has ambiguous operator+ on lambdas, thus I need to work around
    that by converting the lambda to a function pointer explicitly above. There
    is no chance of knowing the return type, so assuming the lambda is void.
-   That's a limitation compared to all other tystems, but since I want the
+   That's a limitation compared to all other systems, but since I want the
    normal function pointers to work well regardless of the return type, I need
    this overload as well. Source:
    https://developercommunity.visualstudio.com/content/problem/155715/visual-c-compiler-is-unable-to-convert-lambda-clos.html */
