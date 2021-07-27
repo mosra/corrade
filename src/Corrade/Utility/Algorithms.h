@@ -115,18 +115,7 @@ dimension has a size of @cpp sizeof(T) @ce and delegates into
 Expects that both arrays have the same size and @p T is a trivially copyable
 type.
 */
-template<unsigned dimensions, class T> void copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>& dst) {
-    static_assert(
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<T>::value
-        #else
-        __has_trivial_copy(T) && __has_trivial_destructor(T)
-        #endif
-        , "types must be trivially copyable");
-
-    return copy(Containers::arrayCast<dimensions + 1, const char>(src),
-                Containers::arrayCast<dimensions + 1, char>(dst));
-}
+template<unsigned dimensions, class T> void copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>& dst);
 
 namespace Implementation {
 
@@ -134,18 +123,6 @@ namespace Implementation {
 template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::StridedArrayView1D<typename View::Type> stridedArrayViewTypeFor(T&&);
 template<class T> static Containers::StridedArrayView1D<T> stridedArrayViewTypeFor(const Containers::ArrayView<T>&);
 template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> stridedArrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
-
-template<class> struct StridedArrayViewType;
-template<class T> struct StridedArrayViewType<Containers::ArrayView<T>> {
-    enum: unsigned { Dimensions = 1 };
-    typedef Containers::ArrayView<typename std::remove_const<T>::type> Type;
-    typedef Containers::ArrayView<const T> ConstType;
-};
-template<unsigned dimensions, class T> struct StridedArrayViewType<Containers::StridedArrayView<dimensions, T>> {
-    enum: unsigned { Dimensions = dimensions };
-    typedef Containers::StridedArrayView<dimensions, typename std::remove_const<T>::type> Type;
-    typedef Containers::StridedArrayView<dimensions, const T> ConstType;
-};
 
 }
 
@@ -161,7 +138,25 @@ Works with any type that's convertible to @ref Containers::StridedArrayView,
 expects that both views have the same underlying type and the same dimension
 count and the @p dst is not @cpp const @ce.
 */
-template<class From, class To, class FromView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst) {
+template<class From, class To, class FromView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
+
+namespace Implementation {
+
+template<class> struct StridedArrayViewType;
+template<class T> struct StridedArrayViewType<Containers::ArrayView<T>> {
+    enum: unsigned { Dimensions = 1 };
+    typedef Containers::ArrayView<typename std::remove_const<T>::type> Type;
+    typedef Containers::ArrayView<const T> ConstType;
+};
+template<unsigned dimensions, class T> struct StridedArrayViewType<Containers::StridedArrayView<dimensions, T>> {
+    enum: unsigned { Dimensions = dimensions };
+    typedef Containers::StridedArrayView<dimensions, typename std::remove_const<T>::type> Type;
+    typedef Containers::StridedArrayView<dimensions, const T> ConstType;
+};
+
+}
+
+template<class From, class To, class FromView, class ToView> void copy(From&& src, To&& dst) {
     static_assert(std::is_same<typename std::remove_const<typename FromView::Type>::type, typename std::remove_const<typename ToView::Type>::type>::value, "can't copy between views of different types");
     static_assert(!std::is_const<typename ToView::Type>::value, "can't copy to a const view");
     static_assert(unsigned(Implementation::StridedArrayViewType<FromView>::Dimensions) ==
@@ -184,6 +179,19 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
 
     for(std::size_t i = 0, max = src.size()[0]; i != max; ++i)
         copy(src[i], dst[i]);
+}
+
+template<unsigned dimensions, class T> void copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>& dst) {
+    static_assert(
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        std::is_trivially_copyable<T>::value
+        #else
+        __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #endif
+        , "types must be trivially copyable");
+
+    return copy(Containers::arrayCast<dimensions + 1, const char>(src),
+                Containers::arrayCast<dimensions + 1, char>(dst));
 }
 
 }}
