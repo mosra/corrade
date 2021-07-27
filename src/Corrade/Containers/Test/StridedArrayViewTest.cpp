@@ -183,7 +183,6 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void emptyCheck();
 
-    void isContiguous();
     void asContiguous();
     void asContiguousNonContiguous();
 
@@ -385,7 +384,6 @@ StridedArrayViewTest::StridedArrayViewTest() {
 
               &StridedArrayViewTest::emptyCheck,
 
-              &StridedArrayViewTest::isContiguous,
               &StridedArrayViewTest::asContiguous,
               &StridedArrayViewTest::asContiguousNonContiguous,
 
@@ -2035,7 +2033,7 @@ void StridedArrayViewTest::emptyCheck() {
     CORRADE_VERIFY(!cbEmpty);
 }
 
-void StridedArrayViewTest::isContiguous() {
+void StridedArrayViewTest::asContiguous() {
     int a[2*3*5];
     StridedArrayView3Di b{a, {5, 3, 2}, {6*4, 2*4, 4}};
 
@@ -2056,28 +2054,79 @@ void StridedArrayViewTest::isContiguous() {
     CORRADE_VERIFY(b.isContiguous<0>());
     CORRADE_VERIFY(b.isContiguous());
 
-    /* Sparse variants */
-    StridedArrayView3Di c{a, {2, 3, 2}, {2*6*4, 2*4, 4}};
-    CORRADE_VERIFY(c.isContiguous<2>());
-    CORRADE_VERIFY(c.isContiguous<1>());
-    CORRADE_VERIFY(!c.isContiguous<0>());
-    CORRADE_VERIFY(!c.isContiguous());
+    {
+        ArrayView<int> bc = b.asContiguous();
+        CORRADE_COMPARE(bc.data(), b.data());
+        CORRADE_COMPARE(bc.size(), 5*3*2);
 
-    StridedArrayView3Di d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
-    CORRADE_VERIFY(d.isContiguous<2>());
-    CORRADE_VERIFY(!d.isContiguous<1>());
-    CORRADE_VERIFY(!d.isContiguous<0>());
+        StridedArrayView1Di b0 = b.asContiguous<0>();
+        CORRADE_COMPARE(b0.data(), b.data());
+        CORRADE_COMPARE(b0.size(), 5*3*2);
+        CORRADE_COMPARE(b0.stride(), 4);
 
-    StridedArrayView3Di e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
-    CORRADE_VERIFY(!e.isContiguous<2>());
-    CORRADE_VERIFY(!e.isContiguous<1>());
-    CORRADE_VERIFY(!e.isContiguous<0>());
+        StridedArrayView2Di b1 = b.asContiguous<1>();
+        CORRADE_COMPARE(b1.data(), b.data());
+        CORRADE_COMPARE(b1.size(), (Size2D{5, 3*2}));
+        CORRADE_COMPARE(b1.stride(), (Stride2D{3*2*4, 4}));
+
+        /* This should return the exact same view */
+        StridedArrayView3Di b2 = b.asContiguous<2>();
+        CORRADE_COMPARE(b2.data(), b.data());
+        CORRADE_COMPARE(b2.size(), b.size());
+        CORRADE_COMPARE(b2.stride(), b.stride());
+
+    /* Non-contiguous in the first dimension */
+    } {
+        StridedArrayView3Di c{a, {2, 3, 2}, {2*6*4, 2*4, 4}};
+        CORRADE_VERIFY(c.isContiguous<2>());
+        CORRADE_VERIFY(c.isContiguous<1>());
+        CORRADE_VERIFY(!c.isContiguous<0>());
+        CORRADE_VERIFY(!c.isContiguous());
+
+        StridedArrayView2Di c1 = c.asContiguous<1>();
+        CORRADE_COMPARE(c1.data(), c.data());
+        CORRADE_COMPARE(c1.size(), (Size2D{2, 3*2}));
+        CORRADE_COMPARE(c1.stride(), (Stride2D{2*6*4, 4}));
+
+        /* This should return the exact same view */
+        StridedArrayView3Di c2 = c.asContiguous<2>();
+        CORRADE_COMPARE(c2.data(), c.data());
+        CORRADE_COMPARE(c2.size(), c.size());
+        CORRADE_COMPARE(c2.stride(), c.stride());
+
+    /* Non-contiguous in the second dimension */
+    } {
+        StridedArrayView3Di d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
+        CORRADE_VERIFY(d.isContiguous<2>());
+        CORRADE_VERIFY(!d.isContiguous<1>());
+        CORRADE_VERIFY(!d.isContiguous<0>());
+
+        /* This should return the exact same view */
+        StridedArrayView3Di d2 = d.asContiguous<2>();
+        CORRADE_COMPARE(d2.data(), d.data());
+        CORRADE_COMPARE(d2.size(), d.size());
+        CORRADE_COMPARE(d2.stride(), d.stride());
+
+    /* Not contigous in the third dimension, can't create any view */
+    } {
+        StridedArrayView3Di e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
+        CORRADE_VERIFY(!e.isContiguous<2>());
+        CORRADE_VERIFY(!e.isContiguous<1>());
+        CORRADE_VERIFY(!e.isContiguous<0>());
 
     /* "Broadcast" */
-    StridedArrayView3Di f{a, {5, 3, 2}, {6*4, 0, 4}};
-    CORRADE_VERIFY(f.isContiguous<2>());
-    CORRADE_VERIFY(!f.isContiguous<1>());
-    CORRADE_VERIFY(!f.isContiguous<0>());
+    } {
+        StridedArrayView3Di f{a, {5, 3, 2}, {6*4, 0, 4}};
+        CORRADE_VERIFY(f.isContiguous<2>());
+        CORRADE_VERIFY(!f.isContiguous<1>());
+        CORRADE_VERIFY(!f.isContiguous<0>());
+
+        /* This should again return the exact same view */
+        StridedArrayView3Di f2 = f.asContiguous<2>();
+        CORRADE_COMPARE(f2.data(), f.data());
+        CORRADE_COMPARE(f2.size(), f.size());
+        CORRADE_COMPARE(f2.stride(), f.stride());
+    }
 
     /* Packed block of memory, but strides not in order / negative */
     CORRADE_VERIFY(!b.flipped<2>().isContiguous<2>());
@@ -2088,31 +2137,28 @@ void StridedArrayViewTest::isContiguous() {
     CORRADE_VERIFY(!b.transposed<1, 2>().isContiguous<0>());
 }
 
-void StridedArrayViewTest::asContiguous() {
-    int a[2*3*5];
-    StridedArrayView1Di b{a, 2*3*5, 4};
-    ArrayView<int> bc = b.asContiguous();
-    CORRADE_VERIFY(bc.data() == a);
-    CORRADE_COMPARE(bc.size(), 2*3*5);
-
-    StridedArrayView3Di c{a, {5, 3, 2}, {6*4, 2*4, 4}};
-    ArrayView<int> cc = c.asContiguous();
-    CORRADE_VERIFY(cc.data() == a);
-    CORRADE_COMPARE(cc.size(), 2*3*5);
-}
-
 void StridedArrayViewTest::asContiguousNonContiguous() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
+    /* Taken from above */
     int a[2*3*5];
+    StridedArrayView3Di c{a, {2, 3, 2}, {2*6*4, 2*4, 4}};
+    StridedArrayView3Di d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
+    StridedArrayView3Di e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
 
     std::ostringstream out;
     Error redirectError{&out};
-    StridedArrayView1Di{a, 2*3*5, 4}.flipped<0>().asContiguous();
+    c.asContiguous();
+    c.asContiguous<0>();
+    d.asContiguous<1>();
+    e.asContiguous<2>();
     CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView::asContiguous(): the view is not contiguous\n");
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous\n"
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension 0\n"
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension 1\n"
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension 2\n");
 }
 
 void StridedArrayViewTest::access() {

@@ -555,6 +555,24 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         ArrayView<T> asContiguous() const;
 
+        /**
+         * @brief Convert the view to a contiguous one from given dimension further
+         * @m_since_latest
+         *
+         * Returns a view with the last @p dimension having size as the product
+         * of sizes in this and all following dimensions, and stride equal to
+         * @cpp sizeof(T) @ce. Expects that @ref isContiguous() "isContiguous<dimension>()"
+         * returns @cpp true @ce.
+         *
+         * Assuming the view is contiguous, calling this function with
+         * @p dimension equal to @ref Dimensions minus one will return the same
+         * view; calling it with @cpp 0 @ce will return an one-dimensional
+         * @ref StridedArrayView with stride equal to @cpp sizeof(T) @ce; while
+         * the non-templated @ref asContiguous() will return an @ref ArrayView
+         * (where the stride is implicitly defined as @cpp sizeof(T) @ce).
+         */
+        template<unsigned dimension> StridedArrayView<dimension + 1, T> asContiguous() const;
+
         /** @brief Element access */
         ElementType operator[](std::size_t i) const;
 
@@ -1714,6 +1732,25 @@ template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions,
     std::size_t size = 1;
     for(std::size_t i = 0; i != dimensions; ++i) size *= _size._data[i];
     return {static_cast<T*>(_data), size};
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimension + 1, T> StridedArrayView<dimensions, T>::asContiguous() const {
+    static_assert(dimension < dimensions, "dimension out of bounds");
+    CORRADE_ASSERT(isContiguous<dimension>(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
+
+    StridedDimensions<dimension + 1, std::size_t> size;
+    StridedDimensions<dimension + 1, std::ptrdiff_t> stride;
+    for(std::size_t i = 0; i != dimension; ++i) {
+        size._data[i] = _size._data[i];
+        stride._data[i] = _stride._data[i];
+    }
+
+    size._data[dimension] = 1;
+    stride._data[dimension] = sizeof(T);
+    for(std::size_t i = dimension; i != dimensions; ++i)
+        size._data[dimension] *= _size._data[i];
+
+    return {size, stride, _data};
 }
 
 namespace Implementation {
