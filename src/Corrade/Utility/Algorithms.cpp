@@ -254,4 +254,79 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
     }
 }
 
+namespace Implementation {
+
+void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView2D<char>& view) {
+    const std::size_t* size = view.size().begin();
+    const std::ptrdiff_t* stride = view.stride().begin();
+    /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
+       for the size assert anyway */
+    return flipSecondToLastDimensionInPlace(Containers::StridedArrayView4D<char>{
+        {static_cast<char*>(view.data()), ~std::size_t{}},
+        {1, 1, size[0], size[1]},
+        {stride[0], stride[0], stride[0], stride[1]}
+    });
+}
+
+void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView3D<char>& view) {
+    const std::size_t* size = view.size().begin();
+    const std::ptrdiff_t* stride = view.stride().begin();
+    /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
+       for the size assert anyway */
+    return flipSecondToLastDimensionInPlace(Containers::StridedArrayView4D<char>{
+        {static_cast<char*>(view.data()), ~std::size_t{}},
+        {1, size[0], size[1], size[2]},
+        {stride[0], stride[0], stride[1], stride[2]}
+    });
+}
+
+void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView4D<char>& view) {
+    /* Should have been checked by flipInPlace() already, just verifying that
+       all the bubbling back to four dimensions went correct */
+    CORRADE_INTERNAL_ASSERT(view.isContiguous<3>());
+
+    auto* const ptr = static_cast<char*>(view.data());
+    const std::size_t* size = view.size().begin();
+    const std::ptrdiff_t* stride = view.stride().begin();
+
+    for(std::size_t i0 = 0; i0 != size[0]; ++i0) {
+        char* const ptr0 = ptr + i0*stride[0];
+        for(std::size_t i1 = 0; i1 != size[1]; ++i1) {
+            char* const ptr1 = ptr0 + i1*stride[1];
+
+            /* Go through half of the items in third dimension and flip them
+               with the other half */
+            for(std::size_t i2 = 0, i2Max = size[2]/2; i2 != i2Max; ++i2) {
+                char* const ptr2Left = ptr1 + i2*stride[2];
+                char* const ptr2Right = ptr1 + (size[2] - i2 - 1)*stride[2];
+
+                /* Copy 256-bit blocks at a time, which could hopefully make
+                   use of 256-bit SIMD */
+                constexpr std::size_t BlockSize = 32;
+                alignas(BlockSize) char tmp[BlockSize];
+                char* ptr3Left = ptr2Left;
+                char* ptr3Right = ptr2Right;
+                for(std::size_t i3 = 0, i3Max = size[3]/BlockSize; i3 != i3Max; ++i3) {
+                    std::memcpy(tmp, ptr3Left, BlockSize);
+                    std::memcpy(ptr3Left, ptr3Right, BlockSize);
+                    std::memcpy(ptr3Right, tmp, BlockSize);
+
+                    ptr3Left += BlockSize;
+                    ptr3Right += BlockSize;
+                }
+
+                /* Copy the rest. I doubt an if() around this makes sense,
+                   since it would slow down the very common and very slow case
+                   where we're flipping pieces of data smaller than 256 bits */
+                const std::size_t remainingSize = size[3]%BlockSize;
+                std::memcpy(tmp, ptr3Left, remainingSize);
+                std::memcpy(ptr3Left, ptr3Right, remainingSize);
+                std::memcpy(ptr3Right, tmp, remainingSize);
+            }
+        }
+    }
+}
+
+}
+
 }}

@@ -68,6 +68,12 @@ struct AlgorithmsTest: TestSuite::Tester {
     void copyBenchmark1DNonContiguous();
     void copyBenchmark2DNonContiguous();
     template<class T> void copyBenchmark3DNonContiguous();
+
+    template<class T> void flipInPlaceFirstDimension();
+    template<class T> void flipInPlaceSecondDimension();
+    template<class T> void flipInPlaceThirdDimension();
+    void flipInPlaceZeroSize();
+    void flipInPlaceNonContigous();
 };
 
 const struct {
@@ -130,20 +136,27 @@ const struct {
 };
 
 /* For testing large types (and the Duff's device branch, which is 8 bytes and
-   above right now) */
+   above right now). The class explicitly fills all the data to catch potential
+   errors where just a part gets copied. */
 template<std::size_t size> struct Data {
     /*implicit*/ Data() = default;
-    /*implicit*/ Data(char i) { data[0] = i; }
+    /*implicit*/ Data(unsigned char value) {
+        for(std::size_t i = 0; i != size; ++i)
+            data[i] = value;
+    }
 
-    char data[size];
+    unsigned char data[size];
 
     Data& operator++() {
-        ++data[0];
+        for(std::size_t i = 0; i != size; ++i)
+            ++data[i];
         return *this;
     }
 
     bool operator==(const Data& other) const {
-        return data[0] == other.data[0];
+        for(std::size_t i = 0; i != size; ++i)
+            if(data[i] != other.data[i]) return false;
+        return true;
     }
 };
 template<std::size_t size> Debug& operator<<(Debug& debug, const Data<size>& value) {
@@ -222,6 +235,21 @@ AlgorithmsTest::AlgorithmsTest() {
                    &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<8>>,
                    &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<16>>,
                    &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<32>>}, 100);
+
+    addTests({&AlgorithmsTest::flipInPlaceFirstDimension<Data<1>>,
+              &AlgorithmsTest::flipInPlaceFirstDimension<Data<8>>,
+              &AlgorithmsTest::flipInPlaceFirstDimension<Data<32>>,
+
+              &AlgorithmsTest::flipInPlaceSecondDimension<Data<1>>,
+              &AlgorithmsTest::flipInPlaceSecondDimension<Data<8>>,
+              &AlgorithmsTest::flipInPlaceSecondDimension<Data<32>>,
+
+              &AlgorithmsTest::flipInPlaceThirdDimension<Data<1>>,
+              &AlgorithmsTest::flipInPlaceThirdDimension<Data<8>>,
+              &AlgorithmsTest::flipInPlaceThirdDimension<Data<32>>,
+
+              &AlgorithmsTest::flipInPlaceZeroSize,
+              &AlgorithmsTest::flipInPlaceNonContigous});
 }
 
 void AlgorithmsTest::copy() {
@@ -774,6 +802,208 @@ template<class T> void AlgorithmsTest::copyBenchmark3DNonContiguous() {
     }
 
     CORRADE_COMPARE(dstData[Size*Size*Size*4/sizeof(T) - 2].data[0], (Size*Size*Size*4/sizeof(T) + 10 - 2)%256);
+}
+
+template<class T> void AlgorithmsTest::flipInPlaceFirstDimension() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    T data[] {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+        0xff, 0xfe, 0xfd, 0xfc, 0xfb, /* padding */
+
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23,
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
+        0xfa, 0xf9, 0xf8, 0xf7, 0xf6 /* padding */
+    };
+
+    Containers::StridedArrayView3D<T> view{data,
+        {2, 3, 7},
+        {(3*7 + 5)*sizeof(T), 7*sizeof(T), sizeof(T)}
+    };
+
+    /* This creates a 4D view and then flattens it to 2D, calling the static 2D
+       variant */
+    Utility::flipInPlace<0>(view);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23,
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
+        0xff, 0xfe, 0xfd, 0xfc, 0xfb, /* padding stays untouched */
+
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+        0xfa, 0xf9, 0xf8, 0xf7, 0xf6, /* padding stays untouched */
+    }), TestSuite::Compare::Container);
+
+    /* This creates a 11D view and then flattens it to 9D, calling the dynamic
+       variant, and flipping back to the original state */
+    Containers::StridedArrayView<10, T> view10{data,
+        {1, 1, 1, 1, 1, 1, 1, 2, 3, 7},
+        {0, 0, 0, 0, 0, 0, 0, (3*7 + 5)*sizeof(T), 7*sizeof(T), sizeof(T)}
+    };
+    Utility::flipInPlace<7>(view10);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+        0xff, 0xfe, 0xfd, 0xfc, 0xfb, /* padding stays untouched */
+
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23,
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
+        0xfa, 0xf9, 0xf8, 0xf7, 0xf6, /* padding stays untouched */
+    }), TestSuite::Compare::Container);
+}
+
+template<class T> void AlgorithmsTest::flipInPlaceSecondDimension() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    T data[] {                                 /* vvvvvvvvvv-- padding */
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0xff, 0xfe,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0xfd, 0xfc,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0xfb, 0xfa,
+
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0xf9, 0xf8,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0xf7, 0xf6,
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0xf5, 0xf4
+                                               /* ^^^^^^^^^^ */
+    };
+
+    Containers::StridedArrayView3D<T> view{data,
+        {2, 3, 7},
+        {3*9*sizeof(T), 9*sizeof(T), sizeof(T)}
+    };
+
+    /* This creates a 4D view and then flattens it to 3D, calling the static 3D
+       variant */
+    Utility::flipInPlace<1>(view);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+                     /* padding stays untouched --vvvvvvvvvv */
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0xff, 0xfe,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0xfd, 0xfc,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0xfb, 0xfa,
+
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0xf9, 0xf8,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0xf7, 0xf6,
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0xf5, 0xf4
+                                               /* ^^^^^^^^^^ */
+    }), TestSuite::Compare::Container);
+
+    /* This creates a 11D view and then flattens it to 10D, calling the dynamic
+       variant, and flipping back to the original state */
+    Containers::StridedArrayView<10, T> view10{data,
+        {2, 1, 1, 1, 1, 1, 1, 1, 3, 7},
+        {3*9*sizeof(T), 0, 0, 0, 0, 0, 0, 0, 9*sizeof(T), sizeof(T)}
+    };
+    Utility::flipInPlace<8>(view10);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+                     /* padding stays untouched --vvvvvvvvvv */
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0xff, 0xfe,
+        0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0xfd, 0xfc,
+        0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0xfb, 0xfa,
+
+        0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0xf9, 0xf8,
+        0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0xf7, 0xf6,
+        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0xf5, 0xf4
+                                               /* ^^^^^^^^^^ */
+    }), TestSuite::Compare::Container);
+}
+
+template<class T> void AlgorithmsTest::flipInPlaceThirdDimension() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    T data[] {
+        /* padding
+            --vvvv        vvvv        vvvv        vvvv        vvvv        vvvv        vvvv */
+        0x01, 0xff, 0x02, 0xf9, 0x03, 0xf3, 0x04, 0xed, 0x05, 0xe7, 0x06, 0xe1, 0x07, 0xdb,
+        0x08, 0xfe, 0x09, 0xf8, 0x0a, 0xf2, 0x0b, 0xec, 0x0c, 0xe6, 0x0d, 0xe0, 0x0e, 0xda,
+        0x0f, 0xfd, 0x10, 0xf7, 0x11, 0xf1, 0x12, 0xeb, 0x13, 0xe5, 0x14, 0xdf, 0x15, 0xd9,
+
+        0x16, 0xfc, 0x17, 0xf6, 0x18, 0xf0, 0x19, 0xea, 0x1a, 0xe4, 0x1b, 0xde, 0x1c, 0xd8,
+        0x1d, 0xfb, 0x1e, 0xf5, 0x1f, 0xef, 0x20, 0xe9, 0x21, 0xe3, 0x22, 0xdd, 0x23, 0xd7,
+        0x24, 0xfa, 0x25, 0xf4, 0x26, 0xee, 0x27, 0xe8, 0x28, 0xe2, 0x29, 0xdc, 0x2a, 0xd6
+        /*    ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^ */
+    };
+
+    Containers::StridedArrayView3D<T> view{data,
+        {2, 3, 7},
+        {3*7*2*sizeof(T), 7*2*sizeof(T), 2*sizeof(T)}
+    };
+
+    /* This creates a 4D view and then flattens it to 4D, calling the static 4D
+       variant */
+    Utility::flipInPlace<2>(view);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+        /* padding stays untouched
+            --vvvv        vvvv        vvvv        vvvv        vvvv        vvvv        vvvv */
+        0x07, 0xff, 0x06, 0xf9, 0x05, 0xf3, 0x04, 0xed, 0x03, 0xe7, 0x02, 0xe1, 0x01, 0xdb,
+        0x0e, 0xfe, 0x0d, 0xf8, 0x0c, 0xf2, 0x0b, 0xec, 0x0a, 0xe6, 0x09, 0xe0, 0x08, 0xda,
+        0x15, 0xfd, 0x14, 0xf7, 0x13, 0xf1, 0x12, 0xeb, 0x11, 0xe5, 0x10, 0xdf, 0x0f, 0xd9,
+
+        0x1c, 0xfc, 0x1b, 0xf6, 0x1a, 0xf0, 0x19, 0xea, 0x18, 0xe4, 0x17, 0xde, 0x16, 0xd8,
+        0x23, 0xfb, 0x22, 0xf5, 0x21, 0xef, 0x20, 0xe9, 0x1f, 0xe3, 0x1e, 0xdd, 0x1d, 0xd7,
+        0x2a, 0xfa, 0x29, 0xf4, 0x28, 0xee, 0x27, 0xe8, 0x26, 0xe2, 0x25, 0xdc, 0x24, 0xd6
+        /*    ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^ */
+    }), TestSuite::Compare::Container);
+
+    /* This creates a 10D view and then flattens it to 10D, calling the dynamic
+       variant, and flipping back to the original state */
+    Containers::StridedArrayView<10, T> view10{data,
+        {2, 3, 1, 1, 1, 1, 1, 1, 1, 7},
+        {3*7*2*sizeof(T), 7*2*sizeof(T), 0, 0, 0, 0, 0, 0, 0, 2*sizeof(T)}
+    };
+    Utility::flipInPlace<9>(view10);
+    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView<T>({
+        /* padding stays untouched
+            --vvvv        vvvv        vvvv        vvvv        vvvv        vvvv        vvvv */
+        0x01, 0xff, 0x02, 0xf9, 0x03, 0xf3, 0x04, 0xed, 0x05, 0xe7, 0x06, 0xe1, 0x07, 0xdb,
+        0x08, 0xfe, 0x09, 0xf8, 0x0a, 0xf2, 0x0b, 0xec, 0x0c, 0xe6, 0x0d, 0xe0, 0x0e, 0xda,
+        0x0f, 0xfd, 0x10, 0xf7, 0x11, 0xf1, 0x12, 0xeb, 0x13, 0xe5, 0x14, 0xdf, 0x15, 0xd9,
+
+        0x16, 0xfc, 0x17, 0xf6, 0x18, 0xf0, 0x19, 0xea, 0x1a, 0xe4, 0x1b, 0xde, 0x1c, 0xd8,
+        0x1d, 0xfb, 0x1e, 0xf5, 0x1f, 0xef, 0x20, 0xe9, 0x21, 0xe3, 0x22, 0xdd, 0x23, 0xd7,
+        0x24, 0xfa, 0x25, 0xf4, 0x26, 0xee, 0x27, 0xe8, 0x28, 0xe2, 0x29, 0xdc, 0x2a, 0xd6
+        /*    ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^        ^^^^ */
+    }), TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::flipInPlaceZeroSize() {
+    Containers::StridedArrayView4D<char> view{nullptr, {}, {0, 0, 0, 1}};
+
+    /* Shouldn't crash, assert or call memcpy with null pointers */
+    Utility::flipInPlace<0>(view);
+    Utility::flipInPlace<1>(view);
+    Utility::flipInPlace<2>(view);
+    Utility::flipInPlace<3>(view);
+    CORRADE_VERIFY(true);
+}
+
+void AlgorithmsTest::flipInPlaceNonContigous() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    int a[2*3*7];
+    Containers::StridedArrayView3D<int> b{a, {1, 3, 7}, {2*3*7*4, 7*4, 4}};
+    Containers::StridedArrayView3D<int> c{a, {2, 1, 7}, {3*7*4, 2*7*4, 4}};
+    Containers::StridedArrayView3D<int> d{a, {2, 3, 3}, {3*7*4, 7*4, 2*4}};
+
+    /* This is fine, it should complain only for dimensions not contiguous
+       *after* */
+    Utility::flipInPlace<0>(b);
+    Utility::flipInPlace<2>(d);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Utility::flipInPlace<0>(c);
+    Utility::flipInPlace<1>(d);
+    CORRADE_COMPARE(out.str(),
+        "Utility::flipInPlace(): the view is not contiguous after dimension 0\n"
+        "Utility::flipInPlace(): the view is not contiguous after dimension 1\n");
 }
 
 }}}}

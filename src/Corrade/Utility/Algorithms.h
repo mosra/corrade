@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::copy()
+ * @brief Function @ref Corrade::Utility::copy(), @ref Corrade::Utility::flipInPlace()
  * @m_since{2020,06}
  */
 
@@ -140,6 +140,26 @@ count and the @p dst is not @cpp const @ce.
 */
 template<class From, class To, class FromView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
 
+/**
+@brief Flip given dimension of a view in-place
+@m_since_latest
+
+Swaps all items in @p dimension such that @cpp viewDimension[i] @ce and
+@cpp viewDimension[dimensionSize - i - 1] @ce exchange their contents for all
+@cpp i < dimensionSize/2 @ce. Expects that @p T is a trivially copyable type
+and the view is contiguous after @p dimension.
+
+View flip not in place can be performed using a @ref copy() to a view that has
+the desired dimension @ref Containers::StridedArrayView::flipped(). In the
+following snippet, the first expression does the flip during a copy, while the
+second performs it in-place:
+
+@snippet Utility.cpp Algorithms-flipInPlace
+
+@see @ref Containers::StridedArrayView::isContiguous()
+*/
+template<unsigned dimension, unsigned dimensions, class T> void flipInPlace(const Containers::StridedArrayView<dimensions, T>& view);
+
 namespace Implementation {
 
 template<class> struct StridedArrayViewType;
@@ -192,6 +212,36 @@ template<unsigned dimensions, class T> void copy(const Containers::StridedArrayV
 
     return copy(Containers::arrayCast<dimensions + 1, const char>(src),
                 Containers::arrayCast<dimensions + 1, char>(dst));
+}
+
+namespace Implementation {
+
+CORRADE_UTILITY_EXPORT void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView2D<char>& view);
+CORRADE_UTILITY_EXPORT void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView3D<char>& view);
+CORRADE_UTILITY_EXPORT void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView4D<char>& view);
+
+template<unsigned dimensions> void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView<dimensions, char>& view) {
+    for(const Containers::StridedArrayView<dimensions - 1, char> i: view)
+        flipSecondToLastDimensionInPlace(i);
+}
+
+}
+
+template<unsigned dimension, unsigned dimensions, class T> void flipInPlace(const Containers::StridedArrayView<dimensions, T>& view) {
+    static_assert(dimension < dimensions, "dimension out of range");
+    static_assert(
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        std::is_trivially_copyable<T>::value
+        #else
+        __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #endif
+        , "types must be trivially copyable");
+
+    const Containers::StridedArrayView<dimensions + 1, char> expanded =
+        Containers::arrayCast<dimensions + 1, char>(view);
+    CORRADE_ASSERT(expanded.template isContiguous<dimension + 1>(),
+        "Utility::flipInPlace(): the view is not contiguous after dimension" << dimension, );
+    Implementation::flipSecondToLastDimensionInPlace(expanded.template asContiguous<dimension + 1>());
 }
 
 }}

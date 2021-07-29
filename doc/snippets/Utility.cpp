@@ -33,6 +33,8 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
@@ -355,6 +357,20 @@ args.addOption("input")
 };
 
 int main() {
+{
+typedef int T;
+/* [Algorithms-flipInPlace] */
+Containers::StridedArrayView2D<T> pixels = DOXYGEN_IGNORE({});
+Containers::StridedArrayView2D<T> destination = DOXYGEN_IGNORE({});
+
+/* Y-flip the pixels into a destination */
+Utility::copy(pixels.flipped<0>(), destination);
+
+/* Y.flip the pixels in-place */
+Utility::flipInPlace<0>(pixels);
+/* [Algorithms-flipInPlace] */
+}
+
 {
 typedef float __m256;
 std::size_t size{};
