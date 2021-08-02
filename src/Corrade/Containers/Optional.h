@@ -535,8 +535,13 @@ template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args
     /* Done like this instead of std::swap() so it works for non-movable /
        non-copyable types as well. */
     if(_set) _value.~T();
-    _set = true;
     Implementation::construct<T>(_value, Utility::forward<Args>(args)...);
+    /* For exception safety flip the _set bit only after the constructor
+       finished -- if the constructor would throw, this means we don't call
+       a destructor on a partially-constructed instance, which would most
+       definitely blow up. */
+    /** @todo operator=() probably needs the same treatment? */
+    _set = true;
     return _value;
 }
 
