@@ -62,8 +62,8 @@
 #elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
 #define CORRADE_TARGET_ARM
 
-/* First is GCC/Clang, second is MSVC */
-#elif defined(__powerpc64__) || defined(_M_PPC)
+/* First two is GCC/Clang, third is MSVC. Not sure about 64-bit MSVC. */
+#elif defined(__powerpc__) || defined(__powerpc64__) || defined(_M_PPC)
 #define CORRADE_TARGET_POWERPC
 
 /* WebAssembly (on Emscripten). Old pure asm.js toolchains did not define this,
