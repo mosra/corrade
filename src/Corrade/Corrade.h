@@ -253,7 +253,8 @@ doesn't know about yet.
 @see @ref CORRADE_TARGET_SSE2, @ref CORRADE_TARGET_SSE3,
     @ref CORRADE_TARGET_SSSE3, @ref CORRADE_TARGET_SSE41,
     @ref CORRADE_TARGET_SSE42, @ref CORRADE_TARGET_AVX,
-    @ref CORRADE_TARGET_AVX2
+    @ref CORRADE_TARGET_AVX_F16C, @ref CORRADE_TARGET_AVX_FMA,
+    @ref CORRADE_TARGET_AVX2, @ref CORRADE_TARGET_AVX512F
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -324,9 +325,10 @@ platforms (such as x86 and ARM). Note that some platforms are Bi-Endian,
 meaning the endianness can be switched at runtime (and thus can't be detected
 at compile-time), this macro only reflects the usual architecture default.
 Moreover, unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
-@ref CORRADE_TARGET_POWERPC are not exposed in CMake because the meaning is
-unclear on platforms with multi-architecture binaries.
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC,
+@ref CORRADE_TARGET_WASM and derived instruction set variables are not exposed
+in CMake because the meaning is unclear on platforms with multi-architecture
+binaries.
 @see @ref CORRADE_TARGET_POWERPC, @ref Corrade::Utility::Endianness,
     @ref corrade-cmake
 */
