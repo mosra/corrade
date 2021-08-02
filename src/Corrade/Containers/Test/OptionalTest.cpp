@@ -140,6 +140,7 @@ struct OptionalTest: TestSuite::Tester {
 
     void emplaceNull();
     void emplaceSet();
+    void emplaceException();
 
     void resetCounters();
 
@@ -200,7 +201,9 @@ OptionalTest::OptionalTest() {
               &OptionalTest::emplaceNull,
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
-    addTests({&OptionalTest::access,
+    addTests({&OptionalTest::emplaceException,
+
+              &OptionalTest::access,
               &OptionalTest::accessRvalue,
               &OptionalTest::accessInvalid,
 
@@ -896,6 +899,45 @@ void OptionalTest::emplaceSet() {
 
     CORRADE_COMPARE(Immovable::constructed, 2);
     CORRADE_COMPARE(Immovable::destructed, 2);
+}
+
+void OptionalTest::emplaceException() {
+    /* We're unfortunately dealing with libraries that use exceptions (OpenEXR)
+       and using an Optional to store state there. That means, emplace() has to
+       be exception-aware and flip the "set" bit only after the constructor
+       finished, not earlier, in order to avoid getting the destructor called
+       on an instance that didn't finish construction. */
+
+    struct Throws {
+        Throws(bool& destructorCalled): destructorCalled(destructorCalled) {
+            throw int{};
+        }
+
+        ~Throws() {
+            destructorCalled = true;
+        }
+
+        bool& destructorCalled;
+    };
+
+    bool thrown = false;
+    bool destructorCalled = false;
+
+    /* It shouldn't mark the optional as set if it throws */
+    {
+        Optional<Throws> a;
+        try {
+            a.emplace(destructorCalled);
+        } catch(int) {
+            thrown = true;
+        }
+
+        CORRADE_VERIFY(!a);
+        CORRADE_VERIFY(thrown);
+        CORRADE_VERIFY(!destructorCalled);
+    }
+
+    CORRADE_VERIFY(!destructorCalled);
 }
 
 void OptionalTest::resetCounters() {
