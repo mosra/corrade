@@ -243,13 +243,13 @@ Defined if the library is built for Android.
 Defined if the library is built for x86 platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM,
-@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
-exposed in CMake because the meaning is unclear on platforms with
-multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
-@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
-pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+@ref CORRADE_TARGET_32BIT, @ref CORRADE_TARGET_BIG_ENDIAN and derived
+instruction set variables are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 @see @ref CORRADE_TARGET_SSE2, @ref CORRADE_TARGET_SSE3,
     @ref CORRADE_TARGET_SSSE3, @ref CORRADE_TARGET_SSE41,
     @ref CORRADE_TARGET_SSE42, @ref CORRADE_TARGET_AVX,
@@ -265,13 +265,13 @@ doesn't know about yet.
 Defined if the library is built for ARM platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM,
-@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
-exposed in CMake because the meaning is unclear on platforms with
-multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
-@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
-pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+@ref CORRADE_TARGET_32BIT, @ref CORRADE_TARGET_BIG_ENDIAN and derived
+instruction set variables are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 @see @ref CORRADE_TARGET_NEON
 */
 #define CORRADE_TARGET_ARM
@@ -284,13 +284,13 @@ doesn't know about yet.
 Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_WASM,
-@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
-exposed in CMake because the meaning is unclear on platforms with
-multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
-@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
-pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+@ref CORRADE_TARGET_32BIT, @ref CORRADE_TARGET_BIG_ENDIAN and derived
+instruction set variables are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 @see @ref CORRADE_TARGET_BIG_ENDIAN
 */
 #define CORRADE_TARGET_POWERPC
@@ -303,17 +303,31 @@ doesn't know about yet.
 Defined if the library is built for WebAssembly (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC,
-@ref CORRADE_TARGET_BIG_ENDIAN and derived instruction set variables are not
-exposed in CMake because the meaning is unclear on platforms with
-multi-architecture binaries. If neither @ref CORRADE_TARGET_X86,
-@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC nor
-@ref CORRADE_TARGET_WASM is defined, the platform might be either a very old
-pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+@ref CORRADE_TARGET_32BIT, @ref CORRADE_TARGET_BIG_ENDIAN and derived
+instruction set variables are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC
+nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
+old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
+library doesn't know about yet.
 @see @ref CORRADE_TARGET_SIMD128
 */
 #define CORRADE_TARGET_WASM
 #undef CORRADE_TARGET_WASM
+
+/**
+@brief 32-bit target
+@m_since_latest
+
+Defined if the library is built for a 32-bit target. Not defined on 64-bit
+platforms. Note that unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC,
+@ref CORRADE_TARGET_WASM, @ref CORRADE_TARGET_BIG_ENDIAN and derived
+instruction set variables are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries.
+*/
+#define CORRADE_TARGET_32BIT
+#undef CORRADE_TARGET_32BIT
 
 /**
 @brief Big-Endian target

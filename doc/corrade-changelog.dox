@@ -47,6 +47,8 @@ namespace Corrade {
     @ref CORRADE_TARGET_SIMD128 preprocessor variables added to the already
     existing @ref CORRADE_TARGET_SSE2 for detecting enabled instruction sets on
     x86, ARM and WebAssembly
+-   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
+    detection of 32-bit builds
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 

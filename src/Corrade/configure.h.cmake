@@ -81,6 +81,11 @@
 #error CORRADE_TARGET_X86 / _ARM / _POWERPC defined on Emscripten
 #endif
 
+/* 64-bit WebAssembly macro was tested by passing -m64 to emcc */
+#if !defined(__x86_64) && !defined(_M_X64) && !defined(__aarch64__) && !defined(_M_ARM64) && !defined(__powerpc64__) && !defined(__wasm64__)
+#define CORRADE_TARGET_32BIT
+#endif
+
 /* C++ standard */
 #ifdef _MSC_VER
 #ifdef _MSVC_LANG
