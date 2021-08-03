@@ -1641,32 +1641,32 @@ template<unsigned dimensions, class T> class StridedIterator {
         #endif
 
         /** @brief Equality comparison */
-        bool operator==(StridedIterator<dimensions, T> other) const {
+        bool operator==(const StridedIterator<dimensions, T>& other) const {
             return _data == other._data && _i == other._i;
         }
 
         /** @brief Non-equality comparison */
-        bool operator!=(StridedIterator<dimensions, T> other) const {
+        bool operator!=(const StridedIterator<dimensions, T>& other) const {
             return _data != other._data || _i != other._i;
         }
 
         /** @brief Less than comparison */
-        bool operator<(StridedIterator<dimensions, T> other) const {
+        bool operator<(const StridedIterator<dimensions, T>& other) const {
             return _data == other._data && _i < other._i;
         }
 
         /** @brief Less than or equal comparison */
-        bool operator<=(StridedIterator<dimensions, T> other) const {
+        bool operator<=(const StridedIterator<dimensions, T>& other) const {
             return _data == other._data && _i <= other._i;
         }
 
         /** @brief Greater than comparison */
-        bool operator>(StridedIterator<dimensions, T> other) const {
+        bool operator>(const StridedIterator<dimensions, T>& other) const {
             return _data == other._data && _i > other._i;
         }
 
         /** @brief Greater than or equal comparison */
-        bool operator>=(StridedIterator<dimensions, T> other) const {
+        bool operator>=(const StridedIterator<dimensions, T>& other) const {
             return _data == other._data && _i >= other._i;
         }
 
@@ -1681,7 +1681,7 @@ template<unsigned dimensions, class T> class StridedIterator {
         }
 
         /** @brief Iterator difference */
-        std::ptrdiff_t operator-(StridedIterator<dimensions, T> it) const {
+        std::ptrdiff_t operator-(const StridedIterator<dimensions, T>& it) const {
             return _i - it._i;
         }
 
