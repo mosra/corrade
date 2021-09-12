@@ -562,7 +562,7 @@ void PairTest::constructMoveCopyMake() {
 
 void PairTest::constructMoveMove() {
     {
-        auto a = pair(Movable{5}, Movable{7});
+        Pair<Movable, Movable> a = {Movable{5}, Movable{7}};
         CORRADE_COMPARE(a.first().a, 5);
         CORRADE_COMPARE(a.second().a, 7);
 
@@ -587,7 +587,7 @@ void PairTest::constructMoveMove() {
 
 void PairTest::constructMoveMoveMake() {
     {
-        Pair<Movable, Movable> a = {Movable{5}, Movable{7}};
+        auto a = pair(Movable{5}, Movable{7});
         CORRADE_VERIFY(std::is_same<decltype(a), Pair<Movable, Movable>>::value);
         CORRADE_COMPARE(a.first().a, 5);
         CORRADE_COMPARE(a.second().a, 7);
