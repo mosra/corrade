@@ -389,8 +389,8 @@ void PairTest::constructCopyCopy() {
     CORRADE_COMPARE(ca.second(), 7);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>, const Copyable&, const Copyable&>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, int>, const Throwable&, const int&>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<int, Throwable>, const int&, const Throwable&>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, Copyable>, const Throwable&, const Copyable&>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Copyable, Throwable>, const Copyable&, const Throwable&>::value);
 }
 
 void PairTest::constructCopyCopyMake() {
