@@ -54,7 +54,9 @@ set(CorradeContainers_HEADERS
     StridedArrayView.h
     String.h
     StringStl.h
-    StringView.h)
+    StringView.h
+    Triple.h
+    TripleStl.h)
 
 set(CorradeContainers_PRIVATE_HEADERS
     Implementation/RawForwardList.h)

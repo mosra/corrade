@@ -46,6 +46,7 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/Triple.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 
@@ -744,6 +745,15 @@ auto b = Containers::optional<std::string>('a', 'b');
 auto a = Containers::Pair<float, int>{35.0f, 7};
 auto b = Containers::pair(35.0f, 7);
 /* [pair] */
+static_cast<void>(a);
+static_cast<void>(b);
+}
+
+{
+/* [triple] */
+auto a = Containers::Triple<float, int, bool>{35.0f, 7, true};
+auto b = Containers::triple(35.0f, 7, true);
+/* [triple] */
 static_cast<void>(a);
 static_cast<void>(b);
 }

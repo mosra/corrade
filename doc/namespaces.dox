@@ -105,7 +105,8 @@ Corrade type            | STL equivalent
 @ref StringView         | @ref std::string_view, \n @ref std::u8string_view @m_class{m-label m-flat m-primary} **C++17**
 @ref MutableStringView  | *no equivalent*
 @m_class{m-label m-flat m-danger} **not planned** | @ref std::wstring, \n @ref std::u16string, \n @ref std::u32string, \n @ref std::wstring_view, \n @ref std::u16string_view, \n @ref std::u32string_view
-* *no equivalent*       | @ref std::any, \n @ref std::tuple, \n @ref std::variant
+@ref Triple             | @ref std::tuple "std::tuple<F, S, T>"
+* *no equivalent*       | @ref std::any, \n @ref std::variant
 */
 /** @namespace Corrade::Containers::Literals
 @brief Container literals

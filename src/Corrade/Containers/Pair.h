@@ -67,6 +67,8 @@ Unlike with @ref std::pair, access to the pair elements is done using
 the members directly. This is done in order to future-proof the design and have
 extra flexibility in how the internals are defined.
 
+There's also a three-element variant, called a @ref Triple.
+
 @section Containers-Pair-stl STL compatibility
 
 Instances of @ref Pair are *explicitly* copy- and move-convertible to and

@@ -79,6 +79,8 @@ class String;
 template<class> class BasicStringView;
 typedef BasicStringView<const char> StringView;
 typedef BasicStringView<char> MutableStringView;
+
+template<class, class, class> class Triple;
 #endif
 
 }}

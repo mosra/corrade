@@ -32,6 +32,7 @@
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Containers/ReferenceStl.h"
+#include "Corrade/Containers/TripleStl.h"
 
 using namespace Corrade;
 
@@ -65,6 +66,20 @@ std::pair<bool, int*> c(Containers::pair(false, &b.second()));
 auto d = Containers::pair(std::pair<char, double>{'p', 3.14});
     // d is Containers::pair<char, double>
 /* [Pair] */
+static_cast<void>(c);
+static_cast<void>(d);
+}
+
+{
+/* [Triple] */
+std::tuple<float, int, bool> a{35.0f, 7, true};
+Containers::Triple<float, int, bool> b{a};
+
+std::tuple<bool, int*, bool> c(Containers::triple(false, &b.second(), true));
+
+auto d = Containers::triple(std::tuple<char, double, bool>{'p', 3.14, true});
+    // d is Containers::triple<char, double, bool>
+/* [Triple] */
 static_cast<void>(c);
 static_cast<void>(d);
 }
