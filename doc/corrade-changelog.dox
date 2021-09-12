@@ -224,6 +224,9 @@ namespace Corrade {
     same effect. See @ref building-corrade-cross-android and
     [mosra/magnum#310](https://github.com/mosra/magnum/issues/310) for more
     information.
+-   Updated Debian build instructions to pass `--no-sign` to
+    `dpkg-buildpackage`, avoiding a confusing error message that might lead
+    people to think the packaging failed (see [mosra/magnum-plugins#105](https://github.com/mosra/magnum-plugins/issues/105))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

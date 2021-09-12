@@ -113,6 +113,8 @@ Is the below list missing your name or something's wrong?
     package
 -   **Guillaume Jacquemin** ([\@williamjcm](https://github.com/williamjcm)) ---
     MSYS2 packages
+-   **Hans Loeblich** ([\@thehans](https://github.com/thehans)) ---
+    improvements to Debian package building experience
 -   **[\@hsdk123](https://github.com/hsdk123)** --- Android toolchain
     improvements
 -   **Ivan Sanz Carasa** ([\@isc30](https://github.com/isc30)) --- Emscripten
