@@ -356,6 +356,8 @@ void PairTest::constructNoInit() {
     CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, Copyable>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Copyable, Throwable>, Corrade::NoInitT>::value);
+    /** @todo test combined trivial & NoInit variants once we figure out how to
+        express the constructor overloads to not conflict with each other */
 
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, Copyable>>::value);

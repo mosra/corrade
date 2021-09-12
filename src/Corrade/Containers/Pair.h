@@ -127,10 +127,12 @@ template<class F, class S> class Pair {
          *
          * For trivial types is equivalent to @ref Pair(DefaultInitT).
          */
-        explicit Pair(Corrade::NoInitT) noexcept;
+        explicit Pair(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value);
         #else
-        template<class F_ = F, class = typename std::enable_if<std::is_standard_layout<F_>::value &&  std::is_standard_layout<S>::value && std::is_trivial<F_>::value && std::is_trivial<S>::value>::type> explicit Pair(Corrade::NoInitT) noexcept {}
-        template<class F_ = F, class S_ = S, class = typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value &&  std::is_constructible<S_, Corrade::NoInitT>::value>::type> explicit Pair(Corrade::NoInitT) noexcept: _first{Corrade::NoInit}, _second{Corrade::NoInit} {}
+        template<class F_ = F, class = typename std::enable_if<std::is_standard_layout<F_>::value && std::is_standard_layout<S>::value && std::is_trivial<F_>::value && std::is_trivial<S>::value>::type> explicit Pair(Corrade::NoInitT) noexcept {}
+        /** @todo support combined trivial & NoInit variants once we figure out
+            how to express the overloads to not conflict with each other */
+        template<class F_ = F, class S_ = S, class = typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S_, Corrade::NoInitT>::value>::type> explicit Pair(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit} {}
         #endif
 
         /**
