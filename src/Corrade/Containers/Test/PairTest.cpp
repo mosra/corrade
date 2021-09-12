@@ -168,6 +168,7 @@ struct Throwable {
     Throwable() {}
     Throwable(const Throwable&) {}
     Throwable(Throwable&&) {}
+    Throwable(Corrade::NoInitT) {}
     Throwable& operator=(const Throwable&) { return *this; }
     Throwable& operator=(Throwable&&) { return *this; }
 };
@@ -187,6 +188,7 @@ struct Copyable {
         ++constructed;
         ++moved;
     }
+    Copyable(Corrade::NoInitT) noexcept {}
     ~Copyable() { ++destructed; }
     Copyable& operator=(const Copyable& other) noexcept {
         a = other.a;
@@ -350,9 +352,10 @@ void PairTest::constructNoInit() {
         CORRADE_COMPARE(a.second().a, 36);
     }
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, int>>::value);
-    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<int, Throwable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pair<int, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Copyable, Throwable>, Corrade::NoInitT>::value);
 
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, Copyable>>::value);
