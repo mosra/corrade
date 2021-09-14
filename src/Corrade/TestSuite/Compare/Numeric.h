@@ -48,7 +48,8 @@ needs to implement at least an @cpp operator<() @ce (explicitly) convertible to
 @snippet TestSuite.cpp Compare-Less
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
+@see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater, @ref Around,
+    @ref Divisible, @ref NotDivisible
 */
 template<class T> class Less {};
 
@@ -62,7 +63,8 @@ to @cpp bool @ce. Example usage:
 @snippet TestSuite.cpp Compare-LessOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
+@see @ref Less, @ref GreaterOrEqual, @ref Greater, @ref Around, @ref Divisible,
+    @ref NotDivisible
 */
 template<class T> class LessOrEqual {};
 
@@ -76,7 +78,8 @@ to @cpp bool @ce. Example usage:
 @snippet TestSuite.cpp Compare-GreaterOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
+@see @ref Less, @ref LessOrEqual, @ref Greater, @ref Around, @ref Divisible,
+    @ref NotDivisible
 */
 template<class T> class GreaterOrEqual {};
 
@@ -90,7 +93,8 @@ needs to implement at least an @cpp operator>() @ce (explicitly) convertible to
 @snippet TestSuite.cpp Compare-Greater
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
+@see @ref Less, @ref LessOrEqual, @ref GreaterOrEqual, @ref Around,
+    @ref Divisible, @ref NotDivisible
 */
 template<class T> class Greater {};
 
@@ -104,7 +108,8 @@ Compared type needs to implement at least an @cpp operator-() @ce,
 
 @snippet TestSuite.cpp Compare-Around
 
-@see @ref around()
+@see @ref around(), @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
+    @ref Greater, @ref Divisible, @ref NotDivisible
 */
 template<class T> class Around {
     public:
@@ -143,7 +148,8 @@ Example usage:
 @snippet TestSuite.cpp Compare-Divisible
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref NotDivisible
+@see @ref NotDivisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
+    @ref Greater, @ref Around
 */
 template<class T> class Divisible {};
 
@@ -158,7 +164,8 @@ Example usage:
 @snippet TestSuite.cpp Compare-NotDivisible
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref Divisible
+@see @ref Divisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
+    @ref Greater, @ref Around
 */
 template<class T> class NotDivisible {};
 
