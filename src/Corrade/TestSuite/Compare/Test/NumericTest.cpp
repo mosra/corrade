@@ -40,12 +40,15 @@ struct NumericTest: Tester {
     void greaterOrEqual();
     void greater();
     void around();
+    void notEqual();
 
     void lessMulti();
     void lessOrEqualMulti();
     void greaterOrEqualMulti();
     void greaterMulti();
     void aroundMulti();
+    /* Not testing NotEqual for multi-value types as there's no scenario of
+       two arbitrary values being always equal and thus failing the test case */
 
     void explicitBoolConversion();
 
@@ -59,6 +62,7 @@ NumericTest::NumericTest() {
               &NumericTest::greaterOrEqual,
               &NumericTest::greater,
               &NumericTest::around,
+              &NumericTest::notEqual,
 
               &NumericTest::lessMulti,
               &NumericTest::lessOrEqualMulti,
@@ -215,6 +219,26 @@ void NumericTest::around() {
     CORRADE_COMPARE_WITH(d, b, Compare::around(0.02f));
 }
 
+void NumericTest::notEqual() {
+    float a = 9.25f;
+    float b = 9.25f;
+    float c = 9.50f;
+    CORRADE_COMPARE(Comparator<NotEqual<float>>{}(a, a), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<NotEqual<float>>{}(a, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<NotEqual<float>>{}(a, c), ComparisonStatusFlag{});
+
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<NotEqual<float>> compare;
+        ComparisonStatusFlags flags = compare(a, b);
+        compare.printMessage(flags, e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "Value a is equal to b, 9.25 was expected to be different from 9.25\n");
+}
+
 void NumericTest::lessMulti() {
     Vec2 a{9.27f, 3.11f};
     Vec2 b{9.28f, 3.12f};
@@ -293,6 +317,7 @@ void NumericTest::explicitBoolConversion() {
         ExplicitBool operator<=(const Foo&) const { return {}; }
         ExplicitBool operator>=(const Foo&) const { return {}; }
         ExplicitBool operator>(const Foo&) const { return {}; }
+        ExplicitBool operator!=(const Foo&) const { return {}; }
     };
 
     struct Bar {
@@ -306,6 +331,7 @@ void NumericTest::explicitBoolConversion() {
     CORRADE_COMPARE(Comparator<GreaterOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Greater<Foo>>{}({}, {}), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Around<Bar>>{{}}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<NotEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
 }
 
 void NumericTest::divisible() {

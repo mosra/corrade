@@ -49,7 +49,7 @@ needs to implement at least an @cpp operator<() @ce (explicitly) convertible to
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater, @ref Around,
-    @ref Divisible, @ref NotDivisible
+    @ref NotEqual, @ref Divisible, @ref NotDivisible
 */
 template<class T> class Less {};
 
@@ -63,8 +63,8 @@ to @cpp bool @ce. Example usage:
 @snippet TestSuite.cpp Compare-LessOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref Less, @ref GreaterOrEqual, @ref Greater, @ref Around, @ref Divisible,
-    @ref NotDivisible
+@see @ref Less, @ref GreaterOrEqual, @ref Greater, @ref Around, @ref NotEqual,
+    @ref Divisible, @ref NotDivisible
 */
 template<class T> class LessOrEqual {};
 
@@ -78,8 +78,8 @@ to @cpp bool @ce. Example usage:
 @snippet TestSuite.cpp Compare-GreaterOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref Less, @ref LessOrEqual, @ref Greater, @ref Around, @ref Divisible,
-    @ref NotDivisible
+@see @ref Less, @ref LessOrEqual, @ref Greater, @ref Around, @ref NotEqual,
+    @ref Divisible, @ref NotDivisible
 */
 template<class T> class GreaterOrEqual {};
 
@@ -94,7 +94,7 @@ needs to implement at least an @cpp operator>() @ce (explicitly) convertible to
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref Less, @ref LessOrEqual, @ref GreaterOrEqual, @ref Around,
-    @ref Divisible, @ref NotDivisible
+    @ref NotEqual, @ref Divisible, @ref NotDivisible
 */
 template<class T> class Greater {};
 
@@ -109,7 +109,7 @@ Compared type needs to implement at least an @cpp operator-() @ce,
 @snippet TestSuite.cpp Compare-Around
 
 @see @ref around(), @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
-    @ref Greater, @ref Divisible, @ref NotDivisible
+    @ref Greater, @ref NotEqual, @ref Divisible, @ref NotDivisible
 */
 template<class T> class Around {
     public:
@@ -138,6 +138,29 @@ equivalent:
 template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}; }
 
 /**
+@brief Pseudo-type for verifying that value is not equal to
+@m_since_latest
+
+Prints both values if they are the same. Useful as an alternative to
+@cpp CORRADE_VERIFY(a != b) @ce that can print the actual compared values
+instead of just saying that the expression failed. Compared type needs to
+implement at least an @cpp operator!=() @ce (explicitly) convertible to
+@cpp bool @ce. Example usage:
+
+@snippet TestSuite.cpp Compare-NotEqual
+
+Note that, for completeness, the failure diagnostic message prints both values.
+This might help uncover bugs in comparison operators or when a fuzzy comparison
+is implemented and the two values actually *are* different, but fall within the
+epsilon value.
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+@see @ref Less, @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater,
+    @ref Around, @ref Divisible, @ref NotDivisible
+*/
+template<class T> class NotEqual {};
+
+/**
 @brief Pseudo-type for verifying that value is divisible by
 @m_since{2020,06}
 
@@ -149,7 +172,7 @@ Example usage:
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref NotDivisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
-    @ref Greater, @ref Around
+    @ref Greater, @ref Around, @ref NotEqual
 */
 template<class T> class Divisible {};
 
@@ -165,7 +188,7 @@ Example usage:
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref Divisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
-    @ref Greater, @ref Around
+    @ref Greater, @ref Around, @ref NotEqual
 */
 template<class T> class NotDivisible {};
 
@@ -275,6 +298,26 @@ template<class T> class Comparator<Compare::Around<T>> {
 
     private:
         T _epsilon;
+        const T* _actualValue;
+        const T* _expectedValue;
+};
+
+template<class T> class Comparator<Compare::NotEqual<T>> {
+    public:
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
+            _actualValue = &actual;
+            _expectedValue = &expected;
+            return *_actualValue != *_expectedValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+        }
+
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is equal to" << expected
+                << Utility::Debug::nospace << "," << *_actualValue
+                << "was expected to be different from" << *_expectedValue;
+        }
+
+    private:
         const T* _actualValue;
         const T* _expectedValue;
 };

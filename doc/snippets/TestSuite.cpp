@@ -164,6 +164,13 @@ CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 }
 
 {
+/* [Compare-NotEqual] */
+int a = DOXYGEN_IGNORE(0), b = DOXYGEN_IGNORE(0);
+CORRADE_COMPARE_AS(a, b, TestSuite::Compare::NotEqual);
+/* [Compare-NotEqual] */
+}
+
+{
 /* [Compare-Divisible] */
 int a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);

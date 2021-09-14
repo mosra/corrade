@@ -84,6 +84,8 @@ namespace Corrade {
 -   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL_IF()
     macros for printing formatted information to the output and explicitly
     failing a test
+-   New @ref TestSuite::Compare::NotEqual comparator to provide an alternative
+    to @cpp CORRADE_VERIFY(a != b) @ce with a better failure diagnostic
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
