@@ -53,7 +53,7 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 template<class T> class Less {};
 
 /**
-@brief Pseudo-type for verifying that value is less than expected
+@brief Pseudo-type for verifying that value is less than or equal to expected
 
 Prints both values if the first is not less than the second. Compared type
 needs to implement at least an @cpp operator<=() @ce (explicitly) convertible
@@ -67,7 +67,7 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 template<class T> class LessOrEqual {};
 
 /**
-@brief Pseudo-type for verifying that value is less than expected
+@brief Pseudo-type for verifying that value is greater than or equal to expected
 
 Prints both values if the first is not less than the second.  Compared type
 needs to implement at least an @cpp operator>=() @ce (explicitly) convertible
@@ -81,7 +81,7 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 template<class T> class GreaterOrEqual {};
 
 /**
-@brief Pseudo-type for verifying that value is less than expected
+@brief Pseudo-type for verifying that value is greater than expected
 
 Prints both values if the first is not less than the second. Compared type
 needs to implement at least an @cpp operator>() @ce (explicitly) convertible to
