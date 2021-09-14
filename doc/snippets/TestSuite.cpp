@@ -41,6 +41,8 @@
 
 using namespace Corrade;
 
+#define DOXYGEN_IGNORE(...) __VA_ARGS__
+
 #if defined(CORRADE_NO_ASSERT) && defined(CORRADE_TARGET_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -113,42 +115,42 @@ CORRADE_COMPARE_AS("actual file contents", "expected.txt",
 
 {
 /* [Compare-Less] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::Less);
 /* [Compare-Less] */
 }
 
 {
 /* [Compare-LessOrEqual] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::LessOrEqual);
 /* [Compare-LessOrEqual] */
 }
 
 {
 /* [Compare-GreaterOrEqual] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::GreaterOrEqual);
 /* [Compare-GreaterOrEqual] */
 }
 
 {
 /* [Compare-Greater] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::Greater);
 /* [Compare-Greater] */
 }
 
 {
 /* [Compare-Around] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
 /* [Compare-Around] */
 }
 
 {
 /* [Compare-around] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 /* [Compare-around] */
@@ -156,21 +158,21 @@ CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 
 {
 /* [Compare-around-just-one] */
-float a;
+float a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 /* [Compare-around-just-one] */
 }
 
 {
 /* [Compare-Divisible] */
-int a;
+int a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);
 /* [Compare-Divisible] */
 }
 
 {
 /* [Compare-NotDivisible] */
-int a;
+int a = DOXYGEN_IGNORE(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::NotDivisible);
 /* [Compare-NotDivisible] */
 }
