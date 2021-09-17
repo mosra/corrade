@@ -31,6 +31,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -130,11 +131,17 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     void explicitAllocatorParameter();
 
+    /* Here go the "weird unexpected corner cases" tests */
+
     void emplaceConstructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
 
     template<template<class> class Allocator, std::size_t alignment> void allocationAlignment();
+
+    void appendConflictingType();
+
+    /* Here go the benchmarks */
 
     void benchmarkAppendVector();
     void benchmarkAppendArray();
@@ -337,6 +344,8 @@ GrowableArrayTest::GrowableArrayTest() {
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 4>,
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 8>,
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 16>}, 100);
+
+    addTests({&GrowableArrayTest::appendConflictingType});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1913,6 +1922,21 @@ template<template<class> class Allocator, std::size_t alignment> void GrowableAr
         CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(a.data()), alignment,
             TestSuite::Compare::Divisible);
     }
+}
+
+void GrowableArrayTest::appendConflictingType() {
+    Array<unsigned> a;
+
+    /* If the second argument is just const T& or T&&, these would fail to
+       compile due to a conflict in template type resolution (int vs unsigned) */
+    const int value = 5;
+    arrayAppend(a, value);
+    arrayAppend(a, 5);
+    arrayAppend<ArrayAllocator>(a, value);
+    arrayAppend<ArrayAllocator>(a, 5);
+    CORRADE_COMPARE_AS(a,
+        Containers::arrayView<unsigned>({5, 5, 5, 5}),
+        TestSuite::Compare::Container);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {
