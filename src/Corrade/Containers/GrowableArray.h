@@ -686,7 +686,7 @@ Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential.
 @see @ref arrayCapacity(), @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
-template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const T& value);
+template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -699,7 +699,7 @@ template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, const T& value) {
+template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value) {
     return arrayAppend<T, Allocator<T>>(array, value);
 }
 #endif
@@ -743,7 +743,7 @@ template<template<class> class Allocator, class T, class... Args> inline T& arra
 
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 */
-template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, T&& value) {
+template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, typename std::common_type<T>::type&& value) {
     return arrayAppend<T, Allocator>(array, Corrade::InPlaceInit, Utility::move(value));
 }
 
@@ -758,7 +758,7 @@ template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Arr
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, T&& value) {
+template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T>& array, typename std::common_type<T>::type&& value) {
     return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, Utility::move(value));
 }
 #endif
@@ -1271,7 +1271,7 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
 
 }
 
-template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const T& value) {
+template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
     /* Can't use {}, see the GCC 4.8-specific overload for details */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5

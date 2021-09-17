@@ -1928,7 +1928,9 @@ void GrowableArrayTest::appendConflictingType() {
     Array<unsigned> a;
 
     /* If the second argument is just const T& or T&&, these would fail to
-       compile due to a conflict in template type resolution (int vs unsigned) */
+       compile due to a conflict in template type resolution (int vs unsigned).
+       Has to be std::common_type<T>::type, which avoids the conflict and
+       instead accepts anything implicitly convertible to T. */
     const int value = 5;
     arrayAppend(a, value);
     arrayAppend(a, 5);
