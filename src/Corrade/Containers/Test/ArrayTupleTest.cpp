@@ -24,10 +24,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Included as first to check that we *really* don't need the ArrayView header
+   for anything. We actually need, but the relevant functions are
+   forward-declared so it should work. */
+#include "Corrade/Containers/ArrayTuple.h"
+
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
-#include "Corrade/Containers/ArrayTuple.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
