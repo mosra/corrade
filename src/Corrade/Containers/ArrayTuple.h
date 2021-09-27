@@ -286,7 +286,7 @@ namespace Implementation {
 
 Stores desired size and output view reference. See @ref ArrayTuple for usage introduction.
 */
-class ArrayTuple::Item {
+class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
     public:
         /**
          * @brief Construct a view with value-initialized elements
@@ -347,6 +347,21 @@ class ArrayTuple::Item {
                create(). */
             outputView = {{nullptr, size}, size};
         }
+
+        /**
+         * @brief Construct a type-erased view without initializing its elements
+         * @param[in] size              Desired view size
+         * @param[in] elementSize       Desired view element size
+         * @param[in] elementAlignment  Desired view element alignment
+         * @param[out] outputView       Reference where to store the resulting
+         *      view
+         *
+         * A type-erased alternative to @ref Item(Corrade::NoInitT, std::size_t, StridedArrayView1D<T>&)
+         * where you set both element size and alignment manually. The
+         * resulting @p outputView has first dimension of @p size and second of
+         * @p elementSize, with stride @p elementSize and @cpp 1 @ce.
+         */
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, std::size_t elementSize, std::size_t elementAlignment, StridedArrayView2D<char>& outputView);
 
     private:
         friend ArrayTuple;
