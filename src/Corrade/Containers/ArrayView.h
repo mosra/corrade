@@ -43,12 +43,12 @@ namespace Implementation {
     template<class, class> struct ArrayViewConverter;
     template<class> struct ErasedArrayViewConverter;
     /* so ArrayTuple can update the data pointer */
-    template<class T> T*& dataRef(Containers::ArrayView<T>& view) {
+    template<class T> T*& dataRef(ArrayView<T>& view) {
         return view._data;
     }
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size member */
-    template<class T> std::size_t& sizeRef(Containers::ArrayView<T>& view) {
+    template<class T> std::size_t& sizeRef(ArrayView<T>& view) {
         return view._size;
     }
     #endif
@@ -494,10 +494,10 @@ template<class T> class ArrayView {
         }
 
     private:
-        friend T*& Implementation::dataRef<>(Containers::ArrayView<T>&);
+        friend T*& Implementation::dataRef<>(ArrayView<T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* so Python buffer protocol can point to the size member */
-        friend std::size_t& Implementation::sizeRef<>(Containers::ArrayView<T>&);
+        friend std::size_t& Implementation::sizeRef<>(ArrayView<T>&);
         #endif
         T* _data;
         std::size_t _size;
