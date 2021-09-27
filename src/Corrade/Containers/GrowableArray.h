@@ -709,8 +709,9 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 @return Reference to the newly appended item
 @m_since{2020,06}
 
-Similar to @ref arrayAppend(Array<T>&, const T&) except that the new element
-is constructed using placement-new with provided @p args.
+Similar to @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&)
+except that the new element is constructed using placement-new with provided
+@p args.
 */
 template<class T, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
 
@@ -768,8 +769,8 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 @return View on the newly appended items
 @m_since{2020,06}
 
-Like @ref arrayAppend(Array<T>&, const T&), but inserting multiple values at
-once.
+Like @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+but inserting multiple values at once.
 @see @ref arrayResize(Array<T>&, NoInitT, std::size_t)
 */
 template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, ArrayView<const T> values);
