@@ -32,8 +32,10 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 
@@ -152,10 +154,12 @@ void ArrayTupleTest::constructEmptyArrays() {
         ArrayView<char> chars{reinterpret_cast<char*>(1337), 3};
         ArrayView<NonCopyable> noncopyable{reinterpret_cast<NonCopyable*>(1337), 3};
         ArrayView<int> ints{reinterpret_cast<int*>(1337), 3};
+        StridedArrayView1D<double> strided{ArrayView<double>{reinterpret_cast<double*>(1337), 3}};
         ArrayTuple data{
             {0, chars},
             {0, noncopyable},
-            {0, ints}
+            {0, ints},
+            {0, strided}
         };
 
         CORRADE_COMPARE(data.size(), 0);
@@ -168,11 +172,14 @@ void ArrayTupleTest::constructEmptyArrays() {
         /* Even though this is basically a no-op, all views should be reset to
            empty nullptr ones */
         CORRADE_COMPARE(chars.size(), 0);
-        CORRADE_COMPARE(noncopyable.size(), 0);
-        CORRADE_COMPARE(ints.size(), 0);
         CORRADE_VERIFY(!chars.data());
+        CORRADE_COMPARE(noncopyable.size(), 0);
         CORRADE_VERIFY(!noncopyable.data());
+        CORRADE_COMPARE(ints.size(), 0);
         CORRADE_VERIFY(!ints.data());
+        CORRADE_COMPARE(strided.size(), 0);
+        CORRADE_COMPARE(strided.stride(), 8); /* stride is always set */
+        CORRADE_VERIFY(!strided.data());
     }
 
     CORRADE_COMPARE(NonCopyable::constructed, 0);
@@ -206,11 +213,13 @@ void ArrayTupleTest::constructValueInit() {
         ArrayView<NonCopyable> noncopyable;
         ArrayView<int> ints;
         ArrayView<Aligned<16>> aligned;
+        StridedArrayView1D<double> strided;
         ArrayTuple data{
             {17, chars},
             {4, noncopyable},
             {7, ints},
-            {3, aligned}
+            {3, aligned},
+            {5, strided}
         };
 
         /* Check base properties */
@@ -221,17 +230,21 @@ void ArrayTupleTest::constructValueInit() {
             4 + 3 +                 /* noncopyable + padding to align ints */
             7*4 +                   /* ints + padding to align aligned */
                 (sizeof(void*) == 4 ? 8 : 4) +
-            3*16                    /* aligned */
+            3*16 +                  /* aligned */
+            5*8                     /* strided, right after overaligned so no
+                                       padding */
         );
         CORRADE_VERIFY(data.data());
         /* Custom deleter to call the destructors */
         CORRADE_VERIFY(data.deleter());
 
-        /* Check array sizes and offsets */
+        /* Check array sizes, strides and offsets */
         CORRADE_COMPARE(chars.size(), 17);
         CORRADE_COMPARE(noncopyable.size(), 4);
         CORRADE_COMPARE(ints.size(), 7);
         CORRADE_COMPARE(aligned.size(), 3);
+        CORRADE_COMPARE(strided.size(), 5);
+        CORRADE_COMPARE(strided.stride(), 8);
         CORRADE_COMPARE(static_cast<void*>(chars.data()), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)));
         CORRADE_COMPARE(static_cast<void*>(noncopyable.data()), data.data() +
@@ -241,6 +254,9 @@ void ArrayTupleTest::constructValueInit() {
         CORRADE_COMPARE(static_cast<void*>(aligned.data()), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
                 (sizeof(void*) == 4 ? 8 : 4));
+        CORRADE_COMPARE(strided.data(), data.data() +
+            sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16);
 
         /* Check that trivial types are zero-init'd and nontrivial had their
            constructor called */
@@ -250,6 +266,7 @@ void ArrayTupleTest::constructValueInit() {
         for(char i: ints) CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(Aligned<16>::constructed, 3);
         CORRADE_COMPARE(Aligned<16>::destructed, 0);
+        for(double i: strided) CORRADE_COMPARE(i, 0.0);
     }
 
     /* Check that non-trivial destructors were called */
@@ -271,11 +288,15 @@ void ArrayTupleTest::constructNoInit() {
         ArrayView<char> initializedChars;
         ArrayView<NonCopyable> noncopyable;
         ArrayView<NonCopyable> initializedNoncopyable;
+        StridedArrayView1D<double> strided;
+        StridedArrayView1D<double> initializedStrided;
         ArrayTuple data{
             {{Corrade::NoInit, 15, chars},
              {Corrade::ValueInit, 15, initializedChars},
              {Corrade::NoInit, 3, noncopyable},
-             {Corrade::ValueInit, 2, initializedNoncopyable}},
+             {Corrade::ValueInit, 2, initializedNoncopyable},
+             {Corrade::NoInit, 5, strided},
+             {Corrade::ValueInit, 4, initializedStrided}},
             [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 return {storage, [](char*, std::size_t) { }};
             }
@@ -285,6 +306,11 @@ void ArrayTupleTest::constructNoInit() {
            only the constructors for the ValueInit'd view were called */
         for(char i: chars) CORRADE_COMPARE(i, '\xce');
         for(char i: initializedChars) CORRADE_COMPARE(i, 0);
+        for(auto i: Containers::arrayCast<2, char>(strided))
+            CORRADE_COMPARE_AS(i, Containers::stridedArrayView({
+                '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce'
+            }), TestSuite::Compare::Container);
+        for(double i: initializedStrided) CORRADE_COMPARE(i, 0.0);
         CORRADE_COMPARE(NonCopyable::constructed, 2);
         CORRADE_COMPARE(NonCopyable::destructed, 0);
 

@@ -88,6 +88,12 @@ namespace Implementation {
     template<unsigned dimensions, std::size_t ...index> constexpr StridedDimensions<dimensions, std::ptrdiff_t> strideForSize(const StridedDimensions<dimensions, std::size_t>& size, std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
+    /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
+       void*& because this also acts as a type disambiguator in the
+       constructor, even though it's subsequently cast back to void. */
+    template<unsigned dimensions, class T> T*& dataRef(StridedArrayView<dimensions, T>& view) {
+        return reinterpret_cast<T*&>(view._data);
+    }
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
     template<unsigned dimensions, class T> StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
@@ -790,6 +796,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
     private:
         template<unsigned, class> friend class StridedArrayView;
 
+        friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* so Python buffer protocol can point to the size / stride members */
         friend StridedDimensions<dimensions, std::size_t>& Implementation::sizeRef<>(StridedArrayView<dimensions, T>&);

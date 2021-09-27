@@ -42,10 +42,12 @@
 namespace Corrade { namespace Containers {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-/* Declaration of ArrayView helpers to avoid including the full header */
+/* Declaration of [Strided]ArrayView helpers to avoid including the full
+   headers */
 template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list);
 namespace Implementation {
     template<class T> T*& dataRef(Containers::ArrayView<T>& view);
+    template<unsigned dimensions, class T> T*& dataRef(Containers::StridedArrayView<dimensions, T>& view);
 }
 #endif
 
@@ -298,14 +300,17 @@ class ArrayTuple::Item {
          * use @ref Item(NoInitT, std::size_t, ArrayView<T>&) instead and then
          * manually construct each item in-place.
          */
-        template<class T> /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, ArrayView<T>& outputView): Item{Corrade::NoInit, size, outputView} {
-            static_assert(std::is_default_constructible<T>::value,
-                "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
-            _constructor = [](void* data) {
-                /* Default-construct the T and work around various compiler
-                   issues, see construct() for details */
-                Implementation::construct(*static_cast<T*>(data));
-            };
+        template<class T> /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, ArrayView<T>& outputView): Item{Corrade::ValueInit, size, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {nullptr, size};
+        }
+
+        /** @overload */
+        template<class T> /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::ValueInit, size, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {{nullptr, size}, size};
         }
 
         /**
@@ -314,6 +319,9 @@ class ArrayTuple::Item {
          * Alias to @ref Item(ValueInitT, std::size_t, ArrayView<T>&).
          */
         template<class T> /*implicit*/ Item(std::size_t size, ArrayView<T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
+
+        /** @overload */
+        template<class T> /*implicit*/ Item(std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /**
          * @brief Construct a view without initializing its elements
@@ -327,7 +335,34 @@ class ArrayTuple::Item {
          * gets finally called on *all elements*, regardless of whether they
          * were properly constructed or not.
          */
-        template<class T> /*implicit*/ Item(Corrade::NoInitT, std::size_t size, ArrayView<T>& outputView):
+        template<class T> /*implicit*/ Item(Corrade::NoInitT, std::size_t size, ArrayView<T>& outputView): Item{Corrade::NoInit, size, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {nullptr, size};
+        }
+
+        /** @overload */
+        template<class T> /*implicit*/ Item(Corrade::NoInitT, std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::NoInit, size, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {{nullptr, size}, size};
+        }
+
+    private:
+        friend ArrayTuple;
+
+        /* Common code shared by ArrayView and StridedArrayView variants */
+        template<class T> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
+            static_assert(std::is_default_constructible<T>::value,
+                "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
+            _constructor = [](void* data) {
+                /* Default-construct the T and work around various compiler
+                   issues, see construct() for details */
+                Implementation::construct(*static_cast<T*>(data));
+            };
+        }
+
+        template<class T> explicit Item(Corrade::NoInitT, std::size_t size, T*& destinationPointer):
             _elementSize{sizeof(T)}, _elementAlignment{alignof(T)}, _elementCount{size},
             _constructor{},
             _destructor{std::is_trivially_destructible<T>::value ? static_cast<void(*)(char*, std::size_t)>(nullptr) :
@@ -343,15 +378,8 @@ class ArrayTuple::Item {
                 Implementation::callDeleter<T>
                 #endif
             },
-            _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))}
-        {
-            /* Populate size of the output view. Pointer gets update inside
-               create(). */
-            outputView = {nullptr, size};
-        }
-
-    private:
-        friend ArrayTuple;
+            _destinationPointer{&reinterpret_cast<void*&>(destinationPointer)}
+        {}
 
         /* The three following constructors are used by
            ArrayTuple(ArrayView<const Item>, A), depending on what the actual
