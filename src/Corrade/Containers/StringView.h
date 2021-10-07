@@ -57,16 +57,16 @@ namespace Implementation {
 */
 enum class StringViewFlag: std::size_t {
     /**
-     * The referenced string is global, i.e., with an unlimited lifetime.
-     * Enabling this flag can avoid needless allocations and copies in cases
-     * where the consumer needs to extend lifetime of passed string view.
+     * The referenced string is global, i.e., with an unlimited lifetime. A
+     * string view with this flag set doesn't need to have a copy allocated in
+     * order to ensure it stays in scope.
      */
     Global = std::size_t{1} << (sizeof(std::size_t)*8 - 1),
 
     /**
-     * The referenced string is null-terminated. Enabling this flag  can avoid
-     * needless allocations and copies in cases where a string is passed to an
-     * API that expects only null-terminated strings.
+     * The referenced string is null-terminated. A string view with this flag
+     * set doesn't need to have a null-terminated copy allocated in order to
+     * pass to an API that expects only null-terminated strings.
      */
     NullTerminated = std::size_t{1} << (sizeof(std::size_t)*8 - 2)
 };
