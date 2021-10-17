@@ -1,9 +1,9 @@
 # Install next packages
 
 ## for usage
-Nothing should be installed
+Nothing special should be installed
 
 ## for build and devel package
 ```
-$ sudo dnf install git gcc-c++ cmake make rpmdevtools
+sudo dnf install git gcc-c++ cmake make rpmdevtools
 ```
