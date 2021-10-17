@@ -7,3 +7,6 @@ Nothing special should be installed
 ```
 sudo dnf install git gcc-c++ cmake make rpmdevtools
 ```
+```
+sudo zypper install git gcc-c++ cmake make rpmdevtools rpm-build
+```
