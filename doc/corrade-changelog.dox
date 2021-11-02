@@ -125,6 +125,8 @@ namespace Corrade {
 -   @ref Containers::arrayAppend(Array<T>&, ArrayView<const T>) and
     @ref Containers::arrayAppend(Array<T>&, NoInitT, std::size_t) are now no-op
     in case the item count is zero
+-   Added an ability to construct a @ref Containers::StridedArrayView1D from a
+    pointer and size, the same way as with contiguous array views
 -   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     constructor is no longer @cpp explicit @ce to allow for easier use in
     initializer lists

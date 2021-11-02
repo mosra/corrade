@@ -424,6 +424,21 @@ template<unsigned dimensions, class T> class StridedArrayView {
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Size& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
+         * @brief Construct a view on an array with explicit length
+         * @param data      Data pointer
+         * @param size      Data size
+         * @m_since_latest
+         *
+         * Enabled only on one-dimensional views. Stride is implicitly set to
+         * @cpp sizeof(T) @ce.
+         * @see @ref stridedArrayView(T*, std::size_t)
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+
+        /**
          * @brief Construct a view on a fixed-size array
          * @param data      Fixed-size array
          *
@@ -930,6 +945,22 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
            little chance one would want an implicit stride of 1 */
 
         /**
+         * @brief Construct a void view on an array with explicit length
+         * @param data      Data pointer
+         * @param size      Data size
+         * @m_since_latest
+         *
+         * Enabled only on one-dimensional views. Stride is implicitly set to
+         * @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T>
+        #else
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+
+        /**
          * @brief Construct a void view on a fixed-size array
          * @param data      Fixed-size array
          *
@@ -1140,6 +1171,22 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
         constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
 
         /**
+         * @brief Construct a const void view on an array with explicit length
+         * @param data      Data pointer
+         * @param size      Data size
+         * @m_since_latest
+         *
+         * Enabled only on one-dimensional views. Stride is implicitly set to
+         * @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T>
+        #else
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+
+        /**
          * @brief Construct a const void view on a fixed-size array
          * @param data      Fixed-size array
          *
@@ -1317,6 +1364,19 @@ template<std::size_t size_, class T, class U> constexpr StridedArrayView1D<T> st
     return StridedArrayView1D<T>{data, member, size, stride};
 }
 #endif
+
+/** @relatesalso ArrayView
+@brief Make a strided view on an array of specific length
+@m_since_latest
+
+Convenience alternative to @ref StridedArrayView::StridedArrayView(T*, std::size_t).
+The following two lines are equivalent:
+
+@snippet Containers.cpp stridedArrayView
+*/
+template<class T> constexpr StridedArrayView1D<T> stridedArrayView(T* data, std::size_t size) {
+    return {data, size};
+}
 
 /** @relatesalso StridedArrayView
 @brief Make a strided view on a fixed-size array

@@ -116,6 +116,9 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructInvalid();
     void constructInvalidVoid();
     void constructInvalidConstVoid();
+    void constructPointerSize();
+    void constructPointerSizeVoid();
+    void constructPointerSizeConstVoid();
     void constructFixedSize();
     void constructFixedSizeVoid();
     void constructFixedSizeConstVoid();
@@ -319,6 +322,9 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructInvalid,
               &StridedArrayViewTest::constructInvalidVoid,
               &StridedArrayViewTest::constructInvalidConstVoid,
+              &StridedArrayViewTest::constructPointerSize,
+              &StridedArrayViewTest::constructPointerSizeVoid,
+              &StridedArrayViewTest::constructPointerSizeConstVoid,
               &StridedArrayViewTest::constructFixedSize,
               &StridedArrayViewTest::constructFixedSizeVoid,
               &StridedArrayViewTest::constructFixedSizeConstVoid,
@@ -1037,6 +1043,69 @@ void StridedArrayViewTest::constructInvalidConstVoid() {
 
 /* Needs to be here in order to use it in constexpr */
 constexpr const int Array10[10]{ 2, 16, 7853268, -100, 234810, 0, 0, 0, 0, 0 };
+
+void StridedArrayViewTest::constructPointerSize() {
+    int a[10]{ 2, 16, 7853268, -100, 234810, 0, 0, 0, 0, 0 };
+
+    {
+        StridedArrayView1Di b = {a, 6};
+        CORRADE_VERIFY(b.data() == a);
+        CORRADE_COMPARE(b.size(), 6);
+        CORRADE_COMPARE(b.stride(), 4);
+        CORRADE_COMPARE(b[2], 7853268);
+        CORRADE_COMPARE(b[4], 234810);
+    } {
+        auto b = stridedArrayView(a, 6);
+        CORRADE_VERIFY(std::is_same<decltype(b), StridedArrayView1Di>::value);
+        CORRADE_VERIFY(b.data() == a);
+        CORRADE_COMPARE(b.size(), 6);
+        CORRADE_COMPARE(b.stride(), 4);
+        CORRADE_COMPARE(b[2], 7853268);
+        CORRADE_COMPARE(b[4], 234810);
+    }
+
+    {
+        constexpr ConstStridedArrayView1Di cb = {Array10, 6};
+        CORRADE_VERIFY(cb.data() == Array10);
+        CORRADE_COMPARE(cb.size(), 6);
+        CORRADE_COMPARE(cb.stride(), 4);
+        CORRADE_COMPARE(cb[2], 7853268);
+        CORRADE_COMPARE(cb[4], 234810);
+    } {
+        constexpr auto cb = stridedArrayView(Array10, 6);
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
+        CORRADE_VERIFY(cb.data() == Array10);
+        CORRADE_COMPARE(cb.size(), 6);
+        CORRADE_COMPARE(cb.stride(), 4);
+        CORRADE_COMPARE(cb[2], 7853268);
+        CORRADE_COMPARE(cb[4], 234810);
+    }
+}
+
+void StridedArrayViewTest::constructPointerSizeVoid() {
+    int a[10]{};
+
+    VoidStridedArrayView1D b = {a, 6};
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.size(), 6);
+    CORRADE_COMPARE(b.stride(), 4);
+
+    /** @todo constexpr but not const? c++14? */
+}
+
+void StridedArrayViewTest::constructPointerSizeConstVoid() {
+    const int a[10]{};
+
+    ConstVoidStridedArrayView1D b = {a, 6};
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.size(), 6);
+    CORRADE_COMPARE(b.stride(), 4);
+
+    constexpr ConstVoidStridedArrayView1D cb = {Array10, 6};
+    CORRADE_VERIFY(cb.data() == Array10);
+    CORRADE_COMPARE(cb.size(), 6);
+    CORRADE_COMPARE(cb.stride(), 4);
+}
 
 void StridedArrayViewTest::constructFixedSize() {
     int a[10]{ 2, 16, 7853268, -100, 234810, 0, 0, 0, 0, 0 };

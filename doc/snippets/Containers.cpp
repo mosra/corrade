@@ -996,6 +996,16 @@ static_cast<void>(y);
 }
 
 {
+/* [stridedArrayView] */
+std::uint32_t* data = DOXYGEN_IGNORE(nullptr);
+
+Containers::StridedArrayView1D<std::uint32_t> a{data, 5};
+auto b = Containers::stridedArrayView(data, 5);
+/* [stridedArrayView] */
+static_cast<void>(b);
+}
+
+{
 /* [stridedArrayView-array] */
 std::uint32_t data[15];
 
