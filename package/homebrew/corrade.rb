@@ -13,6 +13,11 @@ class Corrade < Formula
     cd "build" do
       system "cmake",
         *std_cmake_args,
+        # Without this, ARM builds will try to look for dependencies in
+        # /usr/local/lib and /usr/lib (which are the default locations) instead
+        # of /opt/homebrew/lib which is dedicated for ARM binaries. Please
+        # complain to Homebrew about this insane non-obvious filesystem layout.
+        "-DCMAKE_INSTALL_NAME_DIR:STRING=#{lib}",
         ".."
       system "cmake", "--build", "."
       system "cmake", "--build", ".", "--target", "install"
