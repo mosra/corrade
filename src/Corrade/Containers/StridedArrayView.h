@@ -430,6 +430,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Enabled only on one-dimensional views and if @cpp T* @ce is
          * implicitly convertible to @cpp U* @ce. Expects that both types have
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
+         * @see @ref stridedArrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U, std::size_t size>
