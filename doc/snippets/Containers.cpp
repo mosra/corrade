@@ -442,25 +442,15 @@ int minOfFirstThree = min3(view.prefix<3>());
 static_cast<void>(minOfFirstThree);
 }
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 {
 /* [arrayView] */
-std::uint32_t* data;
+std::uint32_t* data = DOXYGEN_IGNORE(nullptr);
 
 Containers::ArrayView<std::uint32_t> a{data, 5};
 auto b = Containers::arrayView(data, 5);
 /* [arrayView] */
 static_cast<void>(b);
 }
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 {
 /* [arrayView-array] */
@@ -588,25 +578,15 @@ static_cast<void>(fiveInts2);
 static_cast<void>(threeInts);
 }
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 {
 /* [staticArrayView] */
-int* data;
+int* data = DOXYGEN_IGNORE(nullptr);
 
 Containers::StaticArrayView<5, int> a{data};
 auto b = Containers::staticArrayView<5>(data);
 /* [staticArrayView] */
 static_cast<void>(b);
 }
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 {
 /* [staticArrayView-array] */
@@ -676,34 +656,20 @@ list.insert(new Object);
 list.erase(list.last());
 /* [LinkedList-usage] */
 
-#if defined(__GNUC__) || defined( __clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
 /* [LinkedList-traversal] */
 for(Object& o: list) {
-    // ...
+    DOXYGEN_IGNORE(static_cast<void>(o);)
 }
 /* [LinkedList-traversal] */
-#if defined(__GNUC__) || defined( __clang__)
-#pragma GCC diagnostic pop
-#endif
 
 /* [LinkedList-traversal-classic] */
 for(Object* i = list.first(); i; i = i->next()) {
-    // ...
+    DOXYGEN_IGNORE(static_cast<void>(i);)
 }
 /* [LinkedList-traversal-classic] */
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 {
-Object *item, *before;
+Object *item = DOXYGEN_IGNORE(nullptr), *before = DOXYGEN_IGNORE(nullptr);
 /* [LinkedList-move] */
 if(item != before) {
     list.cut(item);
@@ -711,9 +677,6 @@ if(item != before) {
 }
 /* [LinkedList-move] */
 }
-#if defined(__clang__) || defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 }
 
 {
