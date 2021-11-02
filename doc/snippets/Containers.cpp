@@ -173,14 +173,14 @@ namespace LL1 {
 class Object;
 /* [LinkedList-list-pointer] */
 class ObjectGroup: public Containers::LinkedList<Object> {
-    // ...
+    DOXYGEN_IGNORE()
 };
 
 class Object: public Containers::LinkedListItem<Object, ObjectGroup> {
     public:
         ObjectGroup* group() { return list(); }
 
-    // ...
+    DOXYGEN_IGNORE()
 };
 /* [LinkedList-list-pointer] */
 }
@@ -196,7 +196,7 @@ class ObjectGroup: private Containers::LinkedList<Object> {
         Object* firstObject() { return first(); }
         Object* lastObject() { return last(); }
 
-    // ...
+    DOXYGEN_IGNORE()
 };
 
 class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
@@ -208,7 +208,7 @@ class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
         Object* previousObject() { return previous(); }
         Object* nextObject() { return next(); }
 
-    // ...
+    DOXYGEN_IGNORE()
 };
 /* [LinkedList-private-inheritance] */
 }
