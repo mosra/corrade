@@ -976,7 +976,7 @@ for(auto&& image: images.slice({0, 96, 96}, {16, 160, 160}))
 /* [StridedArrayView-usage-3d] */
 
 /* [StridedArrayView-usage-3d-slice-2d] */
-Containers::StridedArrayView2D<std::uint32_t> image = images[5];
+Containers::StridedArrayView2D<std::uint32_t> image = images[4];
 Containers::StridedArrayView2D<std::uint32_t> imageCenter =
     images.slice<2>({4, 96, 96}, {5, 160, 160});
 /* [StridedArrayView-usage-3d-slice-2d] */
