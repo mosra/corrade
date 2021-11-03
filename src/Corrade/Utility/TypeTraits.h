@@ -164,7 +164,29 @@ template<class U> class className {                                         \
 }
 
 namespace Implementation {
-    CORRADE_HAS_TYPE(HasMemberBegin, decltype(std::declval<T>().begin()));
+    /* As of Eigen 3.4.0, due to these two commits in particular,
+        https://gitlab.com/libeigen/eigen/-/commit/c0ca8a9fa3e03ad7ecb270adfe760a1bff7c0829
+        https://gitlab.com/libeigen/eigen/-/commit/2bf1a31d811fef2085bad97f98e2d0095136b636
+       the begin() / end() on Eigen Array types returns void if it's not a
+       vector, which breaks the IsIterable detection code that (for simplicity)
+       relied just on presence of these functions, and assumes sanity. SANITY,
+       WITH EIGEN, HAHA, never. There's probably a more robust way to detect
+       iterability than to adding a workaround for an Eigen-specific wart --
+       for example by trying to increment the iterator like they have in that
+       commit, but trying just
+        CORRADE_HAS_TYPE(HasMemberBegin, decltype(++std::declval<T>().begin()))
+       alone didn't work and adding some other HasBasicSanity SFINAE trait
+       would only add more to the compiler suffering that wouldn't be needed
+       for SANE code.
+
+       See isIterableNotBecauseEigenDevsAttemptedToDisableBeginByMakingItVoid()
+       in TypeTraitsTest for a test case. */
+    template<class T> struct FineUnlessEigenDevsAttemptedToDisableBeginByMakingItVoid {
+        typedef T Type;
+    };
+    template<> struct FineUnlessEigenDevsAttemptedToDisableBeginByMakingItVoid<void> {};
+
+    CORRADE_HAS_TYPE(HasMemberBegin, typename FineUnlessEigenDevsAttemptedToDisableBeginByMakingItVoid<decltype(std::declval<T>().begin())>::Type);
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
