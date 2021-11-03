@@ -55,6 +55,7 @@ struct TypeTraitsTest: TestSuite::Tester {
     void isIterableFreeStd();
     void isIterableFree();
     void isIterableNot();
+    void isIterableNotBecauseEigenDevsAttemptedToDisableBeginByMakingItVoid();
 
     void isStringLike();
     void isStringLikeNot();
@@ -71,6 +72,7 @@ TypeTraitsTest::TypeTraitsTest() {
               &TypeTraitsTest::isIterableFreeStd,
               &TypeTraitsTest::isIterableFree,
               &TypeTraitsTest::isIterableNot,
+              &TypeTraitsTest::isIterableNotBecauseEigenDevsAttemptedToDisableBeginByMakingItVoid,
 
               &TypeTraitsTest::isStringLike,
               &TypeTraitsTest::isStringLikeNot});
@@ -176,6 +178,15 @@ void TypeTraitsTest::isIterableFree() {
 void TypeTraitsTest::isIterableNot() {
     CORRADE_VERIFY(!IsIterable<int>{});
     CORRADE_VERIFY(!IsIterable<NonIterableType>{});
+}
+
+void TypeTraitsTest::isIterableNotBecauseEigenDevsAttemptedToDisableBeginByMakingItVoid() {
+    struct EigenMatrixThatShouldNotHaveAnyBeginEndInTheFirstPlaceButNo {
+        void begin() const;
+        void end() const;
+    };
+
+    CORRADE_VERIFY(!IsIterable<EigenMatrixThatShouldNotHaveAnyBeginEndInTheFirstPlaceButNo>{});
 }
 
 void TypeTraitsTest::isStringLike() {
