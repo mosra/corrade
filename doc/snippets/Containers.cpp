@@ -984,6 +984,18 @@ static_cast<void>(b);
 }
 
 {
+struct Position {
+    float x, y;
+};
+/* [stridedArrayView-data] */
+Containers::ArrayView<float> data;
+
+Containers::StridedArrayView1D<float> a{data, 5, 8};
+auto b = Containers::stridedArrayView(data, 5, 8);
+/* [stridedArrayView-data] */
+static_cast<void>(b);
+}
+{
 /* [StridedArrayView-slice-member] */
 struct Position {
     float x, y;

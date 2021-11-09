@@ -410,6 +410,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Equivalent to calling @ref StridedArrayView(ArrayView<ErasedType>, T*, const Size&, const Stride&)
          * with @p data as the first parameter and @cpp data.data() @ce as the
          * second parameter.
+         * @see @ref stridedArrayView(ArrayView<T>, std::size_t, std::ptrdiff_t)
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
 
@@ -1368,6 +1369,19 @@ template<std::size_t size_, class T, class U> constexpr StridedArrayView1D<T> st
     return StridedArrayView1D<T>{data, member, size, stride};
 }
 #endif
+
+/** @relatesalso StridedArrayView
+@brief Make an one-dimensional strided view with explicit size and stride
+@m_since_latest
+
+Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<T>, const Size&, const Stride&).
+The following two lines are equivalent, skipping all odd items in the array:
+
+@snippet Containers.cpp stridedArrayView-data
+*/
+template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<T> data, std::size_t size, std::ptrdiff_t stride) {
+    return {data, size, stride};
+}
 
 /** @relatesalso StridedArrayView
 @brief Make an one-dimensional strided view on an array of specific length

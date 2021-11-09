@@ -110,9 +110,13 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructConstVoid();
     void constructVoidFrom();
     void constructConstVoidFrom();
-    void constructSizeArray();
+    void constructArray();
     void constructZeroStride();
     void constructNegativeStride();
+    void constructSizeStride();
+    void constructSizeStrideVoid();
+    void constructSizeStrideConstVoid();
+    void constructSizeStrideArray();
     void constructInvalid();
     void constructInvalidVoid();
     void constructInvalidConstVoid();
@@ -316,9 +320,13 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructConstVoid,
               &StridedArrayViewTest::constructVoidFrom,
               &StridedArrayViewTest::constructConstVoidFrom,
-              &StridedArrayViewTest::constructSizeArray,
+              &StridedArrayViewTest::constructArray,
               &StridedArrayViewTest::constructZeroStride,
               &StridedArrayViewTest::constructNegativeStride,
+              &StridedArrayViewTest::constructSizeStride,
+              &StridedArrayViewTest::constructSizeStrideVoid,
+              &StridedArrayViewTest::constructSizeStrideConstVoid,
+              &StridedArrayViewTest::constructSizeStrideArray,
               &StridedArrayViewTest::constructInvalid,
               &StridedArrayViewTest::constructInvalidVoid,
               &StridedArrayViewTest::constructInvalidConstVoid,
@@ -911,7 +919,7 @@ void StridedArrayViewTest::constructConstVoidFrom() {
     CORRADE_COMPARE(ccbv.stride(), 8);
 }
 
-void StridedArrayViewTest::constructSizeArray() {
+void StridedArrayViewTest::constructArray() {
     /* Compared to construct(), size and stride is wrapped in {} */
 
     struct {
@@ -982,6 +990,117 @@ void StridedArrayViewTest::constructNegativeStride() {
     CORRADE_COMPARE(cc.stride(), -8);
     CORRADE_COMPARE(cc[9 - 2], 7853268); /* ID 2 if it wouldn't be negative */
     CORRADE_COMPARE(cc[9 - 4], 234810); /* ID 4 if it wouldn't be negative */
+}
+
+/* Needs to be here in order to use it in constexpr */
+constexpr int Array[10*2]{
+    2, 23125, 16, 1, 7853268, -2, -100, 5, 234810, 1,
+    /* Otherwise GCC 4.8 loudly complains about missing initializers */
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+void StridedArrayViewTest::constructSizeStride() {
+    /* Compared to construct() we don't pass the pointer parameter */
+
+    int a[10*2]{
+        2, 23125, 16, 1, 7853268, -2, -100, 5, 234810, 1,
+        /* Otherwise GCC 4.8 loudly complains about missing initializers */
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+
+    {
+        StridedArrayView1Di b = {a, 10, 8};
+        CORRADE_VERIFY(b.data() == a);
+        CORRADE_VERIFY(!b.empty());
+        CORRADE_COMPARE(b.size(), 10);
+        CORRADE_COMPARE(b.stride(), 8);
+        CORRADE_COMPARE(b[2], 7853268);
+        CORRADE_COMPARE(b[4], 234810);
+
+        auto c = stridedArrayView(arrayView(a), 10, 8);
+        CORRADE_VERIFY(std::is_same<decltype(c), StridedArrayView1Di>::value);
+        CORRADE_VERIFY(c.data() == a);
+        CORRADE_VERIFY(!c.empty());
+        CORRADE_COMPARE(c.size(), 10);
+        CORRADE_COMPARE(c.stride(), 8);
+        CORRADE_COMPARE(c[2], 7853268);
+        CORRADE_COMPARE(c[4], 234810);
+    }
+
+    {
+        constexpr ConstStridedArrayView1Di cb = {Array, 10, 8};
+        CORRADE_VERIFY(cb.data() == Array);
+        CORRADE_VERIFY(!cb.empty());
+        CORRADE_COMPARE(cb.size(), 10);
+        CORRADE_COMPARE(cb.stride(), 8);
+        CORRADE_COMPARE(cb[2], 7853268);
+        CORRADE_COMPARE(cb[4], 234810);
+
+        constexpr auto cc = stridedArrayView(arrayView(Array), 10, 8);
+        CORRADE_VERIFY(std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value);
+        CORRADE_VERIFY(cc.data() == Array);
+        CORRADE_VERIFY(!cc.empty());
+        CORRADE_COMPARE(cc.size(), 10);
+        CORRADE_COMPARE(cc.stride(), 8);
+        CORRADE_COMPARE(cc[2], 7853268);
+        CORRADE_COMPARE(cc[4], 234810);
+    }
+}
+
+void StridedArrayViewTest::constructSizeStrideVoid() {
+    /* Compared to constructVoid() we don't pass the pointer parameter */
+
+    int a[10*2]{};
+
+    VoidStridedArrayView1D b = {a, 10, 8};
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_VERIFY(!b.empty());
+    CORRADE_COMPARE(b.size(), 10);
+    CORRADE_COMPARE(b.stride(), 8);
+
+    /** @todo constexpr but not const? c++14? */
+}
+
+void StridedArrayViewTest::constructSizeStrideConstVoid() {
+    /* Compared to constructConstVoid() we don't pass the pointer parameter */
+
+    const int a[10*2]{};
+
+    ConstVoidStridedArrayView1D b = {a, 10, 8};
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_VERIFY(!b.empty());
+    CORRADE_COMPARE(b.size(), 10);
+    CORRADE_COMPARE(b.stride(), 8);
+
+    constexpr ConstVoidStridedArrayView1D cb = {Array, 10, 8};
+    CORRADE_VERIFY(cb.data() == Array);
+    CORRADE_VERIFY(!cb.empty());
+    CORRADE_COMPARE(cb.size(), 10);
+    CORRADE_COMPARE(cb.stride(), 8);
+}
+
+void StridedArrayViewTest::constructSizeStrideArray() {
+    /* Compared to constructSizeStride(), size and stride is wrapped in {} */
+
+    int a[10*2]{
+        2, 23125, 16, 1, 7853268, -2, -100, 5, 234810, 1,
+        /* Otherwise GCC 4.8 loudly complains about missing initializers */
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+
+    StridedArrayView1Di b = {a, {10}, {8}};
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.size(), 10);
+    CORRADE_COMPARE(b.stride(), 8);
+    CORRADE_COMPARE(b[2], 7853268);
+    CORRADE_COMPARE(b[4], 234810);
+
+    constexpr ConstStridedArrayView1Di cc = {Array, {10}, {8}};
+    CORRADE_VERIFY(cc.data() == Array);
+    CORRADE_COMPARE(cc.size(), 10);
+    CORRADE_COMPARE(cc.stride(), 8);
+    CORRADE_COMPARE(cc[2], 7853268);
+    CORRADE_COMPARE(cc[4], 234810);
 }
 
 void StridedArrayViewTest::constructInvalid() {
