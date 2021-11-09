@@ -388,6 +388,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * dimension if the stride is either positive or negative. Zero strides
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
+         * @see @ref stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType>, T*, std::size_t, std::ptrdiff_t)
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Size& size, const Stride& stride) noexcept: _data{(
             /** @todo can't compare void pointers to check if member is in data,
@@ -419,7 +420,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Assuming @p data are contiguous, stride is calculated implicitly
          * from @p size --- stride of a dimension is stride of the next
          * dimension times next dimension size, while last dimension stride is
-         * implicitly @cpp sizeof(T) @ce.
+         * implicitly @cpp sizeof(T) @ce. In an one-dimensional case you
+         * probably want to use @ref StridedArrayView(ArrayView<U>) instead.
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Size& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
@@ -477,6 +479,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Enabled only on one-dimensional views and if @cpp T* @ce is
          * implicitly convertible to @cpp U* @ce. Expects that both types have
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
+         * @see @ref stridedArrayView(ArrayView<T>)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -493,6 +496,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Enabled only on one-dimensional views and if @cpp T* @ce is
          * implicitly convertible to @cpp U* @ce. Expects that both types have
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
+         * @see @ref stridedArrayView(StaticArrayView<size, T>)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<std::size_t size, class U>
@@ -1365,8 +1369,8 @@ template<std::size_t size_, class T, class U> constexpr StridedArrayView1D<T> st
 }
 #endif
 
-/** @relatesalso ArrayView
-@brief Make a strided view on an array of specific length
+/** @relatesalso StridedArrayView
+@brief Make an one-dimensional strided view on an array of specific length
 @m_since_latest
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(T*, std::size_t).
@@ -1379,7 +1383,7 @@ template<class T> constexpr StridedArrayView1D<T> stridedArrayView(T* data, std:
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on a fixed-size array
+@brief Make an one-dimensional strided view on a fixed-size array
 @m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(U(&)[size]).
@@ -1393,7 +1397,7 @@ template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArray
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on an initializer list
+@brief Make an one-dimensional strided view on an initializer list
 @m_since{2020,06}
 
 Not present as a constructor in order to avoid accidental dangling references
@@ -1406,7 +1410,7 @@ template<class T> StridedArrayView1D<const T> stridedArrayView(std::initializer_
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on @ref ArrayView
+@brief Make an one-dimensional strided view on @ref ArrayView
 @m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<U>).
@@ -1419,7 +1423,7 @@ template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<T> 
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on @ref StaticArrayView
+@brief Make an one-dimensional strided view on @ref StaticArrayView
 @m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(StaticArrayView<size, U>).
@@ -1432,7 +1436,7 @@ template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArray
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a view on a view
+@brief Make a strided view on a strided view
 @m_since{2019,10}
 
 Equivalent to the implicit @ref StridedArrayView copy constructor --- it
@@ -1443,7 +1447,7 @@ template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>
 }
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on an external type / from an external representation
+@brief Make an one-dimensional strided view on an external type / from an external representation
 @m_since{2019,10}
 
 @see @ref Containers-ArrayView-stl
