@@ -472,29 +472,34 @@ benchmark types:
             _state->benchmarkResult = 0;
 
             try {
-                (this->*testCase.second.test)();
+                /* If --no-catch is specified, let the standard exception
+                   abort the process -- useful for debugging. Can't handle this
+                   in the parent try/catch block and conditionally rethrow
+                   because that would cause the backtrace to point here and not
+                   to the original exception location. */
+                if(args.isSet("no-catch")) {
+                    (this->*testCase.second.test)();
+                } else try {
+                    (this->*testCase.second.test)();
+                } catch(const std::exception& e) {
+                    ++errorCount;
+                    aborted = true;
+                    Error out{_state->errorOutput, _state->useColor};
+                    printTestCaseLabel(out, " THROW", Debug::Color::Red,
+                        _state->testCaseLine ? Debug::Color::Default : Debug::Color::Yellow);
+                    /* The file/line info is available but useless because the
+                       exception definitely doesn't come from there, thus not
+                       printing it. Also not doing ++noCheckCount because the
+                       checks could still be there, only after the exception
+                       happened. */
+                    out << Debug::newline << "       " << typeid(e).name() << Debug::nospace << ":" << e.what();
+                }
             } catch(const Exception&) {
                 ++errorCount;
                 aborted = true;
             } catch(const SkipException&) {
                 aborted = true;
                 skipped = true;
-            } catch(const std::exception& e) {
-                /* Conditionally rethrow to let the standard exception abort
-                   the process -- useful for debugging */
-                if(args.isSet("no-catch")) throw;
-
-                ++errorCount;
-                aborted = true;
-                Error out{_state->errorOutput, _state->useColor};
-                printTestCaseLabel(out, " THROW", Debug::Color::Red,
-                    _state->testCaseLine ? Debug::Color::Default : Debug::Color::Yellow);
-                /* The file/line info is available but useless because the
-                   exception definitely doesn't come from there, thus not
-                   printing it. Also not doing ++noCheckCount because the
-                   checks could still be there, only after the exception
-                   happened. */
-                out << Debug::newline << "       " << typeid(e).name() << Debug::nospace << ":" << e.what();
             }
 
             /* Not catching ... exceptions because those could obscure critical
