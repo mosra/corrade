@@ -186,6 +186,8 @@ namespace Corrade {
     Previously this behaved equivalently to
     @ref Utility::Directory::Flag::SkipFiles on Emscripten but that made no
     sense from a portability point of view.
+-   @ref Utility::format() now supports printing integers as characters using
+    the @cpp "{:c}" @ce modifier
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() now have
     @ref Containers::StringView overloads that allocate much less

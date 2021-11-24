@@ -73,13 +73,13 @@ In order to write a literal curly brace to the output, simply double it:
 
 @m_class{m-fullwidth}
 
-| Type                                  | Behavior
-| ------------------------------------- | --------
-| @cpp char @ce, @cpp unsigned char @ce | Written as an integer (*not as a character*)
-| @cpp short @ce, @cpp unsigned short @ce | Written as an integer
-| @cpp int @ce, @cpp unsigned int @ce   | Written as an integer
-| @cpp long @ce, @cpp unsigned long @ce | Written as an integer
-| @cpp long long @ce, @cpp unsigned long long @ce | Written as an integer
+| Type                                  | Default behavior
+| ------------------------------------- | ------------------------------------
+| @cpp char @ce, @cpp unsigned char @ce | Written as a base-10 integer (*not as a character*)
+| @cpp short @ce, @cpp unsigned short @ce | Written as a base-10 integer
+| @cpp int @ce, @cpp unsigned int @ce   | Written as a base-10 integer
+| @cpp long @ce, @cpp unsigned long @ce | Written as a base-10 integer
+| @cpp long long @ce, @cpp unsigned long long @ce | Written as a base-10 integer
 | @cpp float @ce <b></b>    | Written as a float with 6 significant digits by default
 | @cpp double @ce <b></b>   | Written as a float with 15 significant digits by default
 | @cpp long double @ce <b></b> | Written as a float, by default with 18 significant digits on platforms \n with 80-bit @cpp long double @ce and 15 digits on platforms @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit"
@@ -106,6 +106,7 @@ The `type` is a single character specifying output conversion:
 
 Value           | Meaning
 --------------- | -------
+@cpp 'c' @ce <b></b> | Character. Valid only for 8-, 16- and 32-bit integer types. At the moment, arbitrary UTF-32 codepoints don't work, only 7-bit ASCII values have a guaranteed output.
 @cpp 'd' @ce <b></b> | Decimal integer (base 10). Valid only for integer types. Default for integers if nothing is specified.
 @cpp 'o' @ce <b></b> | Octal integer (base 8). Valid only for integer types.
 @cpp 'x' @ce <b></b> | Hexadecimal integer (base 16) with lowercase letters a--f. Valid only for integer types.
@@ -123,11 +124,11 @@ differently based on the data type:
 
 Type            | Meaning
 --------------- | -------
-Integers        | If the number of decimals is smaller than `precision`, the integer gets padded with the `0` character from the left. If both the number and `precision` is @cpp 0 @ce, nothing is written to the output. Default `precision` is @cpp 1 @ce.
+Integers, except for the @cpp 'c' @ce type specifier | If the number of decimals is smaller than `precision`, the integer gets padded with the `0` character from the left. If both the number and `precision` is @cpp 0 @ce, nothing is written to the output. Default `precision` is @cpp 1 @ce.
 Floating-point types with default or @cpp 'g' @ce / @cpp 'G' @ce type specifier | The number is printed with *at most* `precision` significant digits. Default `precision` depends on data type, see the type support table above.
 Floating-point types with @cpp 'e' @ce / @cpp 'E' @ce type specifier | The number is always printed with *exactly* one decimal, `precision` decimal points (including trailing zeros) and the exponent. Default `precision` depends on data type, see the type support table above.
 Floating-point types with @cpp 'f' @ce / @cpp 'F' @ce type specifier | The number is always printed with *exactly* `precision` decimal points including trailing zeros. Default `precision` depends on data type, see the type support table above.
-Strings         | If the string length is larger than `precision`, only the first `precision` *bytes* are written to the output. Default `precision` is unlimited. Note that this doesn't work with UTF-8 at the moment.
+Strings, characters (integers with the @cpp 'c' @ce type specifier) | If the string length is larger than `precision`, only the first `precision` *bytes* are written to the output. Default `precision` is unlimited. Note that this doesn't work with UTF-8 at the moment and specifying `precision` of @cpp 0 @ce doesn't give the expected output for characters.
 
 Example of formating of CSS colors with correct width:
 

@@ -54,12 +54,15 @@ struct FormatTest: TestSuite::Tester {
     void integerLong();
     void integerLongLong();
 
+    void character();
+    void characterLong();
+    void characterPrecision();
+
     void octal();
     void decimal();
     void hexadecimal();
     void hexadecimalUppercase();
     void integerFloat();
-
     void integerPrecision();
 
     void floatingFloat();
@@ -137,12 +140,15 @@ FormatTest::FormatTest() {
               &FormatTest::integerLong,
               &FormatTest::integerLongLong,
 
+              &FormatTest::character,
+              &FormatTest::characterLong,
+              &FormatTest::characterPrecision,
+
               &FormatTest::octal,
               &FormatTest::decimal,
               &FormatTest::hexadecimal,
               &FormatTest::hexadecimalUppercase,
               &FormatTest::integerFloat,
-
               &FormatTest::integerPrecision,
 
               &FormatTest::floatingFloat,
@@ -252,6 +258,50 @@ void FormatTest::integerLong() {
 void FormatTest::integerLongLong() {
     CORRADE_COMPARE(formatString<long long>("{}", -12345678901234ll), "-12345678901234");
     CORRADE_COMPARE(formatString<unsigned long long>("{}", 24568780984912ull), "24568780984912");
+}
+
+void FormatTest::character() {
+    CORRADE_COMPARE(formatString("{}", 'a'), "97");
+    CORRADE_COMPARE(formatString("{:c}", 'a'), "a");
+    CORRADE_COMPARE(formatString("{:c}", 97), "a");
+    CORRADE_COMPARE(formatString("{:c}", 97u), "a");
+
+    /* Eventually it'd be good to have UTF-32 codepoints printed as UTF-8,
+       consistently with Python */
+    {
+        CORRADE_EXPECT_FAIL("Only 7-bit ASCII characters work at the moment.");
+        CORRADE_COMPARE(formatString("{:c}", 0x00001d01), "ᴁ");
+        /** @todo test also 8-bit and 24-bit codepoints when this works */
+    }
+}
+
+void FormatTest::characterLong() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    /* Using formatInto() instead of format() to avoid all errors being printed
+       twice due to the extra pass with size calculation */
+    char buffer[128]{};
+    formatInto(buffer, "{:c}", 97ll);
+    formatInto(buffer, "{:c}", 97ull);
+    CORRADE_COMPARE(out.str(),
+        "Utility::format(): character type used for a 64-bit value\n"
+        "Utility::format(): character type used for a 64-bit value\n");
+}
+
+void FormatTest::characterPrecision() {
+    /* For consistency should behave the same as in case of a string precision
+       (trimming) */
+    CORRADE_COMPARE(formatString("{:.4c}", 'a'), "a");
+
+    {
+        CORRADE_EXPECT_FAIL("Character trimming doesn't work yet.");
+        CORRADE_COMPARE(formatString("{:.0c}", 'a'), "");
+    }
 }
 
 void FormatTest::octal() {
@@ -556,10 +606,12 @@ void FormatTest::floatBase() {
     /* Using formatInto() instead of format() to avoid all errors being printed
        twice due to the extra pass with size calculation */
     char buffer[128]{};
+    formatInto(buffer, "{:c}", 123456.0f);
     formatInto(buffer, "{:o}", 123456.0f);
     formatInto(buffer, "{:x}", 123456.0);
     formatInto(buffer, "{:d}", 123456.0l);
     CORRADE_COMPARE(out.str(),
+        "Utility::format(): character type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n");

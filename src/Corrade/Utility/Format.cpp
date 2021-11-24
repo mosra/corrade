@@ -39,6 +39,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
 
 enum class FormatType: unsigned char {
     Unspecified,
+    Character,
     Octal,
     Decimal,
     Hexadecimal,
@@ -55,6 +56,7 @@ template<class> char formatTypeChar(FormatType type);
 
 template<> char formatTypeChar<int>(FormatType type) {
     switch(type) {
+        case FormatType::Character: return 'c';
         case FormatType::Unspecified:
         case FormatType::Decimal: return 'i';
         case FormatType::Octal: return 'o';
@@ -74,8 +76,16 @@ template<> char formatTypeChar<int>(FormatType type) {
     CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
+template<> char formatTypeChar<long long>(const FormatType type) {
+    /* Return some reasonable default so we can test for the assert */
+    CORRADE_ASSERT(type != FormatType::Character,
+        "Utility::format(): character type used for a 64-bit value", 'i');
+    return formatTypeChar<int>(type);
+}
+
 template<> char formatTypeChar<unsigned int>(FormatType type) {
     switch(type) {
+        case FormatType::Character: return 'c';
         case FormatType::Unspecified:
         case FormatType::Decimal: return 'u';
         case FormatType::Octal: return 'o';
@@ -95,6 +105,13 @@ template<> char formatTypeChar<unsigned int>(FormatType type) {
     CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
+template<> char formatTypeChar<unsigned long long>(const FormatType type) {
+    /* Return some reasonable default so we can test for the assert */
+    CORRADE_ASSERT(type != FormatType::Character,
+        "Utility::format(): character type used for a 64-bit value", 'i');
+    return formatTypeChar<unsigned int>(type);
+}
+
 template<> char formatTypeChar<float>(FormatType type) {
     switch(type) {
         case FormatType::Unspecified:
@@ -104,6 +121,10 @@ template<> char formatTypeChar<float>(FormatType type) {
         case FormatType::FloatExponentUppercase: return 'E';
         case FormatType::FloatFixed: return 'f';
         case FormatType::FloatFixedUppercase: return 'F';
+
+        case FormatType::Character:
+            /* Return some reasonable default so we can test for the assert */
+            CORRADE_ASSERT_UNREACHABLE("Utility::format(): character type used for a floating-point value", 'g');
 
         case FormatType::Decimal:
         case FormatType::Octal:
@@ -139,22 +160,22 @@ void Formatter<unsigned int>::format(std::FILE* const file, const unsigned int v
 }
 std::size_t Formatter<long long>::format(const Containers::ArrayView<char>& buffer, const long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
-    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
+    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<long long>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
 }
 void Formatter<long long>::format(std::FILE* const file, const long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
-    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
+    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<long long>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<unsigned long long>::format(const Containers::ArrayView<char>& buffer, const unsigned long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
-    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned int>(type), 0 };
+    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned long long>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
 }
 void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
-    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned int>(type), 0 };
+    const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned long long>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 
@@ -327,6 +348,9 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
                 if(formatOffset < format.size() && format[formatOffset] != '}') {
                     switch(format[formatOffset]) {
                         /** @todo binary */
+                        case 'c':
+                            type = FormatType::Character;
+                            break;
                         case 'o':
                             type = FormatType::Octal;
                             break;
