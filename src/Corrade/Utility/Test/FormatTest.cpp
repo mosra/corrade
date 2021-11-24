@@ -614,7 +614,14 @@ void FormatTest::stlString() {
 }
 
 void FormatTest::stringPrecision() {
+    CORRADE_COMPARE(formatString("{:.100}", "hello world"), "hello world");
     CORRADE_COMPARE(formatString("{:.4}", "hello world"), "hell");
+    CORRADE_COMPARE(formatString("{:.0}", "hello world"), "");
+
+    {
+        CORRADE_EXPECT_FAIL("String trimming doesn't work with UTF-8 yet.");
+        CORRADE_COMPARE(formatString("{:.6}", "hellóó!"), "hellóó");
+    }
 }
 
 enum: std::uint64_t { SomeValue = 12345678901234ull };
