@@ -94,6 +94,14 @@ namespace Implementation {
     template<unsigned dimensions, class T> inline T*& dataRef(StridedArrayView<dimensions, T>& view) {
         return reinterpret_cast<T*&>(view._data);
     }
+    /* So ArrayTuple can know the total size without having to include this
+       header */
+    template<unsigned dimensions> std::size_t sizeProduct(const StridedDimensions<dimensions, std::size_t>& size) {
+        std::size_t out = 1;
+        for(std::size_t i = 0; i != dimensions; ++i)
+            out *= size[i];
+        return out;
+    }
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
     template<unsigned dimensions, class T> inline StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
