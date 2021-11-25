@@ -24,9 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* Included as first to check that we *really* don't need the ArrayView header
-   for anything. We actually need, but the relevant functions are
-   forward-declared so it should work. */
+/* Included as first to check that we *really* don't need the
+   [Strided]ArrayView headers for anything. We actually need, but the relevant
+   functions are forward-declared so it should work. */
 #include "Corrade/Containers/ArrayTuple.h"
 
 #include <sstream>
@@ -736,8 +736,7 @@ struct Big {
 int Big::constructed = 0;
 int Big::destructed = 0;
 
-void ArrayTupleTest::constructBig()
-{
+void ArrayTupleTest::constructBig() {
     Big::constructed = 0;
     Big::destructed = 0;
 

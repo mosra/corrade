@@ -42,12 +42,12 @@
 namespace Corrade { namespace Containers {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-/* Declaration of [Strided]ArrayView helpers to avoid including the full
-   headers */
+/* Forward declaration of [Strided]ArrayView helpers to avoid including the
+   full headers */
 template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list);
 namespace Implementation {
-    template<class T> T*& dataRef(Containers::ArrayView<T>& view);
-    template<unsigned dimensions, class T> T*& dataRef(Containers::StridedArrayView<dimensions, T>& view);
+    template<class T> T*& dataRef(Containers::ArrayView<T>&);
+    template<unsigned dimensions, class T> T*& dataRef(Containers::StridedArrayView<dimensions, T>&);
 }
 #endif
 
