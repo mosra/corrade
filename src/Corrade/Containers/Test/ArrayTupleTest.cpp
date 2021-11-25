@@ -36,6 +36,7 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 
@@ -299,6 +300,8 @@ void ArrayTupleTest::constructNoInit() {
     char storage[256];
     for(char& i: storage) i = '\xce';
 
+    CORRADE_VERIFY(true); /* to capture correct function name */
+
     {
         ArrayView<char> chars;
         ArrayView<char> initializedChars;
@@ -315,8 +318,10 @@ void ArrayTupleTest::constructNoInit() {
              {Corrade::NoInit, 5, strided},
              {Corrade::ValueInit, 4, initializedStrided},
              {Corrade::NoInit, 3, 4, 4, stridedErased}},
-            [&](std::size_t, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
-                return {storage, [](char*, std::size_t) { }};
+            [&](std::size_t size, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
+                CORRADE_COMPARE_AS(size, Containers::arraySize(storage),
+                    TestSuite::Compare::LessOrEqual);
+                return {storage, [](char*, std::size_t) {}};
             }
         };
 
