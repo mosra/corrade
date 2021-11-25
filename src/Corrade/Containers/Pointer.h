@@ -47,10 +47,10 @@ namespace Implementation {
 
     /* Same as construct() utils in constructHelpers.h but not in-place. See
        their docs for more information. */
-    template<class T, class First, class ...Next> T* allocate(First&& first, Next&& ...next) {
+    template<class T, class First, class ...Next> inline T* allocate(First&& first, Next&& ...next) {
         return new T{Utility::forward<First>(first), Utility::forward<Next>(next)...};
     }
-    template<class T> T* allocate() {
+    template<class T> inline T* allocate() {
         return new T();
     }
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5

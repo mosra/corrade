@@ -91,15 +91,15 @@ namespace Implementation {
     /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
        void*& because this also acts as a type disambiguator in the
        constructor, even though it's subsequently cast back to void. */
-    template<unsigned dimensions, class T> T*& dataRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T> inline T*& dataRef(StridedArrayView<dimensions, T>& view) {
         return reinterpret_cast<T*&>(view._data);
     }
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
-    template<unsigned dimensions, class T> StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T> inline StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
         return view._size;
     }
-    template<unsigned dimensions, class T> StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T> inline StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(StridedArrayView<dimensions, T>& view) {
         return view._stride;
     }
     #endif
