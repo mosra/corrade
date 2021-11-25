@@ -301,10 +301,14 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(Aligned<16>::constructed, 3);
         CORRADE_COMPARE(Aligned<16>::destructed, 0);
         for(double i: strided) CORRADE_COMPARE(i, 0.0);
-        for(auto i: strided3D)
-            for(auto j: i)
-                for(float k: j)
+        /* MSVC 2015 needs the {}s, FFS */
+        for(auto i: strided3D) {
+            for(auto j: i) {
+                for(float k: j) {
                     CORRADE_COMPARE(k, 0.0f);
+                }
+            }
+        }
     }
 
     /* Check that non-trivial destructors were called */
@@ -359,15 +363,22 @@ void ArrayTupleTest::constructNoInit() {
                 '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce'
             }), TestSuite::Compare::Container);
         for(double i: initializedStrided) CORRADE_COMPARE(i, 0.0);
-        for(auto i: Containers::arrayCast<4, char>(strided3D))
-            for(auto j: i)
-                for(auto k: j)
+        /* MSVC 2015 needs the {}s, FFS */
+        for(auto i: Containers::arrayCast<4, char>(strided3D)) {
+            for(auto j: i) {
+                for(auto k: j) {
                     CORRADE_COMPARE_AS(k, Containers::stridedArrayView({
                         '\xce', '\xce', '\xce', '\xce'
                     }), TestSuite::Compare::Container);
-        for(auto i: initializedStrided2D)
-            for(float j: i)
+                }
+            }
+        }
+        /* MSVC 2015 needs the {}s, FFS */
+        for(auto i: initializedStrided2D) {
+            for(float j: i) {
                 CORRADE_COMPARE(j, 0.0f);
+            }
+        }
         for(auto i: stridedErased)
             CORRADE_COMPARE_AS(i, Containers::stridedArrayView({
                 '\xce', '\xce', '\xce', '\xce'
