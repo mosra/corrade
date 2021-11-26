@@ -170,6 +170,8 @@ namespace Corrade {
 -   @ref Utility::Arguments can now recognize short options packed together
     (e.g. `-xzOfile.dat` is equivalent to `-x -z -O file.dat` providing `-x`
     and `-z` are boolean options)
+-   New @ref Utility::copy(std::initializer_list<typename ToView::Type>, To&&)
+    overload for easy populating of arrays and views
 -   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"
     is now enabled on MSVC 2019 16.6+ as well, making it available across all
     compilers

@@ -47,8 +47,14 @@ struct AlgorithmsTest: TestSuite::Tester {
     template<class T> void copyStrided4D();
     void copyStridedZeroSize();
 
+    void copyInitializerList();
+    void copyInitializerListZeroSize();
+    void copyInitializerListStrided();
+    void copyInitializerListStridedZeroSize();
+
     void copyNonMatchingSizes();
     void copyDifferentViewTypes();
+    void copyInitializerListToDifferentViewTypes();
 
     void copyBenchmarkFlatStdCopy();
     void copyBenchmarkFlatLoop();
@@ -210,8 +216,14 @@ AlgorithmsTest::AlgorithmsTest() {
 
     addTests({&AlgorithmsTest::copyStridedZeroSize,
 
+              &AlgorithmsTest::copyInitializerList,
+              &AlgorithmsTest::copyInitializerListZeroSize,
+              &AlgorithmsTest::copyInitializerListStrided,
+              &AlgorithmsTest::copyInitializerListStridedZeroSize,
+
               &AlgorithmsTest::copyNonMatchingSizes,
-              &AlgorithmsTest::copyDifferentViewTypes});
+              &AlgorithmsTest::copyDifferentViewTypes,
+              &AlgorithmsTest::copyInitializerListToDifferentViewTypes});
 
     addBenchmarks({&AlgorithmsTest::copyBenchmarkFlatStdCopy,
                    &AlgorithmsTest::copyBenchmarkFlatLoop,
@@ -422,6 +434,42 @@ void AlgorithmsTest::copyStridedZeroSize() {
     CORRADE_VERIFY(true);
 }
 
+void AlgorithmsTest::copyInitializerList() {
+    /* Not an int to verify the initializer list gets proper type inferred */
+    unsigned dst[5];
+    Utility::copy({1, 7, 2, 3, 5}, Containers::arrayView(dst));
+
+    CORRADE_COMPARE_AS(Containers::arrayView(dst),
+        Containers::arrayView<unsigned>({1, 7, 2, 3, 5}),
+        TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyInitializerListZeroSize() {
+    /* Shouldn't crash and neither should be ambiguous */
+    int dst[1];
+    Utility::copy({}, Containers::arrayView(dst).prefix(std::size_t{0}));
+
+    CORRADE_VERIFY(true);
+}
+
+void AlgorithmsTest::copyInitializerListStrided() {
+    /* Not an int to verify the initializer list gets proper type inferred */
+    unsigned dst[10]{};
+    Utility::copy({1, 7, 2, 3, 5}, Containers::stridedArrayView(Containers::arrayView(dst), 5, 8));
+
+    CORRADE_COMPARE_AS(Containers::arrayView(dst),
+        Containers::arrayView<unsigned>({1, 0, 7, 0, 2, 0, 3, 0, 5, 0}),
+        TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyInitializerListStridedZeroSize() {
+    /* Shouldn't crash and neither should be ambiguous */
+    int dst[1];
+    Utility::copy({}, Containers::stridedArrayView(dst).prefix(std::size_t{0}));
+
+    CORRADE_VERIFY(true);
+}
+
 void AlgorithmsTest::copyNonMatchingSizes() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
@@ -451,13 +499,22 @@ void AlgorithmsTest::copyNonMatchingSizes() {
     Utility::copy(Containers::StridedArrayView3D<const int>{b, {2, 3, 5}},
                   Containers::StridedArrayView3D<int>{b, {2, 3, 4}});
 
+    /* Initializer list. There's no special code path for this, just to be
+       sure it doesn't get auto-sliced or something. */
+    Utility::copy({1, 2}, Containers::ArrayView<char>{a, 3});
+    Utility::copy({1, 2, 3, 4}, Containers::ArrayView<char>{a, 3});
+
     CORRADE_COMPARE(out.str(),
         "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
+
         "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3} and {2, 4} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5} and {2, 4, 5} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5, 7} and {2, 3, 5, 6} don't match\n"
-        "Utility::Algorithms::copy(): sizes {2, 3, 5, 4} and {2, 3, 4, 4} don't match\n");
+        "Utility::Algorithms::copy(): sizes {2, 3, 5, 4} and {2, 3, 4, 4} don't match\n"
+
+        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
+        "Utility::Algorithms::copy(): sizes 4 and 3 don't match\n");
 }
 
 void AlgorithmsTest::copyDifferentViewTypes() {
@@ -484,6 +541,28 @@ void AlgorithmsTest::copyDifferentViewTypes() {
     CORRADE_COMPARE_AS(Containers::arrayView(a),
         Containers::arrayView({11, -22, 33, 777, 55}),
         TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyInitializerListToDifferentViewTypes() {
+    {
+        int a[5];
+        Utility::copy({11, -22, 33, -44, 55}, a);
+        CORRADE_COMPARE_AS(Containers::arrayView(a),
+            Containers::arrayView({11, -22, 33, -44, 55}),
+            TestSuite::Compare::Container);
+    } {
+        std::array<int, 5> a;
+        Utility::copy({11, -22, 33, -44, 55}, a);
+        CORRADE_COMPARE_AS(Containers::arrayView(a),
+            Containers::arrayView({11, -22, 33, -44, 55}),
+            TestSuite::Compare::Container);
+    } {
+        std::vector<int> a(5);
+        Utility::copy({11, -22, 33, -44, 55}, a);
+        CORRADE_COMPARE_AS(Containers::arrayView(a),
+            Containers::arrayView({11, -22, 33, -44, 55}),
+            TestSuite::Compare::Container);
+    }
 }
 
 constexpr std::size_t Size = 16;

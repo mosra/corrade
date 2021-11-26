@@ -122,6 +122,7 @@ namespace Implementation {
 /* Vaguely inspired by the Utility::IsIterable type trait */
 template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::ArrayView<typename View::Type> arrayViewTypeFor(T&&);
 template<class T> static Containers::ArrayView<T> arrayViewTypeFor(const Containers::ArrayView<T>&);
+template<std::size_t size, class T> static Containers::ArrayView<T> arrayViewTypeFor(T(&)[size]);
 template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> arrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
 
 }
@@ -139,6 +140,27 @@ expects that both views have the same underlying type, the same dimension count
 and size and the @p dst is not @cpp const @ce.
 */
 template<class From, class To, class FromView = decltype(Implementation::arrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
+
+/**
+@brief Copy an initializer list to a view
+@m_since_latest
+
+Based on whether the @p dst is convertible to either @ref Containers::ArrayView
+or @ref Containers::StridedArrayView, calls either
+@ref copy(const Containers::ArrayView<const T>&, const Containers::ArrayView<T>&)
+or @ref copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>&).
+Works with any @p dst that's convertible to an one-dimensional
+@ref Containers::StridedArrayView, expects that @p src has the same underlying
+type as @p dst, that they have both the same size and the @p dst is not
+@cpp const @ce.
+
+This overload can also be used for convenient filling of C arrays, which would
+otherwise have to be done element-by-element or using @ref std::memcpy() as
+neither C nor C++ allows array assignment:
+
+@snippet Utility.cpp Algorithms-copy-C-array
+*/
+template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(std::initializer_list<typename ToView::Type> src, To&& dst);
 
 /**
 @brief Flip given dimension of a view in-place
@@ -190,6 +212,18 @@ template<class From, class To, class FromView, class ToView> void copy(From&& sr
     const typename std::common_type<
         typename Implementation::ArrayViewType<FromView>::Type,
         typename Implementation::ArrayViewType<ToView>::Type>::type dstV{dst};
+    copy(srcV, dstV);
+}
+
+template<class To, class ToView> void copy(std::initializer_list<typename ToView::Type> src, To&& dst) {
+    static_assert(!std::is_const<typename ToView::Type>::value,
+        "can't copy to a const view");
+    static_assert(Implementation::ArrayViewType<ToView>::Dimensions == 1,
+        "can copy an initializer list only to a 1D view");
+    /* We need to pass const& to the copy(), passing temporary instances
+       directly would lead to infinite recursion */
+    const typename Implementation::ArrayViewType<ToView>::ConstType srcV = Containers::arrayView(src);
+    const typename Implementation::ArrayViewType<ToView>::Type dstV{dst};
     copy(srcV, dstV);
 }
 

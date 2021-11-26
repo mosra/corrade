@@ -358,6 +358,16 @@ args.addOption("input")
 
 int main() {
 {
+/* [Algorithms-copy-C-array] */
+int a[3];
+
+DOXYGEN_IGNORE()
+
+Utility::copy({1, 2, 3}, a);
+/* [Algorithms-copy-C-array] */
+}
+
+{
 typedef int T;
 /* [Algorithms-flipInPlace] */
 Containers::StridedArrayView2D<T> pixels = DOXYGEN_IGNORE({});
