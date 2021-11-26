@@ -120,9 +120,9 @@ template<unsigned dimensions, class T> void copy(const Containers::StridedArrayV
 namespace Implementation {
 
 /* Vaguely inspired by the Utility::IsIterable type trait */
-template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::StridedArrayView1D<typename View::Type> stridedArrayViewTypeFor(T&&);
-template<class T> static Containers::StridedArrayView1D<T> stridedArrayViewTypeFor(const Containers::ArrayView<T>&);
-template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> stridedArrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
+template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::ArrayView<typename View::Type> arrayViewTypeFor(T&&);
+template<class T> static Containers::ArrayView<T> arrayViewTypeFor(const Containers::ArrayView<T>&);
+template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> arrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
 
 }
 
@@ -138,7 +138,7 @@ Works with any type that's convertible to @ref Containers::StridedArrayView,
 expects that both views have the same underlying type and the same dimension
 count and the @p dst is not @cpp const @ce.
 */
-template<class From, class To, class FromView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::stridedArrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
+template<class From, class To, class FromView = decltype(Implementation::arrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
 
 /**
 @brief Flip given dimension of a view in-place
@@ -162,13 +162,13 @@ template<unsigned dimension, unsigned dimensions, class T> void flipInPlace(cons
 
 namespace Implementation {
 
-template<class> struct StridedArrayViewType;
-template<class T> struct StridedArrayViewType<Containers::ArrayView<T>> {
+template<class> struct ArrayViewType;
+template<class T> struct ArrayViewType<Containers::ArrayView<T>> {
     enum: unsigned { Dimensions = 1 };
     typedef Containers::ArrayView<typename std::remove_const<T>::type> Type;
     typedef Containers::ArrayView<const T> ConstType;
 };
-template<unsigned dimensions, class T> struct StridedArrayViewType<Containers::StridedArrayView<dimensions, T>> {
+template<unsigned dimensions, class T> struct ArrayViewType<Containers::StridedArrayView<dimensions, T>> {
     enum: unsigned { Dimensions = dimensions };
     typedef Containers::StridedArrayView<dimensions, typename std::remove_const<T>::type> Type;
     typedef Containers::StridedArrayView<dimensions, const T> ConstType;
@@ -179,17 +179,17 @@ template<unsigned dimensions, class T> struct StridedArrayViewType<Containers::S
 template<class From, class To, class FromView, class ToView> void copy(From&& src, To&& dst) {
     static_assert(std::is_same<typename std::remove_const<typename FromView::Type>::type, typename std::remove_const<typename ToView::Type>::type>::value, "can't copy between views of different types");
     static_assert(!std::is_const<typename ToView::Type>::value, "can't copy to a const view");
-    static_assert(unsigned(Implementation::StridedArrayViewType<FromView>::Dimensions) ==
-        unsigned(Implementation::StridedArrayViewType<ToView>::Dimensions),
+    static_assert(unsigned(Implementation::ArrayViewType<FromView>::Dimensions) ==
+        unsigned(Implementation::ArrayViewType<ToView>::Dimensions),
         "can't copy between views of different dimensions");
     /* We need to pass const& to the copy(), passing temporary instances
        directly would lead to infinite recursion */
     const typename std::common_type<
-        typename Implementation::StridedArrayViewType<FromView>::ConstType,
-        typename Implementation::StridedArrayViewType<ToView>::ConstType>::type srcV{src};
+        typename Implementation::ArrayViewType<FromView>::ConstType,
+        typename Implementation::ArrayViewType<ToView>::ConstType>::type srcV{src};
     const typename std::common_type<
-        typename Implementation::StridedArrayViewType<FromView>::Type,
-        typename Implementation::StridedArrayViewType<ToView>::Type>::type dstV{dst};
+        typename Implementation::ArrayViewType<FromView>::Type,
+        typename Implementation::ArrayViewType<ToView>::Type>::type dstV{dst};
     copy(srcV, dstV);
 }
 
