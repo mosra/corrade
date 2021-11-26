@@ -160,7 +160,17 @@ neither C nor C++ allows array assignment:
 
 @snippet Utility.cpp Algorithms-copy-C-array
 */
-template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(std::initializer_list<typename ToView::Type> src, To&& dst);
+template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))
+    /* On MSVC's STL, this overload is somehow getting picked for a
+       Containers::ArrayView<const void> argument, attempting to materialize
+       std::initializer_list<void> and dying with "forming a reference to
+       void". Happens with clang-cl as well, so I suspect the STL
+       implementation is to blame... but why? There's no catch-all constructor,
+       just a two-pointer one. */
+    #ifdef CORRADE_TARGET_DINKUMWARE
+    , class = typename std::enable_if<!std::is_same<typename std::remove_const<typename ToView::Type>::type, void>::value>::type
+    #endif
+> void copy(std::initializer_list<typename ToView::Type> src, To&& dst);
 
 /**
 @brief Flip given dimension of a view in-place
@@ -215,7 +225,11 @@ template<class From, class To, class FromView, class ToView> void copy(From&& sr
     copy(srcV, dstV);
 }
 
-template<class To, class ToView> void copy(std::initializer_list<typename ToView::Type> src, To&& dst) {
+template<class To, class ToView
+    #ifdef CORRADE_TARGET_DINKUMWARE
+    , class
+    #endif
+> void copy(std::initializer_list<typename ToView::Type> src, To&& dst) {
     static_assert(!std::is_const<typename ToView::Type>::value,
         "can't copy to a const view");
     static_assert(Implementation::ArrayViewType<ToView>::Dimensions == 1,
