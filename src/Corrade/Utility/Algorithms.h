@@ -135,8 +135,8 @@ Converts @p src and @p dst to a common array view type that's either
 either @ref copy(const Containers::ArrayView<const T>&, const Containers::ArrayView<T>&)
 or @ref copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>&).
 Works with any type that's convertible to @ref Containers::StridedArrayView,
-expects that both views have the same underlying type and the same dimension
-count and the @p dst is not @cpp const @ce.
+expects that both views have the same underlying type, the same dimension count
+and size and the @p dst is not @cpp const @ce.
 */
 template<class From, class To, class FromView = decltype(Implementation::arrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
 
