@@ -579,7 +579,9 @@ template<class T> void AlgorithmsTest::copyMultiDimensionalArray() {
     const T src[2][3]{{1, 2, 3}, {4, 5, 6}};
     T dst[2][3];
 
-    /* This fails to compile for Struct on Clang 3.8 */
+    /* This fails to compile for Struct on Clang 3.8 unless
+       Implementation::arrayViewTypeFor(T(&)[]) is disabled for
+       multi-dimensional arrays */
     Utility::copy(src, dst);
 
     CORRADE_COMPARE_AS(Containers::arrayCast<int>(dst),
