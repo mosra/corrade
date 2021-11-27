@@ -56,7 +56,7 @@ namespace Implementation {
 @brief Array tuple
 @m_since_latest
 
-A set of arrays of homogeneous types and varying lengths stored in a single
+A set of arrays of heterogenous types and varying lengths stored in a single
 allocation. Compared to creating several @ref Array instances, this has the
 advantage of using a single contiguous piece of memory with less allocator
 overhead and potentially better cache performance, especially if there's many
