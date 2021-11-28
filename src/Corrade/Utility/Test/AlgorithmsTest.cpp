@@ -55,6 +55,7 @@ struct AlgorithmsTest: TestSuite::Tester {
     void copyNonMatchingSizes();
     void copyDifferentViewTypes();
     void copyInitializerListToDifferentViewTypes();
+    template<class T> void copyMultiDimensionalArray();
 
     void copyBenchmarkFlatStdCopy();
     void copyBenchmarkFlatLoop();
@@ -192,6 +193,11 @@ template<> struct TypeName<Data<32>> {
     static const char* name() { return "32B"; }
 };
 
+struct Struct {
+    Struct(int a = 0): a{a} {}
+    int a;
+};
+
 AlgorithmsTest::AlgorithmsTest() {
     addTests({&AlgorithmsTest::copy,
               &AlgorithmsTest::copyZeroSize});
@@ -223,7 +229,9 @@ AlgorithmsTest::AlgorithmsTest() {
 
               &AlgorithmsTest::copyNonMatchingSizes,
               &AlgorithmsTest::copyDifferentViewTypes,
-              &AlgorithmsTest::copyInitializerListToDifferentViewTypes});
+              &AlgorithmsTest::copyInitializerListToDifferentViewTypes,
+              &AlgorithmsTest::copyMultiDimensionalArray<int>,
+              &AlgorithmsTest::copyMultiDimensionalArray<Struct>});
 
     addBenchmarks({&AlgorithmsTest::copyBenchmarkFlatStdCopy,
                    &AlgorithmsTest::copyBenchmarkFlatLoop,
@@ -563,6 +571,20 @@ void AlgorithmsTest::copyInitializerListToDifferentViewTypes() {
             Containers::arrayView({11, -22, 33, -44, 55}),
             TestSuite::Compare::Container);
     }
+}
+
+template<class T> void AlgorithmsTest::copyMultiDimensionalArray() {
+    setTestCaseTemplateName(std::is_same<T, int>::value ? "int" : "Struct");
+
+    const T src[2][3]{{1, 2, 3}, {4, 5, 6}};
+    T dst[2][3];
+
+    /* This fails to compile for Struct on Clang 3.8 */
+    Utility::copy(src, dst);
+
+    CORRADE_COMPARE_AS(Containers::arrayCast<int>(dst),
+        Containers::arrayCast<const int>(src),
+        TestSuite::Compare::Container);
 }
 
 constexpr std::size_t Size = 16;
