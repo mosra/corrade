@@ -144,6 +144,8 @@ namespace Corrade {
     @ref Containers::Reference, @ref Containers::MoveReference and
     @ref Containers::AnyReference gained a @relativeref{Containers::Pointer,Type}
     member typedef for consistency with other containers
+-   @ref Containers::StridedArrayView can now be used in STL algorithms such as
+    @ref std::lower_bound() if you include @ref Corrade/Containers/StridedArrayViewStl.h
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 

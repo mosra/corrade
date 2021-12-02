@@ -2644,8 +2644,10 @@ void StridedArrayViewTest::iterator() {
     CORRADE_VERIFY(a.cend() != b.end());
 
     CORRADE_COMPARE(*(a.begin() + 2), data.dataBegin1);
+    CORRADE_COMPARE(*(a.begin() += 2), data.dataBegin1);
     CORRADE_COMPARE(*(2 + a.begin()), data.dataBegin1);
     CORRADE_COMPARE(*(a.end() - 2), data.dataEnd1);
+    CORRADE_COMPARE(*(a.end() -= 2), data.dataEnd1);
     CORRADE_COMPARE(a.end() - a.begin(), a.size());
 
     CORRADE_COMPARE(*(++a.begin()), data.dataBeginIncrement1);

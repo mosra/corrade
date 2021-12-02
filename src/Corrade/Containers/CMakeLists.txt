@@ -52,6 +52,7 @@ set(CorradeContainers_HEADERS
     sequenceHelpers.h
     StaticArray.h
     StridedArrayView.h
+    StridedArrayViewStl.h
     String.h
     StringStl.h
     StringView.h

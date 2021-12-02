@@ -307,6 +307,14 @@ Corrade type                    | ↭ | STL type
 See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
 information.
 
+The @ref Corrade/Containers/StridedArrayViewStl.h header provides a
+@ref std::iterator_traits specialization for @ref StridedIterator, which is
+required in order to be able to use strided array views in STL algorithms such
+as @ref std::lower_bound(). Right now the specialization is limited to just 1D
+views, as higher-dimensional iterators return temporary views instead of value
+references and thus it's not clear what their use in (1D) STL algorithms would
+be.
+
 @anchor Containers-StridedArrayView-single-header
 
 <b></b>
@@ -1769,9 +1777,27 @@ template<unsigned dimensions, class T> class StridedIterator {
             return {_data, _size, _stride, _i + i};
         }
 
+        /**
+         * @brief Add an offset and assign
+         * @m_since_latest
+         */
+        StridedIterator<dimensions, T>& operator+=(std::ptrdiff_t i) {
+            _i += i;
+            return *this;
+        }
+
         /** @brief Subtract an offset */
         StridedIterator<dimensions, T> operator-(std::ptrdiff_t i) const {
             return {_data, _size, _stride, _i - i};
+        }
+
+        /**
+         * @brief Subtract an offset and assign
+         * @m_since_latest
+         */
+        StridedIterator<dimensions, T>& operator-=(std::ptrdiff_t i) {
+            _i -= i;
+            return *this;
         }
 
         /** @brief Iterator difference */
