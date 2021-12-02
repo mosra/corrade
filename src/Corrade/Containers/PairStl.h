@@ -28,6 +28,7 @@
 
 /** @file
 @brief STL compatibility for @ref Corrade::Containers::Pair
+@m_since_latest
 
 Including this header allows you to *explicitly* convert between
 @ref Corrade::Containers::Pair and @ref std::pair using copy / move

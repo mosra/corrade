@@ -28,6 +28,7 @@
 
 /** @file
 @brief STL compatibility for @ref Corrade::Containers::Triple
+@m_since_latest
 
 Including this header allows you to *explicitly* convert between
 @ref Corrade::Containers::Triple and a three-element @ref std::tuple using copy
