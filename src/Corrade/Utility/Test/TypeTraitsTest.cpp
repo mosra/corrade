@@ -80,7 +80,7 @@ TypeTraitsTest::TypeTraitsTest() {
 
 void TypeTraitsTest::longDoubleSize() {
     #ifdef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
-    Debug{} << "long double has the same size as double";
+    CORRADE_INFO("long double has the same size as double");
     {
         #if defined(CORRADE_TARGET_EMSCRIPTEN) && __LDBL_DIG__ != __DBL_DIG__
         CORRADE_EXPECT_FAIL("Emscripten's long double is 80-bit, but doesn't actually have an 80-bit precision, so it's treated as 64-bit.");
@@ -88,7 +88,7 @@ void TypeTraitsTest::longDoubleSize() {
         CORRADE_COMPARE(sizeof(long double), sizeof(double));
     }
     #else
-    Debug{} << "long double doesn't have the same size as double";
+    CORRADE_INFO("long double doesn't have the same size as double");
     CORRADE_COMPARE_AS(sizeof(long double), sizeof(double),
         TestSuite::Compare::Greater);
     #endif
@@ -96,7 +96,7 @@ void TypeTraitsTest::longDoubleSize() {
 
 void TypeTraitsTest::isTriviallyTraitsSupported() {
     #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    Debug{} << "std::is_trivially_* traits supported";
+    CORRADE_INFO("std::is_trivially_* traits supported");
     CORRADE_VERIFY(std::is_trivially_constructible<int, int>::value);
     CORRADE_VERIFY(std::is_trivially_default_constructible<int>::value);
     CORRADE_VERIFY(std::is_trivially_copy_constructible<int>::value);
@@ -105,7 +105,7 @@ void TypeTraitsTest::isTriviallyTraitsSupported() {
     CORRADE_VERIFY(std::is_trivially_copy_assignable<int>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<int>::value);
     #else
-    Debug{} << "std::is_trivially_* traits not supported";
+    CORRADE_INFO("std::is_trivially_* traits not supported");
     /* std::has_trivial_copy_constructor etc. emits a deprecation warning on
        GCC 5+, so using the builtins instead. See the macro docs for details */
     CORRADE_VERIFY(__has_trivial_constructor(int));
