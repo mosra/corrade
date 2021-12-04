@@ -656,7 +656,9 @@ void DirectoryTest::mkpathNoPermission() {
         CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
     }
 
-    #ifdef CORRADE_TARGET_ANDROID
+    /* Apple Mac on M1 seems to have the same message as Android, x86 Macs
+       the same message as Linux (or is this changed since macOS 12?) */
+    #if defined(CORRADE_TARGET_ANDROID) || (defined(CORRADE_TARGET_APPLE) && !defined(CORRADE_TARGET_IOS) && defined(CORRADE_TARGET_ARM))
     CORRADE_COMPARE(out.str(),
         "Utility::Directory::mkpath(): error creating /nope: Read-only file system\n");
     #else
