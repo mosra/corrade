@@ -91,7 +91,14 @@ namespace Implementation {
     /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
        void*& because this also acts as a type disambiguator in the
        constructor, even though it's subsequently cast back to void. */
-    template<unsigned dimensions, class T> inline T*& dataRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    T*& dataRef(StridedArrayView<dimensions, T>& view) {
         return reinterpret_cast<T*&>(view._data);
     }
     /* So ArrayTuple can know the total size without having to include this
@@ -104,10 +111,24 @@ namespace Implementation {
     }
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
-    template<unsigned dimensions, class T> inline StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
         return view._size;
     }
-    template<unsigned dimensions, class T> inline StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(StridedArrayView<dimensions, T>& view) {
+    template<unsigned dimensions, class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(StridedArrayView<dimensions, T>& view) {
         return view._stride;
     }
     #endif
