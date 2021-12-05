@@ -52,7 +52,7 @@
 
 using namespace Corrade;
 
-#define DOXYGEN_IGNORE(...) __VA_ARGS__
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 namespace Other {
 /* [EnumSet-usage] */
@@ -117,7 +117,7 @@ enum class Feature: std::uint64_t {
     GlobalIllumination = 1 << 2,
     Shadows = 1 << 3,
     Reflections = 1 << 4,
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 
 typedef Containers::EnumSet<Feature>
@@ -135,7 +135,7 @@ enum class Feature: std::uint8_t {
     GlobalIllumination = 2,
     Shadows = 3,
     Reflections = 4,
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 
 typedef Containers::BigEnumSet<Feature>
@@ -173,14 +173,14 @@ namespace LL1 {
 class Object;
 /* [LinkedList-list-pointer] */
 class ObjectGroup: public Containers::LinkedList<Object> {
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 
 class Object: public Containers::LinkedListItem<Object, ObjectGroup> {
     public:
         ObjectGroup* group() { return list(); }
 
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 /* [LinkedList-list-pointer] */
 }
@@ -196,7 +196,7 @@ class ObjectGroup: private Containers::LinkedList<Object> {
         Object* firstObject() { return first(); }
         Object* lastObject() { return last(); }
 
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 
 class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
@@ -208,7 +208,7 @@ class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
         Object* previousObject() { return previous(); }
         Object* nextObject() { return next(); }
 
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 /* [LinkedList-private-inheritance] */
 }
@@ -276,7 +276,7 @@ class UnmapBuffer {
         GLuint _id;
 };
 
-GLuint buffer = DOXYGEN_IGNORE({});
+GLuint buffer = DOXYGEN_ELLIPSIS({});
 char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
 
 // Will unmap the buffer on destruction
@@ -372,7 +372,7 @@ Containers::Array<int> data2{15};
 Containers::ArrayView<const int> b = data2;         // b.size() == 15
 
 /* Construct from a pointer and explicit size */
-float* data3 = DOXYGEN_IGNORE({});
+float* data3 = DOXYGEN_ELLIPSIS({});
 Containers::ArrayView<float> c{data3, 1337};        // c.size() == 1337
 /* [ArrayView-usage] */
 static_cast<void>(a);
@@ -391,13 +391,13 @@ static_cast<void>(e);
 
 {
 /* [ArrayView-usage-access] */
-Containers::ArrayView<int> view = DOXYGEN_IGNORE({});
+Containers::ArrayView<int> view = DOXYGEN_ELLIPSIS({});
 
 if(!view.empty()) {
     int min = view.front();
     for(int i: view) if(i < min) min = i;
 
-    DOXYGEN_IGNORE(static_cast<void>(min);)
+    DOXYGEN_ELLIPSIS(static_cast<void>(min);)
 }
 
 if(view.size() > 2 && view[2] < 3) view[2] += 5;
@@ -444,7 +444,7 @@ static_cast<void>(minOfFirstThree);
 
 {
 /* [arrayView] */
-std::uint32_t* data = DOXYGEN_IGNORE(nullptr);
+std::uint32_t* data = DOXYGEN_ELLIPSIS(nullptr);
 
 Containers::ArrayView<std::uint32_t> a{data, 5};
 auto b = Containers::arrayView(data, 5);
@@ -515,7 +515,7 @@ Containers::ArrayTuple data{
 
 // Fill the attachment, subpass and dependency info...
 
-VkRenderPassCreateInfo info{DOXYGEN_IGNORE()};
+VkRenderPassCreateInfo info{DOXYGEN_ELLIPSIS()};
 info.attachmentCount = attachments.size();
 info.pAttachments = attachments;
 info.subpassCount = subpasses.size();
@@ -580,7 +580,7 @@ static_cast<void>(threeInts);
 
 {
 /* [staticArrayView] */
-int* data = DOXYGEN_IGNORE(nullptr);
+int* data = DOXYGEN_ELLIPSIS(nullptr);
 
 Containers::StaticArrayView<5, int> a{data};
 auto b = Containers::staticArrayView<5>(data);
@@ -658,18 +658,18 @@ list.erase(list.last());
 
 /* [LinkedList-traversal] */
 for(Object& o: list) {
-    DOXYGEN_IGNORE(static_cast<void>(o);)
+    DOXYGEN_ELLIPSIS(static_cast<void>(o);)
 }
 /* [LinkedList-traversal] */
 
 /* [LinkedList-traversal-classic] */
 for(Object* i = list.first(); i; i = i->next()) {
-    DOXYGEN_IGNORE(static_cast<void>(i);)
+    DOXYGEN_ELLIPSIS(static_cast<void>(i);)
 }
 /* [LinkedList-traversal-classic] */
 
 {
-Object *item = DOXYGEN_IGNORE(nullptr), *before = DOXYGEN_IGNORE(nullptr);
+Object *item = DOXYGEN_ELLIPSIS(nullptr), *before = DOXYGEN_ELLIPSIS(nullptr);
 /* [LinkedList-move] */
 if(item != before) {
     list.cut(item);
@@ -723,7 +723,7 @@ static_cast<void>(b);
 
 {
 /* [pointer] */
-std::string* ptr = DOXYGEN_IGNORE({});
+std::string* ptr = DOXYGEN_ELLIPSIS({});
 
 auto a = Containers::Pointer<std::string>{ptr};
 auto b = Containers::pointer(ptr);
@@ -1009,7 +1009,7 @@ static_cast<void>(y);
 
 {
 /* [stridedArrayView] */
-std::uint32_t* data = DOXYGEN_IGNORE(nullptr);
+std::uint32_t* data = DOXYGEN_ELLIPSIS(nullptr);
 
 Containers::StridedArrayView1D<std::uint32_t> a{data, 5};
 auto b = Containers::stridedArrayView(data, 5);

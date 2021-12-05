@@ -41,7 +41,7 @@
 
 using namespace Corrade;
 
-#define DOXYGEN_IGNORE(...) __VA_ARGS__
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 #if defined(CORRADE_NO_ASSERT) && defined(CORRADE_TARGET_GCC)
 #pragma GCC diagnostic push
@@ -115,42 +115,42 @@ CORRADE_COMPARE_AS("actual file contents", "expected.txt",
 
 {
 /* [Compare-Less] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::Less);
 /* [Compare-Less] */
 }
 
 {
 /* [Compare-LessOrEqual] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::LessOrEqual);
 /* [Compare-LessOrEqual] */
 }
 
 {
 /* [Compare-GreaterOrEqual] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::GreaterOrEqual);
 /* [Compare-GreaterOrEqual] */
 }
 
 {
 /* [Compare-Greater] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 9.28f, TestSuite::Compare::Greater);
 /* [Compare-Greater] */
 }
 
 {
 /* [Compare-Around] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
 /* [Compare-Around] */
 }
 
 {
 /* [Compare-around] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 /* [Compare-around] */
@@ -158,28 +158,28 @@ CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 
 {
 /* [Compare-around-just-one] */
-float a = DOXYGEN_IGNORE(0.0f);
+float a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 /* [Compare-around-just-one] */
 }
 
 {
 /* [Compare-NotEqual] */
-int a = DOXYGEN_IGNORE(0), b = DOXYGEN_IGNORE(0);
+int a = DOXYGEN_ELLIPSIS(0), b = DOXYGEN_ELLIPSIS(0);
 CORRADE_COMPARE_AS(a, b, TestSuite::Compare::NotEqual);
 /* [Compare-NotEqual] */
 }
 
 {
 /* [Compare-Divisible] */
-int a = DOXYGEN_IGNORE(0.0f);
+int a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);
 /* [Compare-Divisible] */
 }
 
 {
 /* [Compare-NotDivisible] */
-int a = DOXYGEN_IGNORE(0.0f);
+int a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::NotDivisible);
 /* [Compare-NotDivisible] */
 }

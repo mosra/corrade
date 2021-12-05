@@ -19,22 +19,25 @@ FAVICON = 'favicon.ico'
 
 VERSION_LABELS = True
 
-# Code wrapped in DOXYGEN_IGNORE() will get replaced by an (Unicode) ellipsis
-# in the output. In order to make the same code compilable, add
+# Code wrapped in DOXYGEN_ELLIPSIS() will get replaced by an (Unicode) ellipsis
+# in the output; code wrapped in DOXYGEN_IGNORE() will get replaced by nothing.
+# In order to make the same code compilable, add
 #
+#   #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 #   #define DOXYGEN_IGNORE(...) __VA_ARGS__
 #
-# to the snippet code
+# to the snippet code.
 def _doxygen_ignore(code: str):
-    while 'DOXYGEN_IGNORE(' in code:
-        i = code.index('DOXYGEN_IGNORE(')
-        depth = 1
-        for j in range(i + len('DOXYGEN_IGNORE('), len(code)):
-            if code[j] == '(': depth += 1
-            elif code[j] == ')': depth -= 1
-            if depth == 0: break
-        assert depth == 0, "unmatched DOXYGEN_IGNORE() parentheses in %s" % code
-        code = code[:i] + '…' + code[j+1:]
+    for macro, replace in [('DOXYGEN_ELLIPSIS(', '…'), ('DOXYGEN_IGNORE(', '')]:
+        while macro in code:
+            i = code.index(macro)
+            depth = 1
+            for j in range(i + len(macro), len(code)):
+                if code[j] == '(': depth += 1
+                elif code[j] == ')': depth -= 1
+                if depth == 0: break
+            assert depth == 0, "unmatched %s) parentheses in %s" % (macro, code)
+            code = code[:i] + replace + code[j+1:]
     return code
 
 M_CODE_FILTERS_PRE = {

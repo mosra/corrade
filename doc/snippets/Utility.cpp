@@ -59,7 +59,7 @@
 /* [ConfigurationValue] */
 #include <Corrade/Utility/ConfigurationGroup.h>
 
-#define DOXYGEN_IGNORE(...) __VA_ARGS__
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 struct Foo {
     int a, b;
@@ -361,7 +361,7 @@ int main() {
 /* [Algorithms-copy-C-array] */
 int a[3];
 
-DOXYGEN_IGNORE()
+DOXYGEN_ELLIPSIS()
 
 Utility::copy({1, 2, 3}, a);
 /* [Algorithms-copy-C-array] */
@@ -370,8 +370,8 @@ Utility::copy({1, 2, 3}, a);
 {
 typedef int T;
 /* [Algorithms-flipInPlace] */
-Containers::StridedArrayView2D<T> pixels = DOXYGEN_IGNORE({});
-Containers::StridedArrayView2D<T> destination = DOXYGEN_IGNORE({});
+Containers::StridedArrayView2D<T> pixels = DOXYGEN_ELLIPSIS({});
+Containers::StridedArrayView2D<T> destination = DOXYGEN_ELLIPSIS({});
 
 /* Y-flip the pixels into a destination */
 Utility::copy(pixels.flipped<0>(), destination);
@@ -403,7 +403,7 @@ Containers::Array<Matrix4> avxMatrices =
 /* [allocateAligned-NoInit] */
 struct Foo {
     explicit Foo(int) {}
-    DOXYGEN_IGNORE()
+    DOXYGEN_ELLIPSIS()
 };
 
 Containers::Array<Foo> data = Utility::allocateAligned<Foo>(NoInit, 5);
@@ -437,7 +437,7 @@ conf.save();
 
 {
 /* [Configuration-iteration] */
-Utility::ConfigurationGroup conf{DOXYGEN_IGNORE()};
+Utility::ConfigurationGroup conf{DOXYGEN_ELLIPSIS()};
 
 Utility::Debug{} << "Available subgroups:";
 for(Containers::Pair<Containers::StringView,
@@ -757,9 +757,9 @@ switch(a) {
 std::size_t size{};
 /** @todo use Containers::BoolArray once it exists */
 /* [CORRADE_LIKELY] */
-float* in = DOXYGEN_IGNORE(nullptr);
-float* out = DOXYGEN_IGNORE(nullptr);
-std::vector<bool> mask = DOXYGEN_IGNORE({});
+float* in = DOXYGEN_ELLIPSIS(nullptr);
+float* out = DOXYGEN_ELLIPSIS(nullptr);
+std::vector<bool> mask = DOXYGEN_ELLIPSIS({});
 for(std::size_t i = 0; i != size; ++i) {
     if CORRADE_LIKELY(mask[i]) {
         out[i] = in[i];
@@ -774,8 +774,8 @@ for(std::size_t i = 0; i != size; ++i) {
 std::size_t size{};
 auto someComplexOperation = []() { return 0.0f; };
 /* [CORRADE_UNLIKELY] */
-float* data = DOXYGEN_IGNORE(nullptr);
-unsigned* indices = DOXYGEN_IGNORE(nullptr);
+float* data = DOXYGEN_ELLIPSIS(nullptr);
+unsigned* indices = DOXYGEN_ELLIPSIS(nullptr);
 unsigned previousIndex = ~unsigned{};
 float factor;
 for(std::size_t i = 0; i != size; ++i) {
