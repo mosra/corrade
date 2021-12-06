@@ -115,6 +115,7 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicProvides();
     void dynamicProvidesDependency();
     void setPreferredPlugins();
+    void setPreferredPluginsWhileActive();
     void setPreferredPluginsUnknownAlias();
     void setPreferredPluginsDoesNotProvide();
     void setPreferredPluginsOverridePrimaryPlugin();
@@ -189,6 +190,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicProvides,
               &ManagerTest::dynamicProvidesDependency,
               &ManagerTest::setPreferredPlugins,
+              &ManagerTest::setPreferredPluginsWhileActive,
               &ManagerTest::setPreferredPluginsUnknownAlias,
               &ManagerTest::setPreferredPluginsDoesNotProvide,
               &ManagerTest::setPreferredPluginsOverridePrimaryPlugin,
@@ -986,6 +988,18 @@ void ManagerTest::setPreferredPlugins() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     manager.reloadPluginDirectory();
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
+}
+
+void ManagerTest::setPreferredPluginsWhileActive() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    Containers::Pointer<AbstractAnimal> dog = manager.loadAndInstantiate("JustSomeMammal");
+    CORRADE_COMPARE(dog->metadata()->name(), "Dog");
+
+    manager.setPreferredPlugins("JustSomeMammal", {"PitBull"});
+
+    Containers::Pointer<AbstractAnimal> another = manager.loadAndInstantiate("JustSomeMammal");
+    CORRADE_COMPARE(another->metadata()->name(), "PitBull");
 }
 
 void ManagerTest::setPreferredPluginsUnknownAlias() {
