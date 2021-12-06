@@ -938,6 +938,8 @@ void AbstractManager::registerDynamicPlugin(const std::string& name, Containers:
     }
 }
 
+/* This function takes an alias name, since at the time of instantiation the
+   real plugin name is not yet known */
 void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
     auto found = _state->aliases.find(plugin);
@@ -948,17 +950,21 @@ void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin
     metadata = &found->second.metadata;
 }
 
+/* This function however takes the real name, taken from the metadata. This is
+   done in order to avoid a nasty interaction with setPreferredPlugins() and
+   potential other APIs that redirect an alias to some other plugin, which
+   would then lead to the instance not being found */
 void AbstractManager::reregisterInstance(const std::string& plugin, AbstractPlugin& oldInstance, AbstractPlugin* const newInstance) {
-    auto found = _state->aliases.find(plugin);
-    CORRADE_INTERNAL_ASSERT(found != _state->aliases.end());
+    auto found = _state->plugins.find(plugin);
+    CORRADE_INTERNAL_ASSERT(found != _state->plugins.end());
 
-    auto pos = std::find(found->second.instances.begin(), found->second.instances.end(), &oldInstance);
-    CORRADE_INTERNAL_ASSERT(pos != found->second.instances.end());
+    auto pos = std::find(found->second->instances.begin(), found->second->instances.end(), &oldInstance);
+    CORRADE_INTERNAL_ASSERT(pos != found->second->instances.end());
 
     /* If the plugin is being moved, replace the instance pointer. Otherwise
        remove it from the list, and if the list is empty, delete it fully. */
     if(newInstance) *pos = newInstance;
-    else found->second.instances.erase(pos);
+    else found->second->instances.erase(pos);
 }
 
 Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const std::string& plugin) {

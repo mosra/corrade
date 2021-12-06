@@ -278,6 +278,9 @@ namespace Corrade {
     had to be worked around by throwing an exception instead. This workaround
     became obsolete and got removed in 2017, but this option was left there by
     accident. Now it's removed as well.
+-   Calling @ref PluginManager::AbstractManager::setPreferredPlugins() with a
+    plugin of given alias being instantiated led to an internal assertion when
+    the plugin got later unloaded.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

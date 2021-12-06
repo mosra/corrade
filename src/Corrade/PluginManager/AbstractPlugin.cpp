@@ -78,7 +78,9 @@ AbstractPlugin::AbstractPlugin(AbstractPlugin&& other) noexcept: _state{std::mov
        *not* instantiating through the manager, in that case the _metadata
        field would be nullptr. */
     if(_state && _state->manager && _state->metadata)
-        _state->manager->reregisterInstance(_state->plugin, other, this);
+        /* Takes the real name, not the alias -- see this function source
+           for details why */
+        _state->manager->reregisterInstance(_state->metadata->name(), other, this);
 }
 
 AbstractPlugin::~AbstractPlugin() {
@@ -88,7 +90,9 @@ AbstractPlugin::~AbstractPlugin() {
        *not* instantiating through the manager, in that case the _metadata
        field would be nullptr. */
     if(_state && _state->manager && _state->metadata)
-        _state->manager->reregisterInstance(_state->plugin, *this, nullptr);
+        /* Takes the real name, not the alias -- see this function source
+           for details why */
+        _state->manager->reregisterInstance(_state->metadata->name(), *this, nullptr);
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
