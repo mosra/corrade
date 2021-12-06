@@ -972,7 +972,18 @@ void ManagerTest::setPreferredPlugins() {
     manager.setPreferredPlugins("JustSomeMammal", {"Chihuahua", "PitBull"});
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "PitBull");
 
-    /* Reloading plugin directory resets the mapping back */
+    /* Reloading plugin directory while a plugin of this alias is loaded will
+       keep the mapping */
+    CORRADE_COMPARE(manager.load("JustSomeMammal"), LoadState::Loaded);
+    manager.reloadPluginDirectory();
+    CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "PitBull");
+
+    /* Reloading plugin directory without an active instance resets the mapping
+       back */
+    CORRADE_COMPARE(manager.unload("JustSomeMammal"), LoadState::NotLoaded);
+    /* PitBull depends on Dog, which got loaded implicitly, has to be unloaded
+       explicitly */
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     manager.reloadPluginDirectory();
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
 }
