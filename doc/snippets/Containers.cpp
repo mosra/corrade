@@ -995,6 +995,7 @@ auto b = Containers::stridedArrayView(data, 5, 8);
 /* [stridedArrayView-data] */
 static_cast<void>(b);
 }
+
 {
 /* [StridedArrayView-slice-member] */
 struct Position {
