@@ -70,7 +70,7 @@ namespace Corrade {
     counterparts to @ref Containers::Reference for exclusively r-value
     references and both l-value and r-value references
 -   Added a @ref Containers::StridedArrayView::slice() overload for slicing
-    into @cpp struct @ce members
+    into @cpp struct @ce members and @cpp class @ce getter functions
 -   New @ref Containers::Array2, @ref Containers::Array3 and
     @ref Containers::Array4 convenience aliases for
     @ref Containers::StaticArray, together with @ref Containers::Array1 that's

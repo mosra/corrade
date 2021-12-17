@@ -728,6 +728,36 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #endif
 
         /**
+         * @brief Slice to a member function
+         * @m_since_latest
+         *
+         * Assuming the function takes no arguments and returns a reference to
+         * a class member, returns a view on such member.
+         *
+         * @snippet Containers.cpp StridedArrayView-slice-member-function
+         *
+         * Expects the function to return a reference to the class data members
+         * (i.e., the returned offset being less than @cpp sizeof(T) @ce). To
+         * avoid ambiguity, a @cpp const @ce overload is always picked on a
+         * @cpp const @ce view and a non-const overload on a mutable view.
+         *
+         * @attention Note that in order to get the offset, the member function
+         *      is internally executed on a zeroed-out piece of memory. Thus
+         *      it's assumed the function is a simple getter with no logic on
+         *      its own --- attempting to use this API on complex functions may
+         *      lead to crashes. Unfortunately there's no robust way to check
+         *      this at compile time without being too restrictive.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U> StridedArrayView<dimensions, U> slice(U&(T::*memberFunction)()) const;
+        /** @overload */
+        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const) const;
+        #else
+        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)()) const;
+        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const) const;
+        #endif
+
+        /**
          * @brief Array prefix
          *
          * Equivalent to @cpp data.slice(0, end) @ce.
@@ -1970,6 +2000,40 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
     }
 
     return StridedArrayView<newDimensions, T>{size, stride, data};
+}
+
+namespace {
+
+template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFunction) {
+    /* A zeroed-out piece of memory of the same size as T to execute the member
+       function pointer on. *Technically* it might be enough to reinterpret
+       nullptr as T* and execute the member on that, but that would probably
+       trigger UB checkers in various tools, so that's a no-go. Lawyer-speaking
+       this is an UB as well, but hopefully less dangerous one.
+
+       As much as I'd like to guard this to avoid calling complex functions on
+       a zeroed-out memory, I don't really see any check that wouldn't be
+       overly restrictive. For example, allowing only trivially copyable types
+       would prevent a footgun in the form of `slice(&String::front)`, but OTOH
+       `slice(&Pair<String, String>::first)` is completely fine yet doesn't
+       pass the triviality check. Same goes for `std::is_standard_layout`, it'd
+       block me from slicing into pairs of virtual classes, which would again
+       be fine. */
+    alignas(T) typename std::conditional<std::is_const<T>::value, const char, char>::type storage[sizeof(T)]{};
+    const std::size_t offset = reinterpret_cast<const char*>(&(reinterpret_cast<T*>(storage)->*memberFunction)()) - storage;
+    CORRADE_ASSERT(offset < sizeof(T),
+        "Containers::StridedArrayView::slice(): member function slice returned offset" << std::ptrdiff_t(offset) << "for a" << sizeof(T) << Utility::Debug::nospace << "-byte type", {});
+    return offset;
+}
+
+}
+
+template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)()) const {
+    return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
+}
+
+template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const) const {
+    return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::except(const Size& count) const {

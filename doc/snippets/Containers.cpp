@@ -52,6 +52,7 @@
 
 using namespace Corrade;
 
+#define DOXYGEN_IGNORE(...) __VA_ARGS__
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 namespace Other {
@@ -1006,6 +1007,26 @@ Containers::StridedArrayView1D<Position> data;
 Containers::StridedArrayView1D<float> y = data.slice(&Position::y);
 /* [StridedArrayView-slice-member] */
 static_cast<void>(y);
+}
+
+{
+/* [StridedArrayView-slice-member-function] */
+class Color3 {
+    public:
+        DOXYGEN_ELLIPSIS()
+
+        float& r()DOXYGEN_IGNORE({ return data[0]; } int foo);
+        float& g()DOXYGEN_IGNORE({ return data[1]; } int bar);
+        float& b()DOXYGEN_IGNORE({ return data[2]; } int baz);
+
+    private:
+        DOXYGEN_ELLIPSIS(float data[3];)
+};
+
+Containers::StridedArrayView1D<Color3> colors;
+Containers::StridedArrayView1D<float> greens = colors.slice(&Color3::g);
+/* [StridedArrayView-slice-member-function] */
+static_cast<void>(greens);
 }
 
 {

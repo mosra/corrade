@@ -232,6 +232,13 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceConstMemberPointer();
     void sliceMemberPointerEmptyView();
 
+    void sliceMemberFunctionPointer();
+    void sliceMemberFunctionPointerConstData();
+    void sliceMemberFunctionPointerReturningConst();
+    void sliceConstOverloadedMemberFunctionPointer();
+    void sliceMemberFunctionPointerEmptyView();
+    void sliceMemberFunctionPointerReturningOffsetOutOfBounds();
+
     void every();
     void everyNegative();
     void everyInvalid();
@@ -443,6 +450,13 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceMemberPointerConstData,
               &StridedArrayViewTest::sliceConstMemberPointer,
               &StridedArrayViewTest::sliceMemberPointerEmptyView,
+
+              &StridedArrayViewTest::sliceMemberFunctionPointer,
+              &StridedArrayViewTest::sliceMemberFunctionPointerConstData,
+              &StridedArrayViewTest::sliceMemberFunctionPointerReturningConst,
+              &StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer,
+              &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
+              &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds,
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
@@ -3217,6 +3231,244 @@ void StridedArrayViewTest::sliceMemberPointerEmptyView() {
     CORRADE_COMPARE(csecond.size(), 0);
     CORRADE_COMPARE(second.stride(), 0);
     CORRADE_COMPARE(csecond.stride(), 0);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointer() {
+    class Data {
+        public:
+            /*implicit*/ Data(float first, short second, char third): _first{first}, _second{second}, _third{third} {}
+
+            float& first() { return _first; }
+            short& second() { return _second; }
+            char& third() { return _third; }
+        private:
+            float _first;
+            short _second;
+            /* so the last member is at sizeof(T) - 1, to test the assert */
+            char:8;
+            char _third;
+    };
+
+    /* The rest is identical to sliceMemberPointer(), except that the member
+       pointers are actually functions */
+    Data data[]{
+        {1.5f, 3, 'a'},
+        {-0.5f, 11, '7'}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+
+    Containers::StridedArrayView1D<float> first = view.slice(&Data::first);
+    CORRADE_COMPARE(first.data(), reinterpret_cast<char*>(data) + 0);
+    CORRADE_COMPARE(first.size(), 2);
+    CORRADE_COMPARE(first.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(first,
+        Containers::stridedArrayView({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<char*>(data) + 4);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+
+    Containers::StridedArrayView1D<char> third = view.slice(&Data::third);
+    CORRADE_COMPARE(third.data(), reinterpret_cast<char*>(data) + 7);
+    CORRADE_COMPARE(third.size(), 2);
+    CORRADE_COMPARE(third.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(third,
+        Containers::stridedArrayView<char>({'a', '7'}),
+        TestSuite::Compare::Container);
+
+    /* Should work for multiple dimensions as well */
+    Containers::StridedArrayView2D<Data> view2D{data, {1, 2}};
+    Containers::StridedArrayView2D<short> second2D = view2D.slice(&Data::second);
+    CORRADE_COMPARE(second2D.data(), reinterpret_cast<char*>(data) + 4);
+    CORRADE_COMPARE(second2D.size(), (Containers::StridedArrayView2D<short>::Size{1, 2}));
+    CORRADE_COMPARE(second2D.stride(), (Containers::StridedArrayView2D<short>::Stride{sizeof(Data)*2, sizeof(Data)}));
+    CORRADE_COMPARE_AS(second2D[0],
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerConstData() {
+    class Data {
+        public:
+            /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
+
+            const float& first() const { return _first; }
+            const short& second() const { return _second; }
+        private:
+            float _first;
+            short _second;
+    };
+
+    const Data data[]{
+        {1.5f, 3},
+        {-0.5f, 11}
+    };
+    Containers::StridedArrayView1D<const Data> view = data;
+
+    /* Here the member pointer is not const but the original view is, so it
+       should correctly add const where needed */
+    auto second = view.slice(&Data::second);
+    CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerReturningConst() {
+    class Data {
+        public:
+            /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
+
+            const float& first() { return _first; }
+            const short& second() { return _second; }
+        private:
+            float _first;
+            short _second;
+    };
+
+    Data data[]{
+        {1.5f, 3},
+        {-0.5f, 11}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+
+    /* Here the member pointer is not const but the original view is, so it
+       should correctly add const where needed */
+    auto second = view.slice(&Data::second);
+    CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer() {
+    class Data {
+        public:
+            /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
+
+            float& first() { return _first; }
+            const float& first() const { return _first; }
+            short& second() { return _second; }
+            const short& second() const { return _second; }
+        private:
+            float _first;
+            short _second;
+    };
+
+    Data data[]{
+        {1.5f, 3},
+        {-0.5f, 11}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+    Containers::StridedArrayView1D<const Data> cview = data;
+
+    /* It should pick the non-const overload for mutable view and const for
+       const view, without being ambiguous */
+    auto second = view.slice(&Data::second);
+    auto csecond = cview.slice(&Data::second);
+    CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<short>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(csecond), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(csecond.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(csecond.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE(csecond.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(csecond,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
+    class Data {
+        public:
+            short& second() {
+                /* Sure, sure, GCC/Clang, but WHAT IF */
+                #ifdef CORRADE_TARGET_GCC
+                #pragma GCC diagnostic push
+                #ifdef CORRADE_TARGET_CLANG
+                #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+                #elif __GNUC__ >= 6 /* Warning new since GCC 6 */
+                #pragma GCC diagnostic ignored "-Wnonnull-compare"
+                #endif
+                #endif
+                CORRADE_VERIFY(this != nullptr);
+                #ifdef CORRADE_TARGET_GCC
+                #pragma GCC diagnostic pop
+                #endif
+                return _data[1];
+            }
+            const short& second() const {
+                /* Sure, sure, GCC/Clang, but WHAT IF */
+                #ifdef CORRADE_TARGET_GCC
+                #pragma GCC diagnostic push
+                #ifdef CORRADE_TARGET_CLANG
+                #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+                #elif __GNUC__ >= 6 /* Warning new since GCC 6 */
+                #pragma GCC diagnostic ignored "-Wnonnull-compare"
+                #endif
+                #endif
+                CORRADE_VERIFY(this != nullptr);
+                #ifdef CORRADE_TARGET_GCC
+                #pragma GCC diagnostic pop
+                #endif
+                return _data[1];
+            }
+        private:
+            short _data[2];
+    };
+
+    Containers::StridedArrayView1D<Data> empty;
+    Containers::StridedArrayView1D<const Data> cempty;
+    Containers::StridedArrayView1D<short> second = empty.slice(&Data::second);
+    Containers::StridedArrayView1D<const short> csecond = cempty.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<const void*>(2));
+    CORRADE_COMPARE(csecond.data(), reinterpret_cast<const void*>(2));
+    CORRADE_COMPARE(second.size(), 0);
+    CORRADE_COMPARE(csecond.size(), 0);
+    CORRADE_COMPARE(second.stride(), 0);
+    CORRADE_COMPARE(csecond.stride(), 0);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    struct Data {
+        public:
+            /* UB, hello! */
+            float& first() { return *(&_first + 1); }
+            const float& first() const { return *(&_first - 1); }
+        private:
+            float _first;
+    };
+
+    Data data[1];
+    Containers::StridedArrayView1D<Data> view = data;
+    Containers::StridedArrayView1D<const Data> cview = data;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    view.slice(&Data::first);
+    cview.slice(&Data::first);
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView::slice(): member function slice returned offset 4 for a 4-byte type\n"
+        "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n");
 }
 
 void StridedArrayViewTest::every() {
