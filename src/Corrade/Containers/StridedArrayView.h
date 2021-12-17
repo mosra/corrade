@@ -752,9 +752,15 @@ template<unsigned dimensions, class T> class StridedArrayView {
         template<class U> StridedArrayView<dimensions, U> slice(U&(T::*memberFunction)()) const;
         /** @overload */
         template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const) const;
+        /** @overload */
+        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() &) const;
+        /** @overload */
+        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const &) const;
         #else
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)()) const;
+        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)() &) const;
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const) const;
+        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const &) const;
         #endif
 
         /**
@@ -2032,7 +2038,15 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
 }
 
+template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)() &) const {
+    return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
+}
+
 template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const) const {
+    return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
+}
+
+template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const &) const {
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) + memberFunctionSliceOffset(memberFunction))};
 }
 

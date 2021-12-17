@@ -236,6 +236,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceMemberFunctionPointerConstData();
     void sliceMemberFunctionPointerReturningConst();
     void sliceConstOverloadedMemberFunctionPointer();
+    void sliceRvalueOverloadedMemberFunctionPointer();
     void sliceMemberFunctionPointerEmptyView();
     void sliceMemberFunctionPointerReturningOffsetOutOfBounds();
 
@@ -455,6 +456,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceMemberFunctionPointerConstData,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningConst,
               &StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer,
+              &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds,
 
@@ -3375,6 +3377,52 @@ void StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer() {
 
     /* It should pick the non-const overload for mutable view and const for
        const view, without being ambiguous */
+    auto second = view.slice(&Data::second);
+    auto csecond = cview.slice(&Data::second);
+    CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<short>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(csecond), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(second.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(csecond.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(second.size(), 2);
+    CORRADE_COMPARE(csecond.size(), 2);
+    CORRADE_COMPARE(second.stride(), sizeof(Data));
+    CORRADE_COMPARE(csecond.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(second,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(csecond,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
+    /* This is the case with Pointer or Triple */
+
+    class Data {
+        public:
+            /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
+
+            float& first() & { return _first; }
+            float&& first() && { return std::move(_first); }
+            const float& first() const & { return _first; }
+            const float&& first() const && { return std::move(_first); }
+            short& second() & { return _second; }
+            short&& second() && { return std::move(_second); }
+            const short& second() const & { return _second; }
+            const short&& second() const && { return std::move(_second); }
+        private:
+            float _first;
+            short _second;
+    };
+
+    Data data[]{
+        {1.5f, 3},
+        {-0.5f, 11}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+    Containers::StridedArrayView1D<const Data> cview = data;
+
+    /* It should prefer the & overload and ignore the && */
     auto second = view.slice(&Data::second);
     auto csecond = cview.slice(&Data::second);
     CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<short>>::value);
