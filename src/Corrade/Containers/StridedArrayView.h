@@ -854,6 +854,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
     private:
         template<unsigned, class> friend class StridedArrayView;
 
+        typedef typename std::conditional<std::is_const<T>::value, const char, char>::type ArithmeticType;
+
         friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* so Python buffer protocol can point to the size / stride members */
@@ -1934,14 +1936,14 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
     Size size = _size;
     size._data[0] = std::size_t(end - begin);
     return StridedArrayView<dimensions, T>{size, _stride,
-        static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + begin*_stride._data[0]};
+        static_cast<ArithmeticType*>(_data) + begin*_stride._data[0]};
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Size& begin, const Size& end) const {
     constexpr unsigned minDimensions = dimensions < newDimensions ? dimensions : newDimensions;
     StridedDimensions<newDimensions, std::size_t> size{Corrade::NoInit};
     StridedDimensions<newDimensions, std::ptrdiff_t> stride{Corrade::NoInit};
-    auto data = static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data);
+    auto data = static_cast<ArithmeticType*>(_data);
 
     /* Adjust data pointer based on offsets of all source dimensions */
     for(std::size_t i = 0; i != dimensions; ++i) {
@@ -1994,7 +1996,7 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
         /* If step is negative, adjust also data pointer */
         std::size_t divisor;
         if(step[dimension] < 0) {
-            data = static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
+            data = static_cast<ArithmeticType*>(data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
             divisor = -step[dimension];
         } else divisor = step[dimension];
 
@@ -2021,7 +2023,7 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::flipped() const {
     static_assert(dimension < dimensions, "dimension out of range");
 
-    ErasedType* data = static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
+    ErasedType* data = static_cast<ArithmeticType*>(_data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
     Stride stride = _stride;
     stride._data[dimension] *= -1;
     return StridedArrayView{_size, stride, data};
