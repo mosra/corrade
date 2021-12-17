@@ -3423,8 +3423,20 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
     Containers::StridedArrayView1D<const Data> cview = data;
 
     /* It should prefer the & overload and ignore the && */
-    auto second = view.slice(&Data::second);
-    auto csecond = cview.slice(&Data::second);
+    auto second = view.slice
+        /* GCC 4.8 (and 4.9?) and MSVC 2015 need an explicit template parameter
+           to disambiguate for rvalue overloads;  */
+        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5) || defined(CORRADE_MSVC2015_COMPATIBILITY)
+        <short>
+        #endif
+        (&Data::second);
+    auto csecond = cview.slice
+        /* GCC 4.8 (and 4.9?) and MSVC 2015 need an explicit template parameter
+           to disambiguate for rvalue overloads;  */
+        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5) || defined(CORRADE_MSVC2015_COMPATIBILITY)
+        <short>
+        #endif
+        (&Data::second);
     CORRADE_VERIFY(std::is_same<decltype(second), Containers::StridedArrayView1D<short>>::value);
     CORRADE_VERIFY(std::is_same<decltype(csecond), Containers::StridedArrayView1D<const short>>::value);
     CORRADE_COMPARE(second.data(), reinterpret_cast<const char*>(data) + 4);
