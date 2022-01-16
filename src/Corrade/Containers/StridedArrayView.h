@@ -750,11 +750,20 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U> StridedArrayView<dimensions, U> slice(U&(T::*memberFunction)()) const;
-        /** @overload */
+        /**
+         * @overload
+         * @m_since_latest
+         */
         template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const) const;
-        /** @overload */
+        /**
+         * @overload
+         * @m_since_latest
+         */
         template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() &) const;
-        /** @overload */
+        /**
+         * @overload
+         * @m_since_latest
+         */
         template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const &) const;
         #else
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)()) const;
