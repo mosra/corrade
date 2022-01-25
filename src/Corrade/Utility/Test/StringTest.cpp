@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/String.h"
@@ -75,6 +76,79 @@ struct StringTest: TestSuite::Tester {
     void replaceAllEmptySearch();
     void replaceAllEmptyReplace();
     void replaceAllCycle();
+
+    void parseNumberSequence();
+    void parseNumberSequenceOverflow();
+    void parseNumberSequenceError();
+};
+
+const struct {
+    const char* name;
+    Containers::StringView string;
+    Containers::Array<std::uint32_t> expected;
+} ParseNumberSequenceData[]{
+    {"empty",
+        "", {InPlaceInit, {}}},
+    {"single number",
+        "5", {InPlaceInit, {5}}},
+    {"random delimiters",
+        "1,3\n8 5;9", {InPlaceInit, {1, 3, 8, 5, 9}}},
+    {"duplicate numbers and delimiters",
+        "1,\t\v5;;7  ,9\n3\r \f5,9", {InPlaceInit, {1, 5, 7, 9, 3, 5, 9}}},
+    {"delimiters at start and end",
+        "\t\v;;17,34,;;;", {InPlaceInit, {17, 34}}},
+    {"just delimiters",
+        "\t\v;;\n, ,;;;", {InPlaceInit, {}}},
+    {"range",
+        "7-11", {InPlaceInit, {7, 8, 9, 10, 11}}},
+    {"range start == end",
+        "11-11", {InPlaceInit, {11}}},
+    {"range start < end",
+        "11-7", {InPlaceInit, {}}},
+    {"ranges and single numbers combined",
+        "3-5,2,44,789-791", {InPlaceInit, {3, 4, 5, 2, 44, 789, 790, 791}}},
+    {"zeros",
+        "0,0-5,0-0", {InPlaceInit, {0, 0, 1, 2, 3, 4, 5, 0}}}
+};
+
+const struct {
+    const char* name;
+    std::uint32_t min, max;
+    Containers::StringView string;
+    Containers::Array<std::uint32_t> expected;
+} ParseNumberSequenceOverflowData[]{
+    {"zero min and max", 0, 0,
+        "1,5,7", {InPlaceInit, {}}},
+    {"min > max", 7, 1,
+        "1,5,7", {InPlaceInit, {}}},
+    {"less than min or larger than max", 3, 50,
+        "2,34,55,1,17", {InPlaceInit, {34, 17}}},
+    {"parse overflow in the middle", 0, ~std::uint32_t{},
+        "14,9999999999,27", {InPlaceInit, {14, 27}}},
+    {"parse overflow at the end", 0, ~std::uint32_t{},
+        "14,27,9999999999", {InPlaceInit, {14, 27}}},
+    {"0xfffffffe", 0, ~std::uint32_t{},
+        "4294967294", {InPlaceInit, {0xfffffffe}}},
+    {"0xffffffff", 0, ~std::uint32_t{},
+        "4294967295", {InPlaceInit, {}}},
+    {"range start underflow", 3, 50,
+        "17,1-5,25", {InPlaceInit, {17, 3, 4, 5, 25}}},
+    {"range end underflow", 3, 50,
+        "17,0-2,25", {InPlaceInit, {17, 25}}},
+    {"range start overflow", 3, 50,
+        "17,55-60,25", {InPlaceInit, {17, 25}}},
+    {"range end overflow", 3, 50,
+        "17,45-60,25", {InPlaceInit, {17, 45, 46, 47, 48, 49, 25}}},
+    {"range missing start", 3, 50,
+        "17,-7,25", {InPlaceInit, {17, 3, 4, 5, 6, 7, 25}}},
+    {"range missing end", 3, 50,
+        "17,48-,25", {InPlaceInit, {17, 48, 49, 25}}},
+    {"range missing both", 40, 45,
+        "43,-,41", {InPlaceInit, {43, 40, 41, 42, 43, 44, 41}}},
+    {"range missing start, 0xffffffff", 0xfffffffe, ~std::uint32_t{},
+        "17,-4294967295,25", {InPlaceInit, {4294967294}}},
+    {"range missing end, 0xfffffffe", 0, ~std::uint32_t{},
+        "17,4294967294-,25", {InPlaceInit, {17, 4294967294, 25}}},
 };
 
 StringTest::StringTest() {
@@ -113,6 +187,14 @@ StringTest::StringTest() {
               &StringTest::replaceAllEmptySearch,
               &StringTest::replaceAllEmptyReplace,
               &StringTest::replaceAllCycle});
+
+    addInstancedTests({&StringTest::parseNumberSequence},
+        Containers::arraySize(ParseNumberSequenceData));
+
+    addInstancedTests({&StringTest::parseNumberSequenceOverflow},
+        Containers::arraySize(ParseNumberSequenceOverflowData));
+
+    addTests({&StringTest::parseNumberSequenceError});
 }
 
 using namespace Containers::Literals;
@@ -646,6 +728,31 @@ void StringTest::replaceAllEmptyReplace() {
 void StringTest::replaceAllCycle() {
     CORRADE_COMPARE(String::replaceAll("lalala",
         "la", "lala"), "lalalalalala");
+}
+
+void StringTest::parseNumberSequence() {
+    auto&& data = ParseNumberSequenceData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::Optional<Containers::Array<std::uint32_t>> out = String::parseNumberSequence(data.string, 0, ~std::uint32_t{});
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out, data.expected, TestSuite::Compare::Container);
+}
+
+void StringTest::parseNumberSequenceOverflow() {
+    auto&& data = ParseNumberSequenceOverflowData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::Optional<Containers::Array<std::uint32_t>> out = String::parseNumberSequence(data.string, data.min, data.max);
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out, data.expected, TestSuite::Compare::Container);
+}
+
+void StringTest::parseNumberSequenceError() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    String::parseNumberSequence("3,5y7,x,25", 0, ~std::uint32_t{});
+    CORRADE_COMPARE(out.str(), "Utility::parseNumberSequence(): unrecognized character y in 3,5y7,x,25\n");
 }
 
 }}}}

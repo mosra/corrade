@@ -110,6 +110,9 @@ namespace Corrade {
     together with @ref Utility::String::lowercase() and
     @relativeref{Utility::String,uppercase()} overloads taking a
     @ref Containers::StringView
+-   New @ref Utility::String::parseNumberSequence() utility for parsing number
+    sequences such as `1-3,5,17`, useful especially for convenient command-line
+    APIs
 -   New @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() macro for assertions that can
     be evaluated directly inside larger expressions
 -   New @ref CORRADE_LIKELY() and @ref CORRADE_UNLIKELY() macros for

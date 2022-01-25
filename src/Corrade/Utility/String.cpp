@@ -31,6 +31,7 @@
 #include <algorithm>
 
 #include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringStl.h"
 
@@ -273,6 +274,82 @@ Containers::String uppercase(const Containers::StringView string) {
 std::string uppercase(std::string string) {
     uppercaseInPlace(string);
     return string;
+}
+
+Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {
+    Containers::Array<std::uint32_t> out;
+
+    bool hasNumber = false; /* whether we have a number already */
+    std::uint32_t number = 0; /* value of that number */
+    bool overflow = false; /* if we've overflown the 32 bits during parsing */
+    std::uint32_t rangeStart = ~0u; /* if not ~0u, we're in a range */
+
+    /* Going through one iteration more in order to handle the end-of-string
+       condition in the same place as delimiters */
+    for(std::size_t i = 0; i <= string.size(); ++i) {
+        const char c = i == string.size() ? 0 : string[i];
+
+        /* End of string or a delimiter */
+        if(i == string.size() || c == ',' || c == ';' || c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r' || c == '\n') {
+            /* If anything has overflown, ignore this piece completely and
+               reset the bit again */
+            if(overflow) {
+                overflow = false;
+
+            /* If we are in a range, fill it. Clamp range end to the soecified
+               bounds as well, worst case the loop will not iterate at all. */
+            } else if(rangeStart != ~std::uint32_t{}) {
+                const std::size_t rangeEnd = hasNumber && number < max ? number + 1 : max;
+
+                for(; rangeStart < rangeEnd; ++rangeStart)
+                    arrayAppend(out, rangeStart);
+                rangeStart = ~std::uint32_t{};
+
+            /* Otherwise, if we have just one number, save it to the output if
+               it's in bounds.*/
+            } else if(hasNumber && number >= min && number < max) {
+                arrayAppend(out, number);
+
+            /* If we have nothing, there was multiple delimiters after each
+               other. */
+            }
+
+            hasNumber = false;
+            number = 0;
+
+        /* Number */
+        } else if(c >= '0' && c <= '9') {
+            hasNumber = true;
+
+            /* If there's an overflow, remember that to discard the whole piece
+               later. Apparently I can't actually test for overflow with
+               `number < next` (huh? why did I think it would work?) so going
+               with a bigger type for the multiplication. Answers at
+               https://stackoverflow.com/a/1815371 are mostly just crap, using
+               a *division* to test if a multiplication overflowed?! */
+            const std::uint64_t next = std::uint64_t{number}*10 + (c - '0');
+            if(next > ~std::uint32_t{}) overflow = true;
+
+            number = next;
+
+        /* Range specification */
+        } else if(c == '-') {
+            /* If we have a number, remember it as a range start if it's in
+               bounds. Otherwise use the min value. */
+            rangeStart = hasNumber && number >= min ? number : min;
+
+            hasNumber = false;
+            number = 0;
+
+        /* Something weird, bail */
+        } else {
+            /** @todo sanitize when Debug::chr / Debug::str is done */
+            Error{} << "Utility::parseNumberSequence(): unrecognized character" << Containers::StringView{&c, 1} << "in" << string;
+            return {};
+        }
+    }
+
+    return out;
 }
 
 }}}

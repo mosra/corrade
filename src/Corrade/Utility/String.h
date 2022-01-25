@@ -651,6 +651,40 @@ template<std::size_t replaceSize> inline std::string replaceAll(std::string stri
     return Implementation::replaceAll(std::move(string), {search.data(), search.size()}, {replace, replaceSize - 1});
 }
 
+/**
+@brief Parse a number sequence
+@m_since_latest
+
+Parses a string containing a sequence of numbers, returning them converted to
+integers. The numbers can be delimited by commas (`,`), semicolons (`;`) or
+an arbitrary whitespace character. Order in which the numbers were specified is
+kept in the output including possible duplicates. Empty string results in an
+empty array returned.
+
+Additionally it's possible to specify a range using the `-` character, in which case the range will be expanded in the output. The range is inclusive, meaning
+`3-6` will result in @cpp {3, 4, 5, 6} @ce in the output. Ranges where the end
+is smaller than the start (such as `6-3`) will be treated as empty. If the
+number before the `-` is omitted, a @p min is used instead; if the number after
+the `-` is omitted, @cpp max - 1 @ce is used instead.
+
+If an unrecognized character is encountered, the function prints an error and
+returns a @relativeref{Corrade,Containers::NullOpt}. If any parsed number is
+less than @p min, greater than or equal to @p max or doesn't fit into 32 bits,
+it's omitted in the output.
+
+Example usage:
+
+-   `4,3 5;5;17` results in @cpp {4, 3, 5, 5, 17} @ce
+-   `12-,3-5,1` with @p max set to @cpp 15 @ce results in
+    @cpp {12, 13, 14, 3, 4, 5, 1} @ce
+-   `-3, 13-` with @p min set to @cpp 0 @ce and @p max to @cpp 15 @ce results
+    in @cpp {0, 1, 2, 3, 13, 14} @ce
+-   any input with @p min set to @cpp 0 @ce and @p max set to @cpp 0 @ce
+    results in an empty output
+-   `-` results in a range from @p min to @cpp max - 1 @ce
+*/
+CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(Containers::StringView string, std::uint32_t min, std::uint32_t max);
+
 }}}
 
 #endif
