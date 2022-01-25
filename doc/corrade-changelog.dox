@@ -169,6 +169,9 @@ namespace Corrade {
     rethrow exceptions derived from @ref std::exception but instead lets them
     go directly to make the backtrace point to the original exception location
     and not to where it got rethrown from.
+-   The `--skip` and `--only` @ref TestSuite::Tester options now accept a more
+    flexible syntax from @ref Utility::String::parseNumberSequence(), allowing
+    arbitrary ranges to be specified in a succint way
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

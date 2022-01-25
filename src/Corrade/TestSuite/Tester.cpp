@@ -35,6 +35,7 @@
 #include <utility>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
@@ -194,12 +195,12 @@ int Tester::exec(Tester* const previousTester, std::ostream* const logOutput, st
         args.addSkippedPrefix(prefix);
     args.addOption('c', "color", "auto").setHelp("color", "colored output", "on|off|auto")
             .setFromEnvironment("color", "CORRADE_TEST_COLOR")
-        .addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
+        .addOption("skip").setHelp("skip", "skip test cases with given numbers", "N1,N2-N3...")
         .addBooleanOption("skip-tests").setHelp("skip-tests", "skip all tests")
             .setFromEnvironment("skip-tests", "CORRADE_TEST_SKIP_TESTS")
         .addBooleanOption("skip-benchmarks").setHelp("skip-benchmarks", "skip all benchmarks")
             .setFromEnvironment("skip-benchmarks", "CORRADE_TEST_SKIP_BENCHMARKS")
-        .addOption("only").setHelp("only", "run only test cases with given numbers", "\"N1 N2...\"")
+        .addOption("only").setHelp("only", "run only test cases with given numbers", "N1,N2-N3...")
         .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
             .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
         .addOption("repeat-every", "1").setHelp("repeat-every", "repeat every test case N times", "N")
@@ -276,30 +277,27 @@ benchmark types:
 
     /* Remove skipped test cases */
     if(!args.value("skip").empty()) {
-        const std::vector<std::string> skip = Utility::String::split(args.value("skip"), ' ');
-        for(auto&& n: skip) {
-            #ifndef CORRADE_TARGET_ANDROID
-            const std::size_t index = std::stoi(n);
-            #else
-            const std::size_t index = std::strtoul(n.data(), nullptr, 10);
-            #endif
-            if(index - 1 >= _state->testCases.size()) continue;
+        /* The test case numbering is 1-based. The max argument ensures IDs out
+           of bounds are skipped. If the parsing fails due to strange
+           characters, bail. The error should be already printed by the
+           utility. */
+        const Containers::Optional<Containers::Array<std::uint32_t>> range = Utility::String::parseNumberSequence(args.value<Containers::StringView>("skip"), 1, _state->testCases.size() + 1);
+        if(!range) return 2;
+        for(std::uint32_t index: *range)
             _state->testCases[index - 1].test = nullptr;
-        }
     }
 
     /* Extract only whitelisted test cases if requested (and skip skipped) */
     if(!args.value("only").empty()) {
-        const std::vector<std::string> only = Utility::String::split(args.value("only"), ' ');
-        for(auto&& n: only) {
-            #ifndef CORRADE_TARGET_ANDROID
-            const std::size_t index = std::stoi(n);
-            #else
-            const std::size_t index = std::strtoul(n.data(), nullptr, 10);
-            #endif
-            if(index - 1 >= _state->testCases.size() || !_state->testCases[index - 1].test) continue;
-            usedTestCases.emplace_back(index, _state->testCases[index - 1]);
-        }
+        /* The test case numbering is 1-based. The max argument ensures IDs out
+           of bounds are skipped. If the parsing fails due to strange
+           characters, bail. The error should be already printed by the
+           utility. */
+        const Containers::Optional<Containers::Array<std::uint32_t>> range = Utility::String::parseNumberSequence(args.value<Containers::StringView>("only"), 1, _state->testCases.size() + 1);
+        if(!range) return 2;
+        for(std::uint32_t index: *range)
+            if(_state->testCases[index - 1].test)
+                usedTestCases.emplace_back(index, _state->testCases[index - 1]);
 
     /* Otherwise extract all (and skip skipped) */
     } else for(std::size_t i = 0; i != _state->testCases.size(); ++i) {

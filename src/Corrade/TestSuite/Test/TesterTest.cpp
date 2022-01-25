@@ -733,6 +733,7 @@ struct TesterTest: Tester {
     void emptyTest();
 
     void skipOnly();
+    void skipOnlyInvalid();
     void skipAll();
     void skipTests();
     void skipBenchmarks();
@@ -804,6 +805,7 @@ TesterTest::TesterTest() {
               &TesterTest::emptyTest,
 
               &TesterTest::skipOnly,
+              &TesterTest::skipOnlyInvalid,
               &TesterTest::skipAll,
               &TesterTest::skipTests,
               &TesterTest::skipBenchmarks,
@@ -965,7 +967,7 @@ void TesterTest::emptyTest() {
 void TesterTest::skipOnly() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "13 26 4 11", "--skip", "26" };
+    const char* argv[] = { "", "--color", "off", "--only", "11-13;26,4", "--skip", "20-28,12" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
@@ -977,6 +979,23 @@ void TesterTest::skipOnly() {
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "skipOnly.txt"),
         Compare::StringToFile);
+}
+
+void TesterTest::skipOnlyInvalid() {
+    for(const char* arg: {"--skip", "--only"}) {
+        CORRADE_ITERATION(arg);
+
+        const char* argv[] = { "", "--color", "off", arg, "13,0x13" };
+        int argc = Containers::arraySize(argv);
+        Tester::registerArguments(argc, argv);
+
+        std::stringstream out;
+        Error redirectError{&out};
+        Test t{&out};
+        t.registerTest("here.cpp", "TesterTest::Test");
+        CORRADE_COMPARE(t.exec(this, &out, &out), 2);
+        CORRADE_COMPARE(out.str(), "Utility::parseNumberSequence(): unrecognized character x in 13,0x13\n");
+    }
 }
 
 void TesterTest::skipAll() {

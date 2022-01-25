@@ -420,8 +420,8 @@ for example running the tests in a batch via `ctest`.
 Usage:
 
 @code{.shell-session}
-./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
-    [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
+./my-test [-h|--help] [-c|--color on|off|auto] [--skip N1,N2-N3...]
+    [--skip-tests] [--skip-benchmarks] [--only N1,N2-N3...] [--shuffle]
     [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
     [--no-catch] [--save-diagnostic PATH] [--verbose] [--benchmark TYPE]
     [--benchmark-discard N] [--benchmark-yellow N] [--benchmark-red N]
@@ -435,12 +435,14 @@ Arguments:
     output in case an interactive terminal is detected. Note that on Windows it
     is possible to output colors only directly to an interactive terminal
     unless @ref CORRADE_UTILITY_USE_ANSI_COLORS is defined.
--   `--skip "N1 N2..."` --- skip test cases with given numbers
+-   `--skip N1,N2-N3...` --- skip test cases with given numbers. See
+    @ref Utility::String::parseNumberSequence() for syntax description.
 -   `--skip-tests` --- skip all tests (environment:
     `CORRADE_TEST_SKIP_TESTS=ON|OFF`)
 -   `--skip-benchmarks` --- skip all benchmarks (environment:
     `CORRADE_TEST_SKIP_BENCHMARKS=ON|OFF`)
--   `--only "N1 N2..."` --- run only test cases with given numbers
+-   `--only N1,N2-N3...` --- run only test cases with given numbers. See
+    @ref Utility::String::parseNumberSequence() for syntax description.
 -   `--shuffle` --- randomly shuffle test case order (environment:
     `CORRADE_TEST_SHUFFLE=ON|OFF`)
 -   `--repeat-every N` --- repeat every test case N times (environment:
