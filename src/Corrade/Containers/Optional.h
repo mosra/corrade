@@ -63,7 +63,9 @@ struct NullOptT {
 /**
 @brief Null optional initialization tag
 
-Use for explicit initialization of null @ref Optional.
+Use for explicit initialization of null @ref Optional. Checking an optional for
+emptiness can be done either by comparing it against this variable or by making
+use of its (explicit) boolean conversion.
 */
 constexpr NullOptT NullOpt{NullOptT::Init{}};
 
@@ -78,9 +80,10 @@ having a value. A non-allocating counterpart to @ref Pointer.
 A common use for an optional object is for a return value of function that can
 fail --- like @ref Pointer, but without the unnecessary allocation overhead.
 Similarly to @ref Pointer, the presence of an object can be checked using
-@ref operator bool(). The stored object can be accessed using
-@ref operator->(), @ref operator*() or using implicit conversion, while attempt
-to access a stored object in an empty state leads to assertion error.
+@ref operator bool(), or alternatively by comparing to @ref NullOpt (same as a
+pointer can be compared to @cpp nullptr @ce). The stored object can be accessed
+using @ref operator->(), @ref operator*() or using implicit conversion, while
+attempt to access a stored object in an empty state leads to assertion error.
 
 Unlike @ref std::optional, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
