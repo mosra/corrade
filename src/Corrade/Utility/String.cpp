@@ -349,7 +349,8 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
         }
     }
 
-    return out;
+    /* GCC 4.8 decases when seeing just `return out` here */
+    return Containers::optional(std::move(out));
 }
 
 }}}
