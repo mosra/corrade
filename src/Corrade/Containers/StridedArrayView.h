@@ -2043,6 +2043,7 @@ template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFun
 
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)()) const {
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
@@ -2074,6 +2075,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
         memberFunctionSliceOffset<T>(memberFunction))
     };
 }
+#endif
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::except(const Size& count) const {
     Size end{Corrade::NoInit};
