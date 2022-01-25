@@ -299,10 +299,14 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
             /* If we are in a range, fill it. Clamp range end to the soecified
                bounds as well, worst case the loop will not iterate at all. */
             } else if(rangeStart != ~std::uint32_t{}) {
-                const std::size_t rangeEnd = hasNumber && number < max ? number + 1 : max;
+                const std::uint32_t rangeEnd = hasNumber && number < max ? number + 1 : max;
 
-                for(; rangeStart < rangeEnd; ++rangeStart)
-                    arrayAppend(out, rangeStart);
+                /* If the range is non-empty, add an uninitialized sequence to
+                   the array and then fill it. Should be vastly more efficient
+                   for large ranges than arrayAppend() in a loop. */
+                if(rangeEnd > rangeStart)
+                    for(std::uint32_t& i: arrayAppend(out, NoInit, rangeEnd - rangeStart))
+                        i = rangeStart++;
                 rangeStart = ~std::uint32_t{};
 
             /* Otherwise, if we have just one number, save it to the output if
