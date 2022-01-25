@@ -743,6 +743,7 @@ struct TesterTest: Tester {
     void shuffleOne();
     void repeatEvery();
     void repeatAll();
+    void repeatInvalid();
 
     void abortOnFail();
     void abortOnFailSkip();
@@ -777,6 +778,7 @@ struct TesterTest: Tester {
     void benchmarkCpuScalingWarning();
     void benchmarkCpuScalingWarningVerbose();
     #endif
+    void benchmarkInvalid();
 
     void testName();
 
@@ -812,6 +814,7 @@ TesterTest::TesterTest() {
               &TesterTest::shuffleOne,
               &TesterTest::repeatEvery,
               &TesterTest::repeatAll,
+              &TesterTest::repeatInvalid,
 
               &TesterTest::abortOnFail,
               &TesterTest::abortOnFailSkip,
@@ -845,6 +848,7 @@ TesterTest::TesterTest() {
               &TesterTest::benchmarkCpuScalingWarning,
               &TesterTest::benchmarkCpuScalingWarningVerbose,
               #endif
+              &TesterTest::benchmarkInvalid,
 
               &TesterTest::testName,
 
@@ -1124,6 +1128,23 @@ void TesterTest::repeatAll() {
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "repeatAll.txt"),
         Compare::StringToFile);
+}
+
+void TesterTest::repeatInvalid() {
+    for(const char* arg: {"--repeat-every", "--repeat-all"}) {
+        CORRADE_ITERATION(arg);
+
+        const char* argv[] = { "", "--color", "off", arg, "0" };
+        int argc = Containers::arraySize(argv);
+        Tester::registerArguments(argc, argv);
+
+        std::stringstream out;
+        Error redirectError{&out};
+        Test t{&out};
+        t.registerTest("here.cpp", "TesterTest::Test");
+        CORRADE_COMPARE(t.exec(this, &out, &out), 1);
+        CORRADE_COMPARE(out.str(), "TestSuite::Tester::exec(): you have to repeat at least once\n");
+    }
 }
 
 void TesterTest::abortOnFail() {
@@ -1671,6 +1692,19 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
         Compare::StringToFile);
 }
 #endif
+
+void TesterTest::benchmarkInvalid() {
+    const char* argv[] = { "", "--color", "off", "--benchmark", "fumes" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    std::stringstream out;
+    Error redirectError{&out};
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    CORRADE_COMPARE(t.exec(this, &out, &out), 1);
+    CORRADE_COMPARE(out.str(), "TestSuite::Tester::exec(): unknown benchmark type fumes, use one of wall-time, cpu-time or cpu-cycles\n");
+}
 
 void TesterTest::testName() {
     std::stringstream out;

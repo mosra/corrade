@@ -253,10 +253,11 @@ benchmark types:
         defaultBenchmarkType = TestCaseType::CpuTimeBenchmark;
     else if(args.value("benchmark") == "cpu-cycles")
         defaultBenchmarkType = TestCaseType::CpuCyclesBenchmark;
-    /* LCOV_EXCL_START */ /* Can't test stuff that aborts the app */
-    else Utility::Fatal{} << "Unknown benchmark type" << args.value("benchmark")
+    else {
+        Utility::Error{} << "TestSuite::Tester::exec(): unknown benchmark type" << args.value("benchmark")
         << Utility::Debug::nospace << ", use one of wall-time, cpu-time or cpu-cycles";
-    /* LCOV_EXCL_STOP */
+        return 1;
+    }
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
@@ -308,10 +309,10 @@ benchmark types:
 
     const std::size_t repeatAllCount = args.value<std::size_t>("repeat-all");
     const std::size_t repeatEveryCount = args.value<std::size_t>("repeat-every");
-    /* LCOV_EXCL_START */ /* Can't test stuff that aborts the app */
-    if(!repeatAllCount || !repeatEveryCount)
-        Utility::Fatal() << "You have to repeat at least once";
-    /* LCOV_EXCL_STOP */
+    if(!repeatAllCount || !repeatEveryCount) {
+        Utility::Error{} << "TestSuite::Tester::exec(): you have to repeat at least once";
+        return 1;
+    }
 
     /* Repeat the test cases, if requested */
     const std::size_t originalTestCaseCount = usedTestCases.size();
