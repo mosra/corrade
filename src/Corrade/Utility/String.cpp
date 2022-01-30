@@ -305,8 +305,8 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
                    the array and then fill it. Should be vastly more efficient
                    for large ranges than arrayAppend() in a loop. */
                 if(rangeEnd > rangeStart)
-                    for(std::uint32_t& i: arrayAppend(out, NoInit, rangeEnd - rangeStart))
-                        i = rangeStart++;
+                    for(std::uint32_t& j: arrayAppend(out, NoInit, rangeEnd - rangeStart))
+                        j = rangeStart++;
                 rangeStart = ~std::uint32_t{};
 
             /* Otherwise, if we have just one number, save it to the output if
