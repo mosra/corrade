@@ -160,6 +160,12 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         # Enable extra warnings (similar to -Wall)
         "/W4"
 
+        # "conditional expression is constant", especially when a template
+        # argument is passed to an if, which happens mainly in tests but
+        # sometimes also in recursive constexpr functions. As I can't use if
+        # constexpr in C++11 code, there's not really much I can do.
+        "/wd4127"
+
         # "needs to have dll-interface to be used by clients", as the fix for
         # that would effectively prevent using STL completely.
         "/wd4251"
@@ -171,6 +177,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         "/wd4244"
         "/wd4267"
 
+        # "structure was padded due to alignment specifier". YES. THAT'S
+        # EXACTLY AS INTENDED.
+        "/wd4324"
+
         # "new behavior: elements of array will be default initialized".
         # YES. YES I KNOW WHAT I'M DOING.
         "/wd4351"
@@ -179,6 +189,13 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         # only differed by const/volatile qualifiers". Okay. So you had bugs.
         # And?
         "/wd4373"
+
+        # "declaration of 'foo' hides class member". I use this a lot in
+        # constructor arguments, `Class(int foo): foo{foo} {}` and adding some
+        # underscores to mitigate this would not be pretty. OTOH, "C4456:
+        # declaration of 'foo' hides previous local declaration" points to a
+        # valid issue that I should get rid of.
+        "/wd4458"
 
         # "default constructor could not be generated/can never be
         # instantiated". Apparently it can.
