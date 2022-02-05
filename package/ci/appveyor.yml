@@ -27,8 +27,23 @@ environment:
     COMPILER: msvc
     ANSI_COLORS: ON
     PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    APPVEYOR_JOB_NAME: windows-msvc2022
+    CONFIGURATION: Debug
+  - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    PLATFORM: x64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     APPVEYOR_JOB_NAME: windows-static-msvc2019
+    CONFIGURATION: Debug
+    BUILD_STATIC: ON
+  - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    APPVEYOR_JOB_NAME: windows-static-msvc2022
     CONFIGURATION: Debug
     BUILD_STATIC: ON
   - TARGET: desktop
@@ -37,6 +52,13 @@ environment:
     PLATFORM: x64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     APPVEYOR_JOB_NAME: windows-msvc2019-clang
+    CONFIGURATION: Debug
+  - TARGET: desktop
+    COMPILER: msvc-clang
+    ANSI_COLORS: ON
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    APPVEYOR_JOB_NAME: windows-msvc2022-clang
     CONFIGURATION: Debug
   # Build the 32bit and non-ANSI as Release, one on 2015 and one on 2017, so we
   # catch things that are not a problem on either with 64bit and Debug.
