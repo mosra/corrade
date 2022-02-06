@@ -283,4 +283,4 @@
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif
 
-#endif
+#endif // kate: hl c++
