@@ -60,6 +60,7 @@ project(Corrade CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(CMakeDependentOption)
+option(MSVC2019_COMPATIBILITY "Enable compatibility mode for MSVC 2019 (might disable some features)" OFF)
 option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
 option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 
