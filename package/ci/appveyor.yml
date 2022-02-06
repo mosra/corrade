@@ -92,6 +92,15 @@ environment:
     APPVEYOR_JOB_NAME: windows-conforming-msvc2019
     CONFIGURATION: Debug
   - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    # Not playing with fire and using /EHsc on 2022 as well
+    COMPILER_EXTRA: -DCMAKE_CXX_FLAGS="/permissive- /EHsc" -DMSVC_COMPATIBILITY=OFF
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    APPVEYOR_JOB_NAME: windows-conforming-msvc2022
+    CONFIGURATION: Debug
+  - TARGET: desktop
     COMPILER: mingw
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: windows-mingw
