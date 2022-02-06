@@ -35,11 +35,14 @@ build() {
 }
 
 check() {
+    export CORRADE_TEST_SKIP_BENCHMARKS=ON
+    export CORRADE_TEST_COLOR=ON
+
     cd "$_rootdir/build"
-    CORRADE_TEST_COLOR=ON ctest --output-on-failure -j5
+    ctest --output-on-failure -j5
 
     cd "$_rootdir/build-release"
-    CORRADE_TEST_COLOR=ON ctest --output-on-failure -j5
+    ctest --output-on-failure -j5
 }
 
 package() {
