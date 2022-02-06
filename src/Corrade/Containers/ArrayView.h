@@ -353,13 +353,10 @@ template<class T> class ArrayView {
             return Implementation::ArrayViewConverter<T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC2019_COMPATIBILITY
+        #ifndef CORRADE_MSVC_COMPATIBILITY
         /** @brief Whether the view is non-empty */
-        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
-           pointer arithmetic. On MSVC 2019 this works properly when
-           /permissive- is enabled, but I can neither detect a presence of that
-           flag nor force it for all users (since it often ICEs and breaks 3rd
-           party code), so disabling for 2019 as well. */
+        /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
+           when doing pointer arithmetic. */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
@@ -608,13 +605,10 @@ template<> class ArrayView<void> {
            returns a std::vector. */
         template<class T, class = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
 
-        #ifndef CORRADE_MSVC2019_COMPATIBILITY
+        #ifndef CORRADE_MSVC_COMPATIBILITY
         /** @brief Whether the view is non-empty */
-        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
-           pointer arithmetic. On MSVC 2019 this works properly when
-           /permissive- is enabled, but I can neither detect a presence of that
-           flag nor force it for all users (since it often ICEs and breaks 3rd
-           party code), so disabling for 2019 as well. */
+        /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
+           when doing pointer arithmetic. */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
@@ -716,13 +710,10 @@ template<> class ArrayView<const void> {
            returns a std::vector. */
         template<class T, class = decltype(Implementation::ErasedArrayViewConverter<const T>::from(std::declval<const T&>()))> constexpr /*implicit*/ ArrayView(const T& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<const T>::from(other)} {}
 
-        #ifndef CORRADE_MSVC2019_COMPATIBILITY
+        #ifndef CORRADE_MSVC_COMPATIBILITY
         /** @brief Whether the view is non-empty */
-        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
-           pointer arithmetic. On MSVC 2019 this works properly when
-           /permissive- is enabled, but I can neither detect a presence of that
-           flag nor force it for all users (since it often ICEs and breaks 3rd
-           party code), so disabling for 2019 as well. */
+        /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
+           when doing pointer arithmetic. */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
@@ -1011,13 +1002,10 @@ template<std::size_t size_, class T> class StaticArrayView {
             return Implementation::StaticArrayViewConverter<size_, T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC2019_COMPATIBILITY
+        #ifndef CORRADE_MSVC_COMPATIBILITY
         /** @brief Whether the view is non-empty */
-        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
-           pointer arithmetic. On MSVC 2019 this works properly when
-           /permissive- is enabled, but I can neither detect a presence of that
-           flag nor force it for all users (since it often ICEs and breaks 3rd
-           party code), so disabling for 2019 as well. */
+        /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
+           when doing pointer arithmetic. */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
