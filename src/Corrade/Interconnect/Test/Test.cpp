@@ -177,7 +177,9 @@ Test::Test() {
 }
 
 void Test::signalData() {
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    /* Still broken even on MSVC 2022. Maybe 2025 will be the year when MSVC
+       can finally do plain C++11? */
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
     Implementation::SignalData data1(&Postman::newMessage);
     Implementation::SignalData data2(&Postman::newMessage);
     Implementation::SignalData data3(&Postman::paymentRequested);
@@ -200,7 +202,9 @@ void Test::signalData() {
 }
 
 void Test::templatedSignalData() {
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    /* Still broken even on MSVC 2022. Maybe 2025 will be the year when MSVC
+       can finally do plain C++11? */
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
     Implementation::SignalData data1(&TemplatedPostman::newMessage<std::int32_t>);
     Implementation::SignalData data2(&TemplatedPostman::newMessage<std::string>);
     Implementation::SignalData data3(&TemplatedPostman::oldMessage<std::int32_t>);

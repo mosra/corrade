@@ -1947,15 +1947,17 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(av.stride(), (Stride2D{2, 2}));
 
     constexpr Containers::StridedArrayView2D<const Derived> cbv{DerivedArray, {5, 1}};
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
     /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
-       MSVC 2017 and 2019 (but only in the 3D case, not for 1D) */
+       MSVC 2017, 2019 and 2022 (but only in the 3D case, not for 1D). Maybe
+       2025 will be the year when MSVC can finally do plain C++11? */
     constexpr
     #endif
     Containers::StridedArrayView2D<const Base> ca{DerivedArray, {5, 1}};
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
     /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
-       MSVC 2017 and 2019 (but only in the 3D case, not for 1D) */
+       MSVC 2017, 2019 and 2022 (but only in the 3D case, not for 1D). Maybe
+       2025 will be the year when MSVC can finally do plain C++11? */
     constexpr
     #endif
     Containers::StridedArrayView2D<const Base> cav{cbv};

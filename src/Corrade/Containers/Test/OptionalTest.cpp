@@ -495,7 +495,9 @@ void OptionalTest::constructInPlaceMakeAmbiguous() {
     struct Ambiguous {
         Ambiguous() = default;
         Ambiguous(Ambiguous& parent, int = {}): parent{&parent} {}
-        #ifndef CORRADE_MSVC2019_COMPATIBILITY
+        /* Still broken even on MSVC 2022. Maybe 2025 will be the year when
+           MSVC can finally do plain C++11? */
+        #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
         /* https://developercommunity.visualstudio.com/content/problem/358751/c2580-for-different-versions-of-constructors.html,
            affects 2015 as well (https://stackoverflow.com/a/36658141) */
         Ambiguous(const Ambiguous&) = default;

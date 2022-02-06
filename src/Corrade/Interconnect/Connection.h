@@ -53,7 +53,9 @@ namespace Implementation {
 
     class SignalData {
         public:
-            #ifndef CORRADE_MSVC2019_COMPATIBILITY
+            /* Still broken even on MSVC 2022. Maybe 2025 will be the year when
+               MSVC can finally do plain C++11? */
+            #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*BaseSignal)(Args...);
                 *reinterpret_cast<BaseSignal*>(data) = signal;
@@ -95,7 +97,9 @@ namespace Implementation {
             friend SignalDataHash;
             #endif
 
-            #ifdef CORRADE_MSVC2019_COMPATIBILITY
+            /* Still broken even on MSVC 2022. Maybe 2025 will be the year when
+               MSVC can finally do plain C++11? */
+            #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER < 1940
             SignalData(): data() {}
             #endif
 

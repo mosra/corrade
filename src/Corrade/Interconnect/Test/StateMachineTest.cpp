@@ -57,7 +57,9 @@ enum class Input: std::uint8_t {
 typedef Interconnect::StateMachine<2, 2, State, Input> StateMachine;
 
 void StateMachineTest::signalData() {
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    /* Still broken even on MSVC 2022. Maybe 2025 will be the year when MSVC
+       can finally do plain C++11? */
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940
     Implementation::SignalData data1{&StateMachine::entered<State::Start>};
     Implementation::SignalData data2{&StateMachine::entered<State::End>};
     Implementation::SignalData data3{&StateMachine::exited<State::Start>};
