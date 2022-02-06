@@ -55,6 +55,21 @@ environment:
     APPVEYOR_JOB_NAME: windows-noansi-msvc2017
     CONFIGURATION: Release
   - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    # On MSVC 2017 /permissive- dies on an ambiguous Debug::operator<<() for
+    # const char[], unable to pick between const char* and StringView. Sigh.
+    #
+    # On MSVC 2019 without /EHsc it dies on an assert inside Tester.cpp,
+    # probably due to a lot of "warning C4530: C++ exception handler used, but
+    # unwind semantics are not enabled. Specify /EHsc" messages printed before.
+    # Not sure why is that NOT a problem without /permissive-.
+    COMPILER_EXTRA: -DCMAKE_CXX_FLAGS="/permissive- /EHsc"
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    APPVEYOR_JOB_NAME: windows-conforming-msvc2019
+    CONFIGURATION: Debug
+  - TARGET: desktop
     COMPILER: mingw
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: windows-mingw
