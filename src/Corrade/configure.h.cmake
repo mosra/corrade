@@ -26,6 +26,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#cmakedefine CORRADE_MSVC_COMPATIBILITY
 #cmakedefine CORRADE_MSVC2019_COMPATIBILITY
 #cmakedefine CORRADE_MSVC2017_COMPATIBILITY
 #cmakedefine CORRADE_MSVC2015_COMPATIBILITY
@@ -281,6 +282,36 @@
 /* Documented in Utility/TypeTraits.h */
 #if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_ANDROID) && !__LP64__) || defined(CORRADE_TARGET_EMSCRIPTEN) || (defined(CORRADE_TARGET_APPLE) && !defined(CORRADE_TARGET_IOS) && defined(CORRADE_TARGET_ARM))
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+#endif
+
+/* Kill switch for when absence of the /permissive- flag is detected and
+   CORRADE_MSVC_COMPATIBILITY is not defined. According to
+    https://developercommunity.visualstudio.com/t/pre-define-a-macro-when-compiling-under-permissive/1253982
+   there's STILL no macro that advertising presence of the flag (independently
+   verified with `cl /EP /Zc:preprocessor /PD empty.cpp 2>nul` on MSVC 2022).
+   I suppose it's because it would break PCHs?
+
+   However, because we need to remove various class members and do other nasty
+   stuff to work without /permissive-, we need a way to control it from the
+   preprocessor, which the CORRADE_MSVC_COMPATIBILITY macro is for. It's
+   enabled implicitly but the user can explicitly disable it during the build
+   of Corrade, which is then recorded into the generated configure.h file. The
+   /permissive- flag is then expected to be passed.
+
+   To avoid nasty issues with ABI mismatch, the following assert checks that
+   the flag is passed if CORRADE_MSVC_COMPATIBILITY is not enabled. The hope is
+   that CORRADE_MSVC_COMPATIBILITY gets eventually dropped altogether, with
+   this assert being checked always. But as /permissive- caused ICEs in some
+   MSVC 2017 versions, it's not feasible to enforce it yet.
+*/
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && !defined(CORRADE_MSVC_COMPATIBILITY)
+/* Without /permissive- (or with /permissive- /Zc:ternary-, or with just
+   /Zc:ternary), it'd be sizeof(const char*) instead. Yes, it's not
+   bulletproof, but of all cases shown here it's the cheapest check:
+   https://docs.microsoft.com/en-us/cpp/build/reference/permissive-standards-conformance?view=msvc-170#ambiguous-conditional-operator-arguments */
+static_assert(sizeof(1 ? "" : "") == 1,
+    "Corrade was built without CORRADE_MSVC_COMPATIBILITY, but /permissive- " "doesn't seem to be enabled. Either rebuild Corrade with the option "
+    "enabled or ensure /permissive- is set for all files that include Corrade " "headers.");
 #endif
 
 #endif // kate: hl c++

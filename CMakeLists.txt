@@ -60,6 +60,16 @@ project(Corrade CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(CMakeDependentOption)
+
+# We want to present the option to the user, but we also want to implicitly
+# enable it during the first run, unless manually overriden. Thus we first
+# remember if it was defined, then define the option() and then below check the
+# remembered state.
+if(NOT DEFINED MSVC_COMPATIBILITY)
+    set(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED ON)
+endif()
+option(MSVC_COMPATIBILITY "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" OFF)
+
 option(MSVC2019_COMPATIBILITY "Enable compatibility mode for MSVC 2019 (might disable some features)" OFF)
 option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
 option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
@@ -212,12 +222,25 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             set(MSVC2017_COMPATIBILITY ON)
             message(WARNING "MSVC 2017 detected, automatically enabling MSVC2017_COMPATIBILITY. Note that some features may not be available with this compiler.")
         endif()
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.30")
-        if(NOT MSVC2019_COMPATIBILITY)
-            set(MSVC2019_COMPATIBILITY ON)
-            message(WARNING "MSVC 2019 detected, automatically enabling MSVC2019_COMPATIBILITY. Note that some features may not be available with this compiler.")
+    else()
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.30")
+            if(NOT MSVC2019_COMPATIBILITY)
+                set(MSVC2019_COMPATIBILITY ON)
+                message(WARNING "MSVC 2019 detected, automatically enabling MSVC2019_COMPATIBILITY. Note that some features may not be available with this compiler.")
+            endif()
+        endif()
+
+        # MSVC_COMPATIBILITY is enforced by MSVC2017_COMPATIBILITY and
+        # MSVC2015_COMPATIBILITY below, but can be disabled for 2019+.
+        if(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED)
+            set(MSVC_COMPATIBILITY ON)
+            message(WARNING "MSVC 2019+ detected, automatically enabling MSVC_COMPATIBILITY which may cause some features to not be available. You can disable this option if you pass /permissive- to the compiler to enable a standards-conforming mode.")
         endif()
     endif()
+endif()
+
+if(MSVC_COMPATIBILITY)
+    set(CORRADE_MSVC_COMPATIBILITY 1)
 endif()
 
 if(MSVC2019_COMPATIBILITY)
@@ -227,12 +250,14 @@ endif()
 if(MSVC2017_COMPATIBILITY)
     set(CORRADE_MSVC2017_COMPATIBILITY 1)
     set(CORRADE_MSVC2019_COMPATIBILITY 1)
+    set(CORRADE_MSVC_COMPATIBILITY 1)
 endif()
 
 if(MSVC2015_COMPATIBILITY)
     set(CORRADE_MSVC2015_COMPATIBILITY 1)
     set(CORRADE_MSVC2017_COMPATIBILITY 1)
     set(CORRADE_MSVC2019_COMPATIBILITY 1)
+    set(CORRADE_MSVC_COMPATIBILITY 1)
 endif()
 
 if(TESTSUITE_TARGET_XCTEST)

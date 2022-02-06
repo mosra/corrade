@@ -49,6 +49,8 @@ namespace Corrade {
     x86, ARM and WebAssembly
 -   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
     detection of 32-bit builds
+-   New @ref CORRADE_MSVC_COMPATIBILITY flag that controls workarounds for MSVC
+    2019+ with the `/permissive-` flag not enabled.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 

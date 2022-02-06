@@ -239,7 +239,15 @@ void TargetTest::msvcPermissiveFlag() {
     CORRADE_INFO((sizeof(1 ? "" : "") == 1 ?
         "Standards-conforming C++ parser, compiled with the /permissive- flag" :
         "Non-conforming C++ parser, compiled without /permissive-"));
+
+    #ifdef CORRADE_MSVC_COMPATIBILITY
+    if(sizeof(1 ? "" : "") == 1)
+        CORRADE_WARN("CORRADE_MSVC_COMPATIBILITY set, but the parser is standards-conforming.");
     CORRADE_VERIFY(true);
+    #else
+    CORRADE_FAIL_IF(sizeof(1 ? "" : "") != 1,
+        "CORRADE_MSVC_COMPATIBILITY not set and the parser is not standards-conforming.");
+    #endif
 }
 #endif
 
