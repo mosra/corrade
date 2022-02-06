@@ -653,7 +653,7 @@ Released 2019-10-24, tagged as
 @subsection corrade-changelog-2019-10-new New features
 
 -   MSVC 2019 support. It needs about the same set of workarounds as MSVC 2017,
-    which means there's a new (automatically enbaled) `MSVC2019_COMPATIBILITY`
+    which means there's a new (automatically enabled) `MSVC2019_COMPATIBILITY`
     CMake option, exposed further as @ref CORRADE_MSVC2019_COMPATIBILITY CMake
     variable and preprocessor macro. See also
     [mosra/magnum-bootstrap#18](https://github.com/mosra/magnum-bootstrap/issues/18)
