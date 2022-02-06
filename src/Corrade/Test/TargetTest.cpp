@@ -45,6 +45,9 @@ struct TargetTest: TestSuite::Tester {
     void bitness();
     void endian();
     void compiler();
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    void msvcPermissiveFlag();
+    #endif
     void stl();
     void simd();
 };
@@ -55,6 +58,9 @@ TargetTest::TargetTest() {
               &TargetTest::bitness,
               &TargetTest::endian,
               &TargetTest::compiler,
+              #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+              &TargetTest::msvcPermissiveFlag,
+              #endif
               &TargetTest::stl,
               &TargetTest::simd});
 }
@@ -223,6 +229,19 @@ void TargetTest::compiler() {
     CORRADE_VERIFY(!"Clang should have either a MSVC or a GCC frontend, but not both");
     #endif
 }
+
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+void TargetTest::msvcPermissiveFlag() {
+    /* Without /permissive- (or with /permissive- /Zc:ternary-, or with just
+       /Zc:ternary), it'd be sizeof(const char*) instead. Yes, it's not
+       bulletproof, but of all cases shown here it's the cheapest check:
+       https://docs.microsoft.com/en-us/cpp/build/reference/permissive-standards-conformance?view=msvc-170#ambiguous-conditional-operator-arguments */
+    CORRADE_INFO((sizeof(1 ? "" : "") == 1 ?
+        "Standards-conforming C++ parser, compiled with the /permissive- flag" :
+        "Non-conforming C++ parser, compiled without /permissive-"));
+    CORRADE_VERIFY(true);
+}
+#endif
 
 void TargetTest::stl() {
     std::ostringstream out;
