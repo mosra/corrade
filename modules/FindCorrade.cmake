@@ -64,8 +64,6 @@
 #
 #  CORRADE_MSVC_COMPATIBILITY   - Defined if compiled with compatibility
 #   mode for MSVC 2019+ without the /permissive- flag set
-#  CORRADE_MSVC2019_COMPATIBILITY - Defined if compiled with compatibility
-#   mode for MSVC 2019
 #  CORRADE_MSVC2017_COMPATIBILITY - Defined if compiled with compatibility
 #   mode for MSVC 2017
 #  CORRADE_MSVC2015_COMPATIBILITY - Defined if compiled with compatibility
@@ -314,7 +312,6 @@ string(REGEX REPLACE "\n" ";" _corradeConfigure "${_corradeConfigure}")
 set(_corradeFlags
     MSVC2015_COMPATIBILITY
     MSVC2017_COMPATIBILITY
-    MSVC2019_COMPATIBILITY
     MSVC_COMPATIBILITY
     BUILD_DEPRECATED
     BUILD_STATIC

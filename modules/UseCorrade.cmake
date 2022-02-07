@@ -84,10 +84,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         if(NOT CORRADE_MSVC2017_COMPATIBILITY)
             message(FATAL_ERROR "To use Corrade with MSVC 2017, build it with MSVC2017_COMPATIBILITY enabled")
         endif()
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.30")
-        if(NOT CORRADE_MSVC2019_COMPATIBILITY)
-            message(FATAL_ERROR "To use Corrade with MSVC 2019, build it with MSVC2019_COMPATIBILITY enabled")
-        endif()
     endif()
 
     # Don't allow to use compiler newer than what compatibility mode allows

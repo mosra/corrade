@@ -195,8 +195,6 @@ also available as preprocessor variables if you include
 
 -   `CORRADE_MSVC_COMPATIBILITY` --- Defined if compiled with compatibility
     mode for MSVC 2019+ without the `/permissive-` flag set
--   `CORRADE_MSVC2019_COMPATIBILITY` --- Defined if compiled with compatibility
-    mode for MSVC 2019
 -   `CORRADE_MSVC2017_COMPATIBILITY` --- Defined if compiled with compatibility
     mode for MSVC 2017
 -   `CORRADE_MSVC2015_COMPATIBILITY` --- Defined if compiled with compatibility

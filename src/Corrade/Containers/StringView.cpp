@@ -191,7 +191,7 @@ namespace {
        but nothing helped. Only defining CORRADE_NO_ASSERT at the very top made
        the problem go away, and I discovered this only by accident after
        removing basically all other code. WHAT THE FUCK, MSVC. */
-    #ifndef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940 /* MSVC 2019 */
     using namespace Containers::Literals;
     constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
     #else
@@ -200,11 +200,11 @@ namespace {
 }
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnWhitespaceWithoutEmptyParts() const {
-    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940 /* MSVC 2019 */
+    return splitOnAnyWithoutEmptyParts(Whitespace);
+    #else
     using namespace Containers::Literals;
     return splitOnAnyWithoutEmptyParts(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
-    #else
-    return splitOnAnyWithoutEmptyParts(Whitespace);
     #endif
 }
 
@@ -337,11 +337,11 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringVie
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
-    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940 /* MSVC 2019 */
+    return trimmed(Whitespace);
+    #else
     using namespace Containers::Literals;
     return trimmed(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
-    #else
-    return trimmed(Whitespace);
     #endif
 }
 
@@ -350,11 +350,11 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const Str
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
-    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940 /* MSVC 2019 */
+    return trimmedPrefix(Whitespace);
+    #else
     using namespace Containers::Literals;
     return trimmedPrefix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
-    #else
-    return trimmedPrefix(Whitespace);
     #endif
 }
 
@@ -363,11 +363,11 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const Str
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
-    #ifdef CORRADE_MSVC2019_COMPATIBILITY
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1940 /* MSVC 2019 */
+    return trimmedSuffix(Whitespace);
+    #else
     using namespace Containers::Literals;
     return trimmedSuffix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
-    #else
-    return trimmedSuffix(Whitespace);
     #endif
 }
 

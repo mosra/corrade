@@ -579,16 +579,12 @@ portability, compatibility mode for some compilers is provided:
     Visual C++ 2019+ *without* the `/permissive-` flag set. Enabled implicitly
     if MSVC (but not clang-cl) is detected. You can set it to `OFF` but then
     you're required to specify `/permissive-` for all code using Corrade.
--   `MSVC2019_COMPATIBILITY` --- Compiling with compatibility mode for
-    Microsoft Visual C++ 2019. Enabled implicitly if MSVC 2019 is detected,
-    implies `MSVC2022_COMPATIBILITY`.
 -   `MSVC2017_COMPATIBILITY` --- Compiling with compatibility mode for
     Microsoft Visual C++ 2017. Enabled implicitly if MSVC 2017 is detected,
-    implies `MSVC2019_COMPATIBILITY` and `MSVC_COMPATIBILITY`.
+    implies `MSVC_COMPATIBILITY`.
 -   `MSVC2015_COMPATIBILITY` --- Compiling with compatibility mode for
     Microsoft Visual C++ 2015. Enabled implicitly if MSVC 2015 is detected,
-    implies `MSVC2017_COMPATIBILITY`, `MSVC2019_COMPATIBILITY` and
-    `MSVC_COMPATIBILITY`.
+    implies `MSVC2017_COMPATIBILITY` and `MSVC_COMPATIBILITY`.
 
 Corrade will detect the compiler used and refuses to build (or be used) if
 some required compatibility mode is not enabled. On the other hand, if any of
