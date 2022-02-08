@@ -34,6 +34,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   MSVC 2022 support. For that there's a new @ref CORRADE_MSVC_COMPATIBILITY
+    flag that controls workarounds for MSVC 2019+ with the `/permissive-` flag
+    not enabled. This supersedes the `CORRADE_MSVC2019_COMPATIBILITY` flag and
+    can  be turned off if `/permissive-` is set for all files that use Corrade.
+    See also [mosra/corrade#124](https://github.com/mosra/corrade/issues/124).
 -   New @ref CORRADE_TARGET_WASM preprocessor variable for any (even
     non-Emscripten) WebAssembly target, as a complement to
     @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
@@ -49,10 +54,6 @@ namespace Corrade {
     x86, ARM and WebAssembly
 -   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
     detection of 32-bit builds
--   New @ref CORRADE_MSVC_COMPATIBILITY flag that controls workarounds for MSVC
-    2019+ with the `/permissive-` flag not enabled. This supersedes the
-    `CORRADE_MSVC2019_COMPATIBILITY` flag and can be turned off if
-    `/permissive-` is set for all files that use Corrade.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
