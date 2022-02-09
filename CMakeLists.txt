@@ -224,7 +224,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # MSVC_COMPATIBILITY is enforced by MSVC2017_COMPATIBILITY and
     # MSVC2015_COMPATIBILITY below, but can be disabled for 2019+.
     elseif(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED)
-        set(MSVC_COMPATIBILITY ON)
+        set(MSVC_COMPATIBILITY ON CACHE BOOL "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" FORCE)
         message(WARNING "MSVC 2019+ detected, automatically enabling MSVC_COMPATIBILITY which may cause some features to not be available. You can disable this option if you pass /permissive- to the compiler to enable a standards-conforming mode.")
     endif()
 endif()
