@@ -579,7 +579,10 @@ void ArrayTupleTest::constructTriviallyDestructible() {
     CORRADE_VERIFY(data.data());
     CORRADE_COMPARE(data.size(),
         3*4 +
-        13 + 7 + /* 7 bytes padding after the chars to align doubles */
+        13 +
+        /* 7 / 3 bytes padding after the chars to align doubles. Android x86 is
+           the one with 4-byte-aligned doubles. Wonderful, eh? */
+        (alignof(double) == 8 ? 7 : 3) +
         2*8
     );
 
@@ -593,7 +596,7 @@ void ArrayTupleTest::constructTriviallyDestructible() {
     CORRADE_COMPARE(doubles.size(), 2);
     CORRADE_COMPARE(static_cast<void*>(ints.data()), data.data());
     CORRADE_COMPARE(static_cast<void*>(chars.data()), data.data() + 3*4);
-    CORRADE_COMPARE(static_cast<void*>(doubles.data()), data.data() + 3*4 + 13 + 7);
+    CORRADE_COMPARE(static_cast<void*>(doubles.data()), data.data() + 3*4 + 13 + (alignof(double) == 8 ? 7 : 3));
 }
 
 void ArrayTupleTest::constructTriviallyDestructibleCustomAllocatorDefaultDeleter() {
@@ -614,7 +617,10 @@ void ArrayTupleTest::constructTriviallyDestructibleCustomAllocatorDefaultDeleter
     CORRADE_VERIFY(data.data());
     CORRADE_COMPARE(data.size(),
         3*4 +
-        13 + 7 + /* 7 bytes padding after the chars to align doubles */
+        13 +
+        /* 7 / 3 bytes padding after the chars to align doubles. Android x86 is
+           the one with 4-byte-aligned doubles. Wonderful, eh? */
+        (alignof(double) == 8 ? 7 : 3) +
         2*8
     );
 
@@ -638,7 +644,10 @@ void ArrayTupleTest::constructTriviallyDestructibleStatelessDeleter() {
 
     const std::size_t expectedSize =
         3*4 +
-        13 + 7 + /* 7 bytes padding after the chars to align doubles */
+        13 +
+        /* 7 / 3 bytes padding after the chars to align doubles. Android x86 is
+           the one with 4-byte-aligned doubles. Wonderful, eh? */
+        (alignof(double) == 8 ? 7 : 3) +
         2*8;
 
     {
@@ -922,7 +931,10 @@ void ArrayTupleTest::convertArray() {
         CORRADE_VERIFY(data.data());
         CORRADE_COMPARE(data.size(),
             3*4 +
-            13 + 7 + /* 7 bytes padding after the chars to align doubles */
+            13 +
+            /* 7 / 3 bytes padding after the chars to align doubles. Android
+               x86 is the one with 4-byte-aligned doubles. Wonderful, eh? */
+            (alignof(double) == 8 ? 7 : 3) +
             2*8
         );
 
