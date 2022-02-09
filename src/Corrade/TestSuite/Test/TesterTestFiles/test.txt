@@ -123,7 +123,7 @@ Starting TesterTest::Test with 63 test cases...
   SKIP [54] repeatedTestSetupTeardownSkip()@1
         Skipped.
        [54] tearing down...
- BENCH [55]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
+ BENCH [55]   0.00 ± 0.00   ns benchmarkDefault()@9x4000000000 (wall time)
 Benchmark begin
 Benchmark iteration
 Benchmark iteration

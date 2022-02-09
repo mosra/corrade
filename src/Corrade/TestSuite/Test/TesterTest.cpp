@@ -633,7 +633,7 @@ std::uint64_t Test::benchmarkOnceEnd() {
 }
 
 void Test::benchmarkDefault() {
-    CORRADE_BENCHMARK(1000000000) break; /* nice hack, isn't it */
+    CORRADE_BENCHMARK(4000000000u) break; /* nice hack, isn't it */
 }
 
 void Test::benchmarkSkip() {
