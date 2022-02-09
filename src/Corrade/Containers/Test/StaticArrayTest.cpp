@@ -211,7 +211,9 @@ void StaticArrayTest::constructDefaultInit() {
 }
 
 struct Throwable {
-    explicit Throwable(int) {}
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    explicit Throwable(int) CORRADE_UNUSED {}
     Throwable(const Throwable&) {}
     Throwable(Throwable&&) {}
     Throwable& operator=(const Throwable&) { return *this; }
@@ -239,7 +241,9 @@ struct Copyable {
         ++copied;
         return *this;
     }
-    Copyable& operator=(Copyable&& other) noexcept {
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    CORRADE_UNUSED Copyable& operator=(Copyable&& other) noexcept {
         a = other.a;
         ++moved;
         return *this;
@@ -1008,7 +1012,9 @@ void StaticArrayTest::moveConstructPlainStruct() {
         MoveOnlyPointer(const MoveOnlyPointer&) = delete;
         MoveOnlyPointer(MoveOnlyPointer&&) = default;
         MoveOnlyPointer& operator=(const MoveOnlyPointer&) = delete;
-        MoveOnlyPointer& operator=(MoveOnlyPointer&&) = default;
+        /* Clang complains this function is unused. But removing it may have
+           unintended consequences, so don't. */
+        CORRADE_UNUSED MoveOnlyPointer& operator=(MoveOnlyPointer&&) = default;
 
         std::nullptr_t a;
     };

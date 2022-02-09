@@ -3301,7 +3301,10 @@ void StridedArrayViewTest::sliceMemberFunctionPointerConstData() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            const float& first() const { return _first; }
+            /* Clang complains this function is unused, but without it the
+               _first member would be unused as well, and that one is vital to
+               test proper offset calculation, so leave it. */
+            CORRADE_UNUSED const float& first() const { return _first; }
             const short& second() const { return _second; }
         private:
             float _first;
@@ -3331,7 +3334,10 @@ void StridedArrayViewTest::sliceMemberFunctionPointerReturningConst() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            const float& first() { return _first; }
+            /* Clang complains this function is unused, but without it the
+               _first member would be unused as well, and that one is vital to
+               test proper offset calculation, so leave it. */
+            CORRADE_UNUSED const float& first() { return _first; }
             const short& second() { return _second; }
         private:
             float _first;
@@ -3361,8 +3367,11 @@ void StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            float& first() { return _first; }
-            const float& first() const { return _first; }
+            /* Clang complains these functions are unused, but without them the
+               _first member would be unused as well, and that one is vital to
+               test proper offset calculation, so leave them. */
+            CORRADE_UNUSED float& first() { return _first; }
+            CORRADE_UNUSED const float& first() const { return _first; }
             short& second() { return _second; }
             const short& second() const { return _second; }
         private:
@@ -3404,14 +3413,21 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            float& first() & { return _first; }
-            float&& first() && { return std::move(_first); }
-            const float& first() const & { return _first; }
-            const float&& first() const && { return std::move(_first); }
+            /* Clang complains these functions are unused, but without them the
+               _first member would be unused as well, and that one is vital to
+               test proper offset calculation, so leave them. */
+            CORRADE_UNUSED float& first() & { return _first; }
+            CORRADE_UNUSED float&& first() && { return std::move(_first); }
+            CORRADE_UNUSED const float& first() const & { return _first; }
+            CORRADE_UNUSED const float&& first() const && { return std::move(_first); }
             short& second() & { return _second; }
-            short&& second() && { return std::move(_second); }
+            /* Clang complains this function is unused. But its presence is
+               vital to the test case, so leave it. */
+            CORRADE_UNUSED short&& second() && { return std::move(_second); }
             const short& second() const & { return _second; }
-            const short&& second() const && { return std::move(_second); }
+            /* Clang complains this function is unused. But its presence is
+               vital to the test case, so leave it. */
+            CORRADE_UNUSED const short&& second() const && { return std::move(_second); }
         private:
             float _first;
             short _second;

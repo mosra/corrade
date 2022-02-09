@@ -49,7 +49,9 @@ struct BoolPtr {
     }
     ~BoolPtr() { if(a) delete b; }
     BoolPtr& operator=(const BoolPtr&) = delete;
-    BoolPtr& operator=(BoolPtr&& other) {
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    CORRADE_UNUSED BoolPtr& operator=(BoolPtr&& other) {
         std::swap(a, other.a);
         std::swap(b, other.b);
         return *this;
@@ -170,7 +172,9 @@ struct Throwable {
     Throwable(Throwable&&) {}
     Throwable(Corrade::NoInitT) {}
     Throwable& operator=(const Throwable&) { return *this; }
-    Throwable& operator=(Throwable&&) { return *this; }
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    CORRADE_UNUSED Throwable& operator=(Throwable&&) { return *this; }
 };
 
 struct Copyable {
@@ -195,7 +199,9 @@ struct Copyable {
         ++copied;
         return *this;
     }
-    Copyable& operator=(Copyable&& other) noexcept {
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    CORRADE_UNUSED Copyable& operator=(Copyable&& other) noexcept {
         a = other.a;
         ++moved;
         return *this;
@@ -215,8 +221,10 @@ struct Movable {
     static int moved;
 
     explicit Movable(int a = 0) noexcept: a{a} { ++constructed; }
-    /* To test perfect forwarding in in-place construction */
-    explicit Movable(int a, int&&) noexcept: Movable{a} {}
+    /* To test perfect forwarding in in-place construction. Clang complains
+       this function is unused. But removing it may have unintended
+       consequences, so don't. */
+    CORRADE_UNUSED explicit Movable(int a, int&&) noexcept: Movable{a} {}
     Movable(const Movable&) = delete;
     Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;
