@@ -510,7 +510,10 @@ void ArrayTupleTest::constructStatefulAlignedNonTriviallyDestructibleDeleter() {
     NonCopyable::constructed = 0;
     NonCopyable::destructed = 0;
 
-    char preallocated[256];
+    /* StatefulAlignedNonTriviallyDestructibleDeleter is 16-byte aligned and
+       if this array is not aligned (like on Android x86), it may cause nasty
+       crashes when calling the deleter */
+    alignas(16) char preallocated[256];
     void* usedThisPointer;
     char* usedDeleterPointer;
     std::size_t usedDeleterSize;
@@ -668,7 +671,10 @@ void ArrayTupleTest::constructTriviallyDestructibleStatelessDeleter() {
 }
 
 void ArrayTupleTest::constructTriviallyDestructibleStatefulAlignedNonTriviallyDestructibleDeleter() {
-    char preallocated[256];
+    /* StatefulAlignedNonTriviallyDestructibleDeleter is 16-byte aligned and
+       if this array is not aligned (like on Android x86), it may cause nasty
+       crashes when calling the deleter */
+    alignas(16) char preallocated[256];
     void* usedThisPointer;
     char* usedDeleterPointer;
     std::size_t usedDeleterSize;

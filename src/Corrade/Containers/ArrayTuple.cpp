@@ -276,6 +276,10 @@ void ArrayTuple::create(const ArrayView<const Item>& items, const Item& arrayDel
     /* Store the items */
     auto* nextDestructibleItem = reinterpret_cast<DestructibleItem*>(_data + sizeof(std::size_t));
     for(std::size_t i = 0; i != items.size(); ++i) {
+        /** @todo once we're asserting for alignment in Array, assert also here
+            that `_data % items[i]._elementAlignment == 0`. Especially
+            important when custom allocators passing static char[] arrays are
+            involved, like in the tests */
         offset = alignFor(offset, items[i]._elementAlignment);
 
         /* If the item has a default constructor, call it on each element */
