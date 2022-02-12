@@ -12,6 +12,10 @@ executors:
       # Since 2021-09-15, images older than 10.3 are dropped by CircleCI. This
       # means the oldest macOS we can test against is 10.14.4.
       xcode: 10.3.0
+  xcode-11_4:
+    macos:
+      # xcbeautify (for the iOS build) requires Xcode 11.4
+      xcode: 11.4.1
   emscripten:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
@@ -298,6 +302,14 @@ jobs:
     - build:
         script: android-x86.sh
 
+  ios:
+    executor: xcode-11_4
+    steps:
+    - install-base-macos:
+        extra: xcbeautify
+    - build:
+        script: ios-simulator.sh
+
   # Python preprocessor for magnum-singles, for a lack of better name
   acme:
     executor: python-3_6
@@ -328,4 +340,5 @@ workflows:
     - macos-static
     - emscripten
     - android-x86
+    - ios
     - acme
