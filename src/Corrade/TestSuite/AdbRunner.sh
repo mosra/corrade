@@ -100,7 +100,10 @@ remote_tmpdir=/data/local$tmpdir
 adb shell 'rm -rf '$remote_tmpdir'; mkdir '$remote_tmpdir
 
 # Push the test executable and also all required files to the remote temporary
-# directory, preserving directory structure
+# directory, preserving directory structure.
+# TODO adb in platform-tools 31 accepts multiple input files, which should make
+#   it faster to upload stuff (and hopefully less chance for a hang)
+#   https://android.googlesource.com/platform/packages/modules/adb/+/5d093b28cb142c97e444d23f40a7d76603353a0b
 adb push "$binary_dir/$filename" $remote_tmpdir | tail -n 1
 for file in "$@"; do
     # TODO: this will probably break horribly when the filenames contain spaces
