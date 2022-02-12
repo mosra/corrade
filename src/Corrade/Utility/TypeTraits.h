@@ -142,8 +142,7 @@ supported by Corrade, so there the macro is defined always.
     unrestricted usage of template expressions containing commas.
 
 Defines a traits class checking whether an expression is valid. You can use
-@cpp T @ce to reference the type which is being checked; the type expression
-can contain
+@cpp T @ce to reference the type which is being checked.
 
 Usage examples: checking for presence of a @cpp key_type @ce member
 @cpp typedef @ce:
