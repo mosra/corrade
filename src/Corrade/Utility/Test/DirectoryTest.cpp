@@ -491,6 +491,10 @@ void DirectoryTest::isDirectorySymlink() {
            Git clone has the symlinks preserved */
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) thinks all paths are files.");
+        #endif
         CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirSymlink, "dir-symlink")));
     }
 }
