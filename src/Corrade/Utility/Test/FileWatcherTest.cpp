@@ -322,9 +322,10 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
     /* When the file becomes non-empty again, the change is signalled */
     CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
     {
-        #ifdef CORRADE_TARGET_IOS
-        CORRADE_EXPECT_FAIL("iOS seems to be reporting all file sizes to be 0, so the IgnoreChangeIfEmpty flag is ignored there.");
-        #endif
+        /* This used to fail on iOS back when Travis CI was used, but on
+           CircleCI emulator it passes. Since the whole thing needs to be
+           reworked to use OS filesystem watchers (and it's quite useless on
+           iOS anyway), I don't really care. */
         CORRADE_VERIFY(watcher.hasChanged());
     }
 }
