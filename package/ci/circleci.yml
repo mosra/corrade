@@ -31,6 +31,10 @@ executors:
   android-29:
     machine:
       image: android:202102-01
+  arm64:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
 
 commands:
   install-base-linux:
@@ -45,6 +49,20 @@ commands:
           apt update
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
           apt install -y ninja-build $LCOV_PACKAGES << parameters.extra >>
+
+  install-base-linux-arm64:
+    parameters:
+      extra:
+        type: string
+        default: ""
+    steps:
+    - run:
+        name: Update apt and install base packages
+        # Compared to Docker images this needs sudo
+        command: |
+          sudo apt update
+          if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
+          sudo apt install -y ninja-build gcc cmake $LCOV_PACKAGES << parameters.extra >>
 
   install-base-macos:
     parameters:
@@ -84,7 +102,7 @@ commands:
         background: true
     - run:
         name: Update apt and install base packages
-        # Compared to Docker images this needs sudo, for some reason
+        # Compared to Docker images this needs sudo
         command: |
           sudo apt update
           sudo apt install -y ninja-build
@@ -200,6 +218,18 @@ jobs:
         extra: git
     - install-gcc-4_8
     - install-cmake-3_4
+    - make-expected-linux-dirs
+    - build:
+        script: unix-desktop.sh
+    - lcov
+
+  linux-arm64:
+    executor: arm64
+    environment:
+      CMAKE_CXX_FLAGS: --coverage
+      CONFIGURATION: Debug
+    steps:
+    - install-base-linux-arm64
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
@@ -332,6 +362,7 @@ workflows:
   build:
     jobs:
     - linux
+    - linux-arm64
     - linux-static
     - linux-nondeprecated
     - linux-sanitizers
