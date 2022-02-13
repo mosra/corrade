@@ -35,8 +35,7 @@ check() {
 
     rm -rf coverage
     mkdir coverage
-    # Keep in sync with package/ci/appveyor-lcov.sh, circleci.yml and
-    # travis.yml, please
+    # Keep in sync with package/ci/appveyor-lcov.sh and circleci.yml, please
     lcov --directory . --capture --output-file coverage.info
     lcov --extract coverage.info "*/src/Corrade/*" --output-file coverage.info
     lcov --remove coverage.info "*/Test/*" --output-file coverage.info

@@ -195,8 +195,7 @@ commands:
     steps:
     - run:
         name: Collect code coverage
-        # Keep in sync with PKBUILD-coverage, appveyor-lcov.sh and travis.yml,
-        # please
+        # Keep in sync with PKBUILD-coverage and appveyor-lcov.sh, please
         command: |
           lcov $LCOV_EXTRA_OPTS --directory . --capture --output-file coverage.info > /dev/null
           lcov $LCOV_EXTRA_OPTS --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null
