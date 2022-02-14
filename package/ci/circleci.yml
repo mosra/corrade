@@ -228,6 +228,8 @@ jobs:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
     steps:
+    # Not installing the old GCC 4.8 and CMake 3.4 to speed up. These are
+    # tested more than enough on other jobs.
     - install-base-linux-arm64
     - make-expected-linux-dirs
     - build:

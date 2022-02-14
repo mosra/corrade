@@ -942,12 +942,12 @@ for more information.
 
 In `package/ci/` there is a `circle.yml` file with Linux GCC 4.8, Linux ARM64,
 macOS, Emscripten, AddressSanitizer, ThreadSanitizer, Android x86 and iOS
-x86_64 and configuration. Online at https://circleci.com/gh/mosra/corrade.
+x86_64 configuration. Online at https://circleci.com/gh/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
 In `package/ci/` there is an `appveyor.yml` file with Windows desktop MSVC,
-MinGW and Windows RT configuration. Online at
+clang-cl, MinGW and Windows RT configuration. Online at
 https://ci.appveyor.com/project/mosra/corrade.
 
 @subsection building-corrade-ci-coverage Codecov.io
