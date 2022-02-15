@@ -458,6 +458,12 @@ Error::~Error() {
     cleanupOnDestruction();
 }
 
+/* MSVC in a Release build complains that "destructor never returns, potential
+   memory leak". Well, yes, since this is a [[noreturn]] function. */
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#pragma warning(push)
+#pragma warning(disable: 4722)
+#endif
 Fatal::~Fatal() {
     /* Manually call cleanup of Error and Debug superclasses because their
        destructor will never be called */
@@ -466,6 +472,9 @@ Fatal::~Fatal() {
 
     std::exit(_exitCode);
 }
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#pragma warning(pop)
+#endif
 
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
