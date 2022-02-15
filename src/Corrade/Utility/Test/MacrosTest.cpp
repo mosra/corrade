@@ -150,10 +150,20 @@ void MacrosTest::deprecated() {
 CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
+/* If the annotation is removed, it should warn on GCC and Clang at least */
 int three(CORRADE_UNUSED int somenumber) { return 3; }
+
+struct Four {
+    explicit Four(): a{4} {}
+    /* If the annotation is removed, it should warn on Clang */
+    explicit Four(int somenumber) noexcept CORRADE_UNUSED: a{somenumber} {}
+
+    int a;
+};
 
 void MacrosTest::unused() {
     CORRADE_COMPARE(three(6), 3);
+    CORRADE_COMPARE(Four{}.a, 4);
 }
 
 void MacrosTest::fallthrough() {
