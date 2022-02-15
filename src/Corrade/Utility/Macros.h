@@ -284,12 +284,14 @@ function parameters instead.
 
 @snippet Utility.cpp CORRADE_UNUSED
 
-Defined as the C++17 @cpp [[maybe_unused]] @ce attribute on GCC >= 7, with a
+Defined as the C++17 @cpp [[maybe_unused]] @ce attribute on GCC >= 10, with a
 compiler-specific variant on Clang, MSVC and older GCC. Clang and MSVC have
 their own specific macro always as they otherwise complain about use of a C++17
 feature when compiling as C++11 or C++14.
 */
-#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7)
+/* GCC 7 supports [[maybe_unused]] in some cases (function arguments), but not
+   e.g. unused constructors. GCC 10 does, so using that as the min version. */
+#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10
 #define CORRADE_UNUSED [[maybe_unused]]
 /* Clang unfortunately warns that [[maybe_unused]] is a C++17 extension, so we
    use this instead of attempting to suppress the warning like we had to do
