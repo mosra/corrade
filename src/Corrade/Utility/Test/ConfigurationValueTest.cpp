@@ -267,7 +267,7 @@ void ConfigurationValueTest::floatingPointScientific() {
     Configuration c;
 
     {
-        float a = 2.1e7;
+        float a = 2.1e7f;
         std::string value{
             #ifndef __MINGW32__
             "2.1e+07"
@@ -284,7 +284,7 @@ void ConfigurationValueTest::floatingPointScientific() {
         CORRADE_COMPARE(c.value<float>("exp"), a);
         CORRADE_COMPARE(c.value<float>("exp", ConfigurationValueFlag::Scientific), a);
     } {
-        float a = 2.1e+7;
+        float a = 2.1e+7f;
         std::string value{
             #ifndef __MINGW32__
             "2.1e+07"
@@ -311,7 +311,7 @@ void ConfigurationValueTest::floatingPointScientific() {
         CORRADE_COMPARE(c.value("expPos"), valueSci);
         CORRADE_COMPARE(c.value<float>("expPos"), a);
     } {
-        float a = -2.1e7;
+        float a = -2.1e7f;
         std::string value{
             #ifndef __MINGW32__
             "-2.1e+07"
@@ -327,7 +327,7 @@ void ConfigurationValueTest::floatingPointScientific() {
         CORRADE_COMPARE(c.value("expNeg"), value);
         CORRADE_COMPARE(c.value<float>("expNeg"), a);
     } {
-        float a = 2.1e-7;
+        float a = 2.1e-7f;
         std::string value{
             #ifndef __MINGW32__
             "2.1e-07"
@@ -343,7 +343,7 @@ void ConfigurationValueTest::floatingPointScientific() {
         CORRADE_COMPARE(c.value("expNeg2"), value);
         CORRADE_COMPARE(c.value<float>("expNeg2"), a);
     } {
-        float a = 2.1E7;
+        float a = 2.1E7f;
         std::string value{
             #ifndef __MINGW32__
             "2.1E+07"
