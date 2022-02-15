@@ -450,10 +450,10 @@ cache:
 
 @snippet Utility.cpp CORRADE_LIKELY
 
-Defined as the C++20 @cpp [[likely]] @ce attribute on GCC >= 9 (and on Clang 12
-and MSVC 2019 16.6+ if compiling under C++20). On older versions of GCC and on
-Clang in C++11/14/17 mode the macro expands to @cpp __builtin_expect() @ce; on
-older MSVC the macro is a pass-through.
+Defined as the C++20 @cpp [[likely]] @ce attribute on GCC >= 10 (and on Clang
+12 and MSVC 2019 16.6+ if compiling under C++20). On older versions of GCC and
+on Clang in C++11/14/17 mode the macro expands to @cpp __builtin_expect() @ce;
+on older MSVC the macro is a pass-through.
 
 @attention
 @parblock
@@ -473,8 +473,11 @@ but the behavior is highly dependent on compiler-specific heuristics.
 @see @ref CORRADE_UNLIKELY(), @ref CORRADE_ASSUME(),
     @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE
 */
-/* Using > 201703 because MSVC 16.6 reports 201705 when compiling as C++20 */
-#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 9) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+/* While the GCC 9 changelog mentions experimental support for [[likely]] and
+   [[unlikely]], it warns that "attributes at the beginning of statement are
+   ignored" (??). Version 10 treats them properly. For MSVC using > 201703
+   because 16.6 reports 201705 when compiling as C++20. */
+#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
 #define CORRADE_LIKELY(...) (__VA_ARGS__) [[likely]]
 #elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_LIKELY(...) (__builtin_expect((__VA_ARGS__), 1))
@@ -495,8 +498,11 @@ mark boundary conditions in tight loops, for example:
 @see @ref CORRADE_ASSUME(), @ref CORRADE_ALWAYS_INLINE,
     @ref CORRADE_NEVER_INLINE
 */
-/* Using > 201703 because MSVC 16.6 reports 201705 when compiling as C++20 */
-#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 9) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+/* While the GCC 9 changelog mentions experimental support for [[likely]] and
+   [[unlikely]], it warns that "attributes at the beginning of statement are
+   ignored" (??). Version 10 treats them properly. For MSVC using > 201703
+   because 16.6 reports 201705 when compiling as C++20. */
+#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
 #define CORRADE_UNLIKELY(...) (__VA_ARGS__) [[unlikely]]
 #elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_UNLIKELY(...) (__builtin_expect((__VA_ARGS__), 0))
