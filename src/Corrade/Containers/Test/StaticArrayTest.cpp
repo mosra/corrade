@@ -77,6 +77,9 @@ struct StaticArrayTest: TestSuite::Tester {
     void constructNonCopyable();
     void constructNoImplicitConstructor();
     void constructDirectReferences();
+    void constructArray();
+    void constructArrayRvalue();
+    void constructArrayMove();
 
     /* No constructZeroNullPointerAmbiguity() here as the StaticArray is never
        empty, thus never null, thus std::nullptr_t constructor makes no sense */
@@ -139,7 +142,10 @@ StaticArrayTest::StaticArrayTest() {
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::constructNoImplicitConstructor,
-              &StaticArrayTest::constructDirectReferences});
+              &StaticArrayTest::constructDirectReferences,
+              &StaticArrayTest::constructArray,
+              &StaticArrayTest::constructArrayRvalue,
+              &StaticArrayTest::constructArrayMove});
 
     addTests({&StaticArrayTest::copy,
               &StaticArrayTest::move},
@@ -407,6 +413,91 @@ void StaticArrayTest::constructDirectReferences() {
 
     const Containers::StaticArray<5, Reference> b{Corrade::DirectInit, a};
     CORRADE_VERIFY(b);
+}
+
+void StaticArrayTest::constructArray() {
+    struct PairOfInts {
+        int a, b;
+    };
+
+    const PairOfInts data[]{
+        {1, 2},
+        {3, 4},
+        {5, 6}
+    };
+    Containers::StaticArray<3, PairOfInts> a1{data};
+    Containers::StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, data};
+    CORRADE_COMPARE(a1[0].a, 1);
+    CORRADE_COMPARE(a2[0].a, 1);
+    CORRADE_COMPARE(a1[0].b, 2);
+    CORRADE_COMPARE(a2[0].b, 2);
+    CORRADE_COMPARE(a1[1].a, 3);
+    CORRADE_COMPARE(a2[1].a, 3);
+    CORRADE_COMPARE(a1[1].b, 4);
+    CORRADE_COMPARE(a2[1].b, 4);
+    CORRADE_COMPARE(a1[2].a, 5);
+    CORRADE_COMPARE(a2[2].a, 5);
+    CORRADE_COMPARE(a1[2].b, 6);
+    CORRADE_COMPARE(a2[2].b, 6);
+}
+
+void StaticArrayTest::constructArrayRvalue() {
+    struct PairOfInts {
+        int a, b;
+    };
+
+    Containers::StaticArray<3, PairOfInts> a1{{
+        {1, 2},
+        {3, 4},
+        {5, 6}
+    }};
+    Containers::StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, {
+        {1, 2},
+        {3, 4},
+        {5, 6}
+    }};
+    CORRADE_COMPARE(a1[0].a, 1);
+    CORRADE_COMPARE(a2[0].a, 1);
+    CORRADE_COMPARE(a1[0].b, 2);
+    CORRADE_COMPARE(a2[0].b, 2);
+    CORRADE_COMPARE(a1[1].a, 3);
+    CORRADE_COMPARE(a2[1].a, 3);
+    CORRADE_COMPARE(a1[1].b, 4);
+    CORRADE_COMPARE(a2[1].b, 4);
+    CORRADE_COMPARE(a1[2].a, 5);
+    CORRADE_COMPARE(a2[2].a, 5);
+    CORRADE_COMPARE(a1[2].b, 6);
+    CORRADE_COMPARE(a2[2].b, 6);
+}
+
+void StaticArrayTest::constructArrayMove() {
+    struct IntPointerInt {
+        Containers::Pointer<int> a;
+        int b;
+    };
+
+    Containers::StaticArray<3, IntPointerInt> a1{{
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 1}, 2},
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 3}, 4},
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 5}, 6}
+    }};
+    Containers::StaticArray<3, IntPointerInt> a2{Corrade::InPlaceInit, {
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 1}, 2},
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 3}, 4},
+        {Containers::Pointer<int>{Corrade::InPlaceInit, 5}, 6}
+    }};
+    CORRADE_COMPARE(*a1[0].a, 1);
+    CORRADE_COMPARE(*a2[0].a, 1);
+    CORRADE_COMPARE(a1[0].b, 2);
+    CORRADE_COMPARE(a2[0].b, 2);
+    CORRADE_COMPARE(*a1[1].a, 3);
+    CORRADE_COMPARE(*a2[1].a, 3);
+    CORRADE_COMPARE(a1[1].b, 4);
+    CORRADE_COMPARE(a2[1].b, 4);
+    CORRADE_COMPARE(*a1[2].a, 5);
+    CORRADE_COMPARE(*a2[2].a, 5);
+    CORRADE_COMPARE(a1[2].b, 6);
+    CORRADE_COMPARE(a2[2].b, 6);
 }
 
 void StaticArrayTest::copy() {

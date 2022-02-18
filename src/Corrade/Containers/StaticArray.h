@@ -38,6 +38,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/constructHelpers.h"
+#include "Corrade/Containers/sequenceHelpers.h"
 
 namespace Corrade { namespace Containers {
 
@@ -83,8 +84,15 @@ is possible to initialize the array in a different way using so-called *tags*:
     the array using provided arguments. In other words,
     @cpp T array[size]{T{args...}, T{args...}, …} @ce.
 -   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to
-    @ref StaticArray(Args&&... args), again useful when you want to make the
-    choice appear explicit). In other words, @cpp T array[size]{args...} @ce.
+    @ref StaticArray(Args&&... args) shown in the example snippet above. Again useful when you want to make the choice appear explicit). In other words,
+    @cpp T array[size]{args...} @ce. Note that the variadic template means you
+    can't use @cpp {} @ce for nested type initializers but have to specify the
+    types explicitly. An alternative is directly passing an array, i.e. with
+    the items wrapped in an additional @cpp {} @ce, with
+    @ref StaticArray(InPlaceInitT, const T(&)[size_]) or
+    @ref StaticArray(InPlaceInitT, T(&&)[size_]), or using the implicit
+    @ref StaticArray(const T(&)[size_]) and @ref StaticArray(T(&&)[size_])
+    variants.
 -   @ref StaticArray(NoInitT) does not initialize anything. Useful for trivial
     types when you'll be overwriting the contents anyway, for non-trivial types
     this is the dangerous option and you need to call the constructor on all
@@ -214,6 +222,8 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(NoInitT),
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
          *      @ref std::is_trivial
          */
         /* The () instead of {} works around a featurebug in C++ where new T{}
@@ -242,6 +252,8 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(ValueInitT),
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
          *      @ref std::is_trivial
          */
         explicit StaticArray(Corrade::NoInitT) {}
@@ -252,20 +264,49 @@ template<std::size_t size_, class T> class StaticArray {
          * Constructs the array using the @ref StaticArray(NoInitT) constructor
          * and then initializes each element with placement new using forwarded
          * @p args.
-         * @see @ref StaticArray(InPlaceInitT, Args&&... args)
+         * @see @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size_])
          */
         template<class ...Args> explicit StaticArray(Corrade::DirectInitT, Args&&... args);
 
         /**
          * @brief Construct an in-place-initialized array
          *
-         * The arguments are forwarded to the array constructor. Same as
-         * @ref StaticArray(Args&&... args).
+         * The arguments are forwarded to the array constructor. Note that the
+         * variadic template means you can't use @cpp {} @ce for nested type
+         * initializers --- see @ref StaticArray(InPlaceInitT, const T(&)[size_])
+         * or @ref StaticArray(InPlaceInitT, T(&&)[size_]) for an
+         * alternative. Same as @ref StaticArray(Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         template<class ...Args> explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {
             static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
         }
+
+        /**
+         * @brief In-place construct an array by copying the elements from a fixed-size array
+         * @m_since_latest
+         *
+         * Compared to @ref StaticArray(InPlaceInitT, Args&&... args) doesn't
+         * require the elements to have explicitly specified type. The array
+         * elements are copied to the array constructor, if you have a
+         * non-copyable type or want to move the elements, use
+         * @ref StaticArray(InPlaceInitT, T(&&)[size_]) instead. Same as
+         * @ref StaticArray(const T(&)[size_]).
+         */
+        explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+
+        /**
+         * @brief In-place construct an array by moving the elements from a fixed-size array
+         * @m_since_latest
+         *
+         * Compared to @ref StaticArray(InPlaceInitT, Args&&... args) doesn't
+         * require the elements to have explicitly specified type. Same as
+         * @ref StaticArray(T(&&)[size_]).
+         * @see @ref StaticArray(InPlaceInitT, const T(&)[size_])
+         */
+        explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
 
         /**
          * @brief Construct a value-initialized array
@@ -286,6 +327,26 @@ template<std::size_t size_, class T> class StaticArray {
         #else
         template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
         #endif
+
+        /**
+         * @brief In-place construct an array by copying the elements from a fixed-size array
+         * @m_since_latest
+         *
+         * Alias to @ref StaticArray(InPlaceInitT, const T(&)[size_]).
+         * @see @ref StaticArray(T(&&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, Args&&... args)
+         */
+        explicit StaticArray(const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, data} {}
+
+        /**
+         * @brief In-place construct an array by moving the elements from a fixed-size array
+         * @m_since_latest
+         *
+         * Alias to @ref StaticArray(InPlaceInitT, T(&&)[size_]).
+         * @see @ref StaticArray(const T(&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, Args&&... args)
+         */
+        explicit StaticArray(T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, Utility::move(data)} {}
 
         /** @brief Copy constructor */
         StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
@@ -783,6 +844,9 @@ template<std::size_t size_, class T> class StaticArray {
             return Utility::move(value._data[index]);
         }
         #endif
+
+        template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
+        template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
 
         union {
             T _data[size_];
