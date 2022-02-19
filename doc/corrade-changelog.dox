@@ -364,6 +364,11 @@ namespace Corrade {
     code that passes @cpp const char* @ce to it. Given that either type is
     valid now, the code has to be updated to explicitly pass that type to the
     function.
+-   @ref Utility::format() now returns a @ref Containers::String instead of
+    @ref Containers::Array and @ref Utility::formatInto() now takes a
+    @ref Containers::MutableStringView instead of @ref Containers::ArrayView.
+    The types are however implicitly convertible and thus breakages are not
+    expected in majority of existing code.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

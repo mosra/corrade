@@ -42,7 +42,7 @@ namespace Corrade { namespace Utility {
 @brief Format a string
 
 Same as @ref format(), but returning a @ref std::string instead of
-@ref Containers::Array.
+@ref Containers::String.
 */
 template<class ...Args> std::string formatString(const char* format, const Args&... args);
 
@@ -57,8 +57,7 @@ terminating @cpp '\0' @ce character. Example usage:
 
 @snippet Utility.cpp formatInto-string
 
-See @ref formatString() for more information about usage and templating
-language.
+See @ref format() for more information about usage and templating language.
 
 @experimental
 */

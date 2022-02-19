@@ -259,7 +259,7 @@ void Formatter<std::string>::format(std::FILE* const file, const std::string& va
 
 namespace {
 
-int parseNumber(Containers::StringView format, std::size_t& formatOffset) {
+int parseNumber(const Containers::StringView format, std::size_t& formatOffset) {
     int number = -1;
     while(formatOffset < format.size() && format[formatOffset] >= '0' && format[formatOffset] <= '9') {
         if(number == -1) number = 0;
@@ -413,21 +413,21 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
 }
 
-std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
+std::size_t formatInto(const Containers::MutableStringView& buffer, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
     std::size_t bufferOffset = 0;
     formatWith([&buffer, &bufferOffset](Containers::ArrayView<const char> data) {
-        if(buffer) {
+        if(buffer.data()) {
             CORRADE_ASSERT(data.size() <= buffer.size(),
                 "Utility::formatInto(): buffer too small, expected at least" << bufferOffset + data.size() << "but got" << bufferOffset + buffer.size(), );
             /* strncpy() would stop on \0 characters */
             /* data.size() can't be 0 because that would make the above assert
                fail, thus data can't be nullptr either and so we don't need to
                check anything to avoid calling memcpy() with a null pointer */
-            std::memcpy(buffer + bufferOffset, data, data.size());
+            std::memcpy(buffer.data() + bufferOffset, data, data.size());
         }
         bufferOffset += data.size();
     }, [&buffer, &bufferOffset](BufferFormatter& formatter, int precision, FormatType type) {
-        if(buffer) {
+        if(buffer.data()) {
             formatter.size = formatter(buffer.suffix(bufferOffset), precision, type);
             CORRADE_ASSERT(bufferOffset + formatter.size <= buffer.size(),
                 "Utility::formatInto(): buffer too small, expected at least" << bufferOffset + formatter.size << "but got" << buffer.size(), );

@@ -660,38 +660,38 @@ static_cast<void>(b);
 #endif
 
 {
-/* [formatString] */
-std::string s = Utility::formatString("{} version {}.{}.{}, {} MB",
+/* [format] */
+Containers::String s = Utility::format("{} version {}.{}.{}, {} MB",
     "vulkan.hpp", 1, 1, 76, 1.79);
 // vulkan.hpp version 1.1.76, 1.79 MB
-/* [formatString] */
+/* [format] */
 static_cast<void>(s);
 }
 
 {
-/* [formatString-numbered] */
-std::string s = Utility::formatString("<{0}><{1}>Good {}, {}!</{1}></{0}>",
+/* [format-numbered] */
+Containers::String s = Utility::format("<{0}><{1}>Good {}, {}!</{1}></{0}>",
     "p", "strong", "afternoon", "ma'am!");
 // <p><strong>Good afternoon, ma'am!</strong></p>
-/* [formatString-numbered] */
+/* [format-numbered] */
 static_cast<void>(s);
 }
 
 {
-/* [formatString-escape] */
-std::string s = Utility::formatString("union {{ {} a; char data[{}]; }} caster;",
+/* [format-escape] */
+Containers::String s = Utility::format("union {{ {} a; char data[{}]; }} caster;",
     "float", sizeof(float));
 // union { float a; char data[4]; } caster;
-/* [formatString-escape] */
+/* [format-escape] */
 static_cast<void>(s);
 }
 
 {
-/* [formatString-type-precision] */
-std::string s = Utility::formatString("path {{ fill: #{:.6x}; stroke: #{:.6x}; }}",
+/* [format-type-precision] */
+Containers::String s = Utility::format("path {{ fill: #{:.6x}; stroke: #{:.6x}; }}",
     0x33ff00, 0x00aa55);
 // path { fill: #33ff00; stroke: #00aa55; }
-/* [formatString-type-precision] */
+/* [format-type-precision] */
 }
 
 {

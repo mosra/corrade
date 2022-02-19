@@ -51,7 +51,7 @@ Provides type-safe formatting of arbitrary types into a template string,
 similar in syntax to Python's [format()](https://docs.python.org/3.4/library/string.html#format-string-syntax).
 Example usage:
 
-@snippet Utility.cpp formatString
+@snippet Utility.cpp format
 
 # Templating language
 
@@ -60,7 +60,7 @@ ordering (as shown above), or be numbered, such as `{2}`. Zero means first item
 from @p args, it's allowed to repeat the numbers. An implicit placeholder
 following a numbered one will get next position after. Example:
 
-@snippet Utility.cpp formatString-numbered
+@snippet Utility.cpp format-numbered
 
 Unlike in Python, it's allowed to both have more placeholders than arguments or
 more arguments than placeholders. Extraneous placeholders are copied to the
@@ -68,7 +68,7 @@ output verbatim, extraneous arguments are simply ignored.
 
 In order to write a literal curly brace to the output, simply double it:
 
-@snippet Utility.cpp formatString-escape
+@snippet Utility.cpp format-escape
 
 # Data type support
 
@@ -133,14 +133,14 @@ Strings, characters (integers with the @cpp 'c' @ce type specifier) | If the str
 
 Example of formating of CSS colors with correct width:
 
-@snippet Utility.cpp formatString-type-precision
+@snippet Utility.cpp format-type-precision
 
 # Performance
 
 This function always does exactly one allocation for the output array. See
 @ref formatInto(std::string&, std::size_t, const char*, const Args&... args)
-for an ability to write into an existing string (with at most one reallocation)
-and @ref formatInto(const Containers::ArrayView<char>&, const char*, const Args&... args)
+for an ability to write into an existing @ref std::string (with at most one
+reallocation) and @ref formatInto(const Containers::MutableStringView&, const char*, const Args&... args)
 for a completely zero-allocation alternative. There is also
 @ref formatInto(std::FILE*, const char*, const Args&... args) for writing to
 files or standard output.
@@ -159,10 +159,10 @@ serializing text files.
 @see @ref formatString(), @ref formatInto(), @ref print(), @ref printError()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
-template<class ...Args> Containers::Array<char> format(const char* format, const Args&... args);
+template<class ...Args> Containers::String format(const char* format, const Args&... args);
 #else
-/* Done this way to avoid including <Containers/Array.h> for the return type */
-template<class ...Args, class Array = Containers::Array<char>> Array format(const char* format, const Args&... args);
+/* Done this way to avoid including <Containers/String.h> for the return type */
+template<class ...Args, class String = Containers::String, class MutableStringView = Containers::MutableStringView> String format(const char* format, const Args&... args);
 #endif
 
 /**
@@ -179,7 +179,15 @@ See @ref format() for more information about usage and templating language.
 
 @experimental
 */
-template<class ...Args> std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, const Args&... args);
+template<class ...Args> std::size_t formatInto(const Containers::MutableStringView& buffer, const char* format, const Args&... args);
+
+/** @overload */
+/* This is needed as otherwise calling formatInto() with char[] as the first
+   argument would use the MutableStringView constructor that relies on strlen()
+   to determine the size, which isn't wanted in this case */
+template<class ...Args, std::size_t size> std::size_t formatInto(char(&buffer)[size], const char* format, const Args&... args) {
+    return formatInto(Containers::MutableStringView{buffer, size}, format, args...);
+}
 
 /**
 @brief Format a string into a file
@@ -329,29 +337,30 @@ struct FileFormatter {
         const void* _value;
 };
 
-CORRADE_UTILITY_EXPORT std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
+CORRADE_UTILITY_EXPORT std::size_t formatInto(const Containers::MutableStringView& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
 CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
 
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class ...Args, class Array> Array format(const char* format, const Args&... args) {
-    Array array;
-    /* array is nullptr here, so we get just the size. Can't pass just nullptr,
-       because that would match the formatInto(std::FILE*) overload :( */
-    const std::size_t size = formatInto(array, format, args...);
-    /* printf() always wants to print the null terminator, so allow it, and
-       then recreate the Array to be of a correct size again. Once we switch
-       away from printf() this workaround could be removed. The upcoming
-       Containers::String class will probably have something similar, though
-       implicit. */
-    array = Array{NoInit, size + 1};
-    formatInto(array, format, args...);
-    return Array{array.release(), size};
+template<class ...Args, class String, class MutableStringView> String format(const char* format, const Args&... args) {
+    /* Get just the size first. Can't pass just nullptr, because that would
+       match the formatInto(std::FILE*) overload, can't pass a String because
+       it's guaranteed to always point to a null-terminated char array, even if
+       it's empty. */
+    const std::size_t size = formatInto(MutableStringView{}, format, args...);
+    String string{NoInit, size};
+    /* The String is created with an extra byte for the null terminator, but
+       since printf() always wants to print the null terminator, we need to
+       pass a view *including* the null terminator to it -- which is why we
+       have to create the view manually. Once we switch away from printf() this
+       workaround can be removed. */
+    formatInto(MutableStringView{string.data(), size + 1}, format, args...);
+    return string;
 }
 #endif
 
-template<class ...Args> std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, const Args&... args) {
+template<class ...Args> std::size_t formatInto(const Containers::MutableStringView& buffer, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
     return Implementation::formatInto(buffer, format, formatters, sizeof...(args));
 }

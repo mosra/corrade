@@ -188,7 +188,7 @@ by this option either), build Corrade with the option disabled.
 
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
-    @ref AndroidLogStreamBuffer, @ref formatString()
+    @ref AndroidLogStreamBuffer, @ref format(), @relativeref{Utility,print()}
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
@@ -917,6 +917,7 @@ template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>
 Same as @ref Debug, but by default writes output to standard error output.
 Thus it is possible to separate / mute @ref Debug, @ref Warning and @ref Error
 outputs.
+@see @ref printError()
 */
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
@@ -998,8 +999,10 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
 /**
 @brief Error output handler
 
-@copydetails Warning
-@see @ref Fatal
+Same as @ref Debug, but by default writes output to standard error output.
+Thus it is possible to separate / mute @ref Debug, @ref Warning and @ref Error
+outputs.
+@see @ref Fatal, @ref printError()
 */
 class CORRADE_UTILITY_EXPORT Error: public Debug {
     friend Fatal;
