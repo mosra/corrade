@@ -33,6 +33,7 @@
 
 #include <cstdio>
 
+#include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -344,7 +345,7 @@ template<class ...Args, class Array> Array format(const char* format, const Args
        away from printf() this workaround could be removed. The upcoming
        Containers::String class will probably have something similar, though
        implicit. */
-    array = Array{size + 1};
+    array = Array{NoInit, size + 1};
     formatInto(array, format, args...);
     return Array{array.release(), size};
 }
