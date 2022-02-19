@@ -39,13 +39,13 @@ check() {
 
     cd "$_rootdir/build"
     # The Tester test *needs* benchmarks enabled to pass properly
-    ctest --output-on-failure -R TestSuiteTesterTest || true
-    CORRADE_TEST_SKIP_BENCHMARKS=ON ctest --output-on-failure -j5 -E TestSuiteTesterTest || true
+    ctest --output-on-failure -R TestSuiteTesterTest
+    CORRADE_TEST_SKIP_BENCHMARKS=ON ctest --output-on-failure -j5 -E TestSuiteTesterTest
 
     cd "$_rootdir/build-release"
     # The Tester test *needs* benchmarks enabled to pass properly
-    ctest --output-on-failure -R TestSuiteTesterTest || true
-    CORRADE_TEST_SKIP_BENCHMARKS=ON ctest --output-on-failure -j5 -E TestSuiteTesterTest || true
+    ctest --output-on-failure -R TestSuiteTesterTest
+    CORRADE_TEST_SKIP_BENCHMARKS=ON ctest --output-on-failure -j5 -E TestSuiteTesterTest
 }
 
 package() {
