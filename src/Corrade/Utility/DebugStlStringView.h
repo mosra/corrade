@@ -49,6 +49,8 @@ namespace Corrade { namespace Utility {
 @m_since_latest
 */
 inline Debug& operator<<(Debug& debug, std::string_view value) {
+    /* Not using the StringView STL compatibility to avoid including
+       StringStlStringView.h which also drags in String.h */
     return debug << Containers::StringView{value.data(), value.size()};
 }
 

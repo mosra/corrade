@@ -121,9 +121,13 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
         corrade_add_test(ContainersOptionalStlTest OptionalStlTest.cpp)
-        set_target_properties(ContainersOptionalStlTest PROPERTIES
-            CORRADE_CXX_STANDARD 17
-            FOLDER "Corrade/Containers/Test")
+        corrade_add_test(ContainersStringStlViewTest StringStlViewTest.cpp)
+        set_target_properties(
+            ContainersOptionalStlTest
+            ContainersStringStlViewTest
+            PROPERTIES
+                CORRADE_CXX_STANDARD 17
+                FOLDER "Corrade/Containers/Test")
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync

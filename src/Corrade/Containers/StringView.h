@@ -181,21 +181,43 @@ affects compile times. The following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref StringView                 | ⇆ | @ref std::string
-@ref StringView                 | ⇆ | @ref std::string "const std::string"
-@ref MutableStringView          | ⇆ | @ref std::string
-@ref MutableStringView          | → | @ref std::string "const std::string"
+@ref StringView                 | ← | @ref std::string
+@ref StringView                 | ← | @ref std::string "const std::string"
+@ref StringView                 | → | @ref std::string (data copy)
+@ref StringView                 | → | @ref std::string "const std::string" (data copy)
+@ref MutableStringView          | ← | @ref std::string
+@ref MutableStringView          | → | @ref std::string (data copy)
+@ref MutableStringView          | → | @ref std::string "const std::string" (data copy)
 
 Example:
 
 @snippet Containers-stl.cpp StringView
 
-Creating a @ref std::string instance always involves an allocation and a copy,
+Creating a @ref std::string instance always involves a data copy,
 while going the other way always creates a non-owning reference without
 allocations or copies. @ref StringView / @ref MutableStringView created from a
 @ref std::string always have @ref StringViewFlag::NullTerminated set, but the
 usual conditions regarding views apply --- if the original string is modified,
 view pointer, size or the null termination property may not be valid anymore.
+
+On compilers that support C++17 and @ref std::string_view, implicit conversion
+from and to it is provided in @ref Corrade/Containers/StringStlView.h. For
+similar reasons, it's a dedicated header to avoid unconditional
+@cpp #include <string_view> @ce, but this one is even significantly heavier
+than the @ref string "<string>" include on certain implementations, so it's
+separate from a @ref std::string as well. The following table lists allowed
+conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref StringView                 | ⇆ | @ref std::string_view
+@ref MutableStringView          | → | @ref std::string_view
+
+The @ref std::string_view type doesn't have any mutable counterpart, so there's
+no possibility to create a @ref MutableStringView out of it. Because
+@ref std::string_view doesn't preserve any information about the string origin,
+neither @ref StringViewFlag::NullTerminated nor @ref StringViewFlag::Global is
+set in a @ref StringView converted from it.
 
 @experimental
 */

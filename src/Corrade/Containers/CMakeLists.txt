@@ -55,6 +55,7 @@ set(CorradeContainers_HEADERS
     StridedArrayViewStl.h
     String.h
     StringStl.h
+    StringStlView.h
     StringView.h
     Triple.h
     TripleStl.h)

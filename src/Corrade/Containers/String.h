@@ -157,17 +157,37 @@ table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref String                     | ⇆ | @ref std::string
+@ref String                     | ⇆ | @ref std::string (data copy)
 
 Example:
 
 @snippet Containers-stl.cpp String
 
 Because @ref std::string doesn't provide any way to transfer ownership of its
-underlying memory, conversion either way always involves an allocation and a
-copy. To mitigate the conversion impact, it's recommended to convert
-@ref std::string instances to @ref BasicStringView "StringView" instead where
-possible.
+underlying memory, conversion either way always involves a data copy. To
+mitigate the conversion impact, it's recommended to convert @ref std::string
+instances to @ref BasicStringView "StringView" instead where possible.
+
+On compilers that support C++17 and @ref std::string_view, *implicit*
+conversion from and to it is provided in @ref Corrade/Containers/StringStlView.h.
+For similar reasons, it's a dedicated header to avoid unconditional
+@cpp #include <string_view> @ce, but this one is even significantly heavier
+than the @ref string "<string>" include on certain implementations, so it's
+separate from a @ref std::string as well. The following table lists allowed
+conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref String                     | ← | @ref std::string_view (data copy)
+@ref String                     | → | @ref std::string_view
+
+The @ref std::string_view type doesn't have any mutable counterpart, so there's
+no differentiation for a @cpp const @ce variant. While creating a
+@ref std::string_view from a @ref String creates a non-owning reference without
+allocations or copies, converting the other way involves a data copy. To
+mitigate the conversion impact, it's recommended to convert
+@ref std::string_view instances to @ref BasicStringView "StringView" instead
+where possible.
 
 @experimental
 */

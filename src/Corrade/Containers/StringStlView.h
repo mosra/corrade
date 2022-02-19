@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_StringStl_h
-#define Corrade_Containers_StringStl_h
+#ifndef Corrade_Containers_StringStlView_h
+#define Corrade_Containers_StringStlView_h
 /*
     This file is part of Corrade.
 
@@ -27,45 +27,61 @@
 */
 
 /** @file
-@brief STL @ref std::string compatibility for @ref Corrade::Containers::String and @ref Corrade::Containers::StringView
+@brief STL @ref std::string_view compatibility for @ref Corrade::Containers::String and @ref Corrade::Containers::StringView
 @m_since_latest
 
 Including this header allows you to convert a
 @ref Corrade::Containers::String / @ref Corrade::Containers::StringView from
-and to @ref std::string. A separate
-@ref Corrade/Containers/StringStlView.h header provides compatibility with
-@ref std::string_view from C++17. See
+and to a C++17 @ref std::string_view. A separate
+@ref Corrade/Containers/StringStl.h header provides compatibility with
+@ref std::string. See
 @ref Containers-String-stl "String STL compatibility" and
 @ref Containers-BasicStringView-stl "StringView STL compatibility" for more
 information.
 */
 
+/* Unlike with Utility/StlForwardString.h, even libstdc++ 11 and libc++ 13 have
+   a full definition of std::string_view including default parameters in the
+   <string_view> header, so we can't forward-declare it. Didn't check with
+   MSVC, but I assume a similar case. */
+#include <string_view>
+
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
-#include "Corrade/Utility/StlForwardString.h"
 
 /* Listing these namespaces doesn't add anything to the docs, so don't */
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-/** @todo when this file stops getting included for backwards compatibility
-    purposes, include <string> directly and implement the functions inline to
-    avoid bloating our binaries (and especially to avoid having them polluted
-    with STL symbols) */
+/* Since the insanely huge header is included already anyway, it's not that
+   much extra pain to just have the implementations fully inline as well.
+   Better than having to compile a dedicated C++17 file just for this, bloat
+   our binaries and have their symbol tables polluted by tons of STL stuff. */
 
-template<> struct CORRADE_UTILITY_EXPORT StringConverter<std::string> {
-    static String from(const std::string& other);
-    static std::string to(const String& other);
+template<> struct StringConverter<std::string_view> {
+    static String from(std::string_view other) {
+        return String{other.data(), other.size()};
+    }
+    static std::string_view to(const String& other) {
+        return std::string_view{other.data(), other.size()};
+    }
 };
 
-template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<const char, std::string> {
-    static StringView from(const std::string& other);
-    static std::string to(StringView other);
+template<> struct StringViewConverter<const char, std::string_view> {
+    static StringView from(std::string_view other) {
+        return StringView{other.data(), other.size()};
+    }
+    static std::string_view to(StringView other) {
+        return std::string_view{other.data(), other.size()};
+    }
 };
 
-template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<char, std::string> {
-    static MutableStringView from(std::string& other);
-    static std::string to(MutableStringView other);
+/* There's no mutable variant of std::string_view, so this goes just one
+   direction */
+template<> struct StringViewConverter<char, std::string_view> {
+    static std::string_view to(MutableStringView other) {
+        return std::string_view{other.data(), other.size()};
+    }
 };
 
 }}}

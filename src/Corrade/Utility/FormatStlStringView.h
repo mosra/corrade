@@ -47,9 +47,13 @@ namespace Corrade { namespace Utility { namespace Implementation {
 
 template<> struct Formatter<std::string_view> {
     static std::size_t format(const Containers::MutableStringView& buffer, std::string_view value, int precision, FormatType type) {
+        /* Not using the StringView STL compatibility to avoid including
+           StringStlStringView.h which also drags in String.h */
         return Formatter<Containers::StringView>::format(buffer, {value.data(), value.size()}, precision, type);
     }
     static void format(std::FILE* file, std::string_view value, int precision, FormatType type) {
+        /* Not using the StringView STL compatibility to avoid including
+           StringStlStringView.h which also drags in String.h */
         return Formatter<Containers::StringView>::format(file, {value.data(), value.size()}, precision, type);
     }
 };
