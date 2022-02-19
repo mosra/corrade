@@ -27,10 +27,11 @@
 #include <sstream>
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/FormatStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 
@@ -282,28 +283,27 @@ template<class T> void TweakableParserTest::integral() {
     auto&& data = IntegralData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
-    CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
+
+    CORRADE_COMPARE(TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix())), std::make_pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralUppercase() {
     auto&& data = IntegralData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
-    CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
+
+    CORRADE_COMPARE(TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix()))), std::make_pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralError() {
     auto&& data = IntegralErrorData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = Utility::formatString(data.data, TypeTraits<T>::suffix());
 
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<T>::parse({input.data(), input.size()}).first;
+    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first;
     CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
@@ -312,8 +312,8 @@ template<class T> void TweakableParserTest::floatingPoint() {
     auto&& data = FloatingPointData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
-    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
+
+    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(parsed.first, TweakableState::Success);
     CORRADE_COMPARE(parsed.second, T(data.result));
 }
@@ -322,8 +322,8 @@ template<class T> void TweakableParserTest::floatingPointUppercase() {
     auto&& data = FloatingPointData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
-    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
+
+    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix())));
     CORRADE_COMPARE(parsed.first, TweakableState::Success);
     CORRADE_COMPARE(parsed.second, T(data.result));
 }
@@ -332,12 +332,11 @@ template<class T> void TweakableParserTest::floatingPointError() {
     auto&& data = FloatingPointErrorData[testCaseInstanceId()];
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
-    std::string input = Utility::formatString(data.data, TypeTraits<T>::suffix());
 
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<T>::parse({input.data(), input.size()}).first;
+    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first;
     CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
