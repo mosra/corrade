@@ -66,7 +66,6 @@ corrade_add_test(ContainersStridedArrayViewStlTest StridedArrayViewStlTest.cpp)
 corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersStringStlTest StringStlTest.cpp)
 corrade_add_test(ContainersStringViewTest StringViewTest.cpp LIBRARIES CorradeUtilityTestLib)
-corrade_add_test(ContainersStringViewStlTest StringViewStlTest.cpp)
 corrade_add_test(ContainersTripleTest TripleTest.cpp)
 corrade_add_test(ContainersTripleStlTest TripleStlTest.cpp)
 
@@ -110,7 +109,6 @@ set_target_properties(
     ContainersStringTest
     ContainersStringStlTest
     ContainersStringViewTest
-    ContainersStringViewStlTest
     ContainersTripleTest
     ContainersTripleStlTest
     PROPERTIES FOLDER "Corrade/Containers/Test")
