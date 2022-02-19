@@ -57,6 +57,7 @@ if(WITH_UTILITY)
         ConfigurationValue.h
         Debug.h
         DebugStl.h
+        DebugStlStringView.h
         Directory.h
         Endianness.h
         EndiannessBatch.h

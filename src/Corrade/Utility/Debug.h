@@ -76,12 +76,21 @@ Support for printing more types can be added by implementing an overload of
 To optimize compile times, the @ref Corrade/Utility/Debug.h header provides
 only support for printing builtin types, generic iterable containers and
 @ref std::pair. Printing of @ref std::string and @ref std::tuple is possible if
-you @cpp #include @ce a separate @ref Corrade/Utility/DebugStl.h header. This
+you include @ref Corrade/Utility/DebugStl.h. The support is provided in a
+separate header to avoid unconditional @cpp #include <string> @ce or
+@cpp #include <tuple> @ce, which significantly affect compile times. This
 header also provides a fallback to @ref std::ostream @cpp operator<<() @ce
 overloads, if there's no @cpp operator<<() @ce implemented for printing given
 type using @ref Debug. Note that printing @ref std::vector or @ref std::map
 containers is already possible with the generic iterable container support in
 @ref Corrade/Utility/Debug.h.
+
+On compilers that support C++17 and @ref std::string_view, support for printing
+it is provided @ref Corrade/Utility/DebugStlStringView.h. For
+similar reasons, it's a dedicated header to avoid unconditional
+@cpp #include <string_view> @ce, but this one is even significantly heavier
+than the @ref string "<string>" etc. includes on certain implementations, so
+it's separate from the others as well.
 
 @section Utility-Debug-scoped-output Scoped output redirection
 
