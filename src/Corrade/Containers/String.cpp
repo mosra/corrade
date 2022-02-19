@@ -33,7 +33,6 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StaticArray.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers {
 
