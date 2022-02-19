@@ -606,10 +606,10 @@ char* String::release() {
     char* data = _large.data;
 
     /* Create a zero-size small string to fullfil the guarantee of data() being
-       always non-null and null-terminated */
+       always non-null and null-terminated. Since this makes the string switch
+       to SSO, we also clear the deleter this way. */
     _small.data[0] = '\0';
     _small.size = SmallSize;
-
     return data;
 }
 

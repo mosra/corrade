@@ -404,7 +404,8 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Convert to an @ref ArrayView
          *
          * The resulting view has the same size as this string @ref size() ---
-         * the null terminator is not counted into it.
+         * the null terminator is not counted into it. Note that with custom
+         * deleters the returned view is not guaranteed to be actually mutable.
          */
         /*implicit*/ operator ArrayView<char>() noexcept;
         /*implicit*/ operator ArrayView<void>() noexcept; /**< @overload */
@@ -446,7 +447,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @cpp operator delete[] @ce. Can be called only if the string is not
          * stored using SSO --- see @ref Containers-String-usage-sso for more
          * information.
-         * @see @ref String(char*, std::size_t, Deleter)
+         * @see @ref String(char*, std::size_t, Deleter), @ref isSmall()
          */
         Deleter deleter() const;
 
@@ -834,7 +835,9 @@ class CORRADE_UTILITY_EXPORT String {
          * @ref Containers-String-usage-sso for more information. Deleting the
          * returned array is user responsibility --- note the string might have
          * a custom @ref deleter() and so @cpp delete[] @ce might not be always
-         * appropriate.
+         * appropriate. Note also that with custom deleters the returned
+         * pointer is not guaranteed to be actually mutable.
+         * @see @ref isSmall()
          */
         char* release();
 

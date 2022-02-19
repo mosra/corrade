@@ -157,7 +157,6 @@ struct StringTest: TestSuite::Tester {
     template<class T> void find();
 
     void release();
-
     void releaseDeleterSmall();
 };
 
@@ -253,7 +252,6 @@ StringTest::StringTest() {
               &StringTest::find<const String>,
 
               &StringTest::release,
-
               &StringTest::releaseDeleterSmall});
 }
 
