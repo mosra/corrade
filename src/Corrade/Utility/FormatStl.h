@@ -27,10 +27,13 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto()
- * @m_since{2019,10}
- * @experimental
- */
+@brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), STL @ref std::string compatibility for @ref Utility::format()
+@m_since{2019,10}
+
+Including this header also allows you to use @ref std::string in arguments to
+@ref Utility::format().
+@experimental
+*/
 
 #include <string>
 
