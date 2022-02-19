@@ -66,7 +66,7 @@ template<class ...Args> std::size_t formatInto(std::string& string, std::size_t 
 namespace Implementation {
 
 template<> struct Formatter<std::string> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const std::string& value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::MutableStringView& buffer, const std::string& value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value, int precision, FormatType type);
 };
 
