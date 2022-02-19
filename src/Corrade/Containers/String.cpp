@@ -281,6 +281,26 @@ String::operator ArrayView<void>() noexcept {
     return {const_cast<char*>(data.first()), data.second()};
 }
 
+String::operator Array<char>() && {
+    Array<char> out;
+    if(_small.size & 0x80) {
+        const std::size_t size = _small.size & ~SmallSizeMask;
+        out = Array<char>{Corrade::NoInit, size};
+        std::memcpy(out.data(), _small.data, size);
+    } else {
+        out = Array<char>{_large.data, _large.size, deleter()};
+    }
+
+    /* Same as in release(). Create a zero-size small string to fullfil the
+       guarantee of data() being always non-null and null-terminated. Since
+       this makes the string switch to SSO, we also clear the deleter this
+       way. */
+    _small.data[0] = '\0';
+    _small.size = SmallSize;
+
+    return out;
+}
+
 const char* String::data() const {
     if(_small.size & 0x80) return _small.data;
     return _large.data;

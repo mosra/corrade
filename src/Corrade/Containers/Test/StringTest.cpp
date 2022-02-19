@@ -108,6 +108,9 @@ struct StringTest: TestSuite::Tester {
     void convertArrayViewSmall();
     void convertMutableArrayView();
     void convertMutableArrayViewSmall();
+    void convertArray();
+    void convertArraySmall();
+    void convertArrayCustomDeleter();
     void convertExternal();
 
     void compare();
@@ -199,6 +202,9 @@ StringTest::StringTest() {
               &StringTest::convertArrayViewSmall,
               &StringTest::convertMutableArrayView,
               &StringTest::convertMutableArrayViewSmall,
+              &StringTest::convertArray,
+              &StringTest::convertArraySmall,
+              &StringTest::convertArrayCustomDeleter,
               &StringTest::convertExternal,
 
               &StringTest::compare,
@@ -823,6 +829,62 @@ void StringTest::convertMutableArrayViewSmall() {
     ArrayView<void> aaVoidView = aa;
     CORRADE_COMPARE(aaVoidView.size(), aa.size());
     CORRADE_COMPARE(aaVoidView.data(), aa.data());
+}
+
+void StringTest::convertArray() {
+    String a = "Allocated hello\0for a verbose world"_s;
+    Array<char> array = std::move(a);
+    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "Allocated hello\0for a verbose world"_s);
+    CORRADE_COMPARE(array.deleter(), nullptr);
+
+    /* State should be the same as with release(), so of a default-constructed
+       instance -- with zero size, but a non-null null-terminated data */
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.data()[0], '\0');
+}
+
+void StringTest::convertArraySmall() {
+    String a = "this\0world"_s;
+    Array<char> array = std::move(a);
+    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "this\0world"_s);
+    CORRADE_COMPARE(array.deleter(), nullptr);
+
+    /* State should be the same as with release(), so of a default-constructed
+       instance -- with zero size, but a non-null null-terminated data */
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.data()[0], '\0');
+
+    /* Bypassing SSO */
+    String aa{AllocatedInit, "this\0world"_s};
+    Array<char> aarray = std::move(aa);
+    CORRADE_COMPARE(StringView{ArrayView<const char>(aarray)}, "this\0world"_s);
+    CORRADE_COMPARE(aarray.deleter(), nullptr);
+
+    CORRADE_VERIFY(aa.isSmall());
+    CORRADE_COMPARE(aa.size(), 0);
+    CORRADE_VERIFY(aa.data());
+    CORRADE_COMPARE(aa.data()[0], '\0');
+}
+
+void StringTest::convertArrayCustomDeleter() {
+    const char data[] = "Statically allocated hello\0for a verbose world";
+    auto deleter = [](char*, std::size_t){};
+
+    String a{data, Containers::arraySize(data) - 1, deleter};
+    Array<char> array = std::move(a);
+    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "Statically allocated hello\0for a verbose world"_s);
+    CORRADE_COMPARE(array.deleter(), deleter);
+
+    /* State should be the same as with release(), so of a default-constructed
+       instance -- with zero size, but a non-null null-terminated data */
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.data()[0], '\0');
 }
 
 void StringTest::convertExternal() {

@@ -411,6 +411,19 @@ class CORRADE_UTILITY_EXPORT String {
         /*implicit*/ operator ArrayView<void>() noexcept; /**< @overload */
 
         /**
+         * @brief Move-convert to an @ref Array
+         *
+         * The data and the corresponding @ref deleter() is transferred to the
+         * returned array. In case of a SSO, a copy of the string is allocated
+         * including the null terminator and a default deleter is used. The
+         * string then resets data pointer, size and deleter to be equivalent
+         * to a default-constructed instance. Note that with custom deleters
+         * the returned array is not guaranteed to be actually mutable.
+         * @see @ref release(), @ref isSmall()
+         */
+        /*implicit*/ operator Array<char>() &&;
+
+        /**
          * @brief Convert the view to external representation
          *
          * @see @ref Containers-String-stl
@@ -837,7 +850,7 @@ class CORRADE_UTILITY_EXPORT String {
          * a custom @ref deleter() and so @cpp delete[] @ce might not be always
          * appropriate. Note also that with custom deleters the returned
          * pointer is not guaranteed to be actually mutable.
-         * @see @ref isSmall()
+         * @see @ref operator Array<char>(), @ref isSmall()
          */
         char* release();
 
