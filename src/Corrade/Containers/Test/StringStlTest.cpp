@@ -119,18 +119,21 @@ void StringStlTest::convertViewFromStlString() {
     const std::string a{"hello\0!!!", 9};
     StringView b = a;
     CORRADE_COMPARE(b, "hello\0!!!"_s);
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(a.data()));
 }
 
 void StringStlTest::convertViewFromStlStringEmpty() {
     const std::string a;
     StringView b = a;
     CORRADE_COMPARE(b, ""_s);
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(a.data()));
 }
 
 void StringStlTest::convertMutableViewFromStlString() {
     std::string a{"hello\0!!!", 9};
     MutableStringView b = a;
     CORRADE_COMPARE(b, "hello\0!!!"_s);
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(a.data()));
 
     /* Only a mutable string instance should be convertible to a mutable view */
     CORRADE_VERIFY(std::is_convertible<std::string&, MutableStringView>::value);
@@ -141,6 +144,7 @@ void StringStlTest::convertMutableViewFromStlStringEmpty() {
     std::string a;
     MutableStringView b = a;
     CORRADE_COMPARE(b, ""_s);
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(a.data()));
 }
 
 }}}}
