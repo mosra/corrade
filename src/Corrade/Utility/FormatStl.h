@@ -31,7 +31,8 @@
 @m_since{2019,10}
 
 Including this header also allows you to use @ref std::string in arguments to
-@ref Utility::format().
+@ref Utility::format(). A separate @ref Corrade/Utility/FormatStlStringView.h
+header provides compatibility with @ref std::string_view from C++17.
 @experimental
 */
 

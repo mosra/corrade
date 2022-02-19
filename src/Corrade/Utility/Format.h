@@ -88,6 +88,7 @@ In order to write a literal curly brace to the output, simply double it:
 | @ref Containers::StringView, \n @ref Containers::MutableStringView "MutableStringView", @ref Containers::String "String" | Written as a sequence of @ref Containers::StringView::size() characters
 | @ref Containers::ArrayView "Containers::ArrayView<const char>" @m_class{m-label m-danger} **deprecated** | Written as a sequence of @ref Containers::ArrayView::size() characters. \n Deprecated, use @ref Containers::StringView instead.
 | @ref std::string | Written as a sequence of @ref std::string::size() characters \n (@cpp #include @ce @ref Corrade/Utility/FormatStl.h in addition)
+| @ref std::string_view | Written as a sequence of @ref std::string_view::size() characters \n (@cpp #include @ce @ref Corrade/Utility/FormatStlStringView.h in addition)
 
 # Advanced formatting options
 

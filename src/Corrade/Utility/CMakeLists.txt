@@ -62,6 +62,7 @@ if(WITH_UTILITY)
         EndiannessBatch.h
         Format.h
         FormatStl.h
+        FormatStlStringView.h
         Macros.h
         Memory.h
         Move.h
