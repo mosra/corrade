@@ -191,7 +191,7 @@ namespace Implementation {
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
-    CORRADE_HAS_TYPE(HasMemberCStr, decltype(std::declval<T>().c_str()));
+    CORRADE_HAS_TYPE(HasMemberSubstr, decltype(std::declval<T>().substr()));
 }
 
 /**
@@ -221,11 +221,11 @@ template<class T> using IsIterable = std::integral_constant<bool,
 @brief Traits class for checking whether given type is string-like
 @m_since{2019,10}
 
-Equivalent to @ref std::true_type if the class is has a @cpp c_str() @ce
+Equivalent to @ref std::true_type if the class is has a @cpp substr() @ce
 member or is a @ref Containers::BasicStringView "Containers::[Mutable]StringView"
 / @ref Containers::String. Otherwise equivalent to @ref std::false_type. Useful
-for dispatching on the @ref std::string type without having to include or
-@ref StlForwardString.h "forward-declare" it.
+for dispatching on the @ref std::string or the C++17 @ref std::string_view type
+without having to include or @ref StlForwardString.h "forward-declare" them.
 
 Used together with @ref IsIterable by @ref Debug to decide whether given type
 should be printed as a container of its contents or as a whole.
@@ -233,7 +233,7 @@ should be printed as a container of its contents or as a whole.
 */
 template<class T> using IsStringLike = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    Implementation::HasMemberCStr<T>::value || std::is_same<typename std::decay<T>::type, Containers::StringView>::value || std::is_same<typename std::decay<T>::type, Containers::MutableStringView>::value || std::is_same<typename std::decay<T>::type, Containers::String>::value
+    Implementation::HasMemberSubstr<T>::value || std::is_same<typename std::decay<T>::type, Containers::StringView>::value || std::is_same<typename std::decay<T>::type, Containers::MutableStringView>::value || std::is_same<typename std::decay<T>::type, Containers::String>::value
     #else
     implementation-specific
     #endif

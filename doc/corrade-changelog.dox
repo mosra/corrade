@@ -214,6 +214,8 @@ namespace Corrade {
     @ref Containers::String using @ref Utility::format()
 -   Creating an empty path with @ref Utility::Directory::mkpath() now succeeds
     because it makes no sense to fail for such case
+-   @ref Utility::IsStringLike now recognizes also C++17 @ref std::string_view
+    by checking for a @cpp substr() @ce member instead of @cpp c_str() @ce
 -   The @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro is now defined on
     Emscripten always, because even if it's @cpp long double @ce is 80-bit
     sometimes, it doesn't actually have the precision of a 80-bit
@@ -373,6 +375,10 @@ namespace Corrade {
     @ref Containers::MutableStringView instead of @ref Containers::ArrayView.
     The types are however implicitly convertible and thus breakages are not
     expected in majority of existing code.
+-   Printing a C++17 @ref std::string_view with @ref Utility::Debug now
+    requires the @ref Corrade/Utility/DebugStlStringView.h include. Before it
+    was printed as a numeric container due to @ref Utility::IsStringLike not
+    recognizing it.
 
 @subsection corrade-changelog-latest-documentation Documentation
 
