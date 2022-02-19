@@ -118,6 +118,8 @@ struct FormatTest: TestSuite::Tester {
     void typeForString();
     void invalidType();
 
+    /** @todo once we get rid of iostreams, move this and other STL stuff to
+        dedicated FormatStlTest */
     void stlString();
     void stlStringEmpty();
     void stlStringIntoAppend();

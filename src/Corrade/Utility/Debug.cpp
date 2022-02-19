@@ -636,14 +636,16 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
         Debug::Flag::Packed,
         Debug::Flag::Color});
 }
+#endif
 
-/* For some reason Doxygen can't match this with the declaration in DebugStl.h */
+/* For some reason Doxygen can't match these with the declaration in DebugStl.h */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/** @todo when we get rid of iostreams, make this inline in DebugStl.h so we
+    don't bloat our binaries with STL symbols */
 Debug& operator<<(Debug& debug, const std::string& value) {
     return debug.print(value);
 }
-#endif
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Debug& operator<<(Debug& debug, Implementation::DebugOstreamFallback&& value) {
     return debug.print(value);
 }

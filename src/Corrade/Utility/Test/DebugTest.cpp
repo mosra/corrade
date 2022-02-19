@@ -50,6 +50,8 @@ struct DebugTest: TestSuite::Tester {
 
     void debug();
     void string();
+    /** @todo once we get rid of iostreams, move this and other STL stuff to
+        dedicated DebugStlTest */
     void stringStl();
     template<class T> void ints();
     template<class T> void floats();
@@ -986,9 +988,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":978: hello\n"
-        __FILE__ ":980: and this is from another line\n"
-        __FILE__ ":982\n"
+        __FILE__ ":980: hello\n"
+        __FILE__ ":982: and this is from another line\n"
+        __FILE__ ":984\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),
