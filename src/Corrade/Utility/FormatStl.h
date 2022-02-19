@@ -34,6 +34,7 @@
 
 #include <string>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Format.h"
 
 namespace Corrade { namespace Utility {
@@ -66,11 +67,25 @@ template<class ...Args> std::size_t formatInto(std::string& string, std::size_t 
 namespace Implementation {
 
 template<> struct Formatter<std::string> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::MutableStringView& buffer, const std::string& value, int precision, FormatType type);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value, int precision, FormatType type);
+    static std::size_t format(const Containers::MutableStringView& buffer, const std::string& value, int precision, FormatType type) {
+        /* Not using the StringView STL compatibility to avoid including
+           StringStl.h which also drags in String.h */
+        return Formatter<Containers::StringView>::format(buffer, {value.data(), value.size()}, precision, type);
+    }
+    static void format(std::FILE* file, const std::string& value, int precision, FormatType type) {
+        /* Not using the StringView STL compatibility to avoid including
+           StringStl.h which also drags in String.h */
+        return Formatter<Containers::StringView>::format(file, {value.data(), value.size()}, precision, type);
+    }
 };
 
-CORRADE_UTILITY_EXPORT std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
+inline std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formatterCount) {
+    const std::size_t size = formatInto(nullptr, format, formatters, formatterCount);
+    if(buffer.size() < offset + size) buffer.resize(offset + size);
+    /* Under C++11, the character storage always includes the null terminator
+       and printf() always wants to print the null terminator, so allow it */
+    return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
+}
 
 }
 

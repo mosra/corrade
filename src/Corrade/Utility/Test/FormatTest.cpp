@@ -119,6 +119,7 @@ struct FormatTest: TestSuite::Tester {
     void invalidType();
 
     void stlString();
+    void stlStringEmpty();
     void stlStringIntoAppend();
     void stlStringIntoInsert();
 
@@ -208,6 +209,7 @@ FormatTest::FormatTest() {
               &FormatTest::invalidType,
 
               &FormatTest::stlString,
+              &FormatTest::stlStringEmpty,
               &FormatTest::stlStringIntoAppend,
               &FormatTest::stlStringIntoInsert});
 
@@ -925,10 +927,16 @@ void FormatTest::invalidType() {
 }
 
 void FormatTest::stlString() {
+    /* This tests both string input and string output, yes, lazy */
     CORRADE_COMPARE(formatString("hello {}", std::string{"worlds", 5}),
         "hello world");
     CORRADE_COMPARE(formatString("hello {}", std::string{"world\0, i guess?", 16}),
         (std::string{"hello world\0, i guess?", 22}));
+}
+
+void FormatTest::stlStringEmpty() {
+    /* Empty string should not cause any issues with data access */
+    CORRADE_COMPARE(formatString("hello{}!", std::string{}), "hello!");
 }
 
 void FormatTest::stlStringIntoAppend() {

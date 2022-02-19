@@ -25,13 +25,11 @@
 */
 
 #include "Format.h"
-#include "FormatStl.h"
 
 #include <cstring>
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
-#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/TypeTraits.h"
 
@@ -250,12 +248,6 @@ void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file,
     Formatter<Containers::StringView>::format(file, value, precision, type);
 }
 #endif
-std::size_t Formatter<std::string>::format(const Containers::MutableStringView& buffer, const std::string& value, const int precision, const FormatType type) {
-    return Formatter<Containers::StringView>::format(buffer, value, precision, type);
-}
-void Formatter<std::string>::format(std::FILE* const file, const std::string& value, const int precision, const FormatType type) {
-    return Formatter<Containers::StringView>::format(file, value, precision, type);
-}
 
 namespace {
 
@@ -436,14 +428,6 @@ std::size_t formatInto(const Containers::MutableStringView& buffer, const char* 
         bufferOffset += formatter.size;
     }, format, Containers::arrayView(formatters, formatterCount));
     return bufferOffset;
-}
-
-std::size_t formatInto(std::string& buffer, const std::size_t offset, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
-    const std::size_t size = formatInto(nullptr, format, formatters, formatterCount);
-    if(buffer.size() < offset + size) buffer.resize(offset + size);
-    /* Under C++11, the character storage always includes the null terminator
-       and printf() always wants to print the null terminator, so allow it */
-    return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
 }
 
 void formatInto(std::FILE* const file, const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
