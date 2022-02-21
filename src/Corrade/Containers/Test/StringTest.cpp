@@ -161,6 +161,14 @@ struct StringTest: TestSuite::Tester {
 
     void release();
     void releaseDeleterSmall();
+
+    void defaultDeleter();
+    void customDeleter();
+    /* Unlike with Array, it's not possible to create a nullptr String with a
+       custom deleter in order to guarantee that it always points to a
+       null-terminated string, thus there's no customDeleterNullData() */
+    void customDeleterZeroSize();
+    void customDeleterMovedOutInstance();
 };
 
 StringTest::StringTest() {
@@ -258,7 +266,12 @@ StringTest::StringTest() {
               &StringTest::find<const String>,
 
               &StringTest::release,
-              &StringTest::releaseDeleterSmall});
+              &StringTest::releaseDeleterSmall,
+
+              &StringTest::defaultDeleter,
+              &StringTest::customDeleter,
+              &StringTest::customDeleterZeroSize,
+              &StringTest::customDeleterMovedOutInstance});
 }
 
 template<class T> struct ConstTraits;
@@ -1724,6 +1737,78 @@ void StringTest::releaseDeleterSmall() {
     CORRADE_COMPARE(out.str(),
         "Containers::String::deleter(): cannot call on a SSO instance\n"
         "Containers::String::release(): cannot call on a SSO instance\n");
+}
+
+void StringTest::defaultDeleter() {
+    String a{Corrade::ValueInit, 50};
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(a.deleter() == nullptr);
+}
+
+int CustomDeleterCallCount = 0;
+
+void StringTest::customDeleter() {
+    CustomDeleterCallCount = 0;
+    char data[26]{'\xfc'};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        String a{data, 25, [](char* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], '\xfc');
+            CORRADE_COMPARE(size, 25);
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_VERIFY(a.data() == data);
+        CORRADE_COMPARE(a.size(), 25);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void StringTest::customDeleterZeroSize() {
+    CustomDeleterCallCount = 0;
+    /* Zero size forces us to have data[0] a null terminator, so use the second
+       element for an "expected content" check */
+    char data[26]{0, '\xfc'};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        String a{data, 0, [](char* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[1], '\xfc');
+            CORRADE_COMPARE(size, 0);
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_VERIFY(a.data() == data);
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* The deleter should unconditionally get called here as well, consistently
+       with what Array does */
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void StringTest::customDeleterMovedOutInstance() {
+    CustomDeleterCallCount = 0;
+    char data[26]{};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        String a{data, 25, [](char*, std::size_t) {
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+
+        String b = std::move(a);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* The deleter got reset to nullptr in a, which means the function gets
+       called only once, consistently with what Array does */
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
 }
 
 }}}}

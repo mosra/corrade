@@ -103,9 +103,10 @@ string) are guaranteed to be null-terminated, which means a conversion to
 As with @ref BasicStringView "StringView", the class is implicitly convertible
 to @ref ArrayView. In addition it's also move-convertible to @ref Array, transferring the ownership of the internal data array to it. Ownership transfer
 in the other direction is not provided because it's not possible to implicitly
-guarantee null termination of the input @ref Array --- use the explicit
-@ref String(char*, std::size_t, Deleter) constructor together with
-@ref Array::release() in that case.
+guarantee null termination of the input @ref Array. In that case use the
+explicit @ref String(char*, std::size_t, Deleter) constructor together with
+@ref Array::release() and @ref Array::deleter(). See also
+@ref Containers-String-usage-wrapping below.
 
 @subsection Containers-String-usage-sso Small string optimization
 
@@ -146,6 +147,18 @@ initialization constructors are provided, similarly to the @ref Array class:
 -   @ref String(NoInitT, std::size_t) keeps the contents uninitialized, except
     for the null terminator. Equivalent to @cpp new char[size + 1] @ce followed
     by @cpp string[size] = '\0' @ce.
+
+@subsection Containers-String-usage-wrapping Wrapping externally allocated strings
+
+Similarly to an @ref Array, by default the class makes all allocations using
+@cpp operator new[] @ce and deallocates using @cpp operator delete[] @ce. It's
+however also possible to wrap an externally allocated string using
+@ref String(char*, std::size_t, Deleter) together with specifying which
+function to use for deallocation.
+
+For example, properly deallocating a string allocated using @ref std::malloc():
+
+@snippet Containers.cpp String-usage-wrapping
 
 @section Containers-String-stl STL compatibility
 
@@ -309,7 +322,7 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Take ownership of an external data array
-         * @param data      String
+         * @param data      String. Can't be @cpp nullptr @ce.
          * @param size      Size of the string, excluding the null terminator
          * @param deleter   Deleter. Use @cpp nullptr @ce for the standard
          *      @cpp delete[] @ce.
@@ -318,9 +331,21 @@ class CORRADE_UTILITY_EXPORT String {
          * strings, the @p data array is expected to be null-terminated (which
          * implies @p data *can't* be @cpp nullptr @ce), but the null
          * terminator not being included in @p size. For consistency and
-         * interoperability with @ref Array this in turn means the size passed
-         * to @p deleter is one byte less than the actual memory size, and if
-         * the deleter does sized deallocation, it has to account for that.
+         * interoperability with @ref Array (i.e., an empty string turning to a
+         * zero-sized array) this in turn means the size passed to @p deleter
+         * is one byte less than the actual memory size, and if the deleter
+         * does sized deallocation, it has to account for that.
+         *
+         * The @p deleter will be *unconditionally* called on destruction with
+         * @p data and @p size as an argument. In particular, it will be also
+         * called if @p size is @cpp 0 @ce (@p data isn't allowed to be
+         * @cpp nullptr @ce).
+         *
+         * In case of a moved-out instance, the deleter gets reset to a
+         * default-constructed value alongside the array pointer and size. It
+         * effectively means @cpp delete[] nullptr @ce gets called when
+         * destructing a moved-out instance (which is a no-op).
+         * @see @ref Containers-String-usage-wrapping
          */
         explicit String(char* data, std::size_t size, Deleter deleter) noexcept;
 

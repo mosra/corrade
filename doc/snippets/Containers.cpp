@@ -1155,4 +1155,18 @@ static_cast<void>(a);
 static_cast<void>(b);
 }
 
+{
+std::size_t size{};
+/* [String-usage-wrapping] */
+{
+    /* Extra space for a null terminator */
+    char* data = reinterpret_cast<char*>(std::malloc(size + 1));
+
+    // Will call std::free() on destruction
+    Containers::String string{data, size,
+        [](char* data, std::size_t) { std::free(data); }};
+}
+/* [String-usage-wrapping] */
+}
+
 }
