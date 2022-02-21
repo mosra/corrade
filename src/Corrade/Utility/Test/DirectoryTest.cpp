@@ -1149,7 +1149,7 @@ void DirectoryTest::fileSize() {
 void DirectoryTest::fileSizeEmpty() {
     const std::string empty = Directory::join(_testDir, "dir/dummy");
     CORRADE_VERIFY(Directory::exists(empty));
-    CORRADE_VERIFY(!Directory::read(empty));
+    CORRADE_COMPARE(Directory::fileSize(empty), 0);
 }
 
 void DirectoryTest::fileSizeNonSeekable() {
@@ -1157,9 +1157,10 @@ void DirectoryTest::fileSizeNonSeekable() {
     #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
         !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
         !defined(__NetBSD__) && !defined(__DragonFly__)
-    /** @todo Test more thoroughly than this */
-    const auto data = Directory::read("/proc/loadavg");
-    CORRADE_VERIFY(!data.empty());
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::fileSize("/proc/loadavg"));
+    CORRADE_COMPARE(out.str(), "Utility::Directory::fileSize(): /proc/loadavg is not seekable\n");
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
