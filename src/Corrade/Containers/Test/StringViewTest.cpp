@@ -301,8 +301,8 @@ void StringViewTest::constructConstexpr() {
     CORRADE_COMPARE(size, 6);
     CORRADE_COMPARE(flags, StringViewFlag::Global|StringViewFlag::NullTerminated);
     {
-        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
-        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds. Fixed in 2022 19.31.");
         #endif
         CORRADE_COMPARE(data, string);
     }
@@ -473,8 +473,8 @@ void StringViewTest::convertExternalView() {
     constexpr ConstStrView ca{cdata, 12};
     CORRADE_COMPARE(ca.data, StringView{"hello world!"});
     {
-        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
-        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds. Fixed in 2022 19.31.");
         #endif
         CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
     }
@@ -488,8 +488,8 @@ void StringViewTest::convertExternalView() {
     StringView cb = ca;
     CORRADE_COMPARE(cb, StringView{"hello world!"});
     {
-        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
-        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds. Fixed in 2022 19.31.");
         #endif
         CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
     }
@@ -503,8 +503,8 @@ void StringViewTest::convertExternalView() {
     ConstStrView cc = cb;
     CORRADE_COMPARE(cc.data, StringView{"hello world!"});
     {
-        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && defined(_DEBUG)
-        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds.");
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds. Fixed in 2022 19.31.");
         #endif
         CORRADE_COMPARE(static_cast<const void*>(ca.data), cdata);
     }
