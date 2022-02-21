@@ -42,13 +42,6 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    template<class T> struct DefaultDeleter {
-        T operator()() const { return T{}; }
-    };
-    template<class T> struct DefaultDeleter<void(*)(T*, std::size_t)> {
-        void(*operator()() const)(T*, std::size_t) { return nullptr; }
-    };
-
     template<class T, class D> struct CallDeleter {
         void operator()(D deleter, T* data, std::size_t size) const {
             deleter(data, size);
@@ -319,8 +312,7 @@ class Array {
            C++. */
         template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
         #endif
-            /* GCC <=4.8 breaks on _deleter{} */
-            _data{nullptr}, _size{0}, _deleter(Implementation::DefaultDeleter<D>{}()) {}
+            _data{nullptr}, _size{0}, _deleter{} {}
 
         /**
          * @brief Default constructor
@@ -328,8 +320,7 @@ class Array {
          * Creates a zero-sized array. Move an @ref Array with a nonzero size
          * onto the instance to make it useful.
          */
-        /* GCC <=4.8 breaks on _deleter{} */
-        /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter(Implementation::DefaultDeleter<D>{}()) {}
+        /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{} {}
 
         /**
          * @brief Construct a default-initialized array
@@ -423,7 +414,7 @@ class Array {
          * custom deleters and @ref ArrayView for non-owning array wrapper.
          */
         /* GCC <=4.8 breaks on _deleter{} */
-        explicit Array(T* data, std::size_t size, D deleter = Implementation::DefaultDeleter<D>{}()): _data{data}, _size{size}, _deleter(deleter) {}
+        explicit Array(T* data, std::size_t size, D deleter = {}): _data{data}, _size{size}, _deleter(deleter) {}
 
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
