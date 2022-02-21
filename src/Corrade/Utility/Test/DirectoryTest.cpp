@@ -160,14 +160,17 @@ struct DirectoryTest: TestSuite::Tester {
     #endif
 
     void map();
+    void mapEmpty();
     void mapNonexistent();
     void mapUtf8();
 
     void mapRead();
+    void mapReadEmpty();
     void mapReadNonexistent();
     void mapReadUtf8();
 
     void mapWrite();
+    void mapWriteEmpty();
     void mapWriteNoPermission();
     void mapWriteUtf8();
 
@@ -290,14 +293,17 @@ DirectoryTest::DirectoryTest() {
     #endif
 
     addTests({&DirectoryTest::map,
+              &DirectoryTest::mapEmpty,
               &DirectoryTest::mapNonexistent,
               &DirectoryTest::mapUtf8,
 
               &DirectoryTest::mapRead,
+              &DirectoryTest::mapReadEmpty,
               &DirectoryTest::mapReadNonexistent,
               &DirectoryTest::mapReadUtf8,
 
               &DirectoryTest::mapWrite,
+              &DirectoryTest::mapWriteEmpty,
               &DirectoryTest::mapWriteNoPermission,
               &DirectoryTest::mapWriteUtf8});
 
@@ -1499,6 +1505,30 @@ void DirectoryTest::map() {
     #endif
 }
 
+void DirectoryTest::mapEmpty() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::string file = Directory::join(_writeTestDir, "mappedEmpty");
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    Directory::write(file, nullptr);
+
+    {
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(file);
+        CORRADE_COMPARE_AS(mappedFile,
+            Containers::arrayView<char>({}),
+            TestSuite::Compare::Container);
+
+        /* Implicit unmap */
+    }
+
+    /* The file should be still as empty as before */
+    CORRADE_COMPARE_AS(file,
+        "",
+        TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
 void DirectoryTest::mapNonexistent() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
@@ -1531,6 +1561,19 @@ void DirectoryTest::mapRead() {
         const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
         CORRADE_COMPARE_AS(mappedFile,
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
+            TestSuite::Compare::Container);
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapReadEmpty() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    {
+        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "dir/dummy"));
+        CORRADE_COMPARE_AS(mappedFile,
+            Containers::arrayView<char>({}),
             TestSuite::Compare::Container);
     }
     #else
@@ -1575,6 +1618,20 @@ void DirectoryTest::mapWrite() {
     }
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedWriteFile"),
         data,
+        TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapWriteEmpty() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    {
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteEmpty"), 0);
+        CORRADE_COMPARE(mappedFile.size(), 0);
+    }
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedWriteEmpty"),
+        "",
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");

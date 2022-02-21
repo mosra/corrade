@@ -854,9 +854,13 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     const std::size_t size = lseek(fd, 0, SEEK_END);
     lseek(fd, currentPos, SEEK_SET);
 
-    /* Map the file */
-    char* data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0));
-    if(data == MAP_FAILED) {
+    /* Map the file. Can't call mmap() with a zero size, so if the file is
+       empty just set the pointer to null -- but for consistency keep the fd
+       open and let it be handled by the deleter. Array guarantees that deleter
+       gets called even in case of a null data. */
+    char* data;
+    if(!size) data = nullptr;
+    else if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         close(fd);
         Error{} << "Utility::Directory::map(): can't map the file";
         return nullptr;
@@ -878,9 +882,13 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     const std::size_t size = lseek(fd, 0, SEEK_END);
     lseek(fd, currentPos, SEEK_SET);
 
-    /* Map the file */
-    const char* data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0));
-    if(data == MAP_FAILED) {
+    /* Map the file. Can't call mmap() with a zero size, so if the file is
+       empty just set the pointer to null -- but for consistency keep the fd
+       open and let it be handled by the deleter. Array guarantees that deleter
+       gets called even in case of a null data. */
+    const char* data;
+    if(!size) data = nullptr;
+    else if((data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         close(fd);
         Error() << "Utility::Directory::mapRead(): can't map the file";
         return nullptr;
@@ -889,7 +897,7 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
 }
 
-Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::size_t size) {
+Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
@@ -898,26 +906,34 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::s
         return nullptr;
     }
 
-    /* Resize the file to requested size by seeking one byte before */
-    if(lseek(fd, size - 1, SEEK_SET) == -1) {
-        close(fd);
-        Error{} << "Utility::Directory::mapWrite(): can't seek to resize the file";
-        return nullptr;
-    }
+    /* Can't seek, write or mmap() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the fd open and
+       let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    char* data;
+    if(!size) {
+         data = nullptr;
+    } else {
+        /* Resize the file to requested size by seeking one byte before */
+        if(lseek(fd, size - 1, SEEK_SET) == -1) {
+            close(fd);
+            Error{} << "Utility::Directory::mapWrite(): can't seek to resize the file";
+            return nullptr;
+        }
 
-    /* And then writing a zero byte on that position */
-    if(::write(fd, "", 1) != 1) {
-        close(fd);
-        Error{} << "Utility::Directory::mapWrite(): can't write to resize the file";
-        return nullptr;
-    }
+        /* And then writing a zero byte on that position */
+        if(::write(fd, "", 1) != 1) {
+            close(fd);
+            Error{} << "Utility::Directory::mapWrite(): can't write to resize the file";
+            return nullptr;
+        }
 
-    /* Map the file */
-    char* data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0));
-    if(data == MAP_FAILED) {
-        close(fd);
-        Error{} << "Utility::Directory::mapWrite(): can't map the file";
-        return nullptr;
+        /* Map the file */
+        if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
+            close(fd);
+            Error{} << "Utility::Directory::mapWrite(): can't map the file";
+            return nullptr;
+        }
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
@@ -939,24 +955,33 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
         return nullptr;
     }
 
-    /* Create the file mapping */
-    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr);
-    if(!hMap) {
-        Error() << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
-        CloseHandle(hFile);
-        return nullptr;
-    }
-
     /* Get file size */
-    const size_t size = GetFileSize(hFile, nullptr);
+    const std::size_t size = GetFileSize(hFile, nullptr);
 
-    /* Map the file */
-    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0));
-    if(!data) {
-        Error() << "Utility::Directory::map(): can't map the file:" << GetLastError();
-        CloseHandle(hMap);
-        CloseHandle(hFile);
-        return nullptr;
+    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the handle open
+       and let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    HANDLE hMap;
+    char* data;
+    if(!size) {
+        hMap = {};
+        data = nullptr;
+    } else {
+        /* Create the file mapping */
+        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr))) {
+            Error{} << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
+            CloseHandle(hFile);
+            return nullptr;
+        }
+
+        /* Map the file */
+        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
+            Error{} << "Utility::Directory::map(): can't map the file:" << GetLastError();
+            CloseHandle(hMap);
+            CloseHandle(hFile);
+            return nullptr;
+        }
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
@@ -971,30 +996,39 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
         return nullptr;
     }
 
-    /* Create the file mapping */
-    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
-    if(!hMap) {
-        Error() << "Utility::Directory::mapRead(): can't create the file mapping:" << GetLastError();
-        CloseHandle(hFile);
-        return nullptr;
-    }
-
     /* Get file size */
-    const size_t size = GetFileSize(hFile, nullptr);
+    const std::size_t size = GetFileSize(hFile, nullptr);
 
-    /* Map the file */
-    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0));
-    if(!data) {
-        Error() << "Utility::Directory::mapRead(): can't map the file:" << GetLastError();
-        CloseHandle(hMap);
-        CloseHandle(hFile);
-        return nullptr;
+    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the handle open
+       and let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    HANDLE hMap;
+    char* data;
+    if(!size) {
+        hMap = {};
+        data = nullptr;
+    } else {
+        /* Create the file mapping */
+        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr))) {
+            Error{} << "Utility::Directory::mapRead(): can't create the file mapping:" << GetLastError();
+            CloseHandle(hFile);
+            return nullptr;
+        }
+
+        /* Map the file */
+        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)))) {
+            Error{} << "Utility::Directory::mapRead(): can't map the file:" << GetLastError();
+            CloseHandle(hMap);
+            CloseHandle(hFile);
+            return nullptr;
+        }
     }
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
 }
 
-Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::size_t size) {
+Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     HANDLE hFile = CreateFileW(widen(filename).data(),
@@ -1004,21 +1038,30 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::s
         return nullptr;
     }
 
-    /* Create the file mapping */
-    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr);
-    if(!hMap) {
-        Error() << "Utility::Directory::mapWrite(): can't create the file mapping:" << GetLastError();
-        CloseHandle(hFile);
-        return nullptr;
-    }
+    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the handle open
+       and let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    HANDLE hMap;
+    char* data;
+    if(!size) {
+        hMap = {};
+        data = nullptr;
+    } else {
+        /* Create the file mapping */
+        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr))) {
+            Error{} << "Utility::Directory::mapWrite(): can't create the file mapping:" << GetLastError();
+            CloseHandle(hFile);
+            return nullptr;
+        }
 
-    /* Map the file */
-    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0));
-    if(!data) {
-        Error() << "Utility::Directory::mapWrite(): can't map the file:" << GetLastError();
-        CloseHandle(hMap);
-        CloseHandle(hFile);
-        return nullptr;
+        /* Map the file */
+        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
+            Error{} << "Utility::Directory::mapWrite(): can't map the file:" << GetLastError();
+            CloseHandle(hMap);
+            CloseHandle(hFile);
+            return nullptr;
+        }
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
