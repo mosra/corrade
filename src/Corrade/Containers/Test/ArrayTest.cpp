@@ -110,8 +110,14 @@ struct ArrayTest: TestSuite::Tester {
 
     void defaultDeleter();
     void customDeleter();
+    void customDeleterNullData();
+    void customDeleterZeroSize();
+    void customDeleterMovedOutInstance();
     void customDeleterType();
     void customDeleterTypeConstruct();
+    void customDeleterTypeNullData();
+    void customDeleterTypeZeroSize();
+    void customDeleterTypeMovedOutInstance();
 
     void cast();
     void size();
@@ -167,8 +173,14 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::defaultDeleter,
               &ArrayTest::customDeleter,
+              &ArrayTest::customDeleterNullData,
+              &ArrayTest::customDeleterZeroSize,
+              &ArrayTest::customDeleterMovedOutInstance,
               &ArrayTest::customDeleterType,
               &ArrayTest::customDeleterTypeConstruct,
+              &ArrayTest::customDeleterTypeNullData,
+              &ArrayTest::customDeleterTypeZeroSize,
+              &ArrayTest::customDeleterTypeMovedOutInstance,
 
               &ArrayTest::cast,
               &ArrayTest::size,
@@ -765,30 +777,107 @@ void ArrayTest::defaultDeleter() {
     CORRADE_VERIFY(a.deleter() == nullptr);
 }
 
-int CustomDeleterDeletedCount = 0;
+int CustomDeleterCallCount = 0;
 
 void ArrayTest::customDeleter() {
-    int data[25]{};
+    CustomDeleterCallCount = 0;
+    int data[25]{1337};
+    CORRADE_VERIFY(true); /* to register proper function name */
 
     {
-        Array a{data, 25, [](int*, std::size_t size) { CustomDeleterDeletedCount = size; }};
+        Array a{data, 25, [](int* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], 1337);
+            CORRADE_COMPARE(size, 25);
+            ++CustomDeleterCallCount;
+        }};
         CORRADE_VERIFY(a == data);
         CORRADE_COMPARE(a.size(), 25);
-        CORRADE_COMPARE(CustomDeleterDeletedCount, 0);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
 
-    CORRADE_COMPARE(CustomDeleterDeletedCount, 25);
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
 }
 
-struct CustomDeleter {
-    CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
-    void operator()(int*, std::size_t size) { deletedCount = size; }
-    int& deletedCount;
-};
+void ArrayTest::customDeleterNullData() {
+    CustomDeleterCallCount = 0;
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        Array a{nullptr, 25, [](int* data, std::size_t size) {
+            CORRADE_VERIFY(!data);
+            CORRADE_COMPARE(size, 25);
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_VERIFY(a == nullptr);
+        CORRADE_COMPARE(a.size(), 25);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* The deleter should be called even in case the data is null. This is to
+       have correct behavior e.g. in Array<char, Utility::Directory::MapDeleter>
+       where the data can be null for an empty file, but the fd should still
+       get properly closed after. */
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void ArrayTest::customDeleterZeroSize() {
+    CustomDeleterCallCount = 0;
+    int data[25]{1337};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        Array a{data, 0, [](int* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], 1337);
+            CORRADE_COMPARE(size, 0);
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* Variant of the above, while not as common, the deleter should
+       unconditionally get called here as well */
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void ArrayTest::customDeleterMovedOutInstance() {
+    CustomDeleterCallCount = 0;
+    int data[25]{};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        Array a{data, 25, [](int*, std::size_t) {
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+
+        Array b = std::move(a);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* The deleter got reset to nullptr in a, which means the function gets
+       called only once */
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
 
 void ArrayTest::customDeleterType() {
-    int data[25]{};
+    int data[25]{1337};
     int deletedCount = 0;
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    struct CustomDeleter {
+        CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
+        void operator()(int* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], 1337);
+            CORRADE_COMPARE(size, 25);
+            ++deletedCount;
+        }
+        int& deletedCount;
+    };
 
     {
         Containers::Array<int, CustomDeleter> a{data, 25, CustomDeleter{deletedCount}};
@@ -797,7 +886,7 @@ void ArrayTest::customDeleterType() {
         CORRADE_COMPARE(deletedCount, 0);
     }
 
-    CORRADE_COMPARE(deletedCount, 25);
+    CORRADE_COMPARE(deletedCount, 1);
 }
 
 void ArrayTest::customDeleterTypeConstruct() {
@@ -811,6 +900,93 @@ void ArrayTest::customDeleterTypeConstruct() {
     int c;
     Containers::Array<int, CustomImplicitDeleter> d{&c, 1};
     CORRADE_VERIFY(true);
+}
+
+void ArrayTest::customDeleterTypeNullData() {
+    int deletedCount = 0;
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    struct CustomDeleter {
+        CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
+        void operator()(int* data, std::size_t size) {
+            CORRADE_VERIFY(!data);
+            CORRADE_COMPARE(size, 25);
+            ++deletedCount;
+        }
+        int& deletedCount;
+    };
+
+    {
+        Containers::Array<int, CustomDeleter> a{nullptr, 25, CustomDeleter{deletedCount}};
+        CORRADE_VERIFY(a == nullptr);
+        CORRADE_COMPARE(a.size(), 25);
+        CORRADE_COMPARE(deletedCount, 0);
+    }
+
+    /* Just to check that the behavior is the same as with plain deleter
+       pointers -- see comment in customDeleterNullData() for details */
+    CORRADE_COMPARE(deletedCount, 1);
+}
+
+void ArrayTest::customDeleterTypeZeroSize() {
+    int deletedCount = 0;
+    int data[25]{1337};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    struct CustomDeleter {
+        CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
+        void operator()(int* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], 1337);
+            CORRADE_COMPARE(size, 0);
+            ++deletedCount;
+        }
+        int& deletedCount;
+    };
+
+    {
+        Containers::Array<int, CustomDeleter> a{data, 0, CustomDeleter{deletedCount}};
+        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(deletedCount, 0);
+    }
+
+    /* Just to check that the behavior is the same as with plain deleter
+       pointers -- see comment in customDeleterZeroSize() for details */
+    CORRADE_COMPARE(deletedCount, 1);
+}
+
+void ArrayTest::customDeleterTypeMovedOutInstance() {
+    CustomDeleterCallCount = 0;
+    int deletedCount = 0;
+    int data[25]{};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    struct CustomDeleter {
+        CustomDeleter(): deletedCount{} {}
+        CustomDeleter(int& deletedCountOutput): deletedCount{&deletedCountOutput} {}
+        void operator()(int*, std::size_t) {
+            if(deletedCount) ++*deletedCount;
+            ++CustomDeleterCallCount;
+        }
+        int* deletedCount;
+    };
+
+    {
+        Containers::Array<int, CustomDeleter> a{data, 0, CustomDeleter{deletedCount}};
+        CORRADE_COMPARE(deletedCount, 0);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+
+        Containers::Array<int, CustomDeleter> b = std::move(a);
+        CORRADE_COMPARE(deletedCount, 0);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    /* The deleter got reset to a default-constructed state in a, which means
+       the deletedCount pointer gets reset -- but the default-constructed
+       instance still gets called for it, so the global counter is 2 */
+    CORRADE_COMPARE(deletedCount, 1);
+    CORRADE_COMPARE(CustomDeleterCallCount, 2);
 }
 
 void ArrayTest::cast() {

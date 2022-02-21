@@ -77,7 +77,7 @@ namespace Implementation {
 @brief Array
 @tparam T   Element type
 @tparam D   Deleter type. Defaults to pointer to a @cpp void(T*, std::size_t) @ce
-    function, where first is array pointer and second array size
+    function, where first is array pointer and second array size.
 
 A RAII owning wrapper around a plain C array. A lighter alternative to
 @ref std::vector that's deliberately move-only to avoid accidental copies of
@@ -146,10 +146,10 @@ By default the class makes all allocations using @cpp operator new[] @ce and
 deallocates using @cpp operator delete[] @ce for given @p T, with some
 additional trickery done internally to make the @ref Array(NoInitT, std::size_t)
 and @ref Array(DirectInitT, std::size_t, Args&&... args) constructors work.
-When wrapping an externally allocated array using @ref Array(T*, std::size_t, D),
-it is possible to specify which function to use for deallocation. By default
-the deleter is set to @cpp nullptr @ce, which is equivalent to deleting the
-contents using @cpp operator delete[] @ce.
+It's however also possible to wrap an externally allocated array using
+@ref Array(T*, std::size_t, D) together with specifying which function to use
+for deallocation. By default the deleter is set to @cpp nullptr @ce, which is
+equivalent to deleting the contents using @cpp operator delete[] @ce.
 
 For example, properly deallocating array allocated using @ref std::malloc():
 
@@ -160,6 +160,10 @@ by the deleter function. If the deleter needs to manage some state, a custom
 deleter type can be used:
 
 @snippet Containers.cpp Array-usage-deleter
+
+The deleter is called *unconditionally* on destruction, which has some
+implications especially in case of stateful deleters. See the documentation of
+@ref Array(T*, std::size_t, D) for details.
 
 @section Containers-Array-growable Growable arrays
 
@@ -302,7 +306,14 @@ class Array {
 
     public:
         typedef T Type;     /**< @brief Element type */
-        typedef D Deleter;  /**< @brief Deleter type */
+
+        /**
+         * @brief Deleter type
+         *
+         * Defaults to pointer to a @cpp void(T*, std::size_t) @ce function,
+         * where first is array pointer and second array size.
+         */
+        typedef D Deleter;
 
         /** @brief Conversion from `nullptr` */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -407,12 +418,23 @@ class Array {
         explicit Array(std::size_t size): Array{Corrade::ValueInit, size} {}
 
         /**
-         * @brief Wrap an existing array
+         * @brief Wrap an existing array with an explicit deleter
          *
-         * Note that the array will be deleted on destruction using given
-         * @p deleter. See class documentation for more information about
-         * custom deleters and @ref ArrayView for non-owning array wrapper.
+         * The @p deleter will be *unconditionally* called on destruction with
+         * @p data and @p size as an argument. In particular, it will be also
+         * called if @p data is @cpp nullptr @ce or @p size is @cpp 0 @ce.
+         *
+         * In case of a moved-out instance, the deleter gets reset to a
+         * default-constructed value alongside the array pointer and size. For
+         * plain deleter function pointers it effectively means
+         * @cpp delete[] nullptr @ce gets called when destructing a moved-out
+         * instance (which is a no-op), for stateful deleters you have to
+         * ensure the deleter similarly does nothing in its default state.
+         * @see @ref Containers-Array-usage-wrapping
          */
+        /** @todo invent some trickery to provide the default only if D is not
+            a function pointer, to avoid accidental malloc()/delete[]
+            mismatches (String already has the deleter explicit, e.g.) */
         /* GCC <=4.8 breaks on _deleter{} */
         explicit Array(T* data, std::size_t size, D deleter = {}): _data{data}, _size{size}, _deleter(deleter) {}
 
