@@ -1479,7 +1479,7 @@ void DirectoryTest::map() {
 
     {
         Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(file);
-        CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
+        CORRADE_COMPARE_AS(mappedFile,
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
 
@@ -1516,7 +1516,7 @@ void DirectoryTest::mapUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
         const Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
-        CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
+        CORRADE_COMPARE_AS(mappedFile,
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
     }
@@ -1529,7 +1529,7 @@ void DirectoryTest::mapRead() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
         const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
-        CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
+        CORRADE_COMPARE_AS(mappedFile,
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
     }
@@ -1555,7 +1555,7 @@ void DirectoryTest::mapReadUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
         const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
-        CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
+        CORRADE_COMPARE_AS(mappedFile,
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
     }
