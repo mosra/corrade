@@ -30,12 +30,12 @@
 @brief Forward declaration for @ref std::vector
 @m_since{2019,10}
 
-On @ref CORRADE_TARGET_LIBCXX "libc++" (3.9.0 and up) and
-@ref CORRADE_TARGET_LIBSTDCXX "libstdc++" (all versions) includes a lightweight
+On @ref CORRADE_TARGET_LIBCXX "libc++" (3.9.0 and up) includes a lightweight
 implementation-specific STL header containing just the forward declaration of
-@ref std::vector. On @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" and other
-implementations where forward declaration is not possible or is unknown is
-equivalent to @cpp #include <vector> @ce.
+@ref std::vector. On @ref CORRADE_TARGET_LIBSTDCXX "libstdc++",
+@ref CORRADE_TARGET_DINKUMWARE "MSVC STL" and other implementations where
+forward declaration is not possible or is unknown is equivalent to
+@cpp #include <vector> @ce.
 
 <b></b>
 
