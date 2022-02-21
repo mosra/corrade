@@ -1172,9 +1172,9 @@ void DirectoryTest::fileSizeEarlyEof() {
     if(!Directory::exists(file))
         CORRADE_SKIP(file << "doesn't exist, can't test");
     Containers::Optional<std::size_t> size = Directory::fileSize(file);
+    Containers::Array<char> data = Directory::read(file);
     CORRADE_VERIFY(size);
-    CORRADE_COMPARE_AS(*size, Directory::read(file).size(),
-        TestSuite::Compare::Greater);
+    CORRADE_COMPARE_AS(*size, data.size(), TestSuite::Compare::Greater);
     #else
     CORRADE_SKIP("Not sure how to test on this platform.");
     #endif
@@ -1202,7 +1202,8 @@ void DirectoryTest::read() {
         TestSuite::Compare::Container);
 
     /* Read into string */
-    CORRADE_COMPARE(Directory::readString(Directory::join(_testDir, "file")),
+    std::string string = Directory::readString(Directory::join(_testDir, "file"));
+    CORRADE_COMPARE(string,
         std::string(Data, Containers::arraySize(Data)));
 }
 
@@ -1218,7 +1219,7 @@ void DirectoryTest::readNonSeekable() {
         !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
         !defined(__NetBSD__) && !defined(__DragonFly__)
     /** @todo Test more thoroughly than this */
-    const auto data = Directory::read("/proc/loadavg");
+    const Containers::Array<char> data = Directory::read("/proc/loadavg");
     CORRADE_VERIFY(!data.empty());
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -1229,7 +1230,7 @@ void DirectoryTest::readEarlyEof() {
     #ifdef __linux__
     if(!Directory::exists("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"))
         CORRADE_SKIP("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor doesn't exist, can't test");
-    const auto data = Directory::read("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+    const Containers::Array<char> data = Directory::read("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
     CORRADE_VERIFY(!data.empty());
     #else
     CORRADE_SKIP("Not sure how to test on this platform.");
@@ -1477,7 +1478,7 @@ void DirectoryTest::map() {
     Directory::writeString(file, data);
 
     {
-        auto mappedFile = Directory::map(file);
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(file);
         CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
@@ -1514,7 +1515,7 @@ void DirectoryTest::mapNonexistent() {
 void DirectoryTest::mapUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
-        const auto mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
+        const Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
         CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
@@ -1527,7 +1528,7 @@ void DirectoryTest::mapUtf8() {
 void DirectoryTest::mapRead() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
-        const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
+        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
@@ -1553,7 +1554,7 @@ void DirectoryTest::mapReadNonexistent() {
 void DirectoryTest::mapReadUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
-        const auto mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
+        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
             Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
             TestSuite::Compare::Container);
@@ -1567,7 +1568,7 @@ void DirectoryTest::mapWrite() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
-        auto mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteFile"), data.size());
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteFile"), data.size());
         CORRADE_VERIFY(mappedFile);
         CORRADE_COMPARE(mappedFile.size(), data.size());
         std::copy(std::begin(data), std::end(data), mappedFile.begin());
@@ -1588,7 +1589,7 @@ void DirectoryTest::mapWriteNoPermission() {
     {
         std::ostringstream out;
         Error err{&out};
-        auto mappedFile = Directory::mapWrite("/root/mappedFile", 64);
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite("/root/mappedFile", 64);
         CORRADE_VERIFY(!mappedFile);
         CORRADE_COMPARE(out.str(), "Utility::Directory::mapWrite(): can't open /root/mappedFile\n");
     }
@@ -1601,7 +1602,7 @@ void DirectoryTest::mapWriteUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
-        auto mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
         CORRADE_VERIFY(mappedFile);
         CORRADE_COMPARE(mappedFile.size(), data.size());
         std::copy(std::begin(data), std::end(data), mappedFile.begin());
