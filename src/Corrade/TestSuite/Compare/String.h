@@ -50,6 +50,10 @@ information.
 
 @snippet TestSuite.cpp Compare-StringHasPrefix
 
+If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
+specified, passed comparisons where the strings are different will print an
+@cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
+inspection.
 @see @ref StringHasSuffix
 */
 class StringHasPrefix {};
@@ -64,6 +68,10 @@ information.
 
 @snippet TestSuite.cpp Compare-StringHasSuffix
 
+If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
+specified, passed comparisons where the strings are different will print an
+@cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
+inspection.
 @see @ref StringHasPrefix
 */
 class StringHasSuffix {};

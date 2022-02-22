@@ -31,29 +31,51 @@ namespace Corrade { namespace TestSuite {
 ComparisonStatusFlags Comparator<Compare::StringHasPrefix>::operator()(const Containers::StringView actual, const Containers::StringView expectedPrefix) {
     _actualValue = actual;
     _expectedPrefixValue = expectedPrefix;
-    return actual.hasPrefix(expectedPrefix) ?
-        ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+
+    /* If the strings are different, we can print them both in a verbose
+       message */
+    if(!actual.hasPrefix(expectedPrefix)) return ComparisonStatusFlag::Failed;
+    if(actual != expectedPrefix) return ComparisonStatusFlag::Verbose;
+    return {};
 }
 
-void Comparator<Compare::StringHasPrefix>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* const actual, const char* const expected) const {
-    out << "String" << actual << "isn't prefixed with" << expected
-        << Utility::Debug::nospace << ", actual is\n       " << _actualValue
-        << Utility::Debug::newline << "        but expected prefix\n       "
-        << _expectedPrefixValue;
+void Comparator<Compare::StringHasPrefix>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    if(flags == ComparisonStatusFlag::Failed)
+        out << "String" << actual << "isn't prefixed with" << expected
+            << Utility::Debug::nospace << ", actual is\n       " << _actualValue
+            << Utility::Debug::newline << "        but expected prefix\n       "
+            << _expectedPrefixValue;
+    else if(flags == ComparisonStatusFlag::Verbose)
+        out << "String" << actual << "is prefixed with" << expected
+            << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
+            << Utility::Debug::newline << "        has prefix\n       "
+            << _expectedPrefixValue;
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 
 ComparisonStatusFlags Comparator<Compare::StringHasSuffix>::operator()(const Containers::StringView actual, const Containers::StringView expectedSuffix) {
     _actualValue = actual;
     _expectedSuffixValue = expectedSuffix;
-    return actual.hasSuffix(expectedSuffix) ?
-        ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+
+    /* If the strings are different, we can print them both in a verbose
+       message */
+    if(!actual.hasSuffix(expectedSuffix)) return ComparisonStatusFlag::Failed;
+    if(actual != expectedSuffix) return ComparisonStatusFlag::Verbose;
+    return {};
 }
 
-void Comparator<Compare::StringHasSuffix>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* const actual, const char* const expected) const {
-    out << "String" << actual << "isn't suffixed with" << expected
-        << Utility::Debug::nospace << ", actual is\n       " << _actualValue
-        << Utility::Debug::newline << "        but expected suffix\n       "
-        << _expectedSuffixValue;
+void Comparator<Compare::StringHasSuffix>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    if(flags == ComparisonStatusFlag::Failed)
+        out << "String" << actual << "isn't suffixed with" << expected
+            << Utility::Debug::nospace << ", actual is\n       " << _actualValue
+            << Utility::Debug::newline << "        but expected suffix\n       "
+            << _expectedSuffixValue;
+    else if(flags == ComparisonStatusFlag::Verbose)
+        out << "String" << actual << "is suffixed with" << expected
+            << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
+            << Utility::Debug::newline << "        has suffix\n       "
+            << _expectedSuffixValue;
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 
 }}

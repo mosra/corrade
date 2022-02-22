@@ -36,16 +36,20 @@ struct StringTest: TestSuite::Tester {
     explicit StringTest();
 
     void hasPrefix();
-    void hasPrefixMessage();
+    void hasPrefixMessageFailed();
+    void hasPrefixMessageVerbose();
     void hasSuffix();
-    void hasSuffixMessage();
+    void hasSuffixMessageFailed();
+    void hasSuffixMessageVerbose();
 };
 
 StringTest::StringTest() {
     addTests({&StringTest::hasPrefix,
-              &StringTest::hasPrefixMessage,
+              &StringTest::hasPrefixMessageFailed,
+              &StringTest::hasPrefixMessageVerbose,
               &StringTest::hasSuffix,
-              &StringTest::hasSuffixMessage});
+              &StringTest::hasSuffixMessageFailed,
+              &StringTest::hasSuffixMessageVerbose});
 }
 
 void StringTest::hasPrefix() {
@@ -53,13 +57,14 @@ void StringTest::hasPrefix() {
     Containers::StringView b = "hell";
     Containers::StringView c = "world";
 
+    /* If the strings are not the same, it can print a verbose message */
     CORRADE_COMPARE(Comparator<StringHasPrefix>{}(a, a), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<StringHasPrefix>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<StringHasPrefix>{}(a, b), ComparisonStatusFlag::Verbose);
     CORRADE_COMPARE(Comparator<StringHasPrefix>{}(a, c), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<StringHasPrefix>{}(b, a), ComparisonStatusFlag::Failed);
 }
 
-void StringTest::hasPrefixMessage() {
+void StringTest::hasPrefixMessageFailed() {
     std::ostringstream out;
 
     {
@@ -76,18 +81,36 @@ void StringTest::hasPrefixMessage() {
 "        world\n");
 }
 
+void StringTest::hasPrefixMessageVerbose() {
+    std::ostringstream out;
+
+    {
+        Error e{&out};
+        Comparator<StringHasPrefix> compare;
+        ComparisonStatusFlags flags = compare("hello world", "hell");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
+        compare.printMessage(flags, e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a is prefixed with b, the actual string\n"
+"        hello world\n"
+"        has prefix\n"
+"        hell\n");
+}
+
 void StringTest::hasSuffix() {
     Containers::StringView a = "hello world";
     Containers::StringView b = "world";
     Containers::StringView c = "hell";
 
+    /* If the strings are not the same, it can print a verbose message */
     CORRADE_COMPARE(Comparator<StringHasSuffix>{}(a, a), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<StringHasSuffix>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<StringHasSuffix>{}(a, b), ComparisonStatusFlag::Verbose);
     CORRADE_COMPARE(Comparator<StringHasSuffix>{}(a, c), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<StringHasSuffix>{}(b, a), ComparisonStatusFlag::Failed);
 }
 
-void StringTest::hasSuffixMessage() {
+void StringTest::hasSuffixMessageFailed() {
     std::ostringstream out;
 
     {
@@ -102,6 +125,23 @@ void StringTest::hasSuffixMessage() {
 "        hello world\n"
 "        but expected suffix\n"
 "        hell\n");
+}
+
+void StringTest::hasSuffixMessageVerbose() {
+    std::ostringstream out;
+
+    {
+        Error e{&out};
+        Comparator<StringHasSuffix> compare;
+        ComparisonStatusFlags flags = compare("hello world", "world");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
+        compare.printMessage(flags, e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a is suffixed with b, the actual string\n"
+"        hello world\n"
+"        has suffix\n"
+"        world\n");
 }
 
 }}}}}
