@@ -27,16 +27,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/configure.h"
-
-#ifdef CORRADE_TARGET_WINDOWS
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
-#endif
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
 /* Exported in order to be available for the test */
+
+CORRADE_UTILITY_EXPORT void printErrnoErrorString(Debug& debug, int error);
 
 #ifdef CORRADE_TARGET_WINDOWS
 CORRADE_UTILITY_EXPORT void printWindowsErrorString(Debug& debug, unsigned int errorCode);

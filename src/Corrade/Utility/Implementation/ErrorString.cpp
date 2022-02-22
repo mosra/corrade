@@ -27,10 +27,15 @@
 
 #include "ErrorString.h"
 
-#ifdef CORRADE_TARGET_WINDOWS
 #include "Corrade/Containers/ArrayView.h"
-#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
+
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
+#include <string.h>
+#endif
+
+#ifdef CORRADE_TARGET_WINDOWS
+#include "Corrade/Containers/StringView.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
@@ -38,6 +43,38 @@
 #endif
 
 namespace Corrade { namespace Utility { namespace Implementation {
+
+void printErrnoErrorString(Debug& debug, const int error) {
+    /* A string equivalent of the message may or may not be localized and may
+       depend on the system in question. Of course std::strerror() is not
+       thread-safe so we won't even bother with that -- on Unix we'll use
+       strerror_r(), on Windows strerror_s() and otherwise just errno alone. */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* A 256 byte buffer should be big enough for most error messages. The
+       functions should make the string null-terminated. The function has two
+       different signatures based on a phase of the moon, #undef'ing
+       _GNU_SOURCE to get the sane signature always didn't seem like a good
+       idea. The POSIX variant returns int(0) on success, while the GNU variant
+       may return a pointer to a statically allocated string instead of filling
+       the buffer. Sigh. */
+    #if ((_POSIX_C_SOURCE >= 200112L) && !_GNU_SOURCE) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_APPLE)
+    char string[256];
+    CORRADE_INTERNAL_ASSERT_OUTPUT(strerror_r(error, string, Containers::arraySize(string)) == 0);
+    #else
+    char buffer[256];
+    const char* const string = strerror_r(error, buffer, Containers::arraySize(buffer));
+    #endif
+    debug << string;
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* "Your string message can be, at most, 94 characters long." Wow ok, not
+       gonna trust you on that tho. */
+    char string[256];
+    CORRADE_INTERNAL_ASSERT_OUTPUT(strerror_s(string, Containers::arraySize(string), error) == 0);
+    debug << string;
+    #else
+    debug << error;
+    #endif
+}
 
 #ifdef CORRADE_TARGET_WINDOWS
 void printWindowsErrorString(Debug& debug, unsigned int errorCode) {

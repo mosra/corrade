@@ -82,8 +82,6 @@
 #endif
 #include <shlobj.h>
 #include <io.h>
-
-#include "Corrade/Utility/Implementation/ErrorString.h"
 #endif
 
 #include "Corrade/configure.h"
@@ -93,6 +91,11 @@
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
+
+/* errno and GetLastError() stringifiers */
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
+#include "Corrade/Utility/Implementation/ErrorString.h"
+#endif
 
 /* Unicode helpers for Windows */
 #ifdef CORRADE_TARGET_WINDOWS
@@ -215,7 +218,9 @@ bool mkpath(const std::string& path) {
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     const int ret = mkdir(path.data(), 0777);
     if(ret != 0 && errno != EEXIST) {
-        Error{} << "Utility::Directory::mkpath(): error creating" << path << Debug::nospace << ":" << strerror(errno);
+        Error err;
+        err << "Utility::Directory::mkpath(): error creating" << path << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
     return true;
@@ -392,7 +397,9 @@ std::string current() {
     while(!(success = getcwd(&path[0], path.size() + 1))) {
         /* Unexpected error, exit */
         if(errno != ERANGE) {
-            Error{} << "Utility::Directory::current(): error:" << strerror(errno);
+            Error err;
+            err << "Utility::Directory::current(): error:";
+            Utility::Implementation::printErrnoErrorString(err, errno);
             return {};
         }
 

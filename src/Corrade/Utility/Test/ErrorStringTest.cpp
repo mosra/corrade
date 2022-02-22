@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cerrno>
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"
@@ -42,15 +43,28 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct ErrorStringTest: TestSuite::Tester {
     explicit ErrorStringTest();
 
+    void errnoString();
     #ifdef CORRADE_TARGET_WINDOWS
     void windowsString();
     #endif
 };
 
 ErrorStringTest::ErrorStringTest() {
-    #ifdef CORRADE_TARGET_WINDOWS
-    addTests({&ErrorStringTest::windowsString});
-    #endif
+    addTests({&ErrorStringTest::errnoString,
+              #ifdef CORRADE_TARGET_WINDOWS
+              &ErrorStringTest::windowsString
+              #endif
+              });
+}
+
+void ErrorStringTest::errnoString() {
+    std::stringstream out;
+    Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
+    Implementation::printErrnoErrorString(debug, EACCES);
+    CORRADE_INFO("EACCES error string is:" << out.str());
+
+    /** @todo is this locale-dependent or not? */
+    CORRADE_COMPARE(out.str(), "Permission denied");
 }
 
 #ifdef CORRADE_TARGET_WINDOWS

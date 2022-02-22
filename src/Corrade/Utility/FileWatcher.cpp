@@ -38,6 +38,8 @@
 #include "Corrade/Utility/Unicode.h"
 #endif
 
+#include "Corrade/Utility/Implementation/ErrorString.h"
+
 namespace Corrade { namespace Utility {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -116,7 +118,9 @@ bool FileWatcher::hasChanged() {
             #else
             #error
             #endif
-            << Debug::nospace << ":" << std::strerror(errno) << Debug::nospace;
+            << Debug::nospace << ":";
+        Implementation::printErrnoErrorString(err, errno);
+        err << Debug::nospace;
 
         /* Ignore the error if we are told so (but still warn) */
         if(_flags & InternalFlag::IgnoreErrors) {
