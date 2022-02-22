@@ -55,9 +55,10 @@ std::string windowsErrorString(unsigned int errorCode) {
         #endif
     };
 
-    /* Convert to UTF-8 and cut off final newline that FormatMessages adds */
+    /* Convert to UTF-8 and cut off final newline that FormatMessage adds. Yes,
+       a \r\n, IT'S WINDOWS, BABY!!! */
     return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW,
-        wcslen(errorStringW)).except(1));
+        wcslen(errorStringW)).except(2));
 }
 #endif
 
