@@ -32,6 +32,7 @@
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
@@ -347,8 +348,9 @@ void ManagerTest::unresolvedReference() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("UnresolvedReference"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("UnresolvedReference"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::formatString("PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"{}/UnresolvedReference{}\": ", manager.pluginDirectory(), WrongPlugin::pluginSuffix()),
+        TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::noPluginVersion() {
@@ -358,8 +360,9 @@ void ManagerTest::noPluginVersion() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginVersion"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginVersion"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: ";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: ",
+        TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::wrongPluginVersion() {
@@ -379,8 +382,9 @@ void ManagerTest::noPluginInterface() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInterface"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInterface"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix =  "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: ";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: ",
+        TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::wrongPluginInterface() {
@@ -399,8 +403,9 @@ void ManagerTest::noPluginInitializer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInitializer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInitializer"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: ";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: ",
+        TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::noPluginFinalizer() {
@@ -410,8 +415,9 @@ void ManagerTest::noPluginFinalizer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginFinalizer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginFinalizer"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: ";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: ",
+        TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::noPluginInstancer() {
@@ -421,8 +427,9 @@ void ManagerTest::noPluginInstancer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInstancer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInstancer"), PluginManager::LoadState::NotLoaded);
-    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: ";
-    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: ",
+        TestSuite::Compare::StringHasPrefix);
 }
 #endif
 
