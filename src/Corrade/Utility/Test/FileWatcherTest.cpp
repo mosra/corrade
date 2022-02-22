@@ -26,7 +26,9 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FileWatcher.h"
@@ -96,8 +98,16 @@ void FileWatcherTest::nonexistent() {
     }
 
     /* Error reported only once, hasChanged() is a no-op when not valid */
-    CORRADE_COMPARE(out.str(),
-        "Utility::FileWatcher: can't stat nonexistent: No such file or directory, aborting watch\n");
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::FileWatcher: can't stat nonexistent, aborting watch: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::FileWatcher: can't stat nonexistent, aborting watch: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void FileWatcherTest::setup() {

@@ -24,7 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <clocale>
 #include <sstream>
 #include <vector>
 
@@ -41,6 +40,7 @@
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
 
 #include "configure.h"
 
@@ -645,55 +645,42 @@ void DirectoryTest::mkpath() {
 }
 
 void DirectoryTest::mkpathNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writable under Emscripten.");
+    #else
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string prefix = "/var/root";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string prefix = "/data/local";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string prefix = "/root";
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
-
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_SKIP("Everything is writeable under Emscripten");
-    #elif !defined(CORRADE_TARGET_WINDOWS)
-    if(Directory::exists("/nope"))
-        CORRADE_SKIP("Can't test because the destination might be writeable");
-
-    std::ostringstream out;
-    {
-        /* Ensure errors are printed in English */
-        char* currentLocale = std::setlocale(LC_ALL, nullptr);
-        std::setlocale(LC_ALL, "C");
-        Containers::ScopeGuard restoreLocale{currentLocale, [](char* locale) {
-            std::setlocale(LC_ALL, locale);
-        }};
-
-        Error redirectError{&out};
-        CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
-    }
-
-    /* Apple Mac on M1 and newer iOS seems to have the same message as Android,
-       x86 Macs the same message as Linux (or is this changed since certain
-       macOS / iOS version?) */
-    #if defined(CORRADE_TARGET_ANDROID) || (defined(CORRADE_TARGET_APPLE) && (defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ARM)))
-    CORRADE_COMPARE(out.str(),
-        "Utility::Directory::mkpath(): error creating /nope: Read-only file system\n");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string prefix = "C:/Program Files/WindowsApps";
     #else
-    CORRADE_COMPARE(out.str(),
-        "Utility::Directory::mkpath(): error creating /nope: Permission denied\n");
+    std::string prefix;
+    CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    #else
-    if(Directory::exists("W:/"))
-        CORRADE_SKIP("Can't test because the destination might be writeable");
-
     std::ostringstream out;
-    {
-        Error redirectError{&out};
-        CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
-    }
-
-    /* On Windows we cannot ensure messages are printed in a certain language,
-       as they depend on the user's installed languages. So verify just a
-       prefix. */
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::mkpath(Directory::join(prefix, "nope/never")));
+    #ifndef CORRADE_TARGET_WINDOWS
     CORRADE_COMPARE_AS(out.str(),
-        "Utility::Directory::mkpath(): error creating W:: ",
+        formatString("Utility::Directory::mkpath(): can't create {}/nope: error 13 (", prefix),
         TestSuite::Compare::StringHasPrefix);
+    #else
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mkpath(): can't create {}/nope: error 5 (", prefix),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
     #endif
 }
 

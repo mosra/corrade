@@ -45,10 +45,13 @@
 namespace Corrade { namespace Utility { namespace Implementation {
 
 void printErrnoErrorString(Debug& debug, const int error) {
-    /* A string equivalent of the message may or may not be localized and may
-       depend on the system in question. Of course std::strerror() is not
-       thread-safe so we won't even bother with that -- on Unix we'll use
-       strerror_r(), on Windows strerror_s() and otherwise just errno alone. */
+    debug << "error" << error;
+
+    /* If we are on a known system, print also a string equivalent of the
+       message, which may or may not be localized and may depend on the system
+       in question. Of course std::strerror() is not thread-safe so we won't
+       even bother with that -- on Unix we'll use strerror_r(), on Windows
+       strerror_s() and otherwise just stay with errno alone. */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     /* A 256 byte buffer should be big enough for most error messages. The
        functions should make the string null-terminated. The function has two
@@ -64,15 +67,13 @@ void printErrnoErrorString(Debug& debug, const int error) {
     char buffer[256];
     const char* const string = strerror_r(error, buffer, Containers::arraySize(buffer));
     #endif
-    debug << string;
+    debug << "(" << Debug::nospace << string << Debug::nospace << ")";
     #elif defined(CORRADE_TARGET_WINDOWS)
     /* "Your string message can be, at most, 94 characters long." Wow ok, not
        gonna trust you on that tho. */
     char string[256];
     CORRADE_INTERNAL_ASSERT_OUTPUT(strerror_s(string, Containers::arraySize(string), error) == 0);
-    debug << string;
-    #else
-    debug << error;
+    debug << "(" << Debug::nospace << string << Debug::nospace << ")";
     #endif
 }
 
@@ -85,7 +86,11 @@ void printWindowsErrorString(Debug& debug, unsigned int errorCode) {
        a \r\n, IT'S WINDOWS, BABY!!! */
     char errorString[256];
     const std::size_t size = WideCharToMultiByte(CP_UTF8, 0, errorStringW, sizeW - 2, errorString, Containers::arraySize(errorString), nullptr, nullptr);
-    debug << Containers::StringView{errorString, size};
+
+    /* Print both the error code and the string so it's still somewhat helpful
+       even when we have no chance of understanding what's being said in the
+       localized text */
+    debug << "error" << errorCode << "(" << Debug::nospace << Containers::StringView{errorString, size} << Debug::nospace << ")";
 }
 #endif
 

@@ -219,7 +219,7 @@ bool mkpath(const std::string& path) {
     const int ret = mkdir(path.data(), 0777);
     if(ret != 0 && errno != EEXIST) {
         Error err;
-        err << "Utility::Directory::mkpath(): error creating" << path << Debug::nospace << ":";
+        err << "Utility::Directory::mkpath(): can't create" << path << Debug::nospace << ":";
         Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
@@ -229,8 +229,7 @@ bool mkpath(const std::string& path) {
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     if(CreateDirectoryW(widen(path).data(), nullptr) == 0 && GetLastError() != ERROR_ALREADY_EXISTS) {
         Error err;
-        err << "Utility::Directory::mkpath(): error creating"
-            << path << Debug::nospace << ":";
+        err << "Utility::Directory::mkpath(): can't create" << path << Debug::nospace << ":";
         Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return false;
     }

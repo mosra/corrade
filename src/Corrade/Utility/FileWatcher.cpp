@@ -118,18 +118,17 @@ bool FileWatcher::hasChanged() {
             #else
             #error
             #endif
-            << Debug::nospace << ":";
-        Implementation::printErrnoErrorString(err, errno);
-        err << Debug::nospace;
+            << Debug::nospace;
 
         /* Ignore the error if we are told so (but still warn) */
         if(_flags & InternalFlag::IgnoreErrors) {
-            err << ", ignoring";
-            return false;
+            err << ", ignoring:";
+        } else {
+            err << ", aborting watch:";
+            _flags &= ~InternalFlag::Valid;
         }
 
-        err << ", aborting watch";
-        _flags &= ~InternalFlag::Valid;
+        Implementation::printErrnoErrorString(err, errno);
         return false;
     }
 

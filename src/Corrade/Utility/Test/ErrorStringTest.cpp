@@ -61,10 +61,14 @@ void ErrorStringTest::errnoString() {
     std::stringstream out;
     Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
     Implementation::printErrnoErrorString(debug, EACCES);
-    CORRADE_INFO("EACCES error string is:" << out.str());
 
     /** @todo is this locale-dependent or not? */
-    CORRADE_COMPARE(out.str(), "Permission denied");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_COMPARE(out.str(), "error 13 (Permission denied)");
+    #else
+    /* Emscripten uses a different errno */
+    CORRADE_COMPARE(out.str(), "error 2 (Permission denied)");
+    #endif
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -79,7 +83,7 @@ void ErrorStringTest::windowsString() {
     if(GetUserDefaultLangID() != usEnglish)
         CORRADE_SKIP("User language is not US English, can't test");
 
-    CORRADE_COMPARE(out.str(), "The system cannot find the file specified.");
+    CORRADE_COMPARE(out.str(), "error 2 (The system cannot find the file specified.)");
 }
 #endif
 

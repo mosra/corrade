@@ -360,9 +360,17 @@ void ManagerTest::noPluginVersion() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginVersion"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginVersion"), PluginManager::LoadState::NotLoaded);
+    /* On Windows the error code is printed as well, on Unix only dlerror()
+       alone which doesn't have any standard representation to check against */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: error 127 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out.str(),
         "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: ",
         TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void ManagerTest::wrongPluginVersion() {
@@ -382,9 +390,17 @@ void ManagerTest::noPluginInterface() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInterface"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInterface"), PluginManager::LoadState::NotLoaded);
+    /* On Windows the error code is printed as well, on Unix only dlerror()
+       alone which doesn't have any standard representation to check against */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: error 127 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out.str(),
         "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: ",
         TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void ManagerTest::wrongPluginInterface() {
@@ -403,9 +419,17 @@ void ManagerTest::noPluginInitializer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInitializer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInitializer"), PluginManager::LoadState::NotLoaded);
+    /* On Windows the error code is printed as well, on Unix only dlerror()
+       alone which doesn't have any standard representation to check against */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: error 127 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out.str(),
         "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: ",
         TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void ManagerTest::noPluginFinalizer() {
@@ -415,9 +439,17 @@ void ManagerTest::noPluginFinalizer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginFinalizer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginFinalizer"), PluginManager::LoadState::NotLoaded);
+    /* On Windows the error code is printed as well, on Unix only dlerror()
+       alone which doesn't have any standard representation to check against */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: error 127 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out.str(),
         "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: ",
         TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void ManagerTest::noPluginInstancer() {
@@ -427,9 +459,17 @@ void ManagerTest::noPluginInstancer() {
     PluginManager::Manager<WrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInstancer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInstancer"), PluginManager::LoadState::NotLoaded);
+    /* On Windows the error code is printed as well, on Unix only dlerror()
+       alone which doesn't have any standard representation to check against */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: error 127 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out.str(),
         "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: ",
         TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 #endif
 
