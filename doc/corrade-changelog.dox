@@ -210,6 +210,10 @@ namespace Corrade {
     Previously this behaved equivalently to
     @ref Utility::Directory::Flag::SkipFiles on Emscripten but that made no
     sense from a portability point of view.
+-   @ref Utility::Directory::fileSize(), @relativeref{Utility::Directory,read()},
+    and @relativeref{Utility::Directory,copy()} now explicitly check if the
+    path is a directory and fail in that case, instead of returning nonsense,
+    crashing on an allocation failure or silently doing the wrong thing
 -   @ref Utility::format() now supports printing integers as characters using
     the @cpp "{:c}" @ce modifier
 -   @ref Utility::format() now accepts also a C++17 @ref std::string_view if

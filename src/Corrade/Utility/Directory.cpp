@@ -341,6 +341,25 @@ bool exists(const std::string& filename) {
 
 namespace {
 
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+/* Used by fileSize(), read(), copy() source and mapRead() to prevent really
+   bad issues. For directories lseek() returns 9223372036854775807 (2^63 - 1,
+   and thus causing an allocation failure) or maybe also 0 (and thus a silent
+   error); fread() will always read 0 bytes no matter what lseek() reports.
+   Such behavior is everything but useful. The lseek() value is also
+   undocumented, so we can't just check the value to know we opened a
+   directory: https://stackoverflow.com/a/65912203
+
+   Thus a directory is explicitly checked on the file descriptor, and if it is,
+   we fail. This doesn't need to be done when opening for writing (so write(),
+   append(), copy() destination or map() / mapWrite), there the opening itself fails already. On Windows, opening directories fails in any case, so there
+   we don't need to do anything either. */
+bool isDirectory(const int fd) {
+    struct stat st;
+    return fstat(fd, &st) == 0 && S_ISDIR(st.st_mode);
+}
+#endif
+
 /* Used by fileSize() and read(). Returns NullOpt if the file is not seekable
    (as file existence is already checked when opening the FILE*). */
 Containers::Optional<std::size_t> fileSize(std::FILE* const f) {
@@ -402,6 +421,17 @@ Containers::Optional<std::size_t> fileSize(const std::string& filename) {
     }
 
     Containers::ScopeGuard exit{f, std::fclose};
+
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Explicitly fail if opening directories for reading on Unix to prevent
+       silent errors, see isDirectory(int) for details. On Windows the fopen()
+       fails already. */
+    if(isDirectory(fileno(f))) {
+        Error{} << "Utility::Directory::fileSize():" << filename << "is a directory";
+        return {};
+    }
+    #endif
+
     Containers::Optional<std::size_t> size = fileSize(f);
     if(!size)
         Error{} << "Utility::Directory::fileSize():" << filename << "is not seekable";
@@ -409,6 +439,10 @@ Containers::Optional<std::size_t> fileSize(const std::string& filename) {
 }
 
 bool isDirectory(const std::string& path) {
+    /* Compared to the internal isDirectory(std::FILE*) above, this calls the
+       OS APIs directly with the filename and should be atomic and faster
+       compared to first opening the file and then asking for attributes */
+
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /** @todo symlink support */
     const DWORD fileAttributes = GetFileAttributesW(widen(path).data());
@@ -794,6 +828,17 @@ Containers::Array<char> read(const std::string& filename) {
     }
 
     Containers::ScopeGuard exit{f, std::fclose};
+
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Explicitly fail if opening directories for reading on Unix to prevent
+       allocation failures or silent errors, see isDirectory(int) for details.
+       On Windows the fopen() fails already. */
+    if(isDirectory(fileno(f))) {
+        Error{} << "Utility::Directory::read():" << filename << "is a directory";
+        return {};
+    }
+    #endif
+
     Containers::Optional<std::size_t> size = fileSize(f);
 
     /* If the file is not seekable, read it in chunks */
@@ -891,6 +936,16 @@ bool copy(const std::string& from, const std::string& to) {
 
     Containers::ScopeGuard exitIn{in, std::fclose};
 
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Explicitly fail if opening directories for reading on Unix to prevent
+       silent errors, see isDirectory(int) for details. On Windows the fopen()
+       fails already. */
+    if(isDirectory(fileno(in))) {
+        Error{} << "Utility::Directory::copy(): can't read from" << from << "which is a directory";
+        return {};
+    }
+    #endif
+
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const out = std::fopen(to.data(), "wb");
     #else
@@ -972,6 +1027,13 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
         err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
         Utility::Implementation::printErrnoErrorString(err, errno);
         return nullptr;
+    }
+
+    /* Explicitly fail if opening directories for reading on Unix to prevent
+       silent errors, see isDirectory(int) for details */
+    if(isDirectory(fd)) {
+        Error{} << "Utility::Directory::mapRead():" << filename << "is a directory";
+        return {};
     }
 
     /* Get file size */

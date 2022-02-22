@@ -143,6 +143,7 @@ struct DirectoryTest: TestSuite::Tester {
     void fileSizeEmpty();
     void fileSizeNonSeekable();
     void fileSizeEarlyEof();
+    void fileSizeDirectory();
     void fileSizeNonexistent();
     void fileSizeUtf8();
 
@@ -150,23 +151,27 @@ struct DirectoryTest: TestSuite::Tester {
     void readEmpty();
     void readNonSeekable();
     void readEarlyEof();
+    void readDirectory();
     void readNonexistent();
     void readUtf8();
 
     void write();
     void writeEmpty();
+    void writeDirectory();
     void writeNoPermission();
     void writeUtf8();
 
     void append();
     void appendToNonexistent();
     void appendEmpty();
+    void appendDirectory();
     void appendNoPermission();
     void appendUtf8();
 
     void prepareFileToCopy();
     void copy();
     void copyEmpty();
+    void copyDirectory();
     void copyReadNonexistent();
     void copyWriteNoPermission();
     void copyUtf8();
@@ -182,16 +187,19 @@ struct DirectoryTest: TestSuite::Tester {
 
     void map();
     void mapEmpty();
+    void mapDirectory();
     void mapNonexistent();
     void mapUtf8();
 
     void mapRead();
     void mapReadEmpty();
+    void mapReadDirectory();
     void mapReadNonexistent();
     void mapReadUtf8();
 
     void mapWrite();
     void mapWriteEmpty();
+    void mapWriteDirectory();
     void mapWriteNoPermission();
     void mapWriteUtf8();
 
@@ -290,6 +298,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::fileSizeEmpty,
               &DirectoryTest::fileSizeNonSeekable,
               &DirectoryTest::fileSizeEarlyEof,
+              &DirectoryTest::fileSizeDirectory,
               &DirectoryTest::fileSizeNonexistent,
               &DirectoryTest::fileSizeUtf8,
 
@@ -297,17 +306,20 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
               &DirectoryTest::readEarlyEof,
+              &DirectoryTest::readDirectory,
               &DirectoryTest::readNonexistent,
               &DirectoryTest::readUtf8,
 
               &DirectoryTest::write,
               &DirectoryTest::writeEmpty,
+              &DirectoryTest::writeDirectory,
               &DirectoryTest::writeNoPermission,
               &DirectoryTest::writeUtf8,
 
               &DirectoryTest::append,
               &DirectoryTest::appendToNonexistent,
               &DirectoryTest::appendEmpty,
+              &DirectoryTest::appendDirectory,
               &DirectoryTest::appendNoPermission,
               &DirectoryTest::appendUtf8});
 
@@ -316,6 +328,7 @@ DirectoryTest::DirectoryTest() {
              &DirectoryTest::prepareFileToCopy);
 
     addTests({&DirectoryTest::copyEmpty,
+              &DirectoryTest::copyDirectory,
               &DirectoryTest::copyReadNonexistent,
               &DirectoryTest::copyWriteNoPermission,
               &DirectoryTest::copyUtf8});
@@ -334,16 +347,19 @@ DirectoryTest::DirectoryTest() {
 
     addTests({&DirectoryTest::map,
               &DirectoryTest::mapEmpty,
+              &DirectoryTest::mapDirectory,
               &DirectoryTest::mapNonexistent,
               &DirectoryTest::mapUtf8,
 
               &DirectoryTest::mapRead,
               &DirectoryTest::mapReadEmpty,
+              &DirectoryTest::mapReadDirectory,
               &DirectoryTest::mapReadNonexistent,
               &DirectoryTest::mapReadUtf8,
 
               &DirectoryTest::mapWrite,
               &DirectoryTest::mapWriteEmpty,
+              &DirectoryTest::mapWriteDirectory,
               &DirectoryTest::mapWriteNoPermission,
               &DirectoryTest::mapWriteUtf8});
 
@@ -1455,6 +1471,28 @@ void DirectoryTest::fileSizeEarlyEof() {
     #endif
 }
 
+void DirectoryTest::fileSizeDirectory() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    if(!std::getenv("SIMULATOR_UDID"))
+        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_COMPARE(Directory::fileSize(_testDir), Containers::NullOpt);
+
+    /* On Windows the opening itself fails, on Unix we have an explicit check.
+       On other systems no idea, so let's say we expect the same message as on
+       Unix. */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::fileSize(): can't open {}: error 13 (", _testDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), formatString("Utility::Directory::fileSize(): {} is a directory\n", _testDir));
+    #endif
+}
+
 void DirectoryTest::fileSizeNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
@@ -1519,6 +1557,31 @@ void DirectoryTest::readEarlyEof() {
     #endif
 }
 
+void DirectoryTest::readDirectory() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    if(!std::getenv("SIMULATOR_UDID"))
+        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::read(_testDir));
+
+    /* On Windows the opening itself fails, on Unix we have an explicit check.
+       On other systems no idea, so let's say we expect the same message as on
+       Unix. */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::read(): can't open {}: error 13 (", _testDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), formatString("Utility::Directory::read(): {} is a directory\n", _testDir));
+    #endif
+
+    /* Nonexistent file into string shouldn't throw on nullptr */
+    CORRADE_VERIFY(Directory::readString(_testDir).empty());
+}
+
 void DirectoryTest::readNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
@@ -1565,6 +1628,29 @@ void DirectoryTest::writeEmpty() {
     CORRADE_VERIFY(Directory::write(file, nullptr));
     CORRADE_COMPARE_AS(file, "",
         TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::writeDirectory() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::write(_writeTestDir, nullptr));
+    /* Fortunately enough, opening the directory for writing fails already,
+       without having to do anything special */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs use "Permission denied" instead of "Is a directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::write(): can't open {}: error 13 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Emscripten uses a different errno for "Is a directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::write(): can't open {}: error 31 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::write(): can't open {}: error 21 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::writeNoPermission() {
@@ -1648,6 +1734,29 @@ void DirectoryTest::appendEmpty() {
         TestSuite::Compare::FileToString);
 }
 
+void DirectoryTest::appendDirectory() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::append(_writeTestDir, nullptr));
+    /* Fortunately enough, opening the directory for writing fails already,
+       without having to do anything special */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs use "Permission denied" instead of "Is a directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::append(): can't open {}: error 13 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Emscripten uses a different errno for "Is a directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::append(): can't open {}: error 31 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::append(): can't open {}: error 21 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
 void DirectoryTest::appendNoPermission() {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_SKIP("Everything is writable under Emscripten.");
@@ -1717,6 +1826,55 @@ void DirectoryTest::copyEmpty() {
     CORRADE_VERIFY(Directory::copy(source, destination));
     CORRADE_COMPARE_AS(destination, "",
         TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::copyDirectory() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    if(!std::getenv("SIMULATOR_UDID"))
+        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+    #endif
+
+    const std::string source = Directory::join(_writeTestDir, "copySource.dat");
+    const std::string destination = Directory::join(_writeTestDir, "copyDestination.dat");
+    CORRADE_VERIFY(Directory::exists(source));
+
+    {
+        std::ostringstream out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Directory::copy(source, _writeTestDir));
+        /* Opening a directory for writing fails on its own, so there's no need
+           for a special message */
+        #ifdef CORRADE_TARGET_WINDOWS
+        /* Windows APIs use "Permission denied" instead of "Is a directory" */
+        CORRADE_COMPARE_AS(out.str(),
+            formatString("Utility::Directory::copy(): can't open {} for writing: error 13 (", _writeTestDir),
+            TestSuite::Compare::StringHasPrefix);
+        #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Emscripten uses a different errno for "Is a directory" */
+        CORRADE_COMPARE_AS(out.str(),
+            formatString("Utility::Directory::copy(): can't open {} for writing: error 31 (", _writeTestDir),
+            TestSuite::Compare::StringHasPrefix);
+        #else
+        CORRADE_COMPARE_AS(out.str(),
+            formatString("Utility::Directory::copy(): can't open {} for writing: error 21 (", _writeTestDir),
+            TestSuite::Compare::StringHasPrefix);
+        #endif
+    } {
+        std::ostringstream out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Directory::copy(_writeTestDir, destination));
+
+        /* On Windows the opening itself fails, on Unix we have an explicit
+           check. On other systems no idea, so let's say we expect the same
+           message as on Unix. */
+        #ifdef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(out.str(),
+            formatString("Utility::Directory::copy(): can't open {} for reading: error 13 (", _writeTestDir),
+            TestSuite::Compare::StringHasPrefix);
+        #else
+        CORRADE_COMPARE(out.str(), formatString("Utility::Directory::copy(): can't read from {} which is a directory\n", _writeTestDir));
+        #endif
+    }
 }
 
 void DirectoryTest::copyReadNonexistent() {
@@ -1876,6 +2034,29 @@ void DirectoryTest::mapEmpty() {
     #endif
 }
 
+void DirectoryTest::mapDirectory() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::map(_writeTestDir));
+    /* Opening a directory for R+W fails on its own, so there's no need for a
+       special message */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code ("Access denied") */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::map(): can't open {}: error 5 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::map(): can't open {}: error 21 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
 void DirectoryTest::mapNonexistent() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::ostringstream out;
@@ -1917,6 +2098,31 @@ void DirectoryTest::mapReadEmpty() {
     CORRADE_COMPARE_AS(mappedFile,
         Containers::arrayView<char>({}),
         TestSuite::Compare::Container);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapReadDirectory() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    if(!std::getenv("SIMULATOR_UDID"))
+        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+    #endif
+
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::mapRead(_writeTestDir));
+    /* On Windows the opening itself fails, on Unix we have an explicit check */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code ("Access denied") */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mapRead(): can't open {}: error 5 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), formatString("Utility::Directory::mapRead(): {} is a directory\n", _writeTestDir));
+    #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1971,6 +2177,29 @@ void DirectoryTest::mapWriteEmpty() {
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedWriteEmpty"),
         "",
         TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapWriteDirectory() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::mapWrite(_writeTestDir, 64));
+    /* Opening a directory for R+W fails on its own, so there's no need for a
+       special message */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code ("Access denied") */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mapWrite(): can't open {}: error 5 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mapWrite(): can't open {}: error 21 (", _writeTestDir),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
