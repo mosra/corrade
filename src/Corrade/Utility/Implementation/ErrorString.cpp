@@ -31,7 +31,6 @@
 #include <string>
 
 #include "Corrade/Utility/Unicode.h"
-#include "Corrade/Containers/ScopeGuard.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
@@ -42,23 +41,12 @@ namespace Corrade { namespace Utility { namespace Implementation {
 
 #ifdef CORRADE_TARGET_WINDOWS
 std::string windowsErrorString(unsigned int errorCode) {
-    WCHAR* errorStringW = nullptr;
-    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS|FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        nullptr, errorCode, 0, reinterpret_cast<LPWSTR>(&errorStringW),
-        0, nullptr);
-    Containers::ScopeGuard e{errorStringW,
-        #ifdef CORRADE_MSVC2015_COMPATIBILITY
-        /* MSVC 2015 is unable to cast the parameter for LocalFree */
-        [](WCHAR* p){ LocalFree(p); }
-        #else
-        LocalFree
-        #endif
-    };
+    WCHAR errorStringW[256];
+    const std::size_t size = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, errorCode, 0, errorStringW, Containers::arraySize(errorStringW), nullptr);
 
     /* Convert to UTF-8 and cut off final newline that FormatMessage adds. Yes,
        a \r\n, IT'S WINDOWS, BABY!!! */
-    return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW,
-        wcslen(errorStringW)).except(2));
+    return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW, size).except(2));
 }
 #endif
 
