@@ -43,7 +43,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
 #ifdef CORRADE_TARGET_WINDOWS
 std::string windowsErrorString(unsigned int errorCode) {
     WCHAR* errorStringW = nullptr;
-    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER,
+    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS|FORMAT_MESSAGE_ALLOCATE_BUFFER,
         nullptr, errorCode, 0, reinterpret_cast<LPWSTR>(&errorStringW),
         0, nullptr);
     Containers::ScopeGuard e{errorStringW,
