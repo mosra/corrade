@@ -31,6 +31,7 @@
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -182,6 +183,20 @@ CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);
 int a = DOXYGEN_ELLIPSIS(0.0f);
 CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::NotDivisible);
 /* [Compare-NotDivisible] */
+}
+
+{
+/* [Compare-StringHasPrefix] */
+Containers::StringView a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, "hello", TestSuite::Compare::StringHasPrefix);
+/* [Compare-StringHasPrefix] */
+}
+
+{
+/* [Compare-StringHasSuffix] */
+Containers::StringView a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, "world", TestSuite::Compare::StringHasSuffix);
+/* [Compare-StringHasSuffix] */
 }
 
 {

@@ -31,6 +31,7 @@ set(CorradeTestSuiteCompare_HEADERS
     FloatingPoint.h
     Numeric.h
     SortedContainer.h
+    String.h
     StringToFile.h)
 
 # Force IDEs to display all header files in project view
