@@ -42,6 +42,15 @@
 #include "Corrade/Utility/StlForwardString.h"
 #endif
 
+#ifdef CORRADE_BUILD_DEPRECATED
+/* For narrow() / widen(), which used to return / take a std::[w]string. Not
+   ideal for the return types and does nothing for std::wstring that's now an
+   Array (though there you might get it working just from the implicit pointer
+   conversion alone), but at least something. */
+#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/StringStl.h>
+#endif
+
 namespace Corrade { namespace Utility {
 
 /**
@@ -115,47 +124,95 @@ UTF-32 range, returns 0.
 CORRADE_UTILITY_EXPORT std::size_t utf8(char32_t character, Containers::StaticArrayView<4, char> result);
 
 #if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
-/**
-@brief Widen UTF-8 string for use with Windows Unicode APIs
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT Containers::Array<wchar_t> widen(const char* text, int size);
+    CORRADE_UTILITY_EXPORT Containers::String narrow(const wchar_t* text, int size);
+}
 
-Converts UTF-8 string to wide-string (UTF-16) representation. Primary purpose
-is easy interaction with Windows Unicode APIs, thus the function doesn't
-return @ref std::u16string but a @ref std::wstring.
+/**
+@brief Widen a UTF-8 string for use with Windows Unicode APIs
+
+Converts a UTF-8 string to a wide-string (UTF-16) representation. The primary
+purpose of this API is easy interaction with Windows Unicode APIs, thus the
+function doesn't return @cpp char16_t @ce but rather a @cpp wchar_t @ce. If the
+text is not empty, the returned array contains a sentinel null terminator
+(i.e., not counted into its size).
 @partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
     used when dealing directly with Windows Unicode APIs. Other code should
     always use UTF-8, see http://utf8everywhere.org for more information.
 */
 /* Not named utf16() in order to avoid clashes with potential portable
-   std::u16string utf16(const std::string&) implementation in the future */
-CORRADE_UTILITY_EXPORT std::wstring widen(const std::string& text);
-
-/** @overload */
-CORRADE_UTILITY_EXPORT std::wstring widen(Containers::ArrayView<const char> text);
+   std::u16string utf16(const std::string&) implementation in the future. */
+/* The returned value is an Array, which compared to a std::wstring means we
+   can't use SSO to our advantage. On the other hand, assuming the string being
+   no more than three pointers large, it means there's at most 21 bytes to
+   store if we exclude two bytes for a null terminator and one byte for size,
+   thus 10 characters at most. Which is two characters less than what 8.3
+   filenames had, thus unlikely to help us in any real world scenario. And
+   practically maybe only 7 instead of 10, as only libc++ is able to use 22
+   bytes out of 24, the others just 15: https://stackoverflow.com/a/28003328 */
+CORRADE_UTILITY_EXPORT Containers::Array<wchar_t> widen(Containers::StringView text);
 
 /** @overload
 Expects that @p text is null-terminated.
+@todo can be safely removed once the STL overload below is dropped, the
+    StringView will do the job on its own
 */
-CORRADE_UTILITY_EXPORT std::wstring widen(const char* text);
+#ifdef DOXYGEN_GENERATING_OUTPUT
+Containers::Array<wchar_t> widen(const char* text);
+#else
+/* Needed to avoid ambiguity in calls to widen() or narrow() with types that
+   are convertible both to a pointer and to an StringView (or a std::string).
+
+   Matches char*, const char*, char[] or cibst char[] but not StringView or any
+   other class convertible to a StringView (or a std::string). The array is
+   matched because usually when a static array is used for character storage,
+   its size isn't size of the actual string there.
+
+   The return type is templated to avoid unconditionally including Array.h. */
+template<class T, class R = Containers::Array<wchar_t>, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, const char*>::value || std::is_same<typename std::decay<T>::type, char*>::value>::type> inline R widen(T&& text) {
+    return Implementation::widen(text, -1);
+}
+#endif
+
+/** @overload */
+CORRADE_UTILITY_EXPORT std::wstring widen(const std::string& text);
 
 /**
-@brief Narrow string to UTF-8 for use with Windows Unicode APIs
+@brief Narrow a string to UTF-8 for use with Windows Unicode APIs
 
-Converts wide-string (UTF-16) to UTF-8 representation. Primary purpose
-is easy interaction with Windows Unicode APIs, thus the function doesn't
-accept @ref std::u16string but a @ref std::wstring.
+Converts a wide-string (UTF-16) to a UTF-8 representation. The primary purpose
+is easy interaction with Windows Unicode APIs, thus the function doesn't take
+@cpp char16_t @ce but rather a @cpp wchar_t @ce.
 @partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
     used when dealing directly with Windows Unicode APIs. Other code should
     always use UTF-8, see http://utf8everywhere.org for more information.
 */
-CORRADE_UTILITY_EXPORT std::string narrow(const std::wstring& text);
-
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string narrow(Containers::ArrayView<const wchar_t> text);
+CORRADE_UTILITY_EXPORT Containers::String narrow(Containers::ArrayView<const wchar_t> text);
 
 /** @overload
 Expects that @p text is null-terminated.
 */
-CORRADE_UTILITY_EXPORT std::string narrow(const wchar_t* text);
+#ifdef DOXYGEN_GENERATING_OUTPUT
+Containers::String narrow(const wchar_t* text);
+#else
+/* Needed to avoid ambiguity in calls to widen() or narrow() with types that
+   are convertible both to a pointer and to an StringView (or a std::string).
+
+   Matches wchar_t*, const wchar_t*, wchar_t[] or const wchar_t[] but not
+   ArrayView<const wchar_t> or any other class convertible to an ArrayView (or
+   a std::wstring). The array is matched because usually when a static array is
+   used for character storage, its size isn't size of the actual string
+   there.
+
+   The return type is templated to avoid unconditionally including String.h. */
+template<class T, class R = Containers::String, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, const wchar_t*>::value || std::is_same<typename std::decay<T>::type, wchar_t*>::value>::type> inline R narrow(T&& text) {
+    return Implementation::narrow(text, -1);
+}
+#endif
+
+/** @overload */
+CORRADE_UTILITY_EXPORT std::string narrow(const std::wstring& text);
 #endif
 
 }}}

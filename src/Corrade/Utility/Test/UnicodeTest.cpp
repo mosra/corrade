@@ -27,9 +27,16 @@
 #include <sstream>
 #include <string>
 
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Unicode.h"
+
+#ifdef CORRADE_TARGET_WINDOWS
+#include "Corrade/Containers/Array.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -51,8 +58,10 @@ struct UnicodeTest: TestSuite::Tester {
     #ifdef CORRADE_TARGET_WINDOWS
     void widen();
     void widenEmpty();
+    void widenStl();
     void narrow();
     void narrowEmpty();
+    void narrowStl();
     #endif
 };
 
@@ -72,11 +81,15 @@ UnicodeTest::UnicodeTest() {
               #ifdef CORRADE_TARGET_WINDOWS
               &UnicodeTest::widen,
               &UnicodeTest::widenEmpty,
+              &UnicodeTest::widenStl,
               &UnicodeTest::narrow,
-              &UnicodeTest::narrowEmpty
+              &UnicodeTest::narrowEmpty,
+              &UnicodeTest::narrowStl
               #endif
               });
 }
+
+using namespace Containers::Literals;
 
 void UnicodeTest::nextUtf8() {
     /* One-byte sequence */
@@ -211,55 +224,69 @@ void UnicodeTest::utf32utf8Error() {
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
-const Containers::ArrayView<const char> TextNarrow = Containers::arrayView("žluťoučký kůň\0hýždě").except(1);
+const Containers::StringView TextNarrow = "žluťoučký kůň\0hýždě"_s;
 const Containers::ArrayView<const wchar_t> TextWide = Containers::arrayView(L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b").except(1);
 
 void UnicodeTest::widen() {
-    CORRADE_COMPARE(Unicode::widen(std::string{TextNarrow, TextNarrow.size()}),
-        (std::wstring{TextWide, TextWide.size()}));
-
-    CORRADE_COMPARE(Unicode::widen(TextNarrow),
-        (std::wstring{TextWide, TextWide.size()}));
+    Containers::Array<wchar_t> a = Unicode::widen(TextNarrow);
+    CORRADE_COMPARE_AS(a, TextWide,
+        TestSuite::Compare::Container);
+    /* There should be an explicit null terminator */
+    CORRADE_COMPARE(a[a.size()], 0);
 
     /* With implicit size gets cut off after the first \0 */
-    CORRADE_COMPARE(Unicode::widen(TextNarrow.data()),
-        (std::wstring{TextWide.data()}));
+    Containers::Array<wchar_t> b = Unicode::widen(TextNarrow.data());
+    CORRADE_COMPARE_AS(b, TextWide.prefix(13),
+        TestSuite::Compare::Container);
+    /* There should be an explicit null terminator */
+    CORRADE_COMPARE(b[b.size()], 0);
 }
 
 void UnicodeTest::widenEmpty() {
-    CORRADE_COMPARE(Unicode::widen(std::string{}),
-        std::wstring{});
-
-    CORRADE_COMPARE(Unicode::widen(Containers::ArrayView<const char>{}),
-        std::wstring{});
+    Containers::Array<wchar_t> a = Unicode::widen(Containers::StringView{});
+    CORRADE_COMPARE_AS(a,
+        Containers::ArrayView<const wchar_t>{},
+        TestSuite::Compare::Container);
+    /* There should be an explicit null terminator */
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a[0], 0);
 
     /* With implicit size */
-    CORRADE_COMPARE(Unicode::widen(""),
-        std::wstring{});
+    Containers::Array<wchar_t> b = Unicode::widen("");
+    CORRADE_COMPARE_AS(b,
+        Containers::ArrayView<const wchar_t>{},
+        TestSuite::Compare::Container);
+    /* There should be an explicit null terminator */
+    CORRADE_VERIFY(b.data());
+    CORRADE_COMPARE(b[0], 0);
+}
+
+void UnicodeTest::widenStl() {
+    CORRADE_COMPARE(Unicode::widen(std::string{TextNarrow}),
+        (std::wstring{TextWide, TextWide.size()}));
+    /* std::wstring takes care of null termination, no need to test */
 }
 
 void UnicodeTest::narrow() {
-    CORRADE_COMPARE(Unicode::narrow(std::wstring{TextWide, TextWide.size()}),
-        (std::string{TextNarrow, TextNarrow.size()}));
-
-    CORRADE_COMPARE(Unicode::narrow(TextWide),
-        (std::string{TextNarrow, TextNarrow.size()}));
+    CORRADE_COMPARE(Unicode::narrow(TextWide), TextNarrow);
+    /* Containers::String takes care of null termination, no need to test */
 
     /* With implicit size gets cut off after the first \0 */
-    CORRADE_COMPARE(Unicode::narrow(TextWide.data()),
-        (std::string{TextNarrow.data()}));
+    CORRADE_COMPARE(Unicode::narrow(TextWide.data()), TextNarrow.prefix(19));
 }
 
 void UnicodeTest::narrowEmpty() {
-    CORRADE_COMPARE(Unicode::narrow(std::wstring{}),
-        std::string{});
-
-    CORRADE_COMPARE(Unicode::narrow(Containers::ArrayView<const wchar_t>{}),
-        std::string{});
+    CORRADE_COMPARE(Unicode::narrow(Containers::ArrayView<const wchar_t>{}), "");
+    /* Containers::String takes care of null termination, no need to test */
 
     /* With implicit size */
-    CORRADE_COMPARE(Unicode::narrow(L""),
-        std::string{});
+    CORRADE_COMPARE(Unicode::narrow(L""), "");
+}
+
+void UnicodeTest::narrowStl() {
+    CORRADE_COMPARE(Unicode::narrow(std::wstring{TextWide, TextWide.size()}),
+        std::string{TextNarrow});
+    /* std::string takes care of null termination, no need to test */
 }
 #endif
 

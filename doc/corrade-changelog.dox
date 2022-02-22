@@ -397,6 +397,16 @@ namespace Corrade {
     requires the @ref Corrade/Utility/DebugStlStringView.h include. Before it
     was printed as a numeric container due to @ref Utility::IsStringLike not
     recognizing it.
+-   With the ongoing process to make the APIs less STL dependent,
+    @ref Utility::Unicode::narrow() and @relativeref{Utility::Unicode,widen()}
+    variants taking a view or a char pointer now return either a
+    @ref Containers::String or a @ref Containers::Array "Containers::Array<wchar_t>"
+    instead of @ref std::string or @ref std::wstring.
+    @ref Corrade/Containers/StringStl.h is included for implicit conversions
+    from/to a @ref std::string, but there's no implicit conversion for the
+    @ref std::wstring side. The overloads taking a @ref std::string /
+    @ref std::wstring are kept, use them explicitly if you want to have a STL
+    type returned as well.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

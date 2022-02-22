@@ -29,13 +29,15 @@
 #include <cstdint>
 #include <string>
 
+#include "Corrade/Utility/Assert.h"
+
 #ifdef CORRADE_TARGET_WINDOWS
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <windows.h>
-#endif
 
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Containers/Array.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace Unicode {
 
@@ -176,48 +178,62 @@ std::u32string utf32(const std::string& text) {
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
-namespace {
+namespace Implementation {
 
-std::wstring widen(const char* const text, const int size) {
+Containers::Array<wchar_t> widen(const char* const text, const int size) {
+    /* MBtoWC counts the trailing \0 into the size, which we have to cut. It
+       also can't be called with a zero size for some stupid reason, in that
+       case just set the result size to zero. We can't just `return {}` because
+       the output array is guaranteed to be a pointer to a null-terminated
+       string. */
+    const std::size_t resultSize = size == 0 ? 0 : MultiByteToWideChar(CP_UTF8, 0, text, size, nullptr, 0) - (size == -1 ? 1 : 0);
+    /* Create the array with a sentinel null terminator. If size is zero, this
+       is just a single null terminator. */
+    Containers::Array<wchar_t> result{NoInit, resultSize + 1};
+    result[resultSize] = L'\0';
+    /* Again, this function doesn't like to be called if size is zero */
+    if(size) MultiByteToWideChar(CP_UTF8, 0, text, size, result.data(), resultSize);
+    /* Return the size without the null terminator */
+    return Containers::Array<wchar_t>{result.release(), resultSize};
+}
+
+Containers::String narrow(const wchar_t* const text, const int size) {
+    /* Compared to the above case with an Array, if size is zero, we can just
+       do an early return -- the String constructor takes care of the
+       guarantee itself */
     if(!size) return {};
-    /* WCtoMB counts the trailing \0 into size, which we have to cut */
-    std::wstring result(MultiByteToWideChar(CP_UTF8, 0, text, size, nullptr, 0) - (size == -1 ? 1 : 0), 0);
-    MultiByteToWideChar(CP_UTF8, 0, text, size, &result[0], result.size());
+    /* WCtoMB counts the trailing \0 into the size, which we have to cut.
+       Containers::String takes care of allocating extra for the null
+       terminator so we don't need to do that explicitly. */
+    Containers::String result{NoInit, std::size_t(WideCharToMultiByte(CP_UTF8, 0, text, size, nullptr, 0, nullptr, nullptr) - (size == -1 ? 1 : 0))};
+    WideCharToMultiByte(CP_UTF8, 0, text, size, result.data(), result.size(), nullptr, nullptr);
     return result;
 }
 
-std::string narrow(const wchar_t* const text, const int size) {
-    if(!size) return {};
-    /* WCtoMB counts the trailing \0 into size, which we have to cut */
-    std::string result(WideCharToMultiByte(CP_UTF8, 0, text, size, nullptr, 0, nullptr, nullptr) - (size == -1 ? 1 : 0), 0);
-    WideCharToMultiByte(CP_UTF8, 0, text, size, &result[0], result.size(), nullptr, nullptr);
-    return result;
 }
 
+Containers::Array<wchar_t> widen(const Containers::StringView text) {
+    return Implementation::widen(text.data(), text.size());
 }
 
 std::wstring widen(const std::string& text) {
-    return widen(text.data(), text.size());
+    /* Yes, this is nasty as it makes an extra copy. You're suffering by using
+       a std::string already anyway, so this won't hurt that much extra. Plus
+       you've most probably made another allocation just by passing the text
+       in. Haha. */
+    const Containers::Array<wchar_t> widened = Implementation::widen(text.data(), text.size());
+    return {widened.begin(), widened.end()};
 }
 
-std::wstring widen(Containers::ArrayView<const char> text) {
-    return widen(text.data(), text.size());
-}
-
-std::wstring widen(const char* text) {
-    return widen(text, -1);
+Containers::String narrow(const Containers::ArrayView<const wchar_t> text) {
+    return Implementation::narrow(text.data(), text.size());
 }
 
 std::string narrow(const std::wstring& text) {
-    return narrow(text.data(), text.size());
-}
-
-std::string narrow(Containers::ArrayView<const wchar_t> text) {
-    return narrow(text.data(), text.size());
-}
-
-std::string narrow(const wchar_t* text) {
-    return narrow(text, -1);
+    /* Yes, this is nasty as it makes an extra copy. You're suffering by using
+       a std::string already anyway, so this won't hurt that much extra. */
+    const Containers::String narrowed = Implementation::narrow(text.data(), text.size());
+    return {narrowed.begin(), narrowed.end()};
 }
 #endif
 
