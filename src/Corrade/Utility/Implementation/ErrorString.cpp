@@ -28,9 +28,9 @@
 #include "ErrorString.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
-#include <string>
-
-#include "Corrade/Utility/Unicode.h"
+#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Utility/Debug.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
@@ -40,13 +40,15 @@
 namespace Corrade { namespace Utility { namespace Implementation {
 
 #ifdef CORRADE_TARGET_WINDOWS
-std::string windowsErrorString(unsigned int errorCode) {
+void printWindowsErrorString(Debug& debug, unsigned int errorCode) {
     WCHAR errorStringW[256];
-    const std::size_t size = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, errorCode, 0, errorStringW, Containers::arraySize(errorStringW), nullptr);
+    const std::size_t sizeW = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, errorCode, 0, errorStringW, Containers::arraySize(errorStringW), nullptr);
 
-    /* Convert to UTF-8 and cut off final newline that FormatMessage adds. Yes,
+    /* Cut off final newline that FormatMessage adds and convert to UTF-8. Yes,
        a \r\n, IT'S WINDOWS, BABY!!! */
-    return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW, size).except(2));
+    char errorString[256];
+    const std::size_t size = WideCharToMultiByte(CP_UTF8, 0, errorStringW, sizeW - 2, errorString, Containers::arraySize(errorString), nullptr, nullptr);
+    debug << Containers::StringView{errorString, size};
 }
 #endif
 

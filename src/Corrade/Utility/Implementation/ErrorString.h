@@ -30,7 +30,7 @@
 #include "Corrade/configure.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
-#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 #endif
 
@@ -39,7 +39,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
 /* Exported in order to be available for the test */
 
 #ifdef CORRADE_TARGET_WINDOWS
-CORRADE_UTILITY_EXPORT std::string windowsErrorString(unsigned int errorCode);
+CORRADE_UTILITY_EXPORT void printWindowsErrorString(Debug& debug, unsigned int errorCode);
 #endif
 
 }}}

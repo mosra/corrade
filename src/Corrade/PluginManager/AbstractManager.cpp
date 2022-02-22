@@ -605,15 +605,15 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     HMODULE module = LoadLibraryW(widen(filename).data());
     #endif
     if(!module) {
-        Error{} << "PluginManager::Manager::load(): cannot load plugin"
+        Error err;
+        err << "PluginManager::Manager::load(): cannot load plugin"
             << plugin.metadata._name << "from \"" << Debug::nospace
-            << filename << Debug::nospace << "\":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+            << filename << Debug::nospace << "\":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         return LoadState::LoadFailed;
     }
 
@@ -629,14 +629,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginVersion"));
     if(version == nullptr) {
-        Error{} << "PluginManager::Manager::load(): cannot get version of plugin"
-            << plugin.metadata._name << Debug::nospace << ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::load(): cannot get version of plugin"
+            << plugin.metadata._name << Debug::nospace << ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -668,14 +668,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInterface"));
     if(interface == nullptr) {
-        Error{} << "PluginManager::Manager::load(): cannot get interface string of plugin"
-            << plugin.metadata._name << Debug::nospace << ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::load(): cannot get interface string of plugin"
+            << plugin.metadata._name << Debug::nospace << ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -705,14 +705,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInitializer"));
     if(initializer == nullptr) {
-        Error{} << "PluginManager::Manager::load(): cannot get initializer of plugin"
-            << plugin.metadata._name + ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::load(): cannot get initializer of plugin"
+            << plugin.metadata._name + ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -733,14 +733,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginFinalizer"));
     if(finalizer == nullptr) {
-        Error{} << "PluginManager::Manager::load(): cannot get finalizer of plugin"
-            << plugin.metadata._name + ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::load(): cannot get finalizer of plugin"
+            << plugin.metadata._name + ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -761,14 +761,14 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInstancer"));
     if(instancer == nullptr) {
-        Error{} << "PluginManager::Manager::load(): cannot get instancer of plugin"
-            << plugin.metadata._name + ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::load(): cannot get instancer of plugin"
+            << plugin.metadata._name + ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -882,14 +882,14 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
            but that's possible only on QNX, on linux dlclose() only unloads the
            library if it's really not needed. Source:
            https://stackoverflow.com/questions/28882298/error-on-dlclose-shared-objects-still-referenced */
-        Error{} << "PluginManager::Manager::unload(): cannot unload plugin"
-            << plugin.metadata._name << Debug::nospace << ":"
-            #ifndef CORRADE_TARGET_WINDOWS
-            << dlerror()
-            #else
-            << Utility::Implementation::windowsErrorString(GetLastError())
-            #endif
-            ;
+        Error err;
+        err << "PluginManager::Manager::unload(): cannot unload plugin"
+            << plugin.metadata._name << Debug::nospace << ":";
+        #ifndef CORRADE_TARGET_WINDOWS
+        err << dlerror();
+        #else
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        #endif
         plugin.loadState = LoadState::NotLoaded;
         return LoadState::UnloadFailed;
     }

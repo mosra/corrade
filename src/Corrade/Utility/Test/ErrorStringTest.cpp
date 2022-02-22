@@ -55,15 +55,17 @@ ErrorStringTest::ErrorStringTest() {
 
 #ifdef CORRADE_TARGET_WINDOWS
 void ErrorStringTest::windowsString() {
-    std::string string = Implementation::windowsErrorString(ERROR_FILE_NOT_FOUND);
-    CORRADE_INFO("ERROR_FILE_NOT_FOUND error string is:" << string);
+    std::stringstream out;
+    Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
+    Implementation::printWindowsErrorString(debug, ERROR_FILE_NOT_FOUND);
+    CORRADE_INFO("ERROR_FILE_NOT_FOUND error string is:" << out.str());
 
     /* FFS DO YOU HAVE TO YELL AT ME??? */
     const LANGID usEnglish = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
     if(GetUserDefaultLangID() != usEnglish)
         CORRADE_SKIP("User language is not US English, can't test");
 
-    CORRADE_COMPARE(string, "The system cannot find the file specified.");
+    CORRADE_COMPARE(out.str(), "The system cannot find the file specified.");
 }
 #endif
 
