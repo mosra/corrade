@@ -862,7 +862,7 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     if(!size) data = nullptr;
     else if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         close(fd);
-        Error{} << "Utility::Directory::map(): can't map the file";
+        Error{} << "Utility::Directory::map(): can't map" << filename;
         return nullptr;
     }
 
@@ -890,7 +890,7 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     if(!size) data = nullptr;
     else if((data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         close(fd);
-        Error() << "Utility::Directory::mapRead(): can't map the file";
+        Error() << "Utility::Directory::mapRead(): can't map" << filename;
         return nullptr;
     }
 
@@ -917,21 +917,21 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
         /* Resize the file to requested size by seeking one byte before */
         if(lseek(fd, size - 1, SEEK_SET) == -1) {
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't seek to resize the file";
+            Error{} << "Utility::Directory::mapWrite(): can't seek to resize" << filename;
             return nullptr;
         }
 
         /* And then writing a zero byte on that position */
         if(::write(fd, "", 1) != 1) {
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't write to resize the file";
+            Error{} << "Utility::Directory::mapWrite(): can't write to resize" << filename;
             return nullptr;
         }
 
         /* Map the file */
         if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't map the file";
+            Error{} << "Utility::Directory::mapWrite(): can't map" << filename;
             return nullptr;
         }
     }
@@ -970,14 +970,14 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     } else {
         /* Create the file mapping */
         if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr))) {
-            Error{} << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
+            Error{} << "Utility::Directory::map(): can't create file mapping for" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hFile);
             return nullptr;
         }
 
         /* Map the file */
         if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
-            Error{} << "Utility::Directory::map(): can't map the file:" << GetLastError();
+            Error{} << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hMap);
             CloseHandle(hFile);
             return nullptr;
@@ -1011,14 +1011,14 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     } else {
         /* Create the file mapping */
         if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr))) {
-            Error{} << "Utility::Directory::mapRead(): can't create the file mapping:" << GetLastError();
+            Error{} << "Utility::Directory::mapRead(): can't create file mapping for" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hFile);
             return nullptr;
         }
 
         /* Map the file */
         if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)))) {
-            Error{} << "Utility::Directory::mapRead(): can't map the file:" << GetLastError();
+            Error{} << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hMap);
             CloseHandle(hFile);
             return nullptr;
@@ -1050,14 +1050,14 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
     } else {
         /* Create the file mapping */
         if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr))) {
-            Error{} << "Utility::Directory::mapWrite(): can't create the file mapping:" << GetLastError();
+            Error{} << "Utility::Directory::mapWrite(): can't create file mapping for" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hFile);
             return nullptr;
         }
 
         /* Map the file */
         if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
-            Error{} << "Utility::Directory::mapWrite(): can't map the file:" << GetLastError();
+            Error{} << "Utility::Directory::mapWrite(): can't map" << filename << Debug::nospace << ":" << GetLastError();
             CloseHandle(hMap);
             CloseHandle(hFile);
             return nullptr;
