@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_Implementation_ErrorString_h
+#define Corrade_Utility_Implementation_ErrorString_h
 /*
     This file is part of Corrade.
 
@@ -25,36 +27,21 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "WindowsError.h"
+#include "Corrade/configure.h"
 
-#include <string>
-
-#include "Corrade/Utility/Unicode.h"
-#include "Corrade/Containers/ScopeGuard.h"
-
-#define WIN32_LEAN_AND_MEAN 1
-#define VC_EXTRALEAN
-#include <windows.h>
+#ifdef CORRADE_TARGET_WINDOWS
+#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/visibility.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-std::string windowsErrorString(unsigned int errorCode) {
-    WCHAR* errorStringW = nullptr;
-    FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        nullptr, errorCode, 0, reinterpret_cast<LPWSTR>(&errorStringW),
-        0, nullptr);
-    Containers::ScopeGuard e{errorStringW,
-        #ifdef CORRADE_MSVC2015_COMPATIBILITY
-        /* MSVC 2015 is unable to cast the parameter for LocalFree */
-        [](WCHAR* p){ LocalFree(p); }
-        #else
-        LocalFree
-        #endif
-    };
+/* Exported in order to be available for the test */
 
-    /* Convert to UTF-8 and cut off final newline that FormatMessages adds */
-    return Unicode::narrow(Containers::arrayView<const wchar_t>(errorStringW,
-        wcslen(errorStringW)).except(1));
-}
+#ifdef CORRADE_TARGET_WINDOWS
+CORRADE_UTILITY_EXPORT std::string windowsErrorString(unsigned int errorCode);
+#endif
 
 }}}
+
+#endif

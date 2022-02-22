@@ -32,7 +32,9 @@ if(WITH_UTILITY)
         ConfigurationValue.cpp
         MurmurHash2.cpp
         Sha1.cpp
-        System.cpp)
+        System.cpp
+
+        Implementation/ErrorString.cpp)
 
     set(CorradeUtility_GracefulAssert_SRCS
         Algorithms.cpp
@@ -85,6 +87,7 @@ if(WITH_UTILITY)
         visibility.h)
 
     set(CorradeUtility_PRIVATE_HEADERS
+        Implementation/ErrorString.h
         Implementation/Resource.h)
 
     # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
@@ -111,12 +114,6 @@ if(WITH_UTILITY)
     if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC)
         list(APPEND CorradeUtility_SRCS Implementation/WindowsWeakSymbol.cpp)
         list(APPEND CorradeUtility_PRIVATE_HEADERS Implementation/WindowsWeakSymbol.h)
-    endif()
-
-    # Functionality specific to Windows builds
-    if(CORRADE_TARGET_WINDOWS)
-        list(APPEND CorradeUtility_SRCS Implementation/WindowsError.cpp)
-        list(APPEND CorradeUtility_PRIVATE_HEADERS Implementation/WindowsError.h)
     endif()
 
     # Objects shared between main and test library
@@ -209,13 +206,14 @@ if(NOT CMAKE_CROSSCOMPILING)
         Resource.cpp
         String.cpp
 
+        Implementation/ErrorString.cpp
+
         ../Containers/String.cpp
         ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)
         list(APPEND CorradeUtilityRc_SRCS
             # Needed for dealing with the design failure that's called "Unicode WINAPI"
-            Unicode.cpp
-            Implementation/WindowsError.cpp)
+            Unicode.cpp)
 
         # Functionality specific to static Windows builds. Not really needed
         # for corrade-rc as it doesn't load any plugins yet but easier than

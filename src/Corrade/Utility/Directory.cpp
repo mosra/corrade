@@ -83,7 +83,7 @@
 #include <shlobj.h>
 #include <io.h>
 
-#include "Corrade/Utility/Implementation/WindowsError.h"
+#include "Corrade/Utility/Implementation/ErrorString.h"
 #endif
 
 #include "Corrade/configure.h"

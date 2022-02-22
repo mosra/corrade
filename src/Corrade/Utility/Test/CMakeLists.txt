@@ -121,6 +121,9 @@ target_compile_definitions(UtilityAssertStandardDisabledTest PRIVATE
 
 corrade_add_test(UtilityAssertGracefulTest AssertGracefulTest.cpp)
 corrade_add_test(UtilityEndiannessTest EndiannessTest.cpp)
+if(CORRADE_TARGET_WINDOWS)
+    corrade_add_test(UtilityErrorStringTest ErrorStringTest.cpp)
+endif()
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
     LIBRARIES CorradeUtilityTestLib

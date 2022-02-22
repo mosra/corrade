@@ -65,7 +65,7 @@ using Corrade::Utility::Unicode::widen;
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
 #endif
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-#include "Corrade/Utility/Implementation/WindowsError.h"
+#include "Corrade/Utility/Implementation/ErrorString.h"
 #endif
 
 using namespace Corrade::Utility;
