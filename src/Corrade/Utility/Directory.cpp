@@ -796,7 +796,7 @@ bool copy(const std::string& from, const std::string& to) {
     std::FILE* const in = _wfopen(widen(from).data(), L"rb");
     #endif
     if(!in) {
-        Error{} << "Utility::Directory::copy(): can't open" << from;
+        Error{} << "Utility::Directory::copy(): can't open" << from << "for reading";
         return false;
     }
 
@@ -808,7 +808,7 @@ bool copy(const std::string& from, const std::string& to) {
     std::FILE* const out = _wfopen(widen(to).data(), L"wb");
     #endif
     if(!out) {
-        Error{} << "Utility::Directory::copy(): can't open" << to;
+        Error{} << "Utility::Directory::copy(): can't open" << to << "for writing";
         return false;
     }
 

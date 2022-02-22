@@ -145,8 +145,8 @@ struct DirectoryTest: TestSuite::Tester {
     void prepareFileToCopy();
     void copy();
     void copyEmpty();
-    void copyNonexistent();
-    void copyNoPermission();
+    void copyReadNonexistent();
+    void copyWriteNoPermission();
     void copyUtf8();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -275,8 +275,8 @@ DirectoryTest::DirectoryTest() {
              &DirectoryTest::prepareFileToCopy);
 
     addTests({&DirectoryTest::copyEmpty,
-              &DirectoryTest::copyNonexistent,
-              &DirectoryTest::copyNoPermission,
+              &DirectoryTest::copyReadNonexistent,
+              &DirectoryTest::copyWriteNoPermission,
               &DirectoryTest::copyUtf8});
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -1390,21 +1390,21 @@ void DirectoryTest::copyEmpty() {
         TestSuite::Compare::FileToString);
 }
 
-void DirectoryTest::copyNonexistent() {
+void DirectoryTest::copyReadNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::copy("nonexistent", Directory::join(_writeTestDir, "empty")));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open nonexistent\n");
+    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open nonexistent for reading\n");
 }
 
-void DirectoryTest::copyNoPermission() {
+void DirectoryTest::copyWriteNoPermission() {
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
 
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::copy(Directory::join(_testDir, "dir/dummy"), "/root/writtenFile"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open /root/writtenFile\n");
+    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open /root/writtenFile for writing\n");
 }
 
 void DirectoryTest::copyUtf8() {
