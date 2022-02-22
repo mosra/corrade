@@ -556,7 +556,7 @@ Containers::ArrayTuple data{
         Containers::Array<char, Utility::Directory::MapDeleter> data =
             Utility::Directory::mapWrite("storage.tmp", size);
         Utility::Directory::MapDeleter deleter = data.deleter();
-        return {data, deleter};
+        return {data.release(), deleter};
     }
 };
 /* [ArrayTuple-usage-mmap] */
