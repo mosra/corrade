@@ -31,8 +31,11 @@
 #include <algorithm> /* std::max() */
 #endif
 
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace TestSuite {
@@ -48,10 +51,11 @@ ComparisonStatusFlags Comparator<Compare::StringToFile>::operator()(const std::s
     _actualContents = actualContents;
 
     /* If this fails, we already have the actual contents so we can save them */
-    if(!Utility::Directory::exists(filename))
+    Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(filename);
+    if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = Utility::Directory::readString(filename);
+    _expectedContents = *std::move(expectedContents);
     _state = State::Success;
 
     return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
@@ -87,8 +91,8 @@ void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Util
 }
 
 void Comparator<Compare::StringToFile>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
-    std::string filename = Utility::Directory::join(path, Utility::Directory::filename(_filename));
-    if(Utility::Directory::writeString(filename, _actualContents))
+    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_filename).second());
+    if(Utility::Path::write(filename, Containers::StringView{_actualContents}))
         out << "->" << filename;
 }
 #endif

@@ -31,9 +31,11 @@
 #include <algorithm> /* std::max() */
 #endif
 
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -42,10 +44,11 @@ Comparator<Compare::FileToString>::Comparator(): _state(State::ReadError) {}
 ComparisonStatusFlags Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
     _filename = filename;
 
-    if(!Utility::Directory::exists(filename))
+    Containers::Optional<Containers::String> actualContents = Utility::Path::readString(filename);
+    if(!actualContents)
         return ComparisonStatusFlag::Failed;
 
-    _actualContents = Utility::Directory::readString(filename);
+    _actualContents = *std::move(actualContents);
     _expectedContents = expectedContents;
     _state = State::Success;
 

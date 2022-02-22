@@ -32,9 +32,12 @@
 #include <algorithm> /* std::max() */
 #endif
 
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -42,23 +45,24 @@ namespace Corrade { namespace TestSuite {
 Comparator<Compare::File>::Comparator(std::string pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{std::move(pathPrefix)} {}
 
 ComparisonStatusFlags Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
-    _actualFilename = Utility::Directory::join(_pathPrefix, actualFilename);
-    _expectedFilename = Utility::Directory::join(_pathPrefix, expectedFilename);
-
-    if(!Utility::Directory::exists(_actualFilename))
-        return ComparisonStatusFlag::Failed;
-
-    _actualState = State::Success;
+    _actualFilename = Utility::Path::join(_pathPrefix, actualFilename);
+    _expectedFilename = Utility::Path::join(_pathPrefix, expectedFilename);
 
     /* Read the actual file contents before the expected so if the expected
        file can't be read, we can still save actual file contents */
-    _actualContents = Utility::Directory::readString(_actualFilename);
+    Containers::Optional<Containers::String> actualContents = Utility::Path::readString(_actualFilename);
+    if(!actualContents)
+        return ComparisonStatusFlag::Failed;
+
+    _actualContents = *std::move(actualContents);
+    _actualState = State::Success;
 
     /* If this fails, we already have the actual contents so we can save them */
-    if(!Utility::Directory::exists(_expectedFilename))
+    Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(_expectedFilename);
+    if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = Utility::Directory::readString(_expectedFilename);
+    _expectedContents = *std::move(expectedContents);
     _expectedState = State::Success;
 
     return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
@@ -99,8 +103,8 @@ void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Deb
 }
 
 void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
-    std::string filename = Utility::Directory::join(path, Utility::Directory::filename(_expectedFilename));
-    if(Utility::Directory::writeString(filename, _actualContents))
+    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_expectedFilename).second());
+    if(Utility::Path::write(filename, Containers::StringView{_actualContents}))
         out << "->" << filename;
 }
 #endif

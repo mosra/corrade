@@ -26,10 +26,11 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -62,15 +63,15 @@ FileToStringTest::FileToStringTest() {
 }
 
 void FileToStringTest::same() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello World!", Compare::FileToString);
+    CORRADE_COMPARE_AS(Utility::Path::join(FILETEST_DIR, "base.txt"), "Hello World!", Compare::FileToString);
 }
 
 void FileToStringTest::empty() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "empty.txt"), "", Compare::FileToString);
+    CORRADE_COMPARE_AS(Utility::Path::join(FILETEST_DIR, "empty.txt"), "", Compare::FileToString);
 }
 
 void FileToStringTest::utf8Filename() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "hýždě.txt"), "Hello World!", Compare::FileToString);
+    CORRADE_COMPARE_AS(Utility::Path::join(FILETEST_DIR, "hýždě.txt"), "Hello World!", Compare::FileToString);
 }
 
 void FileToStringTest::notFound() {
@@ -93,7 +94,7 @@ void FileToStringTest::differentContents() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "different.txt"), "Hello World!");
+        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "different.txt"), "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
@@ -107,7 +108,7 @@ void FileToStringTest::actualSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!");
+        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "smaller.txt"), "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
@@ -121,7 +122,7 @@ void FileToStringTest::expectedSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello W");
+        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "base.txt"), "Hello W");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }

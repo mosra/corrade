@@ -26,12 +26,13 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -65,15 +66,15 @@ StringToFileTest::StringToFileTest() {
 }
 
 void StringToFileTest::same() {
-    CORRADE_COMPARE_AS("Hello World!", Utility::Directory::join(FILETEST_DIR, "base.txt"), Compare::StringToFile);
+    CORRADE_COMPARE_AS("Hello World!", Utility::Path::join(FILETEST_DIR, "base.txt"), Compare::StringToFile);
 }
 
 void StringToFileTest::empty() {
-    CORRADE_COMPARE_AS("", Utility::Directory::join(FILETEST_DIR, "empty.txt"), Compare::StringToFile);
+    CORRADE_COMPARE_AS("", Utility::Path::join(FILETEST_DIR, "empty.txt"), Compare::StringToFile);
 }
 
 void StringToFileTest::utf8Filename() {
-    CORRADE_COMPARE_AS("Hello World!", Utility::Directory::join(FILETEST_DIR, "hýždě.txt"), Compare::StringToFile);
+    CORRADE_COMPARE_AS("Hello World!", Utility::Path::join(FILETEST_DIR, "hýždě.txt"), Compare::StringToFile);
 }
 
 void StringToFileTest::notFound() {
@@ -94,10 +95,10 @@ void StringToFileTest::notFound() {
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
-    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
-    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "nonexistent.txt");
-    if(Utility::Directory::exists(filename))
-        CORRADE_VERIFY(Utility::Directory::rm(filename));
+    CORRADE_VERIFY(Utility::Path::make(FILETEST_SAVE_DIR));
+    Containers::String filename = Utility::Path::join(FILETEST_SAVE_DIR, "nonexistent.txt");
+    if(Utility::Path::exists(filename))
+        CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
         out.str({});
@@ -115,7 +116,7 @@ void StringToFileTest::differentContents() {
     std::stringstream out;
 
     Comparator<Compare::StringToFile> compare;
-    ComparisonStatusFlags flags = compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt"));
+    ComparisonStatusFlags flags = compare("Hello world?", Utility::Path::join(FILETEST_DIR, "base.txt"));
     CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
 
     {
@@ -127,10 +128,10 @@ void StringToFileTest::differentContents() {
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
-    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
-    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "base.txt");
-    if(Utility::Directory::exists(filename))
-        CORRADE_VERIFY(Utility::Directory::rm(filename));
+    CORRADE_VERIFY(Utility::Path::make(FILETEST_SAVE_DIR));
+    Containers::String filename = Utility::Path::join(FILETEST_SAVE_DIR, "base.txt");
+    if(Utility::Path::exists(filename))
+        CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
         out.str({});
@@ -150,7 +151,7 @@ void StringToFileTest::actualSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::StringToFile> compare;
-        ComparisonStatusFlags flags = compare("Hello W", Utility::Directory::join(FILETEST_DIR, "base.txt"));
+        ComparisonStatusFlags flags = compare("Hello W", Utility::Path::join(FILETEST_DIR, "base.txt"));
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
         compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path
@@ -166,7 +167,7 @@ void StringToFileTest::expectedSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::StringToFile> compare;
-        ComparisonStatusFlags flags = compare("Hello World!", Utility::Directory::join(FILETEST_DIR, "smaller.txt"));
+        ComparisonStatusFlags flags = compare("Hello World!", Utility::Path::join(FILETEST_DIR, "smaller.txt"));
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
         compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path

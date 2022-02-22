@@ -26,11 +26,12 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -86,7 +87,7 @@ void FileTest::actualNotFound() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::File> compare;
-        ComparisonStatusFlags flags = compare("nonexistent.txt", Utility::Directory::join(FILETEST_DIR, "base.txt"));
+        ComparisonStatusFlags flags = compare("nonexistent.txt", Utility::Path::join(FILETEST_DIR, "base.txt"));
         /* Should not return Diagnostic as there's no file to read from */
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
@@ -99,7 +100,7 @@ void FileTest::expectedNotFound() {
     std::stringstream out;
 
     Comparator<Compare::File> compare;
-    ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "nonexistent.txt");
+    ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "base.txt"), "nonexistent.txt");
     /* Should return Diagnostic even though we can't find the expected file
        as it doesn't matter */
     CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
@@ -113,10 +114,10 @@ void FileTest::expectedNotFound() {
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
-    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
-    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "nonexistent.txt");
-    if(Utility::Directory::exists(filename))
-        CORRADE_VERIFY(Utility::Directory::rm(filename));
+    CORRADE_VERIFY(Utility::Path::make(FILETEST_SAVE_DIR));
+    Containers::String filename = Utility::Path::join(FILETEST_SAVE_DIR, "nonexistent.txt");
+    if(Utility::Path::exists(filename))
+        CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
         out.str({});
@@ -128,7 +129,7 @@ void FileTest::expectedNotFound() {
        *expected* filename */
     CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename,
-        Utility::Directory::join(FILETEST_DIR, "base.txt"), File);
+        Utility::Path::join(FILETEST_DIR, "base.txt"), File);
 }
 
 void FileTest::differentContents() {
@@ -147,10 +148,10 @@ void FileTest::differentContents() {
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
-    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
-    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "base.txt");
-    if(Utility::Directory::exists(filename))
-        CORRADE_VERIFY(Utility::Directory::rm(filename));
+    CORRADE_VERIFY(Utility::Path::make(FILETEST_SAVE_DIR));
+    Containers::String filename = Utility::Path::join(FILETEST_SAVE_DIR, "base.txt");
+    if(Utility::Path::exists(filename))
+        CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
         out.str({});
@@ -162,7 +163,7 @@ void FileTest::differentContents() {
        *expected* filename */
     CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename,
-        Utility::Directory::join(FILETEST_DIR, "different.txt"), File);
+        Utility::Path::join(FILETEST_DIR, "different.txt"), File);
 }
 
 void FileTest::actualSmaller() {
