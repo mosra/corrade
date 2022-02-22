@@ -50,7 +50,9 @@ struct UnicodeTest: TestSuite::Tester {
 
     #ifdef CORRADE_TARGET_WINDOWS
     void widen();
+    void widenEmpty();
     void narrow();
+    void narrowEmpty();
     #endif
 };
 
@@ -69,7 +71,9 @@ UnicodeTest::UnicodeTest() {
 
               #ifdef CORRADE_TARGET_WINDOWS
               &UnicodeTest::widen,
-              &UnicodeTest::narrow
+              &UnicodeTest::widenEmpty,
+              &UnicodeTest::narrow,
+              &UnicodeTest::narrowEmpty
               #endif
               });
 }
@@ -207,34 +211,55 @@ void UnicodeTest::utf32utf8Error() {
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
+const Containers::ArrayView<const char> TextNarrow = Containers::arrayView("žluťoučký kůň\0hýždě").except(1);
+const Containers::ArrayView<const wchar_t> TextWide = Containers::arrayView(L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b").except(1);
+
 void UnicodeTest::widen() {
-    const char text[] = "žluťoučký kůň\0hýždě";
-    const wchar_t result[] = L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b";
+    CORRADE_COMPARE(Unicode::widen(std::string{TextNarrow, TextNarrow.size()}),
+        (std::wstring{TextWide, TextWide.size()}));
 
-    CORRADE_COMPARE(Unicode::widen(text),
-                    result);
-    CORRADE_COMPARE(Unicode::widen(std::string{text, sizeof(text)}),
-                    (std::wstring{result, sizeof(result)/sizeof(wchar_t)}));
-    CORRADE_COMPARE(Unicode::widen(Containers::ArrayView<const char>{text, sizeof(text)}),
-                    (std::wstring{result, sizeof(result)/sizeof(wchar_t)}));
+    CORRADE_COMPARE(Unicode::widen(TextNarrow),
+        (std::wstring{TextWide, TextWide.size()}));
 
-    /* Empty string shouldn't crash */
-    CORRADE_COMPARE(Unicode::widen(""), L"");
+    /* With implicit size gets cut off after the first \0 */
+    CORRADE_COMPARE(Unicode::widen(TextNarrow.data()),
+        (std::wstring{TextWide.data()}));
+}
+
+void UnicodeTest::widenEmpty() {
+    CORRADE_COMPARE(Unicode::widen(std::string{}),
+        std::wstring{});
+
+    CORRADE_COMPARE(Unicode::widen(Containers::ArrayView<const char>{}),
+        std::wstring{});
+
+    /* With implicit size */
+    CORRADE_COMPARE(Unicode::widen(""),
+        std::wstring{});
 }
 
 void UnicodeTest::narrow() {
-    const wchar_t text[] = L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b";
-    const char result[] = "žluťoučký kůň\0hýždě";
+    CORRADE_COMPARE(Unicode::narrow(std::wstring{TextWide, TextWide.size()}),
+        (std::string{TextNarrow, TextNarrow.size()}));
 
-    CORRADE_COMPARE(Unicode::narrow(text),
-                    result);
-    CORRADE_COMPARE(Unicode::narrow(std::wstring{text, sizeof(text)/sizeof(wchar_t)}),
-                    (std::string{result, sizeof(result)}));
-    CORRADE_COMPARE(Unicode::narrow(Containers::ArrayView<const wchar_t>{text, sizeof(text)/sizeof(wchar_t)}),
-                    (std::string{result, sizeof(result)}));
+    CORRADE_COMPARE(Unicode::narrow(TextWide),
+        (std::string{TextNarrow, TextNarrow.size()}));
 
-    /* Empty string shouldn't crash */
-    CORRADE_COMPARE(Unicode::narrow(L""), "");
+    /* With implicit size gets cut off after the first \0 */
+    CORRADE_COMPARE(Unicode::narrow(TextWide.data()),
+        (std::string{TextNarrow.data()}));
+}
+
+void UnicodeTest::narrowEmpty() {
+    CORRADE_COMPARE(Unicode::narrow(std::wstring{}),
+        std::string{});
+
+    CORRADE_COMPARE(Unicode::narrow(Containers::ArrayView<const wchar_t>{}),
+        std::string{});
+
+    /* With implicit size */
+    CORRADE_COMPARE(Unicode::narrow(L""),
+        std::string{});
 }
 #endif
 
