@@ -1186,7 +1186,16 @@ void DirectoryTest::fileSizeNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::fileSize("nonexistent"), Containers::NullOpt);
-    CORRADE_COMPARE(out.str(), "Utility::Directory::fileSize(): can't open nonexistent\n");
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::fileSize(): can't open nonexistent: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::fileSize(): can't open nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::fileSizeUtf8() {
@@ -1241,7 +1250,16 @@ void DirectoryTest::readNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::read("nonexistent"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::read(): can't open nonexistent\n");
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::read(): can't open nonexistent: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::read(): can't open nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 
     /* Nonexistent file into string shouldn't throw on nullptr */
     CORRADE_VERIFY(Directory::readString("nonexistent").empty());
@@ -1277,13 +1295,36 @@ void DirectoryTest::writeEmpty() {
 }
 
 void DirectoryTest::writeNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writable under Emscripten.");
+    #else
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string filename = "/var/root/writtenFile";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string filename = "/data/local/writtenFile";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string filename = "/root/writtenFile";
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string filename = "C:/Program Files/WindowsApps/writtenFile";
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    #else
+    std::string filename;
+    CORRADE_SKIP("Not sure how to test on this system.");
+    #endif
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Directory::write("/root/writtenFile", nullptr));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::write(): can't open /root/writtenFile\n");
+    CORRADE_VERIFY(!Directory::write(filename, nullptr));
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::write(): can't open {}: error 13 (", filename),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::writeUtf8() {
@@ -1335,13 +1376,35 @@ void DirectoryTest::appendEmpty() {
 }
 
 void DirectoryTest::appendNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writable under Emscripten.");
+    #else
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string filename = "/var/root/writtenFile";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string filename = "/data/local/writtenFile";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string filename = "/root/writtenFile";
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string filename = "C:/Program Files/WindowsApps/writtenFile";
+    #else
+    std::string filename;
+    CORRADE_SKIP("Not sure how to test on this system.");
+    #endif
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Directory::append("/root/writtenFile", nullptr));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::append(): can't open /root/writtenFile\n");
+    CORRADE_VERIFY(!Directory::append(filename, nullptr));
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::append(): can't open {}: error 13 (", filename),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::appendUtf8() {
@@ -1387,17 +1450,48 @@ void DirectoryTest::copyReadNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::copy("nonexistent", Directory::join(_writeTestDir, "empty")));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open nonexistent for reading\n");
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::copy(): can't open nonexistent for reading: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::copy(): can't open nonexistent for reading: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::copyWriteNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writable under Emscripten.");
+    #else
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string filename = "/var/root/writtenFile";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string filename = "/data/local/writtenFile";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string filename = "/root/writtenFile";
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string filename = "C:/Program Files/WindowsApps/writtenFile";
+    #else
+    std::string filename;
+    CORRADE_SKIP("Not sure how to test on this system.");
+    #endif
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Directory::copy(Directory::join(_testDir, "dir/dummy"), "/root/writtenFile"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open /root/writtenFile for writing\n");
+    CORRADE_VERIFY(!Directory::copy(Directory::join(_testDir, "dir/dummy"), filename));
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::copy(): can't open {} for writing: error 13 (", filename),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::copyUtf8() {
@@ -1514,7 +1608,9 @@ void DirectoryTest::mapNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::map("nonexistent"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open nonexistent\n");
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::map(): can't open nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1558,7 +1654,9 @@ void DirectoryTest::mapReadNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mapRead("nonexistent"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::mapRead(): can't open nonexistent\n");
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::mapRead(): can't open nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1607,13 +1705,38 @@ void DirectoryTest::mapWriteEmpty() {
 
 void DirectoryTest::mapWriteNoPermission() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string filename = "/var/root/mappedFile";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string filename = "/data/local/mappedFile";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string filename = "/root/mappedFile";
     if(Directory::home() == "/root")
         CORRADE_SKIP("Running under root, can't test for permissions.");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string filename = "C:/Program Files/WindowsApps/mappedFile";
+    #else
+    #error
+    #endif
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Directory::mapWrite("/root/mappedFile", 64));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::mapWrite(): can't open /root/mappedFile\n");
+    CORRADE_VERIFY(!Directory::mapWrite(filename, 64));
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mapWrite(): can't open {}: error 5 (", filename),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::mapWrite(): can't open {}: error 13 (", filename),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif

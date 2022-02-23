@@ -349,7 +349,9 @@ Containers::Optional<std::size_t> fileSize(const std::string& filename) {
     std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
     #endif
     if(!f) {
-        Error{} << "Utility::Directory::fileSize(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::fileSize(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return {};
     }
 
@@ -714,7 +716,9 @@ Containers::Array<char> read(const std::string& filename) {
     std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
     #endif
     if(!f) {
-        Error{} << "Utility::Directory::read(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::read(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return nullptr;
     }
 
@@ -758,7 +762,9 @@ bool write(const std::string& filename, const Containers::ArrayView<const void> 
     std::FILE* const f = _wfopen(widen(filename).data(), L"wb");
     #endif
     if(!f) {
-        Error{} << "Utility::Directory::write(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::write(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
 
@@ -781,7 +787,9 @@ bool append(const std::string& filename, const Containers::ArrayView<const void>
     std::FILE* const f = _wfopen(widen(filename).data(), L"ab");
     #endif
     if(!f) {
-        Error{} << "Utility::Directory::append(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::append(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
 
@@ -804,7 +812,9 @@ bool copy(const std::string& from, const std::string& to) {
     std::FILE* const in = _wfopen(widen(from).data(), L"rb");
     #endif
     if(!in) {
-        Error{} << "Utility::Directory::copy(): can't open" << from << "for reading";
+        Error err;
+        err << "Utility::Directory::copy(): can't open" << from << "for reading:";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
 
@@ -816,7 +826,9 @@ bool copy(const std::string& from, const std::string& to) {
     std::FILE* const out = _wfopen(widen(to).data(), L"wb");
     #endif
     if(!out) {
-        Error{} << "Utility::Directory::copy(): can't open" << to << "for writing";
+        Error err;
+        err << "Utility::Directory::copy(): can't open" << to << "for writing:";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return false;
     }
 
@@ -853,7 +865,9 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDWR);
     if(fd == -1) {
-        Error{} << "Utility::Directory::map(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return nullptr;
     }
 
@@ -869,8 +883,10 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     char* data;
     if(!size) data = nullptr;
     else if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
+        Error err;
+        err << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         close(fd);
-        Error{} << "Utility::Directory::map(): can't map" << filename;
         return nullptr;
     }
 
@@ -881,7 +897,9 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDONLY);
     if(fd == -1) {
-        Error() << "Utility::Directory::mapRead(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return nullptr;
     }
 
@@ -897,8 +915,10 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     const char* data;
     if(!size) data = nullptr;
     else if((data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0))) == MAP_FAILED) {
+        Error err;
+        err << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         close(fd);
-        Error() << "Utility::Directory::mapRead(): can't map" << filename;
         return nullptr;
     }
 
@@ -910,7 +930,9 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
        does. */
     const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
     if(fd == -1) {
-        Error{} << "Utility::Directory::mapWrite(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::mapWrite(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
         return nullptr;
     }
 
@@ -924,22 +946,28 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
     } else {
         /* Resize the file to requested size by seeking one byte before */
         if(lseek(fd, size - 1, SEEK_SET) == -1) {
+            Error err;
+            err << "Utility::Directory::mapWrite(): can't seek to resize" << filename << Debug::nospace << ":";
+            Utility::Implementation::printErrnoErrorString(err, errno);
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't seek to resize" << filename;
             return nullptr;
         }
 
         /* And then writing a zero byte on that position */
         if(::write(fd, "", 1) != 1) {
+            Error err;
+            err << "Utility::Directory::mapWrite(): can't write to resize" << filename << Debug::nospace << ":";
+            Utility::Implementation::printErrnoErrorString(err, errno);
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't write to resize" << filename;
             return nullptr;
         }
 
         /* Map the file */
         if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
+            Error err;
+            err << "Utility::Directory::mapWrite(): can't map" << filename << Debug::nospace << ":";
+            Utility::Implementation::printErrnoErrorString(err, errno);
             close(fd);
-            Error{} << "Utility::Directory::mapWrite(): can't map" << filename;
             return nullptr;
         }
     }
@@ -959,7 +987,9 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
-        Error() << "Utility::Directory::map(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return nullptr;
     }
 
@@ -1004,7 +1034,9 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
-        Error() << "Utility::Directory::mapRead(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return nullptr;
     }
 
@@ -1050,7 +1082,9 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
-        Error() << "Utility::Directory::mapWrite(): can't open" << filename;
+        Error err;
+        err << "Utility::Directory::mapWrite(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return nullptr;
     }
 
