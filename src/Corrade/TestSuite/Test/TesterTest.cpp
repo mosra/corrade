@@ -903,6 +903,27 @@ void TesterTest::configurationMove() {
 }
 
 void TesterTest::test() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+    if(std::getenv("CORRADE_TEST_NO_CATCH"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_CATCH set.");
+    if(std::getenv("CORRADE_TEST_SAVE_DIAGNOSTIC"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SAVE_DIAGNOSTIC set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     /* Reset global state for custom comparators (gets modified by other cases
        below */
     MessageDiagnostic::xfail = false;
@@ -950,6 +971,9 @@ void TesterTest::test() {
 }
 
 void TesterTest::emptyTest() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+
     std::stringstream out;
 
     /* Disable automatic colors to ensure we have the same behavior everywhere */
@@ -965,6 +989,13 @@ void TesterTest::emptyTest() {
 }
 
 void TesterTest::skipOnly() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11-13;26,4", "--skip", "20-28,12" };
@@ -999,6 +1030,9 @@ void TesterTest::skipOnlyInvalid() {
 }
 
 void TesterTest::skipAll() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "26", "--skip", "26" };
@@ -1014,6 +1048,13 @@ void TesterTest::skipAll() {
 }
 
 void TesterTest::skipTests() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "13 57 11", "--skip-tests" };
@@ -1035,6 +1076,13 @@ void TesterTest::skipTests() {
 }
 
 void TesterTest::skipBenchmarks() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "13 57 11", "--skip-benchmarks" };
@@ -1052,6 +1100,9 @@ void TesterTest::skipBenchmarks() {
 }
 
 void TesterTest::skipTestsNothingElse() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "13 11", "--skip-tests" };
@@ -1097,6 +1148,11 @@ void TesterTest::skipTestsBenchmarks() {
 }
 
 void TesterTest::shuffleOne() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     /* Shuffling just one test to quickly verify it doesn't blow up, at least */
 
     std::stringstream out;
@@ -1116,6 +1172,11 @@ void TesterTest::shuffleOne() {
 }
 
 void TesterTest::repeatEvery() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "47 4", "--repeat-every", "2" };
@@ -1133,6 +1194,11 @@ void TesterTest::repeatEvery() {
 }
 
 void TesterTest::repeatAll() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "47 4", "--repeat-all", "2" };
@@ -1167,6 +1233,13 @@ void TesterTest::repeatInvalid() {
 }
 
 void TesterTest::abortOnFail() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "1 2 3 4", "--abort-on-fail" };
@@ -1184,6 +1257,13 @@ void TesterTest::abortOnFail() {
 }
 
 void TesterTest::abortOnFailSkip() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "26 2 3 4", "--abort-on-fail" };
@@ -1201,6 +1281,15 @@ void TesterTest::abortOnFailSkip() {
 }
 
 void TesterTest::noXfail() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "6 24", "--no-xfail" };
@@ -1218,6 +1307,9 @@ void TesterTest::noXfail() {
 }
 
 void TesterTest::noCatch() {
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "30", "--no-catch" };
@@ -1242,6 +1334,13 @@ void TesterTest::noCatch() {
 }
 
 void TesterTest::compareMessageVerboseDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_VERBOSE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_VERBOSE set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1262,6 +1361,11 @@ void TesterTest::compareMessageVerboseDisabled() {
 }
 
 void TesterTest::compareMessageVerboseEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1282,6 +1386,13 @@ void TesterTest::compareMessageVerboseEnabled() {
 }
 
 void TesterTest::compareMessageFailed() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1302,6 +1413,13 @@ void TesterTest::compareMessageFailed() {
 }
 
 void TesterTest::compareMessageXfail() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = true;
@@ -1322,6 +1440,13 @@ void TesterTest::compareMessageXfail() {
 }
 
 void TesterTest::saveDiagnosticVerboseDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_VERBOSE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_VERBOSE set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1342,6 +1467,11 @@ void TesterTest::saveDiagnosticVerboseDisabled() {
 }
 
 void TesterTest::saveDiagnosticVerboseEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1362,6 +1492,15 @@ void TesterTest::saveDiagnosticVerboseEnabled() {
 }
 
 void TesterTest::saveDiagnosticFailedDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+    if(std::getenv("CORRADE_TEST_SAVE_DIAGNOSTIC"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SAVE_DIAGNOSTIC set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1382,6 +1521,13 @@ void TesterTest::saveDiagnosticFailedDisabled() {
 }
 
 void TesterTest::saveDiagnosticFailedEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1402,6 +1548,13 @@ void TesterTest::saveDiagnosticFailedEnabled() {
 }
 
 void TesterTest::saveDiagnosticXfailDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = true;
@@ -1423,6 +1576,13 @@ void TesterTest::saveDiagnosticXfailDisabled() {
 }
 
 void TesterTest::saveDiagnosticXfailEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = true;
@@ -1444,6 +1604,17 @@ void TesterTest::saveDiagnosticXfailEnabled() {
 }
 
 void TesterTest::saveDiagnosticXpassDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+    if(std::getenv("CORRADE_TEST_SAVE_DIAGNOSTIC"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SAVE_DIAGNOSTIC set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = true;
@@ -1465,6 +1636,15 @@ void TesterTest::saveDiagnosticXpassDisabled() {
 }
 
 void TesterTest::saveDiagnosticXpassEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_ABORT_ON_FAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_ABORT_ON_FAIL set.");
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = true;
@@ -1485,6 +1665,13 @@ void TesterTest::saveDiagnosticXpassEnabled() {
 }
 
 void TesterTest::saveDiagnosticSucceededDisabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_SAVE_DIAGNOSTIC"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SAVE_DIAGNOSTIC set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1506,6 +1693,11 @@ void TesterTest::saveDiagnosticSucceededDisabled() {
 }
 
 void TesterTest::saveDiagnosticSucceededEnabled() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1526,6 +1718,13 @@ void TesterTest::saveDiagnosticSucceededEnabled() {
 }
 
 void TesterTest::saveDiagnosticAbortOnFail() {
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1545,6 +1744,17 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 }
 
 void TesterTest::benchmarkWallClock() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "wall-time" };
@@ -1566,6 +1776,17 @@ void TesterTest::benchmarkWallClock() {
 }
 
 void TesterTest::benchmarkCpuClock() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "cpu-time" };
@@ -1587,6 +1808,17 @@ void TesterTest::benchmarkCpuClock() {
 }
 
 void TesterTest::benchmarkCpuCycles() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark", "cpu-cycles" };
@@ -1608,6 +1840,15 @@ void TesterTest::benchmarkCpuCycles() {
 }
 
 void TesterTest::benchmarkDiscardAll() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "--benchmark-discard", "100" };
@@ -1629,6 +1870,19 @@ void TesterTest::benchmarkDiscardAll() {
 }
 
 void TesterTest::benchmarkDebugBuildNote() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "-v" };
@@ -1652,6 +1906,19 @@ void TesterTest::benchmarkDebugBuildNote() {
 
 #ifdef __linux__
 void TesterTest::benchmarkCpuScalingNoWarning() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57" };
@@ -1672,6 +1939,21 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
 }
 
 void TesterTest::benchmarkCpuScalingWarning() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_VERBOSE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_VERBOSE set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57" };
@@ -1692,6 +1974,19 @@ void TesterTest::benchmarkCpuScalingWarning() {
 }
 
 void TesterTest::benchmarkCpuScalingWarningVerbose() {
+    if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SKIP_BENCHMARKS set.");
+    if(std::getenv("CORRADE_TEST_SHUFFLE"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_SHUFFLE set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK set.");
+    if(std::getenv("CORRADE_TEST_BENCHMARK_DISCARD"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_BENCHMARK_DISCARD set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "55 57", "-v" };
@@ -1726,6 +2021,11 @@ void TesterTest::benchmarkInvalid() {
 }
 
 void TesterTest::testName() {
+    if(std::getenv("CORRADE_TEST_REPEAT_EVERY"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_EVERY set.");
+    if(std::getenv("CORRADE_TEST_REPEAT_ALL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_REPEAT_ALL set.");
+
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "13" };
@@ -1815,6 +2115,9 @@ void TesterTest::compareNonCopyable() {
 }
 
 void TesterTest::expectFailIfExplicitBool() {
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     struct ExplicitFalse { explicit operator bool() const { return false; } };
     {
         ExplicitFalse t;
@@ -1839,6 +2142,9 @@ void TesterTest::expectFailIfExplicitBool() {
 }
 
 void TesterTest::failIfExplicitBool() {
+    if(std::getenv("CORRADE_TEST_NO_XFAIL"))
+        CORRADE_SKIP("Can't test with CORRADE_TEST_NO_XFAIL set.");
+
     struct ExplicitFalse { explicit operator bool() const { return false; } };
     {
         ExplicitFalse t;
