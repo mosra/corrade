@@ -26,7 +26,9 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
@@ -53,6 +55,7 @@ struct TweakableIntegrationTest: TestSuite::Tester {
     void updateNoChange();
     void updateUnexpectedLine();
     void updateDifferentType();
+    void updateFileError();
     void updateParseError();
     void updateNoAlias();
 
@@ -79,6 +82,7 @@ TweakableIntegrationTest::TweakableIntegrationTest() {
     addTests({&TweakableIntegrationTest::updateNoChange,
               &TweakableIntegrationTest::updateUnexpectedLine,
               &TweakableIntegrationTest::updateDifferentType,
+              &TweakableIntegrationTest::updateFileError,
               &TweakableIntegrationTest::updateParseError,
               &TweakableIntegrationTest::updateNoAlias},
              &TweakableIntegrationTest::setup,
@@ -155,9 +159,9 @@ void TweakableIntegrationTest::variable() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): updating _('X') in {0}:103\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n", __FILE__));
+"Utility::Tweakable::update(): updating _('X') in {0}:107\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -220,9 +224,9 @@ void TweakableIntegrationTest::scopeTemplated() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:103\n"
-"Utility::Tweakable::update(): updating _(133.7f) in {0}:186\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:107\n"
+"Utility::Tweakable::update(): updating _(133.7f) in {0}:190\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -286,9 +290,9 @@ void TweakableIntegrationTest::scopeVoid() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:103\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
-"Utility::Tweakable::update(): updating _(-1.44f) in {0}:252\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:107\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
+"Utility::Tweakable::update(): updating _(-1.44f) in {0}:256\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -330,8 +334,8 @@ void TweakableIntegrationTest::updateNoChange() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:186\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:252\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
@@ -363,7 +367,7 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
     TweakableState state = tweakable.update();
 
     CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): code changed around _('a') in {0}:104, requesting a recompile\n", __FILE__));
+"Utility::Tweakable::update(): code changed around _('a') in {0}:108, requesting a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
@@ -397,8 +401,46 @@ void TweakableIntegrationTest::updateDifferentType() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: 14.4f is not a character literal\n"
-"Utility::Tweakable::update(): change of _(14.4f) in {0}:103 requested a recompile\n", __FILE__));
+"Utility::Tweakable::update(): change of _(14.4f) in {0}:107 requested a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
+}
+
+void TweakableIntegrationTest::updateFileError() {
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+
+    Tweakable tweakable;
+    tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
+
+    /* Trigger watching of this file by executing annotated literal */
+    foo();
+
+    /* FileWatcher crutch. See its test for more info. */
+    /** @todo get rid of this once proper FS inode etc. watching is implemented */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    Utility::System::sleep(1100);
+    #else
+    Utility::System::sleep(10);
+    #endif
+
+    /* Remove the source file */
+    CORRADE_VERIFY(Directory::rm(_thisWriteableFile));
+
+    /* A change is ignored because stat failed */
+    std::ostringstream out;
+    Error redirectError{&out};
+    TweakableState state = tweakable.update();
+
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::FileWatcher: can't stat {}, ignoring: error 44 (", _thisWriteableFile),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::FileWatcher: can't stat {}, ignoring: error 2 (", _thisWriteableFile),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+    CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
 void TweakableIntegrationTest::updateParseError() {
@@ -431,7 +473,7 @@ void TweakableIntegrationTest::updateParseError() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: escape sequences in char literals are not implemented, sorry\n"
-"Utility::Tweakable::update(): error parsing _('\\X') in {0}:103\n", __FILE__));
+"Utility::Tweakable::update(): error parsing _('\\X') in {0}:107\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Error);
 }
 
