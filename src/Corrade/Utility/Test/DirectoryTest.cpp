@@ -85,6 +85,7 @@ struct DirectoryTest: TestSuite::Tester {
     void moveUtf8();
 
     void mkpath();
+    void mkpathDotDotDot();
     void mkpathNoPermission();
     void mkpathUtf8();
 
@@ -213,6 +214,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::moveUtf8,
 
               &DirectoryTest::mkpath,
+              &DirectoryTest::mkpathDotDotDot,
               &DirectoryTest::mkpathNoPermission,
               &DirectoryTest::mkpathUtf8,
 
@@ -620,6 +622,13 @@ void DirectoryTest::mkpath() {
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::exists(leaf));
 
+    /* Empty should be just a no-op without checking anything. Not like
+       in Python, where `os.makedirs('', exist_ok=True)` stupidly fails with
+        FileNotFoundError: [Errno 2] No such file or directory: '' */
+    CORRADE_VERIFY(Directory::mkpath(""));
+}
+
+void DirectoryTest::mkpathDotDotDot() {
     /* Creating current directory should be a no-op because it exists */
     CORRADE_VERIFY(Directory::exists("."));
     {
@@ -637,11 +646,6 @@ void DirectoryTest::mkpath() {
         #endif
         CORRADE_VERIFY(Directory::mkpath(".."));
     }
-
-    /* Empty should be just a no-op without checking anything. Not like
-       in Python, where `os.makedirs('', exist_ok=True)` stupidly fails with
-        FileNotFoundError: [Errno 2] No such file or directory: '' */
-    CORRADE_VERIFY(Directory::mkpath(""));
 }
 
 void DirectoryTest::mkpathNoPermission() {
