@@ -1967,7 +1967,6 @@ void TesterTest::benchmarkCpuScalingWarning() {
     int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
-    /* Same as wall clock output */
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarning.txt"),
         Compare::StringToFile);
@@ -2000,7 +1999,6 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
     int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
-    /* Same as wall clock output */
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerbose.txt"),
         Compare::StringToFile);
