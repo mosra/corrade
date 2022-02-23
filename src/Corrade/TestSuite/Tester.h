@@ -458,7 +458,7 @@ Arguments:
 -   `-S`, `--save-diagnostic PATH` --- save diagnostic files to given path
     (environment: `CORRADE_TEST_SAVE_DIAGNOSTIC`)
 -   `-v`, `--verbose` --- enable verbose output (environment:
-    `CORRADE_TEST_VERBOSE`)
+    `CORRADE_TEST_VERBOSE=ON|OFF`)
 -   `--benchmark TYPE` --- default benchmark type (environment:
     `CORRADE_TEST_BENCHMARK`). Supported benchmark types:
     -   `wall-time` --- wall time spent
@@ -613,7 +613,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes);
 
                 #if defined(__linux__) || defined(DOXYGEN_GENERATING_OUTPUT)
-                /** @brief Where to check for active CPU scaling governor */
+                /**
+                 * @brief Where to check for active CPU scaling governor
+                 * @partialsupport Available only on Linux.
+                 */
                 std::string cpuScalingGovernorFile() const;
 
                 /**
