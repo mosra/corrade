@@ -374,7 +374,17 @@ benchmark types:
                 out << Debug::boldColor(Debug::Color::Yellow) << "  WARN"
                     << Debug::resetColor << "CPU" << governor
                     << "scaling detected, benchmark measurements may be noisy.";
-                if(_state->verbose) out << "Use\n         sudo cpupower frequency-set --governor performance\n       to get more stable results.";
+                if(_state->verbose) {
+                    #ifndef CORRADE_TARGET_ANDROID
+                    out << "Use\n"
+                        "         sudo cpupower frequency-set --governor performance\n"
+                        "       to get more stable results.";
+                    #else
+                    out << "Use\n"
+                        "         echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+                        "       on a rooted device to get more stable results.";
+                    #endif
+                }
                 break;
             }
         }

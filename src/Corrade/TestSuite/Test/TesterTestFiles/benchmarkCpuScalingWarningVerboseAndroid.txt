@@ -1,0 +1,7 @@
+Starting TesterTest::Test with 2 test cases...
+  WARN CPU powersave scaling detected, benchmark measurements may be noisy. Use
+         echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+       on a rooted device to get more stable results.
+ BENCH [55]   0.00 ± 0.00   ns benchmarkDefault()@9x4000000000 (wall time)
+ BENCH [57] 348.36          kB benchmarkOnce()@1x1
+Finished TesterTest::Test with 0 errors out of 0 checks.

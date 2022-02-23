@@ -1999,9 +1999,15 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
     int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
+    #ifndef CORRADE_TARGET_ANDROID
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerbose.txt"),
         Compare::StringToFile);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerboseAndroid.txt"),
+        Compare::StringToFile);
+    #endif
 }
 #endif
 

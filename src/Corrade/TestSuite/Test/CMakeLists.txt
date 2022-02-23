@@ -43,6 +43,7 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/benchmarkDebugBuildNote.txt
         TesterTestFiles/benchmarkCpuScalingWarning.txt
         TesterTestFiles/benchmarkCpuScalingWarningVerbose.txt
+        TesterTestFiles/benchmarkCpuScalingWarningVerboseAndroid.txt
         TesterTestFiles/compareMessageFailed.txt
         TesterTestFiles/compareMessageVerboseDisabled.txt
         TesterTestFiles/compareMessageVerboseEnabled.txt
