@@ -68,11 +68,11 @@ void StringTest::hasPrefixMessageFailed() {
     std::ostringstream out;
 
     {
-        Error e{&out};
+        Debug redirectOutput{&out};
         Comparator<StringHasPrefix> compare;
         ComparisonStatusFlags flags = compare("hello world", "world");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "String a isn't prefixed with b, actual is\n"
@@ -85,11 +85,11 @@ void StringTest::hasPrefixMessageVerbose() {
     std::ostringstream out;
 
     {
-        Error e{&out};
+        Debug redirectOutput{&out};
         Comparator<StringHasPrefix> compare;
         ComparisonStatusFlags flags = compare("hello world", "hell");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "String a is prefixed with b, the actual string\n"
@@ -114,11 +114,11 @@ void StringTest::hasSuffixMessageFailed() {
     std::ostringstream out;
 
     {
-        Error e{&out};
+        Debug redirectOutput{&out};
         Comparator<StringHasSuffix> compare;
         ComparisonStatusFlags flags = compare("hello world", "hell");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "String a isn't suffixed with b, actual is\n"
@@ -131,11 +131,11 @@ void StringTest::hasSuffixMessageVerbose() {
     std::ostringstream out;
 
     {
-        Error e{&out};
+        Debug redirectOutput{&out};
         Comparator<StringHasSuffix> compare;
         ComparisonStatusFlags flags = compare("hello world", "world");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "String a is suffixed with b, the actual string\n"

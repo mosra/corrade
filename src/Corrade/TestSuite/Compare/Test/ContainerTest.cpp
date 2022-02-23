@@ -72,11 +72,11 @@ void ContainerTest::outputActualSmaller() {
     std::vector<int> b{1, 2, 3, 4};
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::Container<std::vector<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(),
@@ -94,11 +94,11 @@ void ContainerTest::outputExpectedSmaller() {
     std::vector<int> b{1, 2, 3};
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::Container<std::vector<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Containers a and b have different size, actual 4 but 3 expected. Actual contents:\n"
@@ -115,11 +115,11 @@ void ContainerTest::output() {
     std::vector<int> b{1, 2, 3, 4};
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::Container<std::vector<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Containers a and b have different contents, actual:\n"
@@ -139,11 +139,11 @@ void ContainerTest::floatingPoint() {
     CORRADE_COMPARE(Comparator<Compare::Container<std::vector<float>>>{}(a, b), ComparisonStatusFlags{});
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::Container<std::vector<float>>> compare;
         ComparisonStatusFlags flags = compare(a, c);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "c");
+        compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
     /* It should report the second element, not the first */

@@ -77,11 +77,11 @@ void FileToStringTest::notFound() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
         ComparisonStatusFlags flags = compare("nonexistent.txt", "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "file", "b");
+        compare.printMessage(flags, redirectOutput, "file", "b");
     }
 
     CORRADE_COMPARE(out.str(), "File file (nonexistent.txt) cannot be read.\n");
@@ -91,11 +91,11 @@ void FileToStringTest::differentContents() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
         ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "different.txt"), "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
@@ -105,11 +105,11 @@ void FileToStringTest::actualSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
         ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
@@ -119,11 +119,11 @@ void FileToStringTest::expectedSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
         ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello W");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");

@@ -84,12 +84,12 @@ void FileTest::actualNotFound() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::File> compare;
         ComparisonStatusFlags flags = compare("nonexistent.txt", Utility::Directory::join(FILETEST_DIR, "base.txt"));
         /* Should not return Diagnostic as there's no file to read from */
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Actual file a (nonexistent.txt) cannot be read.\n");
@@ -105,7 +105,7 @@ void FileTest::expectedNotFound() {
     CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
 
     {
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
@@ -120,7 +120,7 @@ void FileTest::expectedNotFound() {
 
     {
         out.str({});
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
@@ -139,7 +139,7 @@ void FileTest::differentContents() {
     CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
 
     {
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
@@ -154,7 +154,7 @@ void FileTest::differentContents() {
 
     {
         out.str({});
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
@@ -169,11 +169,11 @@ void FileTest::actualSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::File> compare(FILETEST_DIR);
         ComparisonStatusFlags flags = compare("smaller.txt", "base.txt");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path
            already */
     }
@@ -185,11 +185,11 @@ void FileTest::expectedSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::File> compare(FILETEST_DIR);
         ComparisonStatusFlags flags = compare("base.txt", "smaller.txt");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path
            already */
     }

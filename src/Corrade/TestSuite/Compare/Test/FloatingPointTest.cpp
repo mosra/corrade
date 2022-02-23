@@ -112,11 +112,11 @@ void FloatingPointTest::output() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<float> compare;
         ComparisonStatusFlags flags = compare(3.0f, 8.0f);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");

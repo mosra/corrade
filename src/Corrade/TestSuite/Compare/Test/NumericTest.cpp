@@ -120,11 +120,11 @@ void NumericTest::less() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Less<float>> compare;
         ComparisonStatusFlags flags = compare(c, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "c", "b");
+        compare.printMessage(flags, redirectOutput, "c", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value c is not less than b, actual is 9.29 but expected < 9.28\n");
@@ -141,11 +141,11 @@ void NumericTest::lessOrEqual() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<LessOrEqual<float>> compare;
         ComparisonStatusFlags flags = compare(c, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "c", "b");
+        compare.printMessage(flags, redirectOutput, "c", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value c is not less than or equal to b, actual is 9.29 but expected <= 9.28\n");
@@ -162,11 +162,11 @@ void NumericTest::greaterOrEqual() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<GreaterOrEqual<float>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not greater than or equal to b, actual is 9.27 but expected >= 9.28\n");
@@ -183,10 +183,10 @@ void NumericTest::greater() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Greater<float>> compare;
         ComparisonStatusFlags flags = compare(a, b);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
@@ -206,11 +206,11 @@ void NumericTest::around() {
     std::stringstream out;
 
     {
-        Error err{&out};
+        Debug redirectOutput{&out};
         Comparator<Around<float>> compare{0.02f};
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
-        compare.printMessage(flags, err, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
@@ -230,10 +230,10 @@ void NumericTest::notEqual() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<NotEqual<float>> compare;
         ComparisonStatusFlags flags = compare(a, b);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is equal to b, 9.25 was expected to be different from 9.25\n");
@@ -345,10 +345,10 @@ void NumericTest::divisible() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Divisible<int>> compare;
         ComparisonStatusFlags flags = compare(a, c);
-        compare.printMessage(flags, e, "a", "c");
+        compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not divisible by c, 20 % 8 was not expected to be 4\n");
@@ -365,10 +365,10 @@ void NumericTest::notDivisible() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<NotDivisible<int>> compare;
         ComparisonStatusFlags flags = compare(a, c);
-        compare.printMessage(flags, e, "a", "c");
+        compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is divisible by c, 20 % 4 was not expected to be 0\n");

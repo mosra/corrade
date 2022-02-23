@@ -101,7 +101,7 @@ void StringToFileTest::notFound() {
 
     {
         out.str({});
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
@@ -119,7 +119,7 @@ void StringToFileTest::differentContents() {
     CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
 
     {
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
@@ -134,7 +134,7 @@ void StringToFileTest::differentContents() {
 
     {
         out.str({});
-        Debug redirectOutput(&out);
+        Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
@@ -148,11 +148,11 @@ void StringToFileTest::actualSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::StringToFile> compare;
         ComparisonStatusFlags flags = compare("Hello W", Utility::Directory::join(FILETEST_DIR, "base.txt"));
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path
            already */
     }
@@ -164,11 +164,11 @@ void StringToFileTest::expectedSmaller() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Debug redirectOutput{&out};
         Comparator<Compare::StringToFile> compare;
         ComparisonStatusFlags flags = compare("Hello World!", Utility::Directory::join(FILETEST_DIR, "smaller.txt"));
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
-        compare.printMessage(flags, e, "a", "b");
+        compare.printMessage(flags, redirectOutput, "a", "b");
         /* not testing diagnostic as differentContents() tested this code path
            already */
     }
