@@ -1164,8 +1164,10 @@ void DirectoryTest::fileSizeNonSeekable() {
         !defined(__NetBSD__) && !defined(__DragonFly__)
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Directory::fileSize("/proc/loadavg"));
-    CORRADE_COMPARE(out.str(), "Utility::Directory::fileSize(): /proc/loadavg is not seekable\n");
+    /* /proc/loadavg works on Android Emulator but not on a real device;
+       /proc/zoneinfo works everywhere */
+    CORRADE_VERIFY(!Directory::fileSize("/proc/zoneinfo"));
+    CORRADE_COMPARE(out.str(), "Utility::Directory::fileSize(): /proc/zoneinfo is not seekable\n");
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1224,7 +1226,9 @@ void DirectoryTest::readNonSeekable() {
         !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
         !defined(__NetBSD__) && !defined(__DragonFly__)
     /** @todo Test more thoroughly than this */
-    const Containers::Array<char> data = Directory::read("/proc/loadavg");
+    /* /proc/loadavg works on Android Emulator but not on a real device;
+       /proc/zoneinfo works everywhere */
+    const Containers::Array<char> data = Directory::read("/proc/zoneinfo");
     CORRADE_VERIFY(!data.empty());
     #else
     CORRADE_SKIP("Not implemented on this platform.");
