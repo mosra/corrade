@@ -458,7 +458,9 @@ Arguments:
 -   `-S`, `--save-diagnostic PATH` --- save diagnostic files to given path
     (environment: `CORRADE_TEST_SAVE_DIAGNOSTIC`)
 -   `-v`, `--verbose` --- enable verbose output (environment:
-    `CORRADE_TEST_VERBOSE=ON|OFF`)
+    `CORRADE_TEST_VERBOSE=ON|OFF`). Note that there isn't any corresponding
+    "quiet" option, if you want to see just the failures, redirect standard
+    output away.
 -   `--benchmark TYPE` --- default benchmark type (environment:
     `CORRADE_TEST_BENCHMARK`). Supported benchmark types:
     -   `wall-time` --- wall time spent
