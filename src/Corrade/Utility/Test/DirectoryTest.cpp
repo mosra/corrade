@@ -181,6 +181,7 @@ struct DirectoryTest: TestSuite::Tester {
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     void prepareFileToBenchmarkCopy();
     void copy100MReadWrite();
+    void copy100MReadWriteString();
     void copy100MCopy();
     #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     void copy100MMap();
@@ -340,6 +341,7 @@ DirectoryTest::DirectoryTest() {
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     addBenchmarks({
         &DirectoryTest::copy100MReadWrite,
+        &DirectoryTest::copy100MReadWriteString,
         &DirectoryTest::copy100MCopy,
         #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         &DirectoryTest::copy100MMap
@@ -2035,6 +2037,16 @@ void DirectoryTest::copy100MReadWrite() {
 
     CORRADE_BENCHMARK(1)
         Directory::write(output, Directory::read(input));
+}
+
+void DirectoryTest::copy100MReadWriteString() {
+    std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
+    std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
+    CORRADE_VERIFY(Directory::exists(input));
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+
+    CORRADE_BENCHMARK(1)
+        Directory::writeString(output, Directory::readString(input));
 }
 
 void DirectoryTest::copy100MCopy() {
