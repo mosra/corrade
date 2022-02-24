@@ -448,10 +448,12 @@ CORRADE_UTILITY_EXPORT Containers::Optional<std::size_t> fileSize(const std::str
 /**
 @brief Read file into an array
 
-Reads the whole file in a binary mode (i.e. without newline conversion).
-Returns @cpp nullptr @ce and prints a message to @ref Error if the file can't
-be read. Supports non-seekable and other weird files as well. Expects that the
-filename is in UTF-8.
+Reads the whole file in a binary mode (i.e. without newline conversion). If the
+file can't be read, prints a message to @ref Error and returns a zero-sized
+@cpp nullptr @ce array. If the file is non-seekable, it's read in 4 kB chunks
+and the returned array is growable. For seekable files the returned array has a
+default deleter but the size may get shortened from what the system reported to
+what was actually read. Expects that the filename is in UTF-8.
 @see @ref readString(), @ref exists(), @ref write(), @ref append(),
     @ref copy(), @ref mapRead(), @ref fileSize()
 */

@@ -86,6 +86,7 @@
 
 #include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Utility/Debug.h"
@@ -841,18 +842,23 @@ Containers::Array<char> read(const std::string& filename) {
 
     Containers::Optional<std::size_t> size = fileSize(f);
 
-    /* If the file is not seekable, read it in chunks */
+    /* If the file is not seekable, read it in chunks. Read directly into the
+       output array --- each time add uninitialized 4 kB at the end, pass that
+       view to fread(), and then strip away what didn't get filled. Hey, do you
+       like the growable array API as much as I do? :D */
+    /** @todo that the loop works is only verifiable by setting the condition
+        to if(true) and setting chunkSize to 1 -- I don't know about any large
+        non-seekable file that could be used for this */
     if(!size) {
-        std::string data;
-        char buffer[4096];
+        Containers::Array<char> out;
+        constexpr std::size_t chunkSize = 4096;
+
         std::size_t count;
         do {
-            count = std::fread(buffer, 1, Containers::arraySize(buffer), f);
-            data.append(buffer, count);
+            count = std::fread(arrayAppend(out, NoInit, chunkSize), 1, chunkSize, f);
+            arrayRemoveSuffix(out, chunkSize - count);
         } while(count);
 
-        Containers::Array<char> out{data.size()};
-        std::copy(data.begin(), data.end(), out.begin());
         return out;
     }
 
