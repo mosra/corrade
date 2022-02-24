@@ -38,6 +38,7 @@
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
+#include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
@@ -489,7 +490,6 @@ void DirectoryTest::isDirectory() {
 }
 
 void DirectoryTest::isDirectorySymlink() {
-
     CORRADE_VERIFY(Directory::exists(Directory::join(_testDirSymlink, "file-symlink")));
     CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDirSymlink, "file-symlink")));
 
@@ -1135,6 +1135,9 @@ void DirectoryTest::listUtf8() {
     }
 }
 
+/* Checks if we are reading it as binary (CR+LF is not converted to LF),
+   nothing after \0 gets lost, and invalid UTF-8 chars (over 0x80) also cause
+   no issues */
 constexpr const char Data[]{'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
 
 void DirectoryTest::fileSize() {
@@ -1187,15 +1190,11 @@ void DirectoryTest::fileSizeNonexistent() {
 }
 
 void DirectoryTest::fileSizeUtf8() {
-    /* Existing file, check if we are reading it as binary (CR+LF is not
-       converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE(Directory::fileSize(Directory::join(_testDirUtf8, "hýždě")),
         Containers::arraySize(Data));
 }
 
 void DirectoryTest::read() {
-    /* Existing file, check if we are reading it as binary (CR+LF is not
-       converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDir, "file")),
         Containers::arrayView(Data),
         TestSuite::Compare::Container);
@@ -1249,8 +1248,6 @@ void DirectoryTest::readNonexistent() {
 }
 
 void DirectoryTest::readUtf8() {
-    /* Existing file, check if we are reading it as binary (CR+LF is not
-       converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDirUtf8, "hýždě")),
         Containers::arrayView(Data),
         TestSuite::Compare::Container);
@@ -1462,15 +1459,14 @@ void DirectoryTest::copy100MMap() {
 
 void DirectoryTest::map() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     std::string file = Directory::join(_writeTestDir, "mappedFile");
     if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
-    CORRADE_VERIFY(Directory::writeString(file, data));
+    CORRADE_VERIFY(Directory::write(file, Data));
 
     {
         Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(file);
         CORRADE_COMPARE_AS(mappedFile,
-            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
+            Containers::arrayView(Data),
             TestSuite::Compare::Container);
 
         /* Write a thing there */
@@ -1480,7 +1476,7 @@ void DirectoryTest::map() {
         /* Implicit unmap */
     }
 
-    /* The file should be changed */
+    /* Here --------------------vv--vv- the file should be changed */
     CORRADE_COMPARE_AS(file,
         (std::string{"\xCA\xFE\xCA\xFE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11}),
         TestSuite::Compare::FileToString);
@@ -1526,12 +1522,10 @@ void DirectoryTest::mapNonexistent() {
 
 void DirectoryTest::mapUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    {
-        const Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
-        CORRADE_COMPARE_AS(mappedFile,
-            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
-            TestSuite::Compare::Container);
-    }
+    const Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
+    CORRADE_COMPARE_AS(mappedFile,
+        Containers::arrayView(Data),
+        TestSuite::Compare::Container);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1539,12 +1533,10 @@ void DirectoryTest::mapUtf8() {
 
 void DirectoryTest::mapRead() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    {
-        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
-        CORRADE_COMPARE_AS(mappedFile,
-            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
-            TestSuite::Compare::Container);
-    }
+    const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
+    CORRADE_COMPARE_AS(mappedFile,
+        Containers::arrayView(Data),
+        TestSuite::Compare::Container);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1552,12 +1544,10 @@ void DirectoryTest::mapRead() {
 
 void DirectoryTest::mapReadEmpty() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    {
-        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "dir/dummy"));
-        CORRADE_COMPARE_AS(mappedFile,
-            Containers::arrayView<char>({}),
-            TestSuite::Compare::Container);
-    }
+    const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDir, "dir/dummy"));
+    CORRADE_COMPARE_AS(mappedFile,
+        Containers::arrayView<char>({}),
+        TestSuite::Compare::Container);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1576,12 +1566,10 @@ void DirectoryTest::mapReadNonexistent() {
 
 void DirectoryTest::mapReadUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    {
-        const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
-        CORRADE_COMPARE_AS(mappedFile,
-            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
-            TestSuite::Compare::Container);
-    }
+    const Containers::Array<const char, Directory::MapDeleter> mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
+    CORRADE_COMPARE_AS(mappedFile,
+        Containers::arrayView(Data),
+        TestSuite::Compare::Container);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1589,15 +1577,14 @@ void DirectoryTest::mapReadUtf8() {
 
 void DirectoryTest::mapWrite() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
-        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteFile"), data.size());
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteFile"), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
-        CORRADE_COMPARE(mappedFile.size(), data.size());
-        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+        CORRADE_COMPARE(mappedFile.size(), Containers::arraySize(Data));
+        Utility::copy(Data, mappedFile);
     }
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedWriteFile"),
-        data,
+        (std::string{Data, Containers::arraySize(Data)}),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -1634,15 +1621,14 @@ void DirectoryTest::mapWriteNoPermission() {
 
 void DirectoryTest::mapWriteUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
-        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
+        Containers::Array<char, Directory::MapDeleter> mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "hýždě chlípníka"), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
-        CORRADE_COMPARE(mappedFile.size(), data.size());
-        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+        CORRADE_COMPARE(mappedFile.size(), Containers::arraySize(Data));
+        Utility::copy(Data, mappedFile);
     }
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě chlípníka"),
-        data,
+        (std::string{Data, Containers::arraySize(Data)}),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
