@@ -276,8 +276,8 @@ CORRADE_UTILITY_EXPORT std::string current();
 
 Like @ref executableLocation() but instead of the main executable returns
 location of a shared library that contains @p address. If the address is not
-contained in a shared object, an error is printed to the output and an empty
-string is returned. Returned value is encoded in UTF-8.
+resolvable, prints a message to @ref Error and returns an empty string.
+Returned value is encoded in UTF-8.
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
 */

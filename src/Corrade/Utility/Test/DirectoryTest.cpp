@@ -101,8 +101,15 @@ struct DirectoryTest: TestSuite::Tester {
     void currentNonexistent();
     void currentUtf8();
 
+    #ifndef CORRADE_BUILD_STATIC
     void libraryLocation();
+    #else
+    void libraryLocationStatic();
+    #endif
+    void libraryLocationNull();
+    void libraryLocationInvalid();
     void libraryLocationUtf8();
+
     void executableLocation();
     void executableLocationUtf8();
 
@@ -237,8 +244,15 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::currentNonexistent,
               &DirectoryTest::currentUtf8,
 
+              #ifndef CORRADE_BUILD_STATIC
               &DirectoryTest::libraryLocation,
+              #else
+              &DirectoryTest::libraryLocationStatic,
+              #endif
+              &DirectoryTest::libraryLocationNull,
+              &DirectoryTest::libraryLocationInvalid,
               &DirectoryTest::libraryLocationUtf8,
+
               &DirectoryTest::executableLocation,
               &DirectoryTest::executableLocationUtf8,
 
@@ -885,11 +899,8 @@ void DirectoryTest::currentUtf8() {
     CORRADE_SKIP("Not sure how to test this.");
 }
 
+#ifndef CORRADE_BUILD_STATIC
 void DirectoryTest::libraryLocation() {
-    #ifdef CORRADE_BUILD_STATIC
-    CORRADE_SKIP("Corrade built as static, no libraries to test against.");
-    #endif
-
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     const std::string libraryLocation = Directory::libraryLocation(&Utility::Directory::rm);
 
@@ -941,9 +952,64 @@ void DirectoryTest::libraryLocation() {
     /* It shouldn't contain backslashes */
     CORRADE_COMPARE(libraryLocation.find('\\'), std::string::npos);
     #endif
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+#else
+void DirectoryTest::libraryLocationStatic() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    const std::string libraryLocation = Directory::libraryLocation(&Utility::Directory::rm);
 
-    /* Passing a null pointer should fail */
+    CORRADE_INFO("Corrade::Utility library location found as:" << libraryLocation);
+
+    /* No libraries in a static build, so this will print the final executable
+       instead */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(libraryLocation,
+        "UtilityDirectoryTest.exe",
+        TestSuite::Compare::StringHasSuffix);
+    #else
+    CORRADE_COMPARE_AS(libraryLocation,
+        "UtilityDirectoryTest",
+        TestSuite::Compare::StringHasSuffix);
+    #endif
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+#endif
+
+void DirectoryTest::libraryLocationNull() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::ostringstream out;
+    Error redirectError{&out};
     CORRADE_COMPARE(Directory::libraryLocation(nullptr), "");
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::libraryLocation(): can't get library location: error 87 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), "Utility::Directory::libraryLocation(): can't get library location\n");
+    #endif
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::libraryLocationInvalid() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_COMPARE(Directory::libraryLocation(reinterpret_cast<const void*>(0xbadcafe)), "");
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* "The specified module could not be found." */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::libraryLocation(): can't get library location: error 126 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), "Utility::Directory::libraryLocation(): can't get library location\n");
+    #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
