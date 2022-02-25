@@ -760,6 +760,9 @@ void DirectoryTest::currentNonexistent() {
 }
 
 void DirectoryTest::currentUtf8() {
+    /** @todo test once setCurrent() exists -- otherwise we'd have to implement
+        UTF-16 conversion for Windows by hand here to pass to
+        SetCurrentDirectory() and ... ew */
     CORRADE_SKIP("Not sure how to test this.");
 }
 
