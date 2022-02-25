@@ -234,11 +234,12 @@ CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 /**
 @brief Move given file or directory
 
-Returns @cpp true @ce on success, @cpp false @ce otherwise. Expects that the
-paths are in UTF-8.
+If @p from doesn't exist, can't be read, or @p to can't be written, prints a
+message to @ref Error and returns @cpp false @ce. Expects that the paths are in
+UTF-8.
 @see @ref read(), @ref write()
 */
-CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& newPath);
+CORRADE_UTILITY_EXPORT bool move(const std::string& from, const std::string& to);
 
 /**
 @brief Whether the application runs in a sandboxed environment

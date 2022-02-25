@@ -86,6 +86,8 @@ struct DirectoryTest: TestSuite::Tester {
 
     void moveFile();
     void moveDirectory();
+    void moveSourceNonexistent();
+    void moveDestinationNoPermission();
     void moveUtf8();
 
     void mkpath();
@@ -220,6 +222,8 @@ DirectoryTest::DirectoryTest() {
 
               &DirectoryTest::moveFile,
               &DirectoryTest::moveDirectory,
+              &DirectoryTest::moveSourceNonexistent,
+              &DirectoryTest::moveDestinationNoPermission,
               &DirectoryTest::moveUtf8,
 
               &DirectoryTest::mkpath,
@@ -646,6 +650,57 @@ void DirectoryTest::moveDirectory() {
     CORRADE_VERIFY(Directory::move(oldDirectory, newDirectory));
     CORRADE_VERIFY(!Directory::exists(oldDirectory));
     CORRADE_VERIFY(Directory::exists(newDirectory));
+}
+
+void DirectoryTest::moveSourceNonexistent() {
+    std::string to = Directory::join(_writeTestDir, "empty");
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::move("nonexistent", to));
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::move(): can't move nonexistent to {}: error 44 (", to),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::move(): can't move nonexistent to {}: error 2 (", to),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void DirectoryTest::moveDestinationNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writable under Emscripten.");
+    #else
+    std::string from = Directory::join(_testDir, "dir/dummy");
+    #ifdef CORRADE_TARGET_APPLE
+    /* Assuming there's no real possibility to run as root on Apple */
+    std::string to = "/var/root/writtenFile";
+    #elif defined(CORRADE_TARGET_ANDROID)
+    /* Same here, would need a rooted device */
+    std::string to = "/data/local/writtenFile";
+    #elif defined(CORRADE_TARGET_UNIX)
+    std::string to = "/root/writtenFile";
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Only the TrustedInstaller system user is supposed to have access into
+       WindowsApps */
+    std::string to = "C:/Program Files/WindowsApps/writtenFile";
+    #else
+    std::string to;
+    CORRADE_SKIP("Not sure how to test on this system.");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::move(from, to));
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::move(): can't move {} to {}: error 13 (", from, to),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::moveUtf8() {

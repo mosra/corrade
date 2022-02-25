@@ -305,14 +305,21 @@ bool rm(const std::string& path) {
     #endif
 }
 
-bool move(const std::string& oldPath, const std::string& newPath) {
-    return
+bool move(const std::string& from, const std::string& to) {
+    if(
         #ifndef CORRADE_TARGET_WINDOWS
-        std::rename(oldPath.data(), newPath.data())
+        std::rename(from.data(), to.data())
         #else
-        _wrename(widen(oldPath).data(), widen(newPath).data())
+        _wrename(widen(from).data(), widen(to).data())
         #endif
-        == 0;
+    != 0) {
+        Error err;
+        err << "Utility::Directory::move(): can't move" << from << "to" << to << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return false;
+    }
+
+    return true;
 }
 
 bool exists(const std::string& filename) {
