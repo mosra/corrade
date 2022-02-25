@@ -488,11 +488,10 @@ std::string libraryLocation(const void* address) {
     /* Otherwise GCC 4.8 loudly complains about missing initializers */
     Dl_info info{nullptr, nullptr, nullptr, nullptr};
     if(!dladdr(address, &info)) {
-        Error e;
-        e << "Utility::Directory::libraryLocation(): can't get library location";
-        const char* const error = dlerror();
-        if(error)
-            e << Debug::nospace << ":" << error;
+        Error{} << "Utility::Directory::libraryLocation(): can't get library location";
+        /* According to manpages, the dlerror is *never* available, so just
+           assert on that instead of branching */
+        CORRADE_INTERNAL_ASSERT(!dlerror());
         return {};
     }
 
