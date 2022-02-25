@@ -45,11 +45,6 @@
 
 #include "configure.h"
 
-#ifdef CORRADE_UTILITY_LINUX
-/* Needed for an XFAIL in libraryLocation() for older glibcs */
-#include <dlfcn.h>
-#endif
-
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DirectoryTest: TestSuite::Tester {
