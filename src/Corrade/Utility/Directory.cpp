@@ -237,7 +237,7 @@ bool mkpath(const std::string& path) {
 
     /* Not implemented elsewhere */
     #else
-    Warning() << "Utility::Directory::mkdir(): not implemented on this platform";
+    Error{} << "Utility::Directory::mkdir(): not implemented on this platform";
     return false;
     #endif
 }
@@ -334,7 +334,7 @@ bool exists(const std::string& filename) {
     /* Windows Store/Phone not implemented */
     #else
     static_cast<void>(filename);
-    Warning() << "Utility::Directory::exists(): not implemented on this platform";
+    Error{} << "Utility::Directory::exists(): not implemented on this platform";
     return false;
     #endif
 }
@@ -421,7 +421,7 @@ bool isDirectory(const std::string& path) {
     return stat(path.data(), &st) == 0 && S_ISDIR(st.st_mode);
     #else
     static_cast<void>(path);
-    Warning() << "Utility::Directory::isDirectory(): not implemented on this platform";
+    Error{} << "Utility::Directory::isDirectory(): not implemented on this platform";
     return false;
     #endif
 }
@@ -476,7 +476,7 @@ std::string current() {
 
     /* No clue elsewhere (and on Windows RT) */
     #else
-    Warning() << "Utility::Directory::current(): not implemented on this platform";
+    Error{} << "Utility::Directory::current(): not implemented on this platform";
     return {};
     #endif
 }
@@ -562,7 +562,7 @@ std::string executableLocation() {
 
     /* Not implemented */
     #else
-    Warning() << "Utility::Directory::executableLocation(): not implemented on this platform";
+    Error{} << "Utility::Directory::executableLocation(): not implemented on this platform";
     return std::string{};
     #endif
 }
@@ -588,7 +588,7 @@ std::string home() {
 
     /* Other */
     #else
-    Warning() << "Utility::Directory::home(): not implemented on this platform";
+    Error{} << "Utility::Directory::home(): not implemented on this platform";
     return {};
     #endif
 }
@@ -625,7 +625,7 @@ std::string configurationDir(const std::string& applicationName) {
     /* Other not implemented */
     #else
     static_cast<void>(applicationName);
-    Warning() << "Utility::Directory::configurationDir(): not implemented on this platform";
+    Error{} << "Utility::Directory::configurationDir(): not implemented on this platform";
     return {};
     #endif
 }
@@ -661,7 +661,7 @@ std::string tmp() {
     /* Convert to forward slashes */
     return fromNativeSeparators(narrow(path));
     #else
-    Warning() << "Utility::Directory::tmp(): not implemented on this platform";
+    Error{} << "Utility::Directory::tmp(): not implemented on this platform";
     return {};
     #endif
 }
@@ -764,7 +764,7 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
 
     /* Other not implemented */
     #else
-    Warning() << "Utility::Directory::list(): not implemented on this platform";
+    Error{} << "Utility::Directory::list(): not implemented on this platform";
     static_cast<void>(path);
     #endif
 
