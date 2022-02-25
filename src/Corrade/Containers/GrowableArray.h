@@ -324,7 +324,7 @@ template<class T> struct ArrayAllocator {
      * @ref reallocate(). Implementations are expected to either extend
      * @p array in-place to @p newCapacity or allocate a new array with
      * @p newCapacity, move @p prevSize elements from @p array to it and call
-     * destructors on their original location, deallocate @p array it and
+     * destructors on their original location, deallocate the @p array and
      * update the reference to point to the new memory.
      */
     static void reallocate(T*& array, std::size_t prevSize, std::size_t newCapacity);
