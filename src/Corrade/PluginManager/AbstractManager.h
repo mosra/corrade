@@ -242,8 +242,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Set another plugin directory
          *
          * Keeps loaded plugins untouched, removes unloaded plugins which are
-         * not existing anymore and adds newly found plugins. The directory is
-         * expected to be in UTF-8.
+         * not existing anymore and adds newly found plugins. If the directory
+         * doesn't exist, no new plugins are added and only unloaded plugins
+         * get removed. The directory is expected to be in UTF-8.
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */

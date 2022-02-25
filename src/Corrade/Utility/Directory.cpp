@@ -615,7 +615,12 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
     /* POSIX-compliant Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     DIR* directory = opendir(path.data());
-    if(!directory) return list;
+    if(!directory) {
+        Error err;
+        err << "Utility::Directory::list(): can't list" << path << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return list;
+    }
 
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
@@ -666,7 +671,12 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATAW data;
     HANDLE hFile = FindFirstFileW(widen(join(path, "*")).data(), &data);
-    if(hFile == INVALID_HANDLE_VALUE) return list;
+    if(hFile == INVALID_HANDLE_VALUE) {
+        Error err;
+        err << "Utility::Directory::list(): can't list" << path << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return list;
+    }
     Containers::ScopeGuard closeHandle{hFile,
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* MSVC 2015 is unable to cast the parameter for FindClose */

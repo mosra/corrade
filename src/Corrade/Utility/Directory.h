@@ -202,7 +202,8 @@ CORRADE_UTILITY_EXPORT std::string join(std::initializer_list<std::string> paths
 /**
 @brief List directory contents
 
-On failure returns an empty vector. Expects that the path is in UTF-8.
+If the directory can't be opened, prints a message to @ref Error and returns an
+empty vector. Expects that the path is in UTF-8.
 @partialsupport On @ref CORRADE_TARGET_UNIX "Unix" platforms and
     @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed and
     @ref Flag::SkipFiles and @ref Flag::SkipDirectories affects the link

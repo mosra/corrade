@@ -403,23 +403,30 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     /* Find plugin files in the directory. Sort the list so we have predictable
        plugin preference behavior for aliases on systems that have random
        directory listing order. */
-    const std::vector<std::string> d = Directory::list(_state->pluginDirectory,
-        Directory::Flag::SkipDirectories|Directory::Flag::SkipDotAndDotDot|
-        Directory::Flag::SortAscending);
-    for(const std::string& filename: d) {
-        /* File doesn't have module suffix, continue to next */
-        if(!Utility::String::endsWith(filename, _state->pluginSuffix))
-            continue;
+    /** @todo Currently this preserves original behavior of not complaining
+        when the directory doesn't exist, as a lot of existing code and tests
+        relies on it. Figure out a better solution. */
+    if(Directory::exists(_state->pluginDirectory)) {
+        const std::vector<std::string> d = Directory::list(
+            _state->pluginDirectory,
+            Directory::Flag::SkipDirectories|
+            Directory::Flag::SkipDotAndDotDot|
+            Directory::Flag::SortAscending);
+        for(const std::string& filename: d) {
+            /* File doesn't have module suffix, continue to next */
+            if(!Utility::String::endsWith(filename, _state->pluginSuffix))
+                continue;
 
-        /* Dig plugin name from filename */
-        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
+            /* Dig plugin name from filename */
+            const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
 
-        /* Skip the plugin if it is among loaded */
-        if(_state->plugins.find(name) != _state->plugins.end()) continue;
+            /* Skip the plugin if it is among loaded */
+            if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
-        registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
-            _state->pluginMetadataSuffix.empty() ? std::string{} :
-                Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
+            registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
+                _state->pluginMetadataSuffix.empty() ? std::string{} :
+                    Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
+        }
     }
 
     /* If some of the currently loaded plugins aliased plugins that were in the

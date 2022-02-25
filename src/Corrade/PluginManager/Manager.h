@@ -53,7 +53,8 @@ for a high-level introduction.
 Plugins are searched in the following directories, in order:
 
 1.  If a non-empty `pluginDirectory` was passed to the @ref Manager(std::string)
-    constructor, plugins are searched there.
+    constructor, plugins are searched there. If the directory doesn't exist,
+    no search is performed and the process stops here.
 2.  Otherwise, it's expected that given plugin interface defined
     @ref AbstractPlugin::pluginSearchPaths(). The search goes through the
     entries and stops once an existing directory is found.

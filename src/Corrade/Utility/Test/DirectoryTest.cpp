@@ -120,6 +120,7 @@ struct DirectoryTest: TestSuite::Tester {
     void listSkipDotAndDotDot();
     void listSort();
     void listSortPrecedence();
+    void listNonexistent();
     void listUtf8();
 
     void fileSize();
@@ -250,6 +251,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::listSkipDotAndDotDot,
               &DirectoryTest::listSort,
               &DirectoryTest::listSortPrecedence,
+              &DirectoryTest::listNonexistent,
               &DirectoryTest::listUtf8,
 
               &DirectoryTest::fileSize,
@@ -1142,6 +1144,27 @@ void DirectoryTest::listSort() {
 
 void DirectoryTest::listSortPrecedence() {
     CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
+}
+
+void DirectoryTest::listNonexistent() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_COMPARE(Directory::list("nonexistent"), std::vector<std::string>{});
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows has its own code path and thus different errors */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::list(): can't list nonexistent: error 3 (",
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::list(): can't list nonexistent: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::list(): can't list nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
 }
 
 void DirectoryTest::listUtf8() {
