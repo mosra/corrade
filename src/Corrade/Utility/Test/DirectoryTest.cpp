@@ -45,6 +45,11 @@
 
 #include "configure.h"
 
+#ifdef CORRADE_TARGET_UNIX
+/* Needed for chdir() in currentInvalid() */
+#include <unistd.h>
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DirectoryTest: TestSuite::Tester {
@@ -88,6 +93,7 @@ struct DirectoryTest: TestSuite::Tester {
     void isSandboxed();
 
     void current();
+    void currentNonexistent();
     void currentUtf8();
 
     void libraryLocation();
@@ -217,6 +223,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::isSandboxed,
 
               &DirectoryTest::current,
+              &DirectoryTest::currentNonexistent,
               &DirectoryTest::currentUtf8,
 
               &DirectoryTest::libraryLocation,
@@ -715,6 +722,41 @@ void DirectoryTest::current() {
 
     /* Clean up after ourselves */
     CORRADE_VERIFY(Directory::rm("currentDir.mark"));
+}
+
+void DirectoryTest::currentNonexistent() {
+    #ifdef CORRADE_TARGET_UNIX
+    std::string current = Directory::current();
+    CORRADE_VERIFY(!current.empty());
+
+    /* On Android the write dir is relative, so append it to current */
+    std::string newCurrent = Directory::join({current, _writeTestDir, "cwd"});
+    CORRADE_VERIFY(Directory::mkpath(newCurrent));
+
+    {
+        /** @todo remove (and <unistd.h>) once Directory::setCurrent() exists */
+        Containers::ScopeGuard resetCurrent{&current, [](std::string* current) {
+            chdir(current->data());
+        }};
+        chdir(newCurrent.data());
+        CORRADE_COMPARE(Directory::current(), newCurrent);
+
+        CORRADE_VERIFY(Directory::rm(newCurrent));
+
+        std::ostringstream out;
+        Error redirectError{&out};
+        CORRADE_COMPARE(Directory::current(), "");
+        CORRADE_COMPARE_AS(out.str(),
+            "Utility::Directory::current(): error 2 (",
+            TestSuite::Compare::StringHasPrefix);
+    }
+
+    /* Verify that we're back to the original directory so other tests relying
+       on it keep working. Should be also done in case anything above fails. */
+    CORRADE_COMPARE(Directory::current(), current);
+    #else
+    CORRADE_SKIP("Known to fail only on UNIX, not sure how to test elsewhere.");
+    #endif
 }
 
 void DirectoryTest::currentUtf8() {

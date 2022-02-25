@@ -396,10 +396,11 @@ std::string current() {
     std::string path(4, '\0');
     char* success;
     while(!(success = getcwd(&path[0], path.size() + 1))) {
-        /* Unexpected error, exit */
+        /* Unexpected error, exit. Can be for example ENOENT when current
+           working directory gets deleted while the program is running. */
         if(errno != ERANGE) {
             Error err;
-            err << "Utility::Directory::current(): error:";
+            err << "Utility::Directory::current():";
             Utility::Implementation::printErrnoErrorString(err, errno);
             return {};
         }

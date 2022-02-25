@@ -256,8 +256,9 @@ CORRADE_UTILITY_EXPORT bool isSandboxed();
 
 Returns current working directory on Unix systems (equivalent to the value of
 shell builtin @cb{.sh} pwd @ce), non-RT Windows and
-@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On other systems prints a warning
-and returns an empty string. Returned value is encoded in UTF-8.
+@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On other systems or if the current
+directory doesn't exist prints a message to @ref Error and returns an empty
+string. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
