@@ -551,6 +551,7 @@ std::string executableLocation() {
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /** @todo get rid of MAX_PATH */
     std::wstring path(MAX_PATH, L'\0');
     std::size_t size = GetModuleFileNameW(nullptr, &path[0], path.size());
     path.resize(size);
@@ -580,6 +581,7 @@ std::string home() {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /** @todo get rid of MAX_PATH */
     wchar_t h[MAX_PATH];
     /* There doesn't seem to be any possibility how this could fail, so just
        assert */
@@ -615,6 +617,7 @@ std::string configurationDir(const std::string& applicationName) {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /** @todo get rid of MAX_PATH */
     wchar_t path[MAX_PATH];
     /* There doesn't seem to be any possibility how this could fail, so just
        assert */
