@@ -83,8 +83,12 @@ int main(int argc, char** argv) {
         .setGlobalHelp("Resource compiler for Corrade.")
         .parse(argc, argv);
 
-    /* Remove previous output file */
-    Utility::Directory::rm(args.value("out"));
+    /* Remove previous output file. Only if it exists, to not print an error
+       message when compiling for the first time. If it fails, die as well --
+       we'd not succeed after either. */
+    if(Utility::Directory::exists(args.value("out")) &&
+      !Utility::Directory::rm(args.value("out")))
+        return 1;
 
     /* Compile file */
     const std::string compiled = Utility::Resource::compileFrom(args.value("name"), args.value("conf"));

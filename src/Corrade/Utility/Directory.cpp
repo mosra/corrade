@@ -243,26 +243,65 @@ bool mkpath(const std::string& path) {
 }
 
 bool rm(const std::string& path) {
-    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /* std::remove() can't remove directories on Windows */
+    /* Windows need special handling for Unicode, otherwise we can work with
+       the standard std::remove() */
+    #ifdef CORRADE_TARGET_WINDOWS
     auto wpath = widen(path);
-    if(GetFileAttributesW(wpath.data()) & FILE_ATTRIBUTE_DIRECTORY)
-        return RemoveDirectoryW(wpath.data());
+
+    /* std::remove() can't remove directories on Windows */
+    /** @todo how to implement this for RT? */
+    #ifndef CORRADE_TARGET_WINDOWS_RT
+    /* INVALID_FILE_ATTRIBUTES contain the FILE_ATTRIBUTE_DIRECTORY bit for
+       some reason -- so if wouldn't check for INVALID_FILE_ATTRIBUTES,
+       nonexistent files would be reported as "can't remove directory". */
+    const DWORD attributes = GetFileAttributesW(wpath.data());
+    if(attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+        if(!RemoveDirectoryW(wpath.data())) {
+            Error err;
+            err << "Utility::Directory::rm(): can't remove directory" << path << Debug::nospace << ":";
+            Utility::Implementation::printWindowsErrorString(err, GetLastError());
+            return false;
+        }
+
+        return true;
+    }
+    #endif
 
     /* Need to use nonstandard _wremove in order to handle Unicode properly */
-    return _wremove(wpath.data()) == 0;
+    if(_wremove(wpath.data()) != 0) {
+        Error err;
+        err << "Utility::Directory::rm(): can't remove" << path << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return false;
+    }
 
+    return true;
     #else
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* std::remove() can't remove directories on Emscripten */
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
     struct stat st;
     /* using lstat() and not stat() as we care about the symlink, not the
        file/dir it points to */
-    if(lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode))
-        return rmdir(path.data()) == 0;
+    if(lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode)) {
+        if(rmdir(path.data()) != 0) {
+            Error err;
+            err << "Utility::Directory::rm(): can't remove directory" << path << Debug::nospace << ":";
+            Utility::Implementation::printErrnoErrorString(err, errno);
+            return false;
+        }
+
+        return true;
+    }
     #endif
 
-    return std::remove(path.data()) == 0;
+    if(std::remove(path.data()) != 0) {
+        Error err;
+        err << "Utility::Directory::rm(): can't remove" << path << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return false;
+    }
+
+    return true;
     #endif
 }
 

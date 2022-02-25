@@ -137,8 +137,10 @@ ConfigurationTest::ConfigurationTest() {
     Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
 
     /* Remove everything there */
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
+    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf")))
+        Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf")))
+        Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
 }
 
 void ConfigurationTest::parse() {
@@ -409,7 +411,8 @@ void ConfigurationTest::readonly() {
 }
 
 void ConfigurationTest::nonexistentFile() {
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
+    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")));
     Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
 
     /* Everything okay if the file doesn't exist */
@@ -533,7 +536,8 @@ void ConfigurationTest::stripComments() {
 
 void ConfigurationTest::multiLineValue() {
     /* Remove previous saved file */
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
+    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")));
 
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
@@ -553,7 +557,8 @@ void ConfigurationTest::multiLineValue() {
 
 void ConfigurationTest::multiLineValueCrlf() {
     /* Remove previous saved file */
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
+    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")));
 
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));

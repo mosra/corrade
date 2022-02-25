@@ -223,10 +223,11 @@ Expects that the path is in UTF-8.
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 
 /**
-@brief Remove file or directory
+@brief Remove a file or a directory
 
-Returns @cpp true @ce if path is file or empty directory and was successfully
-removed, @cpp false @ce otherwise. Expects that the path is in UTF-8.
+If @p path doesn't exist, is a non-empty directory or can't be removed for some
+other reason, prints a message to @ref Error and returns @cpp false @ce.
+Expects that the path is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 

@@ -79,7 +79,10 @@ struct DirectoryTest: TestSuite::Tester {
 
     void removeFile();
     void removeDirectory();
-    void removeUtf8();
+    void removeFileNonexistent();
+    void removeDirectoryNonEmpty();
+    void removeFileUtf8();
+    void removeDirectoryUtf8();
 
     void moveFile();
     void moveDirectory();
@@ -210,7 +213,10 @@ DirectoryTest::DirectoryTest() {
 
               &DirectoryTest::removeFile,
               &DirectoryTest::removeDirectory,
-              &DirectoryTest::removeUtf8,
+              &DirectoryTest::removeFileNonexistent,
+              &DirectoryTest::removeDirectoryNonEmpty,
+              &DirectoryTest::removeFileUtf8,
+              &DirectoryTest::removeDirectoryUtf8,
 
               &DirectoryTest::moveFile,
               &DirectoryTest::moveDirectory,
@@ -336,8 +342,10 @@ DirectoryTest::DirectoryTest() {
     }
 
     /* Delete the file for copy tests to avoid using a stale version */
-    Directory::rm(Directory::join(_writeTestDir, "copySource.dat"));
-    Directory::rm(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"));
+    if(Directory::exists(Directory::join(_writeTestDir, "copySource.dat")))
+        Directory::rm(Directory::join(_writeTestDir, "copySource.dat"));
+    if(Directory::exists(Directory::join(_writeTestDir, "copyBenchmarkSource.dat")))
+        Directory::rm(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"));
 }
 
 void DirectoryTest::fromNativeSeparators() {
@@ -530,11 +538,6 @@ void DirectoryTest::removeFile() {
     CORRADE_VERIFY(Directory::exists(file));
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::exists(file));
-
-    /* Nonexistent file */
-    std::string nonexistent = Directory::join(_writeTestDir, "nonexistent");
-    CORRADE_VERIFY(!Directory::exists(nonexistent));
-    CORRADE_VERIFY(!Directory::rm(nonexistent));
 }
 
 void DirectoryTest::removeDirectory() {
@@ -545,13 +548,72 @@ void DirectoryTest::removeDirectory() {
     CORRADE_VERIFY(!Directory::exists(directory));
 }
 
-void DirectoryTest::removeUtf8() {
+void DirectoryTest::removeFileNonexistent() {
+    CORRADE_VERIFY(!Directory::exists("nonexistent"));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::rm("nonexistent"));
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::rm(): can't remove nonexistent: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Directory::rm(): can't remove nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void DirectoryTest::removeDirectoryNonEmpty() {
+    std::string directory = Directory::join(_writeTestDir, "nonEmptyDirectory");
+    CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::writeString(Directory::join(directory, "file.txt"), "a"));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Directory::rm(directory));
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "Directory not empty",
+       also there's a dedicated code path (and message) for directories */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::rm(): can't remove directory {}: error 55 (", directory),
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows also have a dedicated code path and message for dirs,
+       "The directory is not empty." */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::rm(): can't remove directory {}: error 145 (", directory),
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_APPLE)
+    /* Otherwise there's common handling for files and dirs, however Apple has
+       to be special and also have a different error code for the same thing */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::rm(): can't remove {}: error 66 (", directory),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Directory::rm(): can't remove {}: error 39 (", directory),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void DirectoryTest::removeFileUtf8() {
     std::string file = Directory::join(_writeTestDir, "hýždě.txt");
     CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
     CORRADE_VERIFY(Directory::writeString(file, "a"));
     CORRADE_VERIFY(Directory::exists(file));
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::exists(file));
+}
+
+void DirectoryTest::removeDirectoryUtf8() {
+    std::string directory = Directory::join(_writeTestDir, "složka");
+    CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::exists(directory));
+    CORRADE_VERIFY(Directory::rm(directory));
+    CORRADE_VERIFY(!Directory::exists(directory));
 }
 
 void DirectoryTest::moveFile() {
@@ -561,7 +623,7 @@ void DirectoryTest::moveFile() {
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(_writeTestDir, "newFile.txt");
-    Directory::rm(newFile);
+    if(Directory::exists(newFile)) Directory::rm(newFile);
 
     CORRADE_VERIFY(Directory::exists(oldFile));
     CORRADE_VERIFY(!Directory::exists(newFile));
@@ -593,7 +655,7 @@ void DirectoryTest::moveUtf8() {
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(_writeTestDir, "nový hýždě.txt");
-    Directory::rm(newFile);
+    if(Directory::exists(newFile)) CORRADE_VERIFY(Directory::rm(newFile));
 
     CORRADE_VERIFY(Directory::exists(oldFile));
     CORRADE_VERIFY(!Directory::exists(newFile));
