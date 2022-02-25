@@ -633,7 +633,7 @@ std::string home() {
 std::string configurationDir(const std::string& applicationName) {
     /* OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
-    return join(home(), "Library/Application Support/" + applicationName);
+    return join({home(), "Library/Application Support", applicationName});
 
     /* XDG-compliant Unix (not using CORRADE_TARGET_UNIX, because that is a
        superset), Emscripten */
@@ -648,7 +648,7 @@ std::string configurationDir(const std::string& applicationName) {
         return {};
     }
 
-    return join(home, ".config/" + lowercaseApplicationName);
+    return join({home, ".config", lowercaseApplicationName});
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
