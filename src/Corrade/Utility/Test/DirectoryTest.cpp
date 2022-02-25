@@ -111,15 +111,19 @@ struct DirectoryTest: TestSuite::Tester {
     void libraryLocationUtf8();
 
     void executableLocation();
+    void executableLocationInvalid();
     void executableLocationUtf8();
 
     void home();
+    void homeInvalid();
     void homeUtf8();
 
     void configurationDir();
+    void configurationDirInvalid();
     void configurationDirUtf8();
 
     void tmp();
+    void tmpInvalid();
     void tmpUtf8();
 
     void list();
@@ -254,15 +258,19 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::libraryLocationUtf8,
 
               &DirectoryTest::executableLocation,
+              &DirectoryTest::executableLocationInvalid,
               &DirectoryTest::executableLocationUtf8,
 
               &DirectoryTest::home,
+              &DirectoryTest::homeInvalid,
               &DirectoryTest::homeUtf8,
 
               &DirectoryTest::configurationDir,
+              &DirectoryTest::configurationDirInvalid,
               &DirectoryTest::configurationDirUtf8,
 
               &DirectoryTest::tmp,
+              &DirectoryTest::tmpInvalid,
               &DirectoryTest::tmpUtf8,
 
               &DirectoryTest::list,
@@ -1069,6 +1077,10 @@ void DirectoryTest::executableLocation() {
     #endif
 }
 
+void DirectoryTest::executableLocationInvalid() {
+    CORRADE_SKIP("Not sure how to test this.");
+}
+
 void DirectoryTest::executableLocationUtf8() {
     CORRADE_SKIP("Not sure how to test this.");
 }
@@ -1107,6 +1119,11 @@ void DirectoryTest::home() {
     CORRADE_EXPECT_FAIL("Not implemented yet.");
     CORRADE_COMPARE(home, "(not implemented)");
     #endif
+}
+
+void DirectoryTest::homeInvalid() {
+    /* Could be tested by temporarily removing $HOME, but ... ahem */
+    CORRADE_SKIP("Not sure how to test this.");
 }
 
 void DirectoryTest::homeUtf8() {
@@ -1159,6 +1176,12 @@ void DirectoryTest::configurationDir() {
     #endif
 }
 
+void DirectoryTest::configurationDirInvalid() {
+    /* Could be tested by temporarily removing $XDG_CONFIG_HOME and $HOME, but
+       ... ahem */
+    CORRADE_SKIP("Not sure how to test this.");
+}
+
 void DirectoryTest::configurationDirUtf8() {
     CORRADE_SKIP("Not sure how to test this.");
 }
@@ -1205,6 +1228,10 @@ void DirectoryTest::tmp() {
         CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
         CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
     }
+}
+
+void DirectoryTest::tmpInvalid() {
+    CORRADE_SKIP("Not known to fail on any known system.");
 }
 
 void DirectoryTest::tmpUtf8() {

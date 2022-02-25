@@ -571,15 +571,20 @@ std::string executableLocation() {
 std::string home() {
     /* Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    if(const char* const h = std::getenv("HOME"))
-        return h;
-    return std::string{};
+    const char* const h = std::getenv("HOME");
+    if(!h) {
+        Error{} << "Utility::Directory::home(): $HOME not available";
+        return {};
+    }
+
+    return h;
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     wchar_t h[MAX_PATH];
-    if(!SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
-        return {};
+    /* There doesn't seem to be any possibility how this could fail, so just
+       assert */
+    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h) == S_OK);
     return fromNativeSeparators(narrow(h));
 
     /* Other */
@@ -601,14 +606,20 @@ std::string configurationDir(const std::string& applicationName) {
     if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
         return join(config, lowercaseApplicationName);
 
-    const std::string home = Directory::home();
-    return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
+    const char* const home = std::getenv("HOME");
+    if(!home) {
+        Error{} << "Utility::Directory::configurationDir(): neither $XDG_CONFIG_HOME nor $HOME available";
+        return {};
+    }
+
+    return join(home, ".config/" + lowercaseApplicationName);
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     wchar_t path[MAX_PATH];
-    if(!SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
-        return {};
+    /* There doesn't seem to be any possibility how this could fail, so just
+       assert */
+    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path) == S_OK);
     const std::string appdata{fromNativeSeparators(narrow(path))};
     return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
@@ -645,7 +656,8 @@ std::string tmp() {
     /* Get the path, remove the trailing slash (and zero terminator) */
     std::wstring path(size, '\0');
     GetTempPathW(size, &path[0]);
-    if(path.size()) path.resize(path.size() - 2);
+    CORRADE_INTERNAL_ASSERT(path.size());
+    path.resize(path.size() - 2);
 
     /* Convert to forward slashes */
     return fromNativeSeparators(narrow(path));
