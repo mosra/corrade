@@ -387,11 +387,18 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 @brief Check if the file or directory exists
 @m_since{2019,10}
 
-Returns @cpp true @ce if the file exists and is accessible (i.e., user has a
-permission to open it), @cpp false @ce otherwise. In particular, checking for
-an empty filename always fails, however checking @cpp "." @ce succeeds in case
-current working directory exists. Expects that the filename is in UTF-8.
-@see @ref isDirectory(), @ref list()
+Returns @cpp true @ce if the file exists, @cpp false @ce otherwise.
+Inaccessible files may still return @cpp true @ce even if reading them will
+subsequently fail. Checking for an empty filename always fails, checking
+@cpp "." @ce always succeeds, even in case current working directory doesn't
+exist. Expects that the filename is in UTF-8.
+
+Unlike other APIs such as @ref read() or @ref list(), this function doesn't
+have any failure state nor it produces any error message --- and if it returns
+@cpp true @ce, it doesn't necessarily mean the file can be opened or the
+directory listed, that's only possible to know once such operation is
+attempted.
+@see @ref isDirectory()
 */
 CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
 
@@ -399,9 +406,14 @@ CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
 @brief Check if given path is a directory
 @m_since{2019,10}
 
-Returns @cpp true @ce if the path exists, is accessible (i.e., user has a
-permission to open it) and is a directory, @cpp false @ce otherwise. Expects
-that the filename is in UTF-8.
+Returns @cpp true @ce if the path exists and is a directory, @cpp false @ce
+otherwise. Inaccessible directories may still return @cpp true @ce even if
+listing them will subsequently fail. Expects that the filename is in UTF-8.
+
+Unlike other APIs such as @ref list(), this function doesn't have any failure
+state nor it produces any error message --- and if it returns @cpp true @ce, it
+doesn't necessarily mean the directory can be listed, that's only possible to
+know once such operation is attempted.
 @partialsupport On @ref CORRADE_TARGET_UNIX "Unix" platforms and
     @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed, so this
     function will return @cpp true @ce for a symlink that points to a

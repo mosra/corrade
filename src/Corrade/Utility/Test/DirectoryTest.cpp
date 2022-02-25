@@ -71,10 +71,12 @@ struct DirectoryTest: TestSuite::Tester {
     void joinMultipleNone();
 
     void exists();
+    void existsNoPermission();
     void existsUtf8();
 
     void isDirectory();
     void isDirectorySymlink();
+    void isDirectoryNoPermission();
     void isDirectoryUtf8();
 
     void removeFile();
@@ -226,10 +228,12 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::joinMultipleNone,
 
               &DirectoryTest::exists,
+              &DirectoryTest::existsNoPermission,
               &DirectoryTest::existsUtf8,
 
               &DirectoryTest::isDirectory,
               &DirectoryTest::isDirectorySymlink,
+              &DirectoryTest::isDirectoryNoPermission,
               &DirectoryTest::isDirectoryUtf8,
 
               &DirectoryTest::removeFile,
@@ -524,6 +528,39 @@ void DirectoryTest::exists() {
     CORRADE_VERIFY(!Directory::exists(""));
 }
 
+void DirectoryTest::existsNoPermission() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is accessible under Emscripten.");
+    #else
+    /* macOS or BSD doesn't have /proc */
+    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
+        !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
+        !defined(__NetBSD__) && !defined(__DragonFly__)
+    /* Assuming there's no real possibility to run as root on Apple so this
+       checks only other Unix systems */
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
+    /* /proc/self/fd exists, PID 1 is the "root" process and should always
+       exist -- thus exists() reporting true, but any attempts to read it
+       should fail. */
+    CORRADE_VERIFY(Directory::exists("/proc/self/mem"));
+    CORRADE_VERIFY(Directory::exists("/proc/1"));
+    CORRADE_VERIFY(Directory::exists("/proc/1/mem"));
+    /* Just to be sure we're not giving back bullshit -- a random file in the
+       same inaccessible directory should fail, opening that inacessible file
+       should fail */
+    CORRADE_VERIFY(!Directory::exists("/proc/1/nonexistent"));
+    CORRADE_VERIFY(!Directory::fileSize("/proc/1/mem"));
+    #else
+    /** @todo find something that actually exists, to test the same case as on
+        Unix. No idea what in C:/Program Files/WindowsApps could be guaranteed
+        to exist. */
+    CORRADE_SKIP("Not sure how to test this.");
+    #endif
+    #endif
+}
+
 void DirectoryTest::existsUtf8() {
     CORRADE_VERIFY(Directory::exists(Directory::join(_testDirUtf8, "hýždě")));
 }
@@ -560,6 +597,43 @@ void DirectoryTest::isDirectorySymlink() {
         #endif
         CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirSymlink, "dir-symlink")));
     }
+}
+
+void DirectoryTest::isDirectoryNoPermission() {
+    /* Similar to existsNoPermission(), but with isDirectory() being tested */
+
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is accessible under Emscripten.");
+    #else
+    /* macOS or BSD doesn't have /proc */
+    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
+        !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
+        !defined(__NetBSD__) && !defined(__DragonFly__)
+    /* Assuming there's no real possibility to run as root on Apple so this
+       checks only other Unix systems */
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
+    /* /proc/self/fd exists and is a directory, PID 1 is the "root" process and
+       should always exist, but we shouldn't be able to peek into it */
+    CORRADE_VERIFY(Directory::isDirectory("/proc/self/fd"));
+    CORRADE_VERIFY(Directory::isDirectory("/proc/1"));
+    CORRADE_VERIFY(Directory::isDirectory("/proc/1/fd"));
+    /* Just to be sure we're not giving back bullshit -- a random file in the
+       same inaccessible directory should fail, opening that inacessible file
+       should fail */
+    CORRADE_VERIFY(!Directory::exists("/proc/1/nonexistent"));
+    CORRADE_VERIFY(!Directory::fileSize("/proc/1/fd"));
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* This file doesn't exist, but the whole contents of the WindowsApps
+       directory is accessible only by the TrustedInstaller system user so this
+       should fail */
+    CORRADE_VERIFY(Directory::isDirectory("C:/Program Files/WindowsApps"));
+    CORRADE_VERIFY(!Directory::isDirectory("C:/Program Files/WindowsApps/someDir"));
+    #else
+    CORRADE_SKIP("Not sure how to test this.");
+    #endif
+    #endif
 }
 
 void DirectoryTest::isDirectoryUtf8() {
@@ -898,7 +972,11 @@ void DirectoryTest::currentNonexistent() {
         chdir(newCurrent.data());
         CORRADE_COMPARE(Directory::current(), newCurrent);
 
+        CORRADE_VERIFY(Directory::exists("."));
         CORRADE_VERIFY(Directory::rm(newCurrent));
+
+        /* Interestingly, this doesn't fail */
+        CORRADE_VERIFY(Directory::exists("."));
 
         std::ostringstream out;
         Error redirectError{&out};
