@@ -41,8 +41,6 @@
 /* format() used to return an Array, now it returns a String. Add an include
    (which is fortunately not too heavy) to ease porting of existing code. */
 #include "Corrade/Containers/String.h"
-
-#include "Corrade/Utility/Macros.h"
 #endif
 
 namespace Corrade { namespace Utility {
