@@ -574,14 +574,15 @@ std::string executableLocation() {
     /* OSX, iOS */
     #elif defined(CORRADE_TARGET_APPLE)
     /* Get path size (need to set it to 0 to avoid filling nullptr with random
-       data and crashing) */
+       data and crashing, HAHA) */
     std::uint32_t size = 0;
     CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(nullptr, &size) == -1);
 
-    /* Allocate proper size and get the path */
+    /* Allocate proper size and get the path. The size includes a null
+       terminator, strip it after. */
     std::string path(size, '\0');
     CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(&path[0], &size) == 0);
-    return path;
+    return path.substr(0, size - 1);
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
