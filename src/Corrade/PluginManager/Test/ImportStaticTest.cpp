@@ -27,6 +27,7 @@
 #include <sstream>
 #include <vector>
 
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -79,17 +80,21 @@ void ImportStaticTest::importOnce() {
 
     importPlugin();
 
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    /* This shouldn't report any error and list the plugin just once */
     {
-        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
-    }
+        Containers::ScopeGuard ejectPluginAfter{[]() {
+            ejectPlugin();
+        }};
 
-    ejectPlugin();
+        std::ostringstream out;
+        Error redirectError{&out};
+
+        /* This shouldn't report any error and list the plugin just once */
+        {
+            PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+        }
+    }
 
     /* Plugin list is empty again */
     {
@@ -109,24 +114,28 @@ void ImportStaticTest::importTwice() {
     importPlugin();
     importPlugin();
 
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    /* This shouldn't report any error and list the plugin just once */
     {
-        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+        Containers::ScopeGuard ejectPluginTwiceAfter{[]() {
+            ejectPlugin();
+            ejectPlugin();
+        }};
 
-    /* And instantiating everything second time should have no issues either */
-    } {
-        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+        std::ostringstream out;
+        Error redirectError{&out};
+
+        /* This shouldn't report any error and list the plugin just once */
+        {
+            PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+
+        /* And instantiating everything second time should have no issues either */
+        } {
+            PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+        }
     }
-
-    ejectPlugin();
-    ejectPlugin();
 
     /* Plugin list is empty again */
     {
@@ -147,25 +156,29 @@ void ImportStaticTest::importTwiceMixedWithAnother() {
     importPluginAnother();
     importPlugin();
 
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    /* This shouldn't report any error and list the plugin just once */
     {
-        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+        Containers::ScopeGuard ejectPluginTwiceMixedWithAnotherAfter{[]() {
+            ejectPlugin();
+            ejectPluginAnother();
+            ejectPlugin();
+        }};
 
-    /* And instantiating everything second time should have no issues either */
-    } {
-        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+        std::ostringstream out;
+        Error redirectError{&out};
+
+        /* This shouldn't report any error and list the plugin just once */
+        {
+            PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+
+        /* And instantiating everything second time should have no issues either */
+        } {
+            PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+        }
     }
-
-    ejectPlugin();
-    ejectPluginAnother();
-    ejectPlugin();
 
     /* Plugin list is empty again */
     {
