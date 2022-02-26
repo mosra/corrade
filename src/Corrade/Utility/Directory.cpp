@@ -493,7 +493,6 @@ std::string current() {
     /* Success, cut the path to correct size */
     path.resize(std::strlen(&path[0]));
     return path;
-    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
