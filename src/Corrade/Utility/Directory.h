@@ -214,11 +214,11 @@ empty vector. Expects that the path is in UTF-8.
 CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Flags flags = Flags());
 
 /**
-@brief Create path
+@brief Create a path
 
-Returns @cpp true @ce if path was successfully created or already exists,
-@cpp false @ce otherwise. In particular, creating an empty path always succeeds.
-Expects that the path is in UTF-8.
+If any component of @p path doesn't exist already and can't be created, prints
+a message to @ref Error and returns @cpp false @ce. Creating an empty path
+always succeeds. Expects that the path is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 
@@ -262,9 +262,15 @@ shell builtin @cb{.sh} pwd @ce), non-RT Windows and
 @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On other systems or if the current
 directory doesn't exist prints a message to @ref Error and returns an empty
 string. Returned value is encoded in UTF-8.
-@note The path is returned with forward slashes on all platforms. Use
-    @ref toNativeSeparators() to convert it to platform-specific format, if
-    needed.
+
+On Unix systems and Emscripten the function is thread-safe. on Windows, the
+current directory is stored as a global state and thus modifying its value in
+multithreaded applications may have bad consequences. See the
+@m_class{m-doc-external} [GetCurrentDirectory()](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getcurrentdirectory)
+documentation for details.
+@note For consistency is the path returned with forward slashes on all
+    platforms. Use @ref toNativeSeparators() to convert it to platform-specific
+    format, if needed.
 @see @ref executableLocation()
 */
 CORRADE_UTILITY_EXPORT std::string current();
@@ -328,11 +334,11 @@ CORRADE_UTILITY_EXPORT std::string libraryLocation(Implementation::FunctionPoint
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
 sandboxed macOS and iOS. On other systems or if the directory can't be found,
-a warning is printed and an empty string is returned. Returned value is encoded
-in UTF-8.
-@note The path is returned with forward slashes on all platforms. Use
-    @ref toNativeSeparators() to convert it to platform-specific format, if
-    needed.
+prints a message to @ref Error and returns an empty string. Returned value is
+encoded in UTF-8.
+@note For consistency is the path returned with forward slashes on all
+    platforms. Use @ref toNativeSeparators() to convert it to platform-specific
+    format, if needed.
 @see @ref current(), @ref libraryLocation()
 */
 CORRADE_UTILITY_EXPORT std::string executableLocation();
@@ -344,11 +350,12 @@ On Unix and non-sandboxed macOS, the directory is equivalent to
 @cb{.sh} ${HOME} @ce environment variable. On sandboxed macOS and iOS the
 directory is equivalent to what's returned by @cpp NSHomeDirectory() @ce. On
 Windows the directory is equivalent to @cb{.bat} %USERPROFILE%/Documents @ce
-or similar. On other systems or if the directory can't be found, empty string
-is returned. Returned value is encoded in UTF-8.
-@note The path is returned with forward slashes on all platforms. Use
-    @ref toNativeSeparators() to convert it to platform-specific format, if
-    needed.
+or similar. On other systems or if the directory can't be found, prints a
+message to @ref Error and returns an empty string. Returned value is encoded in
+UTF-8.
+@note For consistency is the path returned with forward slashes on all
+    platforms. Use @ref toNativeSeparators() to convert it to platform-specific
+    format, if needed.
 */
 CORRADE_UTILITY_EXPORT std::string home();
 
@@ -361,11 +368,11 @@ On Unix (except for macOS), the configuration dir is
 (@p name is lowercased), on Windows the configuration dir is in
 @cb{.bat} %APPDATA%/name @ce (@p name is left as is). On macOS and iOS the
 configuration dir is @cb{.sh} ${HOME}/Library/Application Support/name @ce. On
-other systems or if the directory can't be found, empty string is returned.
-Returned value is encoded in UTF-8.
-@note The path is returned with forward slashes on all platforms. Use
-    @ref toNativeSeparators() to convert it to platform-specific format, if
-    needed.
+other systems or if the directory can't be found, prints a message to
+@ref Error and returns an empty string. Returned value is encoded in UTF-8.
+@note For consistency is the path returned with forward slashes on all
+    platforms. Use @ref toNativeSeparators() to convert it to platform-specific
+    format, if needed.
 */
 CORRADE_UTILITY_EXPORT std::string configurationDir(const std::string& name);
 
@@ -375,11 +382,11 @@ CORRADE_UTILITY_EXPORT std::string configurationDir(const std::string& name);
 On Unix and non-sandboxed macOS, the directory is equivalent to `/tmp`. On
 sandboxed macOS and iOS the directory is the `/tmp` subfolder of the app
 sandbox. On non-RT Windows the directory is equivalent to @cb{.bat} %TEMP% @ce.
-On other systems or if the directory can't be found, empty string is returned.
-Returned value is encoded in UTF-8.
-@note The path is returned with forward slashes on all platforms. Use
-    @ref toNativeSeparators() to convert it to platform-specific format, if
-    needed.
+On other systems or if the directory can't be found, prints a message to
+@ref Error and returns an empty string. Returned value is encoded in UTF-8.
+@note For consistency is the path returned with forward slashes on all
+    platforms. Use @ref toNativeSeparators() to convert it to platform-specific
+    format, if needed.
 */
 CORRADE_UTILITY_EXPORT std::string tmp();
 
@@ -435,32 +442,30 @@ inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::str
 @brief File size
 @m_since{2020,06}
 
-If the file doesn't exist or is not seekable, prints a message to @ref Error
-and returns @ref Containers::NullOpt. Note that some special files on Unix
-platforms may either be non-seekable or report more bytes than they actually
-have, in which case using @ref read() is a more reliable way to get the size
-along with the contents.
-
-Expects that the filename is in UTF-8.
+If the file can't be read, is a directory or is not seekable, prints a message
+to @ref Error and returns @ref Containers::NullOpt. Note that some special
+files on Unix platforms may either be non-seekable or report more bytes than
+they actually have, in which case using @ref read() is a more reliable way to
+get the size along with the contents. Expects that the @p filename is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<std::size_t> fileSize(const std::string& filename);
 
 /**
-@brief Read file into an array
+@brief Read a file into an array
 
-Reads the whole file in a binary mode (i.e. without newline conversion). If the
-file can't be read, prints a message to @ref Error and returns a zero-sized
+Reads the whole file in a binary mode (i.e., without newline conversion). If
+the file can't be read, prints a message to @ref Error and returns a
 @cpp nullptr @ce array. If the file is non-seekable, it's read in 4 kB chunks
 and the returned array is growable. For seekable files the returned array has a
 default deleter but the size may get shortened from what the system reported to
-what was actually read. Expects that the filename is in UTF-8.
+what was actually read. Expects that the @p filename is in UTF-8.
 @see @ref readString(), @ref exists(), @ref write(), @ref append(),
     @ref copy(), @ref mapRead(), @ref fileSize()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
 /**
-@brief Read file into a string
+@brief Read a file into a string
 
 Convenience overload for @ref read().
 @see @ref exists(), @ref writeString(), @ref append(), @ref copy()
@@ -468,18 +473,18 @@ Convenience overload for @ref read().
 CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 
 /**
-@brief Write array into a file
+@brief Write an array into a file
 
-Writes the file as binary (i.e. without newline conversion). Existing files are
-overwritten, use @ref append() to append instead. Returns @cpp false @ce and
-prints a message to @ref Error if the file can't be written, @cpp true @ce
-otherwise. Expects that the filename is in UTF-8.
+Writes the file as binary (i.e., without newline conversion). Existing files
+are overwritten, use @ref append() to append instead. Prints a message to
+@ref Error and returns @cpp false @ce if the file can't be written. Expects
+that the @p filename is in UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
 
 /**
-@brief Write string into a file
+@brief Write a string into a file
 
 Convenience overload for @ref write().
 @see @ref readString(), @ref appendString(), @ref copy()
@@ -487,18 +492,18 @@ Convenience overload for @ref write().
 CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::string& data);
 
 /**
-@brief Append array into a file
+@brief Append an array to a file
 @m_since{2019,10}
 
-Appends to the file as binary (i.e. without newline conversion). Returns
-@cpp false @ce and prints a message to @ref Error if the file can't be written,
-@cpp true @ce otherwise. Expects that the filename is in UTF-8.
+Appends to the file as binary (i.e., without newline conversion). Prints a
+message to @ref Error and returns @cpp false @ce if the file can't be written.
+Expects that the @p filename is in UTF-8.
 @see @ref appendString(), @ref write(), @ref read(), @ref copy(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool append(const std::string& filename, Containers::ArrayView<const void> data);
 
 /**
-@brief Write string into file
+@brief Append a string to a file
 @m_since{2019,10}
 
 Convenience overload for @ref append().
@@ -510,10 +515,10 @@ CORRADE_UTILITY_EXPORT bool appendString(const std::string& filename, const std:
 @brief Copy a file
 @m_since{2019,10}
 
-Zero-allocation file copy with 128 kB block size. Does not work on
-directories. Returns @cpp false @ce and prints a message to @ref Error if
-@p from can't be read or @p to can't be written, @cpp true @ce otherwise.
-Expects that the filename is in UTF-8.
+Zero-allocation file copy with 128 kB block size. Works only on single files,
+i.e., it can't be used to recursively copy whole directories. Prints a message
+to @ref Error and returns @cpp false @ce if @p from can't be read or @p to
+can't be written. Expects that @p from and @p to are in UTF-8.
 
 Note that the following might be slightly faster on some systems where
 memory-mapping is supported and virtual memory is large enough for given file
@@ -527,13 +532,15 @@ CORRADE_UTILITY_EXPORT bool copy(const std::string& from, const std::string& to)
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**
-@brief Map file for reading and writing
+@brief Map a file for reading and writing
 @m_since{2020,06}
 
-Maps the file as read-write memory. The array deleter takes care of unmapping.
-If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
-returned and a message is printed to @ref Error. Expects that the filename is
-in UTF-8.
+Maps the file as a read-write memory. The array deleter takes care of
+unmapping. If the file doesn't exist or an error occurs while mapping, prints a
+message to @ref Error and returns a @cpp nullptr @ce array. Consistently with
+@ref read(), if the file is empty it's only opened but not mapped and a
+zero-sized @cpp nullptr @ce array is returned, with the deleter containing the
+open file handle. Expects that the @p filename is in UTF-8.
 @see @ref mapRead(), @ref mapWrite(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -541,12 +548,14 @@ in UTF-8.
 CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename);
 
 /**
-@brief Map file for reading
+@brief Map a file for reading
 
-Maps the file as read-only memory. The array deleter takes care of unmapping.
-If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
-returned and a message is printed to @ref Error. Expects that the filename is
-in UTF-8.
+Maps the file as a read-only memory. The array deleter takes care of unmapping.
+If the file doesn't exist or an error occurs while mapping, prints a message to
+@ref Error and returns a @cpp nullptr @ce array. Consistently with @ref read(),
+if the file is empty it's only opened but not mapped and a zero-sized
+@cpp nullptr @ce array is returned, with the deleter containing the open file
+handle. Expects that the @p filename is in UTF-8.
 @see @ref map(), @ref mapWrite(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -554,14 +563,17 @@ in UTF-8.
 CORRADE_UTILITY_EXPORT Containers::Array<const char, MapDeleter> mapRead(const std::string& filename);
 
 /**
-@brief Map file for writing
+@brief Map a file for writing
 @m_since{2020,06}
 
-Maps the file as read-write memory and enlarges it to @p size. If the file does
-not exist yet, it is created, if it exists, it's truncated --- thus no data
-is preserved. The array deleter takes care of unmapping, however the file is
-not deleted after unmapping. If an error occurs, @cpp nullptr @ce is returned
-and a message is printed to @ref Error. Expects that the filename is in UTF-8.
+Maps the file as a read-write memory and enlarges it to @p size. If the file
+does not exist yet, it is created, if it exists, it's truncated --- thus no
+data is preserved. The array deleter takes care of unmapping. If an error
+occurs while mapping, prints a message to @ref Error and returns a
+@cpp nullptr @ce array. Consistently with @ref map() and @ref mapRead(), if
+@p size is @cpp 0 @ce the file is only opened but not mapped and a zero-sized
+@cpp nullptr @ce array is returned, with the deleter containing the open file
+handle. Expects that the @p filename is in UTF-8.
 @see @ref map(), @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
