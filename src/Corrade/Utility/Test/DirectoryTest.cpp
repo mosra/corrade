@@ -955,6 +955,14 @@ void DirectoryTest::current() {
 
     /* Clean up after ourselves */
     CORRADE_VERIFY(Directory::rm("currentDir.mark"));
+
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(current.find('\0'), std::string::npos);
+
+    /* On Windows it shouldn't contain backslashes */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(current.find('\\'), std::string::npos);
+    #endif
 }
 
 void DirectoryTest::currentNonexistent() {
@@ -1052,8 +1060,11 @@ void DirectoryTest::libraryLocation() {
         CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteLibraryName)));
     }
 
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(libraryLocation.find('\0'), std::string::npos);
+
+    /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
-    /* It shouldn't contain backslashes */
     CORRADE_COMPARE(libraryLocation.find('\\'), std::string::npos);
     #endif
     #else
@@ -1167,6 +1178,9 @@ void DirectoryTest::executableLocation() {
     }
     #endif
 
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(executableLocation.find('\0'), std::string::npos);
+
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
     CORRADE_COMPARE(executableLocation.find('\\'), std::string::npos);
@@ -1207,13 +1221,20 @@ void DirectoryTest::home() {
     #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_VERIFY(Directory::exists(Directory::join(home, "desktop.ini")));
 
-    /* On Windows it also shouldn't contain backslashes */
-    CORRADE_COMPARE(home.find('\\'), std::string::npos);
-
     /* No idea elsewhere */
     #else
-    CORRADE_EXPECT_FAIL("Not implemented yet.");
-    CORRADE_COMPARE(home, "(not implemented)");
+    {
+        CORRADE_EXPECT_FAIL("Not implemented yet.");
+        CORRADE_COMPARE(home, "(not implemented)");
+    }
+    #endif
+
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(home.find('\0'), std::string::npos);
+
+    /* On Windows it shouldn't contain backslashes */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(home.find('\\'), std::string::npos);
     #endif
 }
 
@@ -1262,13 +1283,20 @@ void DirectoryTest::configurationDir() {
     CORRADE_COMPARE(dir.substr(dir.size()-7), "Corrade");
     CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(dir), "Microsoft")));
 
-    /* On Windows it also shouldn't contain backslashes */
-    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
-
     /* No idea elsewhere */
     #else
-    CORRADE_EXPECT_FAIL("Not implemented yet.");
-    CORRADE_COMPARE(dir, "(not implemented)");
+    {
+        CORRADE_EXPECT_FAIL("Not implemented yet.");
+        CORRADE_COMPARE(dir, "(not implemented)");
+    }
+    #endif
+
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(dir.find('\0'), std::string::npos);
+
+    /* On Windows it shouldn't contain backslashes */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
     #endif
 }
 
@@ -1306,13 +1334,20 @@ void DirectoryTest::tmp() {
     CORRADE_VERIFY(dir.find("Temp") != std::string::npos || dir.find("tmp") != std::string::npos);
     #endif
 
-    /* On Windows it also shouldn't contain backslashes */
-    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
-
     /* No idea elsewhere */
     #else
-    CORRADE_EXPECT_FAIL("Not implemented yet.");
-    CORRADE_COMPARE(dir, "(not implemented)");
+    {
+        CORRADE_EXPECT_FAIL("Not implemented yet.");
+        CORRADE_COMPARE(dir, "(not implemented)");
+    }
+    #endif
+
+    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    CORRADE_COMPARE(dir.find('\0'), std::string::npos);
+
+    /* On Windows it shouldn't contain backslashes */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
     #endif
 
     /* Verify that it's possible to write stuff there */
