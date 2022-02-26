@@ -589,18 +589,16 @@ CORRADE_DEPRECATED("use mapWrite() instead") CORRADE_UTILITY_EXPORT Containers::
 #endif
 #endif
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-#ifdef CORRADE_TARGET_UNIX
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && (defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)))
 class CORRADE_UTILITY_EXPORT MapDeleter {
+    #ifdef CORRADE_TARGET_UNIX
     public:
         constexpr explicit MapDeleter(): _fd{} {}
         constexpr explicit MapDeleter(int fd) noexcept: _fd{fd} {}
         void operator()(const char* data, std::size_t size);
     private:
         int _fd;
-};
-#elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-class CORRADE_UTILITY_EXPORT MapDeleter {
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     public:
         constexpr explicit MapDeleter(): _hFile{}, _hMap{} {}
         constexpr explicit MapDeleter(void* hFile, void* hMap) noexcept: _hFile{hFile}, _hMap{hMap} {}
@@ -608,8 +606,8 @@ class CORRADE_UTILITY_EXPORT MapDeleter {
     private:
         void* _hFile;
         void* _hMap;
+    #endif
 };
-#endif
 #endif
 
 }}}

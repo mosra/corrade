@@ -986,14 +986,21 @@ bool copy(const std::string& from, const std::string& to) {
     return true;
 }
 
-#ifdef CORRADE_TARGET_UNIX
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 void MapDeleter::operator()(const char* const data, const std::size_t size) {
+    #ifdef CORRADE_TARGET_UNIX
     if(data && munmap(const_cast<char*>(data), size) == -1)
         Error() << "Utility::Directory: can't unmap memory-mapped file";
     if(_fd) close(_fd);
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    if(data) UnmapViewOfFile(data);
+    if(_hMap) CloseHandle(_hMap);
+    if(_hFile) CloseHandle(_hFile);
+    #endif
 }
 
 Containers::Array<char, MapDeleter> map(const std::string& filename) {
+    #ifdef CORRADE_TARGET_UNIX
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDWR);
     if(fd == -1) {
@@ -1023,9 +1030,57 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+       does. */
+    HANDLE hFile = CreateFileW(widen(filename).data(),
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+    if(hFile == INVALID_HANDLE_VALUE) {
+        Error err;
+        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return nullptr;
+    }
+
+    /* Get file size */
+    const std::size_t size = GetFileSize(hFile, nullptr);
+
+    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the handle open
+       and let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    HANDLE hMap;
+    char* data;
+    if(!size) {
+        hMap = {};
+        data = nullptr;
+    } else {
+        /* Create the file mapping */
+        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr))) {
+            Error err;
+            err << "Utility::Directory::map(): can't create file mapping for" << filename << Debug::nospace << ":";
+            Utility::Implementation::printWindowsErrorString(err, GetLastError());
+            CloseHandle(hFile);
+            return nullptr;
+        }
+
+        /* Map the file */
+        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
+            Error err;
+            err << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":";
+            Utility::Implementation::printWindowsErrorString(err, GetLastError());
+            CloseHandle(hMap);
+            CloseHandle(hFile);
+            return nullptr;
+        }
+    }
+
+    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+    #endif
 }
 
 Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
+    #ifdef CORRADE_TARGET_UNIX
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDONLY);
     if(fd == -1) {
@@ -1062,9 +1117,56 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     }
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /* Open the file for reading */
+    HANDLE hFile = CreateFileW(widen(filename).data(),
+        GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    if(hFile == INVALID_HANDLE_VALUE) {
+        Error err;
+        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return nullptr;
+    }
+
+    /* Get file size */
+    const std::size_t size = GetFileSize(hFile, nullptr);
+
+    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
+       just set the pointer to null -- but for consistency keep the handle open
+       and let it be handled by the deleter. Array guarantees that deleter gets
+       called even in case of a null data. */
+    HANDLE hMap;
+    char* data;
+    if(!size) {
+        hMap = {};
+        data = nullptr;
+    } else {
+        /* Create the file mapping */
+        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr))) {
+            Error err;
+            err << "Utility::Directory::mapRead(): can't create file mapping for" << filename << Debug::nospace << ":";
+            Utility::Implementation::printWindowsErrorString(err, GetLastError());
+            CloseHandle(hFile);
+            return nullptr;
+        }
+
+        /* Map the file */
+        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)))) {
+            Error err;
+            err << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":";
+            Utility::Implementation::printWindowsErrorString(err, GetLastError());
+            CloseHandle(hMap);
+            CloseHandle(hFile);
+            return nullptr;
+        }
+    }
+
+    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+    #endif
 }
 
 Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
+    #ifdef CORRADE_TARGET_UNIX
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
@@ -1112,111 +1214,7 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
-}
-#elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-void MapDeleter::operator()(const char* const data, const std::size_t) {
-    if(data) UnmapViewOfFile(data);
-    if(_hMap) CloseHandle(_hMap);
-    if(_hFile) CloseHandle(_hFile);
-}
-
-Containers::Array<char, MapDeleter> map(const std::string& filename) {
-    /* Open the file for writing. Create if it doesn't exist, truncate it if it
-       does. */
-    HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return nullptr;
-    }
-
-    /* Get file size */
-    const std::size_t size = GetFileSize(hFile, nullptr);
-
-    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the handle open
-       and let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    HANDLE hMap;
-    char* data;
-    if(!size) {
-        hMap = {};
-        data = nullptr;
-    } else {
-        /* Create the file mapping */
-        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr))) {
-            Error err;
-            err << "Utility::Directory::map(): can't create file mapping for" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hFile);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
-            Error err;
-            err << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hMap);
-            CloseHandle(hFile);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
-}
-
-Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
-    /* Open the file for reading */
-    HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return nullptr;
-    }
-
-    /* Get file size */
-    const std::size_t size = GetFileSize(hFile, nullptr);
-
-    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the handle open
-       and let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    HANDLE hMap;
-    char* data;
-    if(!size) {
-        hMap = {};
-        data = nullptr;
-    } else {
-        /* Create the file mapping */
-        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr))) {
-            Error err;
-            err << "Utility::Directory::mapRead(): can't create file mapping for" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hFile);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)))) {
-            Error err;
-            err << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hMap);
-            CloseHandle(hFile);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
-}
-
-Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
-    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)    /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
@@ -1258,13 +1256,14 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const 
     }
 
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+    #endif
 }
-#endif
 
-#if defined(CORRADE_BUILD_DEPRECATED) && (defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)))
+#ifdef CORRADE_BUILD_DEPRECATED
 Containers::Array<char, MapDeleter> map(const std::string& filename, const std::size_t size) {
     return mapWrite(filename, size);
 }
+#endif
 #endif
 
 }}}
