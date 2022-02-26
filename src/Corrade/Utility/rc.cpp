@@ -71,9 +71,11 @@ Arguments:
 
 }
 
+using namespace Corrade;
+
 #ifndef DOXYGEN_GENERATING_OUTPUT /* LCOV_EXCL_START */
 int main(int argc, char** argv) {
-    Corrade::Utility::Arguments args;
+    Utility::Arguments args;
     args.addArgument("name")
         .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
         .addArgument("out").setHelp("out", "output file", "outfile.cpp")
@@ -82,17 +84,17 @@ int main(int argc, char** argv) {
         .parse(argc, argv);
 
     /* Remove previous output file */
-    Corrade::Utility::Directory::rm(args.value("out"));
+    Utility::Directory::rm(args.value("out"));
 
     /* Compile file */
-    const std::string compiled = Corrade::Utility::Resource::compileFrom(args.value("name"), args.value("conf"));
+    const std::string compiled = Utility::Resource::compileFrom(args.value("name"), args.value("conf"));
 
     /* Compilation failed */
     if(compiled.empty()) return 2;
 
     /* Save output */
-    if(!Corrade::Utility::Directory::writeString(args.value("out"), compiled)) {
-        Corrade::Utility::Error() << "Cannot write output file " << '\'' + args.value("out") + '\'';
+    if(!Utility::Directory::writeString(args.value("out"), compiled)) {
+        Utility::Error{} << "Cannot write output file" << '\'' + args.value("out") + '\'';
         return 3;
     }
 
