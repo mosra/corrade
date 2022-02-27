@@ -859,6 +859,8 @@ template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* cons
             /* The null termination flag only if the original is
                null-terminated and end points to the original end */
             ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == _data + (_size & ~Implementation::StringViewSizeMask))),
+            /* Using an internal assert-less constructor, the public
+               constructor asserts would be redundant */
             nullptr};
 }
 
@@ -876,6 +878,8 @@ template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(const s
             /* The null termination flag only if the original is
                null-terminated and end points to the original end */
             ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == (_size & ~Implementation::StringViewSizeMask))),
+            /* Using an internal assert-less constructor, the public
+               constructor asserts would be redundant */
             nullptr};
 }
 

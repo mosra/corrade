@@ -862,9 +862,10 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Find a substring
          *
-         * Equivalent to @ref BasicStringView::find(char) const. Not allowed to
-         * be called on a r-value since the returned view would become
-         * dangling.
+         * Equivalent to @ref BasicStringView::find(char) const, which in turn
+         * is a specialization of @ref BasicStringView::find(StringView) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
          * @see @ref contains()
          */
         MutableStringView find(char character) &;
