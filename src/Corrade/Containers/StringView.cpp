@@ -373,7 +373,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
 
 namespace {
 
-inline const char* findFirst(const char* data, const std::size_t size, const char* substring, const std::size_t substringSize) {
+inline const char* find(const char* data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
     /* If the substring is not larger than the string we search in */
     if(substringSize <= size) {
         /* If these are both empty (substringSize <= size, so it's also 0),
@@ -395,7 +395,7 @@ inline const char* findFirst(const char* data, const std::size_t size, const cha
     return {};
 }
 
-inline const char* findFirst(const char* data, const std::size_t size, const char character) {
+inline const char* find(const char* data, const std::size_t size, const char character) {
     /* Making a utility function because yet again I'm not sure if null
        pointers are allowed and cppreference says nothing about that, so in
        case this needs to be patched it's better to have it in a single place */
@@ -407,25 +407,25 @@ inline const char* findFirst(const char* data, const std::size_t size, const cha
 template<class T> BasicStringView<T> BasicStringView<T>::find(const StringView substring) const {
     /* Cache the getters to speed up debug builds */
     const std::size_t substringSize = substring.size();
-    if(const char* const found = findFirst(_data, size(), substring._data, substringSize))
+    if(const char* const found = Containers::find(_data, size(), substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
     return {};
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::find(const char character) const {
-    if(const char* const found = findFirst(_data, size(), character))
+    if(const char* const found = Containers::find(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     return {};
 }
 
 template<class T> bool BasicStringView<T>::contains(const StringView substring) const {
-    return findFirst(_data, size(), substring._data, substring.size());
+    return Containers::find(_data, size(), substring._data, substring.size());
 }
 
 template<class T> bool BasicStringView<T>::contains(const char character) const {
-    return findFirst(_data, size(), character);
+    return Containers::find(_data, size(), character);
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
