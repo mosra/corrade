@@ -336,6 +336,7 @@ template<class T> void StringViewTest::constructPointer() {
 
     char string[] = "hello\0world!";
     const BasicStringView<T> view = string;
+    CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
@@ -345,6 +346,7 @@ template<class T> void StringViewTest::constructPointer() {
 
 void StringViewTest::constructPointerNull() {
     StringView view = static_cast<const char*>(nullptr);
+    CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
@@ -353,6 +355,7 @@ void StringViewTest::constructPointerNull() {
 void StringViewTest::constructPointerFlags() {
     char string[] = "hello\0world!";
     StringView view{string, StringViewFlag::Global};
+    CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
@@ -360,6 +363,7 @@ void StringViewTest::constructPointerFlags() {
 
 void StringViewTest::constructEmpty() {
     StringView view = "";
+    CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(view.data());
@@ -370,11 +374,13 @@ void StringViewTest::constructNullptr() {
     /* It's the default constructor, just with the default argument explicit */
 
     StringView view = nullptr;
+    CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 
     constexpr StringView cview = nullptr;
+    CORRADE_VERIFY(cview.isEmpty());
     CORRADE_COMPARE(cview.size(), 0);
     CORRADE_COMPARE(cview.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(cview.data()), nullptr);
@@ -384,6 +390,7 @@ void StringViewTest::constructFromMutable() {
     char string[] = "hello\0world!";
     const MutableStringView a = string;
     const StringView b = a;
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(b.data()), &string[0]);
@@ -397,11 +404,13 @@ void StringViewTest::constructFromMutable() {
 
 void StringViewTest::constructLiteral() {
     StringView view = "hell\0!"_s;
+    CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 6);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_COMPARE(view.data()[2], 'l');
 
     constexpr StringView cview = "hell\0!"_s;
+    CORRADE_VERIFY(!cview.isEmpty());
     CORRADE_COMPARE(cview.size(), 6);
     CORRADE_COMPARE(cview.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_COMPARE(cview.data()[2], 'l');
@@ -409,6 +418,7 @@ void StringViewTest::constructLiteral() {
 
 void StringViewTest::constructLiteralEmpty() {
     StringView view = ""_s;
+    CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_VERIFY(view.data());
