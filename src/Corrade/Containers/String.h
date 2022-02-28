@@ -213,7 +213,7 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * If the view is @ref StringViewFlag::NullTerminated, returns a
          * non-owning reference to it without any extra allocations or copies
-         * involved. Otherwise allocates a null-terminated owning copy using
+         * involved. Otherwise creates a null-terminated owning copy using
          * @ref String(StringView).
          *
          * This function is primarily meant for efficiently passing
@@ -229,9 +229,8 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * If the view is both @ref StringViewFlag::NullTerminated and
          * @ref StringViewFlag::Global, returns a non-owning reference to it
-         * without any extra allocations or copies involved. Otherwise
-         * allocates a null-terminated owning copy using
-         * @ref String(StringView).
+         * without any extra allocations or copies involved. Otherwise creates
+         * a null-terminated owning copy using @ref String(StringView).
          *
          * This function is primarily meant for efficiently storing
          * @ref BasicStringView "StringView" instances, ensuring the
@@ -355,9 +354,9 @@ class CORRADE_UTILITY_EXPORT String {
          * Casts away the @cpp const @ce and delegates to
          * @ref String(char*, std::size_t, Deleter). This constructor is
          * provided mainly to allow a @ref String instance to reference global
-         * immutable data (such as C string literals) without having to
-         * allocate a copy, it's the user responsibility to avoid mutating the
-         * data in any way.
+         * immutable data (such as C string literals) without having to make a
+         * copy, it's the user responsibility to avoid mutating the data in any
+         * way.
          * @see @ref nullTerminatedView(), @ref nullTerminatedGlobalView()
          */
         explicit String(const char* data, std::size_t size, Deleter deleter) noexcept: String{const_cast<char*>(data), size, deleter} {}
