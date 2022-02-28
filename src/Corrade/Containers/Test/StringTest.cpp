@@ -157,6 +157,7 @@ struct StringTest: TestSuite::Tester {
 
     template<class T> void trimmed();
 
+    /* Tests also contains() */
     template<class T> void find();
 
     void release();

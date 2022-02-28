@@ -158,7 +158,10 @@ struct StringViewTest: TestSuite::Tester {
     void trimmedFlags();
     void trimmedNullView();
 
+    /* Tests also contains() */
     void find();
+    void findMultipleOccurences();
+    void findWholeString();
     void findEmpty();
     void findFlags();
 
@@ -235,6 +238,8 @@ StringViewTest::StringViewTest() {
               &StringViewTest::trimmedNullView,
 
               &StringViewTest::find,
+              &StringViewTest::findMultipleOccurences,
+              &StringViewTest::findWholeString,
               &StringViewTest::findEmpty,
               &StringViewTest::findFlags,
 
@@ -1311,62 +1316,66 @@ void StringViewTest::find() {
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
     }
+}
 
-    StringView b = "so, hello hell hello! hello"_s;
+void StringViewTest::findMultipleOccurences() {
+    StringView a = "so, hello hell hello! hello"_s;
 
     /* Multiple occurrences */
     {
-        CORRADE_VERIFY(b.contains("hello"));
+        CORRADE_VERIFY(a.contains("hello"));
 
-        StringView found = b.find("hello");
+        StringView found = a.find("hello");
         CORRADE_COMPARE(found, "hello");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 4);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
 
-    /* First occurrences almost but not quite complete */
+    /* First occurrence almost but not quite complete */
     } {
-        CORRADE_VERIFY(b.contains("hello!"));
+        CORRADE_VERIFY(a.contains("hello!"));
 
-        StringView found = b.find("hello!");
+        StringView found = a.find("hello!");
         CORRADE_COMPARE(found, "hello!");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 15);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
 
     /* Multiple character occurrences */
     } {
-        CORRADE_VERIFY(b.contains('o'));
+        CORRADE_VERIFY(a.contains('o'));
 
-        StringView found = b.find('o');
+        StringView found = a.find('o');
         CORRADE_COMPARE(found, "o");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data() + 1);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 1);
     }
+}
 
-    StringView c = "hell"_s;
+void StringViewTest::findWholeString() {
+    StringView a = "hell"_s;
 
     /* Finding a substring that's the whole string should succeed */
     {
-        CORRADE_VERIFY(c.contains("hell"));
+        CORRADE_VERIFY(a.contains("hell"));
 
-        StringView found = c.find("hell");
+        StringView found = a.find("hell");
         CORRADE_COMPARE(found, "hell");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), c.data());
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
 
     /* But a larger string should fail */
     } {
-        CORRADE_VERIFY(!c.contains("hello"));
+        CORRADE_VERIFY(!a.contains("hello"));
 
-        StringView found = c.find("hello");
+        StringView found = a.find("hello");
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
     }
 
-    StringView d = "h"_s;
+    StringView b = "h"_s;
 
     /* Finding a single character that's the whole string should succeed too */
     {
-        CORRADE_VERIFY(d.contains('h'));
+        CORRADE_VERIFY(b.contains('h'));
 
-        StringView found = d.find('h');
+        StringView found = b.find('h');
         CORRADE_COMPARE(found, "h");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), d.data());
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data());
     }
 }
 
