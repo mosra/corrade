@@ -53,10 +53,22 @@ String String::nullTerminatedView(StringView view) {
     return String{view};
 }
 
+String String::nullTerminatedView(AllocatedInitT, StringView view) {
+    if(view.flags() & StringViewFlag::NullTerminated)
+        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    return String{AllocatedInit, view};
+}
+
 String String::nullTerminatedGlobalView(StringView view) {
     if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global))
         return String{view.data(), view.size(), [](char*, std::size_t){}};
     return String{view};
+}
+
+String String::nullTerminatedGlobalView(AllocatedInitT, StringView view) {
+    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global))
+        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    return String{AllocatedInit, view};
 }
 
 inline void String::construct(Corrade::NoInitT, const std::size_t size) {
@@ -159,6 +171,39 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
     if(size) std::memcpy(_large.data, data, size);
     _large.data[size] = '\0';
     _large.size = size;
+    _large.deleter = nullptr;
+}
+
+String::String(AllocatedInitT, String&& other) {
+    /* Allocate a copy if the other is a SSO */
+    if(other.isSmall()) {
+        const std::size_t sizePlusOne = (other._small.size & ~SmallSizeMask) + 1;
+        _large.data = new char[sizePlusOne];
+        /* Copies also the null terminator */
+        std::memcpy(_large.data, other._small.data, sizePlusOne);
+        _large.size = other._small.size & ~SmallSizeMask;
+        _large.deleter = nullptr;
+
+    /* Otherwise take over the data */
+    } else {
+        _large.data = other._large.data;
+        _large.size = other._large.size;
+        _large.deleter = other._large.deleter;
+    }
+
+    /* Move-out the other instance in both cases */
+    other._large.data = nullptr;
+    other._large.size = 0;
+    other._large.deleter = nullptr;
+}
+
+String::String(AllocatedInitT, const String& other) {
+    const Containers::Pair<const char*, std::size_t> data = other.dataInternal();
+    const std::size_t sizePlusOne = data.second() + 1;
+    _large.size = data.second();
+    _large.data = new char[sizePlusOne];
+    /* Copies also the null terminator */
+    std::memcpy(_large.data, data.first(), sizePlusOne);
     _large.deleter = nullptr;
 }
 

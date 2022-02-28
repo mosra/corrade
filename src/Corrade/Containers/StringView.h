@@ -67,6 +67,7 @@ enum class StringViewFlag: std::size_t {
      * The referenced string is null-terminated. A string view with this flag
      * set doesn't need to have a null-terminated copy allocated in order to
      * pass to an API that expects only null-terminated strings.
+     * @see @ref Containers-BasicStringView-usage-c-string-conversion
      */
     NullTerminated = std::size_t{1} << (sizeof(std::size_t)*8 - 2)
 };
@@ -170,6 +171,37 @@ ends) with given string and then removes it:
 @snippet Containers.cpp StringView-usage-slicing
 </li>
 </ul>
+
+@subsection Containers-BasicStringView-usage-c-string-conversion Converting StringView instances to null-terminated C strings
+
+If possible when interacting with 3rd party APIs, passing a string together
+with the size information is always preferable to passing just a plain
+@cpp const char* @ce. Apart from saving an unnecessary @ref std::strlen() call
+it can avoid unbounded memory reads in security-critical scenarios.
+
+Unlike a @ref String, string views can point to any slice of a larger string
+and thus can't guarantee null termination. Because of this and because even a
+view with @ref StringViewFlag::NullTerminated can still contain a @cpp '\0' @ce
+anywhere in the middle, there's no implicit conversion to @cpp const char* @ce
+provided, and the pointer returned by @ref data() should only be used together
+with @ref size().
+
+The quickest safe way to get a null-terminated string out of a @ref StringView
+is to convert the view to a @ref String and then use @ref String::data().
+However, such operation will unconditionally make a copy of the string, which
+is unnecessary work if the view was null-terminated already. To avoid that,
+there's @ref String::nullTerminatedView(), which will make a copy only if the
+view is not already null-terminated, directly referencing the view with a no-op
+deleter otherwise. For example, when opening a file using @ref std::fopen():
+
+@snippet Containers.cpp StringView-c-string-nullterminated
+
+Similarly as described in @ref Containers-String-usage-c-string-conversion,
+pointers to data in SSO instances will get invalidated when the instance is
+moved. With @ref String::nullTerminatedGlobalView(AllocatedInitT, StringView)
+the null-terminated copy will be always allocated, avoiding this problem:
+
+@snippet Containers.cpp StringView-c-string-allocatedinit
 
 @section Containers-BasicStringView-stl STL compatibility
 

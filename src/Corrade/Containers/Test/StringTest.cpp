@@ -103,6 +103,7 @@ struct StringTest: TestSuite::Tester {
     void constructNoInitTooLarge();
 
     void constructNullTerminatedGlobalView();
+    void constructNullTerminatedGlobalViewAllocatedInit();
 
     void convertStringView();
     void convertStringViewSmall();
@@ -127,16 +128,20 @@ struct StringTest: TestSuite::Tester {
     void compareLargeToSmall();
 
     void copyConstructLarge();
+    void copyConstructLargeAllocatedInit();
     void copyLargeToLarge();
     void copyLargeToSmall();
     void copyConstructSmall();
+    void copyConstructSmallAllocatedInit();
     void copySmallToLarge();
     void copySmallToSmall();
 
     void moveConstructLarge();
+    void moveConstructLargeAllocatedInit();
     void moveLargeToLarge();
     void moveLargeToSmall();
     void moveConstructSmall();
+    void moveConstructSmallAllocatedInit();
     void moveSmallToLarge();
     void moveSmallToSmall();
 
@@ -221,6 +226,7 @@ StringTest::StringTest() {
               &StringTest::constructNoInitTooLarge,
 
               &StringTest::constructNullTerminatedGlobalView,
+              &StringTest::constructNullTerminatedGlobalViewAllocatedInit,
 
               &StringTest::convertStringView,
               &StringTest::convertStringViewSmall,
@@ -245,16 +251,20 @@ StringTest::StringTest() {
               &StringTest::compareLargeToSmall,
 
               &StringTest::copyConstructLarge,
+              &StringTest::copyConstructLargeAllocatedInit,
               &StringTest::copyLargeToLarge,
               &StringTest::copyLargeToSmall,
               &StringTest::copyConstructSmall,
+              &StringTest::copyConstructSmallAllocatedInit,
               &StringTest::copySmallToLarge,
               &StringTest::copySmallToSmall,
 
               &StringTest::moveConstructLarge,
+              &StringTest::moveConstructLargeAllocatedInit,
               &StringTest::moveLargeToLarge,
               &StringTest::moveLargeToSmall,
               &StringTest::moveConstructSmall,
+              &StringTest::moveConstructSmallAllocatedInit,
               &StringTest::moveSmallToLarge,
               &StringTest::moveSmallToSmall,
 
@@ -765,6 +775,92 @@ void StringTest::constructNullTerminatedGlobalView() {
     }
 }
 
+void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
+    /* For a local non-null-terminated string, both convert it to an owning
+       copy */
+    StringView local{"Hello!", 6};
+    CORRADE_COMPARE(local.flags(), StringViewFlags{});
+    {
+        String a = String::nullTerminatedView(AllocatedInit, local);
+        String b = String::nullTerminatedGlobalView(AllocatedInit, local);
+        CORRADE_COMPARE(a, local);
+        CORRADE_COMPARE(b, local);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(!a.deleter());
+        CORRADE_VERIFY(!b.deleter());
+    }
+
+    /* For a local null-terminated only second does */
+    StringView localNullTerminated = "Hello!";
+    CORRADE_COMPARE(localNullTerminated.flags(), StringViewFlag::NullTerminated);
+    {
+        String a = String::nullTerminatedView(AllocatedInit, localNullTerminated);
+        String b = String::nullTerminatedGlobalView(AllocatedInit, localNullTerminated);
+        CORRADE_COMPARE(a, localNullTerminated);
+        CORRADE_COMPARE(b, localNullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(a.deleter());
+        CORRADE_VERIFY(!b.deleter());
+    }
+
+    /* For a global null-terminated string, both keep a view */
+    StringView globalNullTerminated = "Hello!"_s;
+    CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    {
+        String a = String::nullTerminatedView(AllocatedInit, globalNullTerminated);
+        String b = String::nullTerminatedGlobalView(AllocatedInit, globalNullTerminated);
+        CORRADE_COMPARE(a, globalNullTerminated);
+        CORRADE_COMPARE(b, globalNullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
+        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(a.deleter());
+        CORRADE_VERIFY(b.deleter());
+    }
+
+    /* For a global non-null-terminated string, neither keeps a view */
+    StringView global{"Hello!", 6, StringViewFlag::Global};
+    CORRADE_COMPARE(global.flags(), StringViewFlag::Global);
+    {
+        String a = String::nullTerminatedView(AllocatedInit, global);
+        String b = String::nullTerminatedGlobalView(AllocatedInit, global);
+        CORRADE_COMPARE(a, global);
+        CORRADE_COMPARE(b, global);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(!a.deleter());
+        CORRADE_VERIFY(!b.deleter());
+    }
+
+    /* A null view is a special case. It has the flags, but a non-owning String
+       can't guarantee the null-termination so an owning empty instance has to
+       be made instead. */
+    StringView null;
+    CORRADE_VERIFY(!null.data());
+    CORRADE_COMPARE(null.flags(), StringViewFlag::Global);
+    {
+        String a = String::nullTerminatedView(AllocatedInit, null);
+        String b = String::nullTerminatedGlobalView(AllocatedInit, null);
+        CORRADE_COMPARE(a, null);
+        CORRADE_COMPARE(b, null);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(!a.deleter());
+        CORRADE_VERIFY(!b.deleter());
+    }
+}
+
 void StringTest::convertStringView() {
     const String a = "Allocated hello\0for a verbose world"_s;
     CORRADE_VERIFY(a);
@@ -1151,6 +1247,30 @@ void StringTest::copyConstructLarge() {
     CORRADE_COMPARE(aData[0], 'B');
 }
 
+void StringTest::copyConstructLargeAllocatedInit() {
+    /* Same as above, for already-large strings it should have no difference */
+
+    char aData[] = "Allocated hello for a verbose world";
+
+    {
+        String a{aData, sizeof(aData) - 1, [](char* data, std::size_t){
+            ++data[0];
+        }};
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(a.deleter());
+
+        /* A copy is made using a default deleter */
+        String b{AllocatedInit, a};
+        CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+        CORRADE_VERIFY(b.data() != a.data());
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(!b.deleter());
+    }
+
+    /* a is deallocated as usual */
+    CORRADE_COMPARE(aData[0], 'B');
+}
+
 void StringTest::copyLargeToLarge() {
     char aData[] = "Allocated hello for a verbose world";
     char bData[] = "ALLOCATED HELLO FOR A VERBOSE WORLD!!!";
@@ -1217,6 +1337,18 @@ void StringTest::copyConstructSmall() {
     CORRADE_VERIFY(b.isSmall());
 }
 
+void StringTest::copyConstructSmallAllocatedInit() {
+    String a = "hello";
+    CORRADE_VERIFY(a.isSmall());
+
+    /* A copy is made using a default deleter */
+    String b{AllocatedInit, a};
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_VERIFY(!b.deleter());
+}
+
 void StringTest::copySmallToLarge() {
     String a = "hello";
     CORRADE_VERIFY(a.isSmall());
@@ -1261,6 +1393,31 @@ void StringTest::moveConstructLarge() {
 
         /* Everything including the deleter is moved */
         String b = Utility::move(a);
+        CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+        CORRADE_VERIFY(b.data() == aData);
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_COMPARE(b.deleter(), deleter);
+    }
+
+    /* b is deallocated just once */
+    CORRADE_COMPARE(aData[0], 'B');
+
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<String>::value);
+}
+
+void StringTest::moveConstructLargeAllocatedInit() {
+    /* Same as above, for already-large strings it should have no difference */
+
+    char aData[] = "Allocated hello for a verbose world";
+
+    {
+        auto deleter = [](char* data, std::size_t){ ++data[0]; };
+        String a{aData, sizeof(aData) - 1, deleter};
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(a.deleter());
+
+        /* Everything including the deleter is moved */
+        String b{AllocatedInit, Utility::move(a)};
         CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
         CORRADE_VERIFY(b.data() == aData);
         CORRADE_VERIFY(!b.isSmall());
@@ -1346,6 +1503,18 @@ void StringTest::moveConstructSmall() {
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
     CORRADE_VERIFY(b.isSmall());
+}
+
+void StringTest::moveConstructSmallAllocatedInit() {
+    String a = "hello";
+    CORRADE_VERIFY(a.isSmall());
+
+    /* A copy is made using a default deleter */
+    String b{AllocatedInit, Utility::move(a)};
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_VERIFY(!b.deleter());
 }
 
 void StringTest::moveSmallToLarge() {

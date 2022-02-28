@@ -1137,6 +1137,37 @@ static_cast<void>(name);
 }
 
 {
+/* [StringView-c-string-nullterminated] */
+Containers::StringView file = DOXYGEN_ELLIPSIS({});
+
+/* Efficiently ensure fopen() gets a null-terminated C string */
+std::FILE* f = std::fopen(Containers::String::nullTerminatedView(file).data(), "rb");
+DOXYGEN_ELLIPSIS()
+std::fclose(f);
+/* [StringView-c-string-nullterminated] */
+}
+
+{
+/* [StringView-c-string-allocatedinit] */
+void exec(int argc, const char** argv); /* Takes a C string array */
+
+Containers::Array<Containers::StringView> args;
+Containers::Array<Containers::String> data;
+Containers::Array<const char*> argv;
+for(Containers::StringView arg: args) {
+    /* If just arrayAppend(storage, Containers::String::nullTerminatedView(arg))
+       was used, the data() passed to argv could be invalidated next time the
+       storage gets reallocated */
+    arrayAppend(data,
+        Containers::String::nullTerminatedView(Containers::AllocatedInit, arg));
+    arrayAppend(argv, data.back().data());
+}
+
+exec(argv.size(), argv.data());
+/* [StringView-c-string-allocatedinit] */
+}
+
+{
 /* [StringView-join] */
 using namespace Containers::Literals;
 
@@ -1183,6 +1214,25 @@ std::size_t size{};
         [](char* data, std::size_t) { std::free(data); }};
 }
 /* [String-usage-wrapping] */
+}
+
+{
+auto hasNextArg = []() { return false; };
+auto nextArg = []() { return Containers::String{}; };
+/* [String-c-string-allocatedinit] */
+void exec(int argc, const char** argv);
+
+Containers::Array<Containers::String> data;
+Containers::Array<const char*> argv;
+while(hasNextArg()) {
+    /* If arrayAppend(storage, nextArgument()) was used, the data() passed to
+       argv could be invalidated next time the storage gets reallocated */
+    arrayAppend(data, Containers::String{Containers::AllocatedInit, nextArg()});
+    arrayAppend(argv, data.back().data());
+}
+
+exec(argv.size(), argv.data());
+/* [String-c-string-allocatedinit] */
 }
 
 }

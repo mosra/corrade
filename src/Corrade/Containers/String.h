@@ -119,11 +119,10 @@ by default stored inside the class.
 Such optimization is completely transparent to the user, the only difference is
 that @ref deleter() and @ref release() can't be called on SSO strings, as there
 is nothing to delete / release. Presence of SSO on an instance can be queried
-using @ref isSmall(). In cases where SSO isn't desired (for example when
-storing pointers to string contents stored in a growable array), the string can
-be constructed using the @ref AllocatedInit tag (for example with
-@ref String(AllocatedInitT, const char*)), which bypasses this optimization and
-always allocates.
+using @ref isSmall(). In cases where SSO isn't desired, the string can be
+constructed with @ref String(AllocatedInitT, const char*) and related APIs
+using the @ref AllocatedInit tag, which bypasses this optimization and always
+allocates.
 
 @attention For consistency with @ref StringView and in order to allow the small
     string optimization, on 32-bit systems the size is limited to 1 GB. That
@@ -159,6 +158,34 @@ function to use for deallocation.
 For example, properly deallocating a string allocated using @ref std::malloc():
 
 @snippet Containers.cpp String-usage-wrapping
+
+@subsection Containers-String-usage-c-string-conversion Converting String instances to null-terminated C strings
+
+If possible when interacting with 3rd party APIs, passing a string together
+with the size information is always preferable to passing just a plain
+@cpp const char* @ce. Apart from saving an unnecessary @ref std::strlen() call
+it can avoid unbounded memory reads in security-critical scenarios.
+
+As said above, a @ref String is guaranteed to always be null-terminated, even
+in case it's empty. However, unlike with @ref Array, there's no implicit
+conversion to @cpp const char* @ce, because the string can still contain a
+@cpp '\0' @ce anywhere in the middle --- thus you have to get the pointer
+explicitly using @ref data(). In case your string can contain null bytes, you
+should only pass it together with @ref size() or as a range of pointers using
+@ref begin() and @ref end() instead, assuming the target API supports such
+input.
+
+Extra attention is needed when the originating @ref String instance can move
+after the C string pointer got stored somewhere. Pointers to heap-allocated
+strings will not get invalidated but @ref Containers-String-usage-sso "SSO strings"
+will, leading to nasty crashes when accessing the original pointer. Apart from
+ensuring the instances won't get moved, another solution is to force the
+strings to be always allocated with @ref String(AllocatedInitT, String&&) and
+other variants using the @ref AllocatedInit tag. For example:
+
+@snippet Containers.cpp String-c-string-allocatedinit
+
+See also @ref Containers-BasicStringView-usage-c-string-conversion.
 
 @section Containers-String-stl STL compatibility
 
@@ -220,9 +247,22 @@ class CORRADE_UTILITY_EXPORT String {
          * @ref BasicStringView "StringView" instances to APIs that expect
          * null-terminated @cpp const char* @ce. Mutating the result in any way
          * is undefined behavior.
-         * @see @ref nullTerminatedGlobalView()
+         * @see @ref nullTerminatedGlobalView(),
+         *      @ref nullTerminatedView(AllocatedInitT, StringView),
+         *      @ref Containers-String-usage-c-string-conversion
          */
         static String nullTerminatedView(StringView view);
+
+        /**
+         * @brief Turn a view into a null-terminated string, bypassing SSO
+         *
+         * Compared to @ref nullTerminatedView(StringView) the null-terminated
+         * copy is always allocated.
+         * @see @ref nullTerminatedGlobalView(AllocatedInitT, StringView),
+         *      @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
+         */
+        static String nullTerminatedView(AllocatedInitT, StringView view);
 
         /**
          * @brief Turn a view into a null-terminated global string
@@ -237,9 +277,21 @@ class CORRADE_UTILITY_EXPORT String {
          * memory stays in scope and then passing them to APIs that expect
          * null-terminated @cpp const char* @ce. Mutating the result in any way
          * is undefined behavior.
-         * @see @ref nullTerminatedView()
+         * @see @ref nullTerminatedView(),
+         *      @ref nullTerminatedGlobalView(AllocatedInitT, StringView)
          */
         static String nullTerminatedGlobalView(StringView view);
+
+        /**
+         * @brief Turn a view into a null-terminated global string, bypassing SSO
+         *
+         * Compared to @ref nullTerminatedGlobalView(StringView) the
+         * null-terminated copy is always allocated.
+         * @see @ref nullTerminatedView(AllocatedInitT, StringView),
+         *      @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
+         */
+        static String nullTerminatedGlobalView(AllocatedInitT, StringView view);
 
         /**
          * @brief Default constructor
@@ -293,7 +345,8 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Construct from a string view, bypassing SSO
          *
          * Compared to @ref String(StringView) the data is always allocated.
-         * @see @ref Containers-String-usage-sso
+         * @see @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
          */
         explicit String(AllocatedInitT, StringView view);
         explicit String(AllocatedInitT, Containers::ArrayView<const char> view); /**< @overload */
@@ -303,10 +356,22 @@ class CORRADE_UTILITY_EXPORT String {
         explicit String(AllocatedInitT, Containers::ArrayView<char> view); /**< @overload */
 
         /**
+         * @brief Create a string instance bypassing SSO
+         *
+         * If @p other already has allocated data, the data ownership is
+         * transferred. Otherwise a copy is allocated.
+         * @see @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
+         */
+        explicit String(AllocatedInitT, String&& other);
+        explicit String(AllocatedInitT, const String& other); /**< @overload */
+
+        /**
          * @brief Construct from a null-terminated C string, bypassing SSO
          *
          * Compared to @ref String(const char*) the data is always allocated.
-         * @see @ref Containers-String-usage-sso
+         * @see @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
          */
         explicit String(AllocatedInitT, const char* data);
 
@@ -315,7 +380,8 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Compared to @ref String(const char*, std::size_t) the data is always
          * allocated.
-         * @see @ref Containers-String-usage-sso
+         * @see @ref Containers-String-usage-sso,
+         *      @ref Containers-String-usage-c-string-conversion
          */
         explicit String(AllocatedInitT, const char* data, std::size_t size);
 
