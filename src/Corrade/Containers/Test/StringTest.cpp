@@ -686,21 +686,21 @@ void StringTest::constructNullTerminatedGlobalView() {
 
     /* For a local non-null-terminated string, both convert it to an owning
        copy */
-    StringView local{"Allocated hello for a verbose world", 35};
+    StringView local{"Hello!", 6};
     CORRADE_COMPARE(local.flags(), StringViewFlags{});
     {
         String a = String::nullTerminatedView(local);
         String b = String::nullTerminatedGlobalView(local);
-        CORRADE_COMPARE(a, local);
         CORRADE_COMPARE(b, local);
+        CORRADE_COMPARE(a, local);
+        CORRADE_VERIFY(a.isSmall());
+        CORRADE_VERIFY(b.isSmall());
         CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
-        CORRADE_VERIFY(!a.deleter());
-        CORRADE_VERIFY(!b.deleter());
     }
 
     /* For a local null-terminated only second does */
-    StringView localNullTerminated = "Allocated hello for a verbose world";
+    StringView localNullTerminated = "Hello!";
     CORRADE_COMPARE(localNullTerminated.flags(), StringViewFlag::NullTerminated);
     {
         String a = String::nullTerminatedView(localNullTerminated);
@@ -709,12 +709,14 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(b, localNullTerminated);
         CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(b.isSmall());
         CORRADE_VERIFY(a.deleter());
-        CORRADE_VERIFY(!b.deleter());
+        /* b is small, has no deleter */
     }
 
     /* For a global null-terminated string, both keep a view */
-    StringView globalNullTerminated = "Allocated hello for a verbose world"_s;
+    StringView globalNullTerminated = "Hello!"_s;
     CORRADE_COMPARE(globalNullTerminated.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     {
         String a = String::nullTerminatedView(globalNullTerminated);
@@ -723,11 +725,14 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(b, globalNullTerminated);
         CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
         CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!b.isSmall());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
     }
 
-    /* For a global non-null-terminated string, neither keeps a view */    StringView global{"Allocated hello for a verbose world", 35, StringViewFlag::Global};
+    /* For a global non-null-terminated string, neither keeps a view */
+    StringView global{"Hello!", 6, StringViewFlag::Global};
     CORRADE_COMPARE(global.flags(), StringViewFlag::Global);
     {
         String a = String::nullTerminatedView(global);
@@ -736,8 +741,9 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(b, global);
         CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
-        CORRADE_VERIFY(!a.deleter());
-        CORRADE_VERIFY(!b.deleter());
+        CORRADE_VERIFY(a.isSmall());
+        CORRADE_VERIFY(b.isSmall());
+        /* both a and b is small, has no deleter */
     }
 
     /* A null view is a special case. It has the flags, but a non-owning String
@@ -755,6 +761,7 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
         CORRADE_VERIFY(a.isSmall());
         CORRADE_VERIFY(b.isSmall());
+        /* both a and b is small, has no deleter */
     }
 }
 
