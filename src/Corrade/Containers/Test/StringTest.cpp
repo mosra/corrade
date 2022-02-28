@@ -692,8 +692,6 @@ void StringTest::constructNoInitTooLarge() {
 }
 
 void StringTest::constructNullTerminatedGlobalView() {
-    using namespace Literals;
-
     /* For a local non-null-terminated string, both convert it to an owning
        copy */
     StringView local{"Hello!", 6};
@@ -1156,11 +1154,8 @@ void StringTest::compare() {
     CORRADE_VERIFY(empty != a);
 
     /* Null terminator in the middle -- it should not stop at it */
-    {
-        using namespace Literals;
-        CORRADE_VERIFY(String{"hello\0world"_s} == (String{"hello\0world!", 11}));
-        CORRADE_VERIFY(String{"hello\0wOrld"_s} != (String{"hello\0world!", 11}));
-    }
+    CORRADE_VERIFY(String{"hello\0world"_s} == (String{"hello\0world!", 11}));
+    CORRADE_VERIFY(String{"hello\0wOrld"_s} != (String{"hello\0world!", 11}));
 
     /* C strings on either side */
     CORRADE_VERIFY(a == "hello");
