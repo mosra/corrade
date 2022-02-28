@@ -300,6 +300,12 @@ String::operator Array<char>() && {
     return out;
 }
 
+String::operator bool() const {
+    /* The data pointer is guaranteed to be non-null, so no need to check it */
+    if(_small.size & 0x80) return _small.size & ~SmallSizeMask;
+    return _large.size;
+}
+
 const char* String::data() const {
     if(_small.size & 0x80) return _small.data;
     return _large.data;

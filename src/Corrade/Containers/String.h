@@ -481,6 +481,17 @@ class CORRADE_UTILITY_EXPORT String {
         }
 
         /**
+         * @brief Whether the string is non-empty
+         *
+         * Returns @cpp true @ce if the string is non-empty, @cpp false @ce
+         * otherwise. Compared to @ref BasicStringView::operator bool(), a
+         * @ref String can never be @cpp nullptr @ce, so the pointer value
+         * isn't taken into account here.
+         * @see @ref isEmpty()
+         */
+        explicit operator bool() const;
+
+        /**
          * @brief Whether the string is stored using small string optimization
          *
          * It's not allowed to call @ref deleter() or @ref release() on a SSO
@@ -509,14 +520,18 @@ class CORRADE_UTILITY_EXPORT String {
          */
         Deleter deleter() const;
 
-        /** @brief Whether the string is empty */
+        /**
+         * @brief Whether the string is empty
+         *
+         * @see @ref operator bool(), @ref size()
+         */
         bool isEmpty() const;
 
         /**
          * @brief String size
          *
          * Excludes the null terminator.
-         * @see @ref isEmpty()
+         * @see @ref isEmpty(), @ref operator bool()
          */
         std::size_t size() const;
 

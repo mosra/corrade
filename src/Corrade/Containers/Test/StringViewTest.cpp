@@ -282,6 +282,7 @@ template<class T> void StringViewTest::constructDefault() {
     setTestCaseTemplateName(NameFor<T>::name());
 
     const BasicStringView<T> view;
+    CORRADE_VERIFY(!view);
     CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
@@ -292,10 +293,12 @@ template<class T> void StringViewTest::constructDefault() {
 
 void StringViewTest::constructDefaultConstexpr() {
     constexpr StringView view;
+    constexpr bool boolConversion = !!view;
     constexpr bool empty = view.isEmpty();
     constexpr std::size_t size = view.size();
     constexpr StringViewFlags flags = view.flags();
     constexpr const void* data = view.data();
+    CORRADE_VERIFY(!boolConversion);
     CORRADE_VERIFY(empty);
     CORRADE_COMPARE(size, 0);
     CORRADE_COMPARE(flags, StringViewFlag::Global);
@@ -307,6 +310,7 @@ template<class T> void StringViewTest::construct() {
 
     char string[]{'h', 'e', 'l', 'l', '\0', '!', '!'}; /* 7 chars */
     const BasicStringView<T> view{string, 6};
+    CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 6);
     CORRADE_COMPARE(view.flags(), StringViewFlags{});
@@ -318,10 +322,12 @@ template<class T> void StringViewTest::construct() {
 void StringViewTest::constructConstexpr() {
     constexpr const char* string = "hell\0!!"; /* 7 chars + \0 at the end */
     constexpr StringView view = {string, 6, StringViewFlag::Global|StringViewFlag::NullTerminated};
+    constexpr bool boolConversion = !!view;
     constexpr bool empty = view.isEmpty();
     constexpr std::size_t size = view.size();
     constexpr StringViewFlags flags = view.flags();
     constexpr const void* data = view.data();
+    CORRADE_VERIFY(boolConversion);
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(size, 6);
     CORRADE_COMPARE(flags, StringViewFlag::Global|StringViewFlag::NullTerminated);
@@ -338,6 +344,7 @@ template<class T> void StringViewTest::constructPointer() {
 
     char string[] = "hello\0world!";
     const BasicStringView<T> view = string;
+    CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
@@ -348,6 +355,7 @@ template<class T> void StringViewTest::constructPointer() {
 
 void StringViewTest::constructPointerNull() {
     StringView view = static_cast<const char*>(nullptr);
+    CORRADE_VERIFY(!view);
     CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
@@ -356,6 +364,7 @@ void StringViewTest::constructPointerNull() {
 
 void StringViewTest::constructPointerNullSize() {
     StringView view = {nullptr, 5};
+    CORRADE_VERIFY(!view); /* because it's non-empty but null */
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5);
     /* While a null pointer alone can be treated as global and never changing,
@@ -364,6 +373,7 @@ void StringViewTest::constructPointerNullSize() {
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 
     constexpr StringView cview = {nullptr, 5};
+    CORRADE_VERIFY(!view); /* because it's non-empty but null */
     CORRADE_VERIFY(!cview.isEmpty());
     CORRADE_COMPARE(cview.size(), 5);
     /* While a null pointer alone can be treated as global and never changing,
@@ -375,6 +385,7 @@ void StringViewTest::constructPointerNullSize() {
 void StringViewTest::constructPointerFlags() {
     char string[] = "hello\0world!";
     StringView view{string, StringViewFlag::Global};
+    CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
@@ -383,6 +394,7 @@ void StringViewTest::constructPointerFlags() {
 
 void StringViewTest::constructEmpty() {
     StringView view = "";
+    CORRADE_VERIFY(!view);
     CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
@@ -394,12 +406,14 @@ void StringViewTest::constructNullptr() {
     /* It's the default constructor, just with the default argument explicit */
 
     StringView view = nullptr;
+    CORRADE_VERIFY(!view);
     CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
 
     constexpr StringView cview = nullptr;
+    CORRADE_VERIFY(!cview);
     CORRADE_VERIFY(cview.isEmpty());
     CORRADE_COMPARE(cview.size(), 0);
     CORRADE_COMPARE(cview.flags(), StringViewFlag::Global);
@@ -410,6 +424,7 @@ void StringViewTest::constructFromMutable() {
     char string[] = "hello\0world!";
     const MutableStringView a = string;
     const StringView b = a;
+    CORRADE_VERIFY(b);
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
@@ -424,12 +439,14 @@ void StringViewTest::constructFromMutable() {
 
 void StringViewTest::constructLiteral() {
     StringView view = "hell\0!"_s;
+    CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 6);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_COMPARE(view.data()[2], 'l');
 
     constexpr StringView cview = "hell\0!"_s;
+    CORRADE_VERIFY(cview);
     CORRADE_VERIFY(!cview.isEmpty());
     CORRADE_COMPARE(cview.size(), 6);
     CORRADE_COMPARE(cview.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
@@ -438,6 +455,7 @@ void StringViewTest::constructLiteral() {
 
 void StringViewTest::constructLiteralEmpty() {
     StringView view = ""_s;
+    CORRADE_VERIFY(!view);
     CORRADE_VERIFY(view.isEmpty());
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);

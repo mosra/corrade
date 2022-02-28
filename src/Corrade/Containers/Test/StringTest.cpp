@@ -313,6 +313,7 @@ void StringTest::allocatedInitTagInlineDefinition() {
 
 void StringTest::constructDefault() {
     String a;
+    CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
@@ -328,6 +329,7 @@ void StringTest::constructTakeOwnership() {
             ++data[0];
             data[size - 1] = '?';
         }};
+        CORRADE_VERIFY(a);
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!a.isEmpty());
         CORRADE_COMPARE(a.size(), sizeof(data) - 1);
@@ -381,6 +383,7 @@ void StringTest::constructTakeOwnershipTooLarge() {
 
 void StringTest::constructPointer() {
     String a = "Allocated hello for a verbose world\0that rules";
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -392,6 +395,7 @@ void StringTest::constructPointer() {
 
 void StringTest::constructPointerSmall() {
     String a = "hello\0world!";
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
@@ -405,6 +409,7 @@ void StringTest::constructPointerSmall() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, "hello\0world!"};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 5);
@@ -415,6 +420,7 @@ void StringTest::constructPointerSmall() {
 
 void StringTest::constructPointerNull() {
     String a = nullptr;
+    CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
@@ -422,6 +428,7 @@ void StringTest::constructPointerNull() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, nullptr};
+    CORRADE_VERIFY(!aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 0);
@@ -431,6 +438,7 @@ void StringTest::constructPointerNull() {
 void StringTest::constructPointerSize() {
     /* `that rules` doesn't get copied */
     String a{"Allocated hello\0for a verbose world\0that rules", 35};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -441,6 +449,7 @@ void StringTest::constructPointerSize() {
 
 void StringTest::constructPointerSizeZero() {
     String a{"Allocated hello for a verbose world", 0};
+    CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
@@ -449,6 +458,7 @@ void StringTest::constructPointerSizeZero() {
 
 void StringTest::constructPointerSizeSmall() {
     String a{"this\0world\0is hell", 10}; /* `is hell` doesn't get copied */
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -458,6 +468,7 @@ void StringTest::constructPointerSizeSmall() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, "this\0world\0is hell", 10};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 10);
@@ -468,6 +479,7 @@ void StringTest::constructPointerSizeSmall() {
 
 void StringTest::constructPointerSizeNullZero() {
     String a{nullptr, 0};
+    CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
@@ -475,6 +487,7 @@ void StringTest::constructPointerSizeNullZero() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, nullptr, 0};
+    CORRADE_VERIFY(!aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 0);
@@ -513,6 +526,7 @@ void StringTest::constructPointerSizeTooLarge() {
 
 void StringTest::constructValueInit() {
     String a{Corrade::ValueInit, 35};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -523,6 +537,7 @@ void StringTest::constructValueInit() {
 
 void StringTest::constructValueInitSmall() {
     String a{Corrade::ValueInit, 10};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -550,6 +565,7 @@ void StringTest::constructValueInitTooLarge() {
 
 void StringTest::constructDirectInit() {
     String a{Corrade::DirectInit, 35, 'X'};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -560,6 +576,7 @@ void StringTest::constructDirectInit() {
 
 void StringTest::constructDirectInitSmall() {
     String a{Corrade::DirectInit, 10, 'X'};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -587,6 +604,7 @@ void StringTest::constructDirectInitTooLarge() {
 
 void StringTest::constructNoInit() {
     String a{Corrade::NoInit, 35};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -596,6 +614,7 @@ void StringTest::constructNoInit() {
 
 void StringTest::constructNoInitSmall() {
     String a{Corrade::NoInit, 10};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -699,6 +718,7 @@ void StringTest::constructNullTerminatedGlobalView() {
 
 void StringTest::convertStringView() {
     const String a = "Allocated hello\0for a verbose world"_s;
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -718,6 +738,7 @@ void StringTest::convertStringView() {
 
 void StringTest::convertStringViewSmall() {
     const String a = "this\0world"_s;
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -730,6 +751,7 @@ void StringTest::convertStringViewSmall() {
 
     /* Bypassing SSO */
     const String aa{AllocatedInit, "this\0world"_s};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 10);
@@ -744,6 +766,7 @@ void StringTest::convertStringViewSmall() {
 void StringTest::convertMutableStringView() {
     char aData[] = "Allocated hello\0for a verbose world";
     String a = MutableStringView{aData, 35};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -764,6 +787,7 @@ void StringTest::convertMutableStringView() {
 void StringTest::convertMutableStringViewSmall() {
     char aData[] = "this\0world";
     String a = MutableStringView{aData, 10};
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -776,6 +800,7 @@ void StringTest::convertMutableStringViewSmall() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, MutableStringView{aData, 10}};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 10);
@@ -789,6 +814,7 @@ void StringTest::convertMutableStringViewSmall() {
 
 void StringTest::convertArrayView() {
     const String a = arrayView("Allocated hello\0for a verbose world").except(1);
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -805,6 +831,7 @@ void StringTest::convertArrayView() {
 
 void StringTest::convertArrayViewSmall() {
     const String a = arrayView("this\0world").except(1);
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -820,6 +847,7 @@ void StringTest::convertArrayViewSmall() {
 
     /* Bypassing SSO */
     const String aa{AllocatedInit, arrayView("this\0world").except(1)};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 10);
@@ -837,6 +865,7 @@ void StringTest::convertArrayViewSmall() {
 void StringTest::convertMutableArrayView() {
     char aData[] = "Allocated hello\0for a verbose world";
     String a = ArrayView<char>{aData}.except(1);
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
@@ -854,6 +883,7 @@ void StringTest::convertMutableArrayView() {
 void StringTest::convertMutableArrayViewSmall() {
     char aData[] = "this\0world";
     String a = ArrayView<char>{aData}.except(1);
+    CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
@@ -869,6 +899,7 @@ void StringTest::convertMutableArrayViewSmall() {
 
     /* Bypassing SSO */
     String aa{AllocatedInit, ArrayView<char>{aData}.except(1)};
+    CORRADE_VERIFY(aa);
     CORRADE_VERIFY(!aa.isSmall());
     CORRADE_VERIFY(!aa.isEmpty());
     CORRADE_COMPARE(aa.size(), 10);

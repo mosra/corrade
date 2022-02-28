@@ -340,6 +340,18 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
             return Implementation::StringViewConverter<T, U>::to(*this);
         }
 
+        /**
+         * @brief Whether the string is non-empty and non-null
+         *
+         * Returns @cpp true @ce if the string is non-empty *and* the pointer
+         * is not @cpp nullptr @ce, @cpp false @ce otherwise. If you rely on
+         * just one of these conditions, use @ref isEmpty() and @ref data()
+         * instead.
+         */
+        constexpr explicit operator bool() const {
+            return _data && (_size & ~Implementation::StringViewSizeMask);
+        }
+
         /** @brief Flags */
         constexpr StringViewFlags flags() const {
             return StringViewFlag(_size & Implementation::StringViewSizeMask);
@@ -351,6 +363,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * The pointer is not guaranteed to be null-terminated, use
          * @ref flags() and @ref StringViewFlag::NullTerminated to check for
          * the presence of a null terminator.
+         * @see @ref operator bool()
          */
         constexpr T* data() const { return _data; }
 
@@ -358,13 +371,17 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief String size
          *
          * Excludes the null terminator.
-         * @see @ref isEmpty()
+         * @see @ref isEmpty(), @ref operator bool()
          */
         constexpr std::size_t size() const {
             return _size & ~Implementation::StringViewSizeMask;
         }
 
-        /** @brief Whether the string is empty */
+        /**
+         * @brief Whether the string is empty
+         *
+         * @see @ref operator bool(), @ref size()
+         */
         constexpr bool isEmpty() const {
             return !(_size & ~Implementation::StringViewSizeMask);
         }
