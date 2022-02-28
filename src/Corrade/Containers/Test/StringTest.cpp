@@ -144,6 +144,9 @@ struct StringTest: TestSuite::Tester {
 
     void partition();
 
+    void add();
+    void addNullViews();
+
     void join();
     void joinNullViews();
 
@@ -249,6 +252,9 @@ StringTest::StringTest() {
               &StringTest::splitOnWhitespace,
 
               &StringTest::partition,
+
+              &StringTest::add,
+              &StringTest::addNullViews,
 
               &StringTest::join,
               &StringTest::joinNullViews,
@@ -1498,6 +1504,25 @@ void StringTest::partition() {
             (Array3<MutableStringView>{p1, p2, p3}),
             TestSuite::Compare::Container);
     }
+}
+
+void StringTest::add() {
+    /* Tests the StringView API as it's better to do it here instead of in
+       StringViewTest where we would need to include String */
+
+    CORRADE_COMPARE(""_s + ""_s, "");
+    CORRADE_COMPARE("hello"_s + ""_s, "hello");
+    CORRADE_COMPARE(""_s + "hello"_s, "hello");
+    CORRADE_COMPARE("hello"_s + "world"_s, "helloworld");
+}
+
+void StringTest::addNullViews() {
+    /* Test that these don't trigger bullying from UBSan (memcpy called with
+       null pointers) */
+
+    CORRADE_COMPARE(StringView{} + StringView{}, "");
+    CORRADE_COMPARE("hello"_s + nullptr, "hello");
+    CORRADE_COMPARE(nullptr + "hello"_s, "hello");
 }
 
 void StringTest::join() {

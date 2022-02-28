@@ -559,6 +559,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * following produces @cpp "hello, world" @ce:
          *
          * @snippet Containers.cpp StringView-join
+         *
+         * @ref operator+(StringView, StringView)
          */
         String join(ArrayView<const StringView> strings) const;
 
@@ -862,6 +864,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         friend CORRADE_UTILITY_EXPORT bool operator<=(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT bool operator>=(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT bool operator>(StringView, StringView);
+        friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */
@@ -922,6 +925,17 @@ CORRADE_UTILITY_EXPORT bool operator>=(StringView a, StringView b);
 @m_since_latest
 */
 CORRADE_UTILITY_EXPORT bool operator>(StringView a, StringView b);
+
+/**
+@brief String concatenation
+@m_since_latest
+
+For joining more than one string prefer to use @ref StringView::join() to avoid
+needless temporary allocations.
+@todo mutable && overloads that reus the growable string storage instead of
+    allocating new, when growable strings are a thing
+*/
+CORRADE_UTILITY_EXPORT String operator+(StringView a, StringView b);
 
 /* operator<<(Debug&, StringView) implemented directly in Debug */
 

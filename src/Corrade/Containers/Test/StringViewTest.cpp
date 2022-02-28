@@ -119,6 +119,8 @@ struct StringViewTest: TestSuite::Tester {
     void compareEquality();
     void compareNonEquality();
 
+    /* operator+() tested in StringTest */
+
     void access();
     void accessMutable();
     void accessInvalid();

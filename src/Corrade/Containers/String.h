@@ -684,6 +684,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::join().
          * @todo a mutable && overload that reuses the growable string storage
          *      instead of allocating new, when growable strings are a thing
+         * @ref operator+(StringView, StringView)
          */
         String join(ArrayView<const StringView> strings) const;
 
