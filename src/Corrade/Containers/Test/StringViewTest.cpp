@@ -471,9 +471,13 @@ void StringViewTest::constructTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     StringView{nullptr, ~std::size_t{}};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::StringView: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::StringView: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringViewTest::constructNullptrNullTerminated() {

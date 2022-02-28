@@ -376,9 +376,13 @@ void StringTest::constructTakeOwnershipTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{data, ~std::size_t{}, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringTest::constructPointer() {
@@ -517,11 +521,15 @@ void StringTest::constructPointerSizeTooLarge() {
     Error redirectError{&out};
     String a{"abc", ~std::size_t{}};
     String aa{AllocatedInit, "abc", ~std::size_t{}};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n"
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n"
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n"
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringTest::constructValueInit() {
@@ -558,9 +566,13 @@ void StringTest::constructValueInitTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::ValueInit, ~std::size_t{}};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringTest::constructDirectInit() {
@@ -597,9 +609,13 @@ void StringTest::constructDirectInitTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::DirectInit, ~std::size_t{}, 'X'};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringTest::constructNoInit() {
@@ -634,9 +650,13 @@ void StringTest::constructNoInitTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::NoInit, ~std::size_t{}};
-    CORRADE_COMPARE(out.str(), sizeof(std::size_t) == 4 ?
-        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n" :
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: string expected to be smaller than 2^30 bytes, got 4294967295\n");
+    #endif
 }
 
 void StringTest::constructNullTerminatedGlobalView() {
