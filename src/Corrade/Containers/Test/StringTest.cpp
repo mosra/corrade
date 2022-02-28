@@ -80,11 +80,15 @@ struct StringTest: TestSuite::Tester {
     void constructTakeOwnershipTooLarge();
     void constructPointer();
     void constructPointerSmall();
+    void constructPointerSmallAllocatedInit();
     void constructPointerNull();
+    void constructPointerNullAllocatedInit();
     void constructPointerSize();
     void constructPointerSizeZero();
     void constructPointerSizeSmall();
+    void constructPointerSizeSmallAllocatedInit();
     void constructPointerSizeNullZero();
+    void constructPointerSizeNullZeroAllocatedInit();
     void constructPointerSizeNullNonZero();
     void constructPointerSizeTooLarge();
 
@@ -102,14 +106,19 @@ struct StringTest: TestSuite::Tester {
 
     void convertStringView();
     void convertStringViewSmall();
+    void convertStringViewSmallAllocatedInit();
     void convertMutableStringView();
     void convertMutableStringViewSmall();
+    void convertMutableStringViewSmallAllocatedInit();
     void convertArrayView();
     void convertArrayViewSmall();
+    void convertArrayViewSmallAllocatedInit();
     void convertMutableArrayView();
     void convertMutableArrayViewSmall();
+    void convertMutableArrayViewSmallAllocatedInit();
     void convertArray();
     void convertArraySmall();
+    void convertArraySmallAllocatedInit();
     void convertArrayCustomDeleter();
     void convertExternal();
 
@@ -189,11 +198,15 @@ StringTest::StringTest() {
               &StringTest::constructTakeOwnershipTooLarge,
               &StringTest::constructPointer,
               &StringTest::constructPointerSmall,
+              &StringTest::constructPointerSmallAllocatedInit,
               &StringTest::constructPointerNull,
+              &StringTest::constructPointerNullAllocatedInit,
               &StringTest::constructPointerSize,
               &StringTest::constructPointerSizeZero,
               &StringTest::constructPointerSizeSmall,
+              &StringTest::constructPointerSizeSmallAllocatedInit,
               &StringTest::constructPointerSizeNullZero,
+              &StringTest::constructPointerSizeNullZeroAllocatedInit,
               &StringTest::constructPointerSizeNullNonZero,
               &StringTest::constructPointerSizeTooLarge,
 
@@ -211,14 +224,19 @@ StringTest::StringTest() {
 
               &StringTest::convertStringView,
               &StringTest::convertStringViewSmall,
+              &StringTest::convertStringViewSmallAllocatedInit,
               &StringTest::convertMutableStringView,
               &StringTest::convertMutableStringViewSmall,
+              &StringTest::convertMutableStringViewSmallAllocatedInit,
               &StringTest::convertArrayView,
               &StringTest::convertArrayViewSmall,
+              &StringTest::convertArrayViewSmallAllocatedInit,
               &StringTest::convertMutableArrayView,
               &StringTest::convertMutableArrayViewSmall,
+              &StringTest::convertMutableArrayViewSmallAllocatedInit,
               &StringTest::convertArray,
               &StringTest::convertArraySmall,
+              &StringTest::convertArraySmallAllocatedInit,
               &StringTest::convertArrayCustomDeleter,
               &StringTest::convertExternal,
 
@@ -410,16 +428,17 @@ void StringTest::constructPointerSmall() {
     /* Verify the data is really stored inside */
     CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, "hello\0world!"};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 5);
-    CORRADE_COMPARE(aa.data()[0], 'h');
-    CORRADE_COMPARE(aa.data()[a.size() - 1], 'o');
-    CORRADE_COMPARE(aa.data()[a.size()], '\0');
+void StringTest::constructPointerSmallAllocatedInit() {
+    String a{AllocatedInit, "hello\0world!"};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(a.data()[0], 'h');
+    CORRADE_COMPARE(a.data()[a.size() - 1], 'o');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
 }
 
 void StringTest::constructPointerNull() {
@@ -429,14 +448,15 @@ void StringTest::constructPointerNull() {
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, nullptr};
-    CORRADE_VERIFY(!aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 0);
-    CORRADE_COMPARE(aa.data()[0], '\0');
+void StringTest::constructPointerNullAllocatedInit() {
+    String a{AllocatedInit, nullptr};
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(a.data()[0], '\0');
 }
 
 void StringTest::constructPointerSize() {
@@ -469,16 +489,17 @@ void StringTest::constructPointerSizeSmall() {
     CORRADE_COMPARE(a.data()[0], 't');
     CORRADE_COMPARE(a.data()[a.size() - 1], 'd');
     CORRADE_COMPARE(a.data()[a.size()], '\0');
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, "this\0world\0is hell", 10};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 10);
-    CORRADE_COMPARE(aa.data()[0], 't');
-    CORRADE_COMPARE(aa.data()[a.size() - 1], 'd');
-    CORRADE_COMPARE(aa.data()[a.size()], '\0');
+void StringTest::constructPointerSizeSmallAllocatedInit() {
+    String a{AllocatedInit, "this\0world\0is hell", 10};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a.data()[0], 't');
+    CORRADE_COMPARE(a.data()[a.size() - 1], 'd');
+    CORRADE_COMPARE(a.data()[a.size()], '\0');
 }
 
 void StringTest::constructPointerSizeNullZero() {
@@ -488,14 +509,15 @@ void StringTest::constructPointerSizeNullZero() {
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, nullptr, 0};
-    CORRADE_VERIFY(!aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 0);
-    CORRADE_COMPARE(aa.data()[0], '\0');
+void StringTest::constructPointerSizeNullZeroAllocatedInit() {
+    String a{AllocatedInit, nullptr, 0};
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(a.data()[0], '\0');
 }
 
 void StringTest::constructPointerSizeNullNonZero() {
@@ -768,19 +790,20 @@ void StringTest::convertStringViewSmall() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+}
 
-    /* Bypassing SSO */
-    const String aa{AllocatedInit, "this\0world"_s};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 10);
-    CORRADE_COMPARE(aa[0], 't');
+void StringTest::convertStringViewSmallAllocatedInit() {
+    const String a{AllocatedInit, "this\0world"_s};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a[0], 't');
 
-    StringView aaView = aa;
-    CORRADE_COMPARE(aaView.flags(), StringViewFlag::NullTerminated);
-    CORRADE_COMPARE(aaView.size(), aa.size());
-    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+    StringView aView = a;
+    CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aView.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 }
 
 void StringTest::convertMutableStringView() {
@@ -817,19 +840,21 @@ void StringTest::convertMutableStringViewSmall() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, MutableStringView{aData, 10}};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 10);
-    CORRADE_COMPARE(aa[0], 't');
+void StringTest::convertMutableStringViewSmallAllocatedInit() {
+    char aData[] = "this\0world";
+    String a{AllocatedInit, MutableStringView{aData, 10}};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a[0], 't');
 
-    MutableStringView aaView = aa;
-    CORRADE_COMPARE(aaView.flags(), StringViewFlag::NullTerminated);
-    CORRADE_COMPARE(aaView.size(), aa.size());
-    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+    MutableStringView aView = a;
+    CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aView.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 }
 
 void StringTest::convertArrayView() {
@@ -864,22 +889,23 @@ void StringTest::convertArrayViewSmall() {
     ArrayView<const void> aVoidView = a;
     CORRADE_COMPARE(aVoidView.size(), a.size());
     CORRADE_COMPARE(aVoidView.data(), a.data());
+}
 
-    /* Bypassing SSO */
-    const String aa{AllocatedInit, arrayView("this\0world").except(1)};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 10);
-    CORRADE_COMPARE(aa[0], 't');
+void StringTest::convertArrayViewSmallAllocatedInit() {
+    const String a{AllocatedInit, arrayView("this\0world").except(1)};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a[0], 't');
 
-    ArrayView<const char> aaView = aa;
-    CORRADE_COMPARE(aaView.size(), aa.size());
-    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+    ArrayView<const char> aView = a;
+    CORRADE_COMPARE(aView.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 
-    ArrayView<const void> aaVoidView = aa;
-    CORRADE_COMPARE(aaVoidView.size(), aa.size());
-    CORRADE_COMPARE(aaVoidView.data(), aa.data());
+    ArrayView<const void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
 }
 
 void StringTest::convertMutableArrayView() {
@@ -916,22 +942,24 @@ void StringTest::convertMutableArrayViewSmall() {
     ArrayView<void> aVoidView = a;
     CORRADE_COMPARE(aVoidView.size(), a.size());
     CORRADE_COMPARE(aVoidView.data(), a.data());
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, ArrayView<char>{aData}.except(1)};
-    CORRADE_VERIFY(aa);
-    CORRADE_VERIFY(!aa.isSmall());
-    CORRADE_VERIFY(!aa.isEmpty());
-    CORRADE_COMPARE(aa.size(), 10);
-    CORRADE_COMPARE(aa[0], 't');
+void StringTest::convertMutableArrayViewSmallAllocatedInit() {
+    char aData[] = "this\0world";
+    String a{AllocatedInit, ArrayView<char>{aData}.except(1)};
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 10);
+    CORRADE_COMPARE(a[0], 't');
 
-    ArrayView<char> aaView = aa;
-    CORRADE_COMPARE(aaView.size(), aa.size());
-    CORRADE_COMPARE(static_cast<const void*>(aaView.data()), aa.data());
+    ArrayView<char> aView = a;
+    CORRADE_COMPARE(aView.size(), a.size());
+    CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
 
-    ArrayView<void> aaVoidView = aa;
-    CORRADE_COMPARE(aaVoidView.size(), aa.size());
-    CORRADE_COMPARE(aaVoidView.data(), aa.data());
+    ArrayView<void> aVoidView = a;
+    CORRADE_COMPARE(aVoidView.size(), a.size());
+    CORRADE_COMPARE(aVoidView.data(), a.data());
 }
 
 void StringTest::convertArray() {
@@ -960,17 +988,18 @@ void StringTest::convertArraySmall() {
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_VERIFY(a.data());
     CORRADE_COMPARE(a.data()[0], '\0');
+}
 
-    /* Bypassing SSO */
-    String aa{AllocatedInit, "this\0world"_s};
-    Array<char> aarray = std::move(aa);
-    CORRADE_COMPARE(StringView{ArrayView<const char>(aarray)}, "this\0world"_s);
-    CORRADE_COMPARE(aarray.deleter(), nullptr);
+void StringTest::convertArraySmallAllocatedInit() {
+    String a{AllocatedInit, "this\0world"_s};
+    Array<char> array = std::move(a);
+    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "this\0world"_s);
+    CORRADE_COMPARE(array.deleter(), nullptr);
 
-    CORRADE_VERIFY(aa.isSmall());
-    CORRADE_COMPARE(aa.size(), 0);
-    CORRADE_VERIFY(aa.data());
-    CORRADE_COMPARE(aa.data()[0], '\0');
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.data()[0], '\0');
 }
 
 void StringTest::convertArrayCustomDeleter() {
