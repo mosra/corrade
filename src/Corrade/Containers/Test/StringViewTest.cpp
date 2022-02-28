@@ -165,6 +165,12 @@ struct StringViewTest: TestSuite::Tester {
     void findEmpty();
     void findFlags();
 
+    void findLast();
+    void findLastMultipleOccurences();
+    void findLastWholeString();
+    void findLastEmpty();
+    void findLastFlags();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -242,6 +248,12 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findWholeString,
               &StringViewTest::findEmpty,
               &StringViewTest::findFlags,
+
+              &StringViewTest::findLast,
+              &StringViewTest::findLastMultipleOccurences,
+              &StringViewTest::findLastWholeString,
+              &StringViewTest::findLastEmpty,
+              &StringViewTest::findLastFlags,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -1466,6 +1478,214 @@ void StringViewTest::findFlags() {
     /* Same for chars */
     } {
         CORRADE_COMPARE(StringView{nullptr}.find(' ').flags(), StringViewFlag::Global);
+    }
+}
+
+void StringViewTest::findLast() {
+    /* Mostly similar to find(), except that it doesn't check contains() (which
+       is internally the same algorithm as find()) */
+
+    StringView a = "hello cursed world!"_s;
+
+    /* Right at the end */
+    {
+        StringView found = a.findLast("world!");
+        CORRADE_COMPARE(found, "world!");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 13);
+
+    /* In the middle */
+    } {
+        StringView found = a.findLast("cursed");
+        CORRADE_COMPARE(found, "cursed");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* Right at the start */
+    } {
+        StringView found = a.findLast("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Almost, but not quite */
+    } {
+        StringView found = a.findLast("world!!");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Should not read the null terminator */
+    } {
+        StringView found = a.findLast("world!\0"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Single character at the end */
+    } {
+        StringView found = a.findLast('!');
+        CORRADE_COMPARE(found, "!");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 18);
+
+    /* Single character in the middle */
+    } {
+        StringView found = a.findLast('c');
+        CORRADE_COMPARE(found, "c");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 6);
+
+    /* Single character at the start */
+    } {
+        StringView found = a.findLast('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data());
+
+    /* No such character found */
+    } {
+        StringView found = a.findLast('a');
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Should not read the null terminator either */
+    } {
+        StringView found = a.findLast('\0');
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findLastMultipleOccurences() {
+    /* Mostly similar to findMultipleOccurences(), except that it doesn't check
+       contains() (which is internally the same algorithm as find()) */
+
+    StringView a = "so, hello hell hello! hello hell"_s;
+
+    /* Multiple occurrences */
+    {
+        StringView found = a.findLast("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 22);
+
+    /* Last occurrence almost but not quite complete */
+    } {
+        StringView found = a.findLast("hello!");
+        CORRADE_COMPARE(found, "hello!");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
+
+    /* Multiple character occurrences */
+    } {
+        StringView found = a.findLast('o');
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 26);
+    }
+}
+
+void StringViewTest::findLastWholeString() {
+    /* Mostly similar to findWholeString(), except that it doesn't check
+       contains() (which is internally the same algorithm as find()) */
+
+    StringView a = "hell"_s;
+
+    /* Finding a substring that's the whole string should succeed */
+    {
+        StringView found = a.findLast("hell");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* But a larger string should fail */
+    } {
+        StringView found = a.findLast("hello");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+
+    StringView b = "h"_s;
+
+    /* Finding a single character that's the whole string should succeed too */
+    {
+        StringView found = b.findLast('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data());
+    }
+}
+
+void StringViewTest::findLastEmpty() {
+    /* Mostly similar to findEmpty(), except that it doesn't check contains()
+       (which is internally the same algorithm as find()) */
+
+    /* Finding an empty string inside a string should return a zero-sized view
+       to the first byte */
+    {
+        StringView a = "hello";
+        StringView found = a.find("");
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Finding an empty string inside an empty string should do the same */
+    } {
+        StringView a = "";
+        StringView found = a.find("");
+        CORRADE_VERIFY(a.data());
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Finding an empty string inside a null view should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a{nullptr};
+        StringView found = a.findLast("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding an arbitrary string inside a null view should not crash or do
+       anything crazy either */
+    } {
+        StringView a{nullptr};
+        StringView found = a.findLast("hello");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding an arbitrary character inside a null view should not crash or do
+       anything crazy either */
+    } {
+        StringView a{nullptr};
+        StringView found = a.findLast('h');
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+    }
+}
+
+void StringViewTest::findLastFlags() {
+    /* Mostly similar to findFlags() */
+
+    StringView a = "hello world"_s;
+
+    /* Right at the start should preserve just the global flag */
+    {
+        StringView found = a.findLast("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* Same for chars */
+    } {
+        StringView found = a.findLast('h');
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* At the end also null-terminated */
+    } {
+        StringView found = a.findLast("world");
+        CORRADE_COMPARE(found, "world");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Same for chars */
+    } {
+        StringView found = a.findLast('d');
+        CORRADE_COMPARE(found, "d");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be just global */
+    } {
+        CORRADE_COMPARE(StringView{nullptr}.findLast("").flags(), StringViewFlag::Global);
+
+    /* Same for chars */
+    } {
+        CORRADE_COMPARE(StringView{nullptr}.findLast(' ').flags(), StringViewFlag::Global);
     }
 }
 

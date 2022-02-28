@@ -723,7 +723,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * overhead aren't generally suited for one-time searches.
          *
          * Consider using @ref find(char) const for single-byte substrings.
-         * @see @ref contains()
+         * @see @ref contains(), @ref findLast()
          */
         BasicStringView<T> find(StringView substring) const;
 
@@ -732,8 +732,36 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * Faster than @ref find(StringView) const if the string has just one
          * byte.
+         * @see @ref contains(char) const, @ref findLast(char) const
          */
         BasicStringView<T> find(char character) const;
+
+        /**
+         * @brief Find the last occurence of a substring
+         *
+         * Returns a view pointing to the last found substring. If not found,
+         * an empty @cpp nullptr @ce view is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate.
+         *
+         * Similarly as with @ref find(), note that the function operates with
+         * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
+         * one-time searches in non-performance-critical code. See the
+         * documentation of @ref find() for further information and suggested
+         * alternatives.
+         *
+         * Consider using @ref findLast(char) const for single-byte substrings.
+         * @see @ref contains()
+         */
+        BasicStringView<T> findLast(StringView substring) const;
+
+        /**
+         * @brief Find the last occurence of a character
+         *
+         * Faster than @ref findLast(StringView) const if the string has just
+         * one byte.
+         */
+        BasicStringView<T> findLast(char character) const;
 
         /**
          * @brief Whether the view contains a substring

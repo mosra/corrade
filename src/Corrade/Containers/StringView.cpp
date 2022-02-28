@@ -395,11 +395,43 @@ inline const char* find(const char* data, const std::size_t size, const char* co
     return {};
 }
 
+inline const char* findLast(const char* const data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
+    /* If the substring is not larger than the string we search in */
+    if(substringSize <= size) {
+        /* If these are both empty (substringSize <= size, so it's also 0),
+           return a pointer to the first character. This also avoids some
+           potential "this is UB so I can whatever YOLO!" misoptimizations and
+           implementation differences when calling memcmp() with zero size and
+           potentially null pointers also. */
+        if(!size) return data;
+
+        /* Otherwise compare it with the string at all possible positions in
+           the string until we have a match. */
+        for(const char* i = data + size - substringSize; i >= data; --i) {
+            if(std::memcmp(i, substring, substringSize) == 0)
+                return i;
+        }
+    }
+
+    /* If the substring is larger or no match was found, fail */
+    return {};
+}
+
 inline const char* find(const char* data, const std::size_t size, const char character) {
     /* Making a utility function because yet again I'm not sure if null
        pointers are allowed and cppreference says nothing about that, so in
        case this needs to be patched it's better to have it in a single place */
     return static_cast<const char*>(std::memchr(data, character, size));
+}
+
+inline const char* findLast(const char* const data, const std::size_t size, const char character) {
+    /* Linux has a memrchr() function but other OSes not. So let's just do it
+       myself, that way I also don't need to worry about null pointers being
+       allowed or not ... haha, well, except that if data is nullptr,
+       `*(data - 1)` blows up, so I actually need to. */
+    if(data) for(const char* i = data + size - 1; i >= data; --i)
+        if(*i == character) return i;
+    return {};
 }
 
 }
@@ -415,6 +447,22 @@ template<class T> BasicStringView<T> BasicStringView<T>::find(const StringView s
 
 template<class T> BasicStringView<T> BasicStringView<T>::find(const char character) const {
     if(const char* const found = Containers::find(_data, size(), character))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    return {};
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::findLast(const StringView substring) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t substringSize = substring.size();
+    if(const char* const found = Containers::findLast(_data, size(), substring._data, substringSize))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
+
+    return {};
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::findLast(const char character) const {
+    if(const char* const found = Containers::findLast(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     return {};

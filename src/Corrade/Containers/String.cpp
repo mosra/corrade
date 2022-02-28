@@ -611,6 +611,22 @@ StringView String::find(const char character) const & {
     return StringView{*this}.find(character);
 }
 
+MutableStringView String::findLast(const StringView substring) & {
+    return MutableStringView{*this}.findLast(substring);
+}
+
+StringView String::findLast(const StringView substring) const & {
+    return StringView{*this}.findLast(substring);
+}
+
+MutableStringView String::findLast(const char character) & {
+    return MutableStringView{*this}.findLast(character);
+}
+
+StringView String::findLast(const char character) const & {
+    return StringView{*this}.findLast(character);
+}
+
 bool String::contains(const StringView substring) const {
     return StringView{*this}.contains(substring);
 }

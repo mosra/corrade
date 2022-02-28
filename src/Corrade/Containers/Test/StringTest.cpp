@@ -159,6 +159,7 @@ struct StringTest: TestSuite::Tester {
 
     /* Tests also contains() */
     template<class T> void find();
+    template<class T> void findLast();
 
     void release();
     void releaseDeleterSmall();
@@ -265,6 +266,8 @@ StringTest::StringTest() {
 
               &StringTest::find<String>,
               &StringTest::find<const String>,
+              &StringTest::findLast<String>,
+              &StringTest::findLast<const String>,
 
               &StringTest::release,
               &StringTest::releaseDeleterSmall,
@@ -1663,47 +1666,90 @@ template<class T> void StringTest::find() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    T a{"hello world"};
+    /* Duplicated word to test that it's not delegated to findLast() */
+    T a{"hello hello world"};
     {
         CORRADE_VERIFY(a.contains("hello"));
 
         typename ConstTraits<T>::ViewType found = a.find("hello");
         CORRADE_COMPARE(found, "hello"_s);
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
         CORRADE_VERIFY(a.contains("world"));
 
         typename ConstTraits<T>::ViewType found = a.find("world");
         CORRADE_COMPARE(found, "world"_s);
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
         CORRADE_VERIFY(!a.contains("cursed"));
 
         typename ConstTraits<T>::ViewType found = a.find("cursed");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!static_cast<const void*>(found.data()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
     } {
         CORRADE_VERIFY(a.contains('h'));
 
         typename ConstTraits<T>::ViewType found = a.find('h');
         CORRADE_COMPARE(found, "h"_s);
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
         CORRADE_VERIFY(a.contains('d'));
 
         typename ConstTraits<T>::ViewType found = a.find('d');
         CORRADE_COMPARE(found, "d"_s);
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 10);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
         CORRADE_VERIFY(!a.contains('c'));
 
         typename ConstTraits<T>::ViewType found = a.find('c');
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!static_cast<const void*>(found.data()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+    }
+}
+
+template<class T> void StringTest::findLast() {
+    /* Mostly the same as find(), except that we don't test contains() which is
+       implemented with the same algorithm as find() */
+
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    /* Duplicated word to test that it's not delegated to find() */
+    T a{"hello world world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findLast("hello");
+        CORRADE_COMPARE(found, "hello"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLast("world");
+        CORRADE_COMPARE(found, "world"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLast("cursed");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLast('h');
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLast('d');
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLast('c');
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
     }
 }
 

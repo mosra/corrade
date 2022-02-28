@@ -854,7 +854,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::find(StringView) const. Not
          * allowed to be called on a r-value since the returned view would
          * become dangling.
-         * @see @ref contains()
+         * @see @ref contains(), @ref findLast()
          */
         MutableStringView find(StringView substring) &;
         StringView find(StringView substring) const &; /**< @overload */
@@ -866,10 +866,37 @@ class CORRADE_UTILITY_EXPORT String {
          * is a specialization of @ref BasicStringView::find(StringView) const.
          * Not allowed to be called on a r-value since the returned view would
          * become dangling.
-         * @see @ref contains()
+         * @todoc properly link to the char overload of findLast once Doxygen
+         *      stops being crap and can link to & overloads
+         * @see @ref contains(char) const, @ref findLast() "findLast(char)"
          */
         MutableStringView find(char character) &;
         StringView find(char character) const &; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of a substring
+         *
+         * Equivalent to @ref BasicStringView::findLast(StringView) const. Not
+         * allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref find()
+         */
+        MutableStringView findLast(StringView substring) &;
+        StringView findLast(StringView substring) const &; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of a substring
+         *
+         * Equivalent to @ref BasicStringView::findLast(char) const, which in
+         * turn is a specialization of @ref BasicStringView::findLast(StringView) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @todoc properly link to the char overload of find once Doxygen stops
+         *      being crap and can link to & overloads
+         * @see @ref find() "find(char)"
+         */
+        MutableStringView findLast(char character) &;
+        StringView findLast(char character) const &; /**< @overload */
 
         /**
          * @brief Whether the view contains a substring
