@@ -1129,7 +1129,6 @@ static_cast<void>(a);
 }
 
 {
-using namespace Containers::Literals;
 /* [StringView-usage-slicing] */
 Containers::StringView file = "Master Of Puppets.mp3";
 Containers::StringView name = file.exceptSuffix(".mp3"); // "Master Of Puppets"
