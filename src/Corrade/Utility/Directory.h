@@ -63,14 +63,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 namespace Directory {
 
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-/**
-@brief Memory-mapped file deleter
-
-@partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
-    @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
-@see @ref map(), @ref mapRead()
-*/
-class CORRADE_UTILITY_EXPORT MapDeleter;
+class MapDeleter;
 #endif
 
 /**
@@ -587,10 +580,16 @@ CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> mapWrite(const std::s
  */
 CORRADE_DEPRECATED("use mapWrite() instead") CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
 #endif
-#endif
 
-#if !defined(DOXYGEN_GENERATING_OUTPUT) && (defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)))
+/**
+@brief Memory-mapped file deleter
+
+@partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
+    @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
+@see @ref map(), @ref mapRead()
+*/
 class CORRADE_UTILITY_EXPORT MapDeleter {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     #ifdef CORRADE_TARGET_UNIX
     public:
         constexpr explicit MapDeleter(): _fd{} {}
@@ -606,6 +605,7 @@ class CORRADE_UTILITY_EXPORT MapDeleter {
     private:
         void* _hFile;
         void* _hMap;
+    #endif
     #endif
 };
 #endif
