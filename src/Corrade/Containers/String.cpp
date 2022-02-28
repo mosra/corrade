@@ -596,35 +596,83 @@ StringView String::trimmedSuffix() const & {
 }
 
 MutableStringView String::find(const StringView substring) & {
-    return MutableStringView{*this}.find(substring);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return MutableStringView{*this}.findOr(substring, nullptr);
 }
 
 StringView String::find(const StringView substring) const & {
-    return StringView{*this}.find(substring);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return StringView{*this}.findOr(substring, nullptr);
 }
 
 MutableStringView String::find(const char character) & {
-    return MutableStringView{*this}.find(character);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return MutableStringView{*this}.findOr(character, nullptr);
 }
 
 StringView String::find(const char character) const & {
-    return StringView{*this}.find(character);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return StringView{*this}.findOr(character, nullptr);
+}
+
+MutableStringView String::findOr(const StringView substring, char* const fail) & {
+    return MutableStringView{*this}.findOr(substring, fail);
+}
+
+StringView String::findOr(const StringView substring, const char* const fail) const & {
+    return StringView{*this}.findOr(substring, fail);
+}
+
+MutableStringView String::findOr(const char character, char* const fail) & {
+    return MutableStringView{*this}.findOr(character, fail);
+}
+
+StringView String::findOr(const char character, const char* const fail) const & {
+    return StringView{*this}.findOr(character, fail);
 }
 
 MutableStringView String::findLast(const StringView substring) & {
-    return MutableStringView{*this}.findLast(substring);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return MutableStringView{*this}.findLastOr(substring, nullptr);
 }
 
 StringView String::findLast(const StringView substring) const & {
-    return StringView{*this}.findLast(substring);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return StringView{*this}.findLastOr(substring, nullptr);
 }
 
 MutableStringView String::findLast(const char character) & {
-    return MutableStringView{*this}.findLast(character);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return MutableStringView{*this}.findLastOr(character, nullptr);
 }
 
 StringView String::findLast(const char character) const & {
-    return StringView{*this}.findLast(character);
+    /* Calling straight into the concrete implementation to reduce call stack
+       depth */
+    return StringView{*this}.findLastOr(character, nullptr);
+}
+
+MutableStringView String::findLastOr(const StringView substring, char* const fail) & {
+    return MutableStringView{*this}.findLastOr(substring, fail);
+}
+
+StringView String::findLastOr(const StringView substring, const char* const fail) const & {
+    return StringView{*this}.findLastOr(substring, fail);
+}
+
+MutableStringView String::findLastOr(const char character, char* const fail) & {
+    return MutableStringView{*this}.findLastOr(character, fail);
+}
+
+StringView String::findLastOr(const char character, const char* const fail) const & {
+    return StringView{*this}.findLastOr(character, fail);
 }
 
 bool String::contains(const StringView substring) const {

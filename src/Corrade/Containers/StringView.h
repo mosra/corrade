@@ -723,18 +723,60 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * overhead aren't generally suited for one-time searches.
          *
          * Consider using @ref find(char) const for single-byte substrings.
-         * @see @ref contains(), @ref findLast()
+         * @see @ref contains(), @ref findLast(), @ref findOr()
          */
-        BasicStringView<T> find(StringView substring) const;
+        /* Technically it would be enough to have just one overload with a
+           default value for the fail parameter. But then `find(foo, pointer)`
+           would imply "find foo after pointer", because that's what the second
+           parameter does in most APIs. On the other hand, naming this findOr()
+           and documenting the custom failure handling would add extra
+           congitive load for people looking for find() and nothing else. */
+        BasicStringView<T> find(StringView substring) const {
+            return findOr(substring, nullptr);
+        }
 
         /**
          * @brief Find a character
          *
          * Faster than @ref find(StringView) const if the string has just one
          * byte.
-         * @see @ref contains(char) const, @ref findLast(char) const
+         * @see @ref contains(char) const, @ref findOr(char, T*) const,
+         *      @ref findLast(char) const
          */
-        BasicStringView<T> find(char character) const;
+        /* Technically it would be enough to have just one overload with a
+           default value for the fail parameter, see above why it's not */
+        BasicStringView<T> find(char character) const {
+            return findOr(character, nullptr);
+        }
+
+        /**
+         * @brief Find a substring with a custom failure pointer
+         *
+         * Like @ref find(StringView) const, but returns an empty view pointing
+         * to the @p fail value instead of @cpp nullptr @ce, which is useful to
+         * avoid explicit handling of cases where the substring wasn't found.
+         *
+         * The @p fail value can be @cpp nullptr @ce or any other pointer, but
+         * commonly it's set to either @ref begin() or @ref end(). For example
+         * here when getting the basename and an extension from a file path:
+         *
+         * @snippet Containers.cpp StringView-findOr
+         *
+         * Consider using @ref findOr(char, T*) const for single-byte
+         * substrings.
+         * @see @ref findLastOr()
+         * @todoc reference the Path functions for this once they're done
+         */
+        BasicStringView<T> findOr(StringView substring, T* fail) const;
+
+        /**
+         * @brief Find a character with a custom failure pointer
+         *
+         * Faster than @ref findOr(StringView, T*) const if the string has just
+         * one byte.
+         * @see @ref find(char) const, @ref findLastOr(char, T*) const
+         */
+        BasicStringView<T> findOr(char character, T* fail) const;
 
         /**
          * @brief Find the last occurence of a substring
@@ -751,17 +793,45 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * alternatives.
          *
          * Consider using @ref findLast(char) const for single-byte substrings.
-         * @see @ref contains()
+         * @see @ref findLastOr()
          */
-        BasicStringView<T> findLast(StringView substring) const;
+        /* Technically it would be enough to have just one overload with a
+           default value for the fail parameter, see above why it's not */
+        BasicStringView<T> findLast(StringView substring) const {
+            return findLastOr(substring, nullptr);
+        }
 
         /**
          * @brief Find the last occurence of a character
          *
          * Faster than @ref findLast(StringView) const if the string has just
          * one byte.
+         * @see @ref find(char) const, @ref findLastOr(char, T*) const
          */
-        BasicStringView<T> findLast(char character) const;
+        /* Technically it would be enough to have just one overload with a
+           default value for the fail parameter, see above why it's not */
+        BasicStringView<T> findLast(char character) const {
+            return findLastOr(character, nullptr);
+        }
+
+        /**
+         * @brief Find the last occurence a substring with a custom failure pointer
+         *
+         * Like @ref findLast(StringView) const, but returns an empty view
+         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
+         * useful to avoid explicit handling of cases where the substring
+         * wasn't found. See @ref findOr() for an example use case.
+         */
+        BasicStringView<T> findLastOr(StringView substring, T* fail) const;
+
+        /**
+         * @brief Find the last occurence of a character with a custom failure pointer
+         *
+         * Faster than @ref findLastOr(StringView, T*) const if the string has
+         * just one byte.
+         * @see @ref findLast(char) const, @ref findOr(char, T*) const
+         */
+        BasicStringView<T> findLastOr(char character, T* fail) const;
 
         /**
          * @brief Whether the view contains a substring

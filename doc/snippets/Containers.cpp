@@ -1146,6 +1146,23 @@ Containers::String a = ", "_s.join({"hello", "world"});
 }
 
 {
+/* [StringView-findOr] */
+Containers::StringView path = DOXYGEN_ELLIPSIS({});
+
+/* Filename is everything after the last found slash, or the whole path if
+   there's no slash */
+Containers::StringView foundSlash = path.findLastOr('/', path.begin());
+Containers::StringView filename = path.suffix(foundSlash.end());
+
+/* Extension is the last found dot and everything after, or nothing if there's
+   no dot */
+Containers::StringView foundDot = filename.findLastOr('.', filename.end());
+Containers::StringView extension = filename.suffix(foundDot.begin());
+/* [StringView-findOr] */
+static_cast<void>(extension);
+}
+
+{
 using namespace Containers::Literals;
 /* [String-usage-literal-null] */
 Containers::String a = "hello\0world!";         // a.size() == 5

@@ -854,7 +854,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::find(StringView) const. Not
          * allowed to be called on a r-value since the returned view would
          * become dangling.
-         * @see @ref contains(), @ref findLast()
+         * @see @ref contains(), @ref findLast(), @ref findOr()
          */
         MutableStringView find(StringView substring) &;
         StringView find(StringView substring) const &; /**< @overload */
@@ -868,10 +868,37 @@ class CORRADE_UTILITY_EXPORT String {
          * become dangling.
          * @todoc properly link to the char overload of findLast once Doxygen
          *      stops being crap and can link to & overloads
-         * @see @ref contains(char) const, @ref findLast() "findLast(char)"
+         * @see @ref contains(char) const, @ref findLast() "findLast(char)",
+         *      @ref findOr() "findOr(char, char*)"
          */
         MutableStringView find(char character) &;
         StringView find(char character) const &; /**< @overload */
+
+        /**
+         * @brief Find a substring with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findOr(StringView, T*) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref find(), @ref findLastOr()
+         */
+        MutableStringView findOr(StringView substring, char* fail) &;
+        StringView findOr(StringView substring, const char* fail) const &; /**< @overload */
+
+        /**
+         * @brief Find a substring with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findOr(char, T*) const, which in
+         * turn is a specialization of @ref BasicStringView::findOr(StringView, T*) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @todoc properly link to the char overload of findLast[Or] once
+         *      Doxygen stops being crap and can link to & overloads
+         * @see @ref contains(char) const, @ref find() "findLast(char)",
+         *      @ref findLastOr() "findLastOr(char)"
+         */
+        MutableStringView findOr(char character, char* fail) &;
+        StringView findOr(char character, const char* fail) const &; /**< @overload */
 
         /**
          * @brief Find the last occurence of a substring
@@ -879,7 +906,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::findLast(StringView) const. Not
          * allowed to be called on a r-value since the returned view would
          * become dangling.
-         * @see @ref find()
+         * @see @ref find(), @ref findLastOr()
          */
         MutableStringView findLast(StringView substring) &;
         StringView findLast(StringView substring) const &; /**< @overload */
@@ -893,10 +920,35 @@ class CORRADE_UTILITY_EXPORT String {
          * become dangling.
          * @todoc properly link to the char overload of find once Doxygen stops
          *      being crap and can link to & overloads
-         * @see @ref find() "find(char)"
+         * @see @ref find() "find(char)", @ref findOr() "findOr(char, char*)"
          */
         MutableStringView findLast(char character) &;
         StringView findLast(char character) const &; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of a substring with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findLastOr(StringView, T*) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @see @ref findLast(), @ref findOr()
+         */
+        MutableStringView findLastOr(StringView substring, char* fail) &;
+        StringView findLastOr(StringView substring, const char* fail) const &; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of a substring with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findLastOr(char, T*) const,
+         * which in turn is a specialization of @ref BasicStringView::findLastOr(StringView, T*) const.
+         * Not allowed to be called on a r-value since the returned view would
+         * become dangling.
+         * @todoc properly link to the char overload of findLast once Doxygen
+         *      stops being crap and can link to & overloads
+         * @see @ref findLast() "findLast(char)", @ref findOr "findOr(char)"
+         */
+        MutableStringView findLastOr(char character, char* fail) &;
+        StringView findLastOr(char character, const char* fail) const &; /**< @overload */
 
         /**
          * @brief Whether the view contains a substring

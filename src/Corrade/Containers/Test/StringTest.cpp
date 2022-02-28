@@ -159,7 +159,9 @@ struct StringTest: TestSuite::Tester {
 
     /* Tests also contains() */
     template<class T> void find();
+    template<class T> void findOr();
     template<class T> void findLast();
+    template<class T> void findLastOr();
 
     void release();
     void releaseDeleterSmall();
@@ -266,8 +268,12 @@ StringTest::StringTest() {
 
               &StringTest::find<String>,
               &StringTest::find<const String>,
+              &StringTest::findOr<String>,
+              &StringTest::findOr<const String>,
               &StringTest::findLast<String>,
               &StringTest::findLast<const String>,
+              &StringTest::findLastOr<String>,
+              &StringTest::findLastOr<const String>,
 
               &StringTest::release,
               &StringTest::releaseDeleterSmall,
@@ -1711,6 +1717,45 @@ template<class T> void StringTest::find() {
     }
 }
 
+template<class T> void StringTest::findOr() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* Mostly the same as find(), except that we expect a different pointer in
+       case of failure. Non-failure cases are kept to verify it's not
+       propagated to findLastOr() by accident. */
+
+    T a{"hello hello world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findOr("hello", a.end());
+        CORRADE_COMPARE(found, "hello"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findOr("world", a.end());
+        CORRADE_COMPARE(found, "world"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findOr("cursed", a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    } {
+        typename ConstTraits<T>::ViewType found = a.findOr('h', a.end());
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findOr('d', a.end());
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findOr('c', a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    }
+}
+
 template<class T> void StringTest::findLast() {
     /* Mostly the same as find(), except that we don't test contains() which is
        implemented with the same algorithm as find() */
@@ -1750,6 +1795,45 @@ template<class T> void StringTest::findLast() {
         typename ConstTraits<T>::ViewType found = a.findLast('c');
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+    }
+}
+
+template<class T> void StringTest::findLastOr() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* Mostly the same as findLast(), except that we expect a different pointer
+       in case of failure. Non-failure cases are kept to verify it's not
+       propagated to findOr() by accident. */
+
+    T a{"hello world world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findLastOr("hello", a.end());
+        CORRADE_COMPARE(found, "hello"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastOr("world", a.end());
+        CORRADE_COMPARE(found, "world"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastOr("cursed", a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastOr('h', a.end());
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastOr('d', a.end());
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastOr('c', a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
 

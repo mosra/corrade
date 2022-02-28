@@ -164,12 +164,14 @@ struct StringViewTest: TestSuite::Tester {
     void findWholeString();
     void findEmpty();
     void findFlags();
+    void findOr();
 
     void findLast();
     void findLastMultipleOccurences();
     void findLastWholeString();
     void findLastEmpty();
     void findLastFlags();
+    void findLastOr();
 
     void debugFlag();
     void debugFlags();
@@ -248,12 +250,14 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findWholeString,
               &StringViewTest::findEmpty,
               &StringViewTest::findFlags,
+              &StringViewTest::findOr,
 
               &StringViewTest::findLast,
               &StringViewTest::findLastMultipleOccurences,
               &StringViewTest::findLastWholeString,
               &StringViewTest::findLastEmpty,
               &StringViewTest::findLastFlags,
+              &StringViewTest::findLastOr,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -1501,6 +1505,41 @@ void StringViewTest::findFlags() {
     }
 }
 
+void StringViewTest::findOr() {
+    /* Duplicated word to ensure it's not delegated to findLastOr() */
+    StringView a = "hello hello world";
+
+    /* Verify the returned pointer vs the usual find() */
+    {
+        StringView found = a.findOr("hello", a.begin());
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+    } {
+        StringView found = a.find("world!");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findOr("world!", a.begin());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+        CORRADE_VERIFY(found.isEmpty());
+    }
+
+    /* Single character */
+    {
+        StringView found = a.findOr('o', a.begin());
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 4));
+    } {
+        StringView found = a.find('p');
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findOr('p', a.end());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
 void StringViewTest::findLast() {
     /* Mostly similar to find(), except that it doesn't check contains() (which
        is internally the same algorithm as find()) */
@@ -1726,6 +1765,41 @@ void StringViewTest::findLastFlags() {
         StringView found = null.findLast("");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    }
+}
+
+void StringViewTest::findLastOr() {
+    /* Duplicated word to ensure it's not delegated to findOr() */
+    StringView a = "hello hello world";
+
+    /* Verify the returned pointer vs the usual find() */
+    {
+        StringView found = a.findLastOr("hello", a.begin());
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 6));
+    } {
+        StringView found = a.findLast("world!");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findLastOr("world!", a.begin());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+        CORRADE_VERIFY(found.isEmpty());
+    }
+
+    /* Single character */
+    {
+        StringView found = a.findLastOr('o', a.begin());
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 13));
+    } {
+        StringView found = a.findLast('p');
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findLastOr('p', a.end());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+        CORRADE_VERIFY(found.isEmpty());
     }
 }
 
