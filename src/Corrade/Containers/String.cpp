@@ -165,7 +165,7 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
     CORRADE_ASSERT(data || !size,
         "Containers::String: received a null string of size" << size, );
 
-    _large.data = new char[size+1];
+    _large.data = new char[size + 1];
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
     if(size) std::memcpy(_large.data, data, size);
