@@ -1471,13 +1471,33 @@ void StringViewTest::findFlags() {
         CORRADE_COMPARE(found, "d");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Null view should be just global */
+    /* Not found should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
     } {
-        CORRADE_COMPARE(StringView{nullptr}.find("").flags(), StringViewFlag::Global);
+        StringView found = a.find("world!");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
 
     /* Same for chars */
     } {
-        CORRADE_COMPARE(StringView{nullptr}.find(' ').flags(), StringViewFlag::Global);
+        StringView found = a.find('f');
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlag{});
+
+    /* Empty view should be global & null-terminated */
+    } {
+        StringView empty = ""_s;
+        StringView found = empty.find("");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
+    } {
+        StringView null = nullptr;
+        StringView found = null.find("");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
 }
 
@@ -1679,13 +1699,33 @@ void StringViewTest::findLastFlags() {
         CORRADE_COMPARE(found, "d");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Null view should be just global */
+    /* Not found should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
     } {
-        CORRADE_COMPARE(StringView{nullptr}.findLast("").flags(), StringViewFlag::Global);
+        StringView found = a.findLast("world!");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
 
     /* Same for chars */
     } {
-        CORRADE_COMPARE(StringView{nullptr}.findLast(' ').flags(), StringViewFlag::Global);
+        StringView found = a.findLast('f');
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+
+    /* Empty view should be global & null-terminated */
+    } {
+        StringView empty = ""_s;
+        StringView found = empty.findLast("");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
+    } {
+        StringView null = nullptr;
+        StringView found = null.findLast("");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
 }
 

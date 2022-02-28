@@ -442,14 +442,18 @@ template<class T> BasicStringView<T> BasicStringView<T>::find(const StringView s
     if(const char* const found = Containers::find(_data, size(), substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
-    return {};
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant */
+    return BasicStringView<T>{nullptr, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::find(const char character) const {
     if(const char* const found = Containers::find(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    return {};
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant */
+    return BasicStringView<T>{nullptr, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::findLast(const StringView substring) const {
@@ -458,14 +462,18 @@ template<class T> BasicStringView<T> BasicStringView<T>::findLast(const StringVi
     if(const char* const found = Containers::findLast(_data, size(), substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
-    return {};
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant */
+    return BasicStringView<T>{nullptr, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::findLast(const char character) const {
     if(const char* const found = Containers::findLast(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    return {};
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant */
+    return BasicStringView<T>{nullptr, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> bool BasicStringView<T>::contains(const StringView substring) const {

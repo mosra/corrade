@@ -709,9 +709,9 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Find a substring
          *
          * Returns a view pointing to the first found substring. If not found,
-         * an empty @cpp nullptr @ce view is returned. The function uses
-         * @ref slice() internally, meaning it propagates the @ref flags() as
-         * appropriate.
+         * an empty @cpp nullptr @ce view with no @ref StringViewFlags is
+         * returned. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate.
          *
          * Note that the function operates with a @f$ \mathcal{O}(nm) @f$
          * complexity and as such is meant mainly for one-time searches in
@@ -740,9 +740,9 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Find the last occurence of a substring
          *
          * Returns a view pointing to the last found substring. If not found,
-         * an empty @cpp nullptr @ce view is returned. The function uses
-         * @ref slice() internally, meaning it propagates the @ref flags() as
-         * appropriate.
+         * an empty @cpp nullptr @ce view with no @ref StringViewFlags is
+         * returned. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate.
          *
          * Similarly as with @ref find(), note that the function operates with
          * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
