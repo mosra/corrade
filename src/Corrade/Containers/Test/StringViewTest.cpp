@@ -101,6 +101,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructConstexpr();
     template<class T> void constructPointer();
     void constructPointerNull();
+    void constructPointerNullSize();
     void constructPointerFlags();
     void constructEmpty();
     void constructNullptr();
@@ -190,6 +191,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructPointer<const char>,
               &StringViewTest::constructPointer<char>,
               &StringViewTest::constructPointerNull,
+              &StringViewTest::constructPointerNullSize,
               &StringViewTest::constructPointerFlags,
               &StringViewTest::constructEmpty,
               &StringViewTest::constructNullptr,
@@ -350,6 +352,24 @@ void StringViewTest::constructPointerNull() {
     CORRADE_COMPARE(view.size(), 0);
     CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
+}
+
+void StringViewTest::constructPointerNullSize() {
+    StringView view = {nullptr, 5};
+    CORRADE_VERIFY(!view.isEmpty());
+    CORRADE_COMPARE(view.size(), 5);
+    /* While a null pointer alone can be treated as global and never changing,
+       this not */
+    CORRADE_COMPARE(view.flags(), StringViewFlags{});
+    CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
+
+    constexpr StringView cview = {nullptr, 5};
+    CORRADE_VERIFY(!cview.isEmpty());
+    CORRADE_COMPARE(cview.size(), 5);
+    /* While a null pointer alone can be treated as global and never changing,
+       this not */
+    CORRADE_COMPARE(cview.flags(), StringViewFlags{});
+    CORRADE_COMPARE(static_cast<const void*>(cview.data()), nullptr);
 }
 
 void StringViewTest::constructPointerFlags() {
