@@ -1254,9 +1254,8 @@ void StringTest::moveConstructLarge() {
     char aData[] = "Allocated hello for a verbose world";
 
     {
-        String a{aData, sizeof(aData) - 1, [](char* data, std::size_t){
-            ++data[0];
-        }};
+        auto deleter = [](char* data, std::size_t){ ++data[0]; };
+        String a{aData, sizeof(aData) - 1, deleter};
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(a.deleter());
 
@@ -1265,7 +1264,7 @@ void StringTest::moveConstructLarge() {
         CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
         CORRADE_VERIFY(b.data() == aData);
         CORRADE_VERIFY(!b.isSmall());
-        CORRADE_VERIFY(b.deleter());
+        CORRADE_COMPARE(b.deleter(), deleter);
     }
 
     /* b is deallocated just once */
