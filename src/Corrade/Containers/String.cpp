@@ -120,9 +120,9 @@ String::String() noexcept {
     _small.size = SmallSize;
 }
 
-String::String(const StringView view): String{view._data, view._size & ~Implementation::StringViewSizeMask} {}
+String::String(const StringView view): String{view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
-String::String(const MutableStringView view): String{view._data, view._size & ~Implementation::StringViewSizeMask} {}
+String::String(const MutableStringView view): String{view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
 String::String(const ArrayView<const char> view): String{view.data(), view.size()} {}
 
@@ -144,9 +144,9 @@ String::String(const char* const data, const std::size_t size)
     construct(data, size);
 }
 
-String::String(AllocatedInitT, const StringView view): String{AllocatedInit, view._data, view._size & ~Implementation::StringViewSizeMask} {}
+String::String(AllocatedInitT, const StringView view): String{AllocatedInit, view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
-String::String(AllocatedInitT, const MutableStringView view): String{AllocatedInit, view._data, view._size & ~Implementation::StringViewSizeMask} {}
+String::String(AllocatedInitT, const MutableStringView view): String{AllocatedInit, view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
 String::String(AllocatedInitT, const ArrayView<const char> view): String{AllocatedInit, view.data(), view.size()} {}
 

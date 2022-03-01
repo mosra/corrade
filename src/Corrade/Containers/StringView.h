@@ -261,7 +261,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * A default-constructed instance has @ref StringViewFlag::Global set.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _size{std::size_t(StringViewFlag::Global)} {}
+        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
 
         /**
          * @brief Construct from a C string of known size
@@ -283,7 +283,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * use the @link operator""_s() @endlink literal instead.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _size{
+        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{
             (CORRADE_CONSTEXPR_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
             CORRADE_CONSTEXPR_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
@@ -315,7 +315,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /*implicit*/ BasicStringView(ArrayView<T> data, StringViewFlags flags = {}) noexcept;
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _size{mutable_._size} {}
+        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
 
         /**
          * @brief Construct from a null-terminated C string
@@ -381,12 +381,12 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * instead.
          */
         constexpr explicit operator bool() const {
-            return _data && (_size & ~Implementation::StringViewSizeMask);
+            return _data && (_sizePlusFlags & ~Implementation::StringViewSizeMask);
         }
 
         /** @brief Flags */
         constexpr StringViewFlags flags() const {
-            return StringViewFlag(_size & Implementation::StringViewSizeMask);
+            return StringViewFlag(_sizePlusFlags & Implementation::StringViewSizeMask);
         }
 
         /**
@@ -406,7 +406,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref isEmpty(), @ref operator bool()
          */
         constexpr std::size_t size() const {
-            return _size & ~Implementation::StringViewSizeMask;
+            return _sizePlusFlags & ~Implementation::StringViewSizeMask;
         }
 
         /**
@@ -415,7 +415,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref operator bool(), @ref size()
          */
         constexpr bool isEmpty() const {
-            return !(_size & ~Implementation::StringViewSizeMask);
+            return !(_sizePlusFlags & ~Implementation::StringViewSizeMask);
         }
 
         /**
@@ -432,10 +432,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref back()
          */
         constexpr T* end() const {
-            return _data + (_size & ~Implementation::StringViewSizeMask);
+            return _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask);
         }
         constexpr T* cend() const {
-            return _data + (_size & ~Implementation::StringViewSizeMask);
+            return _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask);
         } /**< @overload */
 
         /**
@@ -501,7 +501,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref slice(T*, T*) const
          */
         constexpr BasicStringView<T> suffix(T* begin) const {
-            return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_size & ~Implementation::StringViewSizeMask));
+            return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask));
         }
 
         /**
@@ -511,7 +511,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref slice(std::size_t, std::size_t) const
          */
         constexpr BasicStringView<T> suffix(std::size_t begin) const {
-            return slice(begin, _size & ~Implementation::StringViewSizeMask);
+            return slice(begin, _sizePlusFlags & ~Implementation::StringViewSizeMask);
         }
 
         /**
@@ -521,7 +521,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref slice(std::size_t, std::size_t) const
          */
         constexpr BasicStringView<T> except(std::size_t count) const {
-            return slice(0, (_size & ~Implementation::StringViewSizeMask) - count);
+            return slice(0, (_sizePlusFlags & ~Implementation::StringViewSizeMask) - count);
         }
 
         /**
@@ -917,10 +917,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */
-        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t): _data{data}, _size{sizePlusFlags} {}
+        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t): _data{data}, _sizePlusFlags{sizePlusFlags} {}
 
         T* _data;
-        std::size_t _size;
+        std::size_t _sizePlusFlags;
 };
 
 /**
@@ -1007,38 +1007,38 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
 }
 
 template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* const begin, T* const end) const {
-    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + (_size & ~Implementation::StringViewSizeMask),
+    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask),
             "Containers::StringView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data
             << Utility::Debug::nospace << ":"
             << Utility::Debug::nospace << end - _data
             << Utility::Debug::nospace << "] out of range for"
-            << (_size & ~Implementation::StringViewSizeMask) << "elements"),
+            << (_sizePlusFlags & ~Implementation::StringViewSizeMask) << "elements"),
         BasicStringView<T>{begin, std::size_t(end - begin)|
             /* Propagate the global flag always */
-            (_size & std::size_t(StringViewFlag::Global))|
+            (_sizePlusFlags & std::size_t(StringViewFlag::Global))|
             /* The null termination flag only if the original is
                null-terminated and end points to the original end */
-            ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == _data + (_size & ~Implementation::StringViewSizeMask))),
+            ((_sizePlusFlags & std::size_t(StringViewFlag::NullTerminated))*(end == _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask))),
             /* Using an internal assert-less constructor, the public
                constructor asserts would be redundant */
             nullptr};
 }
 
 template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(const std::size_t begin, const std::size_t end) const {
-    return CORRADE_CONSTEXPR_ASSERT(begin <= end && end <= (_size & ~Implementation::StringViewSizeMask),
+    return CORRADE_CONSTEXPR_ASSERT(begin <= end && end <= (_sizePlusFlags & ~Implementation::StringViewSizeMask),
             "Containers::StringView::slice(): slice ["
             << Utility::Debug::nospace << begin
             << Utility::Debug::nospace << ":"
             << Utility::Debug::nospace << end
             << Utility::Debug::nospace << "] out of range for"
-            << (_size & ~Implementation::StringViewSizeMask) << "elements"),
+            << (_sizePlusFlags & ~Implementation::StringViewSizeMask) << "elements"),
         BasicStringView<T>{_data + begin, (end - begin)|
             /* Propagate the global flag always */
-            (_size & std::size_t(StringViewFlag::Global))|
+            (_sizePlusFlags & std::size_t(StringViewFlag::Global))|
             /* The null termination flag only if the original is
                null-terminated and end points to the original end */
-            ((_size & std::size_t(StringViewFlag::NullTerminated))*(end == (_size & ~Implementation::StringViewSizeMask))),
+            ((_sizePlusFlags & std::size_t(StringViewFlag::NullTerminated))*(end == (_sizePlusFlags & ~Implementation::StringViewSizeMask))),
             /* Using an internal assert-less constructor, the public
                constructor asserts would be redundant */
             nullptr};

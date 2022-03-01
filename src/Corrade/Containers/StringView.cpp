@@ -502,15 +502,15 @@ template class
 
 bool operator==(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    return aSize == (b._size & ~Implementation::StringViewSizeMask) &&
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    return aSize == (b._sizePlusFlags & ~Implementation::StringViewSizeMask) &&
         std::memcmp(a._data, b._data, aSize) == 0;
 }
 
 bool operator!=(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    return aSize != (b._size & ~Implementation::StringViewSizeMask) ||
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    return aSize != (b._sizePlusFlags & ~Implementation::StringViewSizeMask) ||
         std::memcmp(a._data, b._data, aSize) != 0;
 }
 
@@ -521,8 +521,8 @@ namespace {
 
 bool operator<(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
     if(result != 0) return result < 0;
     if(aSize < bSize) return true;
@@ -531,8 +531,8 @@ bool operator<(const StringView a, const StringView b) {
 
 bool operator<=(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
     if(result != 0) return result < 0;
     if(aSize <= bSize) return true;
@@ -541,8 +541,8 @@ bool operator<=(const StringView a, const StringView b) {
 
 bool operator>=(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
     if(result != 0) return result > 0;
     if(aSize >= bSize) return true;
@@ -551,8 +551,8 @@ bool operator>=(const StringView a, const StringView b) {
 
 bool operator>(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, min(aSize, bSize));
     if(result != 0) return result > 0;
     if(aSize > bSize) return true;
@@ -561,8 +561,8 @@ bool operator>(const StringView a, const StringView b) {
 
 String operator+(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */
-    const std::size_t aSize = a._size & ~Implementation::StringViewSizeMask;
-    const std::size_t bSize = b._size & ~Implementation::StringViewSizeMask;
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
 
     String result{Corrade::NoInit, aSize + bSize};
 
