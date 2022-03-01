@@ -48,7 +48,7 @@ void Comparator<Compare::StringHasPrefix>::printMessage(const ComparisonStatusFl
     else if(flags == ComparisonStatusFlag::Verbose)
         out << "String" << actual << "is prefixed with" << expected
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
-            << Utility::Debug::newline << "        has prefix\n       "
+            << Utility::Debug::newline << "        has expected prefix\n       "
             << _expectedPrefixValue;
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
@@ -73,7 +73,7 @@ void Comparator<Compare::StringHasSuffix>::printMessage(const ComparisonStatusFl
     else if(flags == ComparisonStatusFlag::Verbose)
         out << "String" << actual << "is suffixed with" << expected
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
-            << Utility::Debug::newline << "        has suffix\n       "
+            << Utility::Debug::newline << "        has expected suffix\n       "
             << _expectedSuffixValue;
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }

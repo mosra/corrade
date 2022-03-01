@@ -94,7 +94,7 @@ void StringTest::hasPrefixMessageVerbose() {
 
     CORRADE_COMPARE(out.str(), "String a is prefixed with b, the actual string\n"
 "        hello world\n"
-"        has prefix\n"
+"        has expected prefix\n"
 "        hell\n");
 }
 
@@ -140,7 +140,7 @@ void StringTest::hasSuffixMessageVerbose() {
 
     CORRADE_COMPARE(out.str(), "String a is suffixed with b, the actual string\n"
 "        hello world\n"
-"        has suffix\n"
+"        has expected suffix\n"
 "        world\n");
 }
 
