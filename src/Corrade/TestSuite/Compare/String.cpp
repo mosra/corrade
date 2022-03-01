@@ -78,4 +78,55 @@ void Comparator<Compare::StringHasSuffix>::printMessage(const ComparisonStatusFl
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 
+ComparisonStatusFlags Comparator<Compare::StringContains>::operator()(const Containers::StringView actual, const Containers::StringView expectedToContain) {
+    _actualValue = actual;
+    _expectedToContainValue = expectedToContain;
+
+    /* If the strings are different, we can print them both in a verbose
+       message */
+    if(!actual.contains(expectedToContain)) return ComparisonStatusFlag::Failed;
+    if(actual != expectedToContain) return ComparisonStatusFlag::Verbose;
+    return {};
+}
+
+void Comparator<Compare::StringContains>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    if(flags == ComparisonStatusFlag::Failed)
+        out << "String" << actual << "doesn't contain" << expected
+            << Utility::Debug::nospace << ", actual is\n       " << _actualValue
+            << Utility::Debug::newline << "        but expected to contain\n       "
+            << _expectedToContainValue;
+    else if(flags == ComparisonStatusFlag::Verbose)
+        out << "String" << actual << "contains" << expected << "at position"
+            << (_actualValue.find(_expectedToContainValue).begin() - _actualValue.begin())
+            << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
+            << Utility::Debug::newline << "        expectedly contains\n       "
+            << _expectedToContainValue;
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+}
+
+ComparisonStatusFlags Comparator<Compare::StringNotContains>::operator()(const Containers::StringView actual, const Containers::StringView expectedToNotContain) {
+    _actualValue = actual;
+    _expectedToNotContainValue = expectedToNotContain;
+
+    /* Unlike the other comparators, here it can't pass if the strings are the
+       same, meaning we report the verbose message always */
+    if(actual.contains(expectedToNotContain)) return ComparisonStatusFlag::Failed;
+    return ComparisonStatusFlag::Verbose;
+}
+
+void Comparator<Compare::StringNotContains>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    if(flags == ComparisonStatusFlag::Failed)
+        out << "String" << actual << "contains" << expected << "at position"
+            << (_actualValue.find(_expectedToNotContainValue).begin() - _actualValue.begin())
+            << Utility::Debug::nospace << ", actual is\n       " << _actualValue
+            << Utility::Debug::newline << "        but expected to not contain\n       "
+            << _expectedToNotContainValue;
+    else if(flags == ComparisonStatusFlag::Verbose)
+        out << "String" << actual << "doesn't contain" << expected
+            << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
+            << Utility::Debug::newline << "        expectedly doesn't contain\n       "
+            << _expectedToNotContainValue;
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+}
+
 }}

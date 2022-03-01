@@ -38,18 +38,36 @@ struct StringTest: TestSuite::Tester {
     void hasPrefix();
     void hasPrefixMessageFailed();
     void hasPrefixMessageVerbose();
+
     void hasSuffix();
     void hasSuffixMessageFailed();
     void hasSuffixMessageVerbose();
+
+    void contains();
+    void containsMessageFailed();
+    void containsMessageVerbose();
+
+    void notContains();
+    void notContainsMessageFailed();
+    void notContainsMessageVerbose();
 };
 
 StringTest::StringTest() {
     addTests({&StringTest::hasPrefix,
               &StringTest::hasPrefixMessageFailed,
               &StringTest::hasPrefixMessageVerbose,
+
               &StringTest::hasSuffix,
               &StringTest::hasSuffixMessageFailed,
-              &StringTest::hasSuffixMessageVerbose});
+              &StringTest::hasSuffixMessageVerbose,
+
+              &StringTest::contains,
+              &StringTest::containsMessageFailed,
+              &StringTest::containsMessageVerbose,
+
+              &StringTest::notContains,
+              &StringTest::notContainsMessageFailed,
+              &StringTest::notContainsMessageVerbose});
 }
 
 void StringTest::hasPrefix() {
@@ -142,6 +160,98 @@ void StringTest::hasSuffixMessageVerbose() {
 "        hello world\n"
 "        has expected suffix\n"
 "        world\n");
+}
+
+void StringTest::contains() {
+    Containers::StringView a = "what a hell world";
+    Containers::StringView b = "hell";
+    Containers::StringView c = "hello";
+
+    /* If the strings are not the same, it can print a verbose message */
+    CORRADE_COMPARE(Comparator<StringContains>{}(a, a), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<StringContains>{}(a, b), ComparisonStatusFlag::Verbose);
+    CORRADE_COMPARE(Comparator<StringContains>{}(a, c), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<StringContains>{}(b, a), ComparisonStatusFlag::Failed);
+}
+
+void StringTest::containsMessageFailed() {
+    std::ostringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<StringContains> compare;
+        ComparisonStatusFlags flags = compare("what a hell world", "hello");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, redirectOutput, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a doesn't contain b, actual is\n"
+"        what a hell world\n"
+"        but expected to contain\n"
+"        hello\n");
+}
+
+void StringTest::containsMessageVerbose() {
+    std::ostringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<StringContains> compare;
+        ComparisonStatusFlags flags = compare("what a hell world", "hell");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
+        compare.printMessage(flags, redirectOutput, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a contains b at position 7, the actual string\n"
+"        what a hell world\n"
+"        expectedly contains\n"
+"        hell\n");
+}
+
+void StringTest::notContains() {
+    Containers::StringView a = "what a hell world";
+    Containers::StringView b = "hello";
+    Containers::StringView c = "hell";
+
+    /* If the strings are not the same, it can print a verbose message */
+    CORRADE_COMPARE(Comparator<StringNotContains>{}(a, a), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<StringNotContains>{}(a, b), ComparisonStatusFlag::Verbose);
+    CORRADE_COMPARE(Comparator<StringNotContains>{}(a, c), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<StringNotContains>{}(b, a), ComparisonStatusFlag::Verbose);
+}
+
+void StringTest::notContainsMessageFailed() {
+    std::ostringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<StringNotContains> compare;
+        ComparisonStatusFlags flags = compare("what a hell world", "hell");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, redirectOutput, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a contains b at position 7, actual is\n"
+"        what a hell world\n"
+"        but expected to not contain\n"
+"        hell\n");
+}
+
+void StringTest::notContainsMessageVerbose() {
+    std::ostringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<StringNotContains> compare;
+        ComparisonStatusFlags flags = compare("what a hell world", "hello");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Verbose);
+        compare.printMessage(flags, redirectOutput, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "String a doesn't contain b, the actual string\n"
+"        what a hell world\n"
+"        expectedly doesn't contain\n"
+"        hello\n");
 }
 
 }}}}}

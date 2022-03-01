@@ -92,10 +92,12 @@ namespace Corrade {
     failing a test
 -   New @ref TestSuite::Compare::NotEqual comparator to provide an alternative
     to @cpp CORRADE_VERIFY(a != b) @ce with a better failure diagnostic
--   New @ref TestSuite::Compare::StringHasPrefix and
-    @ref TestSuite::Compare::StringHasSuffix comparators to provide an
-    alternative to @cpp CORRADE_VERIFY(a.hasPrefix(b)) @ce and similar with a
-    better failure diagnostic
+-   New @ref TestSuite::Compare::StringHasPrefix,
+    @relativeref{TestSuite::Compare,StringHasSuffix},
+    @relativeref{TestSuite::Compare,StringContains} and
+    @relativeref{TestSuite::Compare,StringNotContains} comparators to provide
+    an alternative to @cpp CORRADE_VERIFY(a.hasPrefix(b)) @ce and similar with
+    a better failure diagnostic
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

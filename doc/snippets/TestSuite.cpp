@@ -200,6 +200,20 @@ CORRADE_COMPARE_AS(a, "world", TestSuite::Compare::StringHasSuffix);
 }
 
 {
+/* [Compare-StringContains] */
+Containers::StringView a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, "hello", TestSuite::Compare::StringContains);
+/* [Compare-StringContains] */
+}
+
+{
+/* [Compare-StringNotContains] */
+Containers::StringView a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, "hell", TestSuite::Compare::StringNotContains);
+/* [Compare-StringNotContains] */
+}
+
+{
 /* [CORRADE_VERIFY] */
 std::string s("hello");
 CORRADE_VERIFY(!s.empty());

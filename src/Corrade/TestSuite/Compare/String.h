@@ -54,7 +54,7 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringHasSuffix
+@see @ref StringHasSuffix, @ref StringContains, @ref StringNotContains
 */
 class StringHasPrefix {};
 
@@ -72,9 +72,45 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringHasPrefix
+@see @ref StringHasPrefix, @ref StringContains, @ref StringNotContains
 */
 class StringHasSuffix {};
+
+/**
+@brief Pseudo-type for verifying that a string contains given substring
+@m_since_latest
+
+Prints both strings if the actual string doesn't contain the expected
+substring. Example usage is below, see @ref TestSuite-Comparator-pseudo-types
+for more information.
+
+@snippet TestSuite.cpp Compare-StringContains
+
+If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
+specified, passed comparisons where the strings are different will print an
+@cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
+inspection.
+@see @ref StringNotContains, @ref StringHasPrefix, @ref StringHasSuffix
+*/
+class StringContains {};
+
+/**
+@brief Pseudo-type for verifying that a string does not contain given substring
+@m_since_latest
+
+Prints both strings if the actual string does contain the expected substring.
+Example usage is below, see @ref TestSuite-Comparator-pseudo-types for more
+information.
+
+@snippet TestSuite.cpp Compare-StringNotContains
+
+If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
+specified, passed comparisons where the strings are different will print an
+@cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
+inspection.
+@see @ref StringContains, @ref StringHasPrefix, @ref StringHasSuffix
+*/
+class StringNotContains {};
 
 }
 
@@ -104,6 +140,32 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringHasSuffix> {
            include */
         Containers::StringView _actualValue;
         Containers::StringView _expectedSuffixValue;
+};
+
+template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringContains> {
+    public:
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expectedToContain);
+
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
+
+    private:
+        /* Same as above, makes no sense to have these as pointers to avoid the
+           include */
+        Containers::StringView _actualValue;
+        Containers::StringView _expectedToContainValue;
+};
+
+template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringNotContains> {
+    public:
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expectedToNotContain);
+
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
+
+    private:
+        /* Same as above, makes no sense to have these as pointers to avoid the
+           include */
+        Containers::StringView _actualValue;
+        Containers::StringView _expectedToNotContainValue;
 };
 #endif
 
