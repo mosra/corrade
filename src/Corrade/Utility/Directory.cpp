@@ -209,7 +209,14 @@ bool mkpath(const std::string& path) {
     if(path.back() == '/')
         return mkpath(path.substr(0, path.size()-1));
 
-    /* If parent directory doesn't exist, create it */
+    /* If parent directory doesn't exist, create it. That means two syscalls to
+       create each parent (and two UTF-16 conversions on Windows). I could also
+       directly call into make() without checking exists() first, relying on
+       mkdir() failing with EEXIST instead -- while that would save one syscall
+       per path component that doesn't exist, for long paths that already exist
+       (which is supposedly the more common scenario) it would mean mkdir()
+       gets called once for each component instead of just one existence check
+       for the parent and one mkdir() for the leaf directory. */
     const std::string parentPath = Directory::path(path);
     if(!parentPath.empty() && !exists(parentPath) && !mkpath(parentPath)) return false;
 
