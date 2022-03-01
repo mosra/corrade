@@ -1178,29 +1178,44 @@ void StringViewTest::partitionNullView() {
 void StringViewTest::hasPrefix() {
     CORRADE_VERIFY("overcomplicated"_s.hasPrefix("over"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasPrefix("oven"));
+
+    CORRADE_VERIFY("hello"_s.hasPrefix('h'));
+    CORRADE_VERIFY(!"hello"_s.hasPrefix('e'));
 }
 
 void StringViewTest::hasPrefixEmpty() {
     CORRADE_VERIFY(!""_s.hasPrefix("overcomplicated"));
     CORRADE_VERIFY("overcomplicated"_s.hasPrefix(""));
     CORRADE_VERIFY(""_s.hasPrefix(""));
+
+    CORRADE_VERIFY(!""_s.hasPrefix('a'));
+    CORRADE_VERIFY(!""_s.hasPrefix('\0'));
 }
 
 void StringViewTest::hasSuffix() {
     CORRADE_VERIFY("overcomplicated"_s.hasSuffix("complicated"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("somplicated"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("overcomplicated even more"));
+
+    CORRADE_VERIFY("hello"_s.hasSuffix('o'));
+    CORRADE_VERIFY(!"hello"_s.hasSuffix('l'));
+    CORRADE_VERIFY(!"hello"_s.hasSuffix('\0'));
 }
 
 void StringViewTest::hasSuffixEmpty() {
     CORRADE_VERIFY(!""_s.hasSuffix("overcomplicated"));
     CORRADE_VERIFY("overcomplicated"_s.hasSuffix(""));
     CORRADE_VERIFY(""_s.hasSuffix(""));
+
+    CORRADE_VERIFY(!""_s.hasSuffix('a'));
+    CORRADE_VERIFY(!""_s.hasSuffix('\0'));
 }
 
 void StringViewTest::exceptPrefix() {
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("over"), "complicated");
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix(""), "overcomplicated");
+
+    CORRADE_COMPARE("hello"_s.exceptPrefix('h'), "ello");
 
     /* Only a null view results in a null output */
     CORRADE_VERIFY(""_s.exceptPrefix("").data());
@@ -1212,6 +1227,9 @@ void StringViewTest::exceptPrefixFlags() {
         StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    CORRADE_COMPARE("hello"_s.exceptPrefix('h').flags(),
+        StringViewFlag::Global|StringViewFlag::NullTerminated);
 }
 
 void StringViewTest::exceptPrefixInvalid() {
@@ -1222,12 +1240,17 @@ void StringViewTest::exceptPrefixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptPrefix("complicated");
-    CORRADE_COMPARE(out.str(), "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
+    "hello"_s.exceptPrefix('o');
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
+        "Containers::StringView::exceptPrefix(): string doesn't begin with o\n");
 }
 
 void StringViewTest::exceptSuffix() {
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("complicated"), "over");
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix(""), "overcomplicated");
+
+    CORRADE_COMPARE("hello"_s.exceptSuffix('o'), "hell");
 
     /* Only a null view results in a null output */
     CORRADE_VERIFY(""_s.exceptSuffix("").data());
@@ -1239,6 +1262,9 @@ void StringViewTest::exceptSuffixFlags() {
         StringViewFlag::Global);
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    CORRADE_COMPARE("hello"_s.exceptSuffix('o').flags(),
+        StringViewFlag::Global);
 }
 
 void StringViewTest::exceptSuffixInvalid() {
@@ -1249,7 +1275,10 @@ void StringViewTest::exceptSuffixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptSuffix("over");
-    CORRADE_COMPARE(out.str(), "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+    "hello"_s.exceptSuffix('h');
+    CORRADE_COMPARE(out.str(),
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
+        "Containers::StringView::exceptSuffix(): string doesn't end with h\n");
 }
 
 void StringViewTest::trimmed() {

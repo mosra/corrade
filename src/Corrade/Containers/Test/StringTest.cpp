@@ -1856,6 +1856,9 @@ void StringTest::hasPrefix() {
 
     CORRADE_VERIFY(String{"overcomplicated"}.hasPrefix("over"));
     CORRADE_VERIFY(!String{"overcomplicated"}.hasPrefix("oven"));
+
+    CORRADE_VERIFY(String{"hello"}.hasPrefix('h'));
+    CORRADE_VERIFY(!String{"hello"}.hasPrefix('e'));
 }
 
 void StringTest::hasSuffix() {
@@ -1864,6 +1867,9 @@ void StringTest::hasSuffix() {
 
     CORRADE_VERIFY(String{"overcomplicated"}.hasSuffix("complicated"));
     CORRADE_VERIFY(!String{"overcomplicated"}.hasSuffix("somplicated"));
+
+    CORRADE_VERIFY(String{"hello"}.hasSuffix('o'));
+    CORRADE_VERIFY(!String{"hello"}.hasSuffix('l'));
 }
 
 template<class T> void StringTest::exceptPrefix() {
@@ -1873,9 +1879,14 @@ template<class T> void StringTest::exceptPrefix() {
        need to verify SSO behavior, only the basics and flag propagation */
 
     T a{"overcomplicated"};
-    typename ConstTraits<T>::ViewType stripped = a.exceptPrefix("over");
-    CORRADE_COMPARE(stripped, "complicated"_s);
-    CORRADE_COMPARE(stripped.flags(), StringViewFlag::NullTerminated);
+
+    typename ConstTraits<T>::ViewType b = a.exceptPrefix("over");
+    CORRADE_COMPARE(b, "complicated"_s);
+    CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
+
+    typename ConstTraits<T>::ViewType c = a.exceptPrefix('o');
+    CORRADE_COMPARE(c, "vercomplicated"_s);
+    CORRADE_COMPARE(c.flags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::exceptPrefixInvalid() {
@@ -1889,11 +1900,15 @@ void StringTest::exceptPrefixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     a.exceptPrefix("complicated");
+    a.exceptPrefix('d');
     ca.exceptPrefix("complicated");
+    ca.exceptPrefix('d');
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
-        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
+        "Containers::StringView::exceptPrefix(): string doesn't begin with d\n"
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
+        "Containers::StringView::exceptPrefix(): string doesn't begin with d\n");
 }
 
 template<class T> void StringTest::exceptSuffix() {
@@ -1903,10 +1918,16 @@ template<class T> void StringTest::exceptSuffix() {
        need to verify SSO behavior, only the basics and flag propagation */
 
     String a{"overcomplicated"};
-    typename ConstTraits<T>::ViewType stripped = a.exceptSuffix("complicated");
-    CORRADE_COMPARE(stripped, "over"_s);
-    CORRADE_COMPARE(stripped.flags(), StringViewFlags{});
+
+    typename ConstTraits<T>::ViewType b = a.exceptSuffix("complicated");
+    CORRADE_COMPARE(b, "over"_s);
+    CORRADE_COMPARE(b.flags(), StringViewFlags{});
+
     CORRADE_COMPARE(a.exceptSuffix("").flags(), StringViewFlag::NullTerminated);
+
+    typename ConstTraits<T>::ViewType c = a.exceptSuffix('d');
+    CORRADE_COMPARE(c, "overcomplicate"_s);
+    CORRADE_COMPARE(c.flags(), StringViewFlags{});
 }
 
 void StringTest::exceptSuffixInvalid() {
@@ -1920,11 +1941,15 @@ void StringTest::exceptSuffixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     a.exceptSuffix("over");
+    a.exceptSuffix('o');
     ca.exceptSuffix("over");
+    ca.exceptSuffix('o');
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
-        "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+        "Containers::StringView::exceptSuffix(): string doesn't end with o\n"
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
+        "Containers::StringView::exceptSuffix(): string doesn't end with o\n");
 }
 
 template<class T> void StringTest::trimmed() {

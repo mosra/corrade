@@ -312,6 +312,11 @@ template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) co
     return std::strncmp(_data, prefix._data, prefixSize) == 0;
 }
 
+template<class T> bool BasicStringView<T>::hasPrefix(const char prefix) const {
+    const std::size_t size = this->size();
+    return size && _data[0] == prefix;
+}
+
 template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) const {
     const std::size_t size = this->size();
     const std::size_t suffixSize = suffix.size();
@@ -320,16 +325,33 @@ template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) co
     return std::strncmp(_data + size - suffixSize, suffix._data, suffixSize) == 0;
 }
 
+template<class T> bool BasicStringView<T>::hasSuffix(const char suffix) const {
+    const std::size_t size = this->size();
+    return size && _data[size - 1] == suffix;
+}
+
 template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const StringView prefix) const {
     CORRADE_ASSERT(hasPrefix(prefix),
         "Containers::StringView::exceptPrefix(): string doesn't begin with" << prefix, {});
     return suffix(prefix.size());
 }
 
+template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const char prefix) const {
+    CORRADE_ASSERT(hasPrefix(prefix),
+        "Containers::StringView::exceptPrefix(): string doesn't begin with" << (StringView{&prefix, 1}), {});
+    return suffix(1);
+}
+
 template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const StringView suffix) const {
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
     return except(suffix.size());
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const char suffix) const {
+    CORRADE_ASSERT(hasSuffix(suffix),
+        "Containers::StringView::exceptSuffix(): string doesn't end with" << (StringView{&suffix, 1}), {});
+    return except(1);
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringView characters) const {

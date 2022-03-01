@@ -788,6 +788,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @see @ref exceptPrefix()
          */
         bool hasPrefix(StringView prefix) const;
+        bool hasPrefix(char prefix) const; /**< @overload */
 
         /**
          * @brief Whether the string ends with given suffix
@@ -796,6 +797,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @see @ref exceptSuffix()
          */
         bool hasSuffix(StringView suffix) const;
+        bool hasSuffix(char suffix) const; /**< @overload */
 
         /**
          * @brief View with given prefix stripped
@@ -807,6 +809,8 @@ class CORRADE_UTILITY_EXPORT String {
          */
         MutableStringView exceptPrefix(StringView prefix) &;
         StringView exceptPrefix(StringView prefix) const &; /**< @overload */
+        MutableStringView exceptPrefix(char prefix) &; /**< @overload */
+        StringView exceptPrefix(char prefix) const &; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -840,6 +844,8 @@ class CORRADE_UTILITY_EXPORT String {
          */
         MutableStringView exceptSuffix(StringView suffix) &;
         StringView exceptSuffix(StringView suffix) const &; /**< @overload */
+        MutableStringView exceptSuffix(char suffix) &; /**< @overload */
+        StringView exceptSuffix(char suffix) const &; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**

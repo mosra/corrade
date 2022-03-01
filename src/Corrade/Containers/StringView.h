@@ -635,6 +635,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref exceptPrefix()
          */
         bool hasPrefix(StringView prefix) const;
+        bool hasPrefix(char prefix) const; /**< @overload */
 
         /**
          * @brief Whether the string ends with given suffix
@@ -644,6 +645,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref exceptSuffix()
          */
         bool hasSuffix(StringView suffix) const;
+        bool hasSuffix(char suffix) const; /**< @overload */
 
         /**
          * @brief View with given prefix stripped
@@ -656,6 +658,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref hasPrefix()
          */
         BasicStringView<T> exceptPrefix(StringView prefix) const;
+        BasicStringView<T> exceptPrefix(char prefix) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -680,6 +683,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref hasSuffix()
          */
         BasicStringView<T> exceptSuffix(StringView suffix) const;
+        BasicStringView<T> exceptSuffix(char suffix) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
