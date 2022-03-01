@@ -329,7 +329,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const Stri
 template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const StringView suffix) const {
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
-    return prefix(size() - suffix.size());
+    return except(suffix.size());
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringView characters) const {
