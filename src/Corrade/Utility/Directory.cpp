@@ -25,448 +25,76 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/configure.h"
-
-/* Requests 64bit file offset on Linux. Has to be done before anything else is
-   included, since we can't be sure that <string> doesn't include anything that
-   this macro would affect. */
-#ifdef CORRADE_TARGET_UNIX
-#define _FILE_OFFSET_BITS 64
-#endif
-
-/* Otherwise _wrename() and _wremove() is not defined on TDM-GCC 5.1. This has
-   to be undefined before including any other header or it doesn't work. */
-#ifdef __MINGW32__
-#undef __STRICT_ANSI__
-#endif
+#define _CORRADE_NO_DEPRECATED_DIRECTORY /* So it doesn't yell here */
 
 #include "Directory.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <algorithm>
+#include <string>
+#include <vector>
 
-/* Checking for API level on Android */
-#ifdef CORRADE_TARGET_ANDROID
-#include <android/api-level.h>
-#endif
-
-/* Unix memory mapping, library location */
-#ifdef CORRADE_TARGET_UNIX
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <dlfcn.h> /* dladdr(), needs also -ldl */
-#endif
-
-/* Unix, Emscripten file & directory access */
-#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-#include <cerrno>
-#include <cstring>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#ifdef CORRADE_TARGET_APPLE
-#include <mach-o/dyld.h>
-#endif
-#endif
-
-/* Windows */
-/** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
-#ifdef CORRADE_TARGET_WINDOWS
-#ifdef __MINGW32__
-#include <wtypes.h>
-#include <windef.h>
-#include <wincrypt.h>
-#include <ntdef.h>
-#include <basetyps.h>
-#endif
-#include <shlobj.h>
-#include <io.h>
-#endif
-
-#include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
-#include "Corrade/Containers/GrowableArray.h"
-#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/String.h"
+#include "Corrade/Containers/PairStl.h"
+#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/System.h"
-
-/* errno and GetLastError() stringifiers */
-#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
-#include "Corrade/Utility/Implementation/ErrorString.h"
-#endif
-
-/* Unicode helpers for Windows */
-#ifdef CORRADE_TARGET_WINDOWS
-#include "Corrade/Utility/Unicode.h"
-using Corrade::Utility::Unicode::widen;
-using Corrade::Utility::Unicode::narrow;
-#endif
 
 namespace Corrade { namespace Utility { namespace Directory {
 
-std::string fromNativeSeparators(std::string path) {
-    #ifdef CORRADE_TARGET_WINDOWS
-    std::replace(path.begin(), path.end(), '\\', '/');
-    #endif
-    return path;
+std::string fromNativeSeparators(const std::string& path) {
+    return Path::fromNativeSeparators(path);
 }
 
-std::string toNativeSeparators(std::string path) {
-    #ifdef CORRADE_TARGET_WINDOWS
-    std::replace(path.begin(), path.end(), '/', '\\');
-    #endif
-    return path;
+std::string toNativeSeparators(const std::string& path) {
+    return Path::toNativeSeparators(path);
 }
 
 std::string path(const std::string& filename) {
-    /* If filename is already a path, return it */
-    if(!filename.empty() && filename.back() == '/')
-        return filename.substr(0, filename.size()-1);
-
-    std::size_t pos = filename.find_last_of('/');
-
-    /* Filename doesn't contain any slash (no path), return empty string */
-    if(pos == std::string::npos) return {};
-
-    /* Return everything to last slash */
-    return filename.substr(0, pos);
+    return Path::split(filename).first();
 }
 
 std::string filename(const std::string& filename) {
-    std::size_t pos = filename.find_last_of('/');
-
-    /* Return whole filename if it doesn't contain slash */
-    if(pos == std::string::npos) return filename;
-
-    /* Return everything after last slash */
-    return filename.substr(pos+1);
+    return Path::split(filename).second();
 }
 
 std::pair<std::string, std::string> splitExtension(const std::string& filename) {
-    /* Find the last dot and the last slash -- for file.tar.gz we want just
-       .gz as an extension; for /etc/rc.conf/bak we don't want to split at the
-       folder name. */
-    const std::size_t pos = filename.find_last_of('.');
-    const std::size_t lastSlash = filename.find_last_of('/');
-
-    /* Empty extension if there's no dot or if the dot is not inside the
-       filename */
-    if(pos == std::string::npos || (lastSlash != std::string::npos && pos < lastSlash))
-        return {filename, {}};
-
-    /* If the dot at the start of the filename (/root/.bashrc), it's also an
-       empty extension. Multiple dots at the start (/home/mosra/../..) classify
-       as no extension as well. */
-    std::size_t prev = pos;
-    while(prev && filename[prev - 1] == '.') --prev;
-    CORRADE_INTERNAL_ASSERT(pos < filename.size());
-    if(prev == 0 || filename[prev - 1] == '/') return {filename, {}};
-
-    /* Otherwise it's a real extension */
-    return {filename.substr(0, pos), filename.substr(pos)};
+    return std::pair<Containers::StringView, Containers::StringView>(Path::splitExtension(filename));
 }
 
 std::string join(const std::string& path, const std::string& filename) {
-    /* Empty path */
-    if(path.empty()) return filename;
-
-    #ifdef CORRADE_TARGET_WINDOWS
-    /* Absolute filename on Windows */
-    if(filename.size() > 2 && filename[1] == ':' && filename[2] == '/')
-        return filename;
-    #endif
-
-    /* Absolute filename */
-    if(!filename.empty() && filename[0] == '/')
-        return filename;
-
-    /* Add trailing slash to path, if not present */
-    if(path.back() != '/')
-        return path + '/' + filename;
-
-    return path + filename;
+    return Path::join(path, filename);
 }
 
 std::string join(const std::initializer_list<std::string> paths) {
-    if(paths.size() == 0) return {};
-
-    auto it = paths.begin();
-    std::string path = *it;
-    ++it;
-    for(; it != paths.end(); ++it)
-        path = join(path, *it);
-
-    return path;
+    const auto pathsView = Containers::arrayView(paths);
+    Containers::Array<Containers::StringView> pathViews{paths.size()};
+    for(std::size_t i = 0; i != pathsView.size(); ++i)
+        pathViews[i] = pathsView[i];
+    return Path::join(pathViews);
 }
 
 bool mkpath(const std::string& path) {
-    if(path.empty()) return true;
-
-    /* If path contains trailing slash, strip it */
-    if(path.back() == '/')
-        return mkpath(path.substr(0, path.size()-1));
-
-    /* If parent directory doesn't exist, create it. That means two syscalls to
-       create each parent (and two UTF-16 conversions on Windows). I could also
-       directly call into make() without checking exists() first, relying on
-       mkdir() failing with EEXIST instead -- while that would save one syscall
-       per path component that doesn't exist, for long paths that already exist
-       (which is supposedly the more common scenario) it would mean mkdir()
-       gets called once for each component instead of just one existence check
-       for the parent and one mkdir() for the leaf directory. */
-    const std::string parentPath = Directory::path(path);
-    if(!parentPath.empty() && !exists(parentPath) && !mkpath(parentPath)) return false;
-
-    /* Create directory, return true if successfully created or already exists */
-
-    /* Unix, Emscripten */
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const int ret = mkdir(path.data(), 0777);
-    if(ret != 0 && errno != EEXIST) {
-        Error err;
-        err << "Utility::Directory::mkpath(): can't create" << path << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-    return true;
-
-    /* Windows (not Store/Phone) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    if(CreateDirectoryW(widen(path).data(), nullptr) == 0 && GetLastError() != ERROR_ALREADY_EXISTS) {
-        Error err;
-        err << "Utility::Directory::mkpath(): can't create" << path << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return false;
-    }
-    return true;
-
-    /* Not implemented elsewhere */
-    #else
-    Error{} << "Utility::Directory::mkdir(): not implemented on this platform";
-    return false;
-    #endif
+    return Path::make(path);
 }
 
 bool rm(const std::string& path) {
-    /* Windows need special handling for Unicode, otherwise we can work with
-       the standard std::remove() */
-    #ifdef CORRADE_TARGET_WINDOWS
-    auto wpath = widen(path);
-
-    /* std::remove() can't remove directories on Windows */
-    /** @todo how to implement this for RT? */
-    #ifndef CORRADE_TARGET_WINDOWS_RT
-    /* INVALID_FILE_ATTRIBUTES contain the FILE_ATTRIBUTE_DIRECTORY bit for
-       some reason -- so if wouldn't check for INVALID_FILE_ATTRIBUTES,
-       nonexistent files would be reported as "can't remove directory". */
-    const DWORD attributes = GetFileAttributesW(wpath.data());
-    if(attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
-        if(!RemoveDirectoryW(wpath.data())) {
-            Error err;
-            err << "Utility::Directory::rm(): can't remove directory" << path << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            return false;
-        }
-
-        return true;
-    }
-    #endif
-
-    /* Need to use nonstandard _wremove in order to handle Unicode properly */
-    if(_wremove(wpath.data()) != 0) {
-        Error err;
-        err << "Utility::Directory::rm(): can't remove" << path << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    return true;
-    #else
-    /* std::remove() can't remove directories on Emscripten */
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
-    struct stat st;
-    /* using lstat() and not stat() as we care about the symlink, not the
-       file/dir it points to */
-    if(lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode)) {
-        if(rmdir(path.data()) != 0) {
-            Error err;
-            err << "Utility::Directory::rm(): can't remove directory" << path << Debug::nospace << ":";
-            Utility::Implementation::printErrnoErrorString(err, errno);
-            return false;
-        }
-
-        return true;
-    }
-    #endif
-
-    if(std::remove(path.data()) != 0) {
-        Error err;
-        err << "Utility::Directory::rm(): can't remove" << path << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    return true;
-    #endif
+    return Path::remove(path);
 }
 
 bool move(const std::string& from, const std::string& to) {
-    if(
-        #ifndef CORRADE_TARGET_WINDOWS
-        std::rename(from.data(), to.data())
-        #else
-        _wrename(widen(from).data(), widen(to).data())
-        #endif
-    != 0) {
-        Error err;
-        err << "Utility::Directory::move(): can't move" << from << "to" << to << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    return true;
+    return Path::move(from, to);
 }
 
 bool exists(const std::string& filename) {
-    /* Sane platforms */
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    return access(filename.data(), F_OK) == 0;
-
-    /* Windows (not Store/Phone) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    return GetFileAttributesW(widen(filename).data()) != INVALID_FILE_ATTRIBUTES;
-
-    /* Windows Store/Phone not implemented */
-    #else
-    static_cast<void>(filename);
-    Error{} << "Utility::Directory::exists(): not implemented on this platform";
-    return false;
-    #endif
-}
-
-namespace {
-
-#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-/* Used by fileSize(), read(), copy() source and mapRead() to prevent really
-   bad issues. For directories lseek() returns 9223372036854775807 (2^63 - 1,
-   and thus causing an allocation failure) or maybe also 0 (and thus a silent
-   error); fread() will always read 0 bytes no matter what lseek() reports.
-   Such behavior is everything but useful. The lseek() value is also
-   undocumented, so we can't just check the value to know we opened a
-   directory: https://stackoverflow.com/a/65912203
-
-   Thus a directory is explicitly checked on the file descriptor, and if it is,
-   we fail. This doesn't need to be done when opening for writing (so write(),
-   append(), copy() destination or map() / mapWrite), there the opening itself fails already. On Windows, opening directories fails in any case, so there
-   we don't need to do anything either. */
-bool isDirectory(const int fd) {
-    struct stat st;
-    return fstat(fd, &st) == 0 && S_ISDIR(st.st_mode);
-}
-#endif
-
-/* Used by fileSize() and read(). Returns NullOpt if the file is not seekable
-   (as file existence is already checked when opening the FILE*). */
-Containers::Optional<std::size_t> fileSize(std::FILE* const f) {
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
-    /* If the file is not seekable, return NullOpt. On POSIX this is usually
-       -1 when the file is non-seekable: https://stackoverflow.com/q/3238788
-       It's undefined behavior on MSVC, tho (but possibly not on MinGW?):
-       https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/lseek-lseeki64 */
-    /** @todo find a reliable way on Windows */
-    if(
-        #ifndef CORRADE_TARGET_WINDOWS
-        lseek(fileno(f), 0, SEEK_END) == -1
-        #else
-        _lseek(_fileno(f), 0, SEEK_END) == -1
-        #endif
-    ) return {};
-    #else
-    /** @todo implementation for non-seekable platforms elsewhere? */
-    #endif
-
-    std::fseek(f, 0, SEEK_END);
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const std::size_t size =
-        /* 32-bit Android ignores _LARGEFILE_SOURCE and instead makes ftello()
-           available always after API level 24 and never before that
-           https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md */
-        #if defined(CORRADE_TARGET_ANDROID) && __SIZEOF_POINTER__ == 4 && __ANDROID_API__ < 24
-        ftell(f)
-        #else
-        ftello(f)
-        #endif
-        ;
-    #elif defined(CORRADE_TARGET_WINDOWS)
-    const std::size_t size = _ftelli64(f);
-    #else
-    const std::size_t size = std::ftell(f);
-    #endif
-
-    /* Put the file handle back to its original state */
-    std::rewind(f);
-
-    return size;
-}
-
+    return Path::exists(filename);
 }
 
 Containers::Optional<std::size_t> fileSize(const std::string& filename) {
-    /* Special case for "Unicode" Windows support */
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const f = std::fopen(filename.data(), "rb");
-    #else
-    std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
-    #endif
-    if(!f) {
-        Error err;
-        err << "Utility::Directory::fileSize(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return {};
-    }
-
-    Containers::ScopeGuard exit{f, std::fclose};
-
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Explicitly fail if opening directories for reading on Unix to prevent
-       silent errors, see isDirectory(int) for details. On Windows the fopen()
-       fails already. */
-    if(isDirectory(fileno(f))) {
-        Error{} << "Utility::Directory::fileSize():" << filename << "is a directory";
-        return {};
-    }
-    #endif
-
-    Containers::Optional<std::size_t> size = fileSize(f);
-    if(!size)
-        Error{} << "Utility::Directory::fileSize():" << filename << "is not seekable";
-    return size;
+    return Path::size(filename);
 }
 
 bool isDirectory(const std::string& path) {
-    /* Compared to the internal isDirectory(std::FILE*) above, this calls the
-       OS APIs directly with the filename and should be atomic and faster
-       compared to first opening the file and then asking for attributes */
-
-    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo symlink support */
-    const DWORD fileAttributes = GetFileAttributesW(widen(path).data());
-    return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
-
-    #elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* using stat() instead of lstat() as that follows symlinks and that's what
-       is desired in most cases */
-    struct stat st;
-    return stat(path.data(), &st) == 0 && S_ISDIR(st.st_mode);
-    #else
-    static_cast<void>(path);
-    Error{} << "Utility::Directory::isDirectory(): not implemented on this platform";
-    return false;
-    #endif
+    return Path::isDirectory(path);
 }
 
 bool isSandboxed() {
@@ -474,798 +102,103 @@ bool isSandboxed() {
 }
 
 std::string current() {
-    /* POSIX. Needs a shitty loop because ... ugh. */
-    #ifdef CORRADE_TARGET_UNIX
-    std::string path(4, '\0');
-    char* success;
-    while(!(success = getcwd(&path[0], path.size() + 1))) {
-        /* Unexpected error, exit. Can be for example ENOENT when current
-           working directory gets deleted while the program is running. */
-        if(errno != ERANGE) {
-            Error err;
-            err << "Utility::Directory::current():";
-            Utility::Implementation::printErrnoErrorString(err, errno);
-            return {};
-        }
-
-        /* Otherwise try again with larger buffer */
-        path.resize(path.size()*2);
-    }
-
-    /* Success, cut the path to correct size */
-    path.resize(std::strlen(&path[0]));
-    return path;
-
-    /* Windows (not RT) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    const std::size_t sizePlusOne = GetCurrentDirectoryW(0, nullptr);
-    CORRADE_INTERNAL_ASSERT(sizePlusOne);
-    /* std::string is always 0-terminated meaning we can ask it to have size
-       only for what we need */
-    std::wstring path(sizePlusOne - 1, '\0');
-    CORRADE_INTERNAL_ASSERT_OUTPUT(GetCurrentDirectoryW(sizePlusOne, &path[0]) == sizePlusOne - 1);
-    return fromNativeSeparators(narrow(path));
-
-    /* Use the root path on Emscripten */
-    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
-    return "/";
-
-    /* No clue elsewhere (and on Windows RT) */
-    #else
-    Error{} << "Utility::Directory::current(): not implemented on this platform";
-    return {};
-    #endif
+    Containers::Optional<Containers::String> out = Path::currentDirectory();
+    return out ? std::string{*out} : std::string{};
 }
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 std::string libraryLocation(const void* address) {
-    /* Linux (and macOS as well, even though Linux man pages don't mention that) */
-    #ifdef CORRADE_TARGET_UNIX
-    /* Otherwise GCC 4.8 loudly complains about missing initializers */
-    Dl_info info{nullptr, nullptr, nullptr, nullptr};
-    if(!dladdr(address, &info)) {
-        Error{} << "Utility::Directory::libraryLocation(): can't get library location";
-        /* According to manpages, the dlerror is *never* available, so just
-           assert on that instead of branching */
-        CORRADE_INTERNAL_ASSERT(!dlerror());
-        return {};
-    }
-
-    return info.dli_fname;
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    HMODULE module{};
-    if(!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<const char*>(address), &module)) {
-        Error err;
-        err << "Utility::Directory::libraryLocation(): can't get library location:";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return {};
-    }
-
-    /** @todo get rid of MAX_PATH */
-    std::wstring path(MAX_PATH, L'\0');
-    std::size_t size = GetModuleFileNameW(module, &path[0], path.size());
-    path.resize(size);
-    return fromNativeSeparators(narrow(path));
-    #endif
+    Containers::Optional<Containers::String> out = Path::libraryLocation(address);
+    return out ? std::string{*out} : std::string{};
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-std::string libraryLocation(Implementation::FunctionPointer address) {
+std::string libraryLocation(Path::Implementation::FunctionPointer address) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return libraryLocation(address.address);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 #endif
 #endif
 
 std::string executableLocation() {
-    /* Linux */
-    #if defined(__linux__)
-    /* Reallocate like hell until we have enough place to store the path. Can't
-       use lstat because the /proc/self/exe symlink is not a real symlink and
-       so stat::st_size returns 0. POSIX, WHAT THE HELL. */
-    constexpr const char self[]{"/proc/self/exe"};
-    std::string path(4, '\0');
-    ssize_t size;
-    while((size = readlink(self, &path[0], path.size())) == ssize_t(path.size()))
-        path.resize(path.size()*2);
-
-    CORRADE_INTERNAL_ASSERT(size > 0);
-
-    path.resize(size);
-    return path;
-
-    /* OSX, iOS */
-    #elif defined(CORRADE_TARGET_APPLE)
-    /* Get path size (need to set it to 0 to avoid filling nullptr with random
-       data and crashing, HAHA) */
-    std::uint32_t size = 0;
-    CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(nullptr, &size) == -1);
-
-    /* Allocate proper size and get the path. The size includes a null
-       terminator, strip it after. */
-    std::string path(size, '\0');
-    CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(&path[0], &size) == 0);
-    return path.substr(0, size - 1);
-
-    /* Windows (not RT) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo get rid of MAX_PATH */
-    std::wstring path(MAX_PATH, L'\0');
-    std::size_t size = GetModuleFileNameW(nullptr, &path[0], path.size());
-    path.resize(size);
-    return fromNativeSeparators(narrow(path));
-
-    /* hardcoded for Emscripten */
-    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
-    return "/app.js";
-
-    /* Not implemented */
-    #else
-    Error{} << "Utility::Directory::executableLocation(): not implemented on this platform";
-    return std::string{};
-    #endif
+    Containers::Optional<Containers::String> out = Path::executableLocation();
+    return out ? std::string{*out} : std::string{};
 }
 
 std::string home() {
-    /* Unix, Emscripten */
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const char* const h = std::getenv("HOME");
-    if(!h) {
-        Error{} << "Utility::Directory::home(): $HOME not available";
-        return {};
-    }
-
-    return h;
-
-    /* Windows (not Store/Phone) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo get rid of MAX_PATH */
-    wchar_t h[MAX_PATH];
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h) == S_OK);
-    return fromNativeSeparators(narrow(h));
-
-    /* Other */
-    #else
-    Error{} << "Utility::Directory::home(): not implemented on this platform";
-    return {};
-    #endif
+    Containers::Optional<Containers::String> out = Path::homeDirectory();
+    return out ? std::string{*out} : std::string{};
 }
 
 std::string configurationDir(const std::string& applicationName) {
-    /* OSX, iOS */
-    #ifdef CORRADE_TARGET_APPLE
-    return join({home(), "Library/Application Support", applicationName});
-
-    /* XDG-compliant Unix (not using CORRADE_TARGET_UNIX, because that is a
-       superset), Emscripten */
-    #elif defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const std::string lowercaseApplicationName = String::lowercase(applicationName);
-    if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
-        return join(config, lowercaseApplicationName);
-
-    const char* const home = std::getenv("HOME");
-    if(!home) {
-        Error{} << "Utility::Directory::configurationDir(): neither $XDG_CONFIG_HOME nor $HOME available";
-        return {};
-    }
-
-    return join({home, ".config", lowercaseApplicationName});
-
-    /* Windows (not Store/Phone) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo get rid of MAX_PATH */
-    wchar_t path[MAX_PATH];
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path) == S_OK);
-    const std::string appdata{fromNativeSeparators(narrow(path))};
-    return appdata.empty() ? std::string{} : join(appdata, applicationName);
-
-    /* Other not implemented */
-    #else
-    static_cast<void>(applicationName);
-    Error{} << "Utility::Directory::configurationDir(): not implemented on this platform";
-    return {};
-    #endif
+    Containers::Optional<Containers::String> out = Path::configurationDirectory(applicationName);
+    return out ? std::string{*out} : std::string{};
 }
 
 std::string tmp() {
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Sandboxed OSX, iOS */
-    #ifdef CORRADE_TARGET_APPLE
-    if(isSandboxed()) return join(home(), "tmp");
-    #endif
-
-    /* Android, you had to be special, right? */
-    #ifdef CORRADE_TARGET_ANDROID
-    return "/data/local/tmp";
-    #endif
-
-    /* Common Unix, Emscripten */
-    return "/tmp";
-
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /* Windows */
-
-    /* Get path size */
-    wchar_t c;
-    const std::size_t size = GetTempPathW(1, &c);
-
-    /* Get the path, remove the trailing slash (and zero terminator) */
-    std::wstring path(size, '\0');
-    GetTempPathW(size, &path[0]);
-    CORRADE_INTERNAL_ASSERT(path.size());
-    path.resize(path.size() - 2);
-
-    /* Convert to forward slashes */
-    return fromNativeSeparators(narrow(path));
-    #else
-    Error{} << "Utility::Directory::tmp(): not implemented on this platform";
-    return {};
-    #endif
+    Containers::Optional<Containers::String> out = Path::temporaryDirectory();
+    return out ? std::string{*out} : std::string{};
 }
 
-std::vector<std::string> list(const std::string& path, Flags flags) {
-    std::vector<std::string> list;
-
-    /* POSIX-compliant Unix, Emscripten */
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    DIR* directory = opendir(path.data());
-    if(!directory) {
-        Error err;
-        err << "Utility::Directory::list(): can't list" << path << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return list;
-    }
-
-    dirent* entry;
-    while((entry = readdir(directory)) != nullptr) {
-        if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
-            continue;
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
-        if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
-            continue;
-        if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG && entry->d_type != DT_LNK)
-            continue;
-        #else
-        /* Emscripten doesn't set DT_REG for files, so we treat everything
-           that's not a DT_DIR as a file. SkipSpecial has no effect here. */
-        if(flags >= Flag::SkipFiles && entry->d_type != DT_DIR)
-            continue;
-        #endif
-
-        /* For symlinks we have to deref the link and ask there again. If that
-           fails for whatever reason, we leave the file in the list -- it can
-           be thought of as "neither a file nor directory" and we're told to
-           skip files/directories, not "include only files/directories".
-
-           Also do this only if we're told to skip certain entry types, for a
-           plain list this is unnecessary overhead. */
-        if((flags & (Flag::SkipDirectories|Flag::SkipFiles|Flag::SkipSpecial)) && entry->d_type == DT_LNK) {
-            /* stat() follows the symlink, lstat() doesn't */
-            struct stat st;
-            if(stat((join(path, entry->d_name)).data(), &st) == 0) {
-                if(flags >= Flag::SkipDirectories && S_ISDIR(st.st_mode))
-                    continue;
-                if(flags >= Flag::SkipFiles && S_ISREG(st.st_mode))
-                    continue;
-                if(flags >= Flag::SkipSpecial && !S_ISDIR(st.st_mode) && !S_ISREG(st.st_mode))
-                    continue;
-            }
-        }
-
-        std::string file{entry->d_name};
-        if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
-            continue;
-
-        list.push_back(std::move(file));
-    }
-
-    closedir(directory);
-
-    /* Windows (not Store/Phone) */
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    WIN32_FIND_DATAW data;
-    HANDLE hFile = FindFirstFileW(widen(join(path, "*")).data(), &data);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::list(): can't list" << path << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return list;
-    }
-    Containers::ScopeGuard closeHandle{hFile,
-        #ifdef CORRADE_MSVC2015_COMPATIBILITY
-        /* MSVC 2015 is unable to cast the parameter for FindClose */
-        [](HANDLE hFile){ FindClose(hFile); }
-        #else
-        FindClose
-        #endif
-    };
-
-    /* Explicitly add `.` for compatibility with other systems */
-    if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
-
-    while(FindNextFileW(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
-        if((flags >= Flag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-            continue;
-        if((flags >= Flag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-            continue;
-        /** @todo symlink support */
-        /** @todo are there any special files in WINAPI? */
-
-        std::string file{narrow(data.cFileName)};
-        /* Not testing for dot, as it is not listed on Windows */
-        if((flags >= Flag::SkipDotAndDotDot) && file == "..")
-            continue;
-
-        list.push_back(std::move(file));
-    }
-
-    /* Other not implemented */
-    #else
-    Error{} << "Utility::Directory::list(): not implemented on this platform";
-    static_cast<void>(path);
-    #endif
-
-    if(flags >= Flag::SortAscending)
-        std::sort(list.begin(), list.end());
-    else if(flags >= Flag::SortDescending)
-        std::sort(list.rbegin(), list.rend());
-
-    return list;
+std::vector<std::string> list(const std::string& path, Path::ListFlags flags) {
+    Containers::Optional<Containers::Array<Containers::String>> out = Path::list(path, flags);
+    return out ? std::vector<std::string>{out->begin(), out->end()} : std::vector<std::string>{};
 }
 
 Containers::Array<char> read(const std::string& filename) {
-    /* Special case for "Unicode" Windows support */
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const f = std::fopen(filename.data(), "rb");
-    #else
-    std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
-    #endif
-    if(!f) {
-        Error err;
-        err << "Utility::Directory::read(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return nullptr;
-    }
-
-    Containers::ScopeGuard exit{f, std::fclose};
-
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Explicitly fail if opening directories for reading on Unix to prevent
-       allocation failures or silent errors, see isDirectory(int) for details.
-       On Windows the fopen() fails already. */
-    if(isDirectory(fileno(f))) {
-        Error{} << "Utility::Directory::read():" << filename << "is a directory";
-        return {};
-    }
-    #endif
-
-    Containers::Optional<std::size_t> size = fileSize(f);
-
-    /* If the file is not seekable, read it in chunks. Read directly into the
-       output array --- each time add uninitialized 4 kB at the end, pass that
-       view to fread(), and then strip away what didn't get filled. Hey, do you
-       like the growable array API as much as I do? :D */
-    /** @todo that the loop works is only verifiable by setting the condition
-        to if(true) and setting chunkSize to 1 -- I don't know about any large
-        non-seekable file that could be used for this */
-    if(!size) {
-        Containers::Array<char> out;
-        constexpr std::size_t chunkSize = 4096;
-
-        std::size_t count;
-        do {
-            count = std::fread(arrayAppend(out, NoInit, chunkSize), 1, chunkSize, f);
-            arrayRemoveSuffix(out, chunkSize - count);
-        } while(count);
-
-        return out;
-    }
-
-    /* Some special files report more bytes than they actually have (such as
-       stuff in /sys). Clamp the returned array to what was reported. */
-    Containers::Array<char> out{NoInit, *size};
-    const std::size_t realSize = std::fread(out, 1, *size, f);
-    CORRADE_INTERNAL_ASSERT(realSize <= *size);
-    return Containers::Array<char>{out.release(), realSize};
+    Containers::Optional<Containers::Array<char>> out = Path::read(filename);
+    return out ? *std::move(out) : nullptr;
 }
 
 std::string readString(const std::string& filename) {
-    const auto data = read(filename);
-
-    return {data, data.size()};
+    Containers::Optional<Containers::String> out = Path::readString(filename);
+    return out ? std::string{*out} : std::string{};
 }
 
 bool write(const std::string& filename, const Containers::ArrayView<const void> data) {
-    /* Special case for "Unicode" Windows support */
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const f = std::fopen(filename.data(), "wb");
-    #else
-    std::FILE* const f = _wfopen(widen(filename).data(), L"wb");
-    #endif
-    if(!f) {
-        Error err;
-        err << "Utility::Directory::write(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    Containers::ScopeGuard exit{f, std::fclose};
-
-    std::fwrite(data, 1, data.size(), f);
-    return true;
+    return Path::write(filename, data);
 }
 
 bool writeString(const std::string& filename, const std::string& data) {
     static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
-    return write(filename, {data.data(), data.size()});
+    return Path::write(filename, Containers::StringView{data});
 }
 
 bool append(const std::string& filename, const Containers::ArrayView<const void> data) {
-    /* Special case for "Unicode" Windows support */
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const f = std::fopen(filename.data(), "ab");
-    #else
-    std::FILE* const f = _wfopen(widen(filename).data(), L"ab");
-    #endif
-    if(!f) {
-        Error err;
-        err << "Utility::Directory::append(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    Containers::ScopeGuard exit{f, std::fclose};
-
-    std::fwrite(data, 1, data.size(), f);
-    return true;
+    return Path::append(filename, data);
 }
 
 bool appendString(const std::string& filename, const std::string& data) {
     static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
-    return append(filename, {data.data(), data.size()});
+    return Path::append(filename, Containers::StringView{data});
 }
 
 bool copy(const std::string& from, const std::string& to) {
-    /* Special case for "Unicode" Windows support */
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const in = std::fopen(from.data(), "rb");
-    #else
-    std::FILE* const in = _wfopen(widen(from).data(), L"rb");
-    #endif
-    if(!in) {
-        Error err;
-        err << "Utility::Directory::copy(): can't open" << from << "for reading:";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    Containers::ScopeGuard exitIn{in, std::fclose};
-
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Explicitly fail if opening directories for reading on Unix to prevent
-       silent errors, see isDirectory(int) for details. On Windows the fopen()
-       fails already. */
-    if(isDirectory(fileno(in))) {
-        Error{} << "Utility::Directory::copy(): can't read from" << from << "which is a directory";
-        return {};
-    }
-    #endif
-
-    #ifndef CORRADE_TARGET_WINDOWS
-    std::FILE* const out = std::fopen(to.data(), "wb");
-    #else
-    std::FILE* const out = _wfopen(widen(to).data(), L"wb");
-    #endif
-    if(!out) {
-        Error err;
-        err << "Utility::Directory::copy(): can't open" << to << "for writing:";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-
-    Containers::ScopeGuard exitOut{out, std::fclose};
-
-    #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-    /* As noted in https://eklitzke.org/efficient-file-copying-on-linux, might
-       make the file reading faster. Didn't make any difference in the 100 MB
-       benchmark on my ultra-fast SSD, though. */
-    posix_fadvise(fileno(in), 0, 0, POSIX_FADV_SEQUENTIAL);
-    #endif
-
-    /* 128 kB: https://eklitzke.org/efficient-file-copying-on-linux. The 100 MB
-       benchmark agrees, going below is significantly slower and going above is
-       not any faster. */
-    char buffer[128*1024];
-    std::size_t count;
-    do {
-        count = std::fread(buffer, 1, Containers::arraySize(buffer), in);
-        std::fwrite(buffer, 1, count, out);
-    } while(count);
-
-    return true;
+    return Path::copy(from, to);
 }
 
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-void MapDeleter::operator()(const char* const data, const std::size_t size) {
-    #ifdef CORRADE_TARGET_UNIX
-    if(data && munmap(const_cast<char*>(data), size) == -1)
-        Error() << "Utility::Directory: can't unmap memory-mapped file";
-    if(_fd) close(_fd);
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    if(data) UnmapViewOfFile(data);
-    if(_hMap) CloseHandle(_hMap);
-    if(_hFile) CloseHandle(_hFile);
-    #endif
+Containers::Array<char, Path::MapDeleter> map(const std::string& filename) {
+    Containers::Optional<Containers::Array<char, Path::MapDeleter>> out = Path::map(filename);
+    return out ? *std::move(out) : nullptr;
 }
 
-Containers::Array<char, MapDeleter> map(const std::string& filename) {
-    #ifdef CORRADE_TARGET_UNIX
-    /* Open the file for reading */
-    const int fd = open(filename.data(), O_RDWR);
-    if(fd == -1) {
-        Error err;
-        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return nullptr;
-    }
-
-    /* Get file size */
-    const off_t currentPos = lseek(fd, 0, SEEK_CUR);
-    const std::size_t size = lseek(fd, 0, SEEK_END);
-    lseek(fd, currentPos, SEEK_SET);
-
-    /* Map the file. Can't call mmap() with a zero size, so if the file is
-       empty just set the pointer to null -- but for consistency keep the fd
-       open and let it be handled by the deleter. Array guarantees that deleter
-       gets called even in case of a null data. */
-    char* data;
-    if(!size) data = nullptr;
-    else if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
-        Error err;
-        err << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        close(fd);
-        return nullptr;
-    }
-
-    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /* Open the file for writing. Create if it doesn't exist, truncate it if it
-       does. */
-    HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::map(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return nullptr;
-    }
-
-    /* Get file size */
-    const std::size_t size = GetFileSize(hFile, nullptr);
-
-    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the handle open
-       and let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    HANDLE hMap;
-    char* data;
-    if(!size) {
-        hMap = {};
-        data = nullptr;
-    } else {
-        /* Create the file mapping */
-        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr))) {
-            Error err;
-            err << "Utility::Directory::map(): can't create file mapping for" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hFile);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
-            Error err;
-            err << "Utility::Directory::map(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hMap);
-            CloseHandle(hFile);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
-    #endif
+Containers::Array<const char, Path::MapDeleter> mapRead(const std::string& filename) {
+    Containers::Optional<Containers::Array<const char, Path::MapDeleter>> out = Path::mapRead(filename);
+    return out ? *std::move(out) : nullptr;
 }
 
-Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
-    #ifdef CORRADE_TARGET_UNIX
-    /* Open the file for reading */
-    const int fd = open(filename.data(), O_RDONLY);
-    if(fd == -1) {
-        Error err;
-        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return nullptr;
-    }
-
-    /* Explicitly fail if opening directories for reading on Unix to prevent
-       silent errors, see isDirectory(int) for details */
-    if(isDirectory(fd)) {
-        Error{} << "Utility::Directory::mapRead():" << filename << "is a directory";
-        return {};
-    }
-
-    /* Get file size */
-    const off_t currentPos = lseek(fd, 0, SEEK_CUR);
-    const std::size_t size = lseek(fd, 0, SEEK_END);
-    lseek(fd, currentPos, SEEK_SET);
-
-    /* Map the file. Can't call mmap() with a zero size, so if the file is
-       empty just set the pointer to null -- but for consistency keep the fd
-       open and let it be handled by the deleter. Array guarantees that deleter
-       gets called even in case of a null data. */
-    const char* data;
-    if(!size) data = nullptr;
-    else if((data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0))) == MAP_FAILED) {
-        Error err;
-        err << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        close(fd);
-        return nullptr;
-    }
-
-    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /* Open the file for reading */
-    HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::mapRead(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return nullptr;
-    }
-
-    /* Get file size */
-    const std::size_t size = GetFileSize(hFile, nullptr);
-
-    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the handle open
-       and let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    HANDLE hMap;
-    char* data;
-    if(!size) {
-        hMap = {};
-        data = nullptr;
-    } else {
-        /* Create the file mapping */
-        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr))) {
-            Error err;
-            err << "Utility::Directory::mapRead(): can't create file mapping for" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hFile);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0)))) {
-            Error err;
-            err << "Utility::Directory::mapRead(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hMap);
-            CloseHandle(hFile);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
-    #endif
+Containers::Array<char, Path::MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
+    Containers::Optional<Containers::Array<char, Path::MapDeleter>> out = Path::mapWrite(filename, size);
+    return out ? *std::move(out) : nullptr;
 }
 
-Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, const std::size_t size) {
-    #ifdef CORRADE_TARGET_UNIX
-    /* Open the file for writing. Create if it doesn't exist, truncate it if it
-       does. */
-    const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
-    if(fd == -1) {
-        Error err;
-        err << "Utility::Directory::mapWrite(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return nullptr;
-    }
-
-    /* Can't seek, write or mmap() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the fd open and
-       let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    char* data;
-    if(!size) {
-         data = nullptr;
-    } else {
-        /* Resize the file to requested size by seeking one byte before */
-        if(lseek(fd, size - 1, SEEK_SET) == -1) {
-            Error err;
-            err << "Utility::Directory::mapWrite(): can't seek to resize" << filename << Debug::nospace << ":";
-            Utility::Implementation::printErrnoErrorString(err, errno);
-            close(fd);
-            return nullptr;
-        }
-
-        /* And then writing a zero byte on that position */
-        if(::write(fd, "", 1) != 1) {
-            Error err;
-            err << "Utility::Directory::mapWrite(): can't write to resize" << filename << Debug::nospace << ":";
-            Utility::Implementation::printErrnoErrorString(err, errno);
-            close(fd);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
-            Error err;
-            err << "Utility::Directory::mapWrite(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printErrnoErrorString(err, errno);
-            close(fd);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
-    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)    /* Open the file for writing. Create if it doesn't exist, truncate it if it
-       does. */
-    HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
-    if(hFile == INVALID_HANDLE_VALUE) {
-        Error err;
-        err << "Utility::Directory::mapWrite(): can't open" << filename << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return nullptr;
-    }
-
-    /* Can't call CreateFileMapping() with a zero size, so if the file is empty
-       just set the pointer to null -- but for consistency keep the handle open
-       and let it be handled by the deleter. Array guarantees that deleter gets
-       called even in case of a null data. */
-    HANDLE hMap;
-    char* data;
-    if(!size) {
-        hMap = {};
-        data = nullptr;
-    } else {
-        /* Create the file mapping */
-        if(!(hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr))) {
-            Error err;
-            err << "Utility::Directory::mapWrite(): can't create file mapping for" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hFile);
-            return nullptr;
-        }
-
-        /* Map the file */
-        if(!(data = reinterpret_cast<char*>(MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))) {
-            Error err;
-            err << "Utility::Directory::mapWrite(): can't map" << filename << Debug::nospace << ":";
-            Utility::Implementation::printWindowsErrorString(err, GetLastError());
-            CloseHandle(hMap);
-            CloseHandle(hFile);
-            return nullptr;
-        }
-    }
-
-    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
-    #endif
-}
-
-#ifdef CORRADE_BUILD_DEPRECATED
-Containers::Array<char, MapDeleter> map(const std::string& filename, const std::size_t size) {
+Containers::Array<char, Path::MapDeleter> map(const std::string& filename, const std::size_t size) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return mapWrite(filename, size);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
-#endif
 #endif
 
 }}}

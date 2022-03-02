@@ -59,7 +59,7 @@ Plugins are searched in the following directories, in order:
     @ref AbstractPlugin::pluginSearchPaths(). The search goes through the
     entries and stops once an existing directory is found.
 
-In both cases the path of @ref Utility::Directory::executableLocation() is
+In both cases the path of @ref Utility::Path::executableLocation() is
 prepended to relative paths before testing. The matching directory is then
 saved and available through @ref pluginDirectory().
 

@@ -205,23 +205,23 @@ target_compile_definitions(UtilityMemoryTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 
 corrade_add_test(UtilityMoveTest MoveTest.cpp)
 
-set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
+set(UtilityPathTest_SRCS PathTest.cpp)
 if(CORRADE_TARGET_IOS)
-    set_source_files_properties(DirectoryTestFiles PROPERTIES
+    set_source_files_properties(PathTestFiles PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
-    list(APPEND UtilityDirectoryTest_SRCS DirectoryTestFiles)
+    list(APPEND PathDirectoryTest_SRCS PathTestFiles)
 endif()
-corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
+corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
     FILES
-        DirectoryTestFiles/dir/dummy
-        DirectoryTestFiles/file
-        DirectoryTestFilesSymlink/dir/dummy
-        DirectoryTestFilesSymlink/dir-symlink
-        DirectoryTestFilesSymlink/file
-        DirectoryTestFilesSymlink/file-symlink
-        DirectoryTestFilesUtf8/šňůra/dummy
-        DirectoryTestFilesUtf8/hýždě)
-target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        PathTestFiles/dir/dummy
+        PathTestFiles/file
+        PathTestFilesSymlink/dir/dummy
+        PathTestFilesSymlink/dir-symlink
+        PathTestFilesSymlink/file
+        PathTestFilesSymlink/file-symlink
+        PathTestFilesUtf8/šňůra/dummy
+        PathTestFilesUtf8/hýždě)
+target_include_directories(UtilityPathTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -309,13 +309,13 @@ set_target_properties(
     UtilityConfigurationTest
     UtilityConfigurationValueTest
     UtilityDebugTest
-    UtilityDirectoryTest
     UtilityFatalTest
     UtilityFormatTest
     UtilityHashDigestTest
     UtilityMacrosTest
     UtilityMemoryTest
     UtilityMoveTest
+    UtilityPathTest
     UtilityResourceTest
     UtilityResourceStaticTest
     UtilitySha1Test
@@ -362,5 +362,28 @@ if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS
     set_target_properties(
         UtilityFileWatcherTest
         UtilityTweakableTest
+        PROPERTIES FOLDER "Corrade/Utility/Test")
+endif()
+
+if(CORRADE_BUILD_DEPRECATED)
+    set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
+    if(CORRADE_TARGET_IOS)
+        set_source_files_properties(PathTestFiles PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources)
+        list(APPEND UtilityDirectoryTest_SRCS PathTestFiles)
+    endif()
+    corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
+        FILES
+            PathTestFiles/dir/dummy
+            PathTestFiles/file
+            PathTestFilesSymlink/dir/dummy
+            PathTestFilesSymlink/dir-symlink
+            PathTestFilesSymlink/file
+            PathTestFilesSymlink/file-symlink
+            PathTestFilesUtf8/šňůra/dummy
+            PathTestFilesUtf8/hýždě)
+    target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    set_target_properties(
+        UtilityDirectoryTest
         PROPERTIES FOLDER "Corrade/Utility/Test")
 endif()

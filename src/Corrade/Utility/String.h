@@ -345,7 +345,7 @@ Splits @p string at the first occurrence of @p separator. First returned value
 is the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns the input string followed by
 two empty strings.
-@see @ref rpartition(), @ref Directory::splitExtension(),
+@see @ref rpartition(), @ref Path::splitExtension(),
     @ref Containers::StringView::partition()
 */
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
@@ -365,7 +365,7 @@ Splits @p string at the last occurrence of @p separator. First returned value is
 the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns two empty strings followed by
 the input string.
-@see @ref partition(), @ref Directory::splitExtension()
+@see @ref partition(), @ref Path::splitExtension()
 */
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator);
 

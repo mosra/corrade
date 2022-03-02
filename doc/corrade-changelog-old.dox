@@ -239,12 +239,13 @@ a high-level overview.
     used
 -   Added @ref Utility::Fatal output. Similar to @ref Utility::Error but exits
     with defined return code right after printing the message.
--   Added @ref Utility::Directory::isSandboxed(),
-    @ref Utility::Directory::executableLocation(), @ref Utility::Directory::tmp(),
-    @ref Utility::Directory::fromNativeSeparators() and
-    @ref Utility::Directory::toNativeSeparators()
--   Added @ref Utility::Directory::map() and @ref Utility::mapRead() for
-    mapping files into memory, works on non-RT Windows and all Unix-like
+-   Added @cpp Utility::Directory::isSandboxed() @ce,
+    @cpp Utility::Directory::executableLocation() @ce,
+    @cpp Utility::Directory::tmp() @ce,
+    @cpp Utility::Directory::fromNativeSeparators() @ce and
+    @cpp Utility::Directory::toNativeSeparators() @ce
+-   Added @cpp Utility::Directory::map() @ce and @cpp Utility::mapRead() @ce
+    for mapping files into memory, works on non-RT Windows and all Unix-like
     systems (see [mosra/corrade#27](https://github.com/mosra/corrade/pull/27))
 -   Added @ref Utility::Resource::hasGroup()
 -   Added @ref Utility::Unicode::prevChar(), @ref Utility::Unicode::utf8()
@@ -300,10 +301,10 @@ a high-level overview.
     consistently on all platforms
 -   Ensuring that floating-point values printed by @ref Utility::Debug have
     enough digits of precision based on their type
--   All @ref Utility::Directory functions now properly take and return UTF-8
-    encoded paths on Windows (see [mosra/corrade#31](https://github.com/mosra/corrade/issues/31))
--   Implemented @ref Utility::Directory::configurationDir() and
-    @ref Utility::Directory::home() on Emscripten, OSX and iOS with proper
+-   All @cpp Utility::Directory @ce functions now properly take and return
+    UTF-8 encoded paths on Windows (see [mosra/corrade#31](https://github.com/mosra/corrade/issues/31))
+-   Implemented @cpp Utility::Directory::configurationDir() @ce and
+    @cpp Utility::Directory::home() @ce on Emscripten, OSX and iOS with proper
     handling of sandboxed apps (see [mosra/corrade#6](https://github.com/mosra/corrade/issues/6))
 -   @ref Utility::Resource and @ref corrade-cmake-add-resource "corrade_add_resource()"
     CMake macro now properly handle UTF-8 filenames on all platforms
@@ -362,9 +363,9 @@ a high-level overview.
     for named arguments
 -   Prefixed @ref Utility::Arguments failed on encountering value starting with
     `-`
--   @ref Utility::Directory::mkpath() now properly returns @cpp false @ce if
-    path creation fails
--   Fixed @ref Utility::Directory::rm() for directories on Emscripten
+-   @cpp Utility::Directory::mkpath() @ce now properly returns @cpp false @ce
+    if path creation fails
+-   Fixed @cpp Utility::Directory::rm() @ce for directories on Emscripten
 -   Fixed unaligned reads and iterative digesting in @ref Utility::Sha1
 -   Properly re-running CMake and updating dependencies when resource
     configuration file added by @ref corrade-cmake-add-resource "corrade_add_resource()"

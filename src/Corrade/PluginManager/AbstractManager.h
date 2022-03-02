@@ -337,7 +337,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @ref setPluginDirectory() or @ref reloadPluginDirectory().
          *
          * @note If passing a file path, the implementation expects forward
-         *      slashes as directory separators. Use @ref Utility::Directory::fromNativeSeparators()
+         *      slashes as directory separators. Use @ref Utility::Path::fromNativeSeparators()
          *      to convert from platform-specific format.
          *
          * @see @ref unload(), @ref loadState(), @ref Manager::instantiate(),

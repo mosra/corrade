@@ -27,9 +27,11 @@
 #define CONFIGURATION_TEST_DIR "${UTILITY_TEST_DIR}/ConfigurationTestFiles/"
 #define CONFIGURATION_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/ConfigurationTestFiles/"
 
-#define DIRECTORY_TEST_DIR "${UTILITY_TEST_DIR}/DirectoryTestFiles"
-#define DIRECTORY_TEST_DIR_SYMLINK "${UTILITY_TEST_DIR}/DirectoryTestFilesSymlink"
-#define DIRECTORY_TEST_DIR_UTF8 "${UTILITY_TEST_DIR}/DirectoryTestFilesUtf8"
+#define PATH_TEST_DIR "${UTILITY_TEST_DIR}/PathTestFiles"
+#define PATH_TEST_DIR_SYMLINK "${UTILITY_TEST_DIR}/PathTestFilesSymlink"
+#define PATH_TEST_DIR_UTF8 "${UTILITY_TEST_DIR}/PathTestFilesUtf8"
+#define PATH_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/PathTestFiles"
+/* To avoid DirectoryTest and PathTest corrupting each other's written files */
 #define DIRECTORY_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/DirectoryTestFiles"
 
 #define FORMAT_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}"

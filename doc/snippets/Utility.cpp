@@ -627,9 +627,9 @@ if(stuff.broken())
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 {
 std::string from, to;
-/* [Directory-copy-mmap] */
-Utility::Directory::write(to, Utility::Directory::mapRead(from));
-/* [Directory-copy-mmap] */
+/* [Path-copy-mmap] */
+Utility::Path::write(to, *Utility::Path::mapRead(from));
+/* [Path-copy-mmap] */
 }
 #endif
 

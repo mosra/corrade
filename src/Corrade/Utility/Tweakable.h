@@ -301,7 +301,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          * relative to the build directory and in other cases you may want to
          * watch files in a directory different from the source tree. This
          * function strips @p prefix from all file paths and prepends
-         * @p replace to them using @ref Directory::join().
+         * @p replace to them using @ref Path::join().
          *
          * It's possible to have either @p prefix or @p replace empty, having
          * both empty is equivalent to calling the parameter-less @ref enable().

@@ -109,7 +109,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * List of hardcoded absolute or relative paths where to search for
          * plugins of given interface. Relative paths are relative to
-         * @ref Utility::Directory::executableLocation() directory. Earlier
+         * @ref Utility::Path::executableLocation() directory. Earlier
          * entries have more priority than later, search stops once a directory
          * that exists is found. By default this function returns an empty
          * list, you can use the convenience @ref implicitPluginSearchPaths()
@@ -327,7 +327,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 @param libraryLocation  Absolute location of a dynamic library containing the
     plugin interface. Should be empty when the library is static or the plugin
     interface is defined directly inside an executable. Use
-    @ref Utility::Directory::libraryLocation() to retrieve the location.
+    @ref Utility::Path::libraryLocation() to retrieve the location.
 @param hardcodedPath    Hardcoded path where to search for plugins. It's
     recommended to propagate this value from the buildsystem, keeping it empty
     by default.
@@ -345,10 +345,10 @@ Produces a list of search paths in this order:
     an absolute path even when not needed may result in self-contained apps
     picking up system-wide plugins by accident, causing all sorts of ABI
     issues. The path can be relative as well, in which case the plugin manager
-    joins path of @ref Utility::Directory::executableLocation() with it.
+    joins path of @ref Utility::Path::executableLocation() with it.
 2.  @cpp "../PlugIns" @ce joined with @p relativePath, if the system is macOS
     or iOS. Since it's a relative location, the plugin manager joins path of
-    @ref Utility::Directory::executableLocation() with it. This is meant for
+    @ref Utility::Path::executableLocation() with it. This is meant for
     bundles, where the main executable is expected to be stored in the `MacOS`
     directory and plugins in the `PlugIns` directory (note the capitalization).
     [Apple docs for reference.](https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html#//apple_ref/doc/uid/10000123i-CH101-SW3)
@@ -365,7 +365,7 @@ Produces a list of search paths in this order:
 4.  @cpp "../lib" @ce joined with @p relativePath, unless the system is
     Windows (because there plugin DLLs are not in a `lib` directory but next to
     the executable in `bin` instead). Since it's a relative location, the
-    plugin manager joins path of @ref Utility::Directory::executableLocation()
+    plugin manager joins path of @ref Utility::Path::executableLocation()
     with it. This will work for most cases of a static system-wide install. For
     example with executable location being @cpp "/usr/bin/magnum-player" @ce
     and @p relativePath set to @cpp "magnum/imageconverters" @ce, it'll result
@@ -374,7 +374,7 @@ Produces a list of search paths in this order:
     no symlink that would make the above work, you need use @p hardcodedPath.
 5.  @p relativePath alone, for example @cpp "magnum/imageconverters" @ce.
     Again, since it's a relative location, the plugin manager joins path of
-    @ref Utility::Directory::executableLocation() with it. This will work for
+    @ref Utility::Path::executableLocation() with it. This will work for
     Windows and all relocatable installs, as it simply looks for the plugins
     next to the executable.
 

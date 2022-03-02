@@ -199,26 +199,25 @@ namespace Corrade {
     compilers
 -   @ref Utility::Debug now accepts also a C++17 @ref std::string_view if
     you include @ref Corrade/Utility/DebugStlStringView.h
--   Improved error handling in @ref Utility::Directory APIs where all APIs now
+-   Improved error handling in @ref Utility::Path APIs where all APIs now
     consistently print an error code and message coming from the system on
     failure instead of a generic message or nothing at all
--   @ref Utility::Directory::isDirectory() now follows symlinks on Unix
-    platforms
--   @ref Utility::Directory::Flag::SkipFiles and
-    @ref Utility::Directory::Flag::SkipDirectories passed to
-    @ref Utility::Directory::list() now affects symlinks as well --- previously
-    they were treated as neither, now they get correctly skipped based on
-    whether the target is a file or a directory
--   @ref Utility::Directory::Flag::SkipSpecial passed to
-    @ref Utility::Directory::list() now has no effect on Emscripten, the same
+-   @ref Utility::Path::isDirectory() now follows symlinks on Unix platforms
+-   @ref Utility::Path::ListFlag::SkipFiles and
+    @ref Utility::Path::ListFlag::SkipDirectories passed to
+    @ref Utility::Path::list() now affects symlinks as well --- previously they
+    were treated as neither, now they get correctly skipped based on whether
+    the target is a file or a directory
+-   @ref Utility::Path::ListFlag::SkipSpecial passed to
+    @ref Utility::Path::list() now has no effect on Emscripten, the same
     as on Windows, as those two platforms have no notion of a special file.
     Previously this behaved equivalently to
-    @ref Utility::Directory::Flag::SkipFiles on Emscripten but that made no
+    @ref Utility::Path::ListFlag::SkipFiles on Emscripten but that made no
     sense from a portability point of view.
--   @ref Utility::Directory::fileSize(), @relativeref{Utility::Directory,read()},
-    and @relativeref{Utility::Directory,copy()} now explicitly check if the
-    path is a directory and fail in that case, instead of returning nonsense,
-    crashing on an allocation failure or silently doing the wrong thing
+-   @ref Utility::Path::size(), @relativeref{Utility::Path,read()} and
+    @relativeref{Utility::Path,copy()} now explicitly check if the path is a
+    directory and fail in that case, instead of returning nonsense, crashing on
+    an allocation failure or silently doing the wrong thing
 -   @ref Utility::format() now supports printing integers as characters using
     the @cpp "{:c}" @ce modifier
 -   @ref Utility::format() now accepts also a C++17 @ref std::string_view if
@@ -228,8 +227,8 @@ namespace Corrade {
     @ref Containers::StringView overloads that allocate much less
 -   Ability to print @ref Containers::BasicStringView and
     @ref Containers::String using @ref Utility::format()
--   Creating an empty path with @ref Utility::Directory::mkpath() now succeeds
-    because it makes no sense to fail for such case
+-   Creating an empty path with @ref Utility::Path::make() now succeeds because
+    it makes no sense to fail for such case
 -   @ref Utility::IsStringLike now recognizes also C++17 @ref std::string_view
     by checking for a @cpp substr() @ce member instead of @cpp c_str() @ce
 -   The @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro is now defined on
@@ -286,8 +285,8 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
--   @ref Utility::Directory::list() was leaking the file handle on Windows
-    (see [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
+-   @ref Utility::Path::list() was leaking the file handle on Windows (see
+    [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable
     array utils, @ref Containers::Optional, @ref Containers::Pointer and
     @ref Containers::StaticArray where using @cpp T{b} @ce or
@@ -328,6 +327,74 @@ namespace Corrade {
 -   @cpp Utility::Directory::isSandboxed() @ce is deprecated in favor of
     @ref Utility::System::isSandboxed(), as that's the better place for this
     API to live in
+-   All other @cpp Utility::Directory @ce APIs are deprecated in favor of a new
+    @ref Utility::Path namespace. It uses the more efficient
+    @ref Containers::StringView instead of @ref std::string for function
+    arguments and non-owned return values, @ref Containers::String
+    instead of @ref std::string for owned return values, wraps return values
+    for all failable APIs in a @ref Containers::Optional and makes various API
+    naming cleanups and clarifications. Because of the sweeping nature of the
+    changes, it was not possible to make these updates
+    in @cpp Utility::Directory @ce directly, as it would cause basically all
+    existing code to break. Thus the new APIs are in a completely new
+    namespace:
+    -   @cpp Utility::Directory::fromNativeSeparators() @ce and
+        @cpp toNativeSeparators() @ce is deprecated in favor
+        of @ref Utility::Path::fromNativeSeparators() and
+        @relativeref{Utility::Path,toNativeSeparators()}
+    -   @cpp Utility::Directory::path() @ce and @cpp filename() @ce is
+        deprecated in favor of @ref Utility::Path::split() that returns both
+        parts together
+    -   @cpp Utility::Directory::splitExtension() @ce is deprecated in favor of
+        @ref Utility::Path::splitExtension()
+    -   @cpp Utility::Directory::join() @ce is deprecated in favor of
+        @ref Utility::Path::join()
+    -   @cpp Utility::Directory::list() @ce, @cpp Flag @ce and @cpp Flags @ce
+        are deprecated in favor of @ref Utility::Path::list(),
+        @relativeref{Utility::Path,ListFlag} and
+        @relativeref{Utility::Path,ListFlags}, returning the list wrapped in a
+        @ref Containers::Optional
+    -   @cpp Utility::Directory::mkpath() @ce, @cpp rm() @ce and
+        @cpp move() @ce are deprecated in favor of @ref Utility::Path::make(),
+        @relativeref{Utility::Path,remove()} and
+        @relativeref{Utility::Path,move()}
+    -   @cpp Utility::Directory::current() @ce, @cpp libraryLocation() @ce,
+        @cpp executableLocation() @ce, @cpp home() @ce,
+        @cpp configurationDir() @ce and @cpp tmp() @ce are deprecated in favor
+        of @ref Utility::Path::currentDirectory(),
+        @relativeref{Utility::Path,libraryLocation()},
+        @relativeref{Utility::Path,executableLocation()},
+        @relativeref{Utility::Path,homeDirectory()},
+        @relativeref{Utility::Path,configurationDirectory()} and
+        @relativeref{Utility::Path,temporaryDirectory()}, all returning the
+        path wrapped in a @ref Containers::Optional
+    -   @cpp Utility::Directory::exists() @ce and @cpp isDirectory() @ce is
+        deprecated in favor of @ref Utility::Path::exists() and
+        @relativeref{Utility::Path,isDirectory()}
+    -   @cpp Utility::Directory::fileSize() @ce is deprecated in favor of
+        @ref Utility::Path::size()
+    -   @cpp Utility::Directory::read() @ce is deprecated in favor of
+        @ref Utility::Path::read(), returning a @ref Containers::Optional
+    -   @cpp Utility::Directory::readString() @ce is deprecated in favor of
+        @ref Utility::Path::readString(), returning a
+        @ref Containers::String in a @ref Containers::Optional, transferring
+        the memory ownership from a @ref Containers::Array instead of making a
+        copy
+    -   @cpp Utility::Directory::write() @ce, @cpp writeString() @ce,
+        @cpp append() @ce and @cpp appendString() @ce are deprecated in favor
+        of @ref Utility::Path::write() and
+        @relativeref{Utility::Path,append()}. Because a
+        @ref Containers::StringView is implicitly convertible to a
+        @ref Containers::ArrayView<const void>, there's no need for a dedicated
+        string overload anymore.
+    -   @cpp Utility::Directory::copy() @ce is deprecated in favor of
+        @ref Utility::Path::copy(),
+    -   @cpp Utility::Directory::map() @ce, @cpp mapRead() @ce,
+        @cpp mapWrite() @ce and @cpp MapDeleter @ce are deprecated in favor of
+        @ref Utility::Path::map(), @relativeref{Utility::Path,mapRead()},
+        @relativeref{Utility::Path,mapWrite()} and
+        @relativeref{Utility::Path,MapDeleter}, returning the mapped array
+        wrapped in an @ref Containers::Optional
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() overloads taking
     @ref Containers::BasicStringView are deprecated in favor of
@@ -505,9 +572,9 @@ Released 2020-06-27, tagged as
     is available in the standard library
 -   Added a @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro for detecting
     platforms where @cpp long double @ce and @cpp double @ce have the same size
--   Added @ref Utility::Directory::map(const std::string&) that provides
+-   Added @cpp Utility::Directory::map(const std::string&) @ce that provides
     read-write access to mapped files without truncating them.
--   Added @ref Utility::Directory::fileSize()
+-   Added @cpp Utility::Directory::fileSize() @ce
 -   New @ref Utility::Endianness::littleEndianInPlace() and
     @ref Utility::Endianness::bigEndianInPlace() overloads taking strided array
     views
@@ -611,8 +678,8 @@ Released 2020-06-27, tagged as
     commas
 -   Enabled @ref Utility::Debug::operator<<(long double) on Emscripten as well,
     as it being unavailable was a pointless restriction hurting portability
--   @ref Utility::Directory::mkpath() now properly reports errors instead of
-    just arrogantly returning @cpp false @ce (see [mosra/corrade#92](https://github.com/mosra/corrade/pull/92))
+-   @cpp Utility::Directory::mkpath() @ce now properly reports errors instead
+    of just arrogantly returning @cpp false @ce (see [mosra/corrade#92](https://github.com/mosra/corrade/pull/92))
 
 @subsection corrade-changelog-2020-06-buildsystem Build system
 
@@ -661,9 +728,9 @@ Released 2020-06-27, tagged as
 @subsection corrade-changelog-2020-06-deprecated Deprecated APIs
 
 -   @cpp Utility::Directory::map(const std::string&, std::size_t) @ce is
-    deprecated and renamed to @ref Utility::Directory::mapWrite() as it doesn't
-    preserve original file contents and thus can't be used for read-write
-    access
+    deprecated and renamed to @cpp Utility::Directory::mapWrite() @ce as it
+    doesn't preserve original file contents and thus can't be used for
+    read-write access
 -   The internal @cpp CORRADE_BIG_ENDIAN @ce macro got renamed to
     @ref CORRADE_TARGET_BIG_ENDIAN and made public. The old variant is still
     present for backwards compatibility, but will be removed in the future.
@@ -684,7 +751,7 @@ Released 2020-06-27, tagged as
     with 15 significant digits instead of 18 on platforms where it is 64-bit
     instead of 80-bit
 -   @ref Utility::Endianness is now a namespace, similarly to the change done
-    to @ref Utility::Directory or @ref Utility::String in 2018.02. The API
+    to @cpp Utility::Directory @ce or @ref Utility::String in 2018.02. The API
     doesn't change apart from that, but code previously doing
     @cpp using Utility::Endianness @ce needs to be changed to
     @cpp using namespace Utility::Endianness @ce to compile again.
@@ -789,21 +856,21 @@ Released 2019-10-24, tagged as
 -   @ref Utility::Debug::packed and @ref Utility::Debug::color output modifiers
     for tighter printing of container types and printing color-like values as
     actual 24bit ANSI color sequences
--   New @ref Utility::Directory::append() and
-    @ref Utility::Directory::appendString() counterparts to
-    @ref Utility::Directory::write()
--   New @ref Utility::Directory::copy() utility for zero-allocation file
+-   New @cpp Utility::Directory::append() @ce and
+    @cpp Utility::Directory::appendString() @ce counterparts to
+    @cpp Utility::Directory::write() @ce
+-   New @cpp Utility::Directory::copy() @ce utility for zero-allocation file
     copies.
--   New @ref Utility::Directory::join(std::initializer_list<std::string>)
+-   New @cpp Utility::Directory::join(std::initializer_list<std::string>) @ce
     overload for joining a path from multiple parts at once
--   New @ref Utility::Directory::current() utility for getting current working
-    directory
--   New @ref Utility::Directory::isDirectory() utility for distinguishing
+-   New @cpp Utility::Directory::current() @ce utility for getting current
+    working directory
+-   New @cpp Utility::Directory::isDirectory() @ce utility for distinguishing
     between files and directories
--   @ref Utility::Directory::libraryLocation() as a counterpart to
-    @ref Utility::Directory::executableLocation()
--   @ref Utility::Directory::splitExtension() as a complement to
-    @ref Utility::Directory::path() and @ref Utility::Directory::filename()
+-   @cpp Utility::Directory::libraryLocation() @ce as a counterpart to
+    @cpp Utility::Directory::executableLocation() @ce
+-   @cpp Utility::Directory::splitExtension() @ce as a complement to
+    @cpp Utility::Directory::path() @ce and @cpp Utility::Directory::filename() @ce
 -   New @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardTuple.h and
@@ -1009,9 +1076,9 @@ Released 2019-10-24, tagged as
     [mosra/corrade#58](https://github.com/mosra/corrade/pull/58))
 -   Fixed @ref Utility::Sha1 calculation on big-endian platforms (see
     [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
--   Fixed @ref Utility::Directory::read() to not use `ftello()` on 32-bit
+-   Fixed @cpp Utility::Directory::read() @ce to not use `ftello()` on 32-bit
     Android and API levels below 24
--   Fixed @ref Utility::Directory::read() to work with files that report an
+-   Fixed @cpp Utility::Directory::read() @ce to work with files that report an
     early EOF (such as stuff from `/sys` on Linux)
 -   Fixed @ref Interconnect::Emitter::emit() for signals from
     multiply-inherited base classes on MSVC --- it was due to an insufficiently
@@ -1029,8 +1096,8 @@ Released 2019-10-24, tagged as
     @ref Utility::Resource data happens more than once. While this was allowed
     for registration, the unregistration caused an assert to be fired. Fixed
     this to be allowed on both.
--   @ref Utility::Directory::copy() wasn't properly freeing both opened files
-    if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
+-   @cpp Utility::Directory::copy() @ce wasn't properly freeing both opened
+    files if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
 -   @ref Interconnect::Emitter::emit() (and signal/slot connections in general)
     now work correctly with non-copyable arguments
 -   Fixed @ref Utility::Debug::isTty() (and thus also @ref TestSuite colored
@@ -1049,7 +1116,7 @@ Released 2019-10-24, tagged as
     favor of @ref Utility::Arguments::setGlobalHelp() to avoid it being used
     for documenting named arguments by accident.
 -   @cpp Utility::Directory::fileExists() @ce is now deprecated in favor of
-    @ref Utility::Directory::exists(). It was named like this to prevent it
+    @cpp Utility::Directory::exists() @ce. It was named like this to prevent it
     from looking like it works on directories only, but such name then caused
     people to ask if it works on directories as well, not helping anything.
 -   `Interconnect::Connection::isConnected()` and

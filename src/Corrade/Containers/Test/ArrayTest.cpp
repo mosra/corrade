@@ -815,7 +815,7 @@ void ArrayTest::customDeleterNullData() {
     }
 
     /* The deleter should be called even in case the data is null. This is to
-       have correct behavior e.g. in Array<char, Utility::Directory::MapDeleter>
+       have correct behavior e.g. in Array<char, Utility::Path::MapDeleter>
        where the data can be null for an empty file, but the fd should still
        get properly closed after. */
     CORRADE_COMPARE(CustomDeleterCallCount, 1);

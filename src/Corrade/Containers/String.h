@@ -694,7 +694,7 @@ class CORRADE_UTILITY_EXPORT String {
         Array<StringView> split(char delimiter) const &; /**< @overload */
 
         /** @todo split(T*) / split(std::size_t) returning a Pair<StringView, StringView>
-            (used frequently in Directory::split*(), would save repetitive
+            (used frequently in Path::split*(), would save repetitive
             assertions), how to distinguish from split(char)?? rename split to
             splitOn()?? */
 

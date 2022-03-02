@@ -235,7 +235,7 @@ endif()
 
 if(CORRADE_TARGET_CLANG_CL)
     list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
-        # See Utility::Directory::libraryLocation() for details
+        # See Utility::Path::libraryLocation() for details
         "-Wno-microsoft-cast")
 endif()
 

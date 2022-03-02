@@ -27,10 +27,10 @@
 if(WITH_UTILITY)
     set(CorradeUtility_SRCS
         Debug.cpp
-        Directory.cpp
         Configuration.cpp
         ConfigurationValue.cpp
         MurmurHash2.cpp
+        Path.cpp
         Sha1.cpp
         System.cpp
 
@@ -60,7 +60,6 @@ if(WITH_UTILITY)
         Debug.h
         DebugStl.h
         DebugStlStringView.h
-        Directory.h
         Endianness.h
         EndiannessBatch.h
         Format.h
@@ -70,6 +69,7 @@ if(WITH_UTILITY)
         Memory.h
         Move.h
         MurmurHash2.h
+        Path.h
         Resource.h
         Sha1.h
         String.h
@@ -89,6 +89,13 @@ if(WITH_UTILITY)
     set(CorradeUtility_PRIVATE_HEADERS
         Implementation/ErrorString.h
         Implementation/Resource.h)
+
+    if(CORRADE_BUILD_DEPRECATED)
+        list(APPEND CorradeUtility_SRCS
+            Directory.cpp)
+        list(APPEND CorradeUtility_HEADERS
+            Directory.h)
+    endif()
 
     # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
     if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
@@ -151,7 +158,7 @@ if(WITH_UTILITY)
         set_target_properties(CorradeUtility PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
-    # Directory::libraryLocation() needs this
+    # Path::libraryLocation() needs this
     if(CORRADE_TARGET_UNIX)
         target_link_libraries(CorradeUtility PUBLIC ${CMAKE_DL_LIBS})
     endif()
@@ -199,10 +206,11 @@ if(NOT CMAKE_CROSSCOMPILING)
     set(CorradeUtilityRc_SRCS
         Arguments.cpp
         Debug.cpp
-        Directory.cpp
+        Directory.cpp # TODO remove once ported away from Directory
         Configuration.cpp
         ConfigurationGroup.cpp
         Format.cpp
+        Path.cpp
         Resource.cpp
         String.cpp
         System.cpp
@@ -242,7 +250,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         add_executable(corrade-rc rc.cpp)
         target_link_libraries(corrade-rc PRIVATE CorradeUtility)
     endif()
-    # Directory::libraryLocation() needs this
+    # Path::libraryLocation() needs this
     if(CORRADE_TARGET_UNIX)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
