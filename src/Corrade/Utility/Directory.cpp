@@ -92,6 +92,7 @@
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
+#include "Corrade/Utility/System.h"
 
 /* errno and GetLastError() stringifiers */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
@@ -469,13 +470,7 @@ bool isDirectory(const std::string& path) {
 }
 
 bool isSandboxed() {
-    #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
-    return true;
-    #elif defined(CORRADE_TARGET_APPLE)
-    return std::getenv("APP_SANDBOX_CONTAINER_ID");
-    #else
-    return false;
-    #endif
+    return System::isSandboxed();
 }
 
 std::string current() {

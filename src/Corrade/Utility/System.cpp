@@ -26,6 +26,10 @@
 
 #include "System.h"
 
+#ifdef CORRADE_TARGET_APPLE
+#include <cstdlib> /* std::getenv() */
+#endif
+
 #ifndef CORRADE_TARGET_WINDOWS
 #include "unistd.h"
 #else
@@ -33,6 +37,16 @@
 #endif
 
 namespace Corrade { namespace Utility { namespace System {
+
+bool isSandboxed() {
+    #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
+    return true;
+    #elif defined(CORRADE_TARGET_APPLE)
+    return std::getenv("APP_SANDBOX_CONTAINER_ID");
+    #else
+    return false;
+    #endif
+}
 
 void sleep(const std::size_t ms) {
     #ifndef CORRADE_TARGET_WINDOWS

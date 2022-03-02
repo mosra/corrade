@@ -234,17 +234,13 @@ UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool move(const std::string& from, const std::string& to);
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether the application runs in a sandboxed environment
-
-Returns @cpp true @ce if running on @ref CORRADE_TARGET_IOS "iOS",
-@ref CORRADE_TARGET_ANDROID "Android", as a
-@ref CORRADE_TARGET_APPLE "macOS" app bundle,
-@ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or in a
-browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", @cpp false @ce
-otherwise.
+@m_deprecated_since_latest Use @ref System::isSandboxed() instead.
 */
-CORRADE_UTILITY_EXPORT bool isSandboxed();
+CORRADE_DEPRECATED("use System::isSandboxed() instead") CORRADE_UTILITY_EXPORT bool isSandboxed();
+#endif
 
 /**
 @brief Current directory

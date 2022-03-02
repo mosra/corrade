@@ -32,11 +32,21 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct SystemTest: TestSuite::Tester {
     explicit SystemTest();
 
+    void isSandboxed();
     void sleep();
 };
 
 SystemTest::SystemTest() {
-    addTests({&SystemTest::sleep});
+    addTests({&SystemTest::isSandboxed,
+              &SystemTest::sleep});
+}
+
+void SystemTest::isSandboxed() {
+    #if defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_VERIFY(System::isSandboxed());
+    #else
+    CORRADE_VERIFY(!System::isSandboxed());
+    #endif
 }
 
 void SystemTest::sleep() {

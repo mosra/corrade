@@ -325,6 +325,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
+-   @cpp Utility::Directory::isSandboxed() @ce is deprecated in favor of
+    @ref Utility::System::isSandboxed(), as that's the better place for this
+    API to live in
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() overloads taking
     @ref Containers::BasicStringView are deprecated in favor of

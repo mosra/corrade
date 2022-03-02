@@ -54,6 +54,19 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 namespace System {
 
+/**
+@brief Whether the application runs in a sandboxed environment
+@m_since_latest
+
+Returns @cpp true @ce if running on @ref CORRADE_TARGET_IOS "iOS",
+@ref CORRADE_TARGET_ANDROID "Android", as a
+@ref CORRADE_TARGET_APPLE "macOS" app bundle,
+@ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or in a
+browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", @cpp false @ce
+otherwise.
+*/
+CORRADE_UTILITY_EXPORT bool isSandboxed();
+
 /** @brief Sleep for given time */
 CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
 

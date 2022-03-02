@@ -50,6 +50,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef CORRADE_TARGET_APPLE
+#include "Corrade/Utility/System.h" /* isSandboxed() */
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DirectoryTest: TestSuite::Tester {
@@ -96,8 +100,6 @@ struct DirectoryTest: TestSuite::Tester {
     void mkpathDotDotDot();
     void mkpathNoPermission();
     void mkpathUtf8();
-
-    void isSandboxed();
 
     void current();
     void currentNonexistent();
@@ -255,8 +257,6 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::mkpathNoPermission,
               &DirectoryTest::mkpathUtf8,
 
-              &DirectoryTest::isSandboxed,
-
               &DirectoryTest::current,
               &DirectoryTest::currentNonexistent,
               &DirectoryTest::currentUtf8,
@@ -370,7 +370,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::mapWriteUtf8});
 
     #ifdef CORRADE_TARGET_APPLE
-    if(Directory::isSandboxed()
+    if(System::isSandboxed()
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         /** @todo Fix this once I persuade CMake to run XCTest tests properly */
         && std::getenv("SIMULATOR_UDID")
@@ -930,14 +930,6 @@ void DirectoryTest::mkpathUtf8() {
     CORRADE_VERIFY(Directory::exists(leaf));
 }
 
-void DirectoryTest::isSandboxed() {
-    #if defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_VERIFY(Directory::isSandboxed());
-    #else
-    CORRADE_VERIFY(!Directory::isSandboxed());
-    #endif
-}
-
 void DirectoryTest::current() {
     const std::string current = Directory::current();
     CORRADE_INFO("Current directory found as:" << current);
@@ -1145,7 +1137,7 @@ void DirectoryTest::executableLocation() {
     /* On sandboxed macOS and iOS verify that the directory contains Info.plist
        file */
     #ifdef CORRADE_TARGET_APPLE
-    if(Directory::isSandboxed()) {
+    if(System::isSandboxed()) {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
             "CTest is not able to run XCTest executables properly in the simulator.");
@@ -1253,7 +1245,7 @@ void DirectoryTest::configurationDir() {
 
     #ifdef CORRADE_TARGET_APPLE
     CORRADE_COMPARE(dir.substr(dir.size() - 7), "Corrade");
-    if(Directory::isSandboxed())
+    if(System::isSandboxed())
         CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(Directory::path(dir)), "Caches")));
     else
         /* App Store is not present on *some* Travis VMs since 2018-08-05.

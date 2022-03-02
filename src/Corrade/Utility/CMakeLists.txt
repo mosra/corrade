@@ -205,6 +205,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         Format.cpp
         Resource.cpp
         String.cpp
+        System.cpp
 
         Implementation/ErrorString.cpp
 
