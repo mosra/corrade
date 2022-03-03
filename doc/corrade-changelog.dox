@@ -183,6 +183,9 @@ namespace Corrade {
 -   The `--skip` and `--only` @ref TestSuite::Tester options now accept a more
     flexible syntax from @ref Utility::String::parseNumberSequence(), allowing
     arbitrary ranges to be specified in a succint way
+-   @ref TestSuite::Compare::SortedContainer can now work with non-copyable
+    containers (such as @ref Containers::Array) and containers without random
+    access (such as @ref std::list or @ref std::unordered_map).
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
@@ -317,6 +320,8 @@ namespace Corrade {
 -   Calling @ref PluginManager::AbstractManager::setPreferredPlugins() with a
     plugin of given alias being instantiated led to an internal assertion when
     the plugin got later unloaded.
+-   @ref TestSuite::Compare::SortedContainer no longer modifies order of
+    referenced elements when non-owning views are passed to it
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

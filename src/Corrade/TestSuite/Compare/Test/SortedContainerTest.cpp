@@ -24,13 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
 #include <unordered_set>
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
+#include "Corrade/TestSuite/Compare/String.h"
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
@@ -41,13 +44,19 @@ struct SortedContainerTest: Tester {
     void nonOwningView();
     void nonCopyableContainer();
     void noRandomAccessContainer();
+    void noDefaultConstructor();
+    void differentSize();
+    void copyConstructPlainStruct();
 };
 
 SortedContainerTest::SortedContainerTest() {
     addTests({&SortedContainerTest::copyableContainer,
               &SortedContainerTest::nonOwningView,
               &SortedContainerTest::nonCopyableContainer,
-              &SortedContainerTest::noRandomAccessContainer});
+              &SortedContainerTest::noRandomAccessContainer,
+              &SortedContainerTest::noDefaultConstructor,
+              &SortedContainerTest::differentSize,
+              &SortedContainerTest::copyConstructPlainStruct});
 }
 
 /* Majority is tested in ContainerTest, this tests only specifics to this
@@ -102,6 +111,74 @@ void SortedContainerTest::noRandomAccessContainer() {
     CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::unordered_set<int>>>{}(a, b)), ComparisonStatusFlags{});
     CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::unordered_set<int>>>{}(b, a)), ComparisonStatusFlags{});
     CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::unordered_set<int>>>{}(a, c)), ComparisonStatusFlag::Failed);
+}
+
+void SortedContainerTest::noDefaultConstructor() {
+    int oneData = 1;
+    int twoData = 2;
+    int threeData = 3;
+    int fourData = 4;
+    Containers::Reference<int> one = oneData;
+    Containers::Reference<int> two = twoData;
+    Containers::Reference<int> three = threeData;
+    Containers::Reference<int> four = fourData;
+    std::vector<Containers::Reference<int>> a{one, two, four, three};
+    std::vector<Containers::Reference<int>> b{one, four, three, two};
+    std::vector<Containers::Reference<int>> c{one, four, three, three};
+
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(a, b)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(b, a)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(a, c)), ComparisonStatusFlag::Failed);
+}
+
+void SortedContainerTest::differentSize() {
+    /* Mainly to verify we're not accidentally using wrong sizes for copying */
+
+    std::vector<int> a{1, 2, 4, 3};
+    std::vector<int> b;
+
+    {
+        std::stringstream out;
+        Debug redirectOutput{&out};
+        Comparator<Compare::SortedContainer<std::vector<int>>> compare;
+        ComparisonStatusFlags flags = compare(a, b);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, redirectOutput, "a", "b");
+        CORRADE_COMPARE_AS(out.str(),
+            "Containers a and b have different size, actual 4 but 0 expected.",
+            TestSuite::Compare::StringHasPrefix);
+    } {
+        std::stringstream out;
+        Debug redirectOutput{&out};
+        Comparator<Compare::SortedContainer<std::vector<int>>> compare;
+        ComparisonStatusFlags flags = compare(b, a);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, redirectOutput, "b", "a");
+        CORRADE_COMPARE_AS(out.str(),
+            "Containers b and a have different size, actual 0 but 4 expected.",
+            TestSuite::Compare::StringHasPrefix);
+    }
+}
+
+struct Int {
+    int a;
+
+    friend bool operator==(Int a, Int b) { return a.a == b.a; }
+    friend bool operator<(Int a, Int b) { return a.a < b.a; }
+};
+
+void SortedContainerTest::copyConstructPlainStruct() {
+    /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
+       attempts to convert Int to int to initialize the first argument and
+       fails miserably. */
+
+    Int a[]{{1}, {2}, {4}, {3}};
+    Int b[]{{1}, {4}, {3}, {2}};
+    Int c[]{{1}, {4}, {3}, {3}};
+
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::ArrayView<Int>>>{}(a, b)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::ArrayView<Int>>>{}(b, a)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::ArrayView<Int>>>{}(a, c)), ComparisonStatusFlag::Failed);
 }
 
 }}}}}

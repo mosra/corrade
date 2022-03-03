@@ -44,14 +44,13 @@ value of the first different item in both containers. Example usage:
 
 @snippet TestSuite.cpp Compare-Container
 
-It is also possible to sort the containers before comparison using
-@link SortedContainer @endlink:
-
-@snippet TestSuite.cpp Compare-SortedContainer
-
 Comparison of containers of floating-point types is by default done as a
-fuzzy-compare, see @ref Comparator<float> and @ref Comparator<double> for
-details.
+fuzzy-compare, delegated to @ref Comparator<float> and @ref Comparator<double>.
+
+This comparator can only compare containers that have random access (i.e.,
+implementing @cpp operator[]() @ce). For comparing non-randomly-accessible
+containers (such as @ref std::list or @ref std::map) and unordered containers
+(such as  @ref std::unordered_map) use @ref SortedContainer instead.
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 */
