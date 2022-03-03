@@ -795,7 +795,8 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     if(flags >= ListFlag::SortDescending && !(flags >= ListFlag::SortAscending))
         std::reverse(list.begin(), list.end());
 
-    return list;
+    /* GCC 4.8 and Clang 3.8 need extra help here */
+    return Containers::optional(std::move(list));
 
     /* Other not implemented */
     #else
@@ -934,7 +935,8 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
             arrayRemoveSuffix(out, chunkSize + extra - count);
         } while(count);
 
-        return out;
+        /* GCC 4.8 and Clang 3.8 need extra help here */
+        return Containers::optional(std::move(out));
     }
 
     /* Some special files report more bytes than they actually have (such as
