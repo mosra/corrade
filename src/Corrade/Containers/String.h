@@ -691,6 +691,11 @@ class CORRADE_UTILITY_EXPORT String {
         Array<MutableStringView> split(char delimiter) &;
         Array<StringView> split(char delimiter) const &; /**< @overload */
 
+        /** @todo split(T*) / split(std::size_t) returning a Pair<StringView, StringView>
+            (used frequently in Directory::split*(), would save repetitive
+            assertions), how to distinguish from split(char)?? rename split to
+            splitOn()?? */
+
         /**
          * @brief Split on given character, removing empty parts
          *
@@ -757,6 +762,8 @@ class CORRADE_UTILITY_EXPORT String {
          */
         Array3<MutableStringView> partition(char separator) &;
         Array3<StringView> partition(char separator) const &; /**< @overload */
+
+        /** @todo change this to return a Triple? it's a smaller header */
 
         /**
          * @brief Join strings with this view as the delimiter

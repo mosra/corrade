@@ -152,6 +152,10 @@ Usage examples: checking for presence of a @cpp key_type @ce member
 Checking for presence of @cpp size() @ce member function:
 
 @snippet Utility.cpp CORRADE_HAS_TYPE-function
+
+@todo rename to CORRADE_IS_INVOCABLE (or even better name?) and change
+    __VA_ARGS__ to decltype(__VA_ARGS__) because that's what is used in most
+    cases? Or not, like in the nasty Eigen workaround below?
 */
 /* Two overloaded get() functions return type of different size. Templated
    get() is used when T has given attribute, non-templated otherwise. Bool
