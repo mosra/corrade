@@ -58,7 +58,7 @@ ContainerTest::ContainerTest() {
 
 void ContainerTest::same() {
     std::vector<int> a{1, 2, 3, 4};
-    CORRADE_COMPARE(Comparator<Compare::Container<std::vector<int>>>()(a, a), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Container<std::vector<int>>>{}(a, a), ComparisonStatusFlags{});
 
     /* Should not return any flags for a success */
     Comparator<Compare::Container<std::vector<int>>> compare;
@@ -159,9 +159,9 @@ void ContainerTest::nonCopyableArray() {
     Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4, 5}};
     Containers::Array<int> c{InPlaceInit, {1, 2, 3, 5, 5}};
 
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>()(a, a), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>()(a, b), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>()(a, c), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, a), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, c), ComparisonStatusFlag::Failed);
 }
 
 }}}}}

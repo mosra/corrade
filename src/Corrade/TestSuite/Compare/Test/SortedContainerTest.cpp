@@ -49,9 +49,9 @@ void SortedContainerTest::test() {
     std::vector<int> b{1, 4, 3, 2};
     std::vector<int> c{1, 4, 3, 3};
 
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, b)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>()(b, a)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, c)), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(a, b)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(b, a)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(a, c)), ComparisonStatusFlag::Failed);
 }
 
 }}}}}
