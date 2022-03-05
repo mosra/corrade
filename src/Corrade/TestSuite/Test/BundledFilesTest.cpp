@@ -24,9 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -47,17 +48,17 @@ BundledFilesTest::BundledFilesTest() {
 }
 
 void BundledFilesTest::relativePath() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(RELATIVE_TEST_DIR, "BundledFilesTestFiles/a.txt"),
+    CORRADE_COMPARE_AS(Utility::Path::join(RELATIVE_TEST_DIR, "BundledFilesTestFiles/a.txt"),
         "relative\n", Compare::FileToString);
 }
 
 void BundledFilesTest::dotDotPath() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(ABSOLUTE_TEST_DIR, "b.txt"),
+    CORRADE_COMPARE_AS(Utility::Path::join(ABSOLUTE_TEST_DIR, "b.txt"),
         "dotdot\n", Compare::FileToString);
 }
 
 void BundledFilesTest::absolutePath() {
-    CORRADE_COMPARE_AS(Utility::Directory::join(ABSOLUTE_TEST_DIR, "c.txt"),
+    CORRADE_COMPARE_AS(Utility::Path::join(ABSOLUTE_TEST_DIR, "c.txt"),
         "absolute\n", Compare::FileToString);
 }
 

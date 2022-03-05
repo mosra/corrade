@@ -26,7 +26,9 @@
 
 #include <vector>
 
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
+#include "Corrade/Containers/StringStl.h" /**< @todo remove when TestSuite is <string>-free */
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
@@ -35,7 +37,7 @@
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/StlMath.h"
@@ -56,8 +58,16 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 template<> class Comparator<FileContents> {
     public:
         ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected) {
-            _actualContents = Utility::Directory::readString(actual);
-            _expectedContents = Utility::Directory::readString(expected);
+            Containers::Optional<Containers::String> actualContents = Utility::Path::readString(actual);
+            if(!actualContents)
+                return ComparisonStatusFlag::Failed;
+            _actualContents = *std::move(actualContents);
+
+            Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(expected);
+            if(!expectedContents)
+                return ComparisonStatusFlag::Failed;
+            _expectedContents = *std::move(expectedContents);
+
             return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
                 ComparisonStatusFlag::Failed;
         }

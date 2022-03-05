@@ -28,7 +28,6 @@
 
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/Directory.h"
 
 using namespace Corrade;
 

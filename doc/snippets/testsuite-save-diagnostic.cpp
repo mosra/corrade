@@ -26,9 +26,11 @@
 
 #include <string>
 
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 using namespace Corrade;
 
@@ -48,7 +50,7 @@ template<> class Comparator<FileContents> {
         }
 
         void saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
-            out << "->" << Utility::Directory::join(path, Utility::Directory::filename(_expectedFilename));
+            out << "->" << Utility::Path::join(path, Utility::Path::split(_expectedFilename).first());
         }
 
     private:

@@ -1,9 +1,9 @@
 Starting TesterTest::Test with 2 test cases...
-  FAIL [06] expectFail() at here.cpp:328
+  FAIL [06] expectFail() at here.cpp:329
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected
         5
-  FAIL [24] failExpected() at here.cpp:441
+  FAIL [24] failExpected() at here.cpp:442
         The value 7 is higher than 5
 Finished TesterTest::Test with 2 errors out of 1 checks.
