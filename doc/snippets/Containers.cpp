@@ -48,7 +48,7 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Triple.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 using namespace Corrade;
 
@@ -551,12 +551,13 @@ Containers::ArrayTuple data{
     {{NoInit, 200*1024*1024, latencies},
      {NoInit, 200*1024*1024, averages}},
     [](std::size_t size, std::size_t)
-        -> std::pair<char*, Utility::Directory::MapDeleter>
+        -> std::pair<char*, Utility::Path::MapDeleter>
     {
-        Containers::Array<char, Utility::Directory::MapDeleter> data =
-            Utility::Directory::mapWrite("storage.tmp", size);
-        Utility::Directory::MapDeleter deleter = data.deleter();
-        return {data.release(), deleter};
+        Containers::Optional<Containers::Array<char, Utility::Path::MapDeleter>>
+            data = Utility::Path::mapWrite("storage.tmp", size);
+        CORRADE_INTERNAL_ASSERT(data);
+        Utility::Path::MapDeleter deleter = data->deleter();
+        return {data->release(), deleter};
     }
 };
 /* [ArrayTuple-usage-mmap] */

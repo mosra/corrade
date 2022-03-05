@@ -39,7 +39,6 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Endianness.h"
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Utility/FileWatcher.h"
@@ -48,6 +47,7 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Memory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Sha1.h"
 #include "Corrade/Utility/StlMath.h"
 
@@ -148,15 +148,15 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 
 {
 /* [CORRADE_INTERNAL_ASSERT_EXPRESSION-without] */
-Containers::Array<char> data;
-CORRADE_INTERNAL_ASSERT_OUTPUT(data = Utility::Directory::read("file.dat"));
-consume(std::move(data));
+Containers::Optional<Containers::Array<char>> data;
+CORRADE_INTERNAL_ASSERT_OUTPUT(data = Utility::Path::read("file.dat"));
+consume(*std::move(data));
 /* [CORRADE_INTERNAL_ASSERT_EXPRESSION-without] */
 }
 
 {
 /* [CORRADE_INTERNAL_ASSERT_EXPRESSION] */
-consume(CORRADE_INTERNAL_ASSERT_EXPRESSION(Utility::Directory::read("file.dat")));
+consume(*CORRADE_INTERNAL_ASSERT_EXPRESSION(Utility::Path::read("file.dat")));
 /* [CORRADE_INTERNAL_ASSERT_EXPRESSION] */
 }
 
