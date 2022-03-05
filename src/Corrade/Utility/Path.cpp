@@ -955,10 +955,25 @@ Containers::Optional<Containers::Array<char>> read(const Containers::StringView 
 
 Containers::Optional<Containers::String> readString(const Containers::StringView filename) {
     if(Containers::Optional<Containers::Array<char>> data = readInternal(filename, 1)) {
-        /* Set the terminator to null */
-        (*data)[data->size()] = '\0';
         const std::size_t size = data->size();
         const auto deleter = data->deleter();
+
+        /* If the array is growable because we have read a non-seekable file
+           and ASan is active, touching anything after the size will trigger an
+           ASan report because we marked the area between size and capacity as
+           untouchable "container overflow". However, touching the null
+           terminator is generally desirable so it shouldn't cause ASan
+           failures. Thus we first resize it to include the null terminator,
+           which will update ASan container annotations. */
+        if(arrayIsGrowable(*data)) arrayResize(*data, NoInit, size + 1);
+
+        /* Now it's safe to set the null terminator. In case the array is not
+           growable, the allocation doesn't have any ASan annotations, so it's
+           fine. */
+        (*data)[size] = '\0';
+
+        /* For the returned String we'll always use the original size,
+           excluding ignoring the size change from arrayResize(). */
         return Containers::String{data->release(), size, deleter};
     }
 
