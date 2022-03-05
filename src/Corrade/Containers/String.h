@@ -525,10 +525,12 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * The data and the corresponding @ref deleter() is transferred to the
          * returned array. In case of a SSO, a copy of the string is allocated
-         * including the null terminator and a default deleter is used. The
-         * string then resets data pointer, size and deleter to be equivalent
-         * to a default-constructed instance. Note that with custom deleters
-         * the returned array is not guaranteed to be actually mutable.
+         * and a default deleter is used. The string then resets data pointer,
+         * size and deleter to be equivalent to a default-constructed instance.
+         * In both the allocated and the SSO case the returned array contains a
+         * sentinel null terminator (i.e., not counted into its size). Note
+         * that with custom deleters the array is not guaranteed to be actually
+         * mutable.
          * @see @ref release(), @ref isSmall()
          */
         /*implicit*/ operator Array<char>() &&;

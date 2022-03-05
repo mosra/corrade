@@ -1065,9 +1065,14 @@ void StringTest::convertMutableArrayViewSmallAllocatedInit() {
 
 void StringTest::convertArray() {
     String a = "Allocated hello\0for a verbose world"_s;
+    CORRADE_VERIFY(!a.isSmall());
+
     Array<char> array = std::move(a);
     CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "Allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
+    /* The original allocation includes a null terminator, it should be here as
+       well */
+    CORRADE_COMPARE(array[array.size()], '\0');
 
     /* State should be the same as with release(), so of a default-constructed
        instance -- with zero size, but a non-null null-terminated data */
@@ -1079,9 +1084,13 @@ void StringTest::convertArray() {
 
 void StringTest::convertArraySmall() {
     String a = "this\0world"_s;
+    CORRADE_VERIFY(a.isSmall());
+
     Array<char> array = std::move(a);
     CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
+    /* The newly allocated array should include the null terminator */
+    CORRADE_COMPARE(array[array.size()], '\0');
 
     /* State should be the same as with release(), so of a default-constructed
        instance -- with zero size, but a non-null null-terminated data */

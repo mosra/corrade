@@ -329,7 +329,10 @@ String::operator Array<char>() && {
     Array<char> out;
     if(_small.size & 0x80) {
         const std::size_t size = _small.size & ~SmallSizeMask;
-        out = Array<char>{Corrade::NoInit, size};
+        /* Allocate the output including a null terminator at the end, but
+           don't include it in the size */
+        out = Array<char>{Array<char>{Corrade::NoInit, size + 1}.release(), size};
+        out[size] = '\0';
         std::memcpy(out.data(), _small.data, size);
     } else {
         out = Array<char>{_large.data, _large.size, deleter()};
