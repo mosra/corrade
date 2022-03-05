@@ -26,13 +26,14 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/System.h"
 #include "Corrade/Utility/Tweakable.h"
@@ -88,19 +89,21 @@ TweakableIntegrationTest::TweakableIntegrationTest() {
              &TweakableIntegrationTest::setup,
              &TweakableIntegrationTest::teardown);
 
-    Directory::mkpath(TWEAKABLE_WRITE_TEST_DIR);
-    _thisWriteableFile = Directory::join(TWEAKABLE_WRITE_TEST_DIR, "TweakableIntegrationTest.cpp");
-    _thisReadablePath = Directory::path(Directory::fromNativeSeparators(__FILE__));
+    Path::make(TWEAKABLE_WRITE_TEST_DIR);
+    _thisWriteableFile = Path::join(TWEAKABLE_WRITE_TEST_DIR, "TweakableIntegrationTest.cpp");
+    _thisReadablePath = Path::split(Path::fromNativeSeparators(__FILE__)).first();
 }
 
 void TweakableIntegrationTest::setup() {
-    Directory::writeString(_thisWriteableFile,
-        Directory::readString(
-            Directory::join(TWEAKABLE_TEST_DIR, "TweakableIntegrationTest.cpp")));
+    /* Can't use verification macros here, let's just hope none of this
+       fails */
+    Path::write(_thisWriteableFile,
+        *Path::readString(
+            Path::join(TWEAKABLE_TEST_DIR, "TweakableIntegrationTest.cpp")));
 }
 
 void TweakableIntegrationTest::teardown() {
-    Directory::rm(_thisWriteableFile);
+    Path::remove(_thisWriteableFile);
 }
 
 /* This is outside so we can trigger the updates from other functions later */
@@ -110,7 +113,7 @@ void TweakableIntegrationTest::variable() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -144,10 +147,14 @@ void TweakableIntegrationTest::variable() {
     #endif
 
     /* Replace the above line with a different number */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_('a'); /* now this */",
-            "_('X'); /* now this */")));
+            "_('X'); /* now this */")}));
 
     /* Now it changes, if enabled */
     {
@@ -159,9 +166,9 @@ void TweakableIntegrationTest::variable() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): updating _('X') in {0}:107\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n", __FILE__));
+"Utility::Tweakable::update(): updating _('X') in {0}:110\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:197\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:267\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -176,7 +183,7 @@ void TweakableIntegrationTest::scopeTemplated() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -209,10 +216,14 @@ void TweakableIntegrationTest::scopeTemplated() {
     #endif
 
     /* Replace the above line with a different number */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_(42.0f); /* yes this */",
-            "_(133.7f); /* yes this */")));
+            "_(133.7f); /* yes this */")}));
 
     /* Now it changes, if enabled */
     {
@@ -224,9 +235,9 @@ void TweakableIntegrationTest::scopeTemplated() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:107\n"
-"Utility::Tweakable::update(): updating _(133.7f) in {0}:190\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:110\n"
+"Utility::Tweakable::update(): updating _(133.7f) in {0}:197\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:267\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -242,7 +253,7 @@ void TweakableIntegrationTest::scopeVoid() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -275,10 +286,14 @@ void TweakableIntegrationTest::scopeVoid() {
     #endif
 
     /* Replace the above line with a different number */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_(22.7f); /* and finally */",
-            "_(-1.44f); /* and finally */")));
+            "_(-1.44f); /* and finally */")}));
 
     /* Now it changes, if enabled */
     {
@@ -290,9 +305,9 @@ void TweakableIntegrationTest::scopeVoid() {
         if(data.enabled) {
             CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:107\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
-"Utility::Tweakable::update(): updating _(-1.44f) in {0}:256\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:110\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:197\n"
+"Utility::Tweakable::update(): updating _(-1.44f) in {0}:267\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -305,7 +320,7 @@ void TweakableIntegrationTest::scopeVoid() {
 }
 
 void TweakableIntegrationTest::updateNoChange() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -322,10 +337,14 @@ void TweakableIntegrationTest::updateNoChange() {
     #endif
 
     /* Replace without changing the literal itself */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_('a'); /* now this */",
-            "_('a'); /* now that */")));
+            "_('a'); /* now that */")}));
 
     std::ostringstream out;
     Debug redirectOutput{&out};
@@ -334,13 +353,13 @@ void TweakableIntegrationTest::updateNoChange() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:190\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:256\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:197\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:267\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
 void TweakableIntegrationTest::updateUnexpectedLine() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -357,22 +376,26 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
     #endif
 
     /* Replace without changing the literal itself */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_('a'); /* now this */",
-            "\n_('a'); /* now this */")));
+            "\n_('a'); /* now this */")}));
 
     std::ostringstream out;
     Warning redirectWarning{&out};
     TweakableState state = tweakable.update();
 
     CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): code changed around _('a') in {0}:108, requesting a recompile\n", __FILE__));
+"Utility::Tweakable::update(): code changed around _('a') in {0}:111, requesting a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
 void TweakableIntegrationTest::updateDifferentType() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -389,10 +412,14 @@ void TweakableIntegrationTest::updateDifferentType() {
     #endif
 
     /* Replace literal to a different type */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_('a'); /* now this */",
-            "_(14.4f); /* now this */")));
+            "_(14.4f); /* now this */")}));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
@@ -401,12 +428,12 @@ void TweakableIntegrationTest::updateDifferentType() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: 14.4f is not a character literal\n"
-"Utility::Tweakable::update(): change of _(14.4f) in {0}:107 requested a recompile\n", __FILE__));
+"Utility::Tweakable::update(): change of _(14.4f) in {0}:110 requested a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
 void TweakableIntegrationTest::updateFileError() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -423,7 +450,7 @@ void TweakableIntegrationTest::updateFileError() {
     #endif
 
     /* Remove the source file */
-    CORRADE_VERIFY(Directory::rm(_thisWriteableFile));
+    CORRADE_VERIFY(Path::remove(_thisWriteableFile));
 
     /* A change is ignored because stat failed */
     std::ostringstream out;
@@ -444,7 +471,7 @@ void TweakableIntegrationTest::updateFileError() {
 }
 
 void TweakableIntegrationTest::updateParseError() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -461,10 +488,14 @@ void TweakableIntegrationTest::updateParseError() {
     #endif
 
     /* Replace literal to a broken value */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "_('a'); /* now this */",
-            "_('\\X'); /* now this */")));
+            "_('\\X'); /* now this */")}));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
@@ -473,12 +504,12 @@ void TweakableIntegrationTest::updateParseError() {
 
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: escape sequences in char literals are not implemented, sorry\n"
-"Utility::Tweakable::update(): error parsing _('\\X') in {0}:107\n", __FILE__));
+"Utility::Tweakable::update(): error parsing _('\\X') in {0}:110\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Error);
 }
 
 void TweakableIntegrationTest::updateNoAlias() {
-    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
+    CORRADE_VERIFY(Path::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -495,10 +526,14 @@ void TweakableIntegrationTest::updateNoAlias() {
     #endif
 
     /* Comment out the alias definition */
-    CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
-        String::replaceFirst(Directory::readString(_thisWriteableFile),
+    Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
+    CORRADE_VERIFY(file);
+    CORRADE_VERIFY(Path::write(_thisWriteableFile,
+        /** @todo drop the cast once String::replaceFirst() can operate on
+            Containers::String */
+        Containers::StringView{String::replaceFirst(*file,
             "#define _ CORRADE_TWEAKABLE",
-            "// #define _ CORRADE_TWEAKABLE")));
+            "// #define _ CORRADE_TWEAKABLE")}));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
