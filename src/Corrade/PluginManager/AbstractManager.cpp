@@ -68,8 +68,6 @@ using Corrade::Utility::Unicode::widen;
 #include "Corrade/Utility/Implementation/ErrorString.h"
 #endif
 
-using namespace Corrade::Utility;
-
 namespace Corrade { namespace PluginManager {
 
 struct AbstractManager::Plugin {
@@ -218,7 +216,7 @@ static_assert(std::is_standard_layout<Implementation::StaticPlugin>::value && st
 
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
     CORRADE_ASSERT(version == Version,
-        "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+        "PluginManager: wrong version of static plugin" << plugin.plugin << Utility::Debug::nospace << ", got" << version << "but expected" << Version, );
     #ifdef CORRADE_NO_ASSERT
     static_cast<void>(version);
     #endif
@@ -227,7 +225,7 @@ void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlug
 
 void AbstractManager::ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
     CORRADE_ASSERT(version == Version,
-        "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+        "PluginManager: wrong version of static plugin" << plugin.plugin << Utility::Debug::nospace << ", got" << version << "but expected" << Version, );
     #ifdef CORRADE_NO_ASSERT
     static_cast<void>(version);
     #endif
@@ -255,7 +253,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
            initialize it (unless the plugin is metadata-less) */
         Utility::Configuration configuration;
         if(!_state->pluginMetadataSuffix.empty()) {
-            Resource rs{std::string{"CorradeStaticPlugin_"} + staticPlugin->plugin};
+            Utility::Resource rs{std::string{"CorradeStaticPlugin_"} + staticPlugin->plugin};
             std::istringstream metadata(rs.get(staticPlugin->plugin + _state->pluginMetadataSuffix));
             configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         }
@@ -311,7 +309,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
            we have static plugins (the aliases are non-empty) -- in that case
            assume the user might want to only use static plugins. */
         if(_state->pluginDirectory.empty() && _state->aliases.empty())
-            Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
+            Utility::Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
     }
     #endif
 }
@@ -406,12 +404,12 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     /** @todo Currently this preserves original behavior of not complaining
         when the directory doesn't exist, as a lot of existing code and tests
         relies on it. Figure out a better solution. */
-    if(Directory::exists(_state->pluginDirectory)) {
-        const std::vector<std::string> d = Directory::list(
+    if(Utility::Directory::exists(_state->pluginDirectory)) {
+        const std::vector<std::string> d = Utility::Directory::list(
             _state->pluginDirectory,
-            Directory::Flag::SkipDirectories|
-            Directory::Flag::SkipDotAndDotDot|
-            Directory::Flag::SortAscending);
+            Utility::Directory::Flag::SkipDirectories|
+            Utility::Directory::Flag::SkipDotAndDotDot|
+            Utility::Directory::Flag::SortAscending);
         for(const std::string& filename: d) {
             /* File doesn't have module suffix, continue to next */
             if(!Utility::String::endsWith(filename, _state->pluginSuffix))
@@ -425,7 +423,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
 
             registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
                 _state->pluginMetadataSuffix.empty() ? std::string{} :
-                    Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
+                    Utility::Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
         }
     }
 
@@ -512,7 +510,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
         const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
         const auto found = _state->plugins.find(name);
         if(found != _state->plugins.end() && (found->second->loadState & LoadState::Loaded)) {
-            Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
+            Utility::Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
             return LoadState::Used;
         }
 
@@ -521,7 +519,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
            plugin of this name, replace it. */
         Containers::Pointer<Plugin> data{new Plugin{name,
             _state->pluginMetadataSuffix.empty() ? std::string{} :
-                Directory::join(Utility::Directory::path(plugin), name + _state->pluginMetadataSuffix)}};
+                Utility::Directory::join(Utility::Directory::path(plugin), name + _state->pluginMetadataSuffix)}};
         const LoadState state = loadInternal(*data, plugin);
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
@@ -555,7 +553,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
         #endif
     }
 
-    Error() << "PluginManager::Manager::load(): plugin" << plugin
+    Utility::Error() << "PluginManager::Manager::load(): plugin" << plugin
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         << "is not static and was not found in" << _state->pluginDirectory;
         #else
@@ -566,14 +564,14 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
-    return loadInternal(plugin, Directory::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
+    return loadInternal(plugin, Utility::Directory::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
 }
 
 LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filename) {
     /* Plugin is not ready to load */
     if(plugin.loadState != LoadState::NotLoaded) {
         if(!(plugin.loadState & (LoadState::Static|LoadState::Loaded)))
-            Error() << "PluginManager::Manager::load(): plugin" << plugin.metadata._name << "is not ready to load:" << plugin.loadState;
+            Utility::Error() << "PluginManager::Manager::load(): plugin" << plugin.metadata._name << "is not ready to load:" << plugin.loadState;
         return plugin.loadState;
     }
 
@@ -597,7 +595,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         }
 
         if(!dependencyManager || !(dependencyManager->loadInternal(*foundDependency->second) & LoadState::Loaded)) {
-            Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin.metadata._name;
+            Utility::Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin.metadata._name;
             return LoadState::UnresolvedDependency;
         }
 
@@ -612,10 +610,10 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     HMODULE module = LoadLibraryW(widen(filename).data());
     #endif
     if(!module) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot load plugin"
-            << plugin.metadata._name << "from \"" << Debug::nospace
-            << filename << Debug::nospace << "\":";
+            << plugin.metadata._name << "from \"" << Utility::Debug::nospace
+            << filename << Utility::Debug::nospace << "\":";
         #ifndef CORRADE_TARGET_WINDOWS
         err << dlerror();
         #else
@@ -636,9 +634,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginVersion"));
     if(version == nullptr) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get version of plugin"
-            << plugin.metadata._name << Debug::nospace << ":";
+            << plugin.metadata._name << Utility::Debug::nospace << ":";
         #ifndef CORRADE_TARGET_WINDOWS
         err << dlerror();
         #else
@@ -652,8 +650,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         return LoadState::LoadFailed;
     }
     if(version() != Version) {
-        Error{} << "PluginManager::Manager::load(): wrong version of plugin"
-                << plugin.metadata._name << Debug::nospace << ", expected"
+        Utility::Error{} << "PluginManager::Manager::load(): wrong version of plugin"
+                << plugin.metadata._name << Utility::Debug::nospace << ", expected"
                 << Version << "but got" << version();
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
@@ -675,9 +673,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInterface"));
     if(interface == nullptr) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get interface string of plugin"
-            << plugin.metadata._name << Debug::nospace << ":";
+            << plugin.metadata._name << Utility::Debug::nospace << ":";
         #ifndef CORRADE_TARGET_WINDOWS
         err << dlerror();
         #else
@@ -691,7 +689,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
-        Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin.metadata._name + ", expected" << pluginInterface() << "but got" << interface();
+        Utility::Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin.metadata._name + ", expected" << pluginInterface() << "but got" << interface();
         #ifndef CORRADE_TARGET_WINDOWS
         dlclose(module);
         #else
@@ -712,7 +710,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInitializer"));
     if(initializer == nullptr) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get initializer of plugin"
             << plugin.metadata._name + ":";
         #ifndef CORRADE_TARGET_WINDOWS
@@ -740,7 +738,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginFinalizer"));
     if(finalizer == nullptr) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get finalizer of plugin"
             << plugin.metadata._name + ":";
         #ifndef CORRADE_TARGET_WINDOWS
@@ -768,7 +766,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
         #endif
         (module, "pluginInstancer"));
     if(instancer == nullptr) {
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get instancer of plugin"
             << plugin.metadata._name + ":";
         #ifndef CORRADE_TARGET_WINDOWS
@@ -810,7 +808,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
         #endif
     }
 
-    Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
+    Utility::Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
     return LoadState::NotFound;
 }
 
@@ -828,7 +826,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
     /* Plugin is used by another plugin, don't unload */
     if(!plugin.metadata._usedBy.empty()) {
-        Error{} << "PluginManager::Manager::unload(): plugin"
+        Utility::Error{} << "PluginManager::Manager::unload(): plugin"
                 << plugin.metadata._name << "is required by other plugins:"
                 << plugin.metadata._usedBy;
         return LoadState::Required;
@@ -839,7 +837,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
         /* Check if all instances can be safely deleted */
         for(AbstractPlugin* const instance: plugin.instances)
             if(!instance->canBeDeleted()) {
-                Error{} << "PluginManager::Manager::unload(): plugin"
+                Utility::Error{} << "PluginManager::Manager::unload(): plugin"
                         << plugin.metadata._name
                         << "is currently used and cannot be deleted";
                 return LoadState::Used;
@@ -889,9 +887,9 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
            but that's possible only on QNX, on linux dlclose() only unloads the
            library if it's really not needed. Source:
            https://stackoverflow.com/questions/28882298/error-on-dlclose-shared-objects-still-referenced */
-        Error err;
+        Utility::Error err;
         err << "PluginManager::Manager::unload(): cannot unload plugin"
-            << plugin.metadata._name << Debug::nospace << ":";
+            << plugin.metadata._name << Utility::Debug::nospace << ":";
         #ifndef CORRADE_TARGET_WINDOWS
         err << dlerror();
         #else
@@ -1015,7 +1013,7 @@ AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata): 
                 return;
             }
 
-            Error{} << "PluginManager::Manager:" << metadata << "was not found";
+            Utility::Error{} << "PluginManager::Manager:" << metadata << "was not found";
         }
 
         loadState = LoadState::WrongMetadataFile;
@@ -1050,7 +1048,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "PluginManager::LoadState(" << Debug::nospace << reinterpret_cast<void*>(std::uint16_t(value)) << Debug::nospace << ")";
+    return debug << "PluginManager::LoadState(" << Utility::Debug::nospace << reinterpret_cast<void*>(std::uint16_t(value)) << Utility::Debug::nospace << ")";
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const LoadStates value) {
