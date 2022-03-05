@@ -40,8 +40,8 @@
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 
 #ifdef __linux__ /* for getting processor count */
@@ -49,6 +49,8 @@
 #endif
 
 namespace Corrade { namespace TestSuite {
+
+using namespace Containers::Literals;
 
 namespace {
     inline int digitCount(int number) {
@@ -365,10 +367,16 @@ benchmark types:
         }
         #ifdef __linux__
         for(std::size_t i = 0, count = sysconf(_SC_NPROCESSORS_ONLN); i != count; ++i) {
-            const std::string file = Utility::formatString(_state->configuration.cpuScalingGovernorFile().data(), i);
-            if(!Utility::Directory::exists(file)) break;
-            const std::string governor = Utility::String::trim(Utility::Directory::readString(file));
-            if(governor != "performance") {
+            /* Try reading the CPU scaling governor file, if it exists. It
+               doesn't exist on some but not all Androids, and it doesn't make
+               sense to print a "No such file" error from read() when running
+               any tests on such systems. */
+            const Containers::String filename = Utility::format(_state->configuration.cpuScalingGovernorFile().data(), i);
+            Containers::Optional<Containers::String> file;
+            if(!Utility::Path::exists(filename) || !(file = Utility::Path::readString(filename)))
+                break;
+            const Containers::StringView governor = file->trimmed();
+            if(governor != "performance"_s) {
                 Warning out{errorOutput, _state->useColor};
 
                 out << Debug::boldColor(Debug::Color::Yellow) << "  WARN"
