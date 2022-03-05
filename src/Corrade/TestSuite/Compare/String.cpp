@@ -50,7 +50,7 @@ void Comparator<Compare::StringHasPrefix>::printMessage(const ComparisonStatusFl
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
             << Utility::Debug::newline << "        has expected prefix\n       "
             << _expectedPrefixValue;
-    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 ComparisonStatusFlags Comparator<Compare::StringHasSuffix>::operator()(const Containers::StringView actual, const Containers::StringView expectedSuffix) {
@@ -75,7 +75,7 @@ void Comparator<Compare::StringHasSuffix>::printMessage(const ComparisonStatusFl
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
             << Utility::Debug::newline << "        has expected suffix\n       "
             << _expectedSuffixValue;
-    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 ComparisonStatusFlags Comparator<Compare::StringContains>::operator()(const Containers::StringView actual, const Containers::StringView expectedToContain) {
@@ -101,7 +101,7 @@ void Comparator<Compare::StringContains>::printMessage(const ComparisonStatusFla
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
             << Utility::Debug::newline << "        expectedly contains\n       "
             << _expectedToContainValue;
-    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 ComparisonStatusFlags Comparator<Compare::StringNotContains>::operator()(const Containers::StringView actual, const Containers::StringView expectedToNotContain) {
@@ -126,7 +126,7 @@ void Comparator<Compare::StringNotContains>::printMessage(const ComparisonStatus
             << Utility::Debug::nospace << ", the actual string\n       " << _actualValue
             << Utility::Debug::newline << "        expectedly doesn't contain\n       "
             << _expectedToNotContainValue;
-    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 }}
