@@ -34,8 +34,8 @@
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FileWatcher.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 
 #include "Corrade/Utility/Implementation/tweakable.h"
@@ -110,15 +110,19 @@ std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const
     auto found = _data->files.find(file);
     if(found == _data->files.end()) {
         /* Strip the directory prefix from the file. If that means the filename
-           would then start with a slash, strip that too so Directory::join()
-           works correctly -- but don't do that in case the directory prefix
-           was empty, in that case the file path was absolute. */
-        /** @todo maybe some Directory utility for this? */
-        std::string stripped = String::stripPrefix(Directory::fromNativeSeparators(file), _data->prefix);
-        if(!_data->prefix.empty() && !stripped.empty() && stripped.front() == '/')
-            stripped.erase(0, 1);
+           would then start with a slash, strip that too so Path::join() works
+           correctly -- but don't do that in case the directory prefix was
+           empty, in that case the file path was absolute.
 
-        const std::string watchPath = Directory::join(_data->replace, stripped);
+           Using auto instead of Containers::String for fileForwardSlashes to
+           avoid a needless copy on non-Windows systems. */
+        /** @todo maybe some Path utility for this? replacePrefix()? */
+        auto fileForwardSlashes = Path::fromNativeSeparators(file);
+        Containers::StringView stripped = fileForwardSlashes.exceptPrefix(_data->prefix);
+        if(!_data->prefix.empty() && stripped.hasPrefix('/'))
+            stripped = stripped.exceptPrefix('/');
+
+        const Containers::String watchPath = Path::join(_data->replace, stripped);
 
         Debug{} << "Utility::Tweakable: watching for changes in" << watchPath;
         /* Ignore errors and do not signal changes if the file is empty in
@@ -618,10 +622,15 @@ TweakableState Tweakable::update() {
         /** @todo suggest recompile if the watcher is not valid anymore */
         if(!file.second.watcher.hasChanged()) continue;
 
+        /* Assume the file could be read -- if it got for example (temporarily)
+           deleted, hasChanged() returns false and thus it shouldn't get here.
+           If this asserts on you, please complain. */
+        const Containers::Optional<Containers::String> data = Path::readString(file.second.watchPath);
+        CORRADE_INTERNAL_ASSERT(data);
+
         /* First go through all defines and search if there is any alias. There
            shouldn't be many. If no alias is found, assume CORRADE_TWEAKABLE. */
-        const std::string data = Directory::readString(file.second.watchPath);
-        std::string name = Implementation::findTweakableAlias(data);
+        std::string name = Implementation::findTweakableAlias(*data);
 
         /* Print helpful message in case no alias was found. Don't do name ==
            "CORRADE_TWEAKABLE" to avoid a temporary allocation of std::string.
@@ -633,7 +642,7 @@ TweakableState Tweakable::update() {
 
         /* Now find all annotated constants and update them. If there's a
            problem, exit immediately, otherwise just accumulate the state. */
-        const TweakableState fileState = Implementation::parseTweakables(name, file.first, data, file.second.variables, scopes);
+        const TweakableState fileState = Implementation::parseTweakables(name, file.first, *data, file.second.variables, scopes);
         if(fileState == TweakableState::NoChange)
             continue;
         else if(fileState == TweakableState::Success)
