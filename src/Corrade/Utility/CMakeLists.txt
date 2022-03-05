@@ -206,14 +206,12 @@ if(NOT CMAKE_CROSSCOMPILING)
     set(CorradeUtilityRc_SRCS
         Arguments.cpp
         Debug.cpp
-        Directory.cpp # TODO remove once ported away from Directory
         Configuration.cpp
         ConfigurationGroup.cpp
         Format.cpp
         Path.cpp
         Resource.cpp
         String.cpp
-        System.cpp
 
         Implementation/ErrorString.cpp
 
@@ -230,6 +228,11 @@ if(NOT CMAKE_CROSSCOMPILING)
         if(NOT CORRADE_TARGET_WINDOWS_RT)
             list(APPEND CorradeUtilityRc_SRCS Implementation/WindowsWeakSymbol.cpp)
         endif()
+    endif()
+    if(CORRADE_TARGET_APPLE)
+        list(APPEND CorradeUtilityRc_SRCS
+            # Needed for isSandboxed() used by some Path APIs
+            System.cpp)
     endif()
 
     # Having a tool used during a build depend on a shared library brings a lot

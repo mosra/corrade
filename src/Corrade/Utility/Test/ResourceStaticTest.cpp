@@ -24,9 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/StringStl.h" /**< @todo remove when StringToFile is <string>-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Resource.h"
 
 #include "configure.h"
@@ -78,10 +79,10 @@ void ResourceStaticTest::initializeOnce() {
 
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
     finalize();
@@ -102,10 +103,10 @@ void ResourceStaticTest::initializeTwice() {
 
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
     finalize();
@@ -130,10 +131,10 @@ void ResourceStaticTest::initializeTwiceMixedWithAnother() {
 
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
     finalize();

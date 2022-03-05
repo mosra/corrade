@@ -28,7 +28,7 @@
 
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Resource.h"
 
 namespace Corrade {
@@ -86,8 +86,8 @@ int main(int argc, char** argv) {
     /* Remove previous output file. Only if it exists, to not print an error
        message when compiling for the first time. If it fails, die as well --
        we'd not succeed after either. */
-    if(Utility::Directory::exists(args.value("out")) &&
-      !Utility::Directory::rm(args.value("out")))
+    if(Utility::Path::exists(args.value("out")) &&
+      !Utility::Path::remove(args.value("out")))
         return 1;
 
     /* Compile file */
@@ -97,7 +97,8 @@ int main(int argc, char** argv) {
     if(compiled.empty()) return 2;
 
     /* Save output */
-    if(!Utility::Directory::writeString(args.value("out"), compiled)) {
+    /** @todo drop the StringView cast once compileFrom() is <string>-free */
+    if(!Utility::Path::write(args.value("out"), Containers::StringView{compiled})) {
         Utility::Error{} << "Cannot write output file" << '\'' + args.value("out") + '\'';
         return 3;
     }

@@ -35,13 +35,15 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -136,11 +138,6 @@ void Resource::unregisterData(Implementation::ResourceGroup& resource) {
 
 namespace {
 
-std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename) {
-    if(!Directory::exists(filename)) return {false, nullptr};
-    return {true, Directory::read(filename)};
-}
-
 std::string comment(const std::string& comment) {
     return "\n    /* " + comment + " */";
 }
@@ -173,12 +170,12 @@ inline bool lessFilename(const std::pair<std::string, std::string>& a, const std
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
     /* Resource file existence */
-    if(!Directory::exists(configurationFile)) {
+    if(!Path::exists(configurationFile)) {
         Error() << "    Error: file" << configurationFile << "does not exist";
         return {};
     }
 
-    const std::string path = Directory::path(configurationFile);
+    const Containers::StringView path = Path::split(configurationFile).first();
     const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
 
     /* Group name */
@@ -200,12 +197,12 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
             return {};
         }
 
-        std::pair<bool, Containers::Array<char>> contents = fileContents(Directory::join(path, filename));
-        if(!contents.first) {
+        Containers::Optional<Containers::String> contents = Path::readString(Path::join(path, filename));
+        if(!contents) {
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(alias, std::string{contents.second, contents.second.size()});
+        fileData.emplace_back(alias, *std::move(contents));
     }
 
     /* The list has to be sorted before passing it to compile() */
@@ -431,16 +428,14 @@ Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayV
             if(name != filenameString) continue;
 
             /* Load the file */
-            bool success;
-            Containers::Array<char> data;
-            std::tie(success, data) = fileContents(Directory::join(Directory::path(_overrideGroup->conf.filename()), file->value("filename")));
-            if(!success) {
+            Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(Path::split(_overrideGroup->conf.filename()).first(), file->value("filename")));
+            if(!data) {
                 Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overridden group";
                 break;
             }
 
             /* Save the file for later use and return */
-            it = _overrideGroup->data.emplace(filenameString, std::move(data)).first;
+            it = _overrideGroup->data.emplace(filenameString, *std::move(data)).first;
             return it->second;
         }
 

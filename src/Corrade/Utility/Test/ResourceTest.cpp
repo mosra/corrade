@@ -30,11 +30,14 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
@@ -233,12 +236,16 @@ void ResourceTest::benchmarkLookupStdMap() {
 
 void ResourceTest::compile() {
     /* Testing also null bytes and signed overflow, don't change binaries */
+    Containers::Optional<Containers::String> consequence = Path::readString(Path::join(RESOURCE_TEST_DIR, "consequence.bin"));
+    Containers::Optional<Containers::String> predisposition = Path::readString(Path::join(RESOURCE_TEST_DIR, "predisposition.bin"));
+    CORRADE_VERIFY(consequence);
+    CORRADE_VERIFY(predisposition);
     std::vector<std::pair<std::string, std::string>> input{
-        {"consequence.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"))},
-        {"predisposition.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"))}};
+        {"consequence.bin", *consequence},
+        {"predisposition.bin", *predisposition}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-                       Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileNotSorted() {
@@ -258,30 +265,30 @@ void ResourceTest::compileNotSorted() {
 
 void ResourceTest::compileNothing() {
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", {}),
-                       Directory::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileEmptyFile() {
     std::vector<std::pair<std::string, std::string>> input{
         {"empty.bin", ""}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-                       Directory::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileFrom() {
     const std::string compiled = Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
-    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "resources.conf"));
+    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileFromUtf8Filenames() {
     const std::string compiled = Resource::compileFrom("ResourceTestUtf8Data",
-        Directory::join(RESOURCE_TEST_DIR, "hýždě.conf"));
-    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "hýždě.conf"));
+    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileFromNonexistentResource() {
@@ -297,8 +304,11 @@ void ResourceTest::compileFromNonexistentFile() {
     Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat of file 1 in group name\n");
+        Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
+    /* There's an error message from Path::read() before */
+    CORRADE_COMPARE_AS(out.str(),
+        "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n",
+        TestSuite::Compare::StringHasSuffix);
 }
 
 void ResourceTest::compileFromEmptyGroup() {
@@ -307,12 +317,12 @@ void ResourceTest::compileFromEmptyGroup() {
 
     /* Empty group name is allowed */
     CORRADE_VERIFY(!Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")).empty());
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")).empty());
     CORRADE_COMPARE(out.str(), "");
 
     /* Missing group entry is not allowed */
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources-no-group.conf")).empty());
+        Path::join(RESOURCE_TEST_DIR, "resources-no-group.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: group name is not specified\n");
 }
 
@@ -321,7 +331,7 @@ void ResourceTest::compileFromEmptyFilename() {
     Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
@@ -330,7 +340,7 @@ void ResourceTest::compileFromEmptyAlias() {
     Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
@@ -358,21 +368,21 @@ void ResourceTest::list() {
 void ResourceTest::get() {
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
     {
         Containers::ArrayView<const char> data = r.getRaw("consequence.bin");
         CORRADE_COMPARE_AS((std::string{data, data.size()}),
-            Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+            Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
             TestSuite::Compare::StringToFile);
     } {
         Containers::ArrayView<const char> data = r.getRaw(std::string{"consequence.bin"});
         CORRADE_COMPARE_AS((std::string{data, data.size()}),
-            Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+            Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
             TestSuite::Compare::StringToFile);
     }
 }
@@ -427,10 +437,10 @@ void ResourceTest::overrideGroup() {
     std::ostringstream out;
     Debug redirectDebug{&out};
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
     Resource r("test");
 
-    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'test' overridden with '" + Directory::join(RESOURCE_TEST_DIR, "resources-overridden.conf") + "'\n");
+    CORRADE_COMPARE(out.str(), formatString("Utility::Resource: group 'test' overridden with '{}'\n", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf")));
     CORRADE_COMPARE(r.get("predisposition.bin"), "overridden predisposition\n");
     CORRADE_COMPARE(r.get("consequence2.txt"), "overridden consequence\n");
 
@@ -447,12 +457,12 @@ void ResourceTest::overrideGroupFallback() {
     std::ostringstream out;
     Warning redirectWarning{&out};
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
     Resource r("test");
 
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
-                       TestSuite::Compare::StringToFile);
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
 }
 
@@ -465,15 +475,17 @@ void ResourceTest::overrideNonexistentFile() {
     Error redirectError{&out};
     Warning redirectWarning(&out);
 
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
     Resource r("test");
 
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
-                       TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE(out.str(),
-        "Utility::Resource::get(): cannot open file path/to/nonexistent.bin from overridden group\n"
-        "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+    /* There's an error message from Path::read() before */
+    CORRADE_COMPARE_AS(out.str(),
+        "\nUtility::Resource::get(): cannot open file path/to/nonexistent.bin from overridden group\n"
+        "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n",
+        TestSuite::Compare::StringHasSuffix);
 }
 
 void ResourceTest::overrideNonexistentGroup() {
@@ -491,7 +503,7 @@ void ResourceTest::overrideNonexistentGroup() {
 
 void ResourceTest::overrideDifferentGroup() {
     std::ostringstream out;
-    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
 
     Warning redirectWarning{&out};
     Resource r("test");
