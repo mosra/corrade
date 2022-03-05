@@ -26,12 +26,13 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FileWatcher.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/System.h"
 
 #include "configure.h"
@@ -60,7 +61,7 @@ struct FileWatcherTest: TestSuite::Tester {
     void debugFlags();
 
     private:
-        std::string _filename;
+        Containers::String _filename;
 };
 
 FileWatcherTest::FileWatcherTest() {
@@ -83,9 +84,11 @@ FileWatcherTest::FileWatcherTest() {
     addTests({&FileWatcherTest::debugFlag,
               &FileWatcherTest::debugFlags});
 
-    Directory::mkpath(FILEWATCHER_WRITE_TEST_DIR);
-    _filename = Directory::join(FILEWATCHER_WRITE_TEST_DIR, "file.txt");
+    Path::make(FILEWATCHER_WRITE_TEST_DIR);
+    _filename = Path::join(FILEWATCHER_WRITE_TEST_DIR, "file.txt");
 }
+
+using namespace Containers::Literals;
 
 void FileWatcherTest::nonexistent() {
     std::ostringstream out;
@@ -111,15 +114,15 @@ void FileWatcherTest::nonexistent() {
 }
 
 void FileWatcherTest::setup() {
-    Directory::writeString(_filename, "hello");
+    Path::write(_filename, "hello"_s);
 }
 
 void FileWatcherTest::teardown() {
-    Directory::rm(_filename);
+    Path::remove(_filename);
 }
 
 void FileWatcherTest::changedRead() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_COMPARE(watcher.flags(), FileWatcher::Flags{});
@@ -137,13 +140,13 @@ void FileWatcherTest::changedRead() {
     #else
     System::sleep(10);
     #endif
-    CORRADE_COMPARE(Directory::readString(_filename), "hello");
+    CORRADE_COMPARE(Path::readString(_filename), Containers::String{"hello"});
 
     CORRADE_VERIFY(!watcher.hasChanged());
 }
 
 void FileWatcherTest::changedWrite() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -156,15 +159,15 @@ void FileWatcherTest::changedWrite() {
     #else
     System::sleep(10);
     #endif
-    CORRADE_VERIFY(Directory::writeString(_filename, "ahoy"));
+    CORRADE_VERIFY(Path::write(_filename, "ahoy"_s));
 
     CORRADE_VERIFY(watcher.hasChanged());
     CORRADE_VERIFY(!watcher.hasChanged()); /* Nothing changed second time */
 }
 
 void FileWatcherTest::changedWriteUtf8() {
-    std::string filenameUtf8 = Directory::join(FILEWATCHER_WRITE_TEST_DIR, "šňůra.txt");
-    CORRADE_VERIFY(Directory::writeString(filenameUtf8, "hýždě"));
+    Containers::String filenameUtf8 = Path::join(FILEWATCHER_WRITE_TEST_DIR, "šňůra.txt");
+    CORRADE_VERIFY(Path::write(filenameUtf8, "hýždě"_s));
 
     FileWatcher watcher{filenameUtf8};
     CORRADE_VERIFY(watcher.isValid());
@@ -177,32 +180,32 @@ void FileWatcherTest::changedWriteUtf8() {
     #else
     System::sleep(10);
     #endif
-    CORRADE_VERIFY(Directory::writeString(filenameUtf8, "půlky"));
+    CORRADE_VERIFY(Path::write(filenameUtf8, "půlky"_s));
 
     CORRADE_VERIFY(watcher.hasChanged());
     CORRADE_VERIFY(!watcher.hasChanged()); /* Nothing changed second time */
 }
 
 void FileWatcherTest::changedDeleted() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
-    CORRADE_VERIFY(Directory::rm(_filename));
+    CORRADE_VERIFY(Path::remove(_filename));
     CORRADE_VERIFY(!watcher.hasChanged());
     CORRADE_VERIFY(!watcher.isValid());
 }
 
 void FileWatcherTest::changedRecreatedImmediately() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
-    CORRADE_VERIFY(Directory::rm(_filename));
+    CORRADE_VERIFY(Path::remove(_filename));
 
     /* Not checking here otherwise it would invalidate the watcher */
 
@@ -213,20 +216,20 @@ void FileWatcherTest::changedRecreatedImmediately() {
     #else
     System::sleep(10);
     #endif
-    Directory::writeString(_filename, "hello again");
+    Path::write(_filename, "hello again"_s);
 
     CORRADE_VERIFY(watcher.hasChanged());
     CORRADE_VERIFY(watcher.isValid());
 }
 
 void FileWatcherTest::changedRecreatedLate() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
-    CORRADE_VERIFY(Directory::rm(_filename));
+    CORRADE_VERIFY(Path::remove(_filename));
 
     /* Checking here will invalidate the watcher */
     CORRADE_VERIFY(!watcher.hasChanged());
@@ -239,7 +242,7 @@ void FileWatcherTest::changedRecreatedLate() {
     #else
     System::sleep(10);
     #endif
-    Directory::writeString(_filename, "hello again");
+    Path::write(_filename, "hello again"_s);
 
     /* And it won't recover from it */
     CORRADE_VERIFY(!watcher.hasChanged());
@@ -247,14 +250,14 @@ void FileWatcherTest::changedRecreatedLate() {
 }
 
 void FileWatcherTest::changedRecreatedLateIgnoreErrors() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreErrors};
     CORRADE_COMPARE(watcher.flags(), FileWatcher::Flag::IgnoreErrors);
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
-    CORRADE_VERIFY(Directory::rm(_filename));
+    CORRADE_VERIFY(Path::remove(_filename));
 
     /* File is gone, but that gets ignored */
     CORRADE_VERIFY(!watcher.hasChanged());
@@ -267,14 +270,14 @@ void FileWatcherTest::changedRecreatedLateIgnoreErrors() {
     #else
     System::sleep(10);
     #endif
-    Directory::writeString(_filename, "hello again");
+    Path::write(_filename, "hello again"_s);
 
     CORRADE_VERIFY(watcher.hasChanged());
     CORRADE_VERIFY(watcher.isValid());
 }
 
 void FileWatcherTest::changedCleared() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -287,11 +290,11 @@ void FileWatcherTest::changedCleared() {
     #else
     System::sleep(10);
     #endif
-    CORRADE_VERIFY(Directory::writeString(_filename, ""));
+    CORRADE_VERIFY(Path::write(_filename, {}));
     CORRADE_VERIFY(watcher.hasChanged());
 
     /* A change right after should not get detected, since it's too soon */
-    CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
+    CORRADE_VERIFY(Path::write(_filename, "some content again"_s));
     bool changed = watcher.hasChanged();
     {
         #if !defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -305,7 +308,7 @@ void FileWatcherTest::changedCleared() {
 }
 
 void FileWatcherTest::changedClearedIgnoreEmpty() {
-    CORRADE_VERIFY(Directory::exists(_filename));
+    CORRADE_VERIFY(Path::exists(_filename));
 
     FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreChangeIfEmpty};
     CORRADE_COMPARE(watcher.flags(), FileWatcher::Flag::IgnoreChangeIfEmpty);
@@ -321,7 +324,7 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
     #endif
 
     /* Change to an empty file is ignored */
-    CORRADE_VERIFY(Directory::writeString(_filename, ""));
+    CORRADE_VERIFY(Path::write(_filename, {}));
     {
         #ifdef CORRADE_TARGET_IOS
         CORRADE_EXPECT_FAIL("iOS seems to be reporting all file sizes to be 0, so the IgnoreChangeIfEmpty flag is ignored there.");
@@ -330,7 +333,7 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
     }
 
     /* When the file becomes non-empty again, the change is signalled */
-    CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
+    CORRADE_VERIFY(Path::write(_filename, "some content again"_s));
     {
         /* This used to fail on iOS back when Travis CI was used, but on
            CircleCI emulator it passes. Since the whole thing needs to be
