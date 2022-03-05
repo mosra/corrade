@@ -33,12 +33,13 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringStl.h" /**< @todo drop once FileToString is <string>-free */
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -756,11 +757,10 @@ void FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd() {
 }
 
 void FormatTest::file() {
-    const std::string filename = Directory::join(FORMAT_WRITE_TEST_DIR, "format.txt");
-    if(!Directory::exists(FORMAT_WRITE_TEST_DIR))
-        CORRADE_VERIFY(Directory::mkpath(FORMAT_WRITE_TEST_DIR));
-    if(Directory::exists(filename))
-        CORRADE_VERIFY(Directory::rm(filename));
+    Containers::String filename = Path::join(FORMAT_WRITE_TEST_DIR, "format.txt");
+    CORRADE_VERIFY(Path::make(FORMAT_WRITE_TEST_DIR));
+    if(Path::exists(filename))
+        CORRADE_VERIFY(Path::remove(filename));
 
     {
         FILE* f = std::fopen(filename.data(), "w");
@@ -775,11 +775,10 @@ void FormatTest::file() {
 }
 
 void FormatTest::fileLongDouble() {
-    const std::string filename = Directory::join(FORMAT_WRITE_TEST_DIR, "format-long-double.txt");
-    if(!Directory::exists(FORMAT_WRITE_TEST_DIR))
-        CORRADE_VERIFY(Directory::mkpath(FORMAT_WRITE_TEST_DIR));
-    if(Directory::exists(filename))
-        CORRADE_VERIFY(Directory::rm(filename));
+    Containers::String filename = Path::join(FORMAT_WRITE_TEST_DIR, "format-long-double.txt");
+    CORRADE_VERIFY(Path::make(FORMAT_WRITE_TEST_DIR));
+    if(Path::exists(filename))
+        CORRADE_VERIFY(Path::remove(filename));
 
     {
         FILE* f = std::fopen(filename.data(), "w");
