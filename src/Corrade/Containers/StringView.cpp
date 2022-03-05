@@ -339,6 +339,9 @@ template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const Stri
 template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const char prefix) const {
     CORRADE_ASSERT(hasPrefix(prefix),
         "Containers::StringView::exceptPrefix(): string doesn't begin with" << (StringView{&prefix, 1}), {});
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(prefix);
+    #endif
     return suffix(1);
 }
 
@@ -351,6 +354,9 @@ template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const Stri
 template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const char suffix) const {
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << (StringView{&suffix, 1}), {});
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(suffix);
+    #endif
     return except(1);
 }
 
