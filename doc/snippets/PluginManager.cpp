@@ -27,10 +27,11 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/StringStl.h" /**< @todo remove when PluginManager is <string>-free */
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Path.h"
 
 using namespace Corrade;
 
@@ -45,7 +46,7 @@ class AbstractFilesystem: public PluginManager::AbstractPlugin {
         std::vector<std::string> pluginSearchPaths() {
             return {
                 "corrade/filesystems",
-                Utility::Directory::join(CMAKE_INSTALL_PREFIX, "lib/corrade/filesystems")
+                Utility::Path::join(CMAKE_INSTALL_PREFIX, "lib/corrade/filesystems")
             };
         }
 

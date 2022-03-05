@@ -29,8 +29,9 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -44,9 +45,9 @@ struct WrongMetadata: AbstractPlugin {
     static std::vector<std::string> pluginSearchPaths() {
         return {
             #ifndef CMAKE_INTDIR
-            Utility::Directory::join(PLUGINS_DIR, "wrong-metadata")
+            Utility::Path::join(PLUGINS_DIR, "wrong-metadata")
             #else
-            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "wrong-metadata"), CMAKE_INTDIR)
+            Utility::Path::join(Utility::Path::join(PLUGINS_DIR, "wrong-metadata"), CMAKE_INTDIR)
             #endif
         };
     }

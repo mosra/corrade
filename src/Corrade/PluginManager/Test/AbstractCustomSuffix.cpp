@@ -31,7 +31,8 @@
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include <vector>
 
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once PluginManager is <string>-free */
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 #endif
@@ -44,7 +45,7 @@ std::string AbstractCustomSuffix::pluginInterface() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractCustomSuffix::pluginSearchPaths() {
-    return {Utility::Directory::join(PLUGINS_DIR, "custom-suffix")};
+    return {Utility::Path::join(PLUGINS_DIR, "custom-suffix")};
 }
 
 std::string AbstractCustomSuffix::pluginSuffix() {

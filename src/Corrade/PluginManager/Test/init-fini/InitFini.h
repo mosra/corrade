@@ -29,8 +29,9 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/StringStl.h" /** @todo remove once PluginManager is <string>-free */
 #include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "configure.h"
@@ -44,7 +45,7 @@ struct InitFini: AbstractPlugin {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     static std::vector<std::string> pluginSearchPaths() {
         return {
-            Utility::Directory::join(PLUGINS_DIR, "init-fini")
+            Utility::Path::join(PLUGINS_DIR, "init-fini")
         };
     }
     #endif

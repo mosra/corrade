@@ -26,16 +26,19 @@
 
 #include "AbstractPlugin.h"
 
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/configure.h"
 #endif
 
 namespace Corrade { namespace PluginManager {
+
+using namespace Containers::Literals;
 
 struct AbstractPlugin::State {
     AbstractManager* manager{};
@@ -139,12 +142,12 @@ std::vector<std::string> implicitPluginSearchPaths(const std::string& libraryLoc
 
     if(!hardcodedPath.empty()) out.push_back(hardcodedPath);
     #ifdef CORRADE_TARGET_APPLE
-    out.push_back(Utility::Directory::join("../PlugIns", relativePath));
+    out.push_back(Utility::Path::join("../PlugIns"_s, relativePath));
     #endif
     if(!libraryLocation.empty())
-        out.push_back(Utility::Directory::join(Utility::Directory::path(libraryLocation), relativePath));
+        out.push_back(Utility::Path::join(Utility::Path::split(libraryLocation).first(), relativePath));
     #ifndef CORRADE_TARGET_WINDOWS
-    out.push_back(Utility::Directory::join("../lib", relativePath));
+    out.push_back(Utility::Path::join("../lib"_s, relativePath));
     #endif
     out.push_back(relativePath);
 

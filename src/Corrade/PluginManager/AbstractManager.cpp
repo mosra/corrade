@@ -34,8 +34,10 @@
 #include <sstream>
 #include <utility>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
@@ -47,7 +49,7 @@
 #include "Corrade/Utility/String.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 
 #ifndef CORRADE_TARGET_WINDOWS
 #include <dlfcn.h>
@@ -293,10 +295,12 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         CORRADE_ASSERT(!pluginSearchPaths.empty(),
             "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
 
-        const std::string executableDir = Utility::Directory::path(Utility::Directory::executableLocation());
+        const Containers::Optional<Containers::String> executableLocation = Utility::Path::executableLocation();
+        CORRADE_INTERNAL_ASSERT(executableLocation);
+        const Containers::StringView executableDir = Utility::Path::split(*executableLocation).first();
         for(const std::string& path: pluginSearchPaths) {
-            std::string fullPath = Utility::Directory::join(executableDir, path);
-            if(!Utility::Directory::exists(fullPath)) continue;
+            const Containers::String fullPath = Utility::Path::join(executableDir, path);
+            if(!Utility::Path::exists(fullPath)) continue;
 
             setPluginDirectory(std::move(fullPath));
             break;
@@ -404,26 +408,26 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     /** @todo Currently this preserves original behavior of not complaining
         when the directory doesn't exist, as a lot of existing code and tests
         relies on it. Figure out a better solution. */
-    if(Utility::Directory::exists(_state->pluginDirectory)) {
-        const std::vector<std::string> d = Utility::Directory::list(
+    if(Utility::Path::exists(_state->pluginDirectory)) {
+        Containers::Optional<Containers::Array<Containers::String>> d = Utility::Path::list(
             _state->pluginDirectory,
-            Utility::Directory::Flag::SkipDirectories|
-            Utility::Directory::Flag::SkipDotAndDotDot|
-            Utility::Directory::Flag::SortAscending);
-        for(const std::string& filename: d) {
+            Utility::Path::ListFlag::SkipDirectories|
+            Utility::Path::ListFlag::SkipDotAndDotDot|
+            Utility::Path::ListFlag::SortAscending);
+        if(d) for(const Containers::String& filename: *d) {
             /* File doesn't have module suffix, continue to next */
-            if(!Utility::String::endsWith(filename, _state->pluginSuffix))
+            if(!filename.hasSuffix(_state->pluginSuffix))
                 continue;
 
             /* Dig plugin name from filename */
-            const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
+            const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix);
 
             /* Skip the plugin if it is among loaded */
             if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
             registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
                 _state->pluginMetadataSuffix.empty() ? std::string{} :
-                    Utility::Directory::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}));
+                    std::string{Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}}));
         }
     }
 
@@ -506,8 +510,8 @@ LoadState AbstractManager::load(const std::string& plugin) {
     /* File path passed, load directly */
     if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
-        const std::string filename = Utility::Directory::filename(plugin);
-        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
+        const Containers::StringView filename = Utility::Path::split(plugin).second();
+        const Containers::StringView name = filename.except(_state->pluginSuffix.size());
         const auto found = _state->plugins.find(name);
         if(found != _state->plugins.end() && (found->second->loadState & LoadState::Loaded)) {
             Utility::Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
@@ -519,7 +523,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
            plugin of this name, replace it. */
         Containers::Pointer<Plugin> data{new Plugin{name,
             _state->pluginMetadataSuffix.empty() ? std::string{} :
-                Utility::Directory::join(Utility::Directory::path(plugin), name + _state->pluginMetadataSuffix)}};
+                std::string{Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix)}}};
         const LoadState state = loadInternal(*data, plugin);
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
@@ -564,7 +568,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
-    return loadInternal(plugin, Utility::Directory::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
+    return loadInternal(plugin, Utility::Path::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
 }
 
 LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filename) {
@@ -986,9 +990,8 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If file path passed, instantiate extracted name instead */
-    if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
-        const std::string filename = Utility::Directory::filename(plugin);
-        const std::string name = filename.substr(0, filename.length() - _state->pluginSuffix.size());
+    if(Containers::StringView{plugin}.hasSuffix(_state->pluginSuffix)) {
+        const Containers::StringView name = Utility::Path::split(plugin).second().exceptSuffix(_state->pluginSuffix);
         auto found = _state->aliases.find(name);
         CORRADE_INTERNAL_ASSERT(found != _state->aliases.end());
         return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, name)));
@@ -1007,8 +1010,10 @@ AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata): 
     if(metadata.empty()) {
         loadState = LoadState::NotLoaded;
     } else {
+        /** @todo ahem, this brancing seems a bit convoluted, error if
+            configuration *is* valid?! */
         if(configuration.isValid()) {
-            if(Utility::Directory::exists(metadata)) {
+            if(Utility::Path::exists(metadata)) {
                 loadState = LoadState::NotLoaded;
                 return;
             }
