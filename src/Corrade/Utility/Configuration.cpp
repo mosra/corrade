@@ -32,9 +32,10 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
@@ -43,7 +44,7 @@ Configuration::Configuration(const Flags flags): ConfigurationGroup(this), _flag
 
 Configuration::Configuration(const std::string& filename, const Flags flags): ConfigurationGroup(this), _filename(flags & Flag::ReadOnly ? std::string() : filename), _flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {
     /* File doesn't exist yet, nothing to do */
-    if(!Directory::exists(filename)) return;
+    if(!Path::exists(filename)) return;
 
     /* The user wants to truncate the file, mark it as changed and do nothing */
     if(flags & Flag::Truncate) {
@@ -51,7 +52,8 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
         return;
     }
 
-    if(parse(Directory::read(filename))) return;
+    Containers::Optional<Containers::Array<char>> data = Path::read(filename);
+    if(data && parse(*data)) return;
 
     /* Error, reset everything back */
     _filename = {};
@@ -272,10 +274,11 @@ std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(C
 bool Configuration::save(const std::string& filename) {
     /* Save to a stringstream and then write it as a string to the file. Doing
        it this way to avoid issues with Unicode filenames on Windows. */
-    /** @todo get rid of streams altogether */
+    /** @todo get rid of streams altogether, and then of the StringView cast
+        also */
     std::ostringstream out;
     save(out);
-    if(Directory::writeString(filename, out.str()))
+    if(Path::write(filename, Containers::StringView{out.str()}))
         return true;
 
     Error() << "Utility::Configuration::save(): cannot open file" << filename;

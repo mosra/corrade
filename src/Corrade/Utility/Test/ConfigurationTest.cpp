@@ -36,9 +36,11 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
@@ -64,6 +66,7 @@ struct ConfigurationTest: TestSuite::Tester {
     void names();
 
     void readonly();
+    void readError();
     void nonexistentFile();
     void truncate();
 
@@ -109,6 +112,7 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::names,
 
               &ConfigurationTest::readonly,
+              &ConfigurationTest::readError,
               &ConfigurationTest::nonexistentFile,
               &ConfigurationTest::truncate,
 
@@ -134,18 +138,18 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::iterateValuesCommentsOnly});
 
     /* Create testing dir */
-    Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
+    Path::make(CONFIGURATION_WRITE_TEST_DIR);
 
     /* Remove everything there */
-    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf")))
-        Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
-    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf")))
-        Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
+    if(Path::exists(Path::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf")))
+        Path::remove(Path::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    if(Path::exists(Path::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf")))
+        Path::remove(Path::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
 }
 
 void ConfigurationTest::parse() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "parse.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
     CORRADE_VERIFY(conf.configuration() == &conf);
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
@@ -193,15 +197,15 @@ void ConfigurationTest::parse() {
 
     /* Save again, verify changes */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "parse-modified.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "parse-modified.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::parseMissingEquals() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-equals.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-equals.conf"));
 
     /* Nothing remains, filename is empty and valid bit is not set */
     CORRADE_VERIFY(!conf.isValid());
@@ -213,7 +217,7 @@ void ConfigurationTest::parseMissingEquals() {
 void ConfigurationTest::parseMissingQuote() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-quote.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-quote.conf"));
 
     /* Nothing remains, filename is empty and valid bit is not set */
     CORRADE_VERIFY(!conf.isValid());
@@ -225,7 +229,7 @@ void ConfigurationTest::parseMissingQuote() {
 void ConfigurationTest::parseMissingMultiLineQuote() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-multiline-quote.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-multiline-quote.conf"));
 
     /* Nothing remains, filename is empty and valid bit is not set */
     CORRADE_VERIFY(!conf.isValid());
@@ -235,8 +239,8 @@ void ConfigurationTest::parseMissingMultiLineQuote() {
 }
 
 void ConfigurationTest::parseHierarchic() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
@@ -252,8 +256,8 @@ void ConfigurationTest::parseHierarchic() {
 
     /* Expect no change */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"),
                        TestSuite::Compare::File);
 
     /* Modify */
@@ -263,14 +267,14 @@ void ConfigurationTest::parseHierarchic() {
 
     /* Verify changes */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::parseHierarchicShortcuts() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"));
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
@@ -293,15 +297,15 @@ void ConfigurationTest::parseHierarchicShortcuts() {
 
     /* Verify that nothing changed except for the last squashed group */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts-modified.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts-modified.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::parseHierarchicEmptyGroup() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-group.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-group.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
@@ -311,7 +315,7 @@ void ConfigurationTest::parseHierarchicEmptyGroup() {
 void ConfigurationTest::parseHierarchicEmptySubgroup() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-subgroup.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-subgroup.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
@@ -321,7 +325,7 @@ void ConfigurationTest::parseHierarchicEmptySubgroup() {
 void ConfigurationTest::parseHierarchicMissingBracket() {
     std::ostringstream out;
     Error redirectError{&out};
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-missing-bracket.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-missing-bracket.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
@@ -329,14 +333,14 @@ void ConfigurationTest::parseHierarchicMissingBracket() {
 }
 
 void ConfigurationTest::utf8Filename() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hýždě.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hýždě.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"));
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
     CORRADE_COMPARE(conf.value("unicode"), "supported");
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hýždě.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "hýždě.conf"),
                        TestSuite::Compare::File);
 }
 
@@ -402,7 +406,7 @@ void ConfigurationTest::names() {
 }
 
 void ConfigurationTest::readonly() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly);
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly);
 
     /* Filename for readonly configuration is empty */
     CORRADE_VERIFY(conf.isValid());
@@ -410,57 +414,85 @@ void ConfigurationTest::readonly() {
     CORRADE_VERIFY(conf.filename().empty());
 }
 
+void ConfigurationTest::readError() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    if(!std::getenv("SIMULATOR_UDID"))
+        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't abuse a directory to simulate a read error.");
+    #endif
+
+    /* A directory, yes. At first I thought this would be a nice & quick way to
+       check, but given the amount of OS-specific workarounds all around I'm
+       not so sure anymore. */
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(CONFIGURATION_TEST_DIR);
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+
+    /* On Windows the opening itself fails, on Unix we have an explicit check.
+       On other systems no idea, so let's say we expect the same message as on
+       Unix. */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Path::read(): can't open {}: error ", CONFIGURATION_TEST_DIR),
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE(out.str(), formatString("Utility::Path::read(): {} is a directory\n", CONFIGURATION_TEST_DIR));
+    #endif
+}
+
 void ConfigurationTest::nonexistentFile() {
-    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")));
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
+    if(Path::exists(Path::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")))
+        CORRADE_VERIFY(Path::remove(Path::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf")));
+    Configuration conf(Path::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
 
     /* Everything okay if the file doesn't exist */
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_COMPARE(conf.filename(), Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
+    CORRADE_COMPARE(conf.filename(), Path::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
 
     conf.setValue("key", "value");
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"),
                        "key=value\n", TestSuite::Compare::FileToString);
 }
 
 void ConfigurationTest::truncate() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly|Configuration::Flag::Truncate);
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly|Configuration::Flag::Truncate);
 
     /* File is truncated on saving */
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf")));
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf"),
+    CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf")));
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf"),
                        "", TestSuite::Compare::FileToString);
 }
 
 void ConfigurationTest::whitespaces() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "whitespaces.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "whitespaces.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"));
     conf.save();
 
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "whitespaces-saved.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "whitespaces-saved.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::bom() {
     {
         /* Stripped by default */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "bom.conf"));
+        Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "bom.conf"));
         CORRADE_VERIFY(conf.isValid());
-        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf")));
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf"),
+        CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf")));
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf"),
             "", TestSuite::Compare::FileToString);
     } {
         /* Explicitly preserved */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "bom.conf"), Configuration::Flag::PreserveBom);
+        Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "bom.conf"), Configuration::Flag::PreserveBom);
         CORRADE_VERIFY(conf.isValid());
-        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf")));
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf"),
+        CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf")));
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf"),
             "\xEF\xBB\xBF", TestSuite::Compare::FileToString);
     }
 }
@@ -468,79 +500,79 @@ void ConfigurationTest::bom() {
 void ConfigurationTest::eol() {
     {
         /* Autodetect Unix */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"), Configuration::Flag::ReadOnly);
+        Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"), Configuration::Flag::ReadOnly);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(!conf.isEmpty());
-        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf")));
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"),
+        CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf")));
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"),
             "key=value\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect Windows */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"), Configuration::Flag::ReadOnly);
+        Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"), Configuration::Flag::ReadOnly);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(!conf.isEmpty());
-        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf")));
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"),
+        CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf")));
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"),
             "key=value\r\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect mixed (both \r and \r\n) */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"), Configuration::Flag::ReadOnly);
+        Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"), Configuration::Flag::ReadOnly);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(!conf.isEmpty());
-        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf")));
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"),
+        CORRADE_VERIFY(conf.save(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf")));
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"),
             "key=value\r\nkey=value\r\n", TestSuite::Compare::FileToString);
     } {
         /* Force Unix */
-        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        Configuration conf(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate|Configuration::Flag::ForceUnixEol);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             "key=value\n", TestSuite::Compare::FileToString);
     } {
         /* Force Windows */
-        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        Configuration conf(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate|Configuration::Flag::ForceWindowsEol);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             "key=value\r\n", TestSuite::Compare::FileToString);
     } {
         /* Default */
-        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        Configuration conf(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate);
         CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
-        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+        CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             "key=value\n", TestSuite::Compare::FileToString);
     }
 }
 
 void ConfigurationTest::stripComments() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "comments.conf"), Configuration::Flag::SkipComments);
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "comments.conf"), Configuration::Flag::SkipComments);
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"));
 
     /* Verify that comments were removed */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "comments-saved.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "comments-saved.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::multiLineValue() {
     /* Remove previous saved file */
-    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")));
+    if(Path::exists(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")))
+        CORRADE_VERIFY(Path::remove(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf")));
 
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
@@ -550,18 +582,18 @@ void ConfigurationTest::multiLineValue() {
 
     /* Expect change only in empty value */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-saved.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "multiLine-saved.conf"),
                        TestSuite::Compare::File);
 }
 
 void ConfigurationTest::multiLineValueCrlf() {
     /* Remove previous saved file */
-    if(Directory::exists(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")));
+    if(Path::exists(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")))
+        CORRADE_VERIFY(Path::remove(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf")));
 
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
@@ -570,8 +602,8 @@ void ConfigurationTest::multiLineValueCrlf() {
 
     /* Expect change only in lines without CR */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf-saved.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"),
+                       Path::join(CONFIGURATION_TEST_DIR, "multiLine-crlf-saved.conf"),
                        TestSuite::Compare::File);
 }
 
@@ -647,7 +679,7 @@ void ConfigurationTest::move() {
 }
 
 void ConfigurationTest::iterateGroups() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     /* No matter whether the originating ConfigurationGroup is const or not,
        it should be possible to use the immutable type */
@@ -674,7 +706,7 @@ void ConfigurationTest::iterateGroups() {
 }
 
 void ConfigurationTest::iterateGroupsRangeFor() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     /* No matter whether the originating ConfigurationGroup is const or not,
        it should be possible to use the immutable type */
@@ -691,8 +723,8 @@ void ConfigurationTest::iterateGroupsRangeFor() {
 }
 
 void ConfigurationTest::iterateGroupsMutable() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    conf.setFilename(Path::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"));
 
     ConfigurationGroup* mixed = conf.group("mixed");
     CORRADE_VERIFY(mixed);
@@ -702,13 +734,13 @@ void ConfigurationTest::iterateGroupsMutable() {
 
     conf.save();
 
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"),
-        Directory::join(CONFIGURATION_TEST_DIR, "iterate-modified.conf"),
+    CORRADE_COMPARE_AS(Path::join(CONFIGURATION_WRITE_TEST_DIR, "iterate.conf"),
+        Path::join(CONFIGURATION_TEST_DIR, "iterate-modified.conf"),
         TestSuite::Compare::File);
 }
 
 void ConfigurationTest::iterateGroupsEmpty() {
-    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     const ConfigurationGroup* valuesOnly = conf.group("valuesOnly");
     CORRADE_VERIFY(valuesOnly);
@@ -716,7 +748,7 @@ void ConfigurationTest::iterateGroupsEmpty() {
 }
 
 void ConfigurationTest::iterateValues() {
-    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     const ConfigurationGroup* valuesOnly = conf.group("valuesOnly");
     CORRADE_VERIFY(valuesOnly);
@@ -740,7 +772,7 @@ void ConfigurationTest::iterateValues() {
 }
 
 void ConfigurationTest::iterateValuesRangeFor() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     const ConfigurationGroup* mixed = conf.group("mixed");
     CORRADE_VERIFY(mixed);
@@ -755,7 +787,7 @@ void ConfigurationTest::iterateValuesRangeFor() {
 }
 
 void ConfigurationTest::iterateValuesEmpty() {
-    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     const ConfigurationGroup* groupsOnly = conf.group("groupsOnly");
     CORRADE_VERIFY(groupsOnly);
@@ -763,7 +795,7 @@ void ConfigurationTest::iterateValuesEmpty() {
 }
 
 void ConfigurationTest::iterateValuesCommentsOnly() {
-    const Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
 
     const ConfigurationGroup* commentsOnly = conf.group("commentsOnly");
     CORRADE_VERIFY(commentsOnly);
