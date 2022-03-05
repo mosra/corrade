@@ -251,24 +251,33 @@ details.
 
 <ul>
 <li>
-@ref Compare::Container and @ref Compare::SortedContainer can be used for
-convenient comparison of large containers. Compared to plain
+@ref Compare::Container and @relativeref{Compare,SortedContainer} can be used
+for convenient comparison of large containers. Compared to plain
 @ref CORRADE_COMPARE() Its diagnostic will show where exactly the containers
 differ, which becomes useful with large data sizes:
 
 @snippet TestSuite.cpp Compare-Container
 </li>
 <li>
-@ref Compare::File, @ref Compare::FileToString and @ref Compare::StringToFile
-allow you to compare files without having to manually read them:
+@ref Compare::StringHasPrefix, @relativeref{Compare,StringHasSuffix},
+@relativeref{Compare,StringContains} and @relativeref{Compare,StringNotContains}
+will provide a better diagnostic compared to e.g. checking
+@ref Containers::StringView::hasPrefix() with @ref CORRADE_VERIFY():
+
+@snippet TestSuite.cpp Compare-StringHasPrefix
+</li>
+<li>
+@ref Compare::File, @relativeref{Compare,FileToString} and
+@relativeref{Compare,StringToFile} allow you to compare files without having to
+manually read them:
 
 @snippet TestSuite.cpp Compare-File
 </li>
 <li>
-@ref Compare::Less, @ref Compare::Around and others from the
-@ref Corrade/TestSuite/Compare/Numeric.h header allow you to do numeric
-comparisons that again provide better failure reporting compared to checking an
-expression result with @ref CORRADE_VERIFY():
+@ref Compare::Less, @relativeref{Compare,Greater}, @relativeref{Compare,Around}
+and others from the @ref Corrade/TestSuite/Compare/Numeric.h header allow you
+to do numeric comparisons that again provide better failure reporting compared
+to checking an expression result with @ref CORRADE_VERIFY():
 
 @snippet TestSuite.cpp Compare-around-just-one
 </li>
