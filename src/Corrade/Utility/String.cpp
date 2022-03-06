@@ -250,10 +250,24 @@ void uppercaseInPlace(const Containers::MutableStringView string) {
 Containers::String lowercase(const Containers::StringView string) {
     /* Theoretically doing the copy in the same loop as case change could be
        faster for *really long* strings due to cache reuse, but until that
-       proves to be a bottleneck I'll go with the simpler solution. */
+       proves to be a bottleneck I'll go with the simpler solution.
+
+       Not implementing through lowercase(Containers::String) as the call stack
+       is deep enough already and we don't need the extra checks there. */
     Containers::String out{string};
     lowercaseInPlace(out);
     return out;
+}
+
+Containers::String lowercase(Containers::String string) {
+    /* In the rare scenario where we'd get a non-owned string (such as
+       String::nullTerminatedView() passed right into the function), make it
+       owned first. Usually it'll get copied however, which already makes it
+       owned. */
+    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+
+    lowercaseInPlace(string);
+    return string;
 }
 
 std::string lowercase(std::string string) {
@@ -264,10 +278,24 @@ std::string lowercase(std::string string) {
 Containers::String uppercase(const Containers::StringView string) {
     /* Theoretically doing the copy in the same loop as case change could be
        faster for *really long* strings due to cache reuse, but until that
-       proves to be a bottleneck I'll go with the simpler solution. */
+       proves to be a bottleneck I'll go with the simpler solution.
+
+       Not implementing through uppercase(Containers::String) as the call stack
+       is deep enough already and we don't need the extra checks there. */
     Containers::String out{string};
     uppercaseInPlace(out);
     return out;
+}
+
+Containers::String uppercase(Containers::String string) {
+    /* In the rare scenario where we'd get a non-owned string (such as
+       String::nullTerminatedView() passed right into the function), make it
+       owned first. Usually it'll get copied however, which already makes it
+       owned. */
+    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+
+    uppercaseInPlace(string);
+    return string;
 }
 
 std::string uppercase(std::string string) {

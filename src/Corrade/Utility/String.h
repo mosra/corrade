@@ -446,6 +446,15 @@ topic.
 */
 CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::StringView string);
 
+/** @overload
+@m_since_latest
+
+Compared to @ref lowercase(Containers::StringView) is able to perform the
+operation in-place if @p string is owned, transferring the data ownership to
+the returned instance. Makes a owned copy first if not.
+*/
+CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::String string);
+
 /** @overload */
 CORRADE_UTILITY_EXPORT std::string lowercase(std::string string);
 
@@ -471,6 +480,15 @@ topic.
 @see @ref uppercaseInPlace()
 */
 CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::StringView string);
+
+/** @overload
+@m_since_latest
+
+Compared to @ref uppercase(Containers::StringView) is able to perform the
+operation in-place if @p string is owned, transferring the data ownership to
+the returned instance. Makes a owned copy first if not.
+*/
+CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::String string);
 
 /** @overload */
 CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);

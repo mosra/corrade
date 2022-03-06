@@ -49,6 +49,9 @@ struct StringTest: TestSuite::Tester {
     void partition();
     void join();
     void lowercaseUppercase();
+    void lowercaseUppercaseString();
+    void lowercaseUppercaseStringSmall();
+    void lowercaseUppercaseStringNotOwned();
     void lowercaseUppercaseStl();
 
     void beginsWith();
@@ -160,6 +163,9 @@ StringTest::StringTest() {
               &StringTest::partition,
               &StringTest::join,
               &StringTest::lowercaseUppercase,
+              &StringTest::lowercaseUppercaseString,
+              &StringTest::lowercaseUppercaseStringSmall,
+              &StringTest::lowercaseUppercaseStringNotOwned,
               &StringTest::lowercaseUppercaseStl,
 
               &StringTest::beginsWith,
@@ -519,6 +525,61 @@ void StringTest::lowercaseUppercase() {
         Containers::String hello = "Hello!"_s;
         String::uppercaseInPlace(hello);
         CORRADE_COMPARE(hello, "HELLO!");
+    }
+}
+
+void StringTest::lowercaseUppercaseString() {
+    /* It should just operate in-place, not allocate a copy */
+
+    {
+        Containers::String in{Containers::AllocatedInit, "YEAh!"};
+        const char* data = in.data();
+        Containers::String out = String::lowercase(std::move(in));
+        CORRADE_COMPARE(out, "yeah!");
+        CORRADE_VERIFY(out.data() == data);
+    } {
+        Containers::String in{Containers::AllocatedInit, "Hello!"};
+        const char* data = in.data();
+        Containers::String out = String::uppercase(std::move(in));
+        CORRADE_COMPARE(out, "HELLO!");
+        CORRADE_VERIFY(out.data() == data);
+    }
+}
+
+void StringTest::lowercaseUppercaseStringSmall() {
+    /* For SSO there's no allocation to preserve, so just check that it works */
+
+    {
+        Containers::String string{"YEAh!"};
+        CORRADE_VERIFY(string.isSmall());
+        CORRADE_COMPARE(String::lowercase(string), "yeah!");
+    } {
+        Containers::String string{"Hello!"};        CORRADE_VERIFY(string.isSmall());
+        CORRADE_COMPARE(String::uppercase(string), "HELLO!");
+    }
+}
+
+void StringTest::lowercaseUppercaseStringNotOwned() {
+    /* Will make a copy as it can't touch a potentially immutable data */
+
+    {
+        const char* data = "YEAh!";
+        Containers::String in = Containers::String::nullTerminatedView(data);
+        CORRADE_VERIFY(!in.isSmall());
+        CORRADE_VERIFY(in.deleter());
+
+        Containers::String out = String::lowercase(std::move(in));
+        CORRADE_COMPARE(out, "yeah!");
+        CORRADE_VERIFY(out.data() != data);
+    } {
+        const char* data = "Hello!";
+        Containers::String in = Containers::String::nullTerminatedView(data);
+        CORRADE_VERIFY(!in.isSmall());
+        CORRADE_VERIFY(in.deleter());
+
+        Containers::String out = String::uppercase(std::move(in));
+        CORRADE_COMPARE(out, "HELLO!");
+        CORRADE_VERIFY(out.data() != data);
     }
 }
 
