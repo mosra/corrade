@@ -31,6 +31,7 @@
  */
 
 #include "Corrade/TestSuite/Comparator.h"
+#include "Corrade/Utility/Math.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -56,11 +57,6 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 */
 template<class> class Container {};
 
-}
-
-namespace Implementation {
-    /* Copied from Magnum/Math/Vector.h, to avoid #include <algorithm> */
-    inline std::size_t max(std::size_t a, std::size_t b) { return a < b ? b : a; }
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -101,7 +97,7 @@ template<class T> void Comparator<Compare::Container<T>>::printMessage(Compariso
     out << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
 
     Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
-    for(std::size_t i = 0, end = Implementation::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
+    for(std::size_t i = 0, end = Utility::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
         if(_actualContents->size() > i && _expectedContents->size() > i &&
             !(comparator((*_actualContents)[i], (*_expectedContents)[i]) & ComparisonStatusFlag::Failed)) continue;
 

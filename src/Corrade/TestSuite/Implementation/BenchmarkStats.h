@@ -30,12 +30,10 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
-#ifdef _MSC_VER
-#include <algorithm> /* std::max() */
-#endif
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/StlMath.h"
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
@@ -99,7 +97,7 @@ inline void printValue(Utility::Debug& out, const double mean, const double stdd
 }
 
 inline void printTime(Utility::Debug& out, const double mean, const double stddev, const Utility::Debug::Color color) {
-    const double max = std::max(mean, stddev);
+    const double max = Utility::max(mean, stddev);
 
     if(max >= 1000000000.0)
         printValue(out, mean, stddev, color, 1000000000.0, " ", "s");
@@ -112,7 +110,7 @@ inline void printTime(Utility::Debug& out, const double mean, const double stdde
 }
 
 inline void printCount(Utility::Debug& out, const double mean, const double stddev, const Utility::Debug::Color color, double multiplier, const char* const unit) {
-    double max = std::max(mean, stddev);
+    double max = Utility::max(mean, stddev);
 
     if(max >= multiplier*multiplier*multiplier)
         printValue(out, mean, stddev, color, multiplier*multiplier*multiplier, "G", unit);

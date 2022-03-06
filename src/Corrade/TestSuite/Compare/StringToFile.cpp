@@ -27,14 +27,12 @@
 #include "StringToFile.h"
 
 #include <cstddef>
-#ifdef _MSC_VER
-#include <algorithm> /* std::max() */
-#endif
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/TestSuite/Tester.h"
 
@@ -74,7 +72,7 @@ void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Util
     else
         out << "contents.";
 
-    for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
+    for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
         /** @todo do this without std::string */

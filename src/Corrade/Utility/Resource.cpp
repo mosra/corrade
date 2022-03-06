@@ -26,9 +26,6 @@
 
 #include "Resource.h"
 
-#ifdef _MSC_VER
-#include <algorithm> /* std::max() */
-#endif
 #include <iomanip>
 #include <map>
 #include <sstream>
@@ -43,6 +40,7 @@
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
@@ -151,7 +149,7 @@ std::string hexcode(const std::string& data) {
         out << "\n    ";
 
         /* Convert all characters on a row to hex "0xab,0x01,..." */
-        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
+        for(std::size_t end = Utility::min(row + 15, data.size()), i = row; i != end; ++i) {
             out << "0x" << std::setw(2) << std::setfill('0')
                 << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
                 << ",";

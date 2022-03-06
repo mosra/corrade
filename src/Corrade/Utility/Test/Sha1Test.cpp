@@ -25,13 +25,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef _MSC_VER
-#include <algorithm> /* std::min() */
-#endif
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Sha1.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -106,7 +103,7 @@ const Containers::ArrayView<const char> String{Data, sizeof(Data) - 1};
 void Sha1Test::iterative() {
     Sha1 hasher;
     for(std::size_t offset = 0; offset < String.size(); offset += testCaseRepeatId() + 1) {
-        const auto slice = String.slice(offset, std::min(offset + testCaseRepeatId() + 1, String.size()));
+        const auto slice = String.slice(offset, Utility::min(offset + testCaseRepeatId() + 1, String.size()));
         hasher << std::string{slice.data(), slice.size()};
     }
 

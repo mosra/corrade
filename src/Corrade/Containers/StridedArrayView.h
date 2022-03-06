@@ -35,6 +35,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/sequenceHelpers.h"
+#include "Corrade/Utility/Math.h"
 
 namespace Corrade { namespace Containers {
 
@@ -54,11 +55,8 @@ namespace Implementation {
     template<unsigned dimensions> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>&, const StridedDimensions<dimensions, std::ptrdiff_t>&, Sequence<>) {
         return 0;
     }
-    constexpr std::size_t largerStride(std::size_t a, std::size_t b) {
-        return a < b ? b : a; /* max(), but named like this to avoid clashes */
-    }
     template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, Sequence<first, next...>) {
-        return largerStride(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
+        return Utility::max(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
     }
 

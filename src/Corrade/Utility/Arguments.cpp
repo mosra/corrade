@@ -29,15 +29,13 @@
 
 #include <cstdlib>
 #include <cstring>
-#ifdef _MSC_VER
-#include <algorithm> /* std::max() */
-#endif
 #include <iomanip>
 #include <sstream>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/String.h"
 
 /* For Arguments::environment() */
@@ -916,7 +914,7 @@ std::string Arguments::help() const {
     std::size_t keyColumnWidth = 10;
     for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
         /* Add space for `--` at the beginning and `...` at the end */
-        keyColumnWidth = std::max(prefix.first.size() + 5, keyColumnWidth);
+        keyColumnWidth = Utility::max(prefix.first.size() + 5, keyColumnWidth);
 
         /* If the key width is larger than maximum, cut it. Also no need to
            process more entries, as no key width can be larger than this */
@@ -944,7 +942,7 @@ std::string Arguments::help() const {
             if(entry.shortKey) currentKeyColumnWidth += 4;
         }
 
-        keyColumnWidth = std::max(currentKeyColumnWidth, keyColumnWidth);
+        keyColumnWidth = Utility::max(currentKeyColumnWidth, keyColumnWidth);
 
         /* If the key width is larger than maximum, cut it. Also no need to
            process more entries, as no key width can be larger than this */

@@ -41,6 +41,7 @@
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 
@@ -571,7 +572,7 @@ benchmark types:
                 /* Gather measurements. There needs to be at least one
                    measurememnt left even if the discard count says otherwise. */
                 const std::size_t discardMeasurements = measurements.empty() ? 0 :
-                        std::min(measurements.size() - 1, args.value<std::size_t>("benchmark-discard"));
+                        Utility::min(measurements.size() - 1, args.value<std::size_t>("benchmark-discard"));
 
                 double mean, stddev;
                 Utility::Debug::Color color;
