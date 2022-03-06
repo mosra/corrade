@@ -516,7 +516,8 @@ void StringTest::lowercaseUppercase() {
         CORRADE_COMPARE(String::uppercase("hýždě"_s), "HýžDě");
 
     /* In-place. These are called from the copying functions so just verify
-       they're exported and callable, every */
+       they're exported and callable, everything else is already tested
+       above */
     } {
         Containers::String yeah = "YEAh!"_s;
         String::lowercaseInPlace(yeah);
