@@ -261,7 +261,13 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * A default-constructed instance has @ref StringViewFlag::Global set.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
+        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept:
+            #ifndef CORRADE_TARGET_BIG_ENDIAN
+            _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)}
+            #else
+            _sizePlusFlags{std::size_t(StringViewFlag::Global)}, _data{}
+            #endif
+            {}
 
         /**
          * @brief Construct from a C string of known size
@@ -283,12 +289,20 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * use the @link operator""_s() @endlink literal instead.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{
+        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept:
+            #ifndef CORRADE_TARGET_BIG_ENDIAN
+            _data{data},
+            #endif
+            _sizePlusFlags{
             (CORRADE_CONSTEXPR_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
             CORRADE_CONSTEXPR_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
                 "Containers::StringView: can't use StringViewFlag::NullTerminated with null data"),
-            size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}
+            size|(std::size_t(flags) & Implementation::StringViewSizeMask))}
+            #ifdef CORRADE_TARGET_BIG_ENDIAN
+            , _data{data}
+            #endif
+            {}
 
         /**
          * @brief Construct from a @ref String
@@ -315,7 +329,13 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /*implicit*/ BasicStringView(ArrayView<T> data, StringViewFlags flags = {}) noexcept;
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
+        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept:
+            #ifndef CORRADE_TARGET_BIG_ENDIAN
+            _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags}
+            #else
+            _sizePlusFlags{mutable_._sizePlusFlags}, _data{mutable_._data}
+            #endif
+            {}
 
         /**
          * @brief Construct from a null-terminated C string
@@ -921,10 +941,25 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */
-        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t): _data{data}, _sizePlusFlags{sizePlusFlags} {}
+        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t):
+            #ifndef CORRADE_TARGET_BIG_ENDIAN
+            _data{data}, _sizePlusFlags{sizePlusFlags}
+            #else
+            _sizePlusFlags{sizePlusFlags}, _data{data}
+            #endif
+            {}
 
+        /* The order matches layout of a non-SSO String, meaning it should be
+           possible to take Array<String> and turn it into a
+           StridedArrayView1D<StringView> where initial offset is 0 on BE,
+           sizeof(void*) on LE and stride is sizeof(String) */
+        #ifndef CORRADE_TARGET_BIG_ENDIAN
         T* _data;
         std::size_t _sizePlusFlags;
+        #else
+        std::size_t _sizePlusFlags;
+        T* _data;
+        #endif
 };
 
 /**

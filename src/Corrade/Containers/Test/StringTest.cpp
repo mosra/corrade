@@ -190,6 +190,8 @@ struct StringTest: TestSuite::Tester {
        null-terminated string, thus there's no customDeleterNullData() */
     void customDeleterZeroSize();
     void customDeleterMovedOutInstance();
+
+    void reinterpretAsStringView();
 };
 
 StringTest::StringTest() {
@@ -315,7 +317,9 @@ StringTest::StringTest() {
               &StringTest::defaultDeleter,
               &StringTest::customDeleter,
               &StringTest::customDeleterZeroSize,
-              &StringTest::customDeleterMovedOutInstance});
+              &StringTest::customDeleterMovedOutInstance,
+
+              &StringTest::reinterpretAsStringView});
 }
 
 template<class T> struct ConstTraits;
@@ -2272,6 +2276,29 @@ void StringTest::customDeleterMovedOutInstance() {
     /* The deleter got reset to nullptr in a, which means the function gets
        called only once, consistently with what Array does */
     CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void StringTest::reinterpretAsStringView() {
+    /* This makes more sense with arrays of String, which would be turned into
+       strided array views of StringView */
+
+    String a{AllocatedInit, "hello!"};
+    StringView& view = *reinterpret_cast<StringView*>(reinterpret_cast<char*>(&a) +
+        #ifndef CORRADE_TARGET_BIG_ENDIAN
+        sizeof(void*)
+        #else
+        0
+        #endif
+        );
+
+    CORRADE_COMPARE(view.data(), static_cast<void*>(a.data()));
+    CORRADE_COMPARE(view.size(), a.size());
+    CORRADE_COMPARE(view, "hello!");
+    {
+        CORRADE_EXPECT_FAIL("The unused bit in String size isn't set to match  StringViewFlag::NullTerminated yet.");
+        CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
+    }
+    CORRADE_COMPARE(view.flags(), StringViewFlags{});
 }
 
 }}}}

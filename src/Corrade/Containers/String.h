@@ -1106,7 +1106,7 @@ class CORRADE_UTILITY_EXPORT String {
                                 | LSB |||||||   MSB   |
             +---------+---------+-----+++++++---------+
             |  data   |  data   |      size      | 00 |
-            | pointer | deleter |                |    |
+            | deleter | pointer |                |    |
             |  8B/4B  |  8B/4B  |  56b/24b  | 6b | 2b |
             +---------+---------+-----------+---------+
 
@@ -1141,14 +1141,16 @@ class CORRADE_UTILITY_EXPORT String {
             std::uint8_t size;
             #endif
         };
+        /* At offset of 0 on BE and sizeof(void*) on LE the layout is
+           compatible with StringView */
         struct Large {
             #ifdef CORRADE_TARGET_BIG_ENDIAN
             std::size_t size;
             char* data;
             void(*deleter)(char*, std::size_t);
             #else
-            char* data;
             void(*deleter)(char*, std::size_t);
+            char* data;
             std::size_t size;
             #endif
         };
