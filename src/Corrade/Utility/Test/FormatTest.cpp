@@ -241,32 +241,32 @@ void FormatTest::escapes() {
 
 void FormatTest::integerChar() {
     if(std::is_signed<char>::value) {
-        CORRADE_COMPARE(formatString<char>("{}", -15), "-15");
+        CORRADE_COMPARE(format<char>("{}", -15), "-15");
     } else {
         /* Android simulator does this. Huh? */
-        CORRADE_COMPARE(formatString<char>("{}", -15), "241");
+        CORRADE_COMPARE(format<char>("{}", -15), "241");
     }
-    CORRADE_COMPARE(formatString<unsigned char>("{}", 230), "230");
+    CORRADE_COMPARE(format<unsigned char>("{}", 230), "230");
 }
 
 void FormatTest::integerShort() {
-    CORRADE_COMPARE(formatString<short>("{}", -32001), "-32001");
-    CORRADE_COMPARE(formatString<unsigned short>("{}", 62750), "62750");
+    CORRADE_COMPARE(format<short>("{}", -32001), "-32001");
+    CORRADE_COMPARE(format<unsigned short>("{}", 62750), "62750");
 }
 
 void FormatTest::integerInt() {
-    CORRADE_COMPARE(formatString<int>("{}", -2000123), "-2000123");
-    CORRADE_COMPARE(formatString<unsigned int>("{}", 4025136), "4025136");
+    CORRADE_COMPARE(format<int>("{}", -2000123), "-2000123");
+    CORRADE_COMPARE(format<unsigned int>("{}", 4025136), "4025136");
 }
 
 void FormatTest::integerLong() {
-    CORRADE_COMPARE(formatString<long>("{}", -2000123), "-2000123");
-    CORRADE_COMPARE(formatString<unsigned long>("{}", 4025136), "4025136");
+    CORRADE_COMPARE(format<long>("{}", -2000123), "-2000123");
+    CORRADE_COMPARE(format<unsigned long>("{}", 4025136), "4025136");
 }
 
 void FormatTest::integerLongLong() {
-    CORRADE_COMPARE(formatString<long long>("{}", -12345678901234ll), "-12345678901234");
-    CORRADE_COMPARE(formatString<unsigned long long>("{}", 24568780984912ull), "24568780984912");
+    CORRADE_COMPARE(format<long long>("{}", -12345678901234ll), "-12345678901234");
+    CORRADE_COMPARE(format<unsigned long long>("{}", 24568780984912ull), "24568780984912");
 }
 
 void FormatTest::character() {
