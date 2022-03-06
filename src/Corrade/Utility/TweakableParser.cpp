@@ -26,8 +26,8 @@
 
 #include "TweakableParser.h"
 
+#include <cstdlib>
 #include <cstring>
-#include <algorithm> /** @todo get rid of this once StringView::find() exists */
 
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Tweakable.h"
@@ -196,7 +196,7 @@ std::pair<TweakableState, float> TweakableParser<float>::parse(Containers::Strin
     char* end;
     const float result = std::strtof(value.data(), &end);
 
-    if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
+    if(end == value.begin() || !value.contains('.')) {
         Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
@@ -219,7 +219,7 @@ std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::Str
     char* end;
     const double result = std::strtod(value.data(), &end);
 
-    if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
+    if(end == value.begin() || !value.contains('.')) {
         Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
@@ -237,7 +237,7 @@ std::pair<TweakableState, long double> TweakableParser<long double>::parse(Conta
     char* end;
     const long double result = std::strtold(value.data(), &end);
 
-    if(end == value.begin() || std::find(value.begin(), value.end(), '.') == value.end()) {
+    if(end == value.begin() || !value.contains('.')) {
         Warning{} << "Utility::TweakableParser:" << value << "is not a floating-point literal";
         return {TweakableState::Recompile, {}};
     }
