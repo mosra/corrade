@@ -66,6 +66,7 @@ if(WITH_UTILITY)
         FormatStl.h
         FormatStlStringView.h
         Macros.h
+        Math.h
         Memory.h
         Move.h
         MurmurHash2.h

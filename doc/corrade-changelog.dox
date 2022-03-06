@@ -117,6 +117,9 @@ namespace Corrade {
 -   @ref Utility::ConfigurationGroup gained an ability to iterate through its
     values and subgroups using @relativeref{Utility::ConfigurationGroup,values()}
     and @relativeref{Utility::ConfigurationGroup,groups()}
+-   New @ref Corrade/Utility/Math.h header implementing @ref Utility::min() and
+    @ref Utility::max() because having to @cpp #include <algorithm> @ce to get
+    @ref std::min() and @ref std::max() is unacceptable.
 -   Added @ref Utility::String::lowercaseInPlace() and @relativeref{Utility::String,uppercaseInPlace()}
     together with @ref Utility::String::lowercase() and
     @relativeref{Utility::String,uppercase()} overloads taking a

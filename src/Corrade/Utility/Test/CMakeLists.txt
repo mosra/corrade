@@ -165,6 +165,8 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN)
     target_link_libraries(UtilityMacrosTest PRIVATE Threads::Threads)
 endif()
 
+corrade_add_test(UtilityMathTest MathTest.cpp)
+
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
