@@ -28,7 +28,6 @@
 
 #include <cctype>
 #include <cstring>
-#include <algorithm>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"

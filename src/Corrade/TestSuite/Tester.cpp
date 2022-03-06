@@ -27,9 +27,9 @@
 #include "Tester.h"
 
 #include <cstdlib>
-#include <algorithm>
+#include <algorithm> /* std::shuffle() */
 #include <iostream>
-#include <random>
+#include <random> /* random device for std::shuffle() */
 #include <sstream>
 #include <typeinfo>
 #include <utility>

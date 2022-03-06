@@ -31,7 +31,7 @@
  * @m_since{2019,10}
  */
 
-#include <algorithm>
+#include <algorithm> /* std::sort() */
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/constructHelpers.h"

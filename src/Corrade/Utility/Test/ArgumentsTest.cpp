@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <algorithm>
+#include <algorithm> /* std::find_if() */
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"

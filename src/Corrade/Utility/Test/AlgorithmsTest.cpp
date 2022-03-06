@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <algorithm>
+#include <algorithm> /* std::copy() */
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"

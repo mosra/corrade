@@ -25,7 +25,7 @@
 */
 
 #include <cctype>
-#include <algorithm>
+#include <algorithm> /* std::transform() */
 #include <locale>
 #include <string>
 

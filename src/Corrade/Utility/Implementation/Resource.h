@@ -27,7 +27,7 @@
 */
 
 #include <cstring>
-#include <algorithm>
+#include <algorithm> /* std::lower_bound() */
 #include <Corrade/Containers/ArrayView.h>
 
 namespace Corrade { namespace Utility { namespace Implementation {

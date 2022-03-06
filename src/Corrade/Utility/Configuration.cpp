@@ -26,7 +26,7 @@
 
 #include "Configuration.h"
 
-#include <algorithm>
+#include <algorithm> /* std::find() */
 #include <sstream>
 #include <utility>
 #include <vector>

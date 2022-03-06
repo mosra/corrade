@@ -27,7 +27,7 @@
 #include "AbstractManager.h"
 
 #include <cstring>
-#include <algorithm>
+#include <algorithm> /* std::find() */
 #include <functional>
 #include <map>
 #include <set>

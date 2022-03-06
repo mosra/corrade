@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <algorithm>
+#include <algorithm> /* std::lower_bound() */
 
 #include "Corrade/Containers/StridedArrayViewStl.h"
 #include "Corrade/TestSuite/Tester.h"
