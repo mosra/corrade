@@ -28,7 +28,6 @@
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
-#include "Corrade/Containers/StringStl.h" /**< @todo remove when TestSuite is <string>-free */
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
@@ -57,7 +56,7 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected) {
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expected) {
             Containers::Optional<Containers::String> actualContents = Utility::Path::readString(actual);
             if(!actualContents)
                 return ComparisonStatusFlag::Failed;
@@ -78,7 +77,7 @@ template<> class Comparator<FileContents> {
         }
 
     private:
-        std::string _actualContents, _expectedContents;
+        Containers::String _actualContents, _expectedContents;
 };
 
 }}
@@ -225,8 +224,8 @@ CORRADE_COMPARE_AS(a, "hell", TestSuite::Compare::StringNotContains);
 
 {
 /* [CORRADE_VERIFY] */
-std::string s("hello");
-CORRADE_VERIFY(!s.empty());
+Containers::StringView s = "hello";
+CORRADE_VERIFY(!s.isEmpty());
 /* [CORRADE_VERIFY] */
 }
 
@@ -336,16 +335,16 @@ setTestCaseName(CORRADE_FUNCTION);
 {
 const char* name{};
 /* [Tester-setTestCaseTemplateName] */
-setTestCaseName(Utility::formatString("{}<{}>", CORRADE_FUNCTION, name));
+setTestCaseName(Utility::format("{}<{}>", CORRADE_FUNCTION, name));
 /* [Tester-setTestCaseTemplateName] */
 }
 }
 
 /* [CORRADE_BENCHMARK] */
 void benchmark() {
-    std::string a = "hello", b = "world";
+    Containers::StringView a = "hello", b = "world";
     CORRADE_BENCHMARK(1000) {
-        volatile std::string c = a + b;
+        volatile Containers::String c = a + b;
     }
 }
 /* [CORRADE_BENCHMARK] */

@@ -27,7 +27,6 @@
 #include <string>
 
 #include "Corrade/Containers/String.h"
-#include "Corrade/Containers/StringStl.h" /**< @todo remove when TestSuite is <string>-free */
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
@@ -37,25 +36,24 @@ class FileContents;
 namespace Corrade { namespace TestSuite {
 
 #ifndef CORRADE_NO_ASSERT
-/** @todo drop the StringView cast once TestSuite is <string>-free */
 /* [Comparator-save-diagnostic] */
 template<> class Comparator<FileContents> {
     public:
-        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected);
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expected);
 
         // ...
 
-        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path) {
             CORRADE_INTERNAL_ASSERT(flags & ComparisonStatusFlag::Diagnostic);
             Containers::String filename = Utility::Path::join(path, _expectedFilename);
-            if(Utility::Path::write(filename, Containers::StringView{_actualContents}))
+            if(Utility::Path::write(filename, _actualContents))
                 out << "->" << filename;
         }
 
     private:
-        std::string _actualContents;
+        Containers::String _actualContents;
         // ...
-        std::string _expectedFilename;
+        Containers::String _expectedFilename;
 };
 /* [Comparator-save-diagnostic] */
 static_assert(Implementation::CanSaveDiagnostic<Comparator<FileContents>>::value,

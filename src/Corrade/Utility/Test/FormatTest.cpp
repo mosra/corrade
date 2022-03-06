@@ -33,7 +33,6 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/String.h"
-#include "Corrade/Containers/StringStl.h" /**< @todo drop once FileToString is <string>-free */
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"

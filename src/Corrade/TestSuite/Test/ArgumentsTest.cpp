@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/StringStl.h" /** @todo drop once Arguments is <string>-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -35,7 +36,7 @@ struct ArgumentsTest: TestSuite::Tester {
 
     void test();
 
-    std::string _value;
+    Containers::String _value;
 };
 
 ArgumentsTest::ArgumentsTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgumentPrefixes({"arguments"})}  {

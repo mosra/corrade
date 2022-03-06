@@ -29,9 +29,7 @@
 #include <cstddef>
 
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Comparator.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 
@@ -39,14 +37,14 @@ namespace Corrade { namespace TestSuite {
 
 Comparator<Compare::FileToString>::Comparator(): _state(State::ReadError) {}
 
-ComparisonStatusFlags Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
+ComparisonStatusFlags Comparator<Compare::FileToString>::operator()(const Containers::StringView filename, const Containers::StringView expectedContents) {
     _filename = filename;
 
     Containers::Optional<Containers::String> actualContents = Utility::Path::readString(filename);
     if(!actualContents)
         return ComparisonStatusFlag::Failed;
 
-    _actualContents = *std::move(actualContents);
+    _actualContents = *Utility::move(actualContents);
     _expectedContents = expectedContents;
     _state = State::Success;
 
@@ -69,13 +67,12 @@ void Comparator<Compare::FileToString>::printMessage(ComparisonStatusFlags, Util
     for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
-        /** @todo do this without std::string */
         if(_actualContents.size() <= i)
-            out << "Expected has character" << std::string() + _expectedContents[i];
+            out << "Expected has character" << _expectedContents.slice(i, i + 1);
         else if(_expectedContents.size() <= i)
-            out << "Actual has character" << std::string() + _actualContents[i];
+            out << "Actual has character" << _actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
+            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;

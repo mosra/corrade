@@ -35,12 +35,13 @@
 #include <utility>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
@@ -63,14 +64,24 @@ namespace {
     constexpr const char PaddingString[] = "0000000000";
 
     #ifdef __linux__
-    constexpr const char DefaultCpuScalingGovernorFile[] = "/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor";
+    constexpr Containers::StringView DefaultCpuScalingGovernorFile = "/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor"_s;
     #endif
 }
 
 struct Tester::TesterConfiguration::Data {
-    std::vector<std::string> skippedArgumentPrefixes;
+    explicit Data() = default;
+
+    Data(const Data& other)
+        #ifdef __linux__
+        : cpuScalingGovernorFile{other.cpuScalingGovernorFile}
+        #endif
+    {
+        arrayAppend(skippedArgumentPrefixes, arrayView(other.skippedArgumentPrefixes));
+    }
+
+    Containers::Array<Containers::String> skippedArgumentPrefixes;
     #ifdef __linux__
-    std::string cpuScalingGovernorFile = DefaultCpuScalingGovernorFile;
+    Containers::String cpuScalingGovernorFile = Containers::String::nullTerminatedGlobalView(DefaultCpuScalingGovernorFile);
     #endif
 };
 
@@ -92,24 +103,46 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::operator=(TesterConfig
 
 Tester::TesterConfiguration::~TesterConfiguration() = default;
 
-Containers::ArrayView<const std::string> Tester::TesterConfiguration::skippedArgumentPrefixes() const {
-    return _data ? Containers::arrayView(&_data->skippedArgumentPrefixes[0], _data->skippedArgumentPrefixes.size()) : nullptr;
+Containers::Array<Containers::StringView> Tester::TesterConfiguration::skippedArgumentPrefixes() const {
+    if(!_data) return nullptr;
+
+    Containers::Array<Containers::StringView> out{NoInit, _data->skippedArgumentPrefixes.size()};
+    for(std::size_t i = 0; i != out.size(); ++i)
+        new(&out[i]) Containers::StringView{_data->skippedArgumentPrefixes[i]};
+    return out;
 }
 
-Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes) {
+Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<Containers::StringView> prefixes) {
     if(!_data) _data.reset(new Data);
-    _data->skippedArgumentPrefixes.insert(_data->skippedArgumentPrefixes.end(), prefixes);
+    const Containers::ArrayView<const Containers::StringView> in = Containers::arrayView(prefixes);
+    const Containers::ArrayView<Containers::String> out = arrayAppend(_data->skippedArgumentPrefixes, NoInit, prefixes.size());
+    for(std::size_t i = 0; i != prefixes.size(); ++i) {
+        new(&out[i]) Containers::String{Containers::String::nullTerminatedGlobalView(in[i])};
+    }
+
+    return *this;
+}
+
+Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<const char*> prefixes) {
+    if(!_data) _data.reset(new Data);
+    const Containers::ArrayView<const char* const> in = Containers::arrayView(prefixes);
+    const Containers::ArrayView<Containers::String> out = arrayAppend(_data->skippedArgumentPrefixes, NoInit, prefixes.size());
+    for(std::size_t i = 0; i != prefixes.size(); ++i) {
+        /* We can't make any assumptions about globality of the char* literals here */
+        new(&out[i]) Containers::String{in[i]};
+    }
+
     return *this;
 }
 
 #ifdef __linux__
-std::string Tester::TesterConfiguration::cpuScalingGovernorFile() const {
-    return _data ? _data->cpuScalingGovernorFile : DefaultCpuScalingGovernorFile;
+Containers::StringView Tester::TesterConfiguration::cpuScalingGovernorFile() const {
+    return _data ? Containers::StringView{_data->cpuScalingGovernorFile} : DefaultCpuScalingGovernorFile;
 }
 
-Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorFile(const std::string& filename) {
+Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorFile(const Containers::StringView filename) {
     if(!_data) _data.reset(new Data);
-    _data->cpuScalingGovernorFile = filename;
+    _data->cpuScalingGovernorFile = Containers::String::nullTerminatedGlobalView(filename);
     return *this;
 }
 #endif
@@ -121,16 +154,28 @@ struct Tester::Printer::Printer::Data {
 struct Tester::TesterState {
     explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
 
-    std::string formattedTestCaseName() const {
-        if(testCaseName.empty()) return "<unknown>";
-        if(testCaseTemplateName.empty()) return testCaseName;
-        return Utility::formatString("{}<{}>", testCaseName, testCaseTemplateName);
+    void printFormattedTestCaseName(Debug& out) const {
+        if(!testCaseName) {
+            out << "<unknown>";
+            return;
+        }
+
+        out << testCaseName;
+        if(testCaseTemplateName)
+            out << Debug::nospace << "<" << Debug::nospace << testCaseTemplateName << Debug::nospace << ">";
     }
 
     Debug::Flags useColor;
     std::ostream *logOutput{}, *errorOutput{};
     std::vector<TestCase> testCases;
-    std::string testFilename, testName, testCaseName, testCaseTemplateName,
+    /* Assuming this always comes from a global string literals (__FILE__ in
+       CORRADE_TEST_MAIN()) */
+    Containers::StringView testFilename;
+    /* These implicitly come from a stringified class name or CORRADE_FUNCTION
+       but can also be overriden, either with a global string literal but also
+       from a formatted string or whatever else, so have a possibility to own
+       them */
+    Containers::String testName, testCaseName, testCaseTemplateName,
         testCaseDescription, benchmarkName;
     std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
         testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
@@ -149,7 +194,10 @@ struct Tester::TesterState {
     IterationPrinter* iterationPrinter{};
     TesterConfiguration configuration;
 
-    std::string saveDiagnosticPath;
+    /* This could practically be a StringView always as it's only used inside
+       exec(), taken from args that are alive until the end, but let's play it
+       safe */
+    Containers::String saveDiagnosticPath;
 };
 
 int* Tester::_argc = nullptr;
@@ -325,8 +373,12 @@ benchmark types:
     if(args.isSet("shuffle"))
         std::shuffle(usedTestCases.begin(), usedTestCases.end(), std::minstd_rand{std::random_device{}()});
 
-    /* Save the path for diagnostic files, if set; remember verbosity */
-    _state->saveDiagnosticPath = args.value("save-diagnostic");
+    /* Save the path for diagnostic files, if set. This could practically be
+       a StringView always as it's only used inside this function and args is
+       alive until the end, but let's play it safe. */
+    _state->saveDiagnosticPath = Containers::String::nullTerminatedGlobalView(args.value<Containers::StringView>("save-diagnostic"));
+
+    /* Remember verbosity */
     _state->verbose = args.isSet("verbose");
 
     unsigned int errorCount = 0,
@@ -483,8 +535,8 @@ benchmark types:
             /* Print the repeat ID only if we are repeating */
             _state->testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
             _state->testCaseLine = 0;
-            _state->testCaseName.clear();
-            _state->testCaseTemplateName.clear();
+            _state->testCaseName = {};
+            _state->testCaseTemplateName = {};
             _state->testCase = &testCase.second;
             _state->benchmarkBatchSize = 0;
             _state->benchmarkResult = 0;
@@ -580,11 +632,12 @@ benchmark types:
 
                 Implementation::printStats(out, mean, stddev, color, benchmarkUnits);
 
-                out << Debug::boldColor(Debug::Color::Default)
-                    << _state->formattedTestCaseName() << Debug::nospace;
+                out << Debug::boldColor(Debug::Color::Default);
+                _state->printFormattedTestCaseName(out);
+                out << Debug::nospace;
 
                 /* Optional test case description */
-                if(!_state->testCaseDescription.empty()) {
+                if(_state->testCaseDescription) {
                     out << "("
                         << Debug::nospace
                         << Debug::resetColor << _state->testCaseDescription
@@ -596,7 +649,7 @@ benchmark types:
                     << measurements.size() - discardMeasurements
                     << Debug::nospace << "x" << Debug::nospace << _state->benchmarkBatchSize
                     << Debug::resetColor;
-                if(!_state->benchmarkName.empty())
+                if(_state->benchmarkName)
                     out << "(" << Utility::Debug::nospace << _state->benchmarkName
                         << Utility::Debug::nospace << ")";
             }
@@ -627,7 +680,7 @@ benchmark types:
     if(_state->diagnosticCount) {
         /* If --save-diagnostic was not enabled but failed checks indicated
            that they *could* save diagnostic files, hint that to the user. */
-        if(!_state->saveDiagnosticPath.empty()) {
+        if(_state->saveDiagnosticPath) {
             out << Debug::boldColor(Debug::Color::Green) << _state->diagnosticCount
                 << "checks saved diagnostic files.";
         } else {
@@ -653,11 +706,12 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
         << Debug::boldColor(Debug::Color::Cyan) << padding
         << Debug::nospace << _state->testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
-        << Debug::boldColor(labelColor) << _state->formattedTestCaseName()
-        << Debug::nospace;
+        << Debug::boldColor(labelColor);
+    _state->printFormattedTestCaseName(out);
+    out << Debug::nospace;
 
     /* Optional test case description */
-    if(!_state->testCaseDescription.empty()) {
+    if(_state->testCaseDescription) {
         out << "("
             << Debug::nospace
             << Debug::resetColor << _state->testCaseDescription
@@ -678,6 +732,7 @@ void Tester::printFileLineInfo(Debug& out, std::size_t line) {
        are linked in reverse order so we have to reverse the vector before
        printing. */
     if(_state->iterationPrinter) {
+        /** @todo remove std::string once Debug doesn't rely on streams */
         std::vector<std::string> iterations;
         for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_parent) {
             iterations.push_back(iterationPrinter->_data->out.str());
@@ -718,7 +773,7 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
     throw Exception();
 }
 
-void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const std::string&), void* comparator) {
+void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const Containers::StringView&), void* comparator) {
     ++_state->checkCount;
 
     /* If verbose output is not enabled, remove verbose stuff from comparison
@@ -765,7 +820,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
        same as FAIL), ... */
     if((flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic)) && !(_state->expectedFailure && flags & ComparisonStatusFlag::Failed)) {
         /* ... and the user allowed that. */
-        if(!_state->saveDiagnosticPath.empty()) {
+        if(_state->saveDiagnosticPath) {
             CORRADE_ASSERT(saver, "TestSuite::Comparator: comparator returning ComparisonStatusFlag::[Verbose]Diagnostic has to implement saveDiagnostic() as well", );
 
             Debug out{_state->logOutput, _state->useColor};
@@ -786,8 +841,10 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
 }
 
 void Tester::registerTest(const char* filename, const char* name, bool isDebugBuild) {
-    _state->testFilename = std::move(filename);
-    if(_state->testName.empty()) _state->testName = std::move(name);
+    /* The file is __FILE__, thus assumed to be global */
+    _state->testFilename = Containers::StringView{filename, Containers::StringViewFlag::Global};
+    /* The name is a stringified class name, thus also assumed to be global */
+    if(!_state->testName) _state->testName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
     _state->isDebugBuild = isDebugBuild;
 }
 
@@ -853,79 +910,108 @@ Containers::StringView Tester::testName() const {
     return _state->testName;
 }
 
-void Tester::setTestName(const std::string& name) {
-    _state->testName = name;
+void Tester::setTestName(const Containers::StringView name) {
+    /* If the name comes from a global string literal, avoid a needless copy */
+    _state->testName = Containers::String::nullTerminatedGlobalView(name);
 }
 
-void Tester::setTestName(std::string&& name) {
-    _state->testName = std::move(name);
+void Tester::setTestName(const char* const name) {
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestName(Containers::StringView{name});
 }
 
-void Tester::setTestName(const char* name) {
-    _state->testName = name;
+Containers::StringView Tester::testCaseName() const {
+    return _state->testCaseName;
 }
 
-void Tester::setTestCaseName(const std::string& name) {
-    _state->testCaseName = name;
+void Tester::setTestCaseName(const Containers::StringView name) {
+    /* If the name comes from a global string literal, avoid a needless copy */
+    _state->testCaseName = Containers::String::nullTerminatedGlobalView(name);
 }
 
-void Tester::setTestCaseName(std::string&& name) {
-    _state->testCaseName = std::move(name);
+void Tester::setTestCaseName(const char* const name) {
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseName(Containers::StringView{name});
 }
 
-void Tester::setTestCaseName(const char* name) {
-    _state->testCaseName = name;
+Containers::StringView Tester::testCaseTemplateName() const {
+    return _state->testCaseTemplateName;
 }
 
-void Tester::setTestCaseTemplateName(const std::string& name) {
-    _state->testCaseTemplateName = name;
+void Tester::setTestCaseTemplateName(const Containers::StringView name) {
+    /* If the name comes from a global string literal, avoid a needless copy */
+    _state->testCaseTemplateName = Containers::String::nullTerminatedGlobalView(name);
 }
 
-void Tester::setTestCaseTemplateName(std::string&& name) {
-    _state->testCaseTemplateName = std::move(name);
+void Tester::setTestCaseTemplateName(const char* const name) {
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseTemplateName(Containers::StringView{name});
 }
 
-void Tester::setTestCaseTemplateName(const char* name) {
-    _state->testCaseTemplateName = name;
+void Tester::setTestCaseTemplateName(const Containers::ArrayView<const Containers::StringView> names) {
+    _state->testCaseTemplateName = ", "_s.join(names);
 }
 
 void Tester::setTestCaseTemplateName(const std::initializer_list<Containers::StringView> names) {
-    _state->testCaseTemplateName = Utility::String::join({names.begin(), names.end()}, ", ");
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseTemplateName(Containers::arrayView(names));
+}
+
+void Tester::setTestCaseTemplateName(const Containers::ArrayView<const char* const> names) {
+    Containers::Array<Containers::StringView> out{NoInit, names.size()};
+    for(std::size_t i = 0; i != names.size(); ++i)
+        new(&out[i]) Containers::StringView{names[i]};
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseTemplateName(out);
 }
 
 void Tester::setTestCaseTemplateName(const std::initializer_list<const char*> names) {
-    _state->testCaseTemplateName = Utility::String::join({names.begin(), names.end()}, ", ");
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseTemplateName(Containers::arrayView(names));
 }
 
-void Tester::setTestCaseDescription(const std::string& description) {
-    _state->testCaseDescription = description;
+Containers::StringView Tester::testCaseDescription() const {
+    return _state->testCaseDescription;
 }
 
-void Tester::setTestCaseDescription(std::string&& description) {
-    _state->testCaseDescription = std::move(description);
+void Tester::setTestCaseDescription(const Containers::StringView description) {
+    /* If the name comes from a global string literal, avoid a needless copy */
+    _state->testCaseDescription = Containers::String::nullTerminatedGlobalView(description);
 }
 
-void Tester::setTestCaseDescription(const char* description) {
-    _state->testCaseDescription = description;
+void Tester::setTestCaseDescription(const char* const description) {
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setTestCaseDescription(Containers::StringView{description});
 }
 
-void Tester::setBenchmarkName(const std::string& name) {
-    _state->benchmarkName = name;
+Containers::StringView Tester::benchmarkName() const {
+    return _state->benchmarkName;
 }
 
-void Tester::setBenchmarkName(std::string&& name) {
-    _state->benchmarkName = std::move(name);
+void Tester::setBenchmarkName(const Containers::StringView name) {
+    /* If the name comes from a global string literal, avoid a needless copy */
+    _state->benchmarkName = Containers::String::nullTerminatedGlobalView(name);
 }
 
-void Tester::setBenchmarkName(const char* name) {
-    _state->benchmarkName = name;
+void Tester::setBenchmarkName(const char* const name) {
+    /* Delegating to the above overload instead of going directly to have both
+       implicitly covered by the tests */
+    setBenchmarkName(Containers::StringView{name});
 }
 
 void Tester::registerTestCase(const char* name) {
     CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
-    if(_state->testCaseName.empty()) _state->testCaseName = std::move(name);
+    /* The name is CORRADE_FUNCTION, thus assumed to be global */
+    if(!_state->testCaseName) _state->testCaseName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
 }
 
 void Tester::registerTestCase(const char* name, int line) {

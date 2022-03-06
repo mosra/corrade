@@ -28,6 +28,7 @@
 #include <string>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"

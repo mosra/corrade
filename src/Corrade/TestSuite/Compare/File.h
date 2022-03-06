@@ -30,11 +30,16 @@
  * @brief Class @ref Corrade::TestSuite::Compare::File
  */
 
-#include <string>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Utility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* The arguments used to be a std::string, so provide implicit conversion to a
+   StringView */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace TestSuite {
 
@@ -43,13 +48,13 @@ namespace Compare { class File; }
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
     public:
-        explicit Comparator(std::string pathPrefix = {});
+        explicit Comparator(Containers::StringView pathPrefix = {});
 
-        ComparisonStatusFlags operator()(const std::string& actualFilename, const std::string& expectedFilename);
+        ComparisonStatusFlags operator()(Containers::StringView actualFilename, Containers::StringView expectedFilename);
 
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
-        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path);
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path);
 
     private:
         enum class State {
@@ -58,7 +63,12 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
         };
 
         State _actualState, _expectedState;
-        std::string _pathPrefix, _actualFilename, _expectedFilename,
+        /* The whole comparison is done in a single expression so the path
+           prefix can stay as a view. However the filenames are join()ed with
+           it, so they have to be owned, same for contents fetched from the
+           files. */
+        Containers::StringView _pathPrefix;
+        Containers::String _actualFilename, _expectedFilename,
             _actualContents, _expectedContents;
 };
 #endif
@@ -102,7 +112,7 @@ class CORRADE_TESTSUITE_EXPORT File {
          *
          * See class documentation for more information.
          */
-        explicit File(const std::string& pathPrefix = {});
+        explicit File(Containers::StringView pathPrefix = {});
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Comparator<Compare::File> comparator();

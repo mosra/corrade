@@ -24,8 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
 
@@ -38,9 +37,9 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        Comparator(const std::string& pathPrefix = {});
-        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected);
-        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& actual, const std::string& expected) const;
+        Comparator(Containers::StringView pathPrefix = {});
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expected);
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView actual, Containers::StringView expected) const;
 
         // ...
 };
@@ -49,7 +48,7 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        explicit FileContents(const std::string& pathPrefix = {}): _c{pathPrefix} {}
+        explicit FileContents(Containers::StringView pathPrefix = {}): _c{pathPrefix} {}
 
         Corrade::TestSuite::Comparator<FileContents>& comparator() {
             return _c;

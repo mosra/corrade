@@ -24,7 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/StringStl.h" /**< @todo remove when StringToFile is <string>-free */
+#include <string> /** @todo remove when Resource is <string>-free */
+
+#include "Corrade/Containers/StringStl.h" /** @todo remove when Resource is <string>-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/Path.h"

@@ -24,10 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
@@ -40,7 +38,7 @@ namespace Corrade { namespace TestSuite {
 
 template<> class Comparator<FileContents> {
     public:
-        ComparisonStatusFlags operator()(const std::string&, const std::string& expected) {
+        ComparisonStatusFlags operator()(Containers::StringView, Containers::StringView expected) {
             _expectedFilename = expected;
             return ComparisonStatusFlag::Failed;
         }
@@ -49,12 +47,12 @@ template<> class Comparator<FileContents> {
             out << "Files" << actual << "and" << expected << "are not the same, actual ABC but expected abc";
         }
 
-        void saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
+        void saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, Containers::StringView path) {
             out << "->" << Utility::Path::join(path, Utility::Path::split(_expectedFilename).first());
         }
 
     private:
-        std::string _expectedFilename;
+        Containers::StringView _expectedFilename;
 };
 
 }}

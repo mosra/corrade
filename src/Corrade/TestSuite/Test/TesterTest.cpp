@@ -30,10 +30,13 @@
 #include <sstream>
 #include <typeinfo>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/ScopeGuard.h"
+#include "Corrade/Containers/StringStl.h" /** @todo drop once Debug is stream-free */
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
@@ -44,13 +47,15 @@
 
 namespace Corrade { namespace TestSuite {
 
+using namespace Containers::Literals;
+
 class StringLength;
 
 template<> class Comparator<StringLength> {
     public:
         Comparator(int epsilon = 0): epsilon(epsilon) {}
 
-        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected) {
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expected) {
             return std::abs(int(actual.size()) - int(expected.size())) <= epsilon ? ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
@@ -78,7 +83,7 @@ template<> class Comparator<MessageDiagnostic> {
     public:
         explicit Comparator(ComparisonStatusFlags flags): _flags{flags} {}
 
-        ComparisonStatusFlags operator()(const std::string&, const std::string&) {
+        ComparisonStatusFlags operator()(Containers::StringView, Containers::StringView) {
             return _flags;
         }
 
@@ -99,7 +104,7 @@ template<> class Comparator<MessageDiagnostic> {
             out << "when comparing" << actual << "and" << expected;
         }
 
-        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path) {
             out << "->" << Utility::Path::join(path,
                 flags & ComparisonStatusFlag::VerboseDiagnostic ? "b.verbose.txt" : "b.txt");
         }
@@ -381,7 +386,7 @@ void Test::compareWithFail() {
 }
 
 void Test::compareImplicitConversionFail() {
-    std::string hello{"hello"};
+    Containers::StringView hello = "hello";
     CORRADE_COMPARE("holla", hello);
 }
 
@@ -456,7 +461,7 @@ void Test::skip() {
 }
 
 void Test::iteration() {
-    for(std::string name: {"Lucy", "JOHN", "Ed"}) {
+    for(Containers::StringView name: {"Lucy", "JOHN", "Ed"}) {
         CORRADE_ITERATION(name << "is the name"); /* should behave like Debug */
         for(std::size_t i = 1; i != name.size(); ++i) {
             CORRADE_ITERATION(i);
@@ -498,11 +503,15 @@ void Test::exceptionNoTestCaseLine() {
 }
 
 void Test::testCaseName() {
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     setTestCaseName("testCaseName<15>");
     CORRADE_VERIFY(true);
 }
 
 void Test::testCaseNameNoChecks() {
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     setTestCaseName("testCaseName<27>");
 }
 
@@ -512,6 +521,8 @@ void Test::testCaseTemplateName() {
 }
 
 void Test::testCaseTemplateNameList() {
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     setTestCaseTemplateName({"15", "int"});
     CORRADE_VERIFY(true);
 }
@@ -521,6 +532,8 @@ void Test::testCaseTemplateNameNoChecks() {
 }
 
 void Test::testCaseDescription() {
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     setTestCaseDescription("hello");
     CORRADE_VERIFY(true);
 }
@@ -618,6 +631,8 @@ void Test::benchmarkOnce() {
 void Test::benchmarkZero() {
     CORRADE_BENCHMARK(0) {}
 
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     setBenchmarkName("bytes in millibits");
 }
 
@@ -638,10 +653,10 @@ void Test::benchmarkDefault() {
 }
 
 void Test::benchmarkSkip() {
-    const std::string a = "hello";
-    const std::string b = "world";
+    Containers::StringView a = "hello";
+    Containers::StringView b = "world";
     CORRADE_BENCHMARK(100) {
-        std::string c = a + b + b + a + a + b;
+        Containers::String c = a + b + b + a + a + b; /* slow AF!! */
     }
 
     CORRADE_SKIP("Can't verify the measurements anyway.");
@@ -727,8 +742,13 @@ void Test::macrosInASingleExpressionBlock() {
 struct TesterTest: Tester {
     explicit TesterTest();
 
+    template<class T> void configurationSetSkippedArgumentPrefixes();
     void configurationCopy();
     void configurationMove();
+    void configurationSkippedPrefixesGlobalLiterals();
+    #ifdef __linux__
+    void configurationCpuScalingGovernorFileGlobalLiterals();
+    #endif
 
     void test();
     void emptyTest();
@@ -783,6 +803,7 @@ struct TesterTest: Tester {
     void benchmarkInvalid();
 
     void testName();
+    void namesGlobalLiterals();
 
     void verifyVarargs();
     void verifyExplicitBool();
@@ -799,8 +820,14 @@ struct TesterTest: Tester {
 class EmptyTest: public Tester {};
 
 TesterTest::TesterTest() {
-    addTests({&TesterTest::configurationCopy,
+    addTests({&TesterTest::configurationSetSkippedArgumentPrefixes<Containers::StringView>,
+              &TesterTest::configurationSetSkippedArgumentPrefixes<const char*>,
+              &TesterTest::configurationCopy,
               &TesterTest::configurationMove,
+              &TesterTest::configurationSkippedPrefixesGlobalLiterals,
+              #ifdef __linux
+              &TesterTest::configurationCpuScalingGovernorFileGlobalLiterals,
+              #endif
 
               &TesterTest::test,
               &TesterTest::emptyTest,
@@ -854,6 +881,7 @@ TesterTest::TesterTest() {
               &TesterTest::benchmarkInvalid,
 
               &TesterTest::testName,
+              &TesterTest::namesGlobalLiterals,
 
               &TesterTest::verifyVarargs,
               &TesterTest::verifyExplicitBool,
@@ -865,6 +893,18 @@ TesterTest::TesterTest() {
               &TesterTest::compareNonCopyable,
               &TesterTest::expectFailIfExplicitBool,
               &TesterTest::failIfExplicitBool});
+}
+
+template<class T> void TesterTest::configurationSetSkippedArgumentPrefixes() {
+    setTestCaseTemplateName(std::is_same<T, const char*>::value ? "const char*" : "Containers::StringView");
+
+    TesterConfiguration a;
+    a.setSkippedArgumentPrefixes({static_cast<T>("eyy"), static_cast<T>("bla")});
+    a.setSkippedArgumentPrefixes({static_cast<T>("welp")});
+
+    CORRADE_COMPARE_AS(a.skippedArgumentPrefixes(),
+        Containers::arrayView<Containers::StringView>({"eyy", "bla", "welp"}),
+        TestSuite::Compare::Container);
 }
 
 void TesterTest::configurationCopy() {
@@ -902,6 +942,51 @@ void TesterTest::configurationMove() {
     CORRADE_COMPARE(c.skippedArgumentPrefixes().size(), 2);
     CORRADE_COMPARE(c.skippedArgumentPrefixes()[1], "bla");
 }
+
+void TesterTest::configurationSkippedPrefixesGlobalLiterals() {
+    TesterConfiguration a;
+
+    /* Setting them to plain C strings will cause copies to be made, global
+       string literals should get referenced */
+    const char* eyyC = "eyy";
+    Containers::StringView blaV = "bla"_s;
+    a.setSkippedArgumentPrefixes({eyyC, blaV});
+    Containers::Array<Containers::StringView> prefixes = a.skippedArgumentPrefixes();
+    CORRADE_COMPARE(prefixes.size(), 2);
+
+    /* Can't test for flags() as those are always just NullTerminated because
+       internally it's stored as a String and so the Global flag gets lost */
+    CORRADE_VERIFY(prefixes[0].data() != eyyC);
+    CORRADE_VERIFY(prefixes[1].data() == blaV);
+}
+
+#ifdef __linux__
+void TesterTest::configurationCpuScalingGovernorFileGlobalLiterals() {
+    TesterConfiguration a;
+
+    /* By default it should be a global string literal */
+    CORRADE_COMPARE(a.cpuScalingGovernorFile().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
+
+    /* Setting it to a plain C string will cause a copy to be made */
+    {
+        const char* eyyC = "eyy";
+        a.setCpuScalingGovernorFile(eyyC);
+        /* Can't test for flags() as those are always just NullTerminated
+           because internally it's stored as a String and so the Global flag
+           gets lost */
+        CORRADE_VERIFY(a.cpuScalingGovernorFile().data() != eyyC);
+
+    /* A global string literal should get referenced */
+    } {
+        Containers::StringView blaV = "bla"_s;
+        a.setCpuScalingGovernorFile(blaV);
+        /* Can't test for flags() as those are always just NullTerminated
+           because internally it's stored as a String and so the Global flag
+           gets lost */
+        CORRADE_VERIFY(a.cpuScalingGovernorFile().data() == blaV);
+    }
+}
+#endif
 
 void TesterTest::test() {
     if(std::getenv("CORRADE_TEST_SKIP_BENCHMARKS"))
@@ -1325,7 +1410,7 @@ void TesterTest::noCatch() {
         t.exec(this, &out, &out);
     } catch(const std::out_of_range& e) {
         failed = true;
-        CORRADE_COMPARE(std::string{e.what()}, "YOU ARE FORBIDDEN FROM ACCESSING ID 7!!!");
+        CORRADE_COMPARE(e.what(), "YOU ARE FORBIDDEN FROM ACCESSING ID 7!!!"_s);
     }
 
     CORRADE_VERIFY(failed);
@@ -2038,6 +2123,8 @@ void TesterTest::testName() {
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
+    /* Explicitly testing the const char* overload, which then delegates to a
+       StringView overload so both are tested */
     t.setTestName("MyCustomTestName");
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(this, &out, &out);
@@ -2047,6 +2134,74 @@ void TesterTest::testName() {
     CORRADE_COMPARE_AS(out.str(),
         Utility::Path::join(TESTER_TEST_DIR, "testName.txt"),
         Compare::StringToFile);
+}
+
+void TesterTest::namesGlobalLiterals() {
+    /* Implicitly it should be all global literals. However can't test that via
+       flags() as those are always just NullTerminated  because internally it's
+       stored as a String and so the Global flag gets lost */
+
+    /* Register current test case name, save it and restore everything later to
+       avoid messing up the output */
+    CORRADE_VERIFY(true);
+    struct Current {
+        Containers::StringView testName, testCaseName;
+    } current{Tester::testName(), Tester::testCaseName()};
+    Containers::ScopeGuard exit{&current, [](Current* current) {
+        Tester::instance().setTestName(current->testName);
+        Tester::instance().setTestCaseName(current->testCaseName);
+        Tester::instance().setTestCaseDescription(nullptr);
+        Tester::instance().setTestCaseTemplateName(nullptr);
+        Tester::instance().setBenchmarkName(nullptr);
+    }};
+
+    /* Setting them to plain C strings will cause copies to be made. Try to
+       match the original test & test case name to avoid confusion when the
+       test fails midway through. */
+    {
+        const char* testNameC = "Corrade::TestSuite::Test::TesterTest";
+        setTestName(testNameC);
+        CORRADE_VERIFY(Tester::testName().data() != testNameC);
+    } {
+        const char* testCaseNameC = "namesGlobalLiterals";
+        setTestCaseName(testCaseNameC);
+        CORRADE_VERIFY(testCaseName().data() != testCaseNameC);
+    } {
+        const char* testCaseDescriptionC = "hello";
+        setTestCaseDescription(testCaseDescriptionC);
+        CORRADE_VERIFY(testCaseDescription().data() != testCaseDescriptionC);
+    } {
+        const char* testCaseTemplateNameC = "hello";
+        setTestCaseTemplateName(testCaseTemplateNameC);
+        CORRADE_VERIFY(testCaseTemplateName().data() != testCaseTemplateNameC);
+    } {
+        const char* benchmarkNameC = "hello";
+        setBenchmarkName(benchmarkNameC);
+        CORRADE_VERIFY(benchmarkName().data() != benchmarkNameC);
+    }
+
+    /* Setting them to global string literals should reference them */
+    {
+        Containers::StringView testNameV = "Corrade::TestSuite::Test::TesterTest"_s;
+        setTestName(testNameV);
+        CORRADE_VERIFY(Tester::testName().data() == testNameV);
+    } {
+        Containers::StringView testCaseNameV = "namesGlobalLiterals"_s;
+        setTestCaseName(testCaseNameV);
+        CORRADE_VERIFY(testCaseName().data() == testCaseNameV);
+    } {
+        Containers::StringView testCaseDescriptionV = "hello"_s;
+        setTestCaseDescription(testCaseDescriptionV);
+        CORRADE_VERIFY(testCaseDescription().data() == testCaseDescriptionV);
+    } {
+        Containers::StringView testCaseTemplateNameV = "hello"_s;
+        setTestCaseTemplateName(testCaseTemplateNameV);
+        CORRADE_VERIFY(testCaseTemplateName().data() == testCaseTemplateNameV);
+    } {
+        Containers::StringView benchmarkNameV = "hello"_s;
+        setBenchmarkName(benchmarkNameV);
+        CORRADE_VERIFY(benchmarkName().data() == benchmarkNameV);
+    }
 }
 
 void TesterTest::verifyVarargs() {

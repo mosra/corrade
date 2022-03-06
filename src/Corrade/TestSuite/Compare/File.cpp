@@ -27,22 +27,20 @@
 #include "File.h"
 
 #include <cstddef>
-#include <utility>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Comparator.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace TestSuite {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Comparator<Compare::File>::Comparator(std::string pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{std::move(pathPrefix)} {}
+Comparator<Compare::File>::Comparator(const Containers::StringView pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{pathPrefix} {}
 
-ComparisonStatusFlags Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
+ComparisonStatusFlags Comparator<Compare::File>::operator()(const Containers::StringView actualFilename, const Containers::StringView expectedFilename) {
     _actualFilename = Utility::Path::join(_pathPrefix, actualFilename);
     _expectedFilename = Utility::Path::join(_pathPrefix, expectedFilename);
 
@@ -52,7 +50,7 @@ ComparisonStatusFlags Comparator<Compare::File>::operator()(const std::string& a
     if(!actualContents)
         return ComparisonStatusFlag::Failed;
 
-    _actualContents = *std::move(actualContents);
+    _actualContents = *Utility::move(actualContents);
     _actualState = State::Success;
 
     /* If this fails, we already have the actual contents so we can save them */
@@ -60,7 +58,7 @@ ComparisonStatusFlags Comparator<Compare::File>::operator()(const std::string& a
     if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = *std::move(expectedContents);
+    _expectedContents = *Utility::move(expectedContents);
     _expectedState = State::Success;
 
     return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
@@ -87,29 +85,28 @@ void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Deb
     for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
-        /** @todo do this without std::string */
         if(_actualContents.size() <= i)
-            out << "Expected has character" << std::string() + _expectedContents[i];
+            out << "Expected has character" << _expectedContents.slice(i, i + 1);
         else if(_expectedContents.size() <= i)
-            out << "Actual has character" << std::string() + _actualContents[i];
+            out << "Actual has character" << _actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
+            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 }
 
-void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
+void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
     Containers::String filename = Utility::Path::join(path, Utility::Path::split(_expectedFilename).second());
-    if(Utility::Path::write(filename, Containers::StringView{_actualContents}))
+    if(Utility::Path::write(filename, _actualContents))
         out << "->" << filename;
 }
 #endif
 
 namespace Compare {
 
-File::File(const std::string& pathPrefix): _c{pathPrefix} {}
+File::File(const Containers::StringView pathPrefix): _c{pathPrefix} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<File> File::comparator() { return _c; }

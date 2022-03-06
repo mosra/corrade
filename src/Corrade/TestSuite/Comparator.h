@@ -33,7 +33,6 @@
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/StlForwardString.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -248,7 +247,12 @@ template<class T> class Comparator {
          * (and the function not being called at all if
          * @ref ComparisonStatusFlag::Diagnostic is not present as well).
          */
-        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, const std::string& path);
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, Containers::StringView path);
+        #else
+        /* using const& to avoid having to include StringView.h */
+        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, const Containers::StringView& path);
+        #endif
 
     private:
         const T* actualValue;
@@ -272,7 +276,7 @@ template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags, Utilit
 }
 
 /* LCOV_EXCL_START */
-template<class T> void Comparator<T>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, const std::string&) {
+template<class T> void Comparator<T>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, const Containers::StringView&) {
     CORRADE_INTERNAL_ASSERT_UNREACHABLE();
 }
 /* LCOV_EXCL_STOP */
@@ -297,12 +301,12 @@ template<class T, class, class> struct ComparatorTraits: ComparatorOperatorTrait
 
 CORRADE_HAS_TYPE(CanSaveDiagnostic, decltype(std::declval<T>().saveDiagnostic({}, std::declval<Utility::Debug&>(), {})));
 
-template<class T> auto diagnosticSaver(typename std::enable_if<CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const std::string&) {
-    return [](void* comparator, ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
+template<class T> auto diagnosticSaver(typename std::enable_if<CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
+    return [](void* comparator, ComparisonStatusFlags flags, Utility::Debug& out, const Containers::StringView& path) {
         static_cast<Comparator<T>*>(comparator)->saveDiagnostic(flags, out, path);
     };
 }
-template<class T> auto diagnosticSaver(typename std::enable_if<!CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const std::string&) {
+template<class T> auto diagnosticSaver(typename std::enable_if<!CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
     return nullptr;
 }
 

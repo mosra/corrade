@@ -25,8 +25,9 @@
 */
 
 #include <cctype>
-#include <Corrade/TestSuite/Tester.h>
-#include <Corrade/Utility/DebugStl.h>
+
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/TestSuite/Tester.h"
 
 using namespace Corrade;
 
@@ -42,7 +43,7 @@ NameTest::NameTest() {
 
 /** [0] */
 void NameTest::noYellingAllowed() {
-    for(std::string name: {"Lucy", "JOHN", "Ed"}) {
+    for(Containers::StringView name: {"Lucy", "JOHN", "Ed"}) {
         CORRADE_ITERATION(name);
         for(std::size_t i = 1; i != name.size(); ++i) {
             CORRADE_ITERATION(i);

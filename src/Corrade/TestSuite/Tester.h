@@ -38,10 +38,15 @@
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Macros.h"
-#include "Corrade/Utility/StlForwardString.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
+#endif
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* Some arguments used to be a std::string, so provide implicit conversion to a
+   StringView */
+#include "Corrade/Containers/StringStl.h"
 #endif
 
 namespace Corrade { namespace TestSuite {
@@ -612,23 +617,33 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 TesterConfiguration& operator=(TesterConfiguration&&) noexcept;
 
                 /** @brief Skipped argument prefixes */
-                Containers::ArrayView<const std::string> skippedArgumentPrefixes() const;
+                /* The getter is used only by tests so the Array allocation is
+                   fine */
+                Containers::Array<Containers::StringView> skippedArgumentPrefixes() const;
 
                 /**
                  * @brief Set skipped argument prefixes
                  *
                  * Useful to allow passing command-line arguments elsewhere
                  * without having the tester complaining about them.
+                 *
+                 * Views that have both @ref Containers::StringViewFlag::Global
+                 * and @ref Containers::StringViewFlag::NullTerminated set
+                 * (such as coming from a @ref Containers::StringView literal)
+                 * will be used without having to make an owned string copy
+                 * internally.
                  * @see @ref arguments()
                  */
-                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes);
+                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<Containers::StringView> prefixes);
+                /* So people aren't forced to include StringView if they don't want */
+                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<const char*> prefixes); /**< @overload */
 
                 #if defined(__linux__) || defined(DOXYGEN_GENERATING_OUTPUT)
                 /**
                  * @brief Where to check for active CPU scaling governor
                  * @partialsupport Available only on Linux.
                  */
-                std::string cpuScalingGovernorFile() const;
+                Containers::StringView cpuScalingGovernorFile() const;
 
                 /**
                  * @brief Set where to check for active CPU scaling governor
@@ -639,16 +654,24 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  * `/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor`,
                  * where `{}` is replaced with CPU ID; if the file doesn't
                  * exist, no check is done.
+                 *
+                 * A view that has both @ref Containers::StringViewFlag::Global
+                 * and @ref Containers::StringViewFlag::NullTerminated set
+                 * (such as coming from a @ref Containers::StringView literal)
+                 * will be used without having to make an owned string copy
+                 * internally.
                  * @partialsupport Available only on Linux.
                  */
-                TesterConfiguration& setCpuScalingGovernorFile(const std::string& filename);
+                TesterConfiguration& setCpuScalingGovernorFile(Containers::StringView filename);
+                /* This one doesn't have a const char* overload as it's
+                   unlikely to be used except for the Tester test itself */
                 #endif
 
             private:
                 friend Tester;
 
-                /* Don't want to include any vector or array here because we
-                   don't need it in public APIs anyway. */
+                /* Don't want to include an Array here because we don't need
+                   it in any public APIs */
                 struct Data;
                 Containers::Pointer<Data> _data;
         };
@@ -1137,12 +1160,23 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * By default the test name is gathered together with test filename by
          * the @ref CORRADE_TEST_MAIN() macro and is equivalent to
          * fully-qualified class name.
+         *
+         * A view that has both @ref Containers::StringViewFlag::Global and
+         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
+         * from a @ref Containers::StringView literal) will be used without
+         * having to make an owned string copy internally.
          * @see @ref setTestCaseName(), @ref setTestCaseTemplateName(),
          *      @ref setTestCaseDescription()
          */
-        void setTestName(const std::string& name);
-        void setTestName(std::string&& name); /**< @overload */
+        void setTestName(Containers::StringView name);
+        /* So people aren't forced to include StringView if they don't want */
         void setTestName(const char* name); /**< @overload */
+
+        /**
+         * @brief Test case name
+         * @m_since_latest
+         */
+        Containers::StringView testCaseName() const;
 
         /**
          * @brief Set custom test case name
@@ -1152,12 +1186,22 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * @snippet TestSuite.cpp Tester-setTestCaseName
          *
+         * A view that has both @ref Containers::StringViewFlag::Global and
+         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
+         * from a @ref Containers::StringView literal) will be used without
+         * having to make an owned string copy internally.
          * @see @ref setTestCaseTemplateName(), @ref setTestName(),
          *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
-        void setTestCaseName(const std::string& name);
-        void setTestCaseName(std::string&& name); /**< @overload */
+        void setTestCaseName(Containers::StringView name);
+        /* So people aren't forced to include StringView if they don't want */
         void setTestCaseName(const char* name); /**< @overload */
+
+        /**
+         * @brief Test case template name
+         * @m_since_latest
+         */
+        Containers::StringView testCaseTemplateName() const;
 
         /**
          * @brief Set test case template name
@@ -1169,22 +1213,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * @snippet TestSuite.cpp Tester-setTestCaseTemplateName
          *
+         * A view that has both @ref Containers::StringViewFlag::Global and
+         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
+         * from a @ref Containers::StringView literal) will be used without
+         * having to make an owned string copy internally.
          * @see @ref setTestCaseName(), @ref setTestName(),
          *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
-        void setTestCaseTemplateName(const std::string& name);
-
-        /**
-         * @overload
-         * @m_since{2019,10}
-         */
-        void setTestCaseTemplateName(std::string&& name);
-
-        /**
-         * @overload
-         * @m_since{2019,10}
-         */
-        void setTestCaseTemplateName(const char* name);
+        void setTestCaseTemplateName(Containers::StringView name);
+        /* So people aren't forced to include StringView if they don't want */
+        void setTestCaseTemplateName(const char* name); /**< @overload */
 
         /**
          * @overload
@@ -1192,18 +1230,22 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Useful for test cases that are templated with more than one
          * parameter. Names are joined with `,`.
-         */
-        void setTestCaseTemplateName(std::initializer_list<Containers::StringView> names);
-        /**
-         * @overload
-         * @m_since_latest
          *
-         * Has to be present in order to avoid @cpp {"abc", "def"} @ce being
-         * interpreted as a begin/end @ref std::string constructor causing all
-         * sorts of nasty memory issues. Sigh.
-         * @todo remove once we get rid of @ref std::string
+         * Unlike with @ref setTestCaseTemplateName(Containers::StringView), a
+         * new string for the joined result is created always so presence of
+         * any @ref Containers::StringViewFlags in passed views doesn't matter.
          */
-        void setTestCaseTemplateName(std::initializer_list<const char*> names);
+        void setTestCaseTemplateName(Containers::ArrayView<const Containers::StringView> names);
+        void setTestCaseTemplateName(std::initializer_list<Containers::StringView> names); /**< @overload */
+        /* So people aren't forced to include StringView if they don't want */
+        void setTestCaseTemplateName(Containers::ArrayView<const char* const> names); /**< @overload */
+        void setTestCaseTemplateName(std::initializer_list<const char*> names); /**< @overload */
+
+        /**
+         * @brief Test case description
+         * @m_since_latest
+         */
+        Containers::StringView testCaseDescription() const;
 
         /**
          * @brief Set test case description
@@ -1211,21 +1253,37 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Additional text displayed after the test case name. By default
          * the description is empty for non-instanced test cases and instance
          * ID for instanced test cases.
+         *
+         * A view that has both @ref Containers::StringViewFlag::Global and
+         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
+         * from a @ref Containers::StringView literal) will be used without
+         * having to make an owned string copy internally.
          * @see @ref setTestName(), @ref setTestCaseName(),
          *      @ref setTestCaseTemplateName()
          */
-        void setTestCaseDescription(const std::string& description);
-        void setTestCaseDescription(std::string&& description); /**< @overload */
+        void setTestCaseDescription(Containers::StringView description);
+        /* So people aren't forced to include StringView if they don't want */
         void setTestCaseDescription(const char* description); /**< @overload */
+
+        /**
+         * @brief Test case description
+         * @m_since_latest
+         */
+        Containers::StringView benchmarkName() const;
 
         /**
          * @brief Set benchmark name
          *
          * In case of @ref addCustomBenchmarks() and @ref addCustomInstancedBenchmarks()
          * provides the name for the unit measured, for example @cpp "wall time" @ce.
+         *
+         * A view that has both @ref Containers::StringViewFlag::Global and
+         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
+         * from a @ref Containers::StringView literal) will be used without
+         * having to make an owned string copy internally.
          */
-        void setBenchmarkName(const std::string& name);
-        void setBenchmarkName(std::string&& name); /**< @overload */
+        void setBenchmarkName(Containers::StringView name);
+        /* So people aren't forced to include StringView if they don't want */
         void setBenchmarkName(const char* name); /**< @overload */
 
     protected:
@@ -1289,7 +1347,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         template<class T> void verify(const char* expression, T&& value);
 
-        /* Called from CORRADE_TEST_MAIN() */
+        /* Called from CORRADE_TEST_MAIN(). The filename is __FILE__ and name
+           is a stringified class name, thus they're assumed to be global. */
         void registerTest(const char* filename, const char* name, bool isDebugBuild = false);
 
         /* Called from CORRADE_SKIP() */
@@ -1365,7 +1424,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /* Called from all CORRADE_*() verification/skip/... macros. The
            variant without line info is for macros that shouldn't count as
            checks (such as CORRADE_ITERATION()) and thus if a test case
-           contains only those, it should be reported as an error. */
+           contains only those, it should be reported as an error.
+
+           The name is CORRADE_FUNCTION and thus assumed to be global. */
         void registerTestCase(const char* name);
         void registerTestCase(const char* name, int line);
 
@@ -1442,7 +1503,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
            for this) so it has to be supplied in a different way */
         CORRADE_TESTSUITE_LOCAL void printFileLineInfo(Debug& out, std::size_t line);
         void verifyInternal(const char* expression, bool value);
-        void printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const std::string&), void* comparator);
+        void printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const Containers::StringView&), void* comparator);
 
         void wallTimeBenchmarkBegin();
         std::uint64_t wallTimeBenchmarkEnd();

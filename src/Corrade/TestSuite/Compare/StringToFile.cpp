@@ -28,10 +28,9 @@
 
 #include <cstddef>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -41,7 +40,7 @@ namespace Corrade { namespace TestSuite {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<Compare::StringToFile>::Comparator(): _state(State::ReadError) {}
 
-ComparisonStatusFlags Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
+ComparisonStatusFlags Comparator<Compare::StringToFile>::operator()(const Containers::StringView actualContents, const Containers::StringView filename) {
     _filename = filename;
 
     /* Save the actual file contents before the expected so if the expected
@@ -53,7 +52,7 @@ ComparisonStatusFlags Comparator<Compare::StringToFile>::operator()(const std::s
     if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = *std::move(expectedContents);
+    _expectedContents = *Utility::move(expectedContents);
     _state = State::Success;
 
     return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
@@ -75,22 +74,21 @@ void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Util
     for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
-        /** @todo do this without std::string */
         if(_actualContents.size() <= i)
-            out << "Expected has character" << std::string() + _expectedContents[i];
+            out << "Expected has character" << _expectedContents.slice(i, i + 1);
         else if(_expectedContents.size() <= i)
-            out << "Actual has character" << std::string() + _actualContents[i];
+            out << "Actual has character" << _actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
+            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 }
 
-void Comparator<Compare::StringToFile>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
+void Comparator<Compare::StringToFile>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
     Containers::String filename = Utility::Path::join(path, Utility::Path::split(_filename).second());
-    if(Utility::Path::write(filename, Containers::StringView{_actualContents}))
+    if(Utility::Path::write(filename, _actualContents))
         out << "->" << filename;
 }
 #endif

@@ -30,11 +30,16 @@
  * @brief Class @ref Corrade::TestSuite::Compare::StringToFile
  */
 
-#include <string>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Utility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* The arguments used to be a std::string, so provide implicit conversion to a
+   StringView */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace TestSuite {
 
@@ -72,11 +77,11 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
     public:
         Comparator();
 
-        ComparisonStatusFlags operator()(const std::string& actualContents, const std::string& filename);
+        ComparisonStatusFlags operator()(Containers::StringView actualContents, Containers::StringView filename);
 
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
-        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path);
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path);
 
     private:
         enum class State {
@@ -85,8 +90,11 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
         };
 
         State _state;
-        std::string _filename,
-            _actualContents, _expectedContents;
+        /* The whole comparison is done in a single expression so the filename
+           and actual contents can stay as views, however expected contents are
+           fetched from a file so they have be owned */
+        Containers::StringView _filename, _actualContents;
+        Containers::String _expectedContents;
 };
 #endif
 

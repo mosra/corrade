@@ -24,7 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/Path.h"

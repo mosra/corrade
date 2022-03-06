@@ -38,7 +38,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Format.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -865,7 +865,7 @@ void ArrayTupleTest::allocatorAlignmentEmpty() {
 }
 
 template<int a> void ArrayTupleTest::allocatorAlignmentFromItems() {
-    setTestCaseTemplateName(Utility::formatString("{}", a));
+    setTestCaseTemplateName(Utility::format("{}", a));
 
     CORRADE_VERIFY(true); /* Just to register correct function name */
 
@@ -882,7 +882,7 @@ template<int a> void ArrayTupleTest::allocatorAlignmentFromItems() {
 }
 
 template<int a> void ArrayTupleTest::allocatorAlignmentFromDeleter() {
-    setTestCaseTemplateName(Utility::formatString("{}", a));
+    setTestCaseTemplateName(Utility::format("{}", a));
 
     CORRADE_VERIFY(true); /* Just to register correct function name */
 

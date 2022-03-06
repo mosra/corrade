@@ -26,7 +26,6 @@
 
 #include <sstream>
 
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -94,7 +93,12 @@ void FileToStringTest::differentContents() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "different.txt"), "Hello World!");
+        /* The filename is referenced as a string view as the assumption is
+           that the whole comparison and diagnostic printing gets done in a
+           single expression. Thus don't pass it as a temporary to avoid
+           dangling views. */
+        Containers::String filename = Utility::Path::join(FILETEST_DIR, "different.txt");
+        ComparisonStatusFlags flags = compare(filename, "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
@@ -108,7 +112,12 @@ void FileToStringTest::actualSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "smaller.txt"), "Hello World!");
+        /* The filename is referenced as a string view as the assumption is
+           that the whole comparison and diagnostic printing gets done in a
+           single expression. Thus don't pass it as a temporary to avoid
+           dangling views. */
+        Containers::String filename = Utility::Path::join(FILETEST_DIR, "smaller.txt");
+        ComparisonStatusFlags flags = compare(filename, "Hello World!");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
@@ -122,7 +131,12 @@ void FileToStringTest::expectedSmaller() {
     {
         Debug redirectOutput{&out};
         Comparator<Compare::FileToString> compare;
-        ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "base.txt"), "Hello W");
+        /* The filename is referenced as a string view as the assumption is
+           that the whole comparison and diagnostic printing gets done in a
+           single expression. Thus don't pass it as a temporary to avoid
+           dangling views. */
+        Containers::String filename = Utility::Path::join(FILETEST_DIR, "base.txt");
+        ComparisonStatusFlags flags = compare(filename, "Hello W");
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
     }

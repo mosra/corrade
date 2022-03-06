@@ -87,6 +87,10 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
+-   The @ref TestSuite library is now completely free of all @ref std::string
+    usage in its public APIs, using only @ref Containers::StringView,
+    @ref Containers::String or even just plain @cpp const char* @ce where
+    compile times *really* matter
 -   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL_IF()
     macros for printing formatted information to the output and explicitly
     failing a test
@@ -428,6 +432,12 @@ namespace Corrade {
     @ref Corrade namespace, available  as @ref DefaultInit, @ref ValueInit,
     @ref NoInit, @ref NoCreate, @ref DirectInit, @ref InPlaceInit and related
     tag types
+-   @ref TestSuite APIs that switched from @ref std::string to
+    @ref Containers::StringView or @ref Containers::String now include
+    @ref Corrade/Containers/StringStl.h for compatibility when building with
+    @ref CORRADE_BUILD_DEPRECATED enabled. Include this header explicitly in
+    your code if you wish to continue to rely on implicit conversion from a
+    @ref std::string.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

@@ -26,10 +26,12 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -100,7 +102,7 @@ template<std::size_t alignment> struct alignas(alignment) Aligned {
 };
 
 template<std::size_t alignment> void MemoryTest::allocateAlignedTrivial() {
-    setTestCaseTemplateName(std::to_string(alignment));
+    setTestCaseTemplateName(format("{}", alignment));
 
     Containers::Array<Aligned<alignment>> data = allocateAligned<Aligned<alignment>>(testCaseRepeatId() + 1);
     CORRADE_VERIFY(data.data());
