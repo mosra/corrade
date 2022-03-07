@@ -55,10 +55,12 @@ void MathTest::minMax() {
 }
 
 void MathTest::minMaxNanPropagation() {
-    CORRADE_COMPARE(Utility::min(NAN, 5.0f), NAN);
-    CORRADE_COMPARE(Utility::max(NAN, 5.0f), NAN);
-    CORRADE_COMPARE(Utility::min(5.0f, NAN), 5.0f);
-    CORRADE_COMPARE(Utility::max(5.0f, NAN), 5.0f);
+    /* MinGW is stupid and has NAN as a double, while it's said to be a float
+       by the standard and all other compilers */
+    CORRADE_COMPARE(Utility::min(float(NAN), 5.0f), float(NAN));
+    CORRADE_COMPARE(Utility::max(float(NAN), 5.0f), float(NAN));
+    CORRADE_COMPARE(Utility::min(5.0f, float(NAN)), 5.0f);
+    CORRADE_COMPARE(Utility::max(5.0f, float(NAN)), 5.0f);
 }
 
 }}}}
