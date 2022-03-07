@@ -33,6 +33,8 @@
 
 #include <algorithm> /* std::sort() */
 
+/* Given there's <algorithm> already, it won't really help much if we'd PIMPL
+   the Array include */
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/TestSuite/Compare/Container.h"

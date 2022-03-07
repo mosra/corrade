@@ -31,6 +31,9 @@
  * @m_since_latest
  */
 
+/* Theoretically, if there would be C string overloads and PIMPL'd internals,
+   this include would not be needed... but practically a string comparison
+   almost never involves just C string literals, so I don't see a point. */
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/visibility.h"
@@ -122,9 +125,6 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringHasPrefix> {
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
-        /* I could make these pointers to avoid the include, but that would
-           force people to just include StringView on their own even if they
-           would be passing plain C string literals, so there's no point */
         Containers::StringView _actualValue;
         Containers::StringView _expectedPrefixValue;
 };
@@ -136,8 +136,6 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringHasSuffix> {
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
-        /* Same as above, makes no sense to have these as pointers to avoid the
-           include */
         Containers::StringView _actualValue;
         Containers::StringView _expectedSuffixValue;
 };
@@ -149,8 +147,6 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringContains> {
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
-        /* Same as above, makes no sense to have these as pointers to avoid the
-           include */
         Containers::StringView _actualValue;
         Containers::StringView _expectedToContainValue;
 };
@@ -162,8 +158,6 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringNotContains>
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
-        /* Same as above, makes no sense to have these as pointers to avoid the
-           include */
         Containers::StringView _actualValue;
         Containers::StringView _expectedToNotContainValue;
 };
