@@ -108,10 +108,6 @@ namespace Compare {
 
 File::File(const Containers::StringView pathPrefix): _c{pathPrefix} {}
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-Comparator<File> File::comparator() { return _c; }
-#endif
-
 }
 
 }}

@@ -115,7 +115,7 @@ class CORRADE_TESTSUITE_EXPORT File {
         explicit File(Containers::StringView pathPrefix = {});
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        Comparator<Compare::File> comparator();
+        Comparator<Compare::File>& comparator() { return _c; }
         #endif
 
     private:
