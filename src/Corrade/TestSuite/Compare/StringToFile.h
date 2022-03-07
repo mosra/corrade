@@ -30,7 +30,11 @@
  * @brief Class @ref Corrade::TestSuite::Compare::StringToFile
  */
 
-#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/Pointer.h"
+/* The include is not strictly needed, but it would only mean the users would
+   then have to include it on their own -- as there's no way to use this
+   comparator without a StringView */
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Utility.h"
@@ -75,7 +79,9 @@ class StringToFile {};
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
     public:
-        Comparator();
+        explicit Comparator();
+
+        ~Comparator();
 
         ComparisonStatusFlags operator()(Containers::StringView actualContents, Containers::StringView filename);
 
@@ -84,17 +90,8 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
         void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path);
 
     private:
-        enum class State {
-            Success,
-            ReadError
-        };
-
-        State _state;
-        /* The whole comparison is done in a single expression so the filename
-           and actual contents can stay as views, however expected contents are
-           fetched from a file so they have be owned */
-        Containers::StringView _filename, _actualContents;
-        Containers::String _expectedContents;
+        struct CORRADE_TESTSUITE_LOCAL State;
+        Containers::Pointer<State> _state;
 };
 #endif
 

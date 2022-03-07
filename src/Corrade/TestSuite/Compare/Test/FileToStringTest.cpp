@@ -26,6 +26,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */

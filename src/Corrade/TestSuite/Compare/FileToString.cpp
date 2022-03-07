@@ -29,50 +29,74 @@
 #include <cstddef>
 
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace TestSuite {
 
-Comparator<Compare::FileToString>::Comparator(): _state(State::ReadError) {}
+namespace {
+
+enum class Result {
+    Success,
+    ReadError
+};
+
+}
+
+struct Comparator<Compare::FileToString>::State {
+    Result result;
+    /* The whole comparison is done in a single expression so the filename and
+       expected contents can stay as views, however actual contents are fetched
+       from a file so they have be owned */
+    Containers::StringView filename;
+    Containers::String actualContents;
+    Containers::StringView expectedContents;
+};
+
+Comparator<Compare::FileToString>::Comparator(): _state{InPlaceInit} {
+    _state->result = Result::ReadError;
+}
+
+Comparator<Compare::FileToString>::~Comparator() = default;
 
 ComparisonStatusFlags Comparator<Compare::FileToString>::operator()(const Containers::StringView filename, const Containers::StringView expectedContents) {
-    _filename = filename;
+    _state->filename = filename;
 
     Containers::Optional<Containers::String> actualContents = Utility::Path::readString(filename);
     if(!actualContents)
         return ComparisonStatusFlag::Failed;
 
-    _actualContents = *Utility::move(actualContents);
-    _expectedContents = expectedContents;
-    _state = State::Success;
+    _state->actualContents = *Utility::move(actualContents);
+    _state->expectedContents = expectedContents;
+    _state->result = Result::Success;
 
-    return _actualContents == expectedContents ? ComparisonStatusFlags{} :
+    return _state->actualContents == expectedContents ? ComparisonStatusFlags{} :
         ComparisonStatusFlag::Failed;
 }
 
 void Comparator<Compare::FileToString>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
-    if(_state != State::Success) {
-        out << "File" << actual << "(" + _filename + ")" << "cannot be read.";
+    if(_state->result != Result::Success) {
+        out << "File" << actual << "(" + _state->filename + ")" << "cannot be read.";
         return;
     }
 
     out << "Files" << actual << "and" << expected << "have different";
-    if(_actualContents.size() != _expectedContents.size())
-        out << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
+    if(_state->actualContents.size() != _state->expectedContents.size())
+        out << "size, actual" << _state->actualContents.size() << "but" << _state->expectedContents.size() << "expected.";
     else
         out << "contents.";
 
-    for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
-        if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
+    for(std::size_t i = 0, end = Utility::max(_state->actualContents.size(), _state->expectedContents.size()); i != end; ++i) {
+        if(_state->actualContents.size() > i && _state->expectedContents.size() > i && _state->actualContents[i] == _state->expectedContents[i]) continue;
 
-        if(_actualContents.size() <= i)
-            out << "Expected has character" << _expectedContents.slice(i, i + 1);
-        else if(_expectedContents.size() <= i)
-            out << "Actual has character" << _actualContents.slice(i, i + 1);
+        if(_state->actualContents.size() <= i)
+            out << "Expected has character" << _state->expectedContents.slice(i, i + 1);
+        else if(_state->expectedContents.size() <= i)
+            out << "Actual has character" << _state->actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
+            out << "Actual character" << _state->actualContents.slice(i, i + 1) << "but" << _state->expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;

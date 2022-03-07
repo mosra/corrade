@@ -31,66 +31,92 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace TestSuite {
 
+namespace {
+
+enum class Result {
+    Success,
+    ReadError
+};
+
+}
+
+struct Comparator<Compare::File>::State {
+    Result actualResult, expectedResult;
+    /* The whole comparison is done in a single expression so the path prefix
+       can stay as a view. However the filenames are join()ed with it, so they
+       have to be owned, same for contents fetched from the files. */
+    Containers::StringView pathPrefix;
+    Containers::String actualFilename, expectedFilename,
+        actualContents, expectedContents;
+};
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Comparator<Compare::File>::Comparator(const Containers::StringView pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{pathPrefix} {}
+Comparator<Compare::File>::Comparator(const Containers::StringView pathPrefix): _state{InPlaceInit} {
+    _state->actualResult = Result::ReadError;
+    _state->expectedResult = Result::ReadError;
+    _state->pathPrefix = pathPrefix;
+}
+
+Comparator<Compare::File>::~Comparator() = default;
 
 ComparisonStatusFlags Comparator<Compare::File>::operator()(const Containers::StringView actualFilename, const Containers::StringView expectedFilename) {
-    _actualFilename = Utility::Path::join(_pathPrefix, actualFilename);
-    _expectedFilename = Utility::Path::join(_pathPrefix, expectedFilename);
+    _state->actualFilename = Utility::Path::join(_state->pathPrefix, actualFilename);
+    _state->expectedFilename = Utility::Path::join(_state->pathPrefix, expectedFilename);
 
     /* Read the actual file contents before the expected so if the expected
        file can't be read, we can still save actual file contents */
-    Containers::Optional<Containers::String> actualContents = Utility::Path::readString(_actualFilename);
+    Containers::Optional<Containers::String> actualContents = Utility::Path::readString(_state->actualFilename);
     if(!actualContents)
         return ComparisonStatusFlag::Failed;
 
-    _actualContents = *Utility::move(actualContents);
-    _actualState = State::Success;
+    _state->actualContents = *Utility::move(actualContents);
+    _state->actualResult = Result::Success;
 
     /* If this fails, we already have the actual contents so we can save them */
-    Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(_expectedFilename);
+    Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(_state->expectedFilename);
     if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = *Utility::move(expectedContents);
-    _expectedState = State::Success;
+    _state->expectedContents = *Utility::move(expectedContents);
+    _state->expectedResult = Result::Success;
 
-    return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
+    return _state->actualContents == _state->expectedContents ? ComparisonStatusFlags{} :
         ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 }
 
 void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
-    if(_actualState != State::Success) {
-        out << "Actual file" << actual << "(" + _actualFilename + ")" << "cannot be read.";
+    if(_state->actualResult != Result::Success) {
+        out << "Actual file" << actual << "(" + _state->actualFilename + ")" << "cannot be read.";
         return;
     }
 
-    if(_expectedState != State::Success) {
-        out << "Expected file" << expected << "(" + _expectedFilename + ")" << "cannot be read.";
+    if(_state->expectedResult != Result::Success) {
+        out << "Expected file" << expected << "(" + _state->expectedFilename + ")" << "cannot be read.";
         return;
     }
 
     out << "Files" << actual << "and" << expected << "have different";
-    if(_actualContents.size() != _expectedContents.size())
-        out << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
+    if(_state->actualContents.size() != _state->expectedContents.size())
+        out << "size, actual" << _state->actualContents.size() << "but" << _state->expectedContents.size() << "expected.";
     else
         out << "contents.";
 
-    for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
-        if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
+    for(std::size_t i = 0, end = Utility::max(_state->actualContents.size(), _state->expectedContents.size()); i != end; ++i) {
+        if(_state->actualContents.size() > i && _state->expectedContents.size() > i && _state->actualContents[i] == _state->expectedContents[i]) continue;
 
-        if(_actualContents.size() <= i)
-            out << "Expected has character" << _expectedContents.slice(i, i + 1);
-        else if(_expectedContents.size() <= i)
-            out << "Actual has character" << _actualContents.slice(i, i + 1);
+        if(_state->actualContents.size() <= i)
+            out << "Expected has character" << _state->expectedContents.slice(i, i + 1);
+        else if(_state->expectedContents.size() <= i)
+            out << "Actual has character" << _state->actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
+            out << "Actual character" << _state->actualContents.slice(i, i + 1) << "but" << _state->expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;
@@ -98,8 +124,8 @@ void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Deb
 }
 
 void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
-    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_expectedFilename).second());
-    if(Utility::Path::write(filename, _actualContents))
+    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_state->expectedFilename).second());
+    if(Utility::Path::write(filename, _state->actualContents))
         out << "->" << filename;
 }
 #endif

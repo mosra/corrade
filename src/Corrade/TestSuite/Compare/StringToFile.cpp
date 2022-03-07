@@ -31,55 +31,78 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace TestSuite {
 
+namespace {
+
+enum class Result {
+    Success,
+    ReadError
+};
+
+}
+
+struct Comparator<Compare::StringToFile>::State {
+    Result result;
+    /* The whole comparison is done in a single expression so the filename and
+       actual contents can stay as views, however expected contents are fetched
+       from a file so they have be owned */
+    Containers::StringView filename, actualContents;
+    Containers::String expectedContents;
+};
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Comparator<Compare::StringToFile>::Comparator(): _state(State::ReadError) {}
+Comparator<Compare::StringToFile>::Comparator(): _state{InPlaceInit} {
+    _state->result = Result::ReadError;
+}
+
+Comparator<Compare::StringToFile>::~Comparator() = default;
 
 ComparisonStatusFlags Comparator<Compare::StringToFile>::operator()(const Containers::StringView actualContents, const Containers::StringView filename) {
-    _filename = filename;
+    _state->filename = filename;
 
     /* Save the actual file contents before the expected so if the expected
        file can't be read, we can still save actual file contents */
-    _actualContents = actualContents;
+    _state->actualContents = actualContents;
 
     /* If this fails, we already have the actual contents so we can save them */
     Containers::Optional<Containers::String> expectedContents = Utility::Path::readString(filename);
     if(!expectedContents)
         return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 
-    _expectedContents = *Utility::move(expectedContents);
-    _state = State::Success;
+    _state->expectedContents = *Utility::move(expectedContents);
+    _state->result = Result::Success;
 
-    return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
+    return actualContents == _state->expectedContents ? ComparisonStatusFlags{} :
         ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 }
 
 void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
-    if(_state != State::Success) {
-        out << "File" << expected << "(" + _filename + ")" << "cannot be read.";
+    if(_state->result != Result::Success) {
+        out << "File" << expected << "(" + _state->filename + ")" << "cannot be read.";
         return;
     }
 
     out << "Files" << actual << "and" << expected << "have different";
-    if(_actualContents.size() != _expectedContents.size())
-        out << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
+    if(_state->actualContents.size() != _state->expectedContents.size())
+        out << "size, actual" << _state->actualContents.size() << "but" << _state->expectedContents.size() << "expected.";
     else
         out << "contents.";
 
-    for(std::size_t i = 0, end = Utility::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
-        if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
+    for(std::size_t i = 0, end = Utility::max(_state->actualContents.size(), _state->expectedContents.size()); i != end; ++i) {
+        if(_state->actualContents.size() > i && _state->expectedContents.size() > i && _state->actualContents[i] == _state->expectedContents[i]) continue;
 
-        if(_actualContents.size() <= i)
-            out << "Expected has character" << _expectedContents.slice(i, i + 1);
-        else if(_expectedContents.size() <= i)
-            out << "Actual has character" << _actualContents.slice(i, i + 1);
+        if(_state->actualContents.size() <= i)
+            out << "Expected has character" << _state->expectedContents.slice(i, i + 1);
+        else if(_state->expectedContents.size() <= i)
+            out << "Actual has character" << _state->actualContents.slice(i, i + 1);
         else
-            out << "Actual character" << _actualContents.slice(i, i + 1) << "but" << _expectedContents.slice(i, i + 1) << "expected";
+            out << "Actual character" << _state->actualContents.slice(i, i + 1) << "but" << _state->expectedContents.slice(i, i + 1) << "expected";
 
         out << "on position" << i << Utility::Debug::nospace << ".";
         break;
@@ -87,8 +110,8 @@ void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Util
 }
 
 void Comparator<Compare::StringToFile>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
-    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_filename).second());
-    if(Utility::Path::write(filename, _actualContents))
+    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_state->filename).second());
+    if(Utility::Path::write(filename, _state->actualContents))
         out << "->" << filename;
 }
 #endif

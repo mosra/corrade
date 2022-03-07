@@ -28,6 +28,7 @@
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"

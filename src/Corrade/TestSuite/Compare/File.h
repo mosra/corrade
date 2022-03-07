@@ -30,7 +30,11 @@
  * @brief Class @ref Corrade::TestSuite::Compare::File
  */
 
-#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/Pointer.h"
+/* The include is not strictly needed, but it would only mean the users would
+   then have to include it on their own -- as there's no way to use this
+   comparator without a StringView */
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Utility.h"
@@ -50,6 +54,8 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
     public:
         explicit Comparator(Containers::StringView pathPrefix = {});
 
+        ~Comparator();
+
         ComparisonStatusFlags operator()(Containers::StringView actualFilename, Containers::StringView expectedFilename);
 
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
@@ -57,19 +63,8 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
         void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, Containers::StringView path);
 
     private:
-        enum class State {
-            Success,
-            ReadError
-        };
-
-        State _actualState, _expectedState;
-        /* The whole comparison is done in a single expression so the path
-           prefix can stay as a view. However the filenames are join()ed with
-           it, so they have to be owned, same for contents fetched from the
-           files. */
-        Containers::StringView _pathPrefix;
-        Containers::String _actualFilename, _expectedFilename,
-            _actualContents, _expectedContents;
+        struct CORRADE_TESTSUITE_LOCAL State;
+        Containers::Pointer<State> _state;
 };
 #endif
 
