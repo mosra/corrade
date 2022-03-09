@@ -48,6 +48,7 @@
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Path.h"
+#include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/Sha1.h"
 #include "Corrade/Utility/StlMath.h"
 
@@ -799,6 +800,43 @@ const char* shader = "#line " CORRADE_LINE_STRING "\n" R"GLSL(
 )GLSL";
 /* [CORRADE_LINE_STRING] */
 static_cast<void>(shader);
+}
+
+{
+/* [Resource-usage] */
+Utility::Resource rs{"game-data"};
+
+std::string licenseText = rs.get("license.txt");
+Containers::ArrayView<const char> soundData = rs.getRaw("intro.ogg");
+DOXYGEN_ELLIPSIS()
+
+std::istringstream in{rs.get("levels/easy.conf")};
+Utility::Configuration easyLevel{in};
+DOXYGEN_ELLIPSIS()
+/* [Resource-usage] */
+static_cast<void>(soundData);
+}
+
+{
+struct Foo {
+/* [Resource-usage-static] */
+int main(int argc, char** argv) {
+    CORRADE_RESOURCE_INITIALIZE(MyGame_RESOURCES)
+
+    DOXYGEN_ELLIPSIS(static_cast<void>(argc); static_cast<void>(argv);)
+}
+/* [Resource-usage-static] */
+};
+}
+
+{
+/* [Resource-usage-override] */
+Utility::Resource::overrideGroup("game-data", Utility::Path::join(
+    /* Assuming resources.conf is next to this C++ source file */
+    Utility::Path::split(Utility::Path::fromNativeSeparators(__FILE__)).first(),
+    "resources.conf"
+));
+/* [Resource-usage-override] */
 }
 
 {

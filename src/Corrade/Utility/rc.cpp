@@ -32,11 +32,13 @@
 namespace Corrade {
 
 /** @page corrade-rc Resource compiler
-@brief Utility for compiling data resources via command-line.
+@brief Resource compiling utility for @ref Utility::Resource.
 
-Produces compiled C++ file with data in hexadecimal representation to be used
-with @ref Utility::Resource. See @ref resource-management for brief
-introduction.
+@m_keywords{corrade-rc}
+
+Produces a C++ file with data in a hexadecimal representation to be compiled
+into an executable and used with @ref Utility::Resource. See also
+@ref resource-management for a tutorial.
 
 This utility is built if `WITH_RC` is enabled when building Corrade. To use
 this utility with CMake, see the
@@ -56,14 +58,15 @@ for more information.
 @section corrade-rc-usage Usage
 
 @code{.sh}
-corrade-rc [-h|--help] [--] name resources.conf outfile.cpp
+corrade-rc [-h|--help] [--] name resources.conf output.cpp
 @endcode
 
 Arguments:
 
+-   `name` --- exported symbol name
 -   `resources.conf` --- resource configuration file (see @ref Utility::Resource
     for format description)
--   `outfile.cpp` --- output file
+-   `output.cpp` --- output file
 -   `-h`, `--help` --- display this help message and exit
 */
 
@@ -74,18 +77,18 @@ using namespace Corrade;
 #ifndef DOXYGEN_GENERATING_OUTPUT /* LCOV_EXCL_START */
 int main(int argc, char** argv) {
     Utility::Arguments args;
-    args.addArgument("name")
+    args.addArgument("name").setHelp("name", "exported symbol name")
         .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
-        .addArgument("out").setHelp("out", "output file", "outfile.cpp")
+        .addArgument("output").setHelp("output", "output file", "output.cpp")
         .setCommand("corrade-rc")
-        .setGlobalHelp("Resource compiler for Corrade.")
+        .setGlobalHelp("Corrade resource compiler.")
         .parse(argc, argv);
 
     /* Remove previous output file. Only if it exists, to not print an error
        message when compiling for the first time. If it fails, die as well --
        we'd not succeed after either. */
-    if(Utility::Path::exists(args.value("out")) &&
-      !Utility::Path::remove(args.value("out")))
+    if(Utility::Path::exists(args.value("output")) &&
+      !Utility::Path::remove(args.value("output")))
         return 1;
 
     /* Compile file */
@@ -96,8 +99,8 @@ int main(int argc, char** argv) {
 
     /* Save output */
     /** @todo drop the StringView cast once resourceCompileFrom() is <string>-free */
-    if(!Utility::Path::write(args.value("out"), Containers::StringView{compiled})) {
-        Utility::Error{} << "Cannot write output file" << '\'' + args.value("out") + '\'';
+    if(!Utility::Path::write(args.value("output"), Containers::StringView{compiled})) {
+        Utility::Error{} << "Cannot write output file" << '\'' + args.value("output") + '\'';
         return 3;
     }
 
