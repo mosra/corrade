@@ -37,6 +37,7 @@
 #include <windows.h>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #endif
 
 namespace Corrade { namespace Utility { namespace Unicode {
