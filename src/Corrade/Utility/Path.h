@@ -409,7 +409,7 @@ UTF-16 representation using @ref Unicode::narrow().
 @note For consistency is the path returned with forward slashes on all
     platforms. Use @ref toNativeSeparators() to convert it to platform-specific
     format, if needed.
-@see @ref current(), @ref libraryLocation()
+@see @ref currentDirectory(), @ref libraryLocation()
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<Containers::String> executableLocation();
 
@@ -553,7 +553,7 @@ directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref readString(), @ref write(), @ref append(), @ref copy(),
-    @ref mapRead(), @ref exists(), @ref fileSize()
+    @ref mapRead(), @ref exists(), @ref size()
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<char>> read(Containers::StringView filename);
 
@@ -563,7 +563,7 @@ CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<char>> read(Contai
 
 Similar to @ref read() but returns a @ref Containers::String, which is
 guaranteed to be null-terminated.
-@see @ref write(), @ref append(), @ref copy(), @ref exists(), @ref fileSize()
+@see @ref write(), @ref append(), @ref copy(), @ref exists(), @ref size()
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<Containers::String> readString(Containers::StringView filename);
 
@@ -625,7 +625,7 @@ passed to system APIs.
 CORRADE_UTILITY_EXPORT bool append(Containers::StringView filename, Containers::ArrayView<const void> data);
 
 /**
-@brief Appending a C string into a file is not allowed
+@brief Appending a C string to a file is not allowed
 @m_since_latest
 
 To avoid accidentally writing C strings including the null terminator, please

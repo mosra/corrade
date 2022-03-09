@@ -543,7 +543,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @p delimiter characters, returns an empty array. The function uses
          * @ref slice() internally, meaning it propagates the @ref flags() as
          * appropriate.
-         * @see @ref split(), @ref splitWithoutEmptyParts(StringView) const,
+         * @see @ref split(), @ref splitOnAnyWithoutEmptyParts(StringView) const,
          *      @ref partition()
          */
         Array<BasicStringView<T>> splitWithoutEmptyParts(char delimiter) const;
@@ -556,7 +556,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * consists just of characters from @p delimiters, returns an empty
          * array. The function uses @ref slice() internally, meaning it
          * propagates the @ref flags() as appropriate.
-         * @see @ref split(), @ref splitWithoutEmptyParts() const
+         * @see @ref split(), @ref splitOnWhitespaceWithoutEmptyParts() const
          */
         Array<BasicStringView<T>> splitOnAnyWithoutEmptyParts(StringView delimiters) const;
 
@@ -571,7 +571,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /**
          * @brief Split on whitespace, removing empty parts
          *
-         * Equivalent to calling @ref splitWithoutEmptyParts(StringView) const
+         * Equivalent to calling @ref splitOnAnyWithoutEmptyParts(StringView) const
          * with @cpp " \t\f\v\r\n" @ce passed to @p delimiters.
          */
         Array<BasicStringView<T>> splitOnWhitespaceWithoutEmptyParts() const;

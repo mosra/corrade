@@ -96,19 +96,17 @@ achieved with the following tags, compared to @ref Containers::Array the
 initialization is performed separately from the allocation itself with either a
 loop or a call to @ref std::memset().
 
--   @ref allocateAligned(Containers::DefaultInitT, std::size_t) leaves trivial
-    types uninitialized and calls the default constructor elsewhere. Because of
-    the differing behavior for trivial types it's better to explicitly use
-    either the @ref Containers::ValueInit or @ref Containers::NoInit variants
-    instead.
--   @ref allocateAligned(Containers::ValueInitT, std::size_t) is equivalent to
-    the default case, zero-initializing trivial types and calling the default
-    constructor elsewhere. Useful when you want to make the choice appear
-    explicit.
--   @ref allocateAligned(Containers::NoInitT, std::size_t) does not initialize
-    anything. Useful for trivial types when you'll be overwriting the contents
-    anyway, for non-trivial types this is the dangerous option and you need to
-    call the constructor on all elements manually using placement new,
+-   @ref allocateAligned(DefaultInitT, std::size_t) leaves trivial types
+    uninitialized and calls the default constructor elsewhere. Because of the
+    differing behavior for trivial types it's better to explicitly use either
+    the @ref ValueInit or @ref NoInit variants instead.
+-   @ref allocateAligned(ValueInitT, std::size_t) is equivalent to the default
+    case, zero-initializing trivial types and calling the default constructor
+    elsewhere. Useful when you want to make the choice appear explicit.
+-   @ref allocateAligned(NoInitT, std::size_t) does not initialize anything.
+    Useful for trivial types when you'll be overwriting the contents anyway,
+    for non-trivial types this is the dangerous option and you need to call the
+    constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar --- see the function docs for an
     example.
 */

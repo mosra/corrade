@@ -404,15 +404,15 @@ a high-level overview.
 -   The `Utility::Debug::setFlags()` function was removed, use
     @ref Utility::Debug::nospace and @ref Utility::Debug::Flag::NoNewlineAtTheEnd
     instead
--   The @ref Utility::Directory, @ref Utility::String and @ref Utility::Unicode
-    classes are now a namespace (might break `using` declarations, but
-    otherwise it's fully source-compatible)
+-   The @cpp Utility::Directory @ce, @ref Utility::String and
+    @ref Utility::Unicode classes are now a namespace (might break `using`
+    declarations, but otherwise it's fully source-compatible)
 -   @ref corrade-cmake-add-test "corrade_add_test()" CMake macro now calls
     @cmake target_link_libraries() @ce with explicit `PRIVATE` keyword, meaning
     the users also have to specify `PUBLIC`/`PRIVATE`/`INTERFACE` when calling
     @cmake target_link_libraries() @ce on a test
--   All path handling functions in @ref Utility::Directory consistently return
-    and expect only forward slashes as directory separators
+-   All path handling functions in @cpp Utility::Directory @ce consistently
+    return and expect only forward slashes as directory separators
 
 @subsection corrade-changelog-2018-02-documentation Documentation
 
@@ -580,7 +580,7 @@ No dependency changes in this release.
 -   Ability to retrieve list of all compiled-in resources in given group using
     @ref Utility::Resource::list()
 -   Added @cpp read() @ce, @cpp readString() @ce, @cpp write() @ce and
-    @cpp writeString() @ce functions to @ref Utility::Directory
+    @cpp writeString() @ce functions to @cpp Utility::Directory @ce
 -   New @ref CORRADE_HAS_TYPE() type traits macro, which now allows to use
     @ref Utility::Debug to print any container that is iterable with C++11
     range-based for.
@@ -607,7 +607,7 @@ No dependency changes in this release.
     the files in binary mode to avoid platform-dependent EOL issues.
 -   @ref Utility::Resource now properly handles empty files when compiling
     resources.
--   @ref Utility::Directory is now working properly under Windows.
+-   @cpp Utility::Directory @ce is now working properly under Windows.
 -   Fixed compilation issues with Clang and libc++
 -   Fixed various compilation issues under MSVC (and worked around a much
     larger amount of compiler bugs)

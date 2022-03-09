@@ -131,7 +131,7 @@ Parts of this library are additionally available in a form of
 */
 
 /** @dir Corrade/Utility
- * @brief Namespace @ref Corrade::Utility, @ref Corrade::Utility::Directory, @ref Corrade::Utility::String, @ref Corrade::Utility::System
+ * @brief Namespace @ref Corrade::Utility, @ref Corrade::Utility::Path, @ref Corrade::Utility::String, @ref Corrade::Utility::System, @ref Corrade::Utility::Unicode
  */
 /** @namespace Corrade::Utility
 @brief Utitlities

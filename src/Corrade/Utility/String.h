@@ -498,8 +498,7 @@ CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 
 In particular, returns @cpp true @ce for empty @p string only if @p prefix is
 empty as well.
-@see @ref viewBeginsWith(), @ref stripPrefix(),
-    @ref Containers::StringView::hasPrefix()
+@see @ref stripPrefix(), @ref Containers::StringView::hasPrefix()
 */
 inline bool beginsWith(const std::string& string, const std::string& prefix) {
     return Implementation::beginsWith({string.data(), string.size()}, {prefix.data(), prefix.size()});
@@ -540,8 +539,7 @@ inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bo
 
 In particular, returns @cpp true @ce for empty @p string only if @p suffix is
 empty as well.
-@see @ref viewEndsWith(), @ref stripSuffix(),
-    @ref Containers::StringView::hasSuffix()
+@see @ref stripSuffix(), @ref Containers::StringView::hasSuffix()
 */
 inline bool endsWith(const std::string& string, const std::string& suffix) {
     return Implementation::endsWith({string.data(), string.size()}, {suffix.data(), suffix.size()});

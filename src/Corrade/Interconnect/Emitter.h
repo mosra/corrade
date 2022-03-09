@@ -531,7 +531,7 @@ count and types must be exactly the same.
 See @ref Interconnect-Emitter-connections "Emitter class documentation" for
 more information about connections.
 
-@see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
+@see @ref Emitter::hasSignalConnections(), @ref Emitter::isConnected(),
      @ref Emitter::signalConnectionCount()
 */
 template<class EmitterObject, class Emitter, class Functor, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Functor&& slot) {
@@ -570,7 +570,7 @@ exactly the same.
 See @ref Interconnect-Emitter-connections "Emitter class documentation" for
 more information about connections.
 
-@see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
+@see @ref Emitter::hasSignalConnections(), @ref Emitter::isConnected(),
      @ref Emitter::signalConnectionCount()
 @todo Connecting to signals
 */

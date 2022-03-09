@@ -711,7 +711,7 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Split on any character from given set, removing empty parts
          *
-         * Equivalent to @ref BasicStringView::splitWithoutEmptyParts(StringView) const.
+         * Equivalent to @ref BasicStringView::splitOnAnyWithoutEmptyParts(StringView) const.
          * Not allowed to be called on a rvalue since the returned views would
          * become dangling.
          */
@@ -735,7 +735,7 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Split on whitespace, removing empty parts
          *
-         * Equivalent to @ref BasicStringView::splitWithoutEmptyParts() const.
+         * Equivalent to @ref BasicStringView::splitOnWhitespaceWithoutEmptyParts() const.
          * Not allowed to be called on a rvalue since the returned views would
          * become dangling.
          */
