@@ -815,7 +815,6 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::join().
          * @todo a mutable && overload that reuses the growable string storage
          *      instead of allocating new, when growable strings are a thing
-         * @ref operator+(StringView, StringView)
          */
         String join(ArrayView<const StringView> strings) const;
 
@@ -836,7 +835,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string begins with given prefix
          *
          * Equivalent to @ref BasicStringView::hasPrefix().
-         * @see @ref exceptPrefix()
          */
         bool hasPrefix(StringView prefix) const;
         bool hasPrefix(char prefix) const; /**< @overload */
@@ -845,7 +843,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Whether the string ends with given suffix
          *
          * Equivalent to @ref BasicStringView::hasSuffix().
-         * @see @ref exceptSuffix()
          */
         bool hasSuffix(StringView suffix) const;
         bool hasSuffix(char suffix) const; /**< @overload */
@@ -854,7 +851,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with given prefix stripped
          *
          * Equivalent to @ref BasicStringView::exceptPrefix().
-         * @see @ref hasPrefix()
          */
         MutableStringView exceptPrefix(StringView prefix);
         StringView exceptPrefix(StringView prefix) const; /**< @overload */
@@ -900,7 +896,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with given suffix stripped
          *
          * Equivalent to @ref BasicStringView::exceptSuffix().
-         * @see @ref hasSuffix()
          */
         MutableStringView exceptSuffix(StringView suffix);
         StringView exceptSuffix(StringView suffix) const; /**< @overload */
@@ -946,7 +941,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with given characters trimmed from prefix and suffix
          *
          * Equivalent to @ref BasicStringView::trimmed(StringView) const.
-         * @see @ref trimmedPrefix(), @ref trimmedSuffix()
          */
         MutableStringView trimmed(StringView characters);
         StringView trimmed(StringView characters) const; /**< @overload */
@@ -955,7 +949,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with whitespace trimmed from prefix and suffix
          *
          * Equivalent to @ref BasicStringView::trimmed() const.
-         * @see @ref trimmedPrefix(), @ref trimmedSuffix()
          */
         MutableStringView trimmed();
         StringView trimmed() const; /**< @overload */
@@ -964,7 +957,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with given characters trimmed from prefix
          *
          * Equivalent to @ref BasicStringView::trimmedPrefix(StringView) const.
-         * @see @ref trimmed(), @ref trimmedSuffix()
          */
         MutableStringView trimmedPrefix(StringView characters);
         StringView trimmedPrefix(StringView characters) const; /**< @overload */
@@ -973,7 +965,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with whitespace trimmed from prefix
          *
          * Equivalent to @ref BasicStringView::trimmedPrefix() const.
-         * @see @ref trimmed(), @ref trimmedSuffix()
          */
         MutableStringView trimmedPrefix();
         StringView trimmedPrefix() const; /**< @overload */
@@ -982,7 +973,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with given characters trimmed from suffix
          *
          * Equivalent to @ref BasicStringView::trimmedSuffix(StringView) const.
-         * @see @ref trimmed(), @ref trimmedPrefix()
          */
         MutableStringView trimmedSuffix(StringView characters);
         StringView trimmedSuffix(StringView characters) const; /**< @overload */
@@ -991,7 +981,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief View with whitespace trimmed from suffix
          *
          * Equivalent to @ref BasicStringView::trimmedSuffix() const.
-         * @see @ref trimmed(), @ref trimmedPrefix()
          */
         MutableStringView trimmedSuffix();
         StringView trimmedSuffix() const; /**< @overload */
@@ -1000,7 +989,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Find a substring
          *
          * Equivalent to @ref BasicStringView::find(StringView) const.
-         * @see @ref contains(), @ref findLast(), @ref findOr()
          */
         MutableStringView find(StringView substring);
         StringView find(StringView substring) const; /**< @overload */
@@ -1010,8 +998,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::find(char) const, which in turn
          * is a specialization of @ref BasicStringView::find(StringView) const.
-         * @see @ref contains(char) const, @ref findLast(char),
-         *      @ref findOr(char, char*)
          */
         MutableStringView find(char character);
         StringView find(char character) const; /**< @overload */
@@ -1020,7 +1006,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Find a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findOr(StringView, T*) const.
-         * @see @ref find(), @ref findLastOr()
          */
         MutableStringView findOr(StringView substring, char* fail);
         StringView findOr(StringView substring, const char* fail) const; /**< @overload */
@@ -1030,8 +1015,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findOr(char, T*) const, which in
          * turn is a specialization of @ref BasicStringView::findOr(StringView, T*) const.
-         * @see @ref contains(char) const, @ref findLast(char),
-         *      @ref findLastOr(char)
          */
         MutableStringView findOr(char character, char* fail);
         StringView findOr(char character, const char* fail) const; /**< @overload */
@@ -1040,7 +1023,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Find the last occurence of a substring
          *
          * Equivalent to @ref BasicStringView::findLast(StringView) const.
-         * @see @ref find(), @ref findLastOr()
          */
         MutableStringView findLast(StringView substring);
         StringView findLast(StringView substring) const; /**< @overload */
@@ -1050,7 +1032,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findLast(char) const, which in
          * turn is a specialization of @ref BasicStringView::findLast(StringView) const.
-         * @see @ref find(char), @ref findOr(char, char*)
          */
         MutableStringView findLast(char character);
         StringView findLast(char character) const; /**< @overload */
@@ -1059,7 +1040,6 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Find the last occurence of a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastOr(StringView, T*) const.
-         * @see @ref findLast(), @ref findOr()
          */
         MutableStringView findLastOr(StringView substring, char* fail);
         StringView findLastOr(StringView substring, const char* fail) const; /**< @overload */
@@ -1069,7 +1049,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findLastOr(char, T*) const,
          * which in turn is a specialization of @ref BasicStringView::findLastOr(StringView, T*) const.
-         * @see @ref findLast(char), @ref findOr(char)
          */
         MutableStringView findLastOr(char character, char* fail);
         StringView findLastOr(char character, const char* fail) const; /**< @overload */
