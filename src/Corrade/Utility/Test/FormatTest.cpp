@@ -638,7 +638,7 @@ void FormatTest::charArray() {
 void FormatTest::stringView() {
     using namespace Containers::Literals;
 
-    CORRADE_COMPARE(format("hello {}", "worlds"_s.except(1)),
+    CORRADE_COMPARE(format("hello {}", "worlds"_s.exceptSuffix(1)),
         "hello world");
     CORRADE_COMPARE(format("hello {}", "world\0, i guess?"_s),
         "hello world\0, i guess?"_s);

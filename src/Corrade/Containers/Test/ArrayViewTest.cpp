@@ -997,23 +997,23 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
-    ArrayView c1 = a.prefix(3);
-    CORRADE_COMPARE(c1.size(), 3);
-    CORRADE_COMPARE(c1[0], 1);
-    CORRADE_COMPARE(c1[1], 2);
-    CORRADE_COMPARE(c1[2], 3);
+    ArrayView c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
 
-    ArrayView c2 = a.except(2);
-    CORRADE_COMPARE(c2.size(), 3);
-    CORRADE_COMPARE(c2[0], 1);
-    CORRADE_COMPARE(c2[1], 2);
-    CORRADE_COMPARE(c2[2], 3);
-
-    ArrayView d = a.suffix(2);
+    ArrayView d = a.exceptPrefix(2);
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+
+    ArrayView e = a.exceptSuffix(2);
+    CORRADE_COMPARE(e.size(), 3);
+    CORRADE_COMPARE(e[0], 1);
+    CORRADE_COMPARE(e[1], 2);
+    CORRADE_COMPARE(e[2], 3);
 
     constexpr ConstArrayView ca = Array5;
     constexpr ConstArrayView cb = ca.slice(1, 4);
@@ -1022,23 +1022,23 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);
 
-    constexpr ConstArrayView cc1 = ca.prefix(3);
-    CORRADE_COMPARE(cc1.size(), 3);
-    CORRADE_COMPARE(cc1[0], 1);
-    CORRADE_COMPARE(cc1[1], 2);
-    CORRADE_COMPARE(cc1[2], 3);
+    constexpr ConstArrayView cc = ca.prefix(3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
 
-    constexpr ConstArrayView cc2 = ca.except(2);
-    CORRADE_COMPARE(cc2.size(), 3);
-    CORRADE_COMPARE(cc2[0], 1);
-    CORRADE_COMPARE(cc2[1], 2);
-    CORRADE_COMPARE(cc2[2], 3);
-
-    constexpr ConstArrayView cd = ca.suffix(2);
+    constexpr ConstArrayView cd = ca.exceptPrefix(2);
     CORRADE_COMPARE(cd.size(), 3);
     CORRADE_COMPARE(cd[0], 3);
     CORRADE_COMPARE(cd[1], 4);
     CORRADE_COMPARE(cd[2], 5);
+
+    constexpr ConstArrayView ce = ca.exceptSuffix(2);
+    CORRADE_COMPARE(ce.size(), 3);
+    CORRADE_COMPARE(ce[0], 1);
+    CORRADE_COMPARE(ce[1], 2);
+    CORRADE_COMPARE(ce[2], 3);
 }
 
 void ArrayViewTest::slicePointer() {

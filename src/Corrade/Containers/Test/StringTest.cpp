@@ -963,7 +963,7 @@ void StringTest::convertMutableStringViewSmallAllocatedInit() {
 }
 
 void StringTest::convertArrayView() {
-    const String a = arrayView("Allocated hello\0for a verbose world").except(1);
+    const String a = arrayView("Allocated hello\0for a verbose world").exceptSuffix(1);
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -980,7 +980,7 @@ void StringTest::convertArrayView() {
 }
 
 void StringTest::convertArrayViewSmall() {
-    const String a = arrayView("this\0world").except(1);
+    const String a = arrayView("this\0world").exceptSuffix(1);
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -997,7 +997,7 @@ void StringTest::convertArrayViewSmall() {
 }
 
 void StringTest::convertArrayViewSmallAllocatedInit() {
-    const String a{AllocatedInit, arrayView("this\0world").except(1)};
+    const String a{AllocatedInit, arrayView("this\0world").exceptSuffix(1)};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -1015,7 +1015,7 @@ void StringTest::convertArrayViewSmallAllocatedInit() {
 
 void StringTest::convertMutableArrayView() {
     char aData[] = "Allocated hello\0for a verbose world";
-    String a = ArrayView<char>{aData}.except(1);
+    String a = ArrayView<char>{aData}.exceptSuffix(1);
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -1033,7 +1033,7 @@ void StringTest::convertMutableArrayView() {
 
 void StringTest::convertMutableArrayViewSmall() {
     char aData[] = "this\0world";
-    String a = ArrayView<char>{aData}.except(1);
+    String a = ArrayView<char>{aData}.exceptSuffix(1);
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -1051,7 +1051,7 @@ void StringTest::convertMutableArrayViewSmall() {
 
 void StringTest::convertMutableArrayViewSmallAllocatedInit() {
     char aData[] = "this\0world";
-    String a{AllocatedInit, ArrayView<char>{aData}.except(1)};
+    String a{AllocatedInit, ArrayView<char>{aData}.exceptSuffix(1)};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
     CORRADE_VERIFY(!a.isEmpty());
@@ -1639,17 +1639,17 @@ void StringTest::slice() {
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
     CORRADE_COMPARE(a.prefix(3), "hel"_s);
     CORRADE_COMPARE(a.prefix(2).flags(), StringViewFlags{});
-    CORRADE_COMPARE(a.except(2), "hel"_s);
-    CORRADE_COMPARE(a.suffix(2), "llo"_s);
-    CORRADE_COMPARE(a.suffix(2).flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(a.exceptPrefix(2), "llo"_s);
+    CORRADE_COMPARE(a.exceptPrefix(2).flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(a.exceptSuffix(2), "hel"_s);
 
     const String ca = "hello";
     CORRADE_COMPARE(ca.slice(1, 4), "ell"_s);
     CORRADE_COMPARE(ca.prefix(3), "hel"_s);
     CORRADE_COMPARE(ca.prefix(2).flags(), StringViewFlags{});
-    CORRADE_COMPARE(ca.except(2), "hel"_s);
-    CORRADE_COMPARE(ca.suffix(2), "llo"_s);
-    CORRADE_COMPARE(ca.suffix(2).flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(ca.exceptPrefix(2), "llo"_s);
+    CORRADE_COMPARE(ca.exceptPrefix(2).flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(ca.exceptSuffix(2), "hel"_s);
 }
 
 void StringTest::slicePointer() {

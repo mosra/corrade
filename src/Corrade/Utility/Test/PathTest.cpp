@@ -766,7 +766,7 @@ void PathTest::existsNoPermission() {
 }
 
 void PathTest::existsNonNullTerminated() {
-    CORRADE_VERIFY(Path::exists(Path::join(_testDir, "fileX").except(1)));
+    CORRADE_VERIFY(Path::exists(Path::join(_testDir, "fileX").exceptSuffix(1)));
 }
 
 void PathTest::existsUtf8() {
@@ -850,9 +850,9 @@ void PathTest::isDirectoryNonNullTerminated() {
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
             "iOS (in a simulator) thinks all paths are files.");
         #endif
-        CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dirX").except(1)));
+        CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dirX").exceptSuffix(1)));
     }
-    CORRADE_VERIFY(!Path::isDirectory(Path::join(_testDir, "fileX").except(1)));
+    CORRADE_VERIFY(!Path::isDirectory(Path::join(_testDir, "fileX").exceptSuffix(1)));
 }
 
 void PathTest::isDirectoryUtf8() {
@@ -963,7 +963,7 @@ void PathTest::makeNonNullTerminated() {
     Containers::String leaf = Path::join(_writeTestDir, "leaf");
     if(Path::exists(leaf))
         CORRADE_VERIFY(Path::remove(leaf));
-    CORRADE_VERIFY(Path::make(Path::join(_writeTestDir, "leafX").except(1)));
+    CORRADE_VERIFY(Path::make(Path::join(_writeTestDir, "leafX").exceptSuffix(1)));
     CORRADE_VERIFY(Path::exists(leaf));
 }
 
@@ -1048,7 +1048,7 @@ void PathTest::removeFileNonNullTerminated() {
     CORRADE_VERIFY(Path::make(_writeTestDir));
     CORRADE_VERIFY(Path::write(file, "a"_s));
     CORRADE_VERIFY(Path::exists(file));
-    CORRADE_VERIFY(Path::remove(Path::join(_writeTestDir, "file.txtX").except(1)));
+    CORRADE_VERIFY(Path::remove(Path::join(_writeTestDir, "file.txtX").exceptSuffix(1)));
     CORRADE_VERIFY(!Path::exists(file));
 }
 
@@ -1056,7 +1056,7 @@ void PathTest::removeDirectoryNonNullTerminated() {
     Containers::String directory = Path::join(_writeTestDir, "directory");
     CORRADE_VERIFY(Path::make(directory));
     CORRADE_VERIFY(Path::exists(directory));
-    CORRADE_VERIFY(Path::remove(Path::join(_writeTestDir, "directoryX").except(1)));
+    CORRADE_VERIFY(Path::remove(Path::join(_writeTestDir, "directoryX").exceptSuffix(1)));
     CORRADE_VERIFY(!Path::exists(directory));
 }
 
@@ -1170,8 +1170,8 @@ void PathTest::moveNonNullTerminated() {
         CORRADE_VERIFY(Path::remove(newFile));
 
     CORRADE_VERIFY(Path::move(
-        Path::join(_writeTestDir, "oldFile.txtX").except(1),
-        Path::join(_writeTestDir, "newFile.txtX").except(1)));
+        Path::join(_writeTestDir, "oldFile.txtX").exceptSuffix(1),
+        Path::join(_writeTestDir, "newFile.txtX").exceptSuffix(1)));
     CORRADE_VERIFY(!Path::exists(oldFile));
     CORRADE_VERIFY(Path::exists(newFile));
 }
@@ -1837,7 +1837,7 @@ void PathTest::listNonexistent() {
 }
 
 void PathTest::listNonNullTerminated() {
-    Containers::Optional<Containers::Array<Containers::String>> list = Path::list((_testDir + "X").except(1));
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::list((_testDir + "X").exceptSuffix(1));
     CORRADE_VERIFY(list);
 
     {
@@ -1976,7 +1976,7 @@ void PathTest::sizeNonexistent() {
 
 void PathTest::sizeNonNullTerminated() {
     /* Existing file, containing the above data */
-    CORRADE_COMPARE(Path::size(Path::join(_testDir, "fileX").except(1)),
+    CORRADE_COMPARE(Path::size(Path::join(_testDir, "fileX").exceptSuffix(1)),
         Containers::arraySize(Data));
 }
 
@@ -2153,7 +2153,7 @@ void PathTest::readNonexistent() {
 }
 
 void PathTest::readNonNullTerminated() {
-    Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(_testDir, "fileX").except(1));
+    Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(_testDir, "fileX").exceptSuffix(1));
     CORRADE_VERIFY(data);
     CORRADE_COMPARE_AS(*data,
         Containers::arrayView(Data),
@@ -2277,7 +2277,7 @@ void PathTest::writeNonNullTerminated() {
 
     if(Path::exists(file))
         CORRADE_VERIFY(Path::remove(file));
-    CORRADE_VERIFY(Path::write(Path::join(_writeTestDir, "fileX").except(1), Containers::arrayView(Data)));
+    CORRADE_VERIFY(Path::write(Path::join(_writeTestDir, "fileX").exceptSuffix(1), Containers::arrayView(Data)));
     CORRADE_COMPARE_AS(file, Path::join(_testDir, "file"),
         TestSuite::Compare::File);
 }
@@ -2413,7 +2413,7 @@ void PathTest::appendNonNullTerminated() {
         CORRADE_VERIFY(Path::remove(file));
 
     CORRADE_VERIFY(Path::write(file, "hello"_s));
-    CORRADE_VERIFY(Path::append(Path::join(_writeTestDir, "fileX").except(1), Containers::arrayView(Data)));
+    CORRADE_VERIFY(Path::append(Path::join(_writeTestDir, "fileX").exceptSuffix(1), Containers::arrayView(Data)));
     CORRADE_COMPARE_AS(file, (std::string{expected, Containers::arraySize(expected)}),
         TestSuite::Compare::FileToString);
 }
@@ -2568,7 +2568,7 @@ void PathTest::copyNonNullTerminated() {
     if(Path::exists(destination))
         CORRADE_VERIFY(Path::remove(destination));
 
-    CORRADE_VERIFY(Path::copy(Path::join(_writeTestDir, "copySource.datX").except(1), Path::join(_writeTestDir, "copyDestination.datX").except(1)));
+    CORRADE_VERIFY(Path::copy(Path::join(_writeTestDir, "copySource.datX").exceptSuffix(1), Path::join(_writeTestDir, "copyDestination.datX").exceptSuffix(1)));
     CORRADE_COMPARE_AS(source, destination, TestSuite::Compare::File);
 }
 
@@ -2742,7 +2742,7 @@ void PathTest::mapNonNullTerminated() {
 
     /* Enough to just verify that the file got read, no need to test writing as
        well */
-    Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::map(Path::join(_writeTestDir, "mappedFileX").except(1));
+    Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::map(Path::join(_writeTestDir, "mappedFileX").exceptSuffix(1));
     CORRADE_VERIFY(mappedFile);
     CORRADE_COMPARE_AS(*mappedFile,
         Containers::arrayView(Data),
@@ -2828,7 +2828,7 @@ void PathTest::mapReadNonexistent() {
 
 void PathTest::mapReadNonNullTerminated() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    Containers::Optional<Containers::Array<const char, Path::MapDeleter>> mappedFile = Path::mapRead(Path::join(_testDir, "fileX").except(1));
+    Containers::Optional<Containers::Array<const char, Path::MapDeleter>> mappedFile = Path::mapRead(Path::join(_testDir, "fileX").exceptSuffix(1));
     CORRADE_VERIFY(mappedFile);
     CORRADE_COMPARE_AS(*mappedFile,
         Containers::arrayView(Data),
@@ -2946,7 +2946,7 @@ void PathTest::mapWriteNoPermission() {
 void PathTest::mapWriteNonNullTerminated() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
-        Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "mappedWriteFileX").except(1), Containers::arraySize(Data));
+        Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "mappedWriteFileX").exceptSuffix(1), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
         CORRADE_COMPARE(mappedFile->size(), Containers::arraySize(Data));
         Utility::copy(Data, *mappedFile);

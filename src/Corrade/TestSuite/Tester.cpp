@@ -628,7 +628,7 @@ benchmark types:
 
                 double mean, stddev;
                 Utility::Debug::Color color;
-                std::tie(mean, stddev, color) = Implementation::calculateStats(measurements.suffix(discardMeasurements), _state->benchmarkBatchSize, args.value<double>("benchmark-yellow"), args.value<double>("benchmark-red"));
+                std::tie(mean, stddev, color) = Implementation::calculateStats(measurements.exceptPrefix(discardMeasurements), _state->benchmarkBatchSize, args.value<double>("benchmark-yellow"), args.value<double>("benchmark-red"));
 
                 Implementation::printStats(out, mean, stddev, color, benchmarkUnits);
 

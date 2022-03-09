@@ -76,7 +76,7 @@ void MainTest::arguments() {
     #endif
     Debug{} << "Arguments expected: {--arg-utf, hýždě, --arg-another, šňůra}";
     Debug{} << "Arguments passed:  " << Containers::arrayView(
-        Tester::arguments().second, Tester::arguments().first).suffix(1);
+        Tester::arguments().second, Tester::arguments().first).exceptPrefix(1);
 
     CORRADE_COMPARE_AS((std::vector<std::string>{
         Tester::arguments().second + 1, Tester::arguments().second + Tester::arguments().first}),

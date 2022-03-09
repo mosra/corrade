@@ -219,13 +219,14 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
         a non-shitty strstr() that can work on non-null-terminated strings */
     /** @todo and then rpartition(), which has absolutely no standard library
         functions either, SIGH */
+    /** @todo use findOr(char) for this, this has an awful lot of branches */
 
     const std::size_t size = this->size();
     T* const pos = static_cast<T*>(std::memchr(_data, separator, size));
     return {
         pos ? prefix(pos) : *this,
-        pos ? slice(pos, pos + 1) : suffix(size),
-        pos ? suffix(pos + 1) : suffix(size)
+        pos ? slice(pos, pos + 1) : exceptPrefix(size),
+        pos ? suffix(pos + 1) : exceptPrefix(size)
     };
 }
 
@@ -333,13 +334,13 @@ template<class T> bool BasicStringView<T>::hasSuffix(const char suffix) const {
 template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const StringView prefix) const {
     CORRADE_ASSERT(hasPrefix(prefix),
         "Containers::StringView::exceptPrefix(): string doesn't begin with" << prefix, {});
-    return suffix(prefix.size());
+    return exceptPrefix(prefix.size());
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const StringView suffix) const {
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
-    return except(suffix.size());
+    return exceptSuffix(suffix.size());
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringView characters) const {

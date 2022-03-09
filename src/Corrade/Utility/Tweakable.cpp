@@ -197,7 +197,7 @@ std::string findTweakableAlias(const std::string& data) {
         /* If the rest doesn't read CORRADE_TWEAKABLE, nope */
         /** @todo convert all this to operate on StringViews when we have
             find() as well */
-        if(!Containers::StringView{data}.suffix(pos).hasPrefix("CORRADE_TWEAKABLE"_s))
+        if(!Containers::StringView{data}.exceptPrefix(pos).hasPrefix("CORRADE_TWEAKABLE"_s))
             continue;
 
         /* Get rid of whitespace at the end of the line */

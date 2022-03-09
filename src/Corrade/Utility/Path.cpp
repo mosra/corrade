@@ -200,7 +200,7 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
 
     /* Join with a slash in between. If it's already there, slice it away first
        so we have uniform handling. */
-    if(path.hasSuffix('/')) path = path.except(1);
+    if(path.hasSuffix('/')) path = path.exceptSuffix(1);
     return "/"_s.join({path, filename});
 }
 

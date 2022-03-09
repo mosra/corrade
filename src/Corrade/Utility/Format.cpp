@@ -420,7 +420,7 @@ std::size_t formatInto(const Containers::MutableStringView& buffer, const char* 
         bufferOffset += data.size();
     }, [&buffer, &bufferOffset](BufferFormatter& formatter, int precision, FormatType type) {
         if(buffer.data()) {
-            formatter.size = formatter(buffer.suffix(bufferOffset), precision, type);
+            formatter.size = formatter(buffer.exceptPrefix(bufferOffset), precision, type);
             CORRADE_ASSERT(bufferOffset + formatter.size <= buffer.size(),
                 "Utility::formatInto(): buffer too small, expected at least" << bufferOffset + formatter.size << "but got" << buffer.size(), );
         } else if(formatter.size == ~std::size_t{})

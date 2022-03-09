@@ -511,7 +511,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
         const Containers::StringView filename = Utility::Path::split(plugin).second();
-        const Containers::StringView name = filename.except(_state->pluginSuffix.size());
+        const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix.size());
         const auto found = _state->plugins.find(name);
         if(found != _state->plugins.end() && (found->second->loadState & LoadState::Loaded)) {
             Utility::Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";

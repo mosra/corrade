@@ -110,7 +110,7 @@ bool Configuration::parse(Containers::ArrayView<const char> in) {
     /* Oh, BOM, eww */
     if(in.size() >= 3 && in[0] == Bom[0] && in[1] == Bom[1] && in[2] == Bom[2]) {
         _flags |= InternalFlag::HasBom;
-        in = in.suffix(3);
+        in = in.exceptPrefix(3);
     }
 
     /* Parse file */

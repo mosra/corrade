@@ -81,7 +81,7 @@ Sha1& Sha1::operator<<(Containers::ArrayView<const char> data) {
         processChunk(data.data() + i);
 
     /* Save last unfinished 512-bit chunk of data */
-    auto leftOver = data.suffix(dataOffset + ((data.size() - dataOffset)/64)*64);
+    auto leftOver = data.exceptPrefix(dataOffset + ((data.size() - dataOffset)/64)*64);
     std::memcpy(_buffer, leftOver.data(), leftOver.size());
     _bufferSize = leftOver.size();
     _dataSize += data.size();

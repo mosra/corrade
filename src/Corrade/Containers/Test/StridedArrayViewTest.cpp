@@ -2844,23 +2844,23 @@ void StridedArrayViewTest::slice() {
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
-    StridedArrayView1Di c1 = a.prefix(3);
-    CORRADE_COMPARE(c1.size(), 3);
-    CORRADE_COMPARE(c1[0], 1);
-    CORRADE_COMPARE(c1[1], 2);
-    CORRADE_COMPARE(c1[2], 3);
+    StridedArrayView1Di c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
 
-    StridedArrayView1Di c2 = a.except(2);
-    CORRADE_COMPARE(c2.size(), 3);
-    CORRADE_COMPARE(c2[0], 1);
-    CORRADE_COMPARE(c2[1], 2);
-    CORRADE_COMPARE(c2[2], 3);
-
-    StridedArrayView1Di d = a.suffix(2);
+    StridedArrayView1Di d = a.exceptPrefix(2);
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+
+    StridedArrayView1Di e = a.exceptSuffix(2);
+    CORRADE_COMPARE(e.size(), 3);
+    CORRADE_COMPARE(e[0], 1);
+    CORRADE_COMPARE(e[1], 2);
+    CORRADE_COMPARE(e[2], 3);
 }
 
 void StridedArrayViewTest::sliceInvalid() {
@@ -2898,25 +2898,25 @@ void StridedArrayViewTest::slice3D() {
     CORRADE_COMPARE(b[0][0][0], 234810);
     CORRADE_COMPARE(b[0][0][1], 232342);
 
-    StridedArrayView3Di c1 = a.prefix({1, 1, 3});
-    CORRADE_COMPARE(c1.size(), (Size3D{1, 1, 3}));
-    CORRADE_COMPARE(c1.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(c1[0][0][0], 2);
-    CORRADE_COMPARE(c1[0][0][1], 16);
-    CORRADE_COMPARE(c1[0][0][2], 7853268);
+    StridedArrayView3Di c = a.prefix({1, 1, 3});
+    CORRADE_COMPARE(c.size(), (Size3D{1, 1, 3}));
+    CORRADE_COMPARE(c.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(c[0][0][0], 2);
+    CORRADE_COMPARE(c[0][0][1], 16);
+    CORRADE_COMPARE(c[0][0][2], 7853268);
 
-    StridedArrayView3Di c2 = a.except({1, 1, 0});
-    CORRADE_COMPARE(c2.size(), (Size3D{1, 1, 3}));
-    CORRADE_COMPARE(c2.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(c2[0][0][0], 2);
-    CORRADE_COMPARE(c2[0][0][1], 16);
-    CORRADE_COMPARE(c2[0][0][2], 7853268);
-
-    StridedArrayView3Di d = a.suffix({0, 1, 2});
+    StridedArrayView3Di d = a.exceptPrefix({0, 1, 2});
     CORRADE_COMPARE(d.size(), (Size3D{2, 1, 1}));
     CORRADE_COMPARE(d.stride(), (Stride3D{48, 24, 8}));
     CORRADE_COMPARE(d[0][0][0], 232342);
     CORRADE_COMPARE(d[1][0][0], 0);
+
+    StridedArrayView3Di e = a.exceptSuffix({1, 1, 0});
+    CORRADE_COMPARE(e.size(), (Size3D{1, 1, 3}));
+    CORRADE_COMPARE(e.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(e[0][0][0], 2);
+    CORRADE_COMPARE(e[0][0][1], 16);
+    CORRADE_COMPARE(e[0][0][2], 7853268);
 }
 
 void StridedArrayViewTest::slice3DInvalid() {
@@ -2960,26 +2960,26 @@ void StridedArrayViewTest::slice3DFirstDimension() {
     CORRADE_COMPARE(b[0][0][0], 2);
     CORRADE_COMPARE(b[0][0][1], 16);
 
-    StridedArrayView3Di c1 = a.prefix(1);
-    CORRADE_COMPARE(c1.size(), (Size3D{1, 2, 3}));
-    CORRADE_COMPARE(c1.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(c1[0][0][0], 2);
-    CORRADE_COMPARE(c1[0][0][1], 16);
-    CORRADE_COMPARE(c1[0][0][2], 7853268);
+    StridedArrayView3Di c = a.prefix(1);
+    CORRADE_COMPARE(c.size(), (Size3D{1, 2, 3}));
+    CORRADE_COMPARE(c.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(c[0][0][0], 2);
+    CORRADE_COMPARE(c[0][0][1], 16);
+    CORRADE_COMPARE(c[0][0][2], 7853268);
 
-    StridedArrayView3Di c2 = a.except(1);
-    CORRADE_COMPARE(c2.size(), (Size3D{1, 2, 3}));
-    CORRADE_COMPARE(c2.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(c2[0][0][0], 2);
-    CORRADE_COMPARE(c2[0][0][1], 16);
-    CORRADE_COMPARE(c2[0][0][2], 7853268);
-
-    StridedArrayView3Di d = a.suffix(1);
+    StridedArrayView3Di d = a.exceptPrefix(1);
     CORRADE_COMPARE(d.size(), (Size3D{1, 2, 3}));
     CORRADE_COMPARE(d.stride(), (Stride3D{48, 24, 8}));
     CORRADE_COMPARE(d[0][0][0], 23);
     CORRADE_COMPARE(d[0][0][1], 76);
     CORRADE_COMPARE(d[0][0][2], 0);
+
+    StridedArrayView3Di e = a.exceptSuffix(1);
+    CORRADE_COMPARE(e.size(), (Size3D{1, 2, 3}));
+    CORRADE_COMPARE(e.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(e[0][0][0], 2);
+    CORRADE_COMPARE(e[0][0][1], 16);
+    CORRADE_COMPARE(e[0][0][2], 7853268);
 }
 
 void StridedArrayViewTest::slice3DFirstDimensionInvalid() {
@@ -3019,23 +3019,23 @@ void StridedArrayViewTest::sliceDimensionUp() {
     CORRADE_COMPARE(c[1][0][0], 2);
     CORRADE_COMPARE(c[2][0][0], 3);
 
-    StridedArrayView3Di d1 = a.prefix<3>(2);
-    CORRADE_COMPARE(d1.size(), (Size3D{2, 1, 1}));
-    CORRADE_COMPARE(d1.stride(), (Stride3D{4, 4, 4}));
-    CORRADE_COMPARE(d1[0][0][0], 1);
-    CORRADE_COMPARE(d1[1][0][0], 2);
+    StridedArrayView3Di d = a.prefix<3>(2);
+    CORRADE_COMPARE(d.size(), (Size3D{2, 1, 1}));
+    CORRADE_COMPARE(d.stride(), (Stride3D{4, 4, 4}));
+    CORRADE_COMPARE(d[0][0][0], 1);
+    CORRADE_COMPARE(d[1][0][0], 2);
 
-    StridedArrayView3Di d2 = a.except<3>(3);
-    CORRADE_COMPARE(d2.size(), (Size3D{2, 1, 1}));
-    CORRADE_COMPARE(d2.stride(), (Stride3D{4, 4, 4}));
-    CORRADE_COMPARE(d2[0][0][0], 1);
-    CORRADE_COMPARE(d2[1][0][0], 2);
-
-    StridedArrayView3Di e = a.suffix<3>(3);
+    StridedArrayView3Di e = a.exceptPrefix<3>(3);
     CORRADE_COMPARE(e.size(), (Size3D{2, 1, 1}));
     CORRADE_COMPARE(e.stride(), (Stride3D{4, 4, 4}));
     CORRADE_COMPARE(e[0][0][0], 4);
     CORRADE_COMPARE(e[1][0][0], 5);
+
+    StridedArrayView3Di f = a.exceptSuffix<3>(3);
+    CORRADE_COMPARE(f.size(), (Size3D{2, 1, 1}));
+    CORRADE_COMPARE(f.stride(), (Stride3D{4, 4, 4}));
+    CORRADE_COMPARE(f[0][0][0], 1);
+    CORRADE_COMPARE(f[1][0][0], 2);
 }
 
 void StridedArrayViewTest::sliceDimensionUpInvalid() {
@@ -3079,23 +3079,23 @@ void StridedArrayViewTest::sliceDimensionDown() {
     CORRADE_COMPARE(c[0][0], 2);
     CORRADE_COMPARE(c[1][0], 0);
 
-    StridedArrayView2Di d1 = a.prefix<2>({1, 2, 3});
-    CORRADE_COMPARE(d1.size(), (Size2D{1, 2}));
-    CORRADE_COMPARE(d1.stride(), (Stride2D{48, 24}));
-    CORRADE_COMPARE(d1[0][0], 2);
-    CORRADE_COMPARE(d1[0][1], -100);
+    StridedArrayView2Di d = a.prefix<2>({1, 2, 3});
+    CORRADE_COMPARE(d.size(), (Size2D{1, 2}));
+    CORRADE_COMPARE(d.stride(), (Stride2D{48, 24}));
+    CORRADE_COMPARE(d[0][0], 2);
+    CORRADE_COMPARE(d[0][1], -100);
 
-    StridedArrayView2Di d2 = a.except<2>({1, 0, 0});
-    CORRADE_COMPARE(d2.size(), (Size2D{1, 2}));
-    CORRADE_COMPARE(d2.stride(), (Stride2D{48, 24}));
-    CORRADE_COMPARE(d2[0][0], 2);
-    CORRADE_COMPARE(d2[0][1], -100);
-
-    StridedArrayView2Di e = a.suffix<2>({0, 1, 2});
+    StridedArrayView2Di e = a.exceptPrefix<2>({0, 1, 2});
     CORRADE_COMPARE(e.size(), (Size2D{2, 1}));
     CORRADE_COMPARE(e.stride(), (Stride2D{48, 24}));
     CORRADE_COMPARE(e[0][0], 232342);
     CORRADE_COMPARE(e[1][0], 0);
+
+    StridedArrayView2Di f = a.exceptSuffix<2>({1, 0, 0});
+    CORRADE_COMPARE(f.size(), (Size2D{1, 2}));
+    CORRADE_COMPARE(f.stride(), (Stride2D{48, 24}));
+    CORRADE_COMPARE(f[0][0], 2);
+    CORRADE_COMPARE(f[0][1], -100);
 }
 
 void StridedArrayViewTest::sliceDimensionDownInvalid() {

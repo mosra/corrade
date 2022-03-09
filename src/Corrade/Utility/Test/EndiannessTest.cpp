@@ -233,7 +233,7 @@ void EndiannessTest::inPlaceListUnaligned() {
         '\x11', '\x22', '\x33', '\x44', '\x55', '\x66', '\x77', '\x88', '\x99'
     };
 
-    Endianness::swapInPlace(Containers::arrayCast<int>(Containers::arrayView(data).suffix(1)));
+    Endianness::swapInPlace(Containers::arrayCast<int>(Containers::arrayView(data).exceptPrefix(1)));
     CORRADE_COMPARE(data[1], '\x55');
     CORRADE_COMPARE(data[2], '\x44');
     CORRADE_COMPARE(data[3], '\x33');

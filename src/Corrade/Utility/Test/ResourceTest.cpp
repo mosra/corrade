@@ -180,15 +180,15 @@ void ResourceTest::resourceLookup() {
 
     /* Those exist. Cutting off the null terminator of the filename. */
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("TOC").except(1)), 0);
+        Containers::arrayView("TOC").exceptSuffix(1)), 0);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("data.txt").except(1)), 1);
+        Containers::arrayView("data.txt").exceptSuffix(1)), 1);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("image.png").except(1)), 2);
+        Containers::arrayView("image.png").exceptSuffix(1)), 2);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("image2.png").except(1)), 3);
+        Containers::arrayView("image2.png").exceptSuffix(1)), 3);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("license.md").except(1)), 4);
+        Containers::arrayView("license.md").exceptSuffix(1)), 4);
 
     /* An extra null terminator won't match */
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "TOC"), 5);
@@ -209,7 +209,7 @@ CORRADE_NEVER_INLINE unsigned int lookupStdMap(const std::map<std::string, unsig
 }
 
 void ResourceTest::benchmarkLookupInPlace() {
-    const auto key = Containers::arrayView("license.md").except(1);
+    const auto key = Containers::arrayView("license.md").exceptSuffix(1);
     unsigned int out = 0;
     CORRADE_BENCHMARK(10)
         out += lookupInPlace(key);

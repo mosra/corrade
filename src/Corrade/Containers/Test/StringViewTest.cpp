@@ -840,20 +840,21 @@ void StringViewTest::slice() {
 
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
     CORRADE_COMPARE(a.prefix(3), "hel"_s);
-    CORRADE_COMPARE(a.except(2), "hel"_s);
-    CORRADE_COMPARE(a.suffix(2), "llo"_s);
+    CORRADE_COMPARE(a.exceptPrefix(2), "llo"_s);
+    CORRADE_COMPARE(a.exceptSuffix(2), "hel"_s);
 
     constexpr StringView ca = "hello"_s;
     constexpr StringView cb = ca.slice(1, 4);
     CORRADE_COMPARE(cb, "ell");
 
-    constexpr StringView cc1 = ca.prefix(3);
-    constexpr StringView cc2 = ca.except(2);
-    CORRADE_COMPARE(cc1, "hel");
-    CORRADE_COMPARE(cc2, "hel");
+    constexpr StringView cc = ca.prefix(3);
+    CORRADE_COMPARE(cc, "hel");
 
-    constexpr StringView cd = ca.suffix(2);
+    constexpr StringView cd = ca.exceptPrefix(2);
     CORRADE_COMPARE(cd, "llo");
+
+    constexpr StringView ce = ca.exceptSuffix(2);
+    CORRADE_COMPARE(ce, "hel");
 }
 
 void StringViewTest::slicePointer() {
