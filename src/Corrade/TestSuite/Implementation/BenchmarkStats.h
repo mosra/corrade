@@ -39,7 +39,7 @@
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
 inline std::tuple<double, double, Utility::Debug::Color> calculateStats(const Containers::ArrayView<const std::uint64_t> measurements, const std::size_t batchSize, const double yellowThreshold, const double redThreshold) {
-    if(measurements.empty() || !batchSize)
+    if(measurements.isEmpty() || !batchSize)
         return std::make_tuple(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), Utility::Debug::Color::Red);
 
     /* Calculate mean */

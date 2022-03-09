@@ -623,7 +623,7 @@ benchmark types:
 
                 /* Gather measurements. There needs to be at least one
                    measurememnt left even if the discard count says otherwise. */
-                const std::size_t discardMeasurements = measurements.empty() ? 0 :
+                const std::size_t discardMeasurements = measurements.isEmpty() ? 0 :
                         Utility::min(measurements.size() - 1, args.value<std::size_t>("benchmark-discard"));
 
                 double mean, stddev;

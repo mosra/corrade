@@ -294,11 +294,19 @@ template<std::size_t size_, class T> class StaticArray {
 
         /**
          * @brief Whether the array is empty
+         * @m_since_latest
          *
          * Always @cpp true @ce (it's not possible to create a zero-sized C
          * array).
          */
-        constexpr bool empty() const { return !size_; }
+        constexpr bool isEmpty() const { return !size_; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr bool empty() const { return !size_; }
+        #endif
 
         /**
          * @brief Pointer to the first element

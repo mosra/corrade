@@ -517,8 +517,18 @@ class Array {
         /** @brief Array size */
         std::size_t size() const { return _size; }
 
-        /** @brief Whether the array is empty */
-        bool empty() const { return !_size; }
+        /**
+         * @brief Whether the array is empty
+         * @m_since_latest
+         */
+        bool isEmpty() const { return !_size; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") bool empty() const { return !_size; }
+        #endif
 
         /**
          * @brief Pointer to first element

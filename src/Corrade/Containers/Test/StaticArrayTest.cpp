@@ -177,8 +177,8 @@ void StaticArrayTest::constructValueInit() {
     const StaticArray a2{Corrade::ValueInit};
     CORRADE_VERIFY(a1);
     CORRADE_VERIFY(a2);
-    CORRADE_VERIFY(!a1.empty());
-    CORRADE_VERIFY(!a2.empty());
+    CORRADE_VERIFY(!a1.isEmpty());
+    CORRADE_VERIFY(!a2.isEmpty());
     CORRADE_COMPARE(a1.size(), StaticArray::Size);
     CORRADE_COMPARE(a2.size(), StaticArray::Size);
     CORRADE_COMPARE(a1.size(), 5);

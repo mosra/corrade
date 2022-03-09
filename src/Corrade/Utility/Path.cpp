@@ -205,7 +205,7 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
 }
 
 Containers::String join(const Containers::ArrayView<const Containers::StringView> paths) {
-    if(paths.empty()) return {};
+    if(paths.isEmpty()) return {};
 
     /** @todo once growable strings are a thing, do this in a loop instead of
         recursing and allocating once for every item! One possibility would be

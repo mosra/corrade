@@ -931,7 +931,7 @@ void TesterTest::configurationMove() {
     a.setSkippedArgumentPrefixes({"eyy", "bla"});
 
     TesterConfiguration b{std::move(a)};
-    CORRADE_VERIFY(a.skippedArgumentPrefixes().empty());
+    CORRADE_VERIFY(a.skippedArgumentPrefixes().isEmpty());
     CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 2);
     CORRADE_COMPARE(b.skippedArgumentPrefixes()[1], "bla");
 

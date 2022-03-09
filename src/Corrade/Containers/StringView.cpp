@@ -232,7 +232,7 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
 template<class T> String BasicStringView<T>::join(const ArrayView<const StringView> strings) const {
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
-    std::size_t totalSize = strings.empty() ? 0 : (strings.size() - 1)*delimiterSize;
+    std::size_t totalSize = strings.isEmpty() ? 0 : (strings.size() - 1)*delimiterSize;
     for(const StringView& s: strings) totalSize += s.size();
 
     /* Reserve memory for the resulting string */

@@ -1559,7 +1559,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyNoInit() {
         arrayAppend(a, Corrade::InPlaceInit, 2);
         arrayRemoveSuffix(a, 1);
         CORRADE_VERIFY(arrayIsGrowable(a));
-        CORRADE_VERIFY(a.empty());
+        CORRADE_VERIFY(a.isEmpty());
         CORRADE_VERIFY(arrayCapacity(a));
 
         arrayShrink(a);
@@ -1582,7 +1582,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
         arrayAppend(a, Corrade::InPlaceInit, 2);
         arrayRemoveSuffix(a, 1);
         CORRADE_VERIFY(arrayIsGrowable(a));
-        CORRADE_VERIFY(a.empty());
+        CORRADE_VERIFY(a.isEmpty());
         CORRADE_VERIFY(arrayCapacity(a));
 
         arrayShrink(a, Corrade::DefaultInit);

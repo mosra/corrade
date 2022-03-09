@@ -530,7 +530,7 @@ template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView
     instead.
 */
 inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
-    return !string.empty() && string[0] == prefix;
+    return !string.isEmpty() && string[0] == prefix;
 }
 #endif
 
@@ -571,7 +571,7 @@ template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView
     instead.
 */
 inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
-    return !string.empty() && string[string.size() - 1] == suffix;
+    return !string.isEmpty() && string[string.size() - 1] == suffix;
 }
 #endif
 

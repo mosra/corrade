@@ -102,7 +102,7 @@ convertible to them:
 @subsection Containers-ArrayView-usage-access Data access
 
 The class provides the usual C++ container interface --- @ref data(),
-@ref size() and @ref empty(); subscript access via @ref operator T*(), range
+@ref size() and @ref isEmpty(); subscript access via @ref operator T*(), range
 access via @ref begin() / @ref end(), and their overloads and acess to the
 @ref front() and @ref back() element, if the view is non-empty. The view itself
 is immutable and thus all member functions are @cpp const @ce, but if the
@@ -369,8 +369,18 @@ template<class T> class ArrayView {
         /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the view is empty */
-        constexpr bool empty() const { return !_size; }
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr bool isEmpty() const { return !_size; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr bool empty() const { return !_size; }
+        #endif
 
         /**
          * @brief Pointer to the first element
@@ -621,8 +631,18 @@ template<> class ArrayView<void> {
         /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the view is empty */
-        constexpr bool empty() const { return !_size; }
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr bool isEmpty() const { return !_size; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr bool empty() const { return !_size; }
+        #endif
 
     private:
         void* _data;
@@ -726,8 +746,18 @@ template<> class ArrayView<const void> {
         /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the view is empty */
-        constexpr bool empty() const { return !_size; }
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr bool isEmpty() const { return !_size; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr bool empty() const { return !_size; }
+        #endif
 
     private:
         const void* _data;
@@ -1018,8 +1048,18 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @brief View size */
         constexpr std::size_t size() const { return size_; }
 
-        /** @brief Whether the view is empty */
-        constexpr bool empty() const { return !size_; }
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr bool isEmpty() const { return !size_; }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr bool empty() const { return !size_; }
+        #endif
 
         /**
          * @brief Pointer to the first element

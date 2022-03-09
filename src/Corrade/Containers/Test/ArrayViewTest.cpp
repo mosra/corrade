@@ -208,72 +208,72 @@ ArrayViewTest::ArrayViewTest() {
 void ArrayViewTest::constructEmpty() {
     ArrayView a;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ArrayView ca;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructEmptyVoid() {
     VoidArrayView a;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr VoidArrayView ca;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructEmptyConstVoid() {
     ConstVoidArrayView a;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ConstVoidArrayView ca;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructNullptr() {
     ArrayView a = nullptr;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ArrayView ca = nullptr;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructNullptrVoid() {
     VoidArrayView a = nullptr;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr VoidArrayView ca = nullptr;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructNullptrConstVoid() {
     ConstVoidArrayView a = nullptr;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ConstVoidArrayView ca = nullptr;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
@@ -282,12 +282,12 @@ void ArrayViewTest::constructNullptrSize() {
        Magnum::GL::Buffer::setData() without passing any actual data */
     ArrayView a{nullptr, 5};
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(!a.empty());
+    CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
 
     constexpr ArrayView ca{nullptr, 5};
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(!a.empty());
+    CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(ca.size(), 5);
 }
 
@@ -334,13 +334,13 @@ void ArrayViewTest::constructVoid() {
     void* a = reinterpret_cast<void*>(0xdeadbeef);
     VoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 
     int* c = reinterpret_cast<int*>(0xdeadbeef);
     VoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
-    CORRADE_VERIFY(!d.empty());
+    CORRADE_VERIFY(!d.isEmpty());
     CORRADE_COMPARE(d.size(), 100);
 
     /** @todo constexpr but not const? c++14? */
@@ -350,18 +350,18 @@ void ArrayViewTest::constructConstVoid() {
     void* a = reinterpret_cast<void*>(0xdeadbeef);
     ConstVoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 
     int* c = reinterpret_cast<int*>(0xdeadbeef);
     ConstVoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
-    CORRADE_VERIFY(!d.empty());
+    CORRADE_VERIFY(!d.isEmpty());
     CORRADE_COMPARE(d.size(), 100);
 
     constexpr ConstVoidArrayView cd{Array30, 25};
     CORRADE_VERIFY(cd == Array30);
-    CORRADE_VERIFY(!cd.empty());
+    CORRADE_VERIFY(!cd.isEmpty());
     CORRADE_COMPARE(cd.size(), 100);
 }
 
@@ -439,7 +439,7 @@ void ArrayViewTest::constructFixedSizeVoid() {
     int a[13];
     VoidArrayView b = a;
     CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 13*sizeof(int));
 
     /** @todo constexpr but not const? c++14? */
@@ -449,12 +449,12 @@ void ArrayViewTest::constructFixedSizeConstVoid() {
     const int a[13]{};
     ConstVoidArrayView b = a;
     CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 13*sizeof(int));
 
     constexpr ConstVoidArrayView cb = Array30;
     CORRADE_VERIFY(cb == Array30);
-    CORRADE_VERIFY(!cb.empty());
+    CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 30*sizeof(int));
 }
 
@@ -768,21 +768,21 @@ void ArrayViewTest::convertConstVoidFromConstExternalView() {
 void ArrayViewTest::emptyCheck() {
     ArrayView a;
     CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
 
     constexpr ConstArrayView ca;
     CORRADE_VERIFY(!ca);
-    constexpr bool caEmpty = ca.empty();
+    constexpr bool caEmpty = ca.isEmpty();
     CORRADE_VERIFY(caEmpty);
 
     int b[5];
     ArrayView c = {b, 5};
     CORRADE_VERIFY(c);
-    CORRADE_VERIFY(!c.empty());
+    CORRADE_VERIFY(!c.isEmpty());
 
     constexpr ConstArrayView cc = {Array13, 5};
     CORRADE_VERIFY(cc);
-    constexpr bool ccEmpty = cc.empty();
+    constexpr bool ccEmpty = cc.isEmpty();
     CORRADE_VERIFY(!ccEmpty);
 }
 

@@ -532,11 +532,11 @@ void ArrayTest::convertToConstExternalView() {
 void ArrayTest::emptyCheck() {
     Array a;
     CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
 
     Array b(5);
     CORRADE_VERIFY(b);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
 }
 
 void ArrayTest::access() {

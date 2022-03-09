@@ -145,13 +145,13 @@ StaticArrayViewTest::StaticArrayViewTest() {
 void StaticArrayViewTest::constructDefault() {
     StaticArrayView<5> a;
     CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(!a.empty());
+    CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), StaticArrayView<5>::Size);
     CORRADE_COMPARE(a.size(), 5);
 
     constexpr StaticArrayView<5> ca;
     CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(!ca.empty());
+    CORRADE_VERIFY(!ca.isEmpty());
     CORRADE_COMPARE(ca.size(), StaticArrayView<5>::Size);
     CORRADE_COMPARE(ca.size(), 5);
 }

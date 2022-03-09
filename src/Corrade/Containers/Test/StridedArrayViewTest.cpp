@@ -694,13 +694,13 @@ void StridedArrayViewTest::dimensionsRangeFor() {
 void StridedArrayViewTest::constructEmpty() {
     StridedArrayView1Di a;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr StridedArrayView1Di ca;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -708,13 +708,13 @@ void StridedArrayViewTest::constructEmpty() {
 void StridedArrayViewTest::constructEmptyVoid() {
     VoidStridedArrayView1D a;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr VoidStridedArrayView1D ca;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -722,13 +722,13 @@ void StridedArrayViewTest::constructEmptyVoid() {
 void StridedArrayViewTest::constructEmptyConstVoid() {
     ConstVoidStridedArrayView1D a;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr ConstVoidStridedArrayView1D ca;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -736,13 +736,13 @@ void StridedArrayViewTest::constructEmptyConstVoid() {
 void StridedArrayViewTest::constructNullptr() {
     StridedArrayView1Di a = nullptr;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr StridedArrayView1Di ca = nullptr;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -750,13 +750,13 @@ void StridedArrayViewTest::constructNullptr() {
 void StridedArrayViewTest::constructNullptrVoid() {
     VoidStridedArrayView1D a = nullptr;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr VoidStridedArrayView1D ca = nullptr;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -764,13 +764,13 @@ void StridedArrayViewTest::constructNullptrVoid() {
 void StridedArrayViewTest::constructNullptrConstVoid() {
     ConstVoidStridedArrayView1D a = nullptr;
     CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.stride(), 0);
 
     constexpr ConstVoidStridedArrayView1D ca = nullptr;
     CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_VERIFY(ca.empty());
+    CORRADE_VERIFY(ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
 }
@@ -812,7 +812,7 @@ void StridedArrayViewTest::construct() {
     {
         StridedArrayView1Di b = {a, &a[0].value, 10, 8};
         CORRADE_VERIFY(b.data() == a);
-        CORRADE_VERIFY(!b.empty());
+        CORRADE_VERIFY(!b.isEmpty());
         CORRADE_COMPARE(b.size(), 10);
         CORRADE_COMPARE(b.stride(), 8);
         CORRADE_COMPARE(b[2], 7853268);
@@ -821,7 +821,7 @@ void StridedArrayViewTest::construct() {
         auto c = stridedArrayView(a, &a[0].value, 10, 8);
         CORRADE_VERIFY(std::is_same<decltype(c), StridedArrayView1Di>::value);
         CORRADE_VERIFY(c.data() == a);
-        CORRADE_VERIFY(!c.empty());
+        CORRADE_VERIFY(!c.isEmpty());
         CORRADE_COMPARE(c.size(), 10);
         CORRADE_COMPARE(c.stride(), 8);
         CORRADE_COMPARE(c[2], 7853268);
@@ -830,7 +830,7 @@ void StridedArrayViewTest::construct() {
         auto c2 = stridedArrayView(b);
         CORRADE_VERIFY(std::is_same<decltype(c2), StridedArrayView1Di>::value);
         CORRADE_VERIFY(c2.data() == a);
-        CORRADE_VERIFY(!c2.empty());
+        CORRADE_VERIFY(!c2.isEmpty());
         CORRADE_COMPARE(c2.size(), 10);
         CORRADE_COMPARE(c2.stride(), 8);
         CORRADE_COMPARE(c2[2], 7853268);
@@ -840,7 +840,7 @@ void StridedArrayViewTest::construct() {
     {
         constexpr ConstStridedArrayView1Di cb = {Struct, &Struct[0].value, 10, 8};
         CORRADE_VERIFY(cb.data() == Struct);
-        CORRADE_VERIFY(!cb.empty());
+        CORRADE_VERIFY(!cb.isEmpty());
         CORRADE_COMPARE(cb.size(), 10);
         CORRADE_COMPARE(cb.stride(), 8);
         CORRADE_COMPARE(cb[2], 7853268);
@@ -849,7 +849,7 @@ void StridedArrayViewTest::construct() {
         constexpr auto cc = stridedArrayView(Struct, &Struct[0].value, 10, 8);
         CORRADE_VERIFY(std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cc.data() == Struct);
-        CORRADE_VERIFY(!cc.empty());
+        CORRADE_VERIFY(!cc.isEmpty());
         CORRADE_COMPARE(cc.size(), 10);
         CORRADE_COMPARE(cc.stride(), 8);
         CORRADE_COMPARE(cc[2], 7853268);
@@ -858,7 +858,7 @@ void StridedArrayViewTest::construct() {
         constexpr auto cc2 = stridedArrayView(cb);
         CORRADE_VERIFY(std::is_same<decltype(cc2), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cc2.data() == Struct);
-        CORRADE_VERIFY(!cc2.empty());
+        CORRADE_VERIFY(!cc2.isEmpty());
         CORRADE_COMPARE(cc2.size(), 10);
         CORRADE_COMPARE(cc2.stride(), 8);
         CORRADE_COMPARE(cc2[2], 7853268);
@@ -874,7 +874,7 @@ void StridedArrayViewTest::constructVoid() {
 
     VoidStridedArrayView1D b = {a, &a[0].value, 10, 8};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 10);
     CORRADE_COMPARE(b.stride(), 8);
 
@@ -889,13 +889,13 @@ void StridedArrayViewTest::constructConstVoid() {
 
     ConstVoidStridedArrayView1D b = {a, &a[0].value, 10, 8};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 10);
     CORRADE_COMPARE(b.stride(), 8);
 
     constexpr ConstVoidStridedArrayView1D cb = {Struct, &Struct[0].value, 10, 8};
     CORRADE_VERIFY(cb.data() == Struct);
-    CORRADE_VERIFY(!cb.empty());
+    CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 8);
 }
@@ -1031,7 +1031,7 @@ void StridedArrayViewTest::constructSizeStride() {
     {
         StridedArrayView1Di b = {a, 10, 8};
         CORRADE_VERIFY(b.data() == a);
-        CORRADE_VERIFY(!b.empty());
+        CORRADE_VERIFY(!b.isEmpty());
         CORRADE_COMPARE(b.size(), 10);
         CORRADE_COMPARE(b.stride(), 8);
         CORRADE_COMPARE(b[2], 7853268);
@@ -1040,7 +1040,7 @@ void StridedArrayViewTest::constructSizeStride() {
         auto c = stridedArrayView(arrayView(a), 10, 8);
         CORRADE_VERIFY(std::is_same<decltype(c), StridedArrayView1Di>::value);
         CORRADE_VERIFY(c.data() == a);
-        CORRADE_VERIFY(!c.empty());
+        CORRADE_VERIFY(!c.isEmpty());
         CORRADE_COMPARE(c.size(), 10);
         CORRADE_COMPARE(c.stride(), 8);
         CORRADE_COMPARE(c[2], 7853268);
@@ -1050,7 +1050,7 @@ void StridedArrayViewTest::constructSizeStride() {
     {
         constexpr ConstStridedArrayView1Di cb = {Array, 10, 8};
         CORRADE_VERIFY(cb.data() == Array);
-        CORRADE_VERIFY(!cb.empty());
+        CORRADE_VERIFY(!cb.isEmpty());
         CORRADE_COMPARE(cb.size(), 10);
         CORRADE_COMPARE(cb.stride(), 8);
         CORRADE_COMPARE(cb[2], 7853268);
@@ -1059,7 +1059,7 @@ void StridedArrayViewTest::constructSizeStride() {
         constexpr auto cc = stridedArrayView(arrayView(Array), 10, 8);
         CORRADE_VERIFY(std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value);
         CORRADE_VERIFY(cc.data() == Array);
-        CORRADE_VERIFY(!cc.empty());
+        CORRADE_VERIFY(!cc.isEmpty());
         CORRADE_COMPARE(cc.size(), 10);
         CORRADE_COMPARE(cc.stride(), 8);
         CORRADE_COMPARE(cc[2], 7853268);
@@ -1074,7 +1074,7 @@ void StridedArrayViewTest::constructSizeStrideVoid() {
 
     VoidStridedArrayView1D b = {a, 10, 8};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 10);
     CORRADE_COMPARE(b.stride(), 8);
 
@@ -1088,13 +1088,13 @@ void StridedArrayViewTest::constructSizeStrideConstVoid() {
 
     ConstVoidStridedArrayView1D b = {a, 10, 8};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_VERIFY(!b.empty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 10);
     CORRADE_COMPARE(b.stride(), 8);
 
     constexpr ConstVoidStridedArrayView1D cb = {Array, 10, 8};
     CORRADE_VERIFY(cb.data() == Array);
-    CORRADE_VERIFY(!cb.empty());
+    CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 8);
 }
@@ -1618,7 +1618,7 @@ void StridedArrayViewTest::construct3D() {
 
     StridedArrayView3Di b = {a, &a[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_COMPARE(b.empty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(b.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(b.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
     CORRADE_COMPARE(b[0][0][0], 2);
@@ -1628,7 +1628,7 @@ void StridedArrayViewTest::construct3D() {
 
     constexpr ConstStridedArrayView3Di cb = {Cube, &Cube[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_VERIFY(cb.data() == Cube);
-    CORRADE_COMPARE(cb.empty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(cb.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(cb.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(cb.stride(), (Stride3D{48, 24, 8}));
     CORRADE_COMPARE(cb[0][0][0], 2);
@@ -1642,7 +1642,7 @@ void StridedArrayViewTest::construct3DVoid() {
 
     VoidStridedArrayView3D b = {a, &a[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_COMPARE(b.empty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(b.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(b.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
 
@@ -1654,13 +1654,13 @@ void StridedArrayViewTest::construct3DConstVoid() {
 
     ConstVoidStridedArrayView3D b = {a, &a[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_VERIFY(b.data() == a);
-    CORRADE_COMPARE(b.empty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(b.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(b.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
 
     constexpr ConstVoidStridedArrayView3D cb = {Cube, &Cube[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_VERIFY(cb.data() == Cube);
-    CORRADE_COMPARE(cb.empty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(cb.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(cb.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(cb.stride(), (Stride3D{48, 24, 8}));
 }
@@ -2152,21 +2152,21 @@ void StridedArrayViewTest::convert3DBool() {
     int data[6];
     StridedArrayView3Di a{data, {1, 2, 3}, {24, 12, 4}};
     CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a.empty(), (Bools3D{false, false, false}));
+    CORRADE_COMPARE(a.isEmpty(), (Bools3D{false, false, false}));
 
     StridedArrayView3Di b{{nullptr, 6}, {1, 0, 3}, {24, 12, 4}};
     CORRADE_VERIFY(!b);
-    CORRADE_COMPARE(b.empty(), (Bools3D{false, true, false}));
+    CORRADE_COMPARE(b.isEmpty(), (Bools3D{false, true, false}));
 
     constexpr ConstStridedArrayView3Di ca{Array6, {1, 2, 3}, {24, 12, 4}};
     constexpr bool boolCa = !!ca;
-    constexpr Bools3D emptyCa = ca.empty();
+    constexpr Bools3D emptyCa = ca.isEmpty();
     CORRADE_VERIFY(boolCa);
     CORRADE_COMPARE(emptyCa, (Bools3D{false, false, false}));
 
     constexpr ConstStridedArrayView3Di cb{{nullptr, 6}, {1, 0, 3}, {24, 12, 4}};
     constexpr bool boolCb = !!cb;
-    constexpr Bools3D emptyCb = cb.empty();
+    constexpr Bools3D emptyCb = cb.isEmpty();
     CORRADE_VERIFY(!boolCb);
     CORRADE_COMPARE(emptyCb, (Bools3D{false, true, false}));
 
@@ -2225,21 +2225,21 @@ void StridedArrayViewTest::convert3DConstVoidFromConstExternalView() {
 void StridedArrayViewTest::emptyCheck() {
     StridedArrayView1Di a;
     CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.empty());
+    CORRADE_VERIFY(a.isEmpty());
 
     constexpr StridedArrayView1Di ca;
     CORRADE_VERIFY(!ca);
-    constexpr bool caEmpty = ca.empty();
+    constexpr bool caEmpty = ca.isEmpty();
     CORRADE_VERIFY(caEmpty);
 
     int b[5];
     StridedArrayView1Di c = {b, 5, 4};
     CORRADE_VERIFY(c);
-    CORRADE_VERIFY(!c.empty());
+    CORRADE_VERIFY(!c.isEmpty());
 
     constexpr ConstStridedArrayView1Di cb = {Array10, 10, 4};
     CORRADE_VERIFY(cb);
-    constexpr bool cbEmpty = cb.empty();
+    constexpr bool cbEmpty = cb.isEmpty();
     CORRADE_VERIFY(!cbEmpty);
 }
 

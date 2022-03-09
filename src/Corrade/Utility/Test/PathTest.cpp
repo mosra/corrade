@@ -2012,7 +2012,7 @@ void PathTest::readEmpty() {
     /* The optional is set, but the array is empty */
     Containers::Optional<Containers::Array<char>> data = Path::read(empty);
     CORRADE_VERIFY(data);
-    CORRADE_VERIFY(data->empty());
+    CORRADE_VERIFY(data->isEmpty());
 }
 
 void PathTest::readEmptyString() {
@@ -2039,7 +2039,7 @@ void PathTest::readNonSeekable() {
        /proc/zoneinfo works everywhere */
     Containers::Optional<Containers::Array<char>> data = Path::read("/proc/zoneinfo");
     CORRADE_VERIFY(data);
-    CORRADE_VERIFY(!data->empty());
+    CORRADE_VERIFY(!data->isEmpty());
     /* The array is growable */
     CORRADE_VERIFY(data->deleter());
     /* But it shouldn't contain null bytes anywhere (which would point to
@@ -2082,7 +2082,7 @@ void PathTest::readEarlyEof() {
         CORRADE_SKIP("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor doesn't exist, can't test");
     Containers::Optional<Containers::Array<char>> data = Path::read("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
     CORRADE_VERIFY(data);
-    CORRADE_VERIFY(!data->empty());
+    CORRADE_VERIFY(!data->isEmpty());
     #else
     CORRADE_SKIP("Not sure how to test on this platform.");
     #endif

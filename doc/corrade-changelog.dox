@@ -331,6 +331,18 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
+-   @cpp Containers::Array::empty() @ce, @cpp ArrayView::empty() @ce,
+    @cpp StaticArray::empty() @ce, @cpp StaticArrayView::empty() @ce and
+    @cpp StridedArrayView::empty() @ce is deprecated in favor of
+    @ref Containers::Array::isEmpty,
+    @relativeref{Containers,ArrayView::isEmpty()},
+    @relativeref{Containers,StaticArray::isEmpty()},
+    @relativeref{Containers,StaticArrayView::isEmpty()} and
+    @relativeref{Containers,StridedArrayView::isEmpty()}. The original name was chosen only to match what STL did, but it could be confused with "make the
+    array empty" (i.e., what `clear()` does) and it was inconsistent with all
+    other APIs returning a @cpp bool @ce as well as the new
+    @ref Containers::String and @ref Containers::BasicStringView "StringView"
+    APIs, which all use `isSomething()` instead.
 -   @cpp Utility::Directory::isSandboxed() @ce is deprecated in favor of
     @ref Utility::System::isSandboxed(), as that's the better place for this
     API to live in

@@ -394,7 +394,7 @@ static_cast<void>(e);
 /* [ArrayView-usage-access] */
 Containers::ArrayView<int> view = DOXYGEN_ELLIPSIS({});
 
-if(!view.empty()) {
+if(!view.isEmpty()) {
     int min = view.front();
     for(int i: view) if(i < min) min = i;
 

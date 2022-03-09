@@ -120,7 +120,7 @@ std::string replaceFirst(std::string string, const Containers::ArrayView<const c
 }
 
 std::string replaceAll(std::string string, const Containers::ArrayView<const char> search, const Containers::ArrayView<const char> replace) {
-    CORRADE_ASSERT(!search.empty(), "Utility::String::replaceAll(): empty search string would cause an infinite loop", {});
+    CORRADE_ASSERT(!search.isEmpty(), "Utility::String::replaceAll(): empty search string would cause an infinite loop", {});
     std::size_t found = 0;
     while((found = string.find(search, found, search.size())) != std::string::npos) {
         string.replace(found, search.size(), replace, replace.size());

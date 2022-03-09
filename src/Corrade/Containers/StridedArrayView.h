@@ -585,10 +585,22 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
-        /** @brief Whether the array is empty */
-        constexpr StridedDimensions<dimensions, bool> empty() const {
-            return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr StridedDimensions<dimensions, bool> isEmpty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
         }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr StridedDimensions<dimensions, bool> empty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        }
+        #endif
 
         /**
          * @brief Whether the view is contiguous from given dimension further
@@ -920,7 +932,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
            getting matched when pass */
         constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, ErasedType* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
-        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> emptyInternal(Implementation::Sequence<sequence...>) const {
+        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 
@@ -1133,10 +1145,22 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
-        /** @brief Whether the array is empty */
-        constexpr StridedDimensions<dimensions, bool> empty() const {
-            return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr StridedDimensions<dimensions, bool> isEmpty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
         }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr StridedDimensions<dimensions, bool> empty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        }
+        #endif
 
     private:
         template<unsigned, class> friend class StridedArrayView;
@@ -1146,7 +1170,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
            getting matched when pass */
         constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
-        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> emptyInternal(Implementation::Sequence<sequence...>) const {
+        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 
@@ -1358,10 +1382,22 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
-        /** @brief Whether the array is empty */
-        constexpr StridedDimensions<dimensions, bool> empty() const {
-            return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        /**
+         * @brief Whether the view is empty
+         * @m_since_latest
+         */
+        constexpr StridedDimensions<dimensions, bool> isEmpty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
         }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief isEmpty()
+         * @m_deprecated_since_latest Use @ref isEmpty() instead.
+         */
+        CORRADE_DEPRECATED("use isEmpty() instead") constexpr StridedDimensions<dimensions, bool> empty() const {
+            return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        }
+        #endif
 
     private:
         template<unsigned, class> friend class StridedArrayView;
@@ -1376,7 +1412,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
            getting matched when pass */
         constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, const void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
-        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> emptyInternal(Implementation::Sequence<sequence...>) const {
+        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 

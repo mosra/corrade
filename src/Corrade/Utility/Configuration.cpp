@@ -121,7 +121,7 @@ bool Configuration::parse(Containers::ArrayView<const char> in) {
         return false;
     }
 
-    CORRADE_INTERNAL_ASSERT(parsed.first.empty());
+    CORRADE_INTERNAL_ASSERT(parsed.first.isEmpty());
     return true;
 }
 
@@ -132,7 +132,7 @@ std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(C
 
     /* Parse file */
     bool multiLineValue = false;
-    while(!in.empty()) {
+    while(!in.isEmpty()) {
         const Containers::ArrayView<const char> currentLine = in;
 
         /* Extract the line and ignore the newline character after it, if any */
