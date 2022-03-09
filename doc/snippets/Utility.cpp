@@ -101,10 +101,10 @@ T operator[](std::size_t pos) const {
 }
 /* [CORRADE_ASSERT] */
 
-std::vector<T> sources;
+Containers::ArrayView<T> sources;
 /* [CORRADE_ASSERT-void] */
 void compile() {
-    CORRADE_ASSERT(!sources.empty(), "Shader::compile(): no sources added", );
+    CORRADE_ASSERT(!sources.isEmpty(), "Shader::compile(): no sources added", );
 
     // ...
 }
