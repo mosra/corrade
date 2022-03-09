@@ -211,7 +211,6 @@ if(NOT CMAKE_CROSSCOMPILING)
         ConfigurationGroup.cpp
         Format.cpp
         Path.cpp
-        Resource.cpp
         String.cpp
 
         Implementation/ErrorString.cpp

@@ -55,19 +55,6 @@ struct ResourceTest: TestSuite::Tester {
     void benchmarkLookupInPlace();
     void benchmarkLookupStdMap();
 
-    void compile();
-    void compileNotSorted();
-    void compileNothing();
-    void compileEmptyFile();
-
-    void compileFrom();
-    void compileFromUtf8Filenames();
-    void compileFromNonexistentResource();
-    void compileFromNonexistentFile();
-    void compileFromEmptyGroup();
-    void compileFromEmptyFilename();
-    void compileFromEmptyAlias();
-
     void hasGroup();
     void list();
     void get();
@@ -90,20 +77,7 @@ ResourceTest::ResourceTest() {
     addBenchmarks({&ResourceTest::benchmarkLookupInPlace,
                    &ResourceTest::benchmarkLookupStdMap}, 100);
 
-    addTests({&ResourceTest::compile,
-              &ResourceTest::compileNotSorted,
-              &ResourceTest::compileNothing,
-              &ResourceTest::compileEmptyFile,
-
-              &ResourceTest::compileFrom,
-              &ResourceTest::compileFromUtf8Filenames,
-              &ResourceTest::compileFromNonexistentResource,
-              &ResourceTest::compileFromNonexistentFile,
-              &ResourceTest::compileFromEmptyGroup,
-              &ResourceTest::compileFromEmptyFilename,
-              &ResourceTest::compileFromEmptyAlias,
-
-              &ResourceTest::hasGroup,
+    addTests({&ResourceTest::hasGroup,
               &ResourceTest::list,
               &ResourceTest::get,
               &ResourceTest::getEmptyFile,
@@ -232,116 +206,6 @@ void ResourceTest::benchmarkLookupStdMap() {
         out += lookupStdMap(map, key);
 
     CORRADE_COMPARE(out, 40);
-}
-
-void ResourceTest::compile() {
-    /* Testing also null bytes and signed overflow, don't change binaries */
-    Containers::Optional<Containers::String> consequence = Path::readString(Path::join(RESOURCE_TEST_DIR, "consequence.bin"));
-    Containers::Optional<Containers::String> predisposition = Path::readString(Path::join(RESOURCE_TEST_DIR, "predisposition.bin"));
-    CORRADE_VERIFY(consequence);
-    CORRADE_VERIFY(predisposition);
-    std::vector<std::pair<std::string, std::string>> input{
-        {"consequence.bin", *consequence},
-        {"predisposition.bin", *predisposition}};
-    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-        Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
-        TestSuite::Compare::StringToFile);
-}
-
-void ResourceTest::compileNotSorted() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
-
-    std::vector<std::pair<std::string, std::string>> input{
-        {"predisposition.bin", {}},
-        {"consequence.bin",{}}};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    Resource::compile("ResourceTestData", "test", input);
-    CORRADE_COMPARE(out.str(), "Utility::Resource::compile(): the file list is not sorted\n");
-}
-
-void ResourceTest::compileNothing() {
-    CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", {}),
-        Path::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
-        TestSuite::Compare::StringToFile);
-}
-
-void ResourceTest::compileEmptyFile() {
-    std::vector<std::pair<std::string, std::string>> input{
-        {"empty.bin", ""}};
-    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-        Path::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
-        TestSuite::Compare::StringToFile);
-}
-
-void ResourceTest::compileFrom() {
-    const std::string compiled = Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources.conf"));
-    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
-        TestSuite::Compare::StringToFile);
-}
-
-void ResourceTest::compileFromUtf8Filenames() {
-    const std::string compiled = Resource::compileFrom("ResourceTestUtf8Data",
-        Path::join(RESOURCE_TEST_DIR, "hýždě.conf"));
-    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
-        TestSuite::Compare::StringToFile);
-}
-
-void ResourceTest::compileFromNonexistentResource() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData", "nonexistent.conf").empty());
-    CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
-}
-
-void ResourceTest::compileFromNonexistentFile() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
-    /* There's an error message from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
-        "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n",
-        TestSuite::Compare::StringHasSuffix);
-}
-
-void ResourceTest::compileFromEmptyGroup() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    /* Empty group name is allowed */
-    CORRADE_VERIFY(!Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")).empty());
-    CORRADE_COMPARE(out.str(), "");
-
-    /* Missing group entry is not allowed */
-    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-no-group.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: group name is not specified\n");
-}
-
-void ResourceTest::compileFromEmptyFilename() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
-}
-
-void ResourceTest::compileFromEmptyAlias() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceTest::hasGroup() {

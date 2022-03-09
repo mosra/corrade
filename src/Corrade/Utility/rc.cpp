@@ -24,12 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
-#include "Corrade/Utility/Resource.h"
+#include "Corrade/Utility/Implementation/ResourceCompile.h"
 
 namespace Corrade {
 
@@ -91,13 +89,13 @@ int main(int argc, char** argv) {
         return 1;
 
     /* Compile file */
-    const std::string compiled = Utility::Resource::compileFrom(args.value("name"), args.value("conf"));
+    const std::string compiled = Utility::Implementation::resourceCompileFrom(args.value("name"), args.value("conf"));
 
     /* Compilation failed */
     if(compiled.empty()) return 2;
 
     /* Save output */
-    /** @todo drop the StringView cast once compileFrom() is <string>-free */
+    /** @todo drop the StringView cast once resourceCompileFrom() is <string>-free */
     if(!Utility::Path::write(args.value("out"), Containers::StringView{compiled})) {
         Utility::Error{} << "Cannot write output file" << '\'' + args.value("out") + '\'';
         return 3;

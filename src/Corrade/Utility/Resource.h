@@ -70,13 +70,12 @@ Standalone resource compiler executable is implemented in
 
 @section Utility-Resource-conf Resource configuration file
 
-Function @ref compileFrom() takes a configuration file as parameter. The file
-allows you to specify filenames and filename aliases of resource files instead
-of passing the data manually to @ref compile(). The file is used when compiling
-resources using @ref corrade-cmake-add-resource "corrade_add_resource()" via
-CMake. The file can be also used when overriding compiled-in resources with
-live data using @ref overrideGroup(). All filenames are expected to be in
-UTF-8. Example file:
+The @ref corrade-rc "corrade-rc" executable and the
+@ref corrade-cmake-add-resource "corrade_add_resource()" CMake macro take a
+configuration file as an input, listing files to be compiled as resources. The
+file can be also used when overriding compiled-in resources with live data
+using @ref overrideGroup(). All filenames are expected to be in UTF-8. Example
+file:
 
 @code{.ini}
 group=myGroup
@@ -109,27 +108,6 @@ and thus is thread-safe.
  */
 class CORRADE_UTILITY_EXPORT Resource {
     public:
-        /**
-         * @brief Compile data resource file
-         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
-         * @param group         Group name
-         * @param files         Files (pairs of filename, file data)
-         *
-         * Produces a C++ file with hexadecimal data representation.
-         */
-        static std::string compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files);
-
-        /**
-         * @brief Compile data resource file using configuration file
-         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
-         * @param configurationFile Filename of configuration file
-         *
-         * Produces a C++ file with hexadecimal data representation. See class
-         * documentation for configuration file syntax overview. The filenames
-         * are taken relative to configuration file path.
-         */
-        static std::string compileFrom(const std::string& name, const std::string& configurationFile);
-
         /**
          * @brief Override group
          * @param group         Group name

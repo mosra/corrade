@@ -265,10 +265,6 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestNothingData}
     LIBRARIES CorradeUtilityTestLib
     FILES
-        ResourceTestFiles/compiled.cpp
-        ResourceTestFiles/compiled-empty.cpp
-        ResourceTestFiles/compiled-nothing.cpp
-        ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
         # Referenced from resources-overriden.conf
         ResourceTestFiles/consequence2.txt
@@ -278,12 +274,6 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/predisposition.bin
         # Referenced from resources-overriden.conf
         ResourceTestFiles/predisposition2.txt
-        ResourceTestFiles/resources.conf
-        ResourceTestFiles/resources-empty-alias.conf
-        ResourceTestFiles/resources-empty-filename.conf
-        ResourceTestFiles/resources-empty-group.conf
-        ResourceTestFiles/resources-no-group.conf
-        ResourceTestFiles/resources-nonexistent.conf
         ResourceTestFiles/resources-overridden.conf
         ResourceTestFiles/resources-overridden-different.conf
         ResourceTestFiles/resources-overridden-none.conf
@@ -304,6 +294,27 @@ corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp
         ResourceTestFiles/predisposition.bin)
 target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+corrade_add_test(UtilityResourceCompileTest
+    ResourceCompileTest.cpp
+    FILES
+        ResourceTestFiles/compiled.cpp
+        ResourceTestFiles/compiled-empty.cpp
+        ResourceTestFiles/compiled-nothing.cpp
+        ResourceTestFiles/compiled-unicode.cpp
+        ResourceTestFiles/consequence.bin
+        ResourceTestFiles/empty.bin
+        ResourceTestFiles/hýždě.bin
+        ResourceTestFiles/hýždě.conf
+        ResourceTestFiles/predisposition.bin
+        ResourceTestFiles/resources.conf
+        ResourceTestFiles/resources-empty-alias.conf
+        ResourceTestFiles/resources-empty-filename.conf
+        ResourceTestFiles/resources-empty-group.conf
+        ResourceTestFiles/resources-no-group.conf
+        ResourceTestFiles/resources-nonexistent.conf)
+target_include_directories(UtilityResourceCompileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_definitions(UtilityResourceCompileTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
+
 set_target_properties(
     UtilityArgumentsTest
     UtilityEndiannessTest
@@ -320,6 +331,7 @@ set_target_properties(
     UtilityPathTest
     UtilityResourceTest
     UtilityResourceStaticTest
+    UtilityResourceCompileTest
     UtilitySha1Test
     UtilityStlForwardStringTest
     UtilityStlForwardTupleTest

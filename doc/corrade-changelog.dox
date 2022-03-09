@@ -508,6 +508,9 @@ namespace Corrade {
     requires the @ref Corrade/Utility/DebugStlStringView.h include. Before it
     was printed as a numeric container due to @ref Utility::IsStringLike not
     recognizing it.
+-   @cpp Utility::Resource::compile() @ce and
+    @cpp Utility::Resource::compileFrom() @ce APIs are no longer public, but
+    rather a private detail of the @ref corrade-rc "corrade-rc" utility.
 -   With the ongoing process to make the APIs less STL dependent,
     @ref Utility::Unicode::narrow() and @relativeref{Utility::Unicode,widen()}
     variants taking a view or a char pointer now return either a
