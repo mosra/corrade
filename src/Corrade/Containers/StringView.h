@@ -149,10 +149,10 @@ that the conversion will not preserve the global / null-terminated annotations.
 @subsection Containers-BasicStringView-usage-slicing String view slicing
 
 The string view class inherits the slicing APIs of @ref ArrayView ---
-@ref slice(), @ref prefix(), @ref suffix() and @ref except() --- and in
-addition it provides string-specific utilities. These are are all derived from
-the slicing APIs, which means they also return sub-views of the original
-string:
+@ref slice(), @ref prefix(), @ref suffix(), @ref exceptPrefix() and
+@ref exceptSuffix() --- and in addition it provides string-specific utilities.
+These are are all derived from the slicing APIs, which means they also return
+sub-views of the original string:
 
 <ul>
 <li>@ref split() and @ref splitWithoutEmptyParts() split the view on given set
@@ -165,8 +165,8 @@ robust while reducing the amount of possible error states</li>
 <li>@ref trimmed() (and its variants @ref trimmedPrefix() /
 @ref trimmedSuffix()), commonly used to remove leading and trailing
 whitespace</li>
-<li>@ref exceptPrefix() / @ref exceptSuffix() checks that a view starts (or
-ends) with given string and then removes it:
+<li>@ref exceptPrefix(StringView) const / @ref exceptSuffix(StringView) const
+checks that a view starts (or ends) with given string and then removes it:
 
 @snippet Containers.cpp StringView-usage-slicing
 </li>
@@ -458,13 +458,15 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         constexpr T& operator[](std::size_t i) const { return _data[i]; }
 
         /**
-         * @brief String slice
+         * @brief View slice
          *
          * Both arguments are expected to be in range. Propagates the
          * @ref StringViewFlag::Global flag and if @p end points to (one item
          * after) the end of the original null-terminated string, the result
          * has @ref StringViewFlag::NullTerminated also.
          * @m_keywords{substr()}
+         * @see @ref prefix(), @ref suffix(), @ref exceptPrefix(),
+         *      @ref exceptSuffix(), @ref slice(std::size_t, std::size_t) const
          */
         constexpr BasicStringView<T> slice(T* begin, T* end) const;
 
@@ -472,57 +474,87 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         constexpr BasicStringView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
-         * @brief String prefix
+         * @brief View prefix until a pointer
          *
          * Equivalent to @cpp string.slice(string.begin(), end) @ce. If @p end
          * is @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce view.
-         * @see @ref slice(T*, T*) const
+         * @see @ref slice(T*, T*) const, @ref suffix(T*) const,
+         *      @ref prefix(std::size_t) const
          */
         constexpr BasicStringView<T> prefix(T* end) const {
             return end ? slice(_data, end) : BasicStringView<T>{};
         }
 
         /**
-         * @brief String prefix
-         *
-         * Equivalent to @cpp string.slice(0, end) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
-         */
-        constexpr BasicStringView<T> prefix(std::size_t end) const {
-            return slice(0, end);
-        }
-
-        /**
-         * @brief String suffix
+         * @brief View suffix until a pointer
          *
          * Equivalent to @cpp string.slice(begin, string.end()) @ce. If
          * @p begin is @cpp nullptr @ce and the original view isn't, returns a
          * zero-sized @cpp nullptr @ce view.
-         * @see @ref slice(T*, T*) const
+         * @see @ref slice(T*, T*) const, @ref prefix(T*) const
+         * @todoc link to suffix(std::size_t) once it takes count and not begin
          */
         constexpr BasicStringView<T> suffix(T* begin) const {
             return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask));
         }
 
         /**
-         * @brief String suffix
+         * @brief View on the first @p count bytes
          *
-         * Equivalent to @cpp string.slice(begin, string.size()) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
+         * Equivalent to @cpp string.slice(0, count) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref exceptPrefix(), @ref prefix(T*) const
+         * @todoc link to suffix(std::size_t) once it takes count and not begin
          */
-        constexpr BasicStringView<T> suffix(std::size_t begin) const {
-            return slice(begin, _sizePlusFlags & ~Implementation::StringViewSizeMask);
+        constexpr BasicStringView<T> prefix(std::size_t count) const {
+            return slice(0, count);
         }
 
+        /* Here will be suffix(std::size_t count), view on the last count
+           bytes, once the deprecated suffix(std::size_t begin) is gone and
+           enough time passes to not cause silent breakages in existing code. */
+
         /**
-         * @brief String prefix except the last @p count items
+         * @brief View except the first @p count bytes
+         *
+         * Equivalent to @cpp string.slice(count, string.size()) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref prefix(std::size_t) const, @ref exceptSuffix()
+         */
+        constexpr BasicStringView<T> exceptPrefix(std::size_t count) const {
+            return slice(count, _sizePlusFlags & ~Implementation::StringViewSizeMask);
+        }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") constexpr BasicStringView<T> suffix(std::size_t begin) const {
+            return slice(begin, _sizePlusFlags & ~Implementation::StringViewSizeMask);
+        }
+        #endif
+
+        /**
+         * @brief View except the last @p count bytes
          *
          * Equivalent to @cpp string.slice(0, string.size() - count) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref exceptPrefix()
+         * @todoc link to suffix(std::size_t) once it takes count and not begin
          */
-        constexpr BasicStringView<T> except(std::size_t count) const {
+        constexpr BasicStringView<T> exceptSuffix(std::size_t count) const {
             return slice(0, (_sizePlusFlags & ~Implementation::StringViewSizeMask) - count);
         }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") constexpr BasicStringView<T> except(std::size_t count) const {
+            return slice(0, (_sizePlusFlags & ~Implementation::StringViewSizeMask) - count);
+        }
+        #endif
 
         /**
          * @brief Split on given character

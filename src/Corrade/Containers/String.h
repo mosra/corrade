@@ -80,13 +80,15 @@ constexpr AllocatedInitT AllocatedInit{AllocatedInitT::Init{}};
 
 A lightweight non-templated alternative to @ref std::string with support for
 custom deleters. A non-owning version of this container is a
-@ref BasicStringView "StringView".
+@ref StringView and a @ref MutableStringView, implemented using a generic
+@ref BasicStringView.
 
 @section Containers-String-usage Usage
 
-It's recommended to prefer using @ref BasicStringView "StringView" in most
-cases, and only create a @ref String instance if you need to extend lifetime of
-the data or mutate it. The @ref String is implicitly convertible from C string
+It's recommended to prefer using @ref StringView / @ref MutableStringView in
+most cases, and only create a @ref String instance if you need to extend
+lifetime of the data or perform an operation that can't be done by mutating a
+view in-place. The @ref String is implicitly convertible from C string
 literals, but the designated way to instantiate a string is using the
 @link operator""_s() @endlink literal. While both expressions are *mostly*
 equivalent, the implicit conversion has some runtime impact due to
@@ -643,7 +645,7 @@ class CORRADE_UTILITY_EXPORT String {
         char operator[](std::size_t i) const; /**< @overload */
 
         /**
-         * @brief String slice
+         * @brief View on a slice
          *
          * Equivalent to @ref BasicStringView::slice(). Both arguments are
          * expected to be in range. If @p end points to (one item after) the
@@ -657,32 +659,80 @@ class CORRADE_UTILITY_EXPORT String {
         StringView slice(std::size_t begin, std::size_t end) const; /**< @overload */
 
         /**
-         * @brief String prefix
+         * @brief View on a prefix until a pointer
          *
-         * Equivalent to @ref BasicStringView::prefix().
+         * Equivalent to @ref BasicStringView::prefix(T*) const. If @p end
+         * points to (one item after) the end of the original (null-terminated)
+         * string, the result has @ref StringViewFlag::NullTerminated set.
          */
         MutableStringView prefix(char* end);
         StringView prefix(const char* end) const; /**< @overload */
-        MutableStringView prefix(std::size_t end); /**< @overload */
-        StringView prefix(std::size_t end) const; /**< @overload */
 
         /**
-         * @brief String suffix
+         * @brief View on a suffix after a pointer
          *
-         * Equivalent to @ref BasicStringView::suffix().
+         * Equivalent to @ref BasicStringView::suffix(T*) const. The result has
+         * always @ref StringViewFlag::NullTerminated set.
          */
         MutableStringView suffix(char* begin);
         StringView suffix(const char* begin) const; /**< @overload */
-        MutableStringView suffix(std::size_t begin); /**< @overload */
-        StringView suffix(std::size_t begin) const; /**< @overload */
 
         /**
-         * @brief String suffix
+         * @brief View on the first @p count bytes
          *
-         * Equivalent to @ref BasicStringView::except().
+         * Equivalent to @ref BasicStringView::prefix(std::size_t) const. If
+         * @p count is equal to @ref size(), the result has
+         * @ref StringViewFlag::NullTerminated set.
          */
-        MutableStringView except(std::size_t count);
-        StringView except(std::size_t count) const; /**< @overload */
+        MutableStringView prefix(std::size_t count);
+        StringView prefix(std::size_t count) const; /**< @overload */
+
+        /* Here will be suffix(std::size_t count), view on the last count
+           bytes, once the deprecated suffix(std::size_t begin) is gone and
+           enough time passes to not cause silent breakages in existing code. */
+
+        /**
+         * @brief View except the first @p count bytes
+         *
+         * Equivalent to @ref BasicStringView::exceptPrefix(). The result has
+         * always @ref StringViewFlag::NullTerminated set.
+         */
+        MutableStringView exceptPrefix(std::size_t begin);
+        StringView exceptPrefix(std::size_t begin) const; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") MutableStringView suffix(std::size_t begin);
+        /** @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") StringView suffix(std::size_t begin) const;
+        #endif
+
+        /**
+         * @brief View except the last @p count bytes
+         *
+         * Equivalent to @ref BasicStringView::exceptSuffix(). If
+         * @p count is @cpp 0 @ce, the result has
+         * @ref StringViewFlag::NullTerminated set.
+         */
+        MutableStringView exceptSuffix(std::size_t count);
+        StringView exceptSuffix(std::size_t count) const; /**< @overload */
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") MutableStringView except(std::size_t count);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") StringView except(std::size_t count) const;
+        #endif
 
         /**
          * @brief Split on given character

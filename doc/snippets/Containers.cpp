@@ -410,11 +410,12 @@ if(view.size() > 2 && view[2] < 3) view[2] += 5;
 int data[]{0, 10, 20, 30, 40, 50, 60};
 Containers::ArrayView<int> view = data;
 
-Containers::ArrayView<int> a = view.slice(3, 5);    // {30, 40, 50}
-Containers::ArrayView<int> b = view.prefix(4);      // {0, 10, 20, 30}
-Containers::ArrayView<int> c = view.suffix(2);      // {50, 60}
-Containers::ArrayView<int> d = view.except(2);      // {0, 10, 20, 30, 40}
+Containers::ArrayView<int> a = view.slice(3, 5);     // {30, 40, 50}
+Containers::ArrayView<int> b = view.prefix(4);       // {0, 10, 20, 30}
+Containers::ArrayView<int> c = view.exceptPrefix(4); // {40, 50, 60}
+Containers::ArrayView<int> d = view.exceptSuffix(2); // {0, 10, 20, 30, 40}
 /* [ArrayView-usage-slicing] */
+/** @todo add suffix(2) above once it actually takes two last items */
 static_cast<void>(a);
 static_cast<void>(b);
 static_cast<void>(c);

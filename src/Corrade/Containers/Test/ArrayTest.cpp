@@ -730,16 +730,24 @@ void ArrayTest::sliceToStatic() {
     CORRADE_COMPARE(bc2[2], 4);
 
     StaticArrayView<3, int> c = a.prefix<3>();
-    CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
     StaticArrayView<3, const int> cc = ac.prefix<3>();
-    CORRADE_COMPARE(cc.size(), 3);
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
+
+    StaticArrayView<3, int> d = a.suffix<3>();
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
+    StaticArrayView<3, const int> dc = ac.suffix<3>();
+    CORRADE_COMPARE(dc[0], 3);
+    CORRADE_COMPARE(dc[1], 4);
+    CORRADE_COMPARE(dc[2], 5);
 }
 
 void ArrayTest::sliceToStaticPointer() {

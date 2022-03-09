@@ -275,8 +275,11 @@ Strided array views are very useful for describing and iteration over
 multi-dimensional data such as 2D (sub)images. In that case, @ref operator[]()
 and iterator access return a view of one dimension less instead of a direct
 element reference, and there are @ref slice(const Size&, const Size&) const,
-@ref prefix(const Size&) const and @ref suffix(const Size&) const overloads
-working on all dimensions at the same time.
+@ref prefix(const Size&) const, @ref exceptPrefix(const Size&) const and
+@ref exceptSuffix(const Size&) const overloads working on all dimensions at the
+same time.
+
+@todoc link to suffix(const Size&) const once it takes count and not begin
 
 @snippet Containers.cpp StridedArrayView-usage-3d
 
@@ -689,16 +692,19 @@ template<unsigned dimensions, class T> class StridedArrayView {
         ElementType back() const;
 
         /**
-         * @brief Array slice
+         * @brief View slice in the first dimension
          *
          * Both arguments are expected to be in range. On multi-dimensional
-         * views slices just the top-level dimension.
-         * @see @ref slice(const Size&, const Size&) const
+         * views slices just the top-level dimension, use
+         * @ref slice(const Size&, const Size&) const to slice in all
+         * dimensions.
+         * @see @ref prefix(), @ref exceptPrefix(), @ref exceptSuffix()
+         * @todoc link to suffix() once it takes count and not begin
          */
         StridedArrayView<dimensions, T> slice(std::size_t begin, std::size_t end) const;
 
         /**
-         * @brief Multi-dimensional array slice
+         * @brief View slice in all dimensions
          *
          * Values in both arguments are expected to be in range for given
          * dimension. If @p newDimensions is smaller than @ref Dimensions,
@@ -783,71 +789,129 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #endif
 
         /**
-         * @brief Array prefix
+         * @brief View on the first @p count items in the first dimension
          *
-         * Equivalent to @cpp data.slice(0, end) @ce.
+         * Equivalent to @cpp data.slice(0, count) @ce. On multi-dimensional
+         * views slices just the top-level dimension, use
+         * @ref prefix(const Size&) const to slice in all dimensions.
          * @see @ref slice(std::size_t, std::size_t) const,
-         *      @ref prefix(const Size&) const
+         *      @ref exceptPrefix(std::size_t) const
+         * @todoc link to suffix(std::size_t) once it takes count and not begin
          */
-        StridedArrayView<dimensions, T> prefix(std::size_t end) const {
-            return slice(0, end);
+        StridedArrayView<dimensions, T> prefix(std::size_t count) const {
+            return slice(0, count);
         }
 
         /**
-         * @brief Multi-dimensional array prefix
+         * @brief View on the first @p count items in all dimensions
          *
-         * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce.
+         * Equivalent to @cpp data.slice<newDimensions>({}, count) @ce.
          * @see @ref slice(const Size&, const Size&) const,
+         *      @ref exceptPrefix(const Size&) const,
          *      @ref prefix(std::size_t) const
+         * @todoc link to suffix(const Size&) once it takes count and not begin
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> prefix(const Size& end) const {
-            return slice<newDimensions>({}, end);
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> prefix(const Size& count) const {
+            return slice<newDimensions>({}, count);
         }
 
+        /* Here will be suffix(count), view on the last count items, once the
+           deprecated suffix(begin) are gone and enough time passes to not
+           cause silent breakages in existing code. */
+
         /**
-         * @brief Array suffix
+         * @brief View except the first @p count items in the first dimension
+         * @m_since_latest
          *
-         * Equivalent to @cpp data.slice(begin, data.size()[0]) @ce.
+         * Equivalent to @cpp data.slice(count, data.size()[0]) @ce. On
+         * multi-dimensional views slices just the top-level dimension, use
+         * @ref exceptPrefix(const Size&) const to slice in all dimensions.
          * @see @ref slice(std::size_t, std::size_t) const,
-         *      @ref suffix(const Size&) const
+         *      @ref prefix(std::size_t) const,
+         *      @ref exceptSuffix(const Size&) const
          */
-        StridedArrayView<dimensions, T> suffix(std::size_t begin) const {
+        StridedArrayView<dimensions, T> exceptPrefix(std::size_t count) const {
+            return slice(count, _size._data[0]);
+        }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptPrefix() instead") StridedArrayView<dimensions, T> suffix(std::size_t begin) const {
             return slice(begin, _size._data[0]);
         }
+        #endif
 
         /**
-         * @brief Multi-dimensional array suffix
+         * @brief View except the first @p count items in all dimensions
+         * @m_since_latest
          *
-         * Equivalent to @cpp data.slice<newDimensions>(begin, data.size()) @ce.
+         * Equivalent to @cpp data.slice<newDimensions>(count, data.size()) @ce.
          * @see @ref slice(const Size&, const Size&) const,
-         *      @ref suffix(std::size_t) const
+         *      @ref prefix(const Size&) const,
+         *      @ref exceptSuffix(const Size&) const,
+         *      @ref exceptSuffix(std::size_t) const
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> suffix(const Size& begin) const {
-            return slice<newDimensions>(begin, _size);
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptPrefix(const Size& count) const {
+            return slice<newDimensions>(count, _size);
         }
 
-        /**
-         * @brief Array suffix
-         * @m_since{2019,10}
-         *
-         * Equivalent to @cpp data.slice({}, data.size()[0] - count) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const,
-         *      @ref suffix(const Size&) const
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief exceptPrefix()
+         * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
          */
-        StridedArrayView<dimensions, T> except(std::size_t count) const {
+        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptPrefix() instead") StridedArrayView<newDimensions, T> suffix(const Size& begin) const {
+            return slice<newDimensions>(begin, _size);
+        }
+        #endif
+
+        /**
+         * @brief View except the last @p count items in the first dimension
+         * @m_since_latest
+         *
+         * Equivalent to @cpp data.slice({}, data.size()[0] - count) @ce. On
+         * multi-dimensional views slices just the top-level dimension, use
+         * @ref exceptSuffix(const Size&) const to slice in all dimensions.
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref exceptPrefix(const Size&) const
+         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         */
+        StridedArrayView<dimensions, T> exceptSuffix(std::size_t count) const {
             return slice({}, _size._data[0] - count);
         }
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Multi-dimensional array suffix
-         * @m_since{2019,10}
+         * @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
+         */
+        CORRADE_DEPRECATED("use exceptSuffix() instead") StridedArrayView<dimensions, T> except(std::size_t count) const {
+            return slice({}, _size._data[0] - count);
+        }
+        #endif
+
+        /**
+         * @brief View except the last @p count items in all dimensions
+         * @m_since_latest
          *
          * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce, where
          * @p end is @cpp data.size()[i] - count[i] @ce for all dimensions.
          * @see @ref slice(const Size&, const Size&) const,
-         *      @ref except(std::size_t) const
+         *      @ref exceptPrefix(std::size_t) const
+         * @todoc link to suffix(const Size&) once it takes count and not begin
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> except(const Size& count) const;
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptSuffix(const Size& count) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @copybrief exceptSuffix()
+         * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
+         */
+        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptSuffix() instead") StridedArrayView<newDimensions, T> except(const Size& count) const {
+            return exceptSuffix<newDimensions>(count);
+        }
+        #endif
 
         /**
          * @brief Pick every Nth element
@@ -2111,7 +2175,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
 }
 #endif
 
-template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::except(const Size& count) const {
+template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::exceptSuffix(const Size& count) const {
     Size end{Corrade::NoInit};
     for(std::size_t i = 0; i != dimensions; ++i)
         end._data[i] = _size._data[i] - count._data[i];

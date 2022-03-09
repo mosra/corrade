@@ -465,14 +465,6 @@ StringView String::prefix(const char* const end) const {
     return StringView{*this}.prefix(end);
 }
 
-MutableStringView String::prefix(const std::size_t end) {
-    return MutableStringView{*this}.prefix(end);
-}
-
-StringView String::prefix(const std::size_t end) const {
-    return StringView{*this}.prefix(end);
-}
-
 MutableStringView String::suffix(char* const begin) {
     return MutableStringView{*this}.suffix(begin);
 }
@@ -481,21 +473,49 @@ StringView String::suffix(const char* const begin) const {
     return StringView{*this}.suffix(begin);
 }
 
+MutableStringView String::prefix(const std::size_t count) {
+    return MutableStringView{*this}.prefix(count);
+}
+
+StringView String::prefix(const std::size_t count) const {
+    return StringView{*this}.prefix(count);
+}
+
+MutableStringView String::exceptPrefix(const std::size_t begin) {
+    return MutableStringView{*this}.exceptPrefix(begin);
+}
+
+StringView String::exceptPrefix(const std::size_t begin) const {
+    return StringView{*this}.exceptPrefix(begin);
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::suffix(const std::size_t begin) {
-    return MutableStringView{*this}.suffix(begin);
+    return MutableStringView{*this}.exceptPrefix(begin);
 }
 
 StringView String::suffix(const std::size_t begin) const {
-    return StringView{*this}.suffix(begin);
+    return StringView{*this}.exceptPrefix(begin);
+}
+#endif
+
+MutableStringView String::exceptSuffix(const std::size_t count) {
+    return MutableStringView{*this}.exceptSuffix(count);
 }
 
+StringView String::exceptSuffix(const std::size_t count) const {
+    return StringView{*this}.exceptSuffix(count);
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::except(const std::size_t count) {
-    return MutableStringView{*this}.except(count);
+    return MutableStringView{*this}.exceptSuffix(count);
 }
 
 StringView String::except(const std::size_t count) const {
-    return StringView{*this}.except(count);
+    return StringView{*this}.exceptSuffix(count);
 }
+#endif
 
 Array<MutableStringView> String::split(const char delimiter) & {
     return MutableStringView{*this}.split(delimiter);

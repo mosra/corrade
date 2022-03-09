@@ -1113,6 +1113,11 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
+    StaticArrayView<3, int> d = a.suffix<3>();
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
     /* Similarly to above, MSVC 2015 chokes on this due to (I assume) doing
        pointer arithmetic on _data inside the assert. */
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -1131,6 +1136,11 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
+
+    constexpr StaticArrayView<3, const int> cd = ca.suffix<3>();
+    CORRADE_COMPARE(cd[0], 3);
+    CORRADE_COMPARE(cd[1], 4);
+    CORRADE_COMPARE(cd[2], 5);
     #endif
 }
 
