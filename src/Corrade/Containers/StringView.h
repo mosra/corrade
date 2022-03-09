@@ -519,7 +519,9 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * Equivalent to @cpp string.slice(count, string.size()) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
-         *      @ref prefix(std::size_t) const, @ref exceptSuffix()
+         *      @ref prefix(std::size_t) const,
+         *      @ref exceptSuffix(std::size_t) const,
+         *      @ref exceptPrefix(StringView) const
          */
         constexpr BasicStringView<T> exceptPrefix(std::size_t count) const {
             return slice(count, _sizePlusFlags & ~Implementation::StringViewSizeMask);
@@ -539,7 +541,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * Equivalent to @cpp string.slice(0, string.size() - count) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
-         *      @ref exceptPrefix()
+         *      @ref exceptPrefix(std::size_t) const,
+         *      @ref exceptSuffix(StringView) const
          * @todoc link to suffix(std::size_t) once it takes count and not begin
          */
         constexpr BasicStringView<T> exceptSuffix(std::size_t count) const {
@@ -687,7 +690,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @ref flags() as appropriate. Additionally, the resulting view is
          * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
          * the view always points to existing memory.
-         * @see @ref hasPrefix()
+         * @see @ref hasPrefix(), @ref exceptPrefix(std::size_t) const
          */
         BasicStringView<T> exceptPrefix(StringView prefix) const;
 
@@ -725,7 +728,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @ref flags() as appropriate. Additionally, the resulting view is
          * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
          * the view always points to existing memory.
-         * @see @ref hasSuffix()
+         * @see @ref hasSuffix(), @ref exceptSuffix(std::size_t) const
          */
         BasicStringView<T> exceptSuffix(StringView suffix) const;
 

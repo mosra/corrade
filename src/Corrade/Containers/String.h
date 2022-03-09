@@ -802,7 +802,8 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Partition
          *
-         * Equivalent to @ref BasicStringView::partition().
+         * Equivalent to @ref BasicStringView::partition(). The last returned
+         * value has always @ref StringViewFlag::NullTerminated set.
          */
         Array3<MutableStringView> partition(char separator);
         Array3<StringView> partition(char separator) const; /**< @overload */
