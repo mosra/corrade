@@ -1260,7 +1260,12 @@ void StringViewTest::exceptPrefixDisabledOverloads() {
     CORRADE_VERIFY(CanExceptPrefixBeCalledWith<signed char>::value);
     /* exceptPrefix('a') should be disallowed because it's too easy to misuse
        e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
-    CORRADE_VERIFY(!CanExceptPrefixBeCalledWith<char>::value);
+    {
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("MSVC 2015 fails at life.");
+        #endif
+        CORRADE_VERIFY(!CanExceptPrefixBeCalledWith<char>::value);
+    }
 }
 
 void StringViewTest::exceptSuffix() {
@@ -1307,7 +1312,12 @@ void StringViewTest::exceptSuffixDisabledOverloads() {
     CORRADE_VERIFY(CanExceptSuffixBeCalledWith<signed char>::value);
     /* exceptPrefix('a') should be disallowed because it's too easy to misuse
        e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
-    CORRADE_VERIFY(!CanExceptSuffixBeCalledWith<char>::value);
+    {
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("MSVC 2015 fails at life.");
+        #endif
+        CORRADE_VERIFY(!CanExceptSuffixBeCalledWith<char>::value);
+    }
 }
 
 void StringViewTest::trimmed() {
