@@ -621,27 +621,11 @@ StringView String::exceptPrefix(const StringView prefix) const & {
     return StringView{*this}.exceptPrefix(prefix);
 }
 
-MutableStringView String::exceptPrefix(const char prefix) & {
-    return MutableStringView{*this}.exceptPrefix(prefix);
-}
-
-StringView String::exceptPrefix(const char prefix) const & {
-    return StringView{*this}.exceptPrefix(prefix);
-}
-
 MutableStringView String::exceptSuffix(const StringView suffix) & {
     return MutableStringView{*this}.exceptSuffix(suffix);
 }
 
 StringView String::exceptSuffix(const StringView suffix) const & {
-    return StringView{*this}.exceptSuffix(suffix);
-}
-
-MutableStringView String::exceptSuffix(const char suffix) & {
-    return MutableStringView{*this}.exceptSuffix(suffix);
-}
-
-StringView String::exceptSuffix(const char suffix) const & {
     return StringView{*this}.exceptSuffix(suffix);
 }
 

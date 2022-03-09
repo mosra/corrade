@@ -868,8 +868,21 @@ class CORRADE_UTILITY_EXPORT String {
          */
         MutableStringView exceptPrefix(StringView prefix) &;
         StringView exceptPrefix(StringView prefix) const &; /**< @overload */
-        MutableStringView exceptPrefix(char prefix) &; /**< @overload */
-        StringView exceptPrefix(char prefix) const &; /**< @overload */
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Using char literals for prefix stripping is not allowed
+         *
+         * To avoid accidentally interpreting a @cpp char @ce literal as a size
+         * and calling @ref exceptPrefix(std::size_t) instead, or vice versa,
+         * you have to always use a string literal to call this function.
+         */
+        MutableStringView exceptPrefix(char prefix) = delete;
+        StringView exceptPrefix(char prefix) const = delete; /**< @overload */
+        #else
+        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> MutableStringView exceptPrefix(T&& prefix) = delete;
+        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> StringView exceptPrefix(T&& prefix) const = delete;
+        #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -903,8 +916,21 @@ class CORRADE_UTILITY_EXPORT String {
          */
         MutableStringView exceptSuffix(StringView suffix) &;
         StringView exceptSuffix(StringView suffix) const &; /**< @overload */
-        MutableStringView exceptSuffix(char suffix) &; /**< @overload */
-        StringView exceptSuffix(char suffix) const &; /**< @overload */
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Using char literals for suffix stripping is not allowed
+         *
+         * To avoid accidentally interpreting a @cpp char @ce literal as a size
+         * and calling @ref exceptSuffix(std::size_t) instead, or vice versa,
+         * you have to always use a string literal to call this function.
+         */
+        MutableStringView exceptSuffix(char suffix) = delete;
+        StringView exceptSuffix(char suffix) const = delete; /**< @overload */
+        #else
+        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> MutableStringView exceptSuffix(T&& suffix) = delete;
+        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> StringView exceptSuffix(T&& suffix) const = delete;
+        #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**

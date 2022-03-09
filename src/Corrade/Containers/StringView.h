@@ -690,7 +690,20 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref hasPrefix()
          */
         BasicStringView<T> exceptPrefix(StringView prefix) const;
-        BasicStringView<T> exceptPrefix(char prefix) const; /**< @overload */
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Using char literals for prefix stripping is not allowed
+         *
+         * To avoid accidentally interpreting a @cpp char @ce literal as a size
+         * and calling @ref exceptPrefix(std::size_t) const instead, or vice
+         * versa, you have to always use a string literal to call this
+         * function.
+         */
+        BasicStringView<T> exceptPrefix(char prefix) const = delete;
+        #else
+        template<class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> BasicStringView<T> exceptPrefix(T&& prefix) const = delete;
+        #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -715,7 +728,20 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref hasSuffix()
          */
         BasicStringView<T> exceptSuffix(StringView suffix) const;
-        BasicStringView<T> exceptSuffix(char suffix) const; /**< @overload */
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Using char literals for suffix stripping is not allowed
+         *
+         * To avoid accidentally interpreting a @cpp char @ce literal as a size
+         * and calling @ref exceptSuffix(std::size_t) const instead, or vice
+         * versa, you have to always use a string literal to call this
+         * function.
+         */
+        BasicStringView<T> exceptSuffix(char suffix) const = delete;
+        #else
+        template<class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> BasicStringView<T> exceptSuffix(T&& suffix) const = delete;
+        #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**

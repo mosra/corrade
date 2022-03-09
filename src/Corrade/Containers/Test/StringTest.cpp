@@ -169,8 +169,10 @@ struct StringTest: TestSuite::Tester {
 
     template<class T> void exceptPrefix();
     void exceptPrefixInvalid();
+    void exceptPrefixDisabledOverloads();
     template<class T> void exceptSuffix();
     void exceptSuffixInvalid();
+    void exceptSuffixDisabledOverloads();
 
     template<class T> void trimmed();
 
@@ -293,9 +295,11 @@ StringTest::StringTest() {
               &StringTest::exceptPrefix<String>,
               &StringTest::exceptPrefix<const String>,
               &StringTest::exceptPrefixInvalid,
+              &StringTest::exceptPrefixDisabledOverloads,
               &StringTest::exceptSuffix<String>,
               &StringTest::exceptSuffix<const String>,
               &StringTest::exceptSuffixInvalid,
+              &StringTest::exceptSuffixDisabledOverloads,
 
               &StringTest::trimmed<String>,
               &StringTest::trimmed<const String>,
@@ -1892,10 +1896,6 @@ template<class T> void StringTest::exceptPrefix() {
     typename ConstTraits<T>::ViewType b = a.exceptPrefix("over");
     CORRADE_COMPARE(b, "complicated"_s);
     CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
-
-    typename ConstTraits<T>::ViewType c = a.exceptPrefix('o');
-    CORRADE_COMPARE(c, "vercomplicated"_s);
-    CORRADE_COMPARE(c.flags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::exceptPrefixInvalid() {
@@ -1909,15 +1909,30 @@ void StringTest::exceptPrefixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     a.exceptPrefix("complicated");
-    a.exceptPrefix('d');
     ca.exceptPrefix("complicated");
-    ca.exceptPrefix('d');
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
-        "Containers::StringView::exceptPrefix(): string doesn't begin with d\n"
-        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
-        "Containers::StringView::exceptPrefix(): string doesn't begin with d\n");
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
+}
+
+CORRADE_HAS_TYPE(CanExceptPrefixBeCalledWith, decltype(String{}.exceptPrefix(std::declval<T>())));
+
+void StringTest::exceptPrefixDisabledOverloads() {
+    /* I thought I could use std::is_invocable (or a C++11 backport of it) to
+       easily test this. Boy I was wrong, that API is absolutely useless, while
+       the CORRADE_HAS_TYPE() macro is the best thing ever.
+
+       Same as exceptSuffixDisabledOverloads(), please keep consistent */
+
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<std::size_t>::value);
+    /* Doing exceptPrefix(1) should work */
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<int>::value);
+    /* Borderline dangerous, but decltype('a') == char, so this should be ok */
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<signed char>::value);
+    /* exceptPrefix('a') should be disallowed because it's too easy to misuse
+       e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
+    CORRADE_VERIFY(!CanExceptPrefixBeCalledWith<char>::value);
 }
 
 template<class T> void StringTest::exceptSuffix() {
@@ -1933,10 +1948,6 @@ template<class T> void StringTest::exceptSuffix() {
     CORRADE_COMPARE(b.flags(), StringViewFlags{});
 
     CORRADE_COMPARE(a.exceptSuffix("").flags(), StringViewFlag::NullTerminated);
-
-    typename ConstTraits<T>::ViewType c = a.exceptSuffix('d');
-    CORRADE_COMPARE(c, "overcomplicate"_s);
-    CORRADE_COMPARE(c.flags(), StringViewFlags{});
 }
 
 void StringTest::exceptSuffixInvalid() {
@@ -1950,15 +1961,30 @@ void StringTest::exceptSuffixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     a.exceptSuffix("over");
-    a.exceptSuffix('o');
     ca.exceptSuffix("over");
-    ca.exceptSuffix('o');
     /* Assert is coming from StringView */
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
-        "Containers::StringView::exceptSuffix(): string doesn't end with o\n"
-        "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
-        "Containers::StringView::exceptSuffix(): string doesn't end with o\n");
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+}
+
+CORRADE_HAS_TYPE(CanExceptSuffixBeCalledWith, decltype(String{}.exceptSuffix(std::declval<T>())));
+
+void StringTest::exceptSuffixDisabledOverloads() {
+    /* I thought I could use std::is_invocable (or a C++11 backport of it) to
+       easily test this. Boy I was wrong, that API is absolutely useless, while
+       the CORRADE_HAS_TYPE() macro is the best thing ever.
+
+       Same as exceptPrefixDisabledOverloads(), please keep consistent */
+
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<std::size_t>::value);
+    /* Ding exceptSuffix(1) should work */
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<int>::value);
+    /* Borderline dangerous, but decltype('a') == char, so this should be ok */
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<signed char>::value);
+    /* exceptPrefix('a') should be disallowed because it's too easy to misuse
+       e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
+    CORRADE_VERIFY(!CanExceptSuffixBeCalledWith<char>::value);
 }
 
 template<class T> void StringTest::trimmed() {

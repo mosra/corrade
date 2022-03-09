@@ -292,7 +292,7 @@ bool make(const Containers::StringView path) {
 
     /* If path contains trailing slash, strip it */
     if(path.hasSuffix('/'))
-        return make(path.exceptSuffix('/'));
+        return make(path.exceptSuffix(1));
 
     /* If parent directory doesn't exist, create it. That means two syscalls to
        create each parent (and two UTF-16 conversions on Windows). I could also

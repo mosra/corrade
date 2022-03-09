@@ -120,7 +120,7 @@ std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const
         auto fileForwardSlashes = Path::fromNativeSeparators(file);
         Containers::StringView stripped = fileForwardSlashes.exceptPrefix(_data->prefix);
         if(!_data->prefix.empty() && stripped.hasPrefix('/'))
-            stripped = stripped.exceptPrefix('/');
+            stripped = stripped.exceptPrefix(1);
 
         const Containers::String watchPath = Path::join(_data->replace, stripped);
 

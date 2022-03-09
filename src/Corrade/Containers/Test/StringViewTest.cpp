@@ -153,9 +153,11 @@ struct StringViewTest: TestSuite::Tester {
     void exceptPrefix();
     void exceptPrefixFlags();
     void exceptPrefixInvalid();
+    void exceptPrefixDisabledOverloads();
     void exceptSuffix();
     void exceptSuffixFlags();
     void exceptSuffixInvalid();
+    void exceptSuffixDisabledOverloads();
 
     void trimmed();
     void trimmedFlags();
@@ -241,9 +243,11 @@ StringViewTest::StringViewTest() {
               &StringViewTest::exceptPrefix,
               &StringViewTest::exceptPrefixFlags,
               &StringViewTest::exceptPrefixInvalid,
+              &StringViewTest::exceptPrefixDisabledOverloads,
               &StringViewTest::exceptSuffix,
               &StringViewTest::exceptSuffixFlags,
               &StringViewTest::exceptSuffixInvalid,
+              &StringViewTest::exceptSuffixDisabledOverloads,
 
               &StringViewTest::trimmed,
               &StringViewTest::trimmedFlags,
@@ -1215,8 +1219,6 @@ void StringViewTest::exceptPrefix() {
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("over"), "complicated");
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix(""), "overcomplicated");
 
-    CORRADE_COMPARE("hello"_s.exceptPrefix('h'), "ello");
-
     /* Only a null view results in a null output */
     CORRADE_VERIFY(""_s.exceptPrefix("").data());
     CORRADE_VERIFY(!StringView{}.exceptPrefix("").data());
@@ -1226,9 +1228,6 @@ void StringViewTest::exceptPrefixFlags() {
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("over").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
     CORRADE_COMPARE("overcomplicated"_s.exceptPrefix("").flags(),
-        StringViewFlag::Global|StringViewFlag::NullTerminated);
-
-    CORRADE_COMPARE("hello"_s.exceptPrefix('h').flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
 }
 
@@ -1240,17 +1239,32 @@ void StringViewTest::exceptPrefixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptPrefix("complicated");
-    "hello"_s.exceptPrefix('o');
     CORRADE_COMPARE(out.str(),
-        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
-        "Containers::StringView::exceptPrefix(): string doesn't begin with o\n");
+        "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
+}
+
+CORRADE_HAS_TYPE(CanExceptPrefixBeCalledWith, decltype(StringView{}.exceptPrefix(std::declval<T>())));
+
+void StringViewTest::exceptPrefixDisabledOverloads() {
+    /* I thought I could use std::is_invocable (or a C++11 backport of it) to
+       easily test this. Boy I was wrong, that API is absolutely useless, while
+       the CORRADE_HAS_TYPE() macro is the best thing ever.
+
+       Same as exceptSuffixDisabledOverloads(), please keep consistent */
+
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<std::size_t>::value);
+    /* Doing exceptPrefix(1) should work */
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<int>::value);
+    /* Borderline dangerous, but decltype('a') == char, so this should be ok */
+    CORRADE_VERIFY(CanExceptPrefixBeCalledWith<signed char>::value);
+    /* exceptPrefix('a') should be disallowed because it's too easy to misuse
+       e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
+    CORRADE_VERIFY(!CanExceptPrefixBeCalledWith<char>::value);
 }
 
 void StringViewTest::exceptSuffix() {
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("complicated"), "over");
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix(""), "overcomplicated");
-
-    CORRADE_COMPARE("hello"_s.exceptSuffix('o'), "hell");
 
     /* Only a null view results in a null output */
     CORRADE_VERIFY(""_s.exceptSuffix("").data());
@@ -1262,9 +1276,6 @@ void StringViewTest::exceptSuffixFlags() {
         StringViewFlag::Global);
     CORRADE_COMPARE("overcomplicated"_s.exceptSuffix("").flags(),
         StringViewFlag::Global|StringViewFlag::NullTerminated);
-
-    CORRADE_COMPARE("hello"_s.exceptSuffix('o').flags(),
-        StringViewFlag::Global);
 }
 
 void StringViewTest::exceptSuffixInvalid() {
@@ -1275,10 +1286,27 @@ void StringViewTest::exceptSuffixInvalid() {
     std::ostringstream out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptSuffix("over");
-    "hello"_s.exceptSuffix('h');
     CORRADE_COMPARE(out.str(),
-        "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
-        "Containers::StringView::exceptSuffix(): string doesn't end with h\n");
+        "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
+}
+
+CORRADE_HAS_TYPE(CanExceptSuffixBeCalledWith, decltype(StringView{}.exceptSuffix(std::declval<T>())));
+
+void StringViewTest::exceptSuffixDisabledOverloads() {
+    /* I thought I could use std::is_invocable (or a C++11 backport of it) to
+       easily test this. Boy I was wrong, that API is absolutely useless, while
+       the CORRADE_HAS_TYPE() macro is the best thing ever.
+
+       Same as exceptPrefixDisabledOverloads(), please keep consistent */
+
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<std::size_t>::value);
+    /* Ding exceptSuffix(1) should work */
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<int>::value);
+    /* Borderline dangerous, but decltype('a') == char, so this should be ok */
+    CORRADE_VERIFY(CanExceptSuffixBeCalledWith<signed char>::value);
+    /* exceptPrefix('a') should be disallowed because it's too easy to misuse
+       e.g. as exceptPrefix(std::toupper('a')), resulting in exceptPrefix(65) */
+    CORRADE_VERIFY(!CanExceptSuffixBeCalledWith<char>::value);
 }
 
 void StringViewTest::trimmed() {
