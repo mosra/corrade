@@ -517,63 +517,63 @@ StringView String::except(const std::size_t count) const {
 }
 #endif
 
-Array<MutableStringView> String::split(const char delimiter) & {
+Array<MutableStringView> String::split(const char delimiter) {
     return MutableStringView{*this}.split(delimiter);
 }
 
-Array<StringView> String::split(const char delimiter) const & {
+Array<StringView> String::split(const char delimiter) const {
     return StringView{*this}.split(delimiter);
 }
 
-Array<MutableStringView> String::splitWithoutEmptyParts(const char delimiter) & {
+Array<MutableStringView> String::splitWithoutEmptyParts(const char delimiter) {
     return MutableStringView{*this}.splitWithoutEmptyParts(delimiter);
 }
 
-Array<StringView> String::splitWithoutEmptyParts(const char delimiter) const & {
+Array<StringView> String::splitWithoutEmptyParts(const char delimiter) const {
     return StringView{*this}.splitWithoutEmptyParts(delimiter);
 }
 
-Array<MutableStringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) & {
+Array<MutableStringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) {
     return MutableStringView{*this}.splitOnAnyWithoutEmptyParts(delimiters);
 }
 
-Array<StringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) const & {
+Array<StringView> String::splitOnAnyWithoutEmptyParts(const StringView delimiters) const {
     return StringView{*this}.splitOnAnyWithoutEmptyParts(delimiters);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
-Array<MutableStringView> String::splitWithoutEmptyParts(const StringView delimiters) & {
+Array<MutableStringView> String::splitWithoutEmptyParts(const StringView delimiters) {
     return splitOnAnyWithoutEmptyParts(delimiters);
 }
 
-Array<StringView> String::splitWithoutEmptyParts(const StringView delimiters) const & {
+Array<StringView> String::splitWithoutEmptyParts(const StringView delimiters) const {
     return splitOnAnyWithoutEmptyParts(delimiters);
 }
 #endif
 
-Array<MutableStringView> String::splitOnWhitespaceWithoutEmptyParts() & {
+Array<MutableStringView> String::splitOnWhitespaceWithoutEmptyParts() {
     return MutableStringView{*this}.splitOnWhitespaceWithoutEmptyParts();
 }
 
-Array<StringView> String::splitOnWhitespaceWithoutEmptyParts() const & {
+Array<StringView> String::splitOnWhitespaceWithoutEmptyParts() const {
     return StringView{*this}.splitOnWhitespaceWithoutEmptyParts();
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
-Array<MutableStringView> String::splitWithoutEmptyParts() & {
+Array<MutableStringView> String::splitWithoutEmptyParts() {
     return splitOnWhitespaceWithoutEmptyParts();
 }
 
-Array<StringView> String::splitWithoutEmptyParts() const & {
+Array<StringView> String::splitWithoutEmptyParts() const {
     return splitOnWhitespaceWithoutEmptyParts();
 }
 #endif
 
-Array3<MutableStringView> String::partition(const char separator) & {
+Array3<MutableStringView> String::partition(const char separator) {
     return MutableStringView{*this}.partition(separator);
 }
 
-Array3<StringView> String::partition(const char separator) const & {
+Array3<StringView> String::partition(const char separator) const {
     return StringView{*this}.partition(separator);
 }
 
@@ -613,147 +613,147 @@ bool String::hasSuffix(const char suffix) const {
     return StringView{*this}.hasSuffix(suffix);
 }
 
-MutableStringView String::exceptPrefix(const StringView prefix) & {
+MutableStringView String::exceptPrefix(const StringView prefix) {
     return MutableStringView{*this}.exceptPrefix(prefix);
 }
 
-StringView String::exceptPrefix(const StringView prefix) const & {
+StringView String::exceptPrefix(const StringView prefix) const {
     return StringView{*this}.exceptPrefix(prefix);
 }
 
-MutableStringView String::exceptSuffix(const StringView suffix) & {
+MutableStringView String::exceptSuffix(const StringView suffix) {
     return MutableStringView{*this}.exceptSuffix(suffix);
 }
 
-StringView String::exceptSuffix(const StringView suffix) const & {
+StringView String::exceptSuffix(const StringView suffix) const {
     return StringView{*this}.exceptSuffix(suffix);
 }
 
-MutableStringView String::trimmed(const StringView characters) & {
+MutableStringView String::trimmed(const StringView characters) {
     return MutableStringView{*this}.trimmed(characters);
 }
 
-StringView String::trimmed(const StringView characters) const & {
+StringView String::trimmed(const StringView characters) const {
     return StringView{*this}.trimmed(characters);
 }
 
-MutableStringView String::trimmed() & {
+MutableStringView String::trimmed() {
     return MutableStringView{*this}.trimmed();
 }
 
-StringView String::trimmed() const & {
+StringView String::trimmed() const {
     return StringView{*this}.trimmed();
 }
 
-MutableStringView String::trimmedPrefix(const StringView characters) & {
+MutableStringView String::trimmedPrefix(const StringView characters) {
     return MutableStringView{*this}.trimmedPrefix(characters);
 }
 
-StringView String::trimmedPrefix(const StringView characters) const & {
+StringView String::trimmedPrefix(const StringView characters) const {
     return StringView{*this}.trimmedPrefix(characters);
 }
 
-MutableStringView String::trimmedPrefix() & {
+MutableStringView String::trimmedPrefix() {
     return MutableStringView{*this}.trimmedPrefix();
 }
 
-StringView String::trimmedPrefix() const & {
+StringView String::trimmedPrefix() const {
     return StringView{*this}.trimmedPrefix();
 }
 
-MutableStringView String::trimmedSuffix(const StringView characters) & {
+MutableStringView String::trimmedSuffix(const StringView characters) {
     return MutableStringView{*this}.trimmedSuffix(characters);
 }
 
-StringView String::trimmedSuffix(const StringView characters) const & {
+StringView String::trimmedSuffix(const StringView characters) const {
     return StringView{*this}.trimmedSuffix(characters);
 }
 
-MutableStringView String::trimmedSuffix() & {
+MutableStringView String::trimmedSuffix() {
     return MutableStringView{*this}.trimmedSuffix();
 }
 
-StringView String::trimmedSuffix() const & {
+StringView String::trimmedSuffix() const {
     return StringView{*this}.trimmedSuffix();
 }
 
-MutableStringView String::find(const StringView substring) & {
+MutableStringView String::find(const StringView substring) {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return MutableStringView{*this}.findOr(substring, nullptr);
 }
 
-StringView String::find(const StringView substring) const & {
+StringView String::find(const StringView substring) const {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return StringView{*this}.findOr(substring, nullptr);
 }
 
-MutableStringView String::find(const char character) & {
+MutableStringView String::find(const char character) {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return MutableStringView{*this}.findOr(character, nullptr);
 }
 
-StringView String::find(const char character) const & {
+StringView String::find(const char character) const {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return StringView{*this}.findOr(character, nullptr);
 }
 
-MutableStringView String::findOr(const StringView substring, char* const fail) & {
+MutableStringView String::findOr(const StringView substring, char* const fail) {
     return MutableStringView{*this}.findOr(substring, fail);
 }
 
-StringView String::findOr(const StringView substring, const char* const fail) const & {
+StringView String::findOr(const StringView substring, const char* const fail) const {
     return StringView{*this}.findOr(substring, fail);
 }
 
-MutableStringView String::findOr(const char character, char* const fail) & {
+MutableStringView String::findOr(const char character, char* const fail) {
     return MutableStringView{*this}.findOr(character, fail);
 }
 
-StringView String::findOr(const char character, const char* const fail) const & {
+StringView String::findOr(const char character, const char* const fail) const {
     return StringView{*this}.findOr(character, fail);
 }
 
-MutableStringView String::findLast(const StringView substring) & {
+MutableStringView String::findLast(const StringView substring) {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return MutableStringView{*this}.findLastOr(substring, nullptr);
 }
 
-StringView String::findLast(const StringView substring) const & {
+StringView String::findLast(const StringView substring) const {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return StringView{*this}.findLastOr(substring, nullptr);
 }
 
-MutableStringView String::findLast(const char character) & {
+MutableStringView String::findLast(const char character) {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return MutableStringView{*this}.findLastOr(character, nullptr);
 }
 
-StringView String::findLast(const char character) const & {
+StringView String::findLast(const char character) const {
     /* Calling straight into the concrete implementation to reduce call stack
        depth */
     return StringView{*this}.findLastOr(character, nullptr);
 }
 
-MutableStringView String::findLastOr(const StringView substring, char* const fail) & {
+MutableStringView String::findLastOr(const StringView substring, char* const fail) {
     return MutableStringView{*this}.findLastOr(substring, fail);
 }
 
-StringView String::findLastOr(const StringView substring, const char* const fail) const & {
+StringView String::findLastOr(const StringView substring, const char* const fail) const {
     return StringView{*this}.findLastOr(substring, fail);
 }
 
-MutableStringView String::findLastOr(const char character, char* const fail) & {
+MutableStringView String::findLastOr(const char character, char* const fail) {
     return MutableStringView{*this}.findLastOr(character, fail);
 }
 
-StringView String::findLastOr(const char character, const char* const fail) const & {
+StringView String::findLastOr(const char character, const char* const fail) const {
     return StringView{*this}.findLastOr(character, fail);
 }
 

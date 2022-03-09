@@ -737,11 +737,10 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Split on given character
          *
-         * Equivalent to @ref BasicStringView::split(). Not allowed to be
-         * called on a rvalue since the returned views would become dangling.
+         * Equivalent to @ref BasicStringView::split().
          */
-        Array<MutableStringView> split(char delimiter) &;
-        Array<StringView> split(char delimiter) const &; /**< @overload */
+        Array<MutableStringView> split(char delimiter);
+        Array<StringView> split(char delimiter) const; /**< @overload */
 
         /** @todo split(T*) / split(std::size_t) returning a Pair<StringView, StringView>
             (used frequently in Path::split*(), would save repetitive
@@ -752,68 +751,61 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Split on given character, removing empty parts
          *
          * Equivalent to @ref BasicStringView::splitWithoutEmptyParts(char) const.
-         * Not allowed to be called on a rvalue since the returned views would
-         * become dangling.
          */
-        Array<MutableStringView> splitWithoutEmptyParts(char delimiter) &;
-        Array<StringView> splitWithoutEmptyParts(char delimiter) const &; /**< @overload */
+        Array<MutableStringView> splitWithoutEmptyParts(char delimiter);
+        Array<StringView> splitWithoutEmptyParts(char delimiter) const; /**< @overload */
 
         /**
          * @brief Split on any character from given set, removing empty parts
          *
          * Equivalent to @ref BasicStringView::splitOnAnyWithoutEmptyParts(StringView) const.
-         * Not allowed to be called on a rvalue since the returned views would
-         * become dangling.
          */
-        Array<MutableStringView> splitOnAnyWithoutEmptyParts(StringView delimiters) &;
-        Array<StringView> splitOnAnyWithoutEmptyParts(StringView delimiters) const &; /**< @overload */
+        Array<MutableStringView> splitOnAnyWithoutEmptyParts(StringView delimiters);
+        Array<StringView> splitOnAnyWithoutEmptyParts(StringView delimiters) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @brief @copybrief splitOnAnyWithoutEmptyParts()
          * @m_deprecated_since_latest Use @ref splitOnAnyWithoutEmptyParts()
          *      instead.
          */
-        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts(StringView delimiters) &;
+        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts(StringView delimiters);
 
         /** @overload
          * @m_deprecated_since_latest Use @ref splitOnAnyWithoutEmptyParts()
          *      instead.
          */
-        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts(StringView delimiters) const &;
+        CORRADE_DEPRECATED("use splitOnAnyWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts(StringView delimiters) const;
         #endif
 
         /**
          * @brief Split on whitespace, removing empty parts
          *
          * Equivalent to @ref BasicStringView::splitOnWhitespaceWithoutEmptyParts() const.
-         * Not allowed to be called on a rvalue since the returned views would
-         * become dangling.
          */
-        Array<MutableStringView> splitOnWhitespaceWithoutEmptyParts() &;
-        Array<StringView> splitOnWhitespaceWithoutEmptyParts() const &; /**< @overload */
+        Array<MutableStringView> splitOnWhitespaceWithoutEmptyParts();
+        Array<StringView> splitOnWhitespaceWithoutEmptyParts() const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @brief @copybrief splitOnWhitespaceWithoutEmptyParts()
          * @m_deprecated_since_latest Use @ref splitOnWhitespaceWithoutEmptyParts()
          *      instead.
          */
-        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts() &;
+        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<MutableStringView> splitWithoutEmptyParts();
 
         /** @overload
          * @m_deprecated_since_latest Use @ref splitOnWhitespaceWithoutEmptyParts()
          *      instead.
          */
-        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts() const &;
+        CORRADE_DEPRECATED("use splitOnWhitespaceWithoutEmptyParts() instead") Array<StringView> splitWithoutEmptyParts() const;
         #endif
 
         /**
          * @brief Partition
          *
-         * Equivalent to @ref BasicStringView::partition(). Not allowed to be
-         * called on a rvalue since the returned views would become dangling.
+         * Equivalent to @ref BasicStringView::partition().
          */
-        Array3<MutableStringView> partition(char separator) &;
-        Array3<StringView> partition(char separator) const &; /**< @overload */
+        Array3<MutableStringView> partition(char separator);
+        Array3<StringView> partition(char separator) const; /**< @overload */
 
         /** @todo change this to return a Triple? it's a smaller header */
 
@@ -861,13 +853,11 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief View with given prefix stripped
          *
-         * Equivalent to @ref BasicStringView::exceptPrefix(). Not allowed to
-         * be called on a r-value since the returned view would become
-         * dangling.
+         * Equivalent to @ref BasicStringView::exceptPrefix().
          * @see @ref hasPrefix()
          */
-        MutableStringView exceptPrefix(StringView prefix) &;
-        StringView exceptPrefix(StringView prefix) const &; /**< @overload */
+        MutableStringView exceptPrefix(StringView prefix);
+        StringView exceptPrefix(StringView prefix) const; /**< @overload */
 
         #ifdef DOXYGEN_GENERATING_OUTPUT
         /**
@@ -891,7 +881,7 @@ class CORRADE_UTILITY_EXPORT String {
          *      could imply the original instance gets modified. Use
          *      @ref exceptPrefix() instead.
          */
-        CORRADE_DEPRECATED("use exceptPrefix() instead") MutableStringView stripPrefix(StringView prefix) & {
+        CORRADE_DEPRECATED("use exceptPrefix() instead") MutableStringView stripPrefix(StringView prefix) {
             return exceptPrefix(prefix);
         }
 
@@ -901,7 +891,7 @@ class CORRADE_UTILITY_EXPORT String {
          *      could imply the original instance gets modified. Use
          *      @ref exceptPrefix() instead.
          */
-        CORRADE_DEPRECATED("use exceptPrefix() instead") StringView stripPrefix(StringView prefix) const & {
+        CORRADE_DEPRECATED("use exceptPrefix() instead") StringView stripPrefix(StringView prefix) const {
             return exceptPrefix(prefix);
         }
         #endif
@@ -909,13 +899,11 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief View with given suffix stripped
          *
-         * Equivalent to @ref BasicStringView::exceptSuffix(). Not allowed to
-         * be called on a r-value since the returned view would become
-         * dangling.
+         * Equivalent to @ref BasicStringView::exceptSuffix().
          * @see @ref hasSuffix()
          */
-        MutableStringView exceptSuffix(StringView suffix) &;
-        StringView exceptSuffix(StringView suffix) const &; /**< @overload */
+        MutableStringView exceptSuffix(StringView suffix);
+        StringView exceptSuffix(StringView suffix) const; /**< @overload */
 
         #ifdef DOXYGEN_GENERATING_OUTPUT
         /**
@@ -939,7 +927,7 @@ class CORRADE_UTILITY_EXPORT String {
          *      could imply the original instance gets modified. Use
          *      @ref exceptSuffix() instead.
          */
-        CORRADE_DEPRECATED("use exceptSuffix() instead") MutableStringView stripSuffix(StringView suffix) & {
+        CORRADE_DEPRECATED("use exceptSuffix() instead") MutableStringView stripSuffix(StringView suffix) {
             return exceptSuffix(suffix);
         }
 
@@ -949,7 +937,7 @@ class CORRADE_UTILITY_EXPORT String {
          *      could imply the original instance gets modified. Use
          *      @ref exceptSuffix() instead.
          */
-        CORRADE_DEPRECATED("use exceptSuffix() instead") StringView stripSuffix(StringView suffix) const & {
+        CORRADE_DEPRECATED("use exceptSuffix() instead") StringView stripSuffix(StringView suffix) const {
             return exceptSuffix(suffix);
         }
         #endif
@@ -957,170 +945,134 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief View with given characters trimmed from prefix and suffix
          *
-         * Equivalent to @ref BasicStringView::trimmed(StringView) const. Not
-         * allowed to be called on a r-value since the returned view would
-         * become dangling.
+         * Equivalent to @ref BasicStringView::trimmed(StringView) const.
          * @see @ref trimmedPrefix(), @ref trimmedSuffix()
          */
-        MutableStringView trimmed(StringView characters) &;
-        StringView trimmed(StringView characters) const &; /**< @overload */
+        MutableStringView trimmed(StringView characters);
+        StringView trimmed(StringView characters) const; /**< @overload */
 
         /**
          * @brief View with whitespace trimmed from prefix and suffix
          *
-         * Equivalent to @ref BasicStringView::trimmed() const. Not allowed to
-         * be called on a r-value since the returned view would become
-         * dangling.
+         * Equivalent to @ref BasicStringView::trimmed() const.
          * @see @ref trimmedPrefix(), @ref trimmedSuffix()
          */
-        MutableStringView trimmed() &;
-        StringView trimmed() const &; /**< @overload */
+        MutableStringView trimmed();
+        StringView trimmed() const; /**< @overload */
 
         /**
          * @brief View with given characters trimmed from prefix
          *
          * Equivalent to @ref BasicStringView::trimmedPrefix(StringView) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
          * @see @ref trimmed(), @ref trimmedSuffix()
          */
-        MutableStringView trimmedPrefix(StringView characters) &;
-        StringView trimmedPrefix(StringView characters) const &; /**< @overload */
+        MutableStringView trimmedPrefix(StringView characters);
+        StringView trimmedPrefix(StringView characters) const; /**< @overload */
 
         /**
          * @brief View with whitespace trimmed from prefix
          *
-         * Equivalent to @ref BasicStringView::trimmedPrefix() const. Not
-         * allowed to be called on a r-value since the returned view would
-         * become dangling.
+         * Equivalent to @ref BasicStringView::trimmedPrefix() const.
          * @see @ref trimmed(), @ref trimmedSuffix()
          */
-        MutableStringView trimmedPrefix() &;
-        StringView trimmedPrefix() const &; /**< @overload */
+        MutableStringView trimmedPrefix();
+        StringView trimmedPrefix() const; /**< @overload */
 
         /**
          * @brief View with given characters trimmed from suffix
          *
          * Equivalent to @ref BasicStringView::trimmedSuffix(StringView) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
          * @see @ref trimmed(), @ref trimmedPrefix()
          */
-        MutableStringView trimmedSuffix(StringView characters) &;
-        StringView trimmedSuffix(StringView characters) const &; /**< @overload */
+        MutableStringView trimmedSuffix(StringView characters);
+        StringView trimmedSuffix(StringView characters) const; /**< @overload */
 
         /**
          * @brief View with whitespace trimmed from suffix
          *
-         * Equivalent to @ref BasicStringView::trimmedSuffix() const. Not
-         * allowed to be called on a r-value since the returned view would
-         * become dangling.
+         * Equivalent to @ref BasicStringView::trimmedSuffix() const.
          * @see @ref trimmed(), @ref trimmedPrefix()
          */
-        MutableStringView trimmedSuffix() &;
-        StringView trimmedSuffix() const &; /**< @overload */
+        MutableStringView trimmedSuffix();
+        StringView trimmedSuffix() const; /**< @overload */
 
         /**
          * @brief Find a substring
          *
-         * Equivalent to @ref BasicStringView::find(StringView) const. Not
-         * allowed to be called on a r-value since the returned view would
-         * become dangling.
+         * Equivalent to @ref BasicStringView::find(StringView) const.
          * @see @ref contains(), @ref findLast(), @ref findOr()
          */
-        MutableStringView find(StringView substring) &;
-        StringView find(StringView substring) const &; /**< @overload */
+        MutableStringView find(StringView substring);
+        StringView find(StringView substring) const; /**< @overload */
 
         /**
          * @brief Find a substring
          *
          * Equivalent to @ref BasicStringView::find(char) const, which in turn
          * is a specialization of @ref BasicStringView::find(StringView) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
-         * @todoc properly link to the char overload of findLast once Doxygen
-         *      stops being crap and can link to & overloads
-         * @see @ref contains(char) const, @ref findLast() "findLast(char)",
-         *      @ref findOr() "findOr(char, char*)"
+         * @see @ref contains(char) const, @ref findLast(char),
+         *      @ref findOr(char, char*)
          */
-        MutableStringView find(char character) &;
-        StringView find(char character) const &; /**< @overload */
+        MutableStringView find(char character);
+        StringView find(char character) const; /**< @overload */
 
         /**
          * @brief Find a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findOr(StringView, T*) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
          * @see @ref find(), @ref findLastOr()
          */
-        MutableStringView findOr(StringView substring, char* fail) &;
-        StringView findOr(StringView substring, const char* fail) const &; /**< @overload */
+        MutableStringView findOr(StringView substring, char* fail);
+        StringView findOr(StringView substring, const char* fail) const; /**< @overload */
 
         /**
          * @brief Find a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findOr(char, T*) const, which in
          * turn is a specialization of @ref BasicStringView::findOr(StringView, T*) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
-         * @todoc properly link to the char overload of findLast[Or] once
-         *      Doxygen stops being crap and can link to & overloads
-         * @see @ref contains(char) const, @ref find() "findLast(char)",
-         *      @ref findLastOr() "findLastOr(char)"
+         * @see @ref contains(char) const, @ref findLast(char),
+         *      @ref findLastOr(char)
          */
-        MutableStringView findOr(char character, char* fail) &;
-        StringView findOr(char character, const char* fail) const &; /**< @overload */
+        MutableStringView findOr(char character, char* fail);
+        StringView findOr(char character, const char* fail) const; /**< @overload */
 
         /**
          * @brief Find the last occurence of a substring
          *
-         * Equivalent to @ref BasicStringView::findLast(StringView) const. Not
-         * allowed to be called on a r-value since the returned view would
-         * become dangling.
+         * Equivalent to @ref BasicStringView::findLast(StringView) const.
          * @see @ref find(), @ref findLastOr()
          */
-        MutableStringView findLast(StringView substring) &;
-        StringView findLast(StringView substring) const &; /**< @overload */
+        MutableStringView findLast(StringView substring);
+        StringView findLast(StringView substring) const; /**< @overload */
 
         /**
          * @brief Find the last occurence of a substring
          *
          * Equivalent to @ref BasicStringView::findLast(char) const, which in
          * turn is a specialization of @ref BasicStringView::findLast(StringView) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
-         * @todoc properly link to the char overload of find once Doxygen stops
-         *      being crap and can link to & overloads
-         * @see @ref find() "find(char)", @ref findOr() "findOr(char, char*)"
+         * @see @ref find(char), @ref findOr(char, char*)
          */
-        MutableStringView findLast(char character) &;
-        StringView findLast(char character) const &; /**< @overload */
+        MutableStringView findLast(char character);
+        StringView findLast(char character) const; /**< @overload */
 
         /**
          * @brief Find the last occurence of a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastOr(StringView, T*) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
          * @see @ref findLast(), @ref findOr()
          */
-        MutableStringView findLastOr(StringView substring, char* fail) &;
-        StringView findLastOr(StringView substring, const char* fail) const &; /**< @overload */
+        MutableStringView findLastOr(StringView substring, char* fail);
+        StringView findLastOr(StringView substring, const char* fail) const; /**< @overload */
 
         /**
          * @brief Find the last occurence of a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastOr(char, T*) const,
          * which in turn is a specialization of @ref BasicStringView::findLastOr(StringView, T*) const.
-         * Not allowed to be called on a r-value since the returned view would
-         * become dangling.
-         * @todoc properly link to the char overload of findLast once Doxygen
-         *      stops being crap and can link to & overloads
-         * @see @ref findLast() "findLast(char)", @ref findOr "findOr(char)"
+         * @see @ref findLast(char), @ref findOr(char)
          */
-        MutableStringView findLastOr(char character, char* fail) &;
-        StringView findLastOr(char character, const char* fail) const &; /**< @overload */
+        MutableStringView findLastOr(char character, char* fail);
+        StringView findLastOr(char character, const char* fail) const; /**< @overload */
 
         /**
          * @brief Whether the view contains a substring
