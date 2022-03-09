@@ -270,20 +270,20 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/compiled-nothing.cpp
         ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
+        # Referenced from resources-overriden.conf
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin
         ResourceTestFiles/hýždě.bin
         ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
+        # Referenced from resources-overriden.conf
         ResourceTestFiles/predisposition2.txt
         ResourceTestFiles/resources.conf
         ResourceTestFiles/resources-empty-alias.conf
-        ResourceTestFiles/resources-empty-file.conf
         ResourceTestFiles/resources-empty-filename.conf
         ResourceTestFiles/resources-empty-group.conf
         ResourceTestFiles/resources-no-group.conf
         ResourceTestFiles/resources-nonexistent.conf
-        ResourceTestFiles/resources-nothing.conf
         ResourceTestFiles/resources-overridden.conf
         ResourceTestFiles/resources-overridden-different.conf
         ResourceTestFiles/resources-overridden-none.conf
