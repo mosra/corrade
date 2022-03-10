@@ -80,10 +80,10 @@ void ResourceStaticTest::initializeOnce() {
     CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 
     Resource r("test");
-    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+    CORRADE_COMPARE_AS(r.getString("predisposition.bin"),
         Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+    CORRADE_COMPARE_AS(r.getString("consequence.bin"),
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
@@ -104,10 +104,10 @@ void ResourceStaticTest::initializeTwice() {
     CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 
     Resource r("test");
-    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+    CORRADE_COMPARE_AS(r.getString("predisposition.bin"),
         Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+    CORRADE_COMPARE_AS(r.getString("consequence.bin"),
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
@@ -132,10 +132,10 @@ void ResourceStaticTest::initializeTwiceMixedWithAnother() {
     CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 
     Resource r("test");
-    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+    CORRADE_COMPARE_AS(r.getString("predisposition.bin"),
         Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+    CORRADE_COMPARE_AS(r.getString("consequence.bin"),
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 

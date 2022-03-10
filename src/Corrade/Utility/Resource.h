@@ -30,12 +30,13 @@
  * @brief Class @ref Corrade::Utility::Resource
  */
 
-#include <utility>
-
-#include "Corrade/Containers/ArrayView.h"
-#include "Corrade/Utility/StlForwardString.h"
-#include "Corrade/Utility/StlForwardVector.h"
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/visibility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* Most APIs took a std::string before, provide implicit conversions */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace Utility {
 
@@ -87,7 +88,7 @@ The @cb{.ini} group @ce is an identifier that you'll subsequently pass to the
 @ref Resource() constructor, each @cb{.ini} [file] @ce section then describes
 one file to be compiled in, with paths relative to location of the
 configuration file. By default, the @cb{.ini} filename @ce is the name under
-which the files will be available when calling @ref getRaw() or @ref get()
+which the files will be available when calling @ref getRaw() or @ref getString()
 later, including any directory separators. Use the @cpp alias @ce option to
 override the name.
 
@@ -150,7 +151,8 @@ by their filenames:
 
 Because the data are coming from a readonly memory inside the executable
 itself, the class returns non-owning views. In most conditions you can assume
-unlimited lifetime of the data, see @ref getRaw() and @ref get() for details.
+unlimited lifetime of the data, see @ref getRaw() and @ref getString() for
+details.
 
 @subsection Utility-Resource-usage-static Resources in static libraries
 
@@ -237,15 +239,10 @@ class CORRADE_UTILITY_EXPORT Resource {
          *      thread-safe. See @ref Utility-Resource-multithreading for more
          *      information.
          */
-        static void overrideGroup(const std::string& group, const std::string& configurationFile);
+        static void overrideGroup(Containers::StringView group, Containers::StringView configurationFile);
 
         /** @brief Whether given group exists */
-        static bool hasGroup(const std::string& group);
-
-        /** @overload */
-        template<std::size_t size> static bool hasGroup(const char(&group)[size]) {
-            return hasGroupInternal({group, size - 1});
-        }
+        static bool hasGroup(Containers::StringView group);
 
         /**
          * @brief Constructor
@@ -253,11 +250,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Expects that the group exists.
          * @see @ref hasGroup()
          */
-        explicit Resource(const std::string& group);
-
-        /** @overload */
-        template<std::size_t size>
-        explicit Resource(const char(&group)[size]): Resource{{group, size - 1}, nullptr} {}
+        explicit Resource(Containers::StringView group);
 
         ~Resource();
 
@@ -266,7 +259,9 @@ class CORRADE_UTILITY_EXPORT Resource {
          *
          * The resource group has no concept of a directory hierarchy --- if
          * filenames in the input configuration file contain path separators,
-         * the returned list will contain them verbatim.
+         * the returned list will contain them verbatim. The returned strings
+         * all have @ref Containers::StringViewFlag::Global set, but are *not*
+         * @ref Containers::StringViewFlag::NullTerminated.
          *
          * Note that the list contains only the compiled-in files, no
          * additional filenames supplied by an
@@ -274,7 +269,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * This is done to avoid overrides causing unexpected behavior in code
          * that assumes a fixed set of files.
          */
-        std::vector<std::string> list() const;
+        Containers::Array<Containers::StringView> list() const;
 
         /**
          * @brief Get resource data
@@ -290,26 +285,37 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @ref Path::read(), no OS-specific treatment of non-null terminated
          * strings nor any encoding conversion is done --- this function never
          * allocates.
+         * @todo when get() is gone and enough time passes, this should be
+         *      renamed to get() to be consistent with Path
          */
-        Containers::ArrayView<const char> getRaw(const std::string& filename) const;
-
-        /** @overload */
-        template<std::size_t size> Containers::ArrayView<const char> getRaw(const char(&filename)[size]) const {
-            return getInternal({filename, size - 1});
-        }
+        Containers::ArrayView<const char> getRaw(Containers::StringView filename) const;
 
         /**
-         * @brief Get resource data as a @ref std::string
+         * @brief Get resource data as a string
+         * @m_since_latest
          *
          * Expects that the group contains given @p filename. If the file is
-         * empty, returns a zero-sized string.
+         * empty, returns a zero-sized @cpp nullptr @ce view. If the file is
+         * not coming from an
+         * @ref Utility-Resource-usage-override "overriden group", the returned
+         * string has @ref Containers::StringViewFlag::Global set, otherwise
+         * it's alive only until the next @ref overrideGroup() call on the same
+         * group. The returned string is *not*
+         * @ref Containers::StringViewFlag::NullTerminated.
          *
          * The @p filename is expected to be in in UTF-8. Unlike with
          * @ref Path::read(), no OS-specific treatment of non-null terminated
          * strings nor any encoding conversion is done --- this function never
          * allocates.
          */
-        std::string get(const std::string& filename) const;
+        Containers::StringView getString(Containers::StringView filename) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief getString()
+         * @m_deprecated_since_latest Use @ref getString() instead.
+         */
+        CORRADE_DEPRECATED("use getString() instead") std::string get(const std::string& filename) const;
+        #endif
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
@@ -321,13 +327,6 @@ class CORRADE_UTILITY_EXPORT Resource {
 
     private:
         struct OverrideData;
-
-        static bool hasGroupInternal(Containers::ArrayView<const char> group);
-
-        /* The void* is just to avoid this being matched by accident */
-        explicit Resource(Containers::ArrayView<const char> group, void*);
-
-        Containers::ArrayView<const char> getInternal(Containers::ArrayView<const char> filename) const;
 
         Implementation::ResourceGroup* _group;
         OverrideData* _overrideGroup;

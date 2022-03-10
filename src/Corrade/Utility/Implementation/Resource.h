@@ -26,29 +26,29 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cstring>
 #include <algorithm> /* std::lower_bound() */
+#include <Corrade/Containers/StringView.h>
 #include <Corrade/Containers/ArrayView.h>
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-inline Containers::ArrayView<const char> resourceFilenameAt(const unsigned int* const positions, const unsigned char* const filenames, const std::size_t i) {
+inline Containers::StringView resourceFilenameAt(const unsigned int* const positions, const unsigned char* const filenames, const std::size_t i) {
     /* Every position pair denotes end offsets of one file, filename is first */
     const std::size_t begin = i == 0 ? 0 : positions[2*(i - 1)];
     const std::size_t end = positions[2*i];
-    return {reinterpret_cast<const char*>(filenames) + begin, end - begin};
+    return {reinterpret_cast<const char*>(filenames) + begin, end - begin, Containers::StringViewFlag::Global};
 }
 
-inline Containers::ArrayView<const char> resourceDataAt(const unsigned int* const positions, const unsigned char* const data, const std::size_t i) {
+inline Containers::StringView resourceDataAt(const unsigned int* const positions, const unsigned char* const data, const std::size_t i) {
     /* Every position pair denotes end offsets of one file, data is second */
     const std::size_t begin = i == 0 ? 0 : positions[2*(i - 1) + 1];
     const std::size_t end = positions[2*i + 1];
-    return {reinterpret_cast<const char*>(data) + begin, end - begin};
+    return {reinterpret_cast<const char*>(data) + begin, end - begin, Containers::StringViewFlag::Global};
 }
 
 /* Assuming the filenames are sorted, look up a particular filename. Returns
    either its index or count if not found. */
-inline std::size_t resourceLookup(const unsigned int count, const unsigned int* const positionData, const unsigned char* const filenames, const Containers::ArrayView<const char> filename) {
+inline std::size_t resourceLookup(const unsigned int count, const unsigned int* const positionData, const unsigned char* const filenames, const Containers::StringView filename) {
     /* Like std::map, but without crazy allocations using std::lower_bound and
        a std::lexicographical_compare */
     struct Position {
@@ -60,6 +60,8 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
         [positions, filenames](const Position& position, const Containers::ArrayView<const char> filename) {
             const std::size_t end = position.filename;
             const std::size_t begin = &position == positions ? 0 : (&position - 1)->filename;
+            /* Not constructing a temporary StringView here as this shall be
+               faster */
             return std::lexicographical_compare(filenames + begin, filenames + end,
                 filename.begin(), filename.end());
         });
@@ -70,8 +72,7 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
     /* Check that the filenames match --- it only returns a lower bound, not an
        exact match */
     const std::size_t i = found - positions.begin();
-    const Containers::ArrayView<const char> foundFilename = resourceFilenameAt(positionData, filenames, i);
-    if(filename.size() != foundFilename.size() || std::memcmp(filename, foundFilename, filename.size())) return count;
+    if(filename != resourceFilenameAt(positionData, filenames, i)) return count;
 
     /* Return the found index */
     return i;

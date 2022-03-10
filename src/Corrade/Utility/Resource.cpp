@@ -35,7 +35,6 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
@@ -59,8 +58,9 @@ struct ResourceGlobals {
 
     /* Overridden groups. This is only allocated if the user calls
        Resource::overrideGroup() and stores a pointer to a function-local
-       static variable from there. */
-    std::map<std::string, std::string>* overrideGroups;
+       static variable from there. The keys point to names of existing groups,
+       thus don't need to be allocated. */
+    std::map<Containers::StringView, Containers::String>* overrideGroups;
 };
 
 /* What the hell is going on here with the #ifdefs?! */
@@ -116,9 +116,11 @@ ResourceGlobals& windowsResourceGlobals() {
 
 struct Resource::OverrideData {
     const Configuration conf;
-    std::map<std::string, Containers::Array<char>> data;
+    /* Here the key is again pointing to names of existing files, thus no need
+       to be allocated */
+    std::map<Containers::StringView, Containers::Array<char>> data;
 
-    explicit OverrideData(const std::string& filename): conf(filename) {}
+    explicit OverrideData(const Containers::StringView filename): conf(filename) {}
 };
 
 void Resource::registerData(Implementation::ResourceGroup& resource) {
@@ -130,57 +132,47 @@ void Resource::unregisterData(Implementation::ResourceGroup& resource) {
 }
 
 namespace {
-    Implementation::ResourceGroup* findGroup(const Containers::ArrayView<const char> name) {
+    Implementation::ResourceGroup* findGroup(const Containers::StringView name) {
         for(Implementation::ResourceGroup* group = resourceGlobals.groups; group; group = Containers::Implementation::forwardListNext(*group)) {
-            /* std::strncmp() would return equality also if name was just a
-               prefix of group->name, so test that it ends with a null
-               terminator */
-            if(std::strncmp(group->name, name, name.size()) == 0 && group->name[name.size()] == '\0') return group;
+            if(group->name == name) return group;
         }
 
         return nullptr;
     }
 }
 
-void Resource::overrideGroup(const std::string& group, const std::string& configurationFile) {
+void Resource::overrideGroup(const Containers::StringView group, const Containers::StringView configurationFile) {
     if(!resourceGlobals.overrideGroups) {
-        static std::map<std::string, std::string> overrideGroups;
+        static std::map<Containers::StringView, Containers::String> overrideGroups;
         resourceGlobals.overrideGroups = &overrideGroups;
     }
 
-    CORRADE_ASSERT(findGroup({group.data(), group.size()}),
-        "Utility::Resource::overrideGroup(): group" << '\'' + group + '\'' << "was not found", );
+    CORRADE_ASSERT(findGroup(group),
+        "Utility::Resource::overrideGroup(): group '" << Debug::nospace << group << Debug::nospace << "' was not found", );
     /* This group can be already overridden from before, so insert if not there
        yet and then update the filename */
-    resourceGlobals.overrideGroups->emplace(group, std::string{}).first->second = configurationFile;
+    resourceGlobals.overrideGroups->emplace(group, Containers::String{}).first->second = Containers::String::nullTerminatedGlobalView(configurationFile);
 }
 
-bool Resource::hasGroup(const std::string& group) {
-    return hasGroupInternal({group.data(), group.size()});
-}
-
-bool Resource::hasGroupInternal(const Containers::ArrayView<const char> group) {
+bool Resource::hasGroup(const Containers::StringView group) {
     return findGroup(group);
 }
 
-Resource::Resource(const std::string& group): Resource{{group.data(), group.size()}, nullptr} {}
-
-Resource::Resource(const Containers::ArrayView<const char> group, void*): _group{findGroup(group)}, _overrideGroup(nullptr) {
-    CORRADE_ASSERT(_group, "Utility::Resource: group '" << Debug::nospace << (std::string{group, group.size()}) << Debug::nospace << "' was not found", );
+Resource::Resource(const Containers::StringView group): _group{findGroup(group)}, _overrideGroup(nullptr) {
+    CORRADE_ASSERT(_group, "Utility::Resource: group '" << Debug::nospace << group << Debug::nospace << "' was not found", );
 
     if(resourceGlobals.overrideGroups) {
-        const std::string groupString{group.data(), group.size()};
-        auto overridden = resourceGlobals.overrideGroups->find(groupString);
+        auto overridden = resourceGlobals.overrideGroups->find(group);
         if(overridden != resourceGlobals.overrideGroups->end()) {
             Debug{}
-                << "Utility::Resource: group '" << Debug::nospace << groupString << Debug::nospace << "' overridden with '" << Debug::nospace << overridden->second << Debug::nospace << "\'";
+                << "Utility::Resource: group '" << Debug::nospace << group << Debug::nospace << "' overridden with '" << Debug::nospace << overridden->second << Debug::nospace << "\'";
             _overrideGroup = new OverrideData(overridden->second);
 
-            if(_overrideGroup->conf.value("group") != groupString) Warning{}
+            if(_overrideGroup->conf.value<Containers::StringView>("group") != group) Warning{}
                 << "Utility::Resource: overridden with different group, found '"
-                << Debug::nospace << _overrideGroup->conf.value("group")
+                << Debug::nospace << _overrideGroup->conf.value<Containers::StringView>("group")
                 << Debug::nospace << "' but expected '" << Debug::nospace
-                << groupString << Debug::nospace << "'";
+                << group << Debug::nospace << "'";
         }
     }
 }
@@ -189,69 +181,72 @@ Resource::~Resource() {
     delete _overrideGroup;
 }
 
-std::vector<std::string> Resource::list() const {
+Containers::Array<Containers::StringView> Resource::list() const {
     CORRADE_INTERNAL_ASSERT(_group);
 
-    std::vector<std::string> result;
-    result.reserve(_group->count);
-    for(std::size_t i = 0; i != _group->count; ++i) {
-        Containers::ArrayView<const char> filename = Implementation::resourceFilenameAt(_group->positions, _group->filenames, i);
-        result.push_back({filename.data(), filename.size()});
-    }
-
-    return result;
+    Containers::Array<Containers::StringView> out{NoInit, _group->count};
+    for(std::size_t i = 0; i != _group->count; ++i)
+        new(&out[i]) Containers::StringView{Implementation::resourceFilenameAt(_group->positions, _group->filenames, i)};
+    return out;
 }
 
-Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) const {
-    return getInternal({filename.data(), filename.size()});
+Containers::ArrayView<const char> Resource::getRaw(const Containers::StringView filename) const {
+    /* Going this way instead of the other way around because the StringView
+       can hold information about null termination or global lifetime, which
+       would be painful to query in a subsequent step */
+    return getString(filename);
 }
 
-Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayView<const char> filename) const {
+Containers::StringView Resource::getString(const Containers::StringView filename) const {
     CORRADE_INTERNAL_ASSERT(_group);
+
+    /* Look for the file in compiled-in resources. This is done before looking
+       into an overriden group configuration file to prevent retrieving files
+       that aren't compiled in. */
+    const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, filename);
+    CORRADE_ASSERT(i != _group->count,
+        "Utility::Resource::get(): file '" << Debug::nospace << filename << Debug::nospace << "' was not found in group '" << Debug::nospace << _group->name << Debug::nospace << "'", {});
 
     /* The group is overridden with live data */
     if(_overrideGroup) {
-        const std::string filenameString{filename.data(), filename.size()};
-
         /* The file is already loaded */
-        auto it = _overrideGroup->data.find(filenameString);
+        auto it = _overrideGroup->data.find(filename);
         if(it != _overrideGroup->data.end())
-            return it->second;
+            return Containers::ArrayView<const char>{it->second};
 
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
         std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
         for(auto file: files) {
-            const std::string name = file->hasValue("alias") ? file->value("alias") : file->value("filename");
-            if(name != filenameString) continue;
+            const Containers::StringView name = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : file->value<Containers::StringView>("filename");
+            if(name != filename) continue;
 
             /* Load the file */
             Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(Path::split(_overrideGroup->conf.filename()).first(), file->value("filename")));
             if(!data) {
-                Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overridden group";
+                Error{} << "Utility::Resource::get(): cannot open file" << file->value<Containers::StringView>("filename") << "from overridden group";
                 break;
             }
 
-            /* Save the file for later use and return */
-            it = _overrideGroup->data.emplace(filenameString, *std::move(data)).first;
-            return it->second;
+            /* Save the file for later use and return. Use a filename from the
+               compiled-in resources which is guaranteed to be global to avoid
+               allocating a new string */
+            it = _overrideGroup->data.emplace(Implementation::resourceFilenameAt(_group->positions, _group->filenames, i), *std::move(data)).first;
+            return Containers::ArrayView<const char>{it->second};
         }
 
         /* The file was not found, fallback to compiled-in ones */
-        Warning() << "Utility::Resource::get(): file '" << Debug::nospace
-            << filenameString << Debug::nospace << "' was not found in overridden group, fallback to compiled-in resources";
+        Warning{} << "Utility::Resource::get(): file '" << Debug::nospace
+            << filename << Debug::nospace << "' was not found in overridden group, fallback to compiled-in resources";
     }
-
-    const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, filename);
-    CORRADE_ASSERT(i != _group->count,
-        "Utility::Resource::get(): file '" << Debug::nospace << (std::string{filename, filename.size()}) << Debug::nospace << "' was not found in group '" << Debug::nospace << _group->name << Debug::nospace << "\'", nullptr);
 
     return Implementation::resourceDataAt(_group->positions, _group->data, i);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 std::string Resource::get(const std::string& filename) const {
-    Containers::ArrayView<const char> data = getRaw(filename);
-    return data ? std::string{data, data.size()} : std::string{};
+    return getString(filename);
 }
+#endif
 
 }}

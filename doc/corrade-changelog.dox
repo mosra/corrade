@@ -430,6 +430,14 @@ namespace Corrade {
         @relativeref{Utility::Path,mapWrite()} and
         @relativeref{Utility::Path,MapDeleter}, returning the mapped array
         wrapped in an @ref Containers::Optional
+-   The @ref Utility::Resource class was ported to use
+    @ref Containers::StringView instead of @ref std::string,
+-   @cpp Utility::Resource::get() @ce is deprecated in favor of
+    @ref Utility::Resource::getString(). The @cpp get() @ce API is scheduled to
+    be reintroduced --- with a @ref Containers::ArrayView return type
+    consistent with @ref Utility::Path::read() and
+    @ref Utility::Path::readString() --- once enough time passes after the
+    deprecated API gets removed to avoid silent breakages in existing code.
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() overloads taking
     @ref Containers::BasicStringView are deprecated in favor of
@@ -511,6 +519,10 @@ namespace Corrade {
 -   @cpp Utility::Resource::compile() @ce and
     @cpp Utility::Resource::compileFrom() @ce APIs are no longer public, but
     rather a private detail of the @ref corrade-rc "corrade-rc" utility.
+-   @cpp Utility::Resource::list() @ce now returns a @ref Containers::Array of
+    @ref Containers::StringView instead of a @ref std::vector. Because the
+    reason for this change was to get rid of @cpp #include <vector> @ce, no
+    backwards compatibility is provided.
 -   With the ongoing process to make the APIs less STL dependent,
     @ref Utility::Unicode::narrow() and @relativeref{Utility::Unicode,widen()}
     variants taking a view or a char pointer now return either a

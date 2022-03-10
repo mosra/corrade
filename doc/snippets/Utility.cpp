@@ -806,14 +806,15 @@ static_cast<void>(shader);
 /* [Resource-usage] */
 Utility::Resource rs{"game-data"};
 
-std::string licenseText = rs.get("license.txt");
+Containers::StringView licenseText = rs.getString("license.txt");
 Containers::ArrayView<const char> soundData = rs.getRaw("intro.ogg");
 DOXYGEN_ELLIPSIS()
 
-std::istringstream in{rs.get("levels/easy.conf")};
+std::istringstream in{rs.getString("levels/easy.conf")};
 Utility::Configuration easyLevel{in};
 DOXYGEN_ELLIPSIS()
 /* [Resource-usage] */
+static_cast<void>(licenseText);
 static_cast<void>(soundData);
 }
 

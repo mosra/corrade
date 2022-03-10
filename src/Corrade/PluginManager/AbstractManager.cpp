@@ -256,7 +256,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         Utility::Configuration configuration;
         if(!_state->pluginMetadataSuffix.empty()) {
             Utility::Resource rs{std::string{"CorradeStaticPlugin_"} + staticPlugin->plugin};
-            std::istringstream metadata(rs.get(staticPlugin->plugin + _state->pluginMetadataSuffix));
+            std::istringstream metadata(rs.getString(staticPlugin->plugin + _state->pluginMetadataSuffix));
             configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         }
 

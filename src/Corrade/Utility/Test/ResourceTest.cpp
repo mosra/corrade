@@ -26,13 +26,14 @@
 
 #include <map>
 #include <sstream>
-#include <vector>
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove when <string> is gone */
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -56,17 +57,22 @@ struct ResourceTest: TestSuite::Tester {
     void benchmarkLookupStdMap();
 
     void hasGroup();
+    void emptyGroup();
+    void nonexistentGroup();
     void list();
-    void get();
-    void getEmptyFile();
-    void getNonexistent();
-    void getNothing();
+    void listEmptyGroup();
+    void getRaw();
+    void getString();
+    void getEmptyFileRaw();
+    void getEmptyFileString();
+    void getNonexistentFile();
 
     void overrideGroup();
-    void overrideGroupFallback();
-    void overrideNonexistentFile();
-    void overrideNonexistentGroup();
-    void overrideDifferentGroup();
+    void overrideGroupNonexistent();
+    void overrideGroupDifferent();
+    void overrideGroupFileNonexistent();
+    void overrideGroupFileFallback();
+    void overrideGroupFileFallbackReadError();
 };
 
 ResourceTest::ResourceTest() {
@@ -78,18 +84,25 @@ ResourceTest::ResourceTest() {
                    &ResourceTest::benchmarkLookupStdMap}, 100);
 
     addTests({&ResourceTest::hasGroup,
+              &ResourceTest::emptyGroup,
+              &ResourceTest::nonexistentGroup,
               &ResourceTest::list,
-              &ResourceTest::get,
-              &ResourceTest::getEmptyFile,
-              &ResourceTest::getNonexistent,
-              &ResourceTest::getNothing,
+              &ResourceTest::listEmptyGroup,
+              &ResourceTest::getRaw,
+              &ResourceTest::getString,
+              &ResourceTest::getEmptyFileRaw,
+              &ResourceTest::getEmptyFileString,
+              &ResourceTest::getNonexistentFile,
 
               &ResourceTest::overrideGroup,
-              &ResourceTest::overrideGroupFallback,
-              &ResourceTest::overrideNonexistentFile,
-              &ResourceTest::overrideNonexistentGroup,
-              &ResourceTest::overrideDifferentGroup});
+              &ResourceTest::overrideGroupNonexistent,
+              &ResourceTest::overrideGroupDifferent,
+              &ResourceTest::overrideGroupFileNonexistent,
+              &ResourceTest::overrideGroupFileFallback,
+              &ResourceTest::overrideGroupFileFallbackReadError});
 }
+
+using namespace Containers::Literals;
 
 constexpr unsigned int Positions[] {
     3, 6,
@@ -115,17 +128,18 @@ constexpr unsigned char Data[] =
     "GPL?!\n#####\n\nDon't."    // 19   44
     ;
 
-inline std::string asString(Containers::ArrayView<const char> view) {
-    return {view.data(), view.size()};
-}
-
 void ResourceTest::resourceFilenameAt() {
     /* Last position says how large the filenames are */
     CORRADE_COMPARE(sizeof(Filenames) - 1, Positions[4*2]);
 
     /* First is a special case */
-    CORRADE_COMPARE(asString(Implementation::resourceFilenameAt(Positions, Filenames, 0)), "TOC");
-    CORRADE_COMPARE(asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)), "image.png");
+    Containers::StringView toc = Implementation::resourceFilenameAt(Positions, Filenames, 0);
+    CORRADE_COMPARE(toc, "TOC");
+    CORRADE_COMPARE(toc.flags(), Containers::StringViewFlag::Global);
+
+    Containers::StringView png = Implementation::resourceFilenameAt(Positions, Filenames, 2);
+    CORRADE_COMPARE(png, "image.png");
+    CORRADE_COMPARE(png.flags(), Containers::StringViewFlag::Global);
 }
 
 void ResourceTest::resourceDataAt() {
@@ -133,39 +147,34 @@ void ResourceTest::resourceDataAt() {
     CORRADE_COMPARE(sizeof(Data) - 1, Positions[4*2 + 1]);
 
     /* First is a special case */
-    CORRADE_COMPARE(asString(Implementation::resourceDataAt(Positions, Data, 0)), "Don't.");
-    CORRADE_COMPARE(asString(Implementation::resourceDataAt(Positions, Data, 4)), "GPL?!\n#####\n\nDon't.");
+    CORRADE_COMPARE(Implementation::resourceDataAt(Positions, Data, 0), "Don't."_s);
+    CORRADE_COMPARE(Implementation::resourceDataAt(Positions, Data, 4), "GPL?!\n#####\n\nDon't."_s);
 }
 
 void ResourceTest::resourceLookup() {
     /* The filenames should be sorted */
-    CORRADE_VERIFY(
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 0)) <
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 1)));
-    CORRADE_VERIFY(
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 1)) <
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)));
-    CORRADE_VERIFY(
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)) <
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 3)));
-    CORRADE_VERIFY(
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 3)) <
-        asString(Implementation::resourceFilenameAt(Positions, Filenames, 4)));
+    for(std::size_t i = 0; i != 4; ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE_AS(
+            Implementation::resourceFilenameAt(Positions, Filenames, 0),
+            Implementation::resourceFilenameAt(Positions, Filenames, 1),
+            TestSuite::Compare::Less);
+    }
 
-    /* Those exist. Cutting off the null terminator of the filename. */
+    /* Those exist */
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("TOC").exceptSuffix(1)), 0);
+        "TOC"), 0);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("data.txt").exceptSuffix(1)), 1);
+        "data.txt"), 1);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("image.png").exceptSuffix(1)), 2);
+        "image.png"), 2);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("image2.png").exceptSuffix(1)), 3);
+        "image2.png"), 3);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
-        Containers::arrayView("license.md").exceptSuffix(1)), 4);
+        "license.md"), 4);
 
     /* An extra null terminator won't match */
-    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "TOC"), 5);
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "TOC\0"_s), 5);
 
     /* Lower bound returns license.md, but filename match discards that */
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "image3.png"), 5);
@@ -174,7 +183,7 @@ void ResourceTest::resourceLookup() {
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "termcap.info"), 5);
 }
 
-CORRADE_NEVER_INLINE unsigned int lookupInPlace(Containers::ArrayView<const char> key) {
+CORRADE_NEVER_INLINE unsigned int lookupInPlace(Containers::StringView key) {
     return Implementation::resourceLookup(5, Positions, Filenames, key);
 }
 
@@ -183,7 +192,7 @@ CORRADE_NEVER_INLINE unsigned int lookupStdMap(const std::map<std::string, unsig
 }
 
 void ResourceTest::benchmarkLookupInPlace() {
-    const auto key = Containers::arrayView("license.md").exceptSuffix(1);
+    const Containers::StringView key = "license.md";
     unsigned int out = 0;
     CORRADE_BENCHMARK(10)
         out += lookupInPlace(key);
@@ -210,168 +219,200 @@ void ResourceTest::benchmarkLookupStdMap() {
 
 void ResourceTest::hasGroup() {
     CORRADE_VERIFY(Resource::hasGroup("test"));
-    CORRADE_VERIFY(Resource::hasGroup(std::string{"test"}));
     CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
-    CORRADE_VERIFY(!Resource::hasGroup(std::string{"nonexistent"}));
 }
 
-void ResourceTest::list() {
-    {
-        Resource r{"test"};
-        CORRADE_COMPARE_AS(r.list(),
-            (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
-            TestSuite::Compare::Container);
-    } {
-        Resource r{std::string{"test"}};
-        CORRADE_COMPARE_AS(r.list(),
-            (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
-            TestSuite::Compare::Container);
-    }
+void ResourceTest::emptyGroup() {
+    /* Should not print any error messages about anything */
+    std::ostringstream out;
+    Error redirectError{&out};
+    Resource rs{"nothing"};
+    CORRADE_COMPARE(out.str(), "");
 }
 
-void ResourceTest::get() {
-    Resource r("test");
-    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
-        TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
-        TestSuite::Compare::StringToFile);
-
-    {
-        Containers::ArrayView<const char> data = r.getRaw("consequence.bin");
-        CORRADE_COMPARE_AS((std::string{data, data.size()}),
-            Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
-            TestSuite::Compare::StringToFile);
-    } {
-        Containers::ArrayView<const char> data = r.getRaw(std::string{"consequence.bin"});
-        CORRADE_COMPARE_AS((std::string{data, data.size()}),
-            Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
-            TestSuite::Compare::StringToFile);
-    }
-}
-
-void ResourceTest::getEmptyFile() {
-    Resource r("empty");
-    CORRADE_VERIFY(!r.getRaw("empty.bin"));
-    CORRADE_COMPARE(r.get("empty.bin"), "");
-}
-
-void ResourceTest::getNonexistent() {
+void ResourceTest::nonexistentGroup() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
     std::ostringstream out;
     Error redirectError{&out};
-
-    {
-        Resource r("nonexistentGroup");
-        CORRADE_COMPARE(out.str(), "Utility::Resource: group 'nonexistentGroup' was not found\n");
-    }
-
-    out.str({});
-
-    {
-        Resource r("test");
-        CORRADE_VERIFY(r.get("nonexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
-    }
-
-    Resource r("test");
-    const auto data = r.getRaw("nonexistentFile");
-    CORRADE_VERIFY(!data);
-    CORRADE_VERIFY(!data.size());
+    Resource rs{"nonexistentGroup"};
+    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'nonexistentGroup' was not found\n");
 }
 
-void ResourceTest::getNothing() {
-    Containers::Optional<Resource> r;
-    {
-        std::ostringstream out;
-        Error redirectError{&out};
+void ResourceTest::list() {
+    Resource rs{"test"};
+    Containers::Array<Containers::StringView> list = rs.list();
+    CORRADE_COMPARE_AS(list,
+        Containers::arrayView({"consequence.bin"_s, "predisposition.bin"_s}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE(list[0].flags(), Containers::StringViewFlag::Global);
+    CORRADE_COMPARE(list[1].flags(), Containers::StringViewFlag::Global);
+}
 
-        r.emplace("nothing");
-        CORRADE_VERIFY(out.str().empty());
-    }
+void ResourceTest::listEmptyGroup() {
+    Resource rs{"nothing"};
+    CORRADE_COMPARE_AS(rs.list(),
+        Containers::ArrayView<const Containers::StringView>{},
+        TestSuite::Compare::Container);
+}
 
-    CORRADE_COMPARE(r->list(), std::vector<std::string>{});
+void ResourceTest::getRaw() {
+    Resource rs{"test"};
+
+    CORRADE_COMPARE_AS(rs.getRaw("predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
+
+    CORRADE_COMPARE_AS(rs.getRaw("consequence.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::getString() {
+    Resource rs{"test"};
+
+    Containers::StringView predisposition = rs.getString("predisposition.bin");
+    CORRADE_COMPARE_AS(predisposition,
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(predisposition.flags(), Containers::StringViewFlag::Global);
+
+    Containers::StringView consequence = rs.getString("consequence.bin");
+    CORRADE_COMPARE_AS(consequence,
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(consequence.flags(), Containers::StringViewFlag::Global);
+}
+
+void ResourceTest::getEmptyFileRaw() {
+    Resource rs{"empty"};
+
+    Containers::ArrayView<const char> empty = rs.getRaw("empty.bin");
+    CORRADE_VERIFY(!empty.data());
+    CORRADE_VERIFY(!empty.size());
+}
+
+void ResourceTest::getEmptyFileString() {
+    Resource rs{"empty"};
+
+    Containers::StringView empty = rs.getString("empty.bin");
+    CORRADE_VERIFY(!empty.data());
+    CORRADE_VERIFY(!empty.size());
+    CORRADE_COMPARE(empty.flags(), Containers::StringViewFlag::Global);
+}
+
+void ResourceTest::getNonexistentFile() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Resource rs{"test"};
+    rs.getString("nonexistentFile");
+    rs.getRaw("nonexistentFile");
+    /* The message is still get() as that's what eventually will getRaw() be
+       renamed to; and getString() uses the same underlying code */
+    CORRADE_COMPARE(out.str(),
+        "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n"
+        "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
 }
 
 void ResourceTest::overrideGroup() {
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
+
     std::ostringstream out;
     Debug redirectDebug{&out};
-
-    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
-    Resource r("test");
-
+    Resource rs{"test"};
     CORRADE_COMPARE(out.str(), formatString("Utility::Resource: group 'test' overridden with '{}'\n", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf")));
-    CORRADE_COMPARE(r.get("predisposition.bin"), "overridden predisposition\n");
-    CORRADE_COMPARE(r.get("consequence2.txt"), "overridden consequence\n");
 
-    /* Test that two subsequent r.getRaw() point to the same location */
-    const auto ptr = r.getRaw("predisposition.bin").begin();
-    CORRADE_VERIFY(r.getRaw("predisposition.bin").begin() == ptr);
+    /* Overriden files are not marked as global */
+    Containers::StringView predisposition = rs.getString("predisposition.bin");
+    CORRADE_COMPARE(predisposition, "overridden predisposition\n");
+    CORRADE_COMPARE(predisposition.flags(), Containers::StringViewFlags{});
+
+    /* Two subsequent calls should point to the same location (the file doesn't
+    get read again) */
+    CORRADE_VERIFY(rs.getString("predisposition.bin").data() == predisposition.data());
 }
 
-void ResourceTest::overrideGroupFallback() {
+void ResourceTest::overrideGroupNonexistent() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Resource::overrideGroup("nonexistentGroup", {});
+    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'nonexistentGroup' was not found\n");
+}
+
+void ResourceTest::overrideGroupDifferent() {
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
 
     std::ostringstream out;
     Warning redirectWarning{&out};
-
-    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
-    Resource r("test");
-
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
-        TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
+    Resource rs{"test"};
+    CORRADE_COMPARE(out.str(), "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
 }
 
-void ResourceTest::overrideNonexistentFile() {
+void ResourceTest::overrideGroupFileFallback() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
+
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
+    Resource rs{"test"};
+
+    std::ostringstream out;
+    Warning redirectWarning{&out};
+    Containers::StringView consequence = rs.getString("consequence.bin");
+    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
+
+    /* Original compiled-in file, global flag */
+    CORRADE_COMPARE_AS(consequence,
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(consequence.flags(), Containers::StringViewFlag::Global);
+}
+
+void ResourceTest::overrideGroupFileFallbackReadError() {
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
+    Resource rs{"test"};
 
     std::ostringstream out;
     Error redirectError{&out};
     Warning redirectWarning(&out);
-
-    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
-    Resource r("test");
-
-    CORRADE_COMPARE_AS(r.get("consequence.bin"),
-        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
-        TestSuite::Compare::StringToFile);
+    Containers::StringView consequence = rs.getString("consequence.bin");
     /* There's an error message from Path::read() before */
     CORRADE_COMPARE_AS(out.str(),
         "\nUtility::Resource::get(): cannot open file path/to/nonexistent.bin from overridden group\n"
         "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n",
         TestSuite::Compare::StringHasSuffix);
+
+    /* Original compiled-in file, global flag */
+    CORRADE_COMPARE_AS(consequence,
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(consequence.flags(), Containers::StringViewFlag::Global);
 }
 
-void ResourceTest::overrideNonexistentGroup() {
+void ResourceTest::overrideGroupFileNonexistent() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
+    Resource rs{"test"};
+
     std::ostringstream out;
     Error redirectError{&out};
-
-    /* Nonexistent group */
-    Resource::overrideGroup("nonexistentGroup", {});
-    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'nonexistentGroup' was not found\n");
-}
-
-void ResourceTest::overrideDifferentGroup() {
-    std::ostringstream out;
-    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
-
-    Warning redirectWarning{&out};
-    Resource r("test");
-    CORRADE_COMPARE(out.str(), "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
+    rs.getString("consequence2.txt");
+    /* The file is in the overriden group, but not in the compiled-in data and
+       thus it fails */
+    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence2.txt' was not found in group 'test'\n");
 }
 
 }}}}

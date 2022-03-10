@@ -28,8 +28,8 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <Corrade/Containers/StringView.h>
 #include <Corrade/Utility/Debug.h>
-#include <Corrade/Utility/DebugStl.h>
 #include <Corrade/Utility/Resource.h>
 
 using namespace Corrade;
@@ -39,5 +39,5 @@ int main() {
     Utility::Resource rs{"data"};
 
     /* Print out the license */
-    Utility::Debug{} << rs.get("license.txt");
+    Utility::Debug{} << rs.getString("license.txt");
 }
