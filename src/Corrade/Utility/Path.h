@@ -246,7 +246,7 @@ exist.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 
 Unlike other APIs such as @ref read() or @ref list(), this function doesn't
@@ -274,7 +274,7 @@ listing them will subsequently fail.
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 
 Unlike other APIs such as @ref list(), this function doesn't have any failure
@@ -303,7 +303,7 @@ always succeeds.
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 */
 CORRADE_UTILITY_EXPORT bool make(Containers::StringView path);
@@ -318,7 +318,7 @@ other reason, prints a message to @ref Error and returns @cpp false @ce.
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 */
 CORRADE_UTILITY_EXPORT bool remove(Containers::StringView path);
@@ -333,7 +333,7 @@ message to @ref Error and returns @cpp false @ce.
 Expects that @p from and @p to are in UTF-8. If either path is already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref read(), @ref write()
 */
@@ -506,7 +506,7 @@ If @p path is not a directory or it can't be opened, prints a message to
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @partialsupport On @ref CORRADE_TARGET_UNIX "Unix" platforms and
     @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed and
@@ -530,7 +530,7 @@ get the size along with the contents.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<std::size_t> size(Containers::StringView filename);
@@ -550,7 +550,7 @@ what was actually read.
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref readString(), @ref write(), @ref append(), @ref copy(),
     @ref mapRead(), @ref exists(), @ref size()
@@ -578,7 +578,7 @@ are overwritten, use @ref append() to append instead. Prints a message to
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref read(), @ref mapWrite()
 */
@@ -618,7 +618,7 @@ message to @ref Error and returns @cpp false @ce if the file can't be written.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref write(), @ref read(), @ref copy(), @ref map()
 */
@@ -660,7 +660,7 @@ can't be written.
 Expects that @p from and @p to are in UTF-8. If either path is already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 
 Note that the following might be slightly faster on some systems where
@@ -688,7 +688,7 @@ open file handle.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref mapRead(), @ref mapWrite(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
@@ -710,7 +710,7 @@ handle.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref map(), @ref mapWrite(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
@@ -734,7 +734,7 @@ handle.
 Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
-path is instead first coverted to UTF-16 using @ref Unicode::widen() and then
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
 @see @ref map(), @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
