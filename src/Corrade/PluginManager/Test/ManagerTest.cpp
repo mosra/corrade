@@ -383,7 +383,7 @@ void ManagerTest::wrongMetadataFile() {
 }
 
 void ManagerTest::missingMetadataFile() {
-    std::string dir = Utility::Path::join(PLUGINS_DIR, "missing-metadata");
+    Containers::String dir = Utility::Path::join(PLUGINS_DIR, "missing-metadata");
     CORRADE_VERIFY(Utility::Path::make(dir));
     CORRADE_VERIFY(Utility::Path::write(Utility::Path::join(dir, "MissingMetadata" + AbstractPlugin::pluginSuffix()), "this is not a binary"_s));
 
@@ -1159,7 +1159,7 @@ void ManagerTest::utf8Path() {
     #endif
 
     /* Copy the dog plugin to a new UTF-8 path */
-    const std::string utf8PluginsDir = Utility::Path::join(PLUGINS_DIR, "hýždě");
+    Containers::String utf8PluginsDir = Utility::Path::join(PLUGINS_DIR, "hýždě");
     CORRADE_VERIFY(Utility::Path::make(utf8PluginsDir));
 
     CORRADE_VERIFY(Utility::Path::copy(
