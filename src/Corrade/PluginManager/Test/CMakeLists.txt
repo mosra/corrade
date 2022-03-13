@@ -58,12 +58,27 @@ corrade_add_test(PluginManagerManagerTest
         CorradePluginManagerTestLib
         Canary CustomSuffixStatic DisabledMetadataStatic)
 target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    # So the plugins get properly built when building the test
+    add_dependencies(PluginManagerManagerTest
+        Bulldog Dog PitBull Snail
+        CustomSuffix Deletable DisabledMetadata
+        Doggo
+        HotDog HotDogWithSnail OldBread RottenTomato
+        NoPluginFinalizer NoPluginInitializer NoPluginInstancer
+        NoPluginInterface NoPluginVersion WrongMetadata)
+    if(NOT CORRADE_TARGET_WINDOWS)
+        add_dependencies(PluginManagerManagerTest UnresolvedReference)
+    endif()
+endif()
 
 corrade_add_test(PluginManagerManagerInitFiniTest
     ManagerInitFiniTest.cpp
     LIBRARIES InitFiniStatic CorradePluginManager)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(PluginManagerManagerInitFiniTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+    # So the plugins get properly built when building the test
+    add_dependencies(PluginManagerManagerInitFiniTest InitFiniDynamic)
 endif()
 
 corrade_add_test(PluginManagerImportStaticTest
