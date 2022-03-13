@@ -430,7 +430,7 @@ void ManagerTest::wrongPluginVersion() {
     PluginManager::Manager<AbstractFood> foodManager;
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 6 but got 0\n");
+    CORRADE_COMPARE(out.str(), Utility::formatString("PluginManager::Manager::load(): wrong version of plugin OldBread, expected {} but got 0\n", CORRADE_PLUGIN_VERSION));
 }
 
 void ManagerTest::noPluginInterface() {
