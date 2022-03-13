@@ -229,9 +229,7 @@ ManagerTest::ManagerTest() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::pluginDirectoryNonexistent() {
-    struct SomePlugin: AbstractPlugin {
-        static std::string pluginInterface() { return {}; }
-    };
+    struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case, a nonexistent directory is ignored */
     std::ostringstream out;
@@ -258,9 +256,7 @@ void ManagerTest::pluginDirectoryNotReadable() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    struct SomePlugin: AbstractPlugin {
-        static std::string pluginInterface() { return {}; }
-    };
+    struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case, a nonexistent directory is ignored */
     std::ostringstream out;
@@ -275,9 +271,7 @@ void ManagerTest::pluginDirectoryNotReadable() {
 #endif
 
 void ManagerTest::pluginSearchPathsNotUsed() {
-    struct SomePlugin: AbstractPlugin {
-        static std::string pluginInterface() { return {}; }
-    };
+    struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case (no assert) */
     std::ostringstream out;
@@ -294,9 +288,7 @@ void ManagerTest::pluginSearchPathsNotProvided() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    struct SomePlugin: AbstractPlugin {
-        static std::string pluginInterface() { return {}; }
-    };
+    struct SomePlugin: AbstractPlugin {};
 
     /* Complain that no plugin search path is set */
     std::ostringstream out;
@@ -312,8 +304,6 @@ void ManagerTest::pluginSearchPathsNotFound() {
         static std::vector<std::string> pluginSearchPaths() {
             return {"nonexistent", "/absolute/but/nonexistent"};
         }
-
-        static std::string pluginInterface() { return {}; }
     };
 
     /* Complain that no plugin search path is set */
@@ -363,8 +353,6 @@ void ManagerTest::nameList() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 struct WrongPlugin: AbstractPlugin {
-    static std::string pluginInterface() { return {}; }
-
     static std::vector<std::string> pluginSearchPaths() {
         return {Utility::Path::join(PLUGINS_DIR, "wrong")};
     }
