@@ -29,12 +29,19 @@
 #include "Corrade/Containers/ArrayViewStlSpan.h"
 #endif
 
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+
 using namespace Corrade;
 
 int main() {
 #if __has_include(<span>)
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [ArrayView] */
+#include <Corrade/Containers/ArrayViewStlSpan.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::span<int> a;
 Containers::ArrayView<int> b = a;
 

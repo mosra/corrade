@@ -34,11 +34,18 @@
 #include "Corrade/Containers/ReferenceStl.h"
 #include "Corrade/Containers/TripleStl.h"
 
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+
 using namespace Corrade;
 
 int main() {
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [ArrayView] */
+#include <Corrade/Containers/ArrayViewStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::vector<int> a;
 
 Containers::ArrayView<int> b = a;
@@ -57,7 +64,12 @@ auto d = Containers::array<int>({5});   // d.size() == 1, d[0] == 5
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [Pair] */
+#include <Corrade/Containers/PairStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::pair<float, int> a{35.0f, 7};
 Containers::Pair<float, int> b{a};
 
@@ -71,7 +83,12 @@ static_cast<void>(d);
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [Triple] */
+#include <Corrade/Containers/TripleStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::tuple<float, int, bool> a{35.0f, 7, true};
 Containers::Triple<float, int, bool> b{a};
 
@@ -85,7 +102,12 @@ static_cast<void>(d);
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [Pointer] */
+#include <Corrade/Containers/PointerStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::unique_ptr<int> a{new int{5}};
 Containers::Pointer<int> b = std::move(a);
 
@@ -97,7 +119,12 @@ auto d = Containers::pointer(std::unique_ptr<int>{new int{5}});
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [StringView] */
+#include <Corrade/Containers/StringStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 using namespace Containers::Literals;
 
 std::string a = "Hello\0world!"_s;
@@ -108,14 +135,24 @@ b[5] = ' ';
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [String] */
+#include <Corrade/Containers/StringStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::string a = "Hello world!";
 Containers::String b = a.substr(5);
 /* [String] */
 }
 
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [Reference] */
+#include <Corrade/Containers/ReferenceStl.h>
+
+DOXYGEN_ELLIPSIS()
+
 int a = 1337;
 Containers::Reference<int> b = a;
 

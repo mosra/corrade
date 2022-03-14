@@ -28,11 +28,18 @@
 
 #include "Corrade/Containers/OptionalStl.h"
 
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+
 using namespace Corrade;
 
 int main() {
 {
+/* The include is already above, so doing it again here should be harmless */
 /* [Optional] */
+#include <Corrade/Containers/Optional.h>
+
+DOXYGEN_ELLIPSIS()
+
 std::optional<int> a{5};
 Containers::Optional<int> b(a);
 
