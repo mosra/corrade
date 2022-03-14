@@ -674,7 +674,7 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
     CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::UnresolvedDependency);
 
-    /* No internal statie is modified, even through PitBull provides a Dog */
+    /* No internal state is modified, even through PitBull provides a Dog */
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
 
     /* Now load the Dog and test it */
@@ -689,7 +689,6 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     /* Now it's available and we can finally load PitBull */
     CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::Loaded);
 }
-
 #endif
 
 void ManagerTest::configurationGlobal() {
