@@ -27,7 +27,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */

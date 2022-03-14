@@ -187,6 +187,11 @@ parsing and usage documentation we used @ref Utility::Arguments.
 @until }
 @until }
 
+Note that here we're including @ref Corrade/PluginManager/Manager.hpp instead
+of a regular `*.h` file as we implemented our own plugin interface and thus
+need the full template definitons. See @ref PluginManager-Manager-template-definitions
+for more information.
+
 Compile the application with a simple CMake @cmake add_executable() @ce
 command and don't forget to link in all the static plugins compiled above:
 

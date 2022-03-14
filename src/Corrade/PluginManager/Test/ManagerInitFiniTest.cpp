@@ -26,7 +26,7 @@
 
 #include <sstream>
 
-#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 

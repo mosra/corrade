@@ -29,7 +29,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"

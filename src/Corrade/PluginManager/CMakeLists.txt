@@ -41,6 +41,7 @@ set(CorradePluginManager_HEADERS
     AbstractManager.h
     AbstractManagingPlugin.h
     Manager.h
+    Manager.hpp
     PluginManager.h
     PluginMetadata.h
     visibility.h)

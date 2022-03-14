@@ -30,9 +30,6 @@
  * @brief Class @ref Corrade::PluginManager::Manager
  */
 
-#include "Corrade/Containers/Array.h"
-#include "Corrade/Containers/Pointer.h"
-#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {
@@ -131,6 +128,28 @@ only after it's not needed anymore. The only way you may run into problem is by
 loading the same plugin binary twice under different filenames, causing the
 loader to have symbol conflicts, violating ODR.
 
+@section PluginManager-Manager-template-definitions Custom plugin interfaces and template definitions
+
+To avoid pulling in relatively big includes, the
+@ref Corrade/PluginManager/Manager.h header contains only declarations of the
+template functions. While that works fine when using builtin plugin interfaces
+in Corrade and Magnum, you need to make an extra step when implementing your
+own plugin interfaces.
+
+The easiest is to simply include @ref Corrade/PluginManager/Manager.hpp instead
+of the `*.h` file in order to get the full definitions. If you however want to
+avoid the additional overhead of the template instantiations and includes it
+pulls in, it's recommended to include it only in the source file where you
+define the plugin interface and perform an explicit template instantiation:
+
+@snippet PluginManager.cpp Manager-explicit-template-instantiation
+
+The namespace where you locate the @cpp template class @ce is important.
+Additionally, if the plugin interface is exposed in a shared library, you may
+need to export the template instantiation symbols for example with
+@ref CORRADE_VISIBILITY_EXPORT. Look into Corrade and Magnum sources for
+further examples.
+
 @section PluginManager-Manager-multithreading Thread safety
 
 Static plugins register themselves into a global storage. If done implicitly,
@@ -161,12 +180,12 @@ template<class T> class Manager: public AbstractManager {
          *      platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
-        explicit Manager(Containers::StringView pluginDirectory = {}):
-            #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), T::pluginSuffix(), T::pluginMetadataSuffix(), pluginDirectory} {}
-            #else
-            AbstractManager{T::pluginInterface(), T::pluginMetadataSuffix()} { static_cast<void>(pluginDirectory); }
-            #endif
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit Manager(Containers::StringView pluginDirectory = {});
+        #else
+        explicit Manager(Containers::StringView pluginDirectory);
+        explicit Manager();
+        #endif
 
         /**
          * @brief Instantiate a plugin
@@ -178,9 +197,7 @@ template<class T> class Manager: public AbstractManager {
          *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */
-        Containers::Pointer<T> instantiate(Containers::StringView plugin) {
-            return Containers::pointerCast<T>(instantiateInternal(plugin));
-        }
+        Containers::Pointer<T> instantiate(Containers::StringView plugin);
 
         /**
          * @brief Load and instantiate plugin
@@ -192,11 +209,16 @@ template<class T> class Manager: public AbstractManager {
          * See its documentation for more information. The resulting plugin
          * name is then loaded using @ref instantiate() as usual.
          */
-        Containers::Pointer<T> loadAndInstantiate(Containers::StringView plugin) {
-            return Containers::pointerCast<T>(loadAndInstantiateInternal(plugin));
-        }
+        Containers::Pointer<T> loadAndInstantiate(Containers::StringView plugin);
 };
 
 }}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* The definitions used to be inline, include them for backwards compatibility.
+   Updated code should either include the hpp directly or include it in plugin
+   interface implementation only and export accordingly. */
+#include "Corrade/PluginManager/Manager.hpp"
+#endif
 
 #endif

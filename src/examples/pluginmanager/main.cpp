@@ -28,7 +28,7 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <Corrade/PluginManager/Manager.h>
+#include <Corrade/PluginManager/Manager.hpp> /* important */
 #include <Corrade/PluginManager/PluginMetadata.h>
 #include <Corrade/Utility/Arguments.h>
 #include <Corrade/Utility/ConfigurationGroup.h>

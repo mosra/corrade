@@ -483,6 +483,13 @@ namespace Corrade {
     building with @ref CORRADE_BUILD_DEPRECATED enabled. Include this header
     explicitly in your code if you wish to continue to rely on implicit
     conversion from a @ref std::string.
+-   To avoid unconditionally including relatively heavy headers,
+    @ref PluginManager::Manager now has the template definitions moved into
+    @ref Corrade/PluginManager/Manager.hpp. This header is implicitly included
+    from the `*.h` for backwards compatibility if @ref CORRADE_BUILD_DEPRECATED
+    is defined. While nothing changes when using builtin Corrade and Magnum
+    plugin interfaces, for custom interfaces you need to either include this header explicitly or perform an explicit template instantiation as
+    described in @ref PluginManager-Manager-template-definitions.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

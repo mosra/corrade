@@ -28,8 +28,11 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Path.h"
+
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 using namespace Corrade;
 
@@ -81,3 +84,18 @@ if(loadState & (PluginManager::LoadState::WrongPluginVersion|
 }
 #endif
 }
+
+/* The include is already above, so doing it again here should be harmless */
+/* [Manager-explicit-template-instantiation] */
+#include <Corrade/PluginManager/Manager.hpp>
+
+namespace MyNamespace {
+    class MyAbstractPlugin: public PluginManager::AbstractPlugin {
+        DOXYGEN_ELLIPSIS()
+    };
+}
+
+namespace Corrade { namespace PluginManager {
+    template class Manager<MyNamespace::MyAbstractPlugin>;
+}}
+/* [Manager-explicit-template-instantiation] */
