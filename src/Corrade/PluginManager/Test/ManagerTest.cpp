@@ -66,6 +66,7 @@ struct ManagerTest: TestSuite::Tester {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void pluginDirectoryNonexistent();
     void pluginDirectoryNotReadable();
+    void pluginDirectoryUtf8();
     #endif
 
     void pluginSearchPathsNotUsed();
@@ -101,6 +102,7 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPluginFilePathLoadAndInstantiate();
     void dynamicPluginFilePathConflictsWithLoadedPlugin();
     void dynamicPluginFilePathRemoveOnFail();
+    void dynamicPluginFilePathUtf8();
     #endif
 
     void configurationGlobal();
@@ -129,10 +131,6 @@ struct ManagerTest: TestSuite::Tester {
     void setPreferredPluginsOverridePrimaryPlugin();
     #endif
 
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    void utf8Path();
-    #endif
-
     void twoManagerInstances();
 
     void customSuffix();
@@ -149,6 +147,7 @@ ManagerTest::ManagerTest() {
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::pluginDirectoryNonexistent,
               &ManagerTest::pluginDirectoryNotReadable,
+              &ManagerTest::pluginDirectoryUtf8,
               #endif
 
               &ManagerTest::pluginSearchPathsNotUsed,
@@ -184,6 +183,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPluginFilePathLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin,
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
+              &ManagerTest::dynamicPluginFilePathUtf8,
               #endif
 
               &ManagerTest::configurationGlobal,
@@ -210,10 +210,6 @@ ManagerTest::ManagerTest() {
               &ManagerTest::setPreferredPluginsUnknownAlias,
               &ManagerTest::setPreferredPluginsDoesNotProvide,
               &ManagerTest::setPreferredPluginsOverridePrimaryPlugin,
-              #endif
-
-              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-              &ManagerTest::utf8Path,
               #endif
 
               &ManagerTest::twoManagerInstances,
@@ -267,6 +263,41 @@ void ManagerTest::pluginDirectoryNotReadable() {
     CORRADE_COMPARE_AS(out.str(),
         Utility::formatString("Utility::Path::list(): can't list {}: error ", directory),
         TestSuite::Compare::StringHasPrefix);
+}
+
+void ManagerTest::pluginDirectoryUtf8() {
+    #if defined(__has_feature)
+    #if __has_feature(address_sanitizer)
+    CORRADE_SKIP("Because the same shared object is loaded from two different paths, its globals (the vtable) are loaded twice. Skipping to avoid AddressSanitizer complain about ODR violation.");
+    #endif
+    #endif
+
+    /* Copy the dog plugin to a new UTF-8 path */
+    Containers::String utf8PluginsDir = Utility::Path::join(PLUGINS_DIR, "zvířata");
+    CORRADE_VERIFY(Utility::Path::make(utf8PluginsDir));
+
+    CORRADE_VERIFY(Utility::Path::copy(
+        Utility::Path::join({PLUGINS_DIR, "animals", "Dog" + AbstractPlugin::pluginSuffix()}),
+        Utility::Path::join(utf8PluginsDir, "Dog" + AbstractPlugin::pluginSuffix())));
+    CORRADE_VERIFY(Utility::Path::copy(
+        Utility::Path::join({PLUGINS_DIR, "animals", "Dog.conf"}),
+        Utility::Path::join(utf8PluginsDir, "Dog.conf")));
+
+    PluginManager::Manager<AbstractAnimal> manager{utf8PluginsDir};
+    /* One static plugin always present */
+    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
+
+    {
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_VERIFY(animal->hasTail());
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->legCount(), 4);
+    }
+
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
 
@@ -688,6 +719,38 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
 
     /* Now it's available and we can finally load PitBull */
     CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::Loaded);
+}
+
+void ManagerTest::dynamicPluginFilePathUtf8() {
+    #if defined(__has_feature)
+    #if __has_feature(address_sanitizer)
+    CORRADE_SKIP("Because the same shared object is loaded from two different paths, its globals (the vtable) are loaded twice. Skipping to avoid AddressSanitizer complain about ODR violation.");
+    #endif
+    #endif
+
+    /* Copy the dog plugin to a new UTF-8 path */
+    Containers::String utf8PluginsDir = Utility::Path::join(PLUGINS_DIR, "další zvířata");
+    CORRADE_VERIFY(Utility::Path::make(utf8PluginsDir));
+
+    Containers::String utf8PluginFilename = Utility::Path::join(utf8PluginsDir, "Šakal" + AbstractPlugin::pluginSuffix());
+    CORRADE_VERIFY(Utility::Path::copy(
+        Utility::Path::join({PLUGINS_DIR, "animals", "Dog" + AbstractPlugin::pluginSuffix()}),
+        utf8PluginFilename));
+    CORRADE_VERIFY(Utility::Path::copy(
+        Utility::Path::join({PLUGINS_DIR, "animals", "Dog.conf"}),
+        Utility::Path::join(utf8PluginsDir, "Šakal.conf")));
+
+    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
+    CORRADE_COMPARE(manager.load(utf8PluginFilename), LoadState::Loaded);
+    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Šakal"}));
+    CORRADE_COMPARE(manager.loadState("Šakal"), LoadState::Loaded);
+
+    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Šakal");
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Doug");
+    CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
 }
 #endif
 
@@ -1136,41 +1199,6 @@ void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
     /* Reloading plugin directory resets the mapping back */
     manager.reloadPluginDirectory();
     CORRADE_COMPARE(manager.metadata("Dog")->name(), "Dog");
-}
-
-void ManagerTest::utf8Path() {
-    #if defined(__has_feature)
-    #if __has_feature(address_sanitizer)
-    CORRADE_SKIP("Because the same shared object is loaded from two different paths, its globals (the vtable) are loaded twice. Skipping to avoid AddressSanitizer complain about ODR violation.");
-    #endif
-    #endif
-
-    /* Copy the dog plugin to a new UTF-8 path */
-    Containers::String utf8PluginsDir = Utility::Path::join(PLUGINS_DIR, "hýždě");
-    CORRADE_VERIFY(Utility::Path::make(utf8PluginsDir));
-
-    CORRADE_VERIFY(Utility::Path::copy(
-        Utility::Path::join({PLUGINS_DIR, "animals", "Dog" + AbstractPlugin::pluginSuffix()}),
-        Utility::Path::join(utf8PluginsDir, "Dog" + AbstractPlugin::pluginSuffix())));
-    CORRADE_VERIFY(Utility::Path::copy(
-        Utility::Path::join({PLUGINS_DIR, "animals", "Dog.conf"}),
-        Utility::Path::join(utf8PluginsDir, "Dog.conf")));
-
-    PluginManager::Manager<AbstractAnimal> manager{utf8PluginsDir};
-    /* One static plugin always present */
-    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
-    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
-    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
-
-    {
-        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
-        CORRADE_VERIFY(animal);
-        CORRADE_VERIFY(animal->hasTail());
-        CORRADE_COMPARE(animal->name(), "Doug");
-        CORRADE_COMPARE(animal->legCount(), 4);
-    }
-
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
 
