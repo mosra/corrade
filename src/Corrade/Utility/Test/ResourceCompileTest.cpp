@@ -66,34 +66,6 @@ ResourceCompileTest::ResourceCompileTest() {
               &ResourceCompileTest::compileFromEmptyAlias});
 }
 
-constexpr unsigned int Positions[] {
-    3, 6,
-    11, 17,
-    20, 21,
-    30, 25,
-    40, 44
-};
-
-constexpr unsigned char Filenames[] =
-    "TOC"           // 3    3
-    "data.txt"      // 8    11
-    "image.png"     // 9    20
-    "image2.png"    // 10   30
-    "license.md"    // 10   40
-    ;
-
-constexpr unsigned char Data[] =
-    "Don't."                    // 6    6
-    "hello world"               // 11   17
-    "!PNG"                      // 4    21
-    "!PNG"                      // 4    25
-    "GPL?!\n#####\n\nDon't."    // 19   44
-    ;
-
-inline std::string asString(Containers::ArrayView<const char> view) {
-    return {view.data(), view.size()};
-}
-
 void ResourceCompileTest::compile() {
     /* Testing also null bytes and signed overflow, don't change binaries */
     Containers::Optional<Containers::String> consequence = Path::readString(Path::join(RESOURCE_TEST_DIR, "consequence.bin"));
