@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "Corrade/Containers/StringStl.h" /**< @todo remove when PluginManager is <string>-free */
-#include "Corrade/PluginManager/AbstractManager.h"
+#include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Path.h"
@@ -43,7 +43,7 @@ class AbstractFilesystem: public PluginManager::AbstractPlugin {
             return "cz.mosra.corrade.AbstractFilesystem/1.0";
         }
 
-        std::vector<std::string> pluginSearchPaths() {
+        static std::vector<std::string> pluginSearchPaths() {
             return {
                 "corrade/filesystems",
                 Utility::Path::join(CMAKE_INSTALL_PREFIX, "lib/corrade/filesystems")
@@ -67,6 +67,9 @@ static int corradeZipFilesystemStaticImport() {
 /* [CORRADE_PLUGIN_IMPORT] */
 
 int main() {
+/* Needed to verify the AbstractFilesystem definition is actually usable */
+PluginManager::Manager<AbstractFilesystem> manager;
+
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 {
 PluginManager::LoadState loadState{};
