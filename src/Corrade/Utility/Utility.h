@@ -30,7 +30,7 @@
  * @brief Forward declarations for the @ref Corrade::Utility namespace
  */
 
-#include <cstdint>
+#include <cstdint> /** @todo do we really need this? */
 #include <cstddef>
 
 #include "Corrade/configure.h"
