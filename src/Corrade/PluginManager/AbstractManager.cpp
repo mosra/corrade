@@ -59,7 +59,6 @@
 #endif
 #include <windows.h>
 #include "Corrade/Utility/Unicode.h"
-using Corrade::Utility::Unicode::widen;
 #endif
 #endif
 
@@ -611,7 +610,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     #ifndef CORRADE_TARGET_WINDOWS
     void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE module = LoadLibraryW(widen(filename).data());
+    HMODULE module = LoadLibraryW(Utility::Unicode::widen(filename));
     #endif
     if(!module) {
         Utility::Error err;
