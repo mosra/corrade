@@ -26,9 +26,7 @@
 
 #include "GlobalStateAcrossLibrariesLibrary.h"
 
-#include <vector>
-#include <string>
-
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/PluginManager/Manager.h"
 
 #include "AbstractAnimal.h"
@@ -39,12 +37,16 @@ static void importPlugin() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-std::vector<std::string> staticPluginsLoadedInALibrary() {
+Containers::Array<Containers::String> staticPluginsLoadedInALibrary() {
     importPlugin();
 
     /* Avoid accidentally loading the dynamic plugins as well */
     Manager<AbstractAnimal> manager{"nonexistent"};
-    return manager.pluginList();
+
+    Containers::Array<Containers::String> out;
+    for(Containers::StringView i: manager.pluginList())
+        arrayAppend(out, i);
+    return out;
 }
 
 }}}

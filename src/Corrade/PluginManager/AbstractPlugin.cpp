@@ -26,6 +26,8 @@
 
 #include "AbstractPlugin.h"
 
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
@@ -42,20 +44,24 @@ using namespace Containers::Literals;
 
 struct AbstractPlugin::State {
     AbstractManager* manager{};
-    std::string plugin;
+    Containers::String plugin;
     const PluginMetadata* metadata{};
     Utility::ConfigurationGroup configuration{};
 };
 
-std::string AbstractPlugin::pluginInterface() { return {}; }
+Containers::StringView AbstractPlugin::pluginInterface() { return ""_s; }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-std::vector<std::string> AbstractPlugin::pluginSearchPaths() { return {}; }
+Containers::Array<Containers::String> AbstractPlugin::pluginSearchPaths() { return {}; }
 
-std::string AbstractPlugin::pluginSuffix() { return PLUGIN_FILENAME_SUFFIX; }
+Containers::StringView AbstractPlugin::pluginSuffix() {
+    return PLUGIN_FILENAME_SUFFIX;
+}
 #endif
 
-std::string AbstractPlugin::pluginMetadataSuffix() { return ".conf"; }
+Containers::StringView AbstractPlugin::pluginMetadataSuffix() {
+    return ".conf"_s;
+}
 
 void AbstractPlugin::initialize() {}
 
@@ -63,9 +69,9 @@ void AbstractPlugin::finalize() {}
 
 AbstractPlugin::AbstractPlugin(): _state{InPlaceInit} {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _state{InPlaceInit} {
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, const Containers::StringView& plugin): _state{InPlaceInit} {
     _state->manager = &manager;
-    _state->plugin = plugin;
+    _state->plugin = Containers::String::nullTerminatedGlobalView(plugin);
     manager.registerInstance(plugin, *this, _state->metadata);
     _state->configuration = _state->metadata->configuration();
 }
@@ -100,7 +106,7 @@ AbstractPlugin::~AbstractPlugin() {
 
 bool AbstractPlugin::canBeDeleted() { return false; }
 
-const std::string& AbstractPlugin::plugin() const {
+Containers::StringView AbstractPlugin::plugin() const {
     CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin", _state->plugin);
     return _state->plugin;
 }
@@ -130,26 +136,26 @@ const AbstractManager* AbstractPlugin::manager() const {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-std::vector<std::string> implicitPluginSearchPaths(const std::string& libraryLocation, const std::string& hardcodedPath, const char* const relativePath) {
-    std::vector<std::string> out;
+Containers::Array<Containers::String> implicitPluginSearchPaths(const Containers::StringView libraryLocation, const Containers::StringView hardcodedPath, const Containers::StringView relativePath) {
+    Containers::Array<Containers::String> out;
     #ifdef CORRADE_TARGET_APPLE
-    out.reserve(5);
+    arrayReserve(out, 5);
     #elif !defined(CORRADE_TARGET_WINDOWS)
-    out.reserve(4);
+    arrayReserve(out, 4);
     #else
-    out.reserve(3);
+    arrayReserve(out, 3);
     #endif
 
-    if(!hardcodedPath.empty()) out.push_back(hardcodedPath);
+    if(hardcodedPath) arrayAppend(out, Containers::String::nullTerminatedGlobalView(hardcodedPath));
     #ifdef CORRADE_TARGET_APPLE
-    out.push_back(Utility::Path::join("../PlugIns"_s, relativePath));
+    arrayAppend(out, Utility::Path::join("../PlugIns"_s, relativePath));
     #endif
-    if(!libraryLocation.empty())
-        out.push_back(Utility::Path::join(Utility::Path::split(libraryLocation).first(), relativePath));
+    if(libraryLocation)
+        arrayAppend(out, Utility::Path::join(Utility::Path::split(libraryLocation).first(), relativePath));
     #ifndef CORRADE_TARGET_WINDOWS
-    out.push_back(Utility::Path::join("../lib"_s, relativePath));
+    arrayAppend(out, Utility::Path::join("../lib"_s, relativePath));
     #endif
-    out.push_back(relativePath);
+    arrayAppend(out, Containers::String::nullTerminatedGlobalView(relativePath));
 
     return out;
 }

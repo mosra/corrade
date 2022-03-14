@@ -27,6 +27,8 @@
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -46,10 +48,13 @@ struct AbstractPluginTest: TestSuite::Tester {
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void implicitPluginSearchPaths();
+    void implicitPluginSearchPathsGlobalViews();
     void implicitPluginSearchPathsNoLibraryLocation();
     void implicitPluginSearchPathsNoAbsolutePath();
     #endif
 };
+
+using namespace Containers::Literals;
 
 AbstractPluginTest::AbstractPluginTest() {
     addTests({&AbstractPluginTest::constructCopy,
@@ -57,6 +62,7 @@ AbstractPluginTest::AbstractPluginTest() {
 
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &AbstractPluginTest::implicitPluginSearchPaths,
+              &AbstractPluginTest::implicitPluginSearchPathsGlobalViews,
               &AbstractPluginTest::implicitPluginSearchPathsNoLibraryLocation,
               &AbstractPluginTest::implicitPluginSearchPathsNoAbsolutePath
               #endif
@@ -106,8 +112,11 @@ void AbstractPluginTest::constructMove() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void AbstractPluginTest::implicitPluginSearchPaths() {
-    std::vector<std::string> expected{
-        "/usr/lib/64/corrade/foobars",
+    Containers::StringView hardcodedPath = "/usr/lib/64/corrade/foobars";
+    Containers::StringView relativePath = "corrade/foobars";
+    /** @todo StringView once Compare::Container can compare different types */
+    const Containers::String expected[]{
+        hardcodedPath,
         #ifdef CORRADE_TARGET_APPLE
         "../PlugIns/corrade/foobars",
         #endif
@@ -115,16 +124,52 @@ void AbstractPluginTest::implicitPluginSearchPaths() {
         #ifndef CORRADE_TARGET_WINDOWS
         "../lib/corrade/foobars",
         #endif
-        "corrade/foobars"
+        relativePath
     };
-    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+    Containers::Array<Containers::String> paths = PluginManager::implicitPluginSearchPaths(
         "/usr/lib/CorradeFooBar.so",
-        "/usr/lib/64/corrade/foobars",
-        "corrade/foobars"), expected);
+        hardcodedPath,
+        relativePath
+    );
+    CORRADE_COMPARE_AS(paths,
+        Containers::arrayView(expected),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(paths[0].data(),
+        static_cast<const void*>(hardcodedPath.data()),
+        TestSuite::Compare::NotEqual);
+    CORRADE_COMPARE_AS(paths.back().data(),
+        static_cast<const void*>(relativePath.data()),
+        TestSuite::Compare::NotEqual);
+}
+
+void AbstractPluginTest::implicitPluginSearchPathsGlobalViews() {
+    Containers::StringView hardcodedPath = "/usr/lib/64/corrade/foobars"_s;
+    Containers::StringView relativePath = "corrade/foobars"_s;
+    /** @todo StringView once Compare::Container can compare different types */
+    const Containers::String expected[]{
+        hardcodedPath,
+        #ifdef CORRADE_TARGET_APPLE
+        "../PlugIns/corrade/foobars",
+        #endif
+        "/usr/lib/corrade/foobars",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "../lib/corrade/foobars",
+        #endif
+        relativePath
+    };
+    Containers::Array<Containers::String> paths = PluginManager::implicitPluginSearchPaths(
+        "/usr/lib/CorradeFooBar.so",
+        hardcodedPath,
+        relativePath
+    );
+    CORRADE_COMPARE_AS(paths, Containers::arrayView(expected), TestSuite::Compare::Container);
+    CORRADE_COMPARE(paths[0].data(), static_cast<const void*>(hardcodedPath.data()));
+    CORRADE_COMPARE(paths.back().data(), static_cast<const void*>(relativePath.data()));
 }
 
 void AbstractPluginTest::implicitPluginSearchPathsNoLibraryLocation() {
-    std::vector<std::string> expected{
+    /** @todo StringView once Compare::Container can compare different types */
+    const Containers::String expected[]{
         "/usr/lib/64/corrade/foobars",
         #ifdef CORRADE_TARGET_APPLE
         "../PlugIns/corrade/foobars",
@@ -134,14 +179,16 @@ void AbstractPluginTest::implicitPluginSearchPathsNoLibraryLocation() {
         #endif
         "corrade/foobars"
     };
-    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+    CORRADE_COMPARE_AS(PluginManager::implicitPluginSearchPaths(
         {},
         "/usr/lib/64/corrade/foobars",
-        "corrade/foobars"), expected);
+        "corrade/foobars"
+    ), Containers::arrayView(expected), TestSuite::Compare::Container);
 }
 
 void AbstractPluginTest::implicitPluginSearchPathsNoAbsolutePath() {
-    std::vector<std::string> expected{
+    /** @todo StringView once Compare::Container can compare different types */
+    const Containers::String expected[]{
         #ifdef CORRADE_TARGET_APPLE
         "../PlugIns/corrade/foobars",
         #endif
@@ -151,10 +198,11 @@ void AbstractPluginTest::implicitPluginSearchPathsNoAbsolutePath() {
         #endif
         "corrade/foobars"
     };
-    CORRADE_COMPARE(PluginManager::implicitPluginSearchPaths(
+    CORRADE_COMPARE_AS(PluginManager::implicitPluginSearchPaths(
         "/usr/lib/CorradeFooBar.so",
         {},
-        "corrade/foobars"), expected);
+        "corrade/foobars"
+    ), Containers::arrayView(expected), TestSuite::Compare::Container);
 }
 #endif
 

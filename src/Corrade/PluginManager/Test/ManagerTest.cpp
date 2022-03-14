@@ -29,11 +29,11 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once PluginManager is <string>-free */
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/FormatStl.h"
@@ -69,6 +69,11 @@ struct ManagerTest: TestSuite::Tester {
     void pluginDirectoryUtf8();
     #endif
 
+    void pluginInterfaceNotGlobal();
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    void pluginSuffixNotGlobal();
+    #endif
+    void pluginMetadataSuffixNotGlobal();
     void pluginSearchPathsNotUsed();
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void pluginSearchPathsNotProvided();
@@ -102,6 +107,7 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPluginFilePathLoadAndInstantiate();
     void dynamicPluginFilePathConflictsWithLoadedPlugin();
     void dynamicPluginFilePathRemoveOnFail();
+    void dynamicPluginFilePathNonNullTerminated();
     void dynamicPluginFilePathUtf8();
     #endif
 
@@ -150,6 +156,11 @@ ManagerTest::ManagerTest() {
               &ManagerTest::pluginDirectoryUtf8,
               #endif
 
+              &ManagerTest::pluginInterfaceNotGlobal,
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+              &ManagerTest::pluginSuffixNotGlobal,
+              #endif
+              &ManagerTest::pluginMetadataSuffixNotGlobal,
               &ManagerTest::pluginSearchPathsNotUsed,
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::pluginSearchPathsNotProvided,
@@ -183,6 +194,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPluginFilePathLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin,
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
+              &ManagerTest::dynamicPluginFilePathNonNullTerminated,
               &ManagerTest::dynamicPluginFilePathUtf8,
               #endif
 
@@ -285,7 +297,9 @@ void ManagerTest::pluginDirectoryUtf8() {
 
     PluginManager::Manager<AbstractAnimal> manager{utf8PluginsDir};
     /* One static plugin always present */
-    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Canary"_s, "Dog"_s
+    }), TestSuite::Compare::Container);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
 
@@ -300,6 +314,57 @@ void ManagerTest::pluginDirectoryUtf8() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
+
+void ManagerTest::pluginInterfaceNotGlobal() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    struct SomePlugin: AbstractPlugin {
+        static Containers::StringView pluginInterface() {
+            return "this.will.Assert/1.0";
+        }
+    };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    PluginManager::Manager<SomePlugin> manager;
+    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginInterface(): returned view is not global: this.will.Assert/1.0\n");
+}
+
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+void ManagerTest::pluginSuffixNotGlobal() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    struct SomePlugin: AbstractPlugin {
+        static Containers::StringView pluginSuffix() { return ".boom"; }
+    };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    PluginManager::Manager<SomePlugin> manager;
+    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginSuffix(): returned view is not global: .boom\n");
+}
+#endif
+
+void ManagerTest::pluginMetadataSuffixNotGlobal() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    struct SomePlugin: AbstractPlugin {
+        static Containers::StringView pluginMetadataSuffix() {
+            return ".boomconf";
+        }
+    };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    PluginManager::Manager<SomePlugin> manager;
+    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginMetadataSuffix(): returned view is not global: .boomconf\n");
+}
 
 void ManagerTest::pluginSearchPathsNotUsed() {
     struct SomePlugin: AbstractPlugin {};
@@ -332,8 +397,8 @@ void ManagerTest::pluginSearchPathsNotProvided() {
 
 void ManagerTest::pluginSearchPathsNotFound() {
     struct SomePlugin: AbstractPlugin {
-        static std::vector<std::string> pluginSearchPaths() {
-            return {"nonexistent", "/absolute/but/nonexistent"};
+        static Containers::Array<Containers::String> pluginSearchPaths() {
+            return {InPlaceInit, {"nonexistent", "/absolute/but/nonexistent"}};
         }
     };
 
@@ -352,10 +417,12 @@ void ManagerTest::nameList() {
     {
         PluginManager::Manager<AbstractAnimal> manager;
 
-        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-            "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
-        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-            "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "Bulldog"_s, "Canary"_s, "Dog"_s, "PitBull"_s, "Snail"_s
+        }), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+            "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "PitBull"_s, "Snail"_s
+        }), TestSuite::Compare::Container);
     }
     #endif
 
@@ -363,10 +430,12 @@ void ManagerTest::nameList() {
         /* Check if the list of dynamic plugins is cleared after destructing */
         PluginManager::Manager<AbstractAnimal> manager("nonexistent");
 
-        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-            "Canary"}), TestSuite::Compare::Container);
-        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-            "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "Canary"_s
+        }), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+            "Canary"_s, "JustSomeBird"_s
+        }), TestSuite::Compare::Container);
     }
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -374,18 +443,20 @@ void ManagerTest::nameList() {
     {
         PluginManager::Manager<AbstractAnimal> manager{Utility::Path::join(PLUGINS_DIR, "animals")};
 
-        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-            "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
-        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-            "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "Bulldog"_s, "Canary"_s, "Dog"_s, "PitBull"_s, "Snail"_s
+        }), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+            "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "PitBull"_s, "Snail"_s
+        }), TestSuite::Compare::Container);
     }
     #endif
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 struct WrongPlugin: AbstractPlugin {
-    static std::vector<std::string> pluginSearchPaths() {
-        return {Utility::Path::join(PLUGINS_DIR, "wrong")};
+    static Containers::Array<Containers::String> pluginSearchPaths() {
+        return {InPlaceInit, {Utility::Path::join(PLUGINS_DIR, "wrong")}};
     }
 };
 
@@ -641,7 +712,9 @@ void ManagerTest::dynamicPluginFilePath() {
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
     CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
-    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Canary"_s, "Dog"_s
+    }), TestSuite::Compare::Container);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
 
     Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
@@ -721,6 +794,15 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::Loaded);
 }
 
+void ManagerTest::dynamicPluginFilePathNonNullTerminated() {
+    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+    Containers::Pointer<AbstractAnimal> animal = manager.loadAndInstantiate(Containers::StringView{DOG_PLUGIN_FILENAME "X"}.exceptSuffix(1));
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Doug");
+    CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+}
+
 void ManagerTest::dynamicPluginFilePathUtf8() {
     #if defined(__has_feature)
     #if __has_feature(address_sanitizer)
@@ -744,7 +826,9 @@ void ManagerTest::dynamicPluginFilePathUtf8() {
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
     CORRADE_COMPARE(manager.load(utf8PluginFilename), LoadState::Loaded);
-    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Šakal"}));
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Canary"_s, "Šakal"_s
+    }), TestSuite::Compare::Container);
     CORRADE_COMPARE(manager.loadState("Šakal"), LoadState::Loaded);
 
     Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Šakal");
@@ -878,7 +962,7 @@ void ManagerTest::destructionHierarchy() {
     /* Dog needs to be ordered first in the map for this test case to work.
        Basically I'm testing that the unload of plugins happens in the
        right order and that I'm not using invalid iterators at any point. */
-    CORRADE_VERIFY(std::string{"Dog"} < std::string{"PitBull"});
+    CORRADE_COMPARE_AS("Dog"_s, "PitBull"_s, TestSuite::Compare::Less);
 
     {
         PluginManager::Manager<AbstractAnimal> manager;
@@ -1022,18 +1106,22 @@ void ManagerTest::reloadPluginDirectory() {
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
-    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Bulldog"_s, "Canary"_s, "Dog"_s, "LostPitBull"_s, "LostSnail"_s, "PitBull"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+        "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "LostPitBull"_s, "LostSnail"_s, "PitBull"_s
+    }), TestSuite::Compare::Container);
 
     /* Unload PitBull and it should disappear from the list */
     CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     manager.reloadPluginDirectory();
-    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Bulldog"_s, "Canary"_s, "Dog"_s, "LostPitBull"_s, "LostSnail"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+        "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "LostPitBull"_s, "LostSnail"_s
+    }), TestSuite::Compare::Container);
 
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
     #endif
@@ -1046,18 +1134,22 @@ void ManagerTest::restoreAliasesAfterPluginDirectoryChange() {
     PluginManager::Manager<AbstractAnimal> manager;
     CORRADE_COMPARE(manager.load(DOGGO_PLUGIN_FILENAME), LoadState::Loaded);
 
-    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "Doggo", "PitBull", "Snail"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-        "AGoodBoy", "Bulldog", "Canary", "Dog", "Doggo", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Bulldog"_s, "Canary"_s, "Dog"_s, "Doggo"_s, "PitBull"_s, "Snail"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+        "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "Doggo"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "PitBull"_s, "Snail"_s
+    }), TestSuite::Compare::Container);
 
     /* Set plugin directory to an empty idr -- there should stay the Doggo
        plugin and its Dog alias */
     manager.setPluginDirectory("nonexistent");
-    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-        "Canary", "Doggo"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-        "Canary", "Dog", "Doggo", "JustSomeBird"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+        "Canary"_s, "Doggo"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), Containers::arrayView({
+        "Canary"_s, "Dog"_s, "Doggo"_s, "JustSomeBird"_s
+    }), TestSuite::Compare::Container);
     #endif
 }
 
@@ -1207,15 +1299,19 @@ void ManagerTest::twoManagerInstances() {
     PluginManager::Manager<AbstractAnimal> b;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    CORRADE_COMPARE_AS(a.aliasList(), (std::vector<std::string>{
-        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(b.aliasList(), (std::vector<std::string>{
-        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(a.aliasList(), Containers::arrayView({
+        "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "PitBull"_s, "Snail"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(b.aliasList(), Containers::arrayView({
+        "AGoodBoy"_s, "Bulldog"_s, "Canary"_s, "Dog"_s, "JustSomeBird"_s, "JustSomeMammal"_s, "PitBull"_s, "Snail"_s
+    }), TestSuite::Compare::Container);
     #else
-    CORRADE_COMPARE_AS(a.aliasList(), (std::vector<std::string>{
-        "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(b.aliasList(), (std::vector<std::string>{
-        "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(a.aliasList(), Containers::arrayView({
+        "Canary"_s, "JustSomeBird"_s
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(b.aliasList(), Containers::arrayView({
+        "Canary"_s, "JustSomeBird"_s
+    }), TestSuite::Compare::Container);
     #endif
 
     /* Verify that loading a dynamic plugin works the same in both */
@@ -1252,9 +1348,13 @@ void ManagerTest::customSuffix() {
         PluginManager::Manager<AbstractCustomSuffix> manager;
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"CustomSuffix", "CustomSuffixStatic"}));
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "CustomSuffix"_s, "CustomSuffixStatic"_s
+        }), TestSuite::Compare::Container);
         #else
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"CustomSuffixStatic"}));
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "CustomSuffixStatic"_s
+        }), TestSuite::Compare::Container);
         #endif
 
         CORRADE_COMPARE(manager.load("CustomSuffixStatic"), LoadState::Static);
@@ -1288,9 +1388,13 @@ void ManagerTest::disabledMetadata() {
         PluginManager::Manager<AbstractDisabledMetadata> manager;
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"DisabledMetadata", "DisabledMetadataStatic"}));
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "DisabledMetadata"_s, "DisabledMetadataStatic"_s
+        }), TestSuite::Compare::Container);
         #else
-        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"DisabledMetadataStatic"}));
+        CORRADE_COMPARE_AS(manager.pluginList(), Containers::arrayView({
+            "DisabledMetadataStatic"_s
+        }), TestSuite::Compare::Container);
         #endif
 
         CORRADE_COMPARE(manager.load("DisabledMetadataStatic"), LoadState::Static);

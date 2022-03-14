@@ -34,9 +34,9 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 Canary::Canary() = default;
 
-Canary::Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+Canary::Canary(AbstractManager& manager, const Containers::StringView& plugin): AbstractAnimal{manager, plugin} {}
 
-std::string Canary::name() { return configuration().value("name"); }
+Containers::String Canary::name() { return configuration().value<Containers::String>("name"); }
 int Canary::legCount() { return 2; }
 bool Canary::hasTail() { return true; }
 

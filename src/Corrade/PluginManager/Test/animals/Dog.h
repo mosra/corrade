@@ -41,9 +41,9 @@ namespace Corrade { namespace PluginManager { namespace Test {
 class DOG_EXPORT Dog: public AbstractAnimal {
     public:
         explicit Dog() = default;
-        explicit Dog(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+        explicit Dog(AbstractManager& manager, const Containers::StringView& plugin): AbstractAnimal{manager, plugin} {}
 
-        std::string name() override;
+        Containers::String name() override;
         int legCount() override;
         bool hasTail() override;
 };

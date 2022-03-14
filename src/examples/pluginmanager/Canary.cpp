@@ -36,10 +36,10 @@ namespace Corrade { namespace Examples {
 
 class Canary: public AbstractAnimal {
     public:
-        explicit Canary(PluginManager::AbstractManager& manager, const std::string& plugin):
+        explicit Canary(PluginManager::AbstractManager& manager, Containers::StringView plugin):
             AbstractAnimal{manager, plugin} {}
 
-        std::string name() const override { return "Achoo"; }
+        Containers::String name() const override { return "Achoo"; }
         int legCount() const override { return 2; }
         bool hasTail() const override { return true; }
 };

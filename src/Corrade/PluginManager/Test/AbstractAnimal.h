@@ -26,23 +26,21 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
 #include "Corrade/PluginManager/AbstractPlugin.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractAnimal: public AbstractPlugin {
     public:
-        static std::string pluginInterface();
+        static Containers::StringView pluginInterface();
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        static std::vector<std::string> pluginSearchPaths();
+        static Containers::Array<Containers::String> pluginSearchPaths();
         #endif
 
         explicit AbstractAnimal() = default;
-        explicit AbstractAnimal(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+        explicit AbstractAnimal(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager, plugin} {}
 
-        virtual std::string name() = 0;
+        virtual Containers::String name() = 0;
         virtual int legCount() = 0;
         virtual bool hasTail() = 0;
 };

@@ -29,26 +29,27 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <vector>
+#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/String.h>
 #include <Corrade/PluginManager/AbstractPlugin.h>
 
 namespace Corrade { namespace Examples {
 
 class AbstractAnimal: public PluginManager::AbstractPlugin {
     public:
-        static std::string pluginInterface() {
-            return "cz.mosra.corrade.Examples.AbstractAnimal/1.0";
+        static Containers::StringView pluginInterface() {
+            using namespace Containers::Literals;
+            return "cz.mosra.corrade.Examples.AbstractAnimal/1.0"_s;
         }
 
-        static std::vector<std::string> pluginSearchPaths() {
-            return {""};
+        static Containers::Array<Containers::String> pluginSearchPaths() {
+            return {InPlaceInit, {""}};
         }
 
-        explicit AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):
+        explicit AbstractAnimal(PluginManager::AbstractManager& manager, Containers::StringView plugin):
             AbstractPlugin{manager, plugin} {}
 
-        virtual std::string name() const = 0;
+        virtual Containers::String name() const = 0;
         virtual int legCount() const = 0;
         virtual bool hasTail() const = 0;
 };

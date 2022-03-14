@@ -85,6 +85,15 @@ namespace Corrade {
     @ref Containers::ArrayView4 convenience aliases for
     @ref Containers::StaticArrayView
 
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+
+-   The @ref PluginManager library is now free of @ref std::string and
+    @ref std::vector usage in all its public APIs except the
+    @ref PluginManager::PluginMetadata class. @ref Containers::StringView,
+    @ref Containers::String, @ref Containers::ArrayView and
+    @ref Containers::Array is used instead, resulting in much less temporary
+    allocations and better compile times.
+
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
 -   The @ref TestSuite library is now completely free of all @ref std::string
@@ -468,12 +477,12 @@ namespace Corrade {
     @ref Corrade namespace, available  as @ref DefaultInit, @ref ValueInit,
     @ref NoInit, @ref NoCreate, @ref DirectInit, @ref InPlaceInit and related
     tag types
--   @ref TestSuite APIs that switched from @ref std::string to
-    @ref Containers::StringView or @ref Containers::String now include
-    @ref Corrade/Containers/StringStl.h for compatibility when building with
-    @ref CORRADE_BUILD_DEPRECATED enabled. Include this header explicitly in
-    your code if you wish to continue to rely on implicit conversion from a
-    @ref std::string.
+-   @ref PluginManager and @ref TestSuite APIs that switched from
+    @ref std::string to @ref Containers::StringView or @ref Containers::String
+    now include @ref Corrade/Containers/StringStl.h for compatibility when
+    building with @ref CORRADE_BUILD_DEPRECATED enabled. Include this header
+    explicitly in your code if you wish to continue to rely on implicit
+    conversion from a @ref std::string.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
@@ -497,6 +506,23 @@ namespace Corrade {
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make
     sense and so it's not assumed any existing code relied on it, nevertheless
     it's a subtle change in behavior that is worth mentioning.
+-   @ref PluginManager::AbstractManager::pluginList() and
+    @relativeref{PluginManager::AbstractManager,aliasList()} now return a
+    @ref Containers::Array of @ref Containers::String instead of a
+    @ref std::vector of @ref std::string. As the change was done to avoid
+    including a heavy @ref std::vector, no backwards compatibility is done.
+-   Overrides of @ref PluginManager::AbstractPlugin::pluginInterface(),
+    @relativeref{PluginManager::AbstractPlugin,pluginSuffix()} and
+    @relativeref{PluginManager::AbstractPlugin,pluginMetadataSuffix()} are now
+    expected to return a global @ref Containers::StringView, i.e. a string view
+    literal, instead of a @ref std::string. Since a global view has to be
+    explicitly made, no backwards compatibility can be provides
+-   Override of @ref PluginManager::AbstractPlugin::pluginSearchPaths() is now
+    expected to return a @ref Containers::Array of @ref Containers::String
+    instead of a @ref std::vector of @ref std::string, similarly
+    @ref PluginManager::implicitPluginSearchPaths() is changed to match that.
+    As the change was done to avoid including a heavy @ref std::vector, no
+    backwards compatibility is done.
 -   Due to changes to @ref CORRADE_SKIP() internals, passing a @ref std::string
     to it now requires an explicit @cpp #include <Corrade/Utility/DebugStl.h> @ce.
     Alternatively, if string concatenation was used, you can compose the

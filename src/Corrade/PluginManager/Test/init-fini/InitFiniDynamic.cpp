@@ -35,7 +35,7 @@ struct InitFiniDynamic: InitFiniStatic {
     static void initialize() { Utility::Debug{} << "Dynamic plugin initialized"; }
     static void finalize() { Utility::Debug{} << "Dynamic plugin finalized"; }
 
-    explicit InitFiniDynamic(AbstractManager& manager, const std::string& plugin): InitFiniStatic{manager, plugin} {}
+    explicit InitFiniDynamic(AbstractManager& manager, const Containers::StringView& plugin): InitFiniStatic{manager, plugin} {}
 };
 
 }}}

@@ -34,7 +34,7 @@ struct InitFiniStatic: InitFini {
     static void initialize();
     static void finalize();
 
-    explicit InitFiniStatic(AbstractManager& manager, const std::string& plugin): InitFini{manager, plugin} {}
+    explicit InitFiniStatic(AbstractManager& manager, const Containers::StringView& plugin): InitFini{manager, plugin} {}
 };
 
 }}}

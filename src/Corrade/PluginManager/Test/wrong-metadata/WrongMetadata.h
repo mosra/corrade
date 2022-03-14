@@ -26,10 +26,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <vector>
-
-#include "Corrade/Containers/StringStl.h" /** @todo remove once <string> is gone */
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Path.h"
 
@@ -40,19 +38,19 @@ namespace Corrade { namespace PluginManager { namespace Test {
 /* This is both a plugin interface and a plugin implementation. That's okay. */
 
 struct WrongMetadata: AbstractPlugin {
-    static std::string pluginInterface() { return {}; }
+    static Containers::StringView pluginInterface() { return {}; }
 
-    static std::vector<std::string> pluginSearchPaths() {
-        return {
+    static Containers::Array<Containers::String> pluginSearchPaths() {
+        return {InPlaceInit, {
             #ifndef CMAKE_INTDIR
             Utility::Path::join(PLUGINS_DIR, "wrong-metadata")
             #else
             Utility::Path::join(Utility::Path::join(PLUGINS_DIR, "wrong-metadata"), CMAKE_INTDIR)
             #endif
-        };
+        }};
     }
 
-    explicit WrongMetadata(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+    explicit WrongMetadata(AbstractManager& manager, Containers::StringView plugin): AbstractPlugin{manager, plugin} {}
 };
 
 }}}

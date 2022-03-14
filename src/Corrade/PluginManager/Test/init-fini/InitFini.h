@@ -26,10 +26,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <vector>
-
-#include "Corrade/Containers/StringStl.h" /** @todo remove once PluginManager is <string>-free */
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Path.h"
 
@@ -40,17 +38,17 @@
 namespace Corrade { namespace PluginManager { namespace Test {
 
 struct InitFini: AbstractPlugin {
-    static std::string pluginInterface() { return {}; }
+    static Containers::StringView pluginInterface() { return {}; }
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    static std::vector<std::string> pluginSearchPaths() {
-        return {
+    static Containers::Array<Containers::String> pluginSearchPaths() {
+        return {InPlaceInit, {
             Utility::Path::join(PLUGINS_DIR, "init-fini")
-        };
+        }};
     }
     #endif
 
-    explicit InitFini(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+    explicit InitFini(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager, plugin} {}
 };
 
 }}}

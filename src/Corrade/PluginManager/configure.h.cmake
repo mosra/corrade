@@ -24,4 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#define PLUGIN_FILENAME_SUFFIX "${CMAKE_SHARED_MODULE_SUFFIX}"
+/* A StringView literal, so it expects the Literals namespace to be used at the
+   point of use */
+#define PLUGIN_FILENAME_SUFFIX "${CMAKE_SHARED_MODULE_SUFFIX}"_s

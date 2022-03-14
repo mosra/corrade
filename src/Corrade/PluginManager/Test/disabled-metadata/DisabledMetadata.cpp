@@ -33,9 +33,9 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class DisabledMetadata: public AbstractDisabledMetadata {
     public:
-        explicit DisabledMetadata(AbstractManager& manager, const std::string& plugin): AbstractDisabledMetadata{manager, plugin} {}
+        explicit DisabledMetadata(AbstractManager& manager, const Containers::StringView& plugin): AbstractDisabledMetadata{manager, plugin} {}
 
-        std::string greet() override { return "Olaa!"; }
+        Containers::String greet() override { return "Olaa!"; }
 };
 
 }}}

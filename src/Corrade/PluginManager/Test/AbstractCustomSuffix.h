@@ -32,16 +32,16 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractCustomSuffix: public AbstractPlugin {
     public:
-        static std::string pluginInterface();
+        static Containers::StringView pluginInterface();
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        static std::vector<std::string> pluginSearchPaths();
-        static std::string pluginSuffix();
+        static Containers::Array<Containers::String> pluginSearchPaths();
+        static Containers::StringView pluginSuffix();
         #endif
-        static std::string pluginMetadataSuffix();
+        static Containers::StringView pluginMetadataSuffix();
 
-        explicit AbstractCustomSuffix(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+        explicit AbstractCustomSuffix(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager, plugin} {}
 
-        virtual std::string greet() = 0;
+        virtual Containers::String greet() = 0;
 };
 
 }}}

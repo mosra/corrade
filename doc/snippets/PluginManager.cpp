@@ -24,10 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <vector>
-
-#include "Corrade/Containers/StringStl.h" /**< @todo remove when PluginManager is <string>-free */
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Macros.h"
@@ -39,18 +37,19 @@ using namespace Corrade;
 /* [AbstractPlugin] */
 class AbstractFilesystem: public PluginManager::AbstractPlugin {
     public:
-        static std::string pluginInterface() {
-            return "cz.mosra.corrade.AbstractFilesystem/1.0";
+        static Containers::StringView pluginInterface() {
+            using namespace Containers::Literals;
+            return "cz.mosra.corrade.AbstractFilesystem/1.0"_s;
         }
 
-        static std::vector<std::string> pluginSearchPaths() {
-            return {
+        static Containers::Array<Containers::String> pluginSearchPaths() {
+            return {InPlaceInit, {
                 "corrade/filesystems",
                 Utility::Path::join(CMAKE_INSTALL_PREFIX, "lib/corrade/filesystems")
-            };
+            }};
         }
 
-        explicit AbstractFilesystem(PluginManager::AbstractManager& manager, const std::string& plugin):
+        explicit AbstractFilesystem(PluginManager::AbstractManager& manager, const Containers::StringView& plugin):
             PluginManager::AbstractPlugin{manager, plugin} {}
 
         explicit AbstractFilesystem() = default;

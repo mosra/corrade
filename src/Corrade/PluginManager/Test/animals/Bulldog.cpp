@@ -26,15 +26,16 @@
 
 #include "../AbstractAnimal.h"
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Bulldog: public AbstractAnimal {
     public:
-        explicit Bulldog(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+        explicit Bulldog(AbstractManager& manager, const Containers::StringView& plugin): AbstractAnimal{manager, plugin} {}
 
-        std::string name() override { return "Bulldog"; }
+        Containers::String name() override { return "Bulldog"; }
         int legCount() override { return 0; }
         bool hasTail() override { return false; }
 };

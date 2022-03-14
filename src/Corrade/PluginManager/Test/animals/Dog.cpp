@@ -26,12 +26,13 @@
 
 #include "Dog.h"
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-std::string Dog::name() { return "Doug"; }
+Containers::String Dog::name() { return "Doug"; }
 bool Dog::hasTail() { return true; }
 int Dog::legCount() { return 4; }
 

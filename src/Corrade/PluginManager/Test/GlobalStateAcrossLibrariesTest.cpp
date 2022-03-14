@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
-#include <string>
-
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
 #include "AbstractAnimal.h"
@@ -53,14 +51,18 @@ void GlobalStateAcrossLibrariesTest::test() {
 
     /* Canary is linked to the library, the executable should see it too unless
        CORRADE_BUILD_STATIC_UNIQUE_GLOBALS is disabled */
-    CORRADE_COMPARE(staticPluginsLoadedInALibrary(), std::vector<std::string>{"Canary"});
+    CORRADE_COMPARE_AS(staticPluginsLoadedInALibrary(),
+        Containers::arrayView<Containers::String>({"Canary"}),
+        TestSuite::Compare::Container);
 
     /* Avoid accidentally loading the dynamic plugins as well */
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
     #ifndef CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
     CORRADE_EXPECT_FAIL("CORRADE_BUILD_STATIC_UNIQUE_GLOBALS not enabled.");
     #endif
-    CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+    CORRADE_COMPARE_AS(manager.pluginList(),
+        Containers::arrayView<Containers::StringView>({"Canary"}),
+        TestSuite::Compare::Container);
 }
 
 }}}}

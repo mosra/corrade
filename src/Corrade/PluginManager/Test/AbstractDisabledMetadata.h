@@ -32,15 +32,15 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractDisabledMetadata: public AbstractPlugin {
     public:
-        static std::string pluginInterface();
+        static Containers::StringView pluginInterface();
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        static std::vector<std::string> pluginSearchPaths();
+        static Containers::Array<Containers::String> pluginSearchPaths();
         #endif
-        static std::string pluginMetadataSuffix();
+        static Containers::StringView pluginMetadataSuffix();
 
-        explicit AbstractDisabledMetadata(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+        explicit AbstractDisabledMetadata(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager, plugin} {}
 
-        virtual std::string greet() = 0;
+        virtual Containers::String greet() = 0;
 };
 
 }}}

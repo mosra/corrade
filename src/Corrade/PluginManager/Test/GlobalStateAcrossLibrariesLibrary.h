@@ -26,8 +26,6 @@
 */
 
 #include "Corrade/PluginManager/Manager.h"
-#include "Corrade/Utility/StlForwardString.h"
-#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/VisibilityMacros.h"
 
 #ifdef PluginManagerGlobalStateAcrossLibrariesLibrary_EXPORTS
@@ -38,7 +36,7 @@
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-CORRADE_GLOBALSTATEACROSSLIBRARIESLIBRARY_EXPORT std::vector<std::string> staticPluginsLoadedInALibrary();
+CORRADE_GLOBALSTATEACROSSLIBRARIESLIBRARY_EXPORT Containers::Array<Containers::String> staticPluginsLoadedInALibrary();
 
 }}}
 

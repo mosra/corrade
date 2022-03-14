@@ -26,12 +26,9 @@
 
 #include "AbstractCustomSuffix.h"
 
-#include <string>
-
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include <vector>
-
-#include "Corrade/Containers/StringStl.h" /** @todo remove once PluginManager is <string>-free */
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Path.h"
 
 #include "configure.h"
@@ -39,22 +36,24 @@
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-std::string AbstractCustomSuffix::pluginInterface() {
-    return "cz.mosra.corrade.PluginManager.Test.AbstractCustomSuffix/1.0";
+using namespace Containers::Literals;
+
+Containers::StringView AbstractCustomSuffix::pluginInterface() {
+    return "cz.mosra.corrade.PluginManager.Test.AbstractCustomSuffix/1.0"_s;
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-std::vector<std::string> AbstractCustomSuffix::pluginSearchPaths() {
-    return {Utility::Path::join(PLUGINS_DIR, "custom-suffix")};
+Containers::Array<Containers::String> AbstractCustomSuffix::pluginSearchPaths() {
+    return {InPlaceInit, {Utility::Path::join(PLUGINS_DIR, "custom-suffix")}};
 }
 
-std::string AbstractCustomSuffix::pluginSuffix() {
-    return ".mod";
+Containers::StringView AbstractCustomSuffix::pluginSuffix() {
+    return ".mod"_s;
 }
 #endif
 
-std::string AbstractCustomSuffix::pluginMetadataSuffix() {
-    return ".modconf";
+Containers::StringView AbstractCustomSuffix::pluginMetadataSuffix() {
+    return ".modconf"_s;
 }
 
 }}}

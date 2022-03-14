@@ -32,12 +32,12 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractDeletable: public AbstractPlugin {
     public:
-        static std::string pluginInterface();
+        static Containers::StringView pluginInterface();
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        static std::vector<std::string> pluginSearchPaths();
+        static Containers::Array<Containers::String> pluginSearchPaths();
         #endif
 
-        explicit AbstractDeletable(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+        explicit AbstractDeletable(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager, plugin} {}
 
         void set(unsigned int* var) { _var = var; }
 

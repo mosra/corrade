@@ -30,15 +30,10 @@
  * @brief Class @ref Corrade::PluginManager::Manager
  */
 
-#include <string>
-
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Pointer.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractManager.h"
-
-#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-/** @todo figure out a better way of passing plugin search paths (accept any container) */
-#include <vector>
-#endif
 
 namespace Corrade { namespace PluginManager {
 
@@ -52,9 +47,10 @@ for a high-level introduction.
 
 Plugins are searched in the following directories, in order:
 
-1.  If a non-empty `pluginDirectory` was passed to the @ref Manager(std::string)
-    constructor, plugins are searched there. If the directory doesn't exist,
-    no search is performed and the process stops here.
+1.  If a non-empty `pluginDirectory` was passed to the
+    @ref Manager(Containers::StringView) constructor, plugins are searched
+    there. If the directory doesn't exist, no search is performed and the
+    process stops here.
 2.  Otherwise, it's expected that given plugin interface defined
     @ref AbstractPlugin::pluginSearchPaths(). The search goes through the
     entries and stops once an existing directory is found.
@@ -165,9 +161,9 @@ template<class T> class Manager: public AbstractManager {
          *      platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
-        explicit Manager(std::string pluginDirectory = {}):
+        explicit Manager(Containers::StringView pluginDirectory = {}):
             #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), T::pluginSuffix(), T::pluginMetadataSuffix(), std::move(pluginDirectory)} {}
+            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), T::pluginSuffix(), T::pluginMetadataSuffix(), pluginDirectory} {}
             #else
             AbstractManager{T::pluginInterface(), T::pluginMetadataSuffix()} { static_cast<void>(pluginDirectory); }
             #endif
@@ -182,7 +178,7 @@ template<class T> class Manager: public AbstractManager {
          *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */
-        Containers::Pointer<T> instantiate(const std::string& plugin) {
+        Containers::Pointer<T> instantiate(Containers::StringView plugin) {
             return Containers::pointerCast<T>(instantiateInternal(plugin));
         }
 
@@ -196,7 +192,7 @@ template<class T> class Manager: public AbstractManager {
          * See its documentation for more information. The resulting plugin
          * name is then loaded using @ref instantiate() as usual.
          */
-        Containers::Pointer<T> loadAndInstantiate(const std::string& plugin) {
+        Containers::Pointer<T> loadAndInstantiate(Containers::StringView plugin) {
             return Containers::pointerCast<T>(loadAndInstantiateInternal(plugin));
         }
 };

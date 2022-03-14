@@ -31,9 +31,9 @@ namespace Corrade { namespace PluginManager { namespace Test {
 class Canary: public AbstractAnimal {
     public:
         explicit Canary();
-        explicit Canary(AbstractManager& manager, const std::string& plugin);
+        explicit Canary(AbstractManager& manager, const Containers::StringView& plugin);
 
-        std::string name() override;
+        Containers::String name() override;
         int legCount() override;
         bool hasTail() override;
 };

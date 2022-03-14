@@ -34,9 +34,12 @@
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
-#include "Corrade/Utility/StlForwardString.h"
-#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/Utility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* A lot of APIs used to take or return std::string before */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 #ifdef CORRADE_TARGET_WINDOWS
 /* I didn't find a better way to circumvent the need for including windows.h */
@@ -225,18 +228,24 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Plugin interface
          *
          * Only plugins with the same plugin interface string can be used
-         * in this plugin manager.
+         * in this plugin manager. The returned view is always both
+         * @ref Containers::StringViewFlag::NullTerminated and
+         * @ref Containers::StringViewFlag::Global.
          */
-        std::string pluginInterface() const;
+        Containers::StringView pluginInterface() const;
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /**
          * @brief Plugin directory
          *
+         * The returned view points to memory owned by the plugin manager and
+         * is only guaranteed to stay valid until the next call to
+         * @ref setPluginDirectory() or until the manager gets destroyed. The
+         * view is always @ref Containers::StringViewFlag::NullTerminated.
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
-        std::string pluginDirectory() const;
+        Containers::StringView pluginDirectory() const;
 
         /**
          * @brief Set another plugin directory
@@ -244,11 +253,20 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins. If the directory
          * doesn't exist, no new plugins are added and only unloaded plugins
-         * get removed. The directory is expected to be in UTF-8.
+         * get removed.
+         *
+         * Expects that the @p directory is in UTF-8. If it's already
+         * @ref Containers::StringViewFlag::NullTerminated, it's passed to
+         * system APIs directly, otherwise a null-terminated copy is allocated
+         * first. On Windows the path is instead first converted to UTF-16
+         * using @ref Utility::Unicode::widen() and then passed to system APIs.
+         *
+         * If @p directory is @ref Containers::StringViewFlag::Global, no
+         * internal copy of the string is made.
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
-        void setPluginDirectory(std::string directory);
+        void setPluginDirectory(Containers::StringView directory);
 
         /**
          * @brief Reload plugin directory
@@ -273,25 +291,38 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * Note that after calling @ref setPluginDirectory() or @ref reloadPluginDirectory()
          * this preference gets reset and you may need to call this function
          * again.
+         *
+         * If @p alias is @ref Containers::StringViewFlag::Global, no internal
+         * copy of the string is made.
          */
-        void setPreferredPlugins(const std::string& alias, std::initializer_list<std::string> plugins);
+        void setPreferredPlugins(Containers::StringView alias, std::initializer_list<Containers::StringView> plugins);
 
         /**
          * @brief List of all available plugin names
          *
          * Returns a list of names that correspond to concrete unique static or
          * dynamic plugins.
+         *
+         * The returned views point to memory owned by the plugin manager and
+         * are only guaranteed to stay valid until the next call to
+         * @ref setPluginDirectory(), @ref reloadPluginDirectory(), @ref load()
+         * or @ref Manager::loadAndInstantiate() or until the manager gets
+         * destroyed.
          * @see @ref aliasList()
          */
-        std::vector<std::string> pluginList() const;
+        Containers::Array<Containers::StringView> pluginList() const;
 
         /**
          * @brief List of all available alias names
          *
          * In addition to everything returned by @ref pluginList() contains
-         * also all plugin aliases.
+         * also all plugin aliases. The returned views point to memory owned by
+         * the plugin manager and are only guaranteed to stay valid until the
+         * next call to @ref setPluginDirectory(), @ref reloadPluginDirectory(),
+         * @ref load() or @ref Manager::loadAndInstantiate() or until the
+         * manager gets destroyed.
          */
-        std::vector<std::string> aliasList() const;
+        Containers::Array<Containers::StringView> aliasList() const;
 
         /**
          * @brief Plugin metadata
@@ -300,8 +331,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * plugin is not found.
          * @see @ref AbstractPlugin::metadata()
          */
-        PluginMetadata* metadata(const std::string& plugin);
-        const PluginMetadata* metadata(const std::string& plugin) const; /**< @overload */
+        PluginMetadata* metadata(Containers::StringView plugin);
+        const PluginMetadata* metadata(Containers::StringView plugin) const; /**< @overload */
 
         /**
          * @brief Load state of a plugin
@@ -312,7 +343,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * or @ref LoadState::WrongMetadataFile.
          * @see @ref load(), @ref unload()
          */
-        LoadState loadState(const std::string& plugin) const;
+        LoadState loadState(Containers::StringView plugin) const;
 
         /**
          * @brief Load a plugin
@@ -336,10 +367,15 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * after calling @ref unload() on it, until next call to
          * @ref setPluginDirectory() or @ref reloadPluginDirectory().
          *
-         * @note If passing a file path, the implementation expects forward
-         *      slashes as directory separators. Use @ref Utility::Path::fromNativeSeparators()
-         *      to convert from platform-specific format.
+         * If passing a file path, it's expected to be in UTF-8 and have
+         * forward slashes as directory separators. Use
+         * @ref Utility::Path::fromNativeSeparators() to convert from
+         * platform-specific format. On Windows the path is first converted to
+         * UTF-16 using @ref Utility::Unicode::widen() and then passed to
+         * system APIs.
          *
+         * An internal copy of @p plugin is made if it's not
+         * @ref Containers::StringViewFlag::Global.
          * @see @ref unload(), @ref loadState(), @ref Manager::instantiate(),
          *      @ref Manager::loadAndInstantiate()
          * @partialsupport On platforms without
@@ -347,7 +383,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      returns always either @ref LoadState::Static or
          *      @ref LoadState::NotFound.
          */
-        LoadState load(const std::string& plugin);
+        LoadState load(Containers::StringView plugin);
 
         /**
          * @brief Unload a plugin
@@ -364,7 +400,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      returns always either @ref LoadState::Static or
          *      @ref LoadState::NotFound.
          */
-        LoadState unload(const std::string& plugin);
+        LoadState unload(Containers::StringView plugin);
 
         /**
          * @brief Register an external manager for resolving inter-manager dependencies
@@ -392,7 +428,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     public:
     #endif
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
-        typedef void* (*Instancer)(AbstractManager&, const std::string&);
+        typedef void* (*Instancer)(AbstractManager&, const Containers::StringView&);
         static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
         static void ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin);
 
@@ -402,25 +438,25 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     protected:
     #endif
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginSuffix, std::string pluginConfSuffix, std::string pluginDirectory);
+        explicit AbstractManager(Containers::StringView pluginInterface, Containers::ArrayView<const Containers::String> pluginSearchPaths, Containers::StringView pluginSuffix, Containers::StringView pluginConfSuffix, Containers::StringView pluginDirectory);
         #else
-        explicit AbstractManager(std::string pluginInterface, std::string pluginConfSuffix);
+        explicit AbstractManager(Containers::StringView pluginInterface, Containers::StringView pluginConfSuffix);
         #endif
 
-        Containers::Pointer<AbstractPlugin> instantiateInternal(const std::string& plugin);
-        Containers::Pointer<AbstractPlugin> loadAndInstantiateInternal(const std::string& plugin);
+        Containers::Pointer<AbstractPlugin> instantiateInternal(Containers::StringView plugin);
+        Containers::Pointer<AbstractPlugin> loadAndInstantiateInternal(Containers::StringView plugin);
 
     private:
         struct State;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(const std::string& name, Containers::Pointer<Plugin>&& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(Containers::StringView name, Containers::Pointer<Plugin>&& plugin);
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
-        CORRADE_PLUGINMANAGER_LOCAL void reregisterInstance(const std::string& plugin, AbstractPlugin& oldInstance, AbstractPlugin* newInstance);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(Containers::StringView plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void reregisterInstance(Containers::StringView plugin, AbstractPlugin& oldInstance, AbstractPlugin* newInstance);
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
-        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, const std::string& filename);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, Containers::StringView filename);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
@@ -431,9 +467,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 namespace Implementation {
 
 struct StaticPlugin {
-    /* Assuming both plugin and interface are static strings produced by the
-       CORRADE_PLUGIN_REGISTER() macro, so there's no need to make an allocated
-       copy of them, just a direct reference */
+    /* Both the plugin and interface are produced by the
+       CORRADE_PLUGIN_REGISTER() macro, thus can be assumed to be global
+       literals */
     const char* plugin;
     const char* interface;
     AbstractManager::Instancer instancer;
@@ -505,7 +541,7 @@ of application execution. It's also safe to call this macro more than once.
     resourceFinalizer_##name();
 
 /** @brief Plugin version */
-#define CORRADE_PLUGIN_VERSION 6
+#define CORRADE_PLUGIN_VERSION 7
 
 /** @hideinitializer
 @brief Register a static or dynamic plugin
@@ -540,6 +576,11 @@ See @ref plugin-management for more information about plugin compilation.
     running into linker errors with `pluginImporter_`, this could be the
     reason.
 */
+/* In the following macros, Containers::StringView is used instead of const
+   char* to have the possibility of propagating the global annotation of a
+   string literal passed to instantiate() all the way to AbstractPlugin
+   internals. It's however passed as const& to make it possible for people to
+   implement plugins without even having to include the StringView header. */
 #ifdef CORRADE_STATIC_PLUGIN
 #define CORRADE_PLUGIN_REGISTER(name, className, interface_)                \
     namespace {                                                             \
@@ -550,8 +591,8 @@ See @ref plugin-management for more information about plugin compilation.
         staticPlugin_##name.plugin = #name;                                 \
         staticPlugin_##name.interface = interface_;                         \
         staticPlugin_##name.instancer =                                     \
-            [](Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) -> void* { \
-                return new className(manager, plugin);                      \
+            [](Corrade::PluginManager::AbstractManager& manager, const Corrade::Containers::StringView& plugin) -> void* { \
+                return new className{manager, plugin};                      \
             };                                                              \
         staticPlugin_##name.initializer = className::initialize;            \
         staticPlugin_##name.finalizer = className::finalize;                \
@@ -567,8 +608,8 @@ See @ref plugin-management for more information about plugin compilation.
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; } \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin); \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const Corrade::Containers::StringView& plugin); \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const Corrade::Containers::StringView& plugin) \
         { return new className{manager, plugin}; }                          \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer();              \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer()               \

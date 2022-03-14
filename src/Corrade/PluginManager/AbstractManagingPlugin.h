@@ -89,7 +89,10 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * all your subclasses.
          * @see @ref manager(), @ref metadata()
          */
-        explicit AbstractManagingPlugin(AbstractManager& manager, const std::string& plugin):
+        /* The plugin name is passed as a const& to make it possible for people
+           to implement plugins without even having to include the StringView
+           header. */
+        explicit AbstractManagingPlugin(AbstractManager& manager, const Containers::StringView& plugin):
             AbstractPlugin{manager, plugin} {}
 
     protected:

@@ -25,11 +25,11 @@
 */
 
 #include <sstream>
-#include <vector>
 
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #include "AbstractAnimal.h"
@@ -75,7 +75,9 @@ void ImportStaticTest::importOnce() {
     {
         /* Avoid importing all dynamic plugins as well */
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 
     importPlugin();
@@ -92,14 +94,18 @@ void ImportStaticTest::importOnce() {
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
             CORRADE_COMPARE(out.str(), "");
-            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+            CORRADE_COMPARE_AS(manager.pluginList(),
+                Containers::arrayView<Containers::StringView>({"Canary"}),
+                TestSuite::Compare::Container);
         }
     }
 
     /* Plugin list is empty again */
     {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 }
 
@@ -108,7 +114,9 @@ void ImportStaticTest::importTwice() {
     {
         /* Avoid importing all dynamic plugins as well */
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 
     importPlugin();
@@ -127,20 +135,26 @@ void ImportStaticTest::importTwice() {
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
             CORRADE_COMPARE(out.str(), "");
-            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+            CORRADE_COMPARE_AS(manager.pluginList(),
+                Containers::arrayView<Containers::StringView>({"Canary"}),
+                TestSuite::Compare::Container);
 
         /* And instantiating everything second time should have no issues either */
         } {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
             CORRADE_COMPARE(out.str(), "");
-            CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+            CORRADE_COMPARE_AS(manager.pluginList(),
+                Containers::arrayView<Containers::StringView>({"Canary"}),
+                TestSuite::Compare::Container);
         }
     }
 
     /* Plugin list is empty again */
     {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 }
 
@@ -149,7 +163,9 @@ void ImportStaticTest::importTwiceMixedWithAnother() {
     {
         /* Avoid importing all dynamic plugins as well */
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 
     importPlugin();
@@ -170,20 +186,26 @@ void ImportStaticTest::importTwiceMixedWithAnother() {
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
             CORRADE_COMPARE(out.str(), "");
-            CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+            CORRADE_COMPARE_AS(manager.pluginList(),
+                Containers::arrayView<Containers::StringView>({"Canary", "Dird"}),
+                TestSuite::Compare::Container);
 
         /* And instantiating everything second time should have no issues either */
         } {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
             CORRADE_COMPARE(out.str(), "");
-            CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+            CORRADE_COMPARE_AS(manager.pluginList(),
+                Containers::arrayView<Containers::StringView>({"Canary", "Dird"}),
+                TestSuite::Compare::Container);
         }
     }
 
     /* Plugin list is empty again */
     {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+        CORRADE_COMPARE_AS(manager.pluginList(),
+            Containers::ArrayView<const Containers::StringView>{},
+            TestSuite::Compare::Container);
     }
 }
 

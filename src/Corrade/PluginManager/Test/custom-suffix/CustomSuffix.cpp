@@ -33,10 +33,10 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class CustomSuffix: public AbstractCustomSuffix {
     public:
-        explicit CustomSuffix(AbstractManager& manager, const std::string& plugin): AbstractCustomSuffix{manager, plugin} {}
+        explicit CustomSuffix(AbstractManager& manager, const Containers::StringView& plugin): AbstractCustomSuffix{manager, plugin} {}
 
-        std::string greet() override {
-            return configuration().value("greeting");
+        Containers::String greet() override {
+            return configuration().value<Containers::String>("greeting");
         }
 };
 

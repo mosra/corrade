@@ -43,10 +43,9 @@
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo drop once PluginMetadata is <string>-free */
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/Resource.h"
-#include "Corrade/Utility/String.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/Utility/Path.h"
@@ -70,6 +69,8 @@
 #endif
 
 namespace Corrade { namespace PluginManager {
+
+using namespace Containers::Literals;
 
 struct AbstractManager::Plugin {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -103,7 +104,7 @@ struct AbstractManager::Plugin {
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* Constructor for dynamic plugins */
-    explicit Plugin(std::string name, const std::string& metadata);
+    explicit Plugin(Containers::StringView name, Containers::StringView metadata);
     #endif
 
     /* Constructor for static plugins */
@@ -118,29 +119,30 @@ struct AbstractManager::Plugin {
 };
 
 struct AbstractManager::State {
-    explicit State(std::string&& pluginInterface,
+    explicit State(Containers::StringView pluginInterface,
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        std::string&& pluginSuffix,
+        Containers::StringView pluginSuffix,
         #endif
-        std::string&& pluginMetadataSuffix):
-        pluginInterface{std::move(pluginInterface)},
+        Containers::StringView pluginMetadataSuffix):
+        pluginInterface{pluginInterface},
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        pluginSuffix{std::move(pluginSuffix)},
+        pluginSuffix{pluginSuffix},
         #endif
-        pluginMetadataSuffix{std::move(pluginMetadataSuffix)}
+        pluginMetadataSuffix{pluginMetadataSuffix}
     {}
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    std::string pluginDirectory;
+    Containers::String pluginDirectory;
     #endif
-    std::string pluginInterface;
+    /* These are all global, checked in the AbstractManager constructor */
+    Containers::StringView pluginInterface;
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    std::string pluginSuffix;
+    Containers::StringView pluginSuffix;
     #endif
-    std::string pluginMetadataSuffix;
+    Containers::StringView pluginMetadataSuffix;
 
-    std::map<std::string, Containers::Pointer<Plugin>> plugins;
-    std::map<std::string, Plugin&> aliases;
+    std::map<Containers::String, Containers::Pointer<Plugin>> plugins;
+    std::map<Containers::String, Plugin&> aliases;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     std::set<AbstractManager*> externalManagers;
@@ -234,16 +236,22 @@ void AbstractManager::ejectStaticPlugin(int version, Implementation::StaticPlugi
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginSuffix, std::string pluginMetadataSuffix, std::string pluginDirectory):
+AbstractManager::AbstractManager(const Containers::StringView pluginInterface, const Containers::ArrayView<const Containers::String> pluginSearchPaths, const Containers::StringView pluginSuffix, const Containers::StringView pluginMetadataSuffix, const Containers::StringView pluginDirectory):
+    _state{InPlaceInit, pluginInterface, pluginSuffix, pluginMetadataSuffix}
 #else
-AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginMetadataSuffix):
+AbstractManager::AbstractManager(const Containers::StringView pluginInterface, const Containers::StringView pluginMetadataSuffix):
+    _state{InPlaceInit, pluginInterface, pluginMetadataSuffix}
 #endif
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    _state{InPlaceInit, std::move(pluginInterface), std::move(pluginSuffix), std::move(pluginMetadataSuffix)}
-    #else
-    _state{InPlaceInit, std::move(pluginInterface), std::move(pluginMetadataSuffix)}
-    #endif
 {
+    CORRADE_ASSERT(pluginInterface.flags() & Containers::StringViewFlag::Global,
+        "PluginManager::AbstractPlugin::pluginInterface(): returned view is not global:" << pluginInterface, );
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_ASSERT(pluginSuffix.flags() & Containers::StringViewFlag::Global,
+        "PluginManager::AbstractPlugin::pluginSuffix(): returned view is not global:" << pluginSuffix, );
+    #endif
+    CORRADE_ASSERT(pluginMetadataSuffix.flags() & Containers::StringViewFlag::Global,
+        "PluginManager::AbstractPlugin::pluginMetadataSuffix(): returned view is not global:" << pluginMetadataSuffix, );
+
     /* Add static plugins which have the same interface and don't have a
        manager assigned to them (i.e, aren't in the map yet). */
     for(const Implementation::StaticPlugin* staticPlugin = globalStaticPlugins; staticPlugin; staticPlugin = Containers::Implementation::forwardListNext(*staticPlugin)) {
@@ -253,8 +261,8 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         /* Assign the plugin to this manager, parse its metadata and
            initialize it (unless the plugin is metadata-less) */
         Utility::Configuration configuration;
-        if(!_state->pluginMetadataSuffix.empty()) {
-            Utility::Resource rs{std::string{"CorradeStaticPlugin_"} + staticPlugin->plugin};
+        if(_state->pluginMetadataSuffix) {
+            Utility::Resource rs{"CorradeStaticPlugin_"_s + staticPlugin->plugin};
             std::istringstream metadata(rs.getString(staticPlugin->plugin + _state->pluginMetadataSuffix));
             configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         }
@@ -262,7 +270,11 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         /* Insert the plugin into our list. The names should be globally
            unique, so the insertion is expected to always succeed (if it
            wouldn't, we would have a leak here). */
-        const auto inserted = _state->plugins.emplace(staticPlugin->plugin, Containers::pointer(new Plugin{*staticPlugin, std::move(configuration)}));
+        const auto inserted = _state->plugins.emplace(
+            /* The plugin name is guaranteed to be a global literal even though
+               it's just a const char*, wrap it without copying */
+            Containers::String::nullTerminatedView(staticPlugin->plugin),
+            Containers::pointer(new Plugin{*staticPlugin, std::move(configuration)}));
         CORRADE_INTERNAL_ASSERT(inserted.second);
         Plugin& p = *inserted.first->second;
 
@@ -271,9 +283,17 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         /* The plugin is the best version of itself. If there was already
            an alias for this name, replace it. */
         {
-            const auto alias = _state->aliases.find(inserted.first->first);
+            /* Of course std::map::find() would allocate a new string in order
+               to find it, prevent that from happening by wrapping it again */
+            /** @todo clean this up once we kill std::map */
+            const auto alias = _state->aliases.find(Containers::String::nullTerminatedView(staticPlugin->plugin));
             if(alias != _state->aliases.end()) _state->aliases.erase(alias);
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({inserted.first->first, p}).second);
+            /* And here as well -- wrap the string to avoid a copy */
+            /* Libc++ frees the passed Plugin& reference when using
+               emplace(), causing double-free memory corruption later.
+               Everything is okay with insert(). */
+            /** @todo put back emplace() here when libc++ is fixed */
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({Containers::String::nullTerminatedView(staticPlugin->plugin), p}).second);
         }
 
         /* Add aliases to the list (only the ones that aren't already there
@@ -289,19 +309,19 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If plugin directory is set, use it, otherwise loop through */
-    if(!pluginDirectory.empty()) setPluginDirectory(std::move(pluginDirectory));
+    if(pluginDirectory) setPluginDirectory(pluginDirectory);
     else {
-        CORRADE_ASSERT(!pluginSearchPaths.empty(),
+        CORRADE_ASSERT(!pluginSearchPaths.isEmpty(),
             "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
 
         const Containers::Optional<Containers::String> executableLocation = Utility::Path::executableLocation();
         CORRADE_INTERNAL_ASSERT(executableLocation);
         const Containers::StringView executableDir = Utility::Path::split(*executableLocation).first();
-        for(const std::string& path: pluginSearchPaths) {
+        for(const Containers::StringView path: pluginSearchPaths) {
             const Containers::String fullPath = Utility::Path::join(executableDir, path);
             if(!Utility::Path::exists(fullPath)) continue;
 
-            setPluginDirectory(std::move(fullPath));
+            setPluginDirectory(fullPath);
             break;
         }
 
@@ -311,7 +331,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
            CorradeUtility.dll as a plugin. Don't print the warning in case
            we have static plugins (the aliases are non-empty) -- in that case
            assume the user might want to only use static plugins. */
-        if(_state->pluginDirectory.empty() && _state->aliases.empty())
+        if(!_state->pluginDirectory && _state->aliases.empty())
             Utility::Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
     }
     #endif
@@ -340,7 +360,7 @@ AbstractManager::~AbstractManager() {
     #endif
 
     /* Unload all plugins */
-    for(std::pair<const std::string, Containers::Pointer<Plugin>>& plugin: _state->plugins) {
+    for(std::pair<const Containers::String, Containers::Pointer<Plugin>>& plugin: _state->plugins) {
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /* Try to unload the plugin (and all plugins that depend on it) */
         unloadRecursiveInternal(*plugin.second);
@@ -373,16 +393,16 @@ LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
     return after;
 }
 
-std::string AbstractManager::pluginInterface() const {
+Containers::StringView AbstractManager::pluginInterface() const {
     return _state->pluginInterface;
 }
 
-std::string AbstractManager::pluginDirectory() const {
+Containers::StringView AbstractManager::pluginDirectory() const {
     return _state->pluginDirectory;
 }
 
-void AbstractManager::setPluginDirectory(std::string directory) {
-    _state->pluginDirectory = std::move(directory);
+void AbstractManager::setPluginDirectory(const Containers::StringView directory) {
+    _state->pluginDirectory = Containers::String::nullTerminatedGlobalView(directory);
 
     /* Remove aliases for unloaded plugins from the container. They need to be
        removed before plugins themselves */
@@ -413,7 +433,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
             Utility::Path::ListFlag::SkipDirectories|
             Utility::Path::ListFlag::SkipDotAndDotDot|
             Utility::Path::ListFlag::SortAscending);
-        if(d) for(const Containers::String& filename: *d) {
+        if(d) for(const Containers::StringView filename: *d) {
             /* File doesn't have module suffix, continue to next */
             if(!filename.hasSuffix(_state->pluginSuffix))
                 continue;
@@ -425,15 +445,14 @@ void AbstractManager::setPluginDirectory(std::string directory) {
             if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
             registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
-                _state->pluginMetadataSuffix.empty() ? std::string{} :
-                    std::string{Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix)}}));
+                _state->pluginMetadataSuffix ? Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix) : Containers::String{}}));
         }
     }
 
     /* If some of the currently loaded plugins aliased plugins that were in the
        old plugin directory, these are no longer there. Refresh the alias list
        with the new plugins. */
-    for(std::pair<const std::string, Containers::Pointer<Plugin>>& p: _state->plugins) {
+    for(std::pair<const Containers::String, Containers::Pointer<Plugin>>& p: _state->plugins) {
         /* Add aliases to the list (only the ones that aren't already there are
            added, calling insert() won't overwrite the existing value) */
         for(const std::string& alias: p.second->metadata._provides) {
@@ -451,66 +470,92 @@ void AbstractManager::reloadPluginDirectory() {
 }
 #endif
 
-void AbstractManager::setPreferredPlugins(const std::string& alias, const std::initializer_list<std::string> plugins) {
-    auto foundAlias = _state->aliases.find(alias);
+void AbstractManager::setPreferredPlugins(Containers::StringView alias, const std::initializer_list<Containers::StringView> plugins) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto foundAlias = _state->aliases.find(Containers::String::nullTerminatedView(alias));
     CORRADE_ASSERT(foundAlias != _state->aliases.end(),
         "PluginManager::Manager::setPreferredPlugins():" << alias << "is not a known alias", );
 
     /* Replace the alias with the first candidate that exists */
-    for(const std::string& plugin: plugins) {
-        auto foundPlugin = _state->plugins.find(plugin);
+    for(const Containers::StringView plugin: plugins) {
+        /* Of course std::map::find() would allocate a new String in order to
+           find it, prevent that from happening by wrapping a view */
+        /** @todo clean this up once we kill std::map */
+        auto foundPlugin = _state->plugins.find(Containers::String::nullTerminatedView(plugin));
         if(foundPlugin == _state->plugins.end())
             continue;
 
         CORRADE_ASSERT(std::find(foundPlugin->second->metadata.provides().begin(), foundPlugin->second->metadata.provides().end(), alias) != foundPlugin->second->metadata.provides().end(),
             "PluginManager::Manager::setPreferredPlugins():" << plugin << "does not provide" << alias, );
         _state->aliases.erase(foundAlias);
-        _state->aliases.insert({alias, *foundPlugin->second});
+        /* Libc++ frees the passed Plugin& reference when using emplace(),
+           causing double-free memory corruption later. Everything is okay with
+           insert(). */
+        /** @todo put back emplace() here when libc++ is fixed */
+        _state->aliases.insert({Containers::String::nullTerminatedGlobalView(alias), *foundPlugin->second});
         break;
     }
 }
 
-std::vector<std::string> AbstractManager::pluginList() const {
-    std::vector<std::string> names;
-    for(const std::pair<const std::string, Containers::Pointer<Plugin>>& plugin: _state->plugins)
-        names.push_back(plugin.first);
+Containers::Array<Containers::StringView> AbstractManager::pluginList() const {
+    Containers::Array<Containers::StringView> names{NoInit, _state->plugins.size()};
+    std::size_t i = 0;
+    for(const std::pair<const Containers::String, Containers::Pointer<Plugin>>& plugin: _state->plugins)
+        new(&names[i++]) Containers::StringView{plugin.first};
     return names;
 }
 
-std::vector<std::string> AbstractManager::aliasList() const {
-    std::vector<std::string> names;
-    for(const auto& alias: _state->aliases) names.push_back(alias.first);
+Containers::Array<Containers::StringView> AbstractManager::aliasList() const {
+    Containers::Array<Containers::StringView> names{NoInit, _state->aliases.size()};
+    std::size_t i = 0;
+    for(const std::pair<const Containers::String, Plugin&>& alias: _state->aliases)
+        new(&names[i++]) Containers::StringView{alias.first};
     return names;
 }
 
-const PluginMetadata* AbstractManager::metadata(const std::string& plugin) const {
-    auto found = _state->aliases.find(plugin);
+const PluginMetadata* AbstractManager::metadata(const Containers::StringView plugin) const {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     if(found != _state->aliases.end()) return &found->second.metadata;
 
     return nullptr;
 }
 
-PluginMetadata* AbstractManager::metadata(const std::string& plugin) {
-    auto found = _state->aliases.find(plugin);
+PluginMetadata* AbstractManager::metadata(const Containers::StringView plugin) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     if(found != _state->aliases.end()) return &found->second.metadata;
 
     return nullptr;
 }
 
-LoadState AbstractManager::loadState(const std::string& plugin) const {
-    auto found = _state->aliases.find(plugin);
+LoadState AbstractManager::loadState(const Containers::StringView plugin) const {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     if(found != _state->aliases.end()) return found->second.loadState;
 
     return LoadState::NotFound;
 }
 
-LoadState AbstractManager::load(const std::string& plugin) {
+LoadState AbstractManager::load(const Containers::StringView plugin) {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* File path passed, load directly */
-    if(Utility::String::endsWith(plugin, _state->pluginSuffix)) {
+    if(plugin.hasSuffix(_state->pluginSuffix)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
         const Containers::StringView filename = Utility::Path::split(plugin).second();
         const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix.size());
+        /* std::map::find() would allocate a new String in order to find it,
+           unfortunately as the name slice is not null-terminated we can't
+           prevent anything with String::nullTerminatedView() */
+        /** @todo clean this up once we kill std::map */
         const auto found = _state->plugins.find(name);
         if(found != _state->plugins.end() && (found->second->loadState & LoadState::Loaded)) {
             Utility::Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
@@ -521,8 +566,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
         Containers::Pointer<Plugin> data{new Plugin{name,
-            _state->pluginMetadataSuffix.empty() ? std::string{} :
-                std::string{Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix)}}};
+            _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}}};
         const LoadState state = loadInternal(*data, plugin);
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
@@ -547,7 +591,10 @@ LoadState AbstractManager::load(const std::string& plugin) {
     }
     #endif
 
-    auto found = _state->aliases.find(plugin);
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     if(found != _state->aliases.end()) {
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         return loadInternal(found->second);
@@ -570,7 +617,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     return loadInternal(plugin, Utility::Path::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
 }
 
-LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filename) {
+LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView filename) {
     /* Plugin is not ready to load */
     if(plugin.loadState != LoadState::NotLoaded) {
         if(!(plugin.loadState & (LoadState::Static|LoadState::Loaded)))
@@ -608,7 +655,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
     /* Open plugin file, make symbols globally available for next libs (which
        may depend on this) */
     #ifndef CORRADE_TARGET_WINDOWS
-    void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
+    void* module = dlopen(Containers::String::nullTerminatedView(filename).data(), RTLD_NOW|RTLD_GLOBAL);
     #else
     HMODULE module = LoadLibraryW(Utility::Unicode::widen(filename));
     #endif
@@ -801,8 +848,11 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
 }
 #endif
 
-LoadState AbstractManager::unload(const std::string& plugin) {
-    auto found = _state->aliases.find(plugin);
+LoadState AbstractManager::unload(const Containers::StringView plugin) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     if(found != _state->aliases.end()) {
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         return unloadInternal(found->second);
@@ -922,14 +972,21 @@ void AbstractManager::registerExternalManager(AbstractManager& manager) {
     #endif
 }
 
-void AbstractManager::registerDynamicPlugin(const std::string& name, Containers::Pointer<Plugin>&& plugin) {
-    /* Insert plugin to list */
+void AbstractManager::registerDynamicPlugin(const Containers::StringView name, Containers::Pointer<Plugin>&& plugin) {
+    /* Insert the plugin to the map. The name is never null terminated so even
+       if it would be global in case of an unlikely scenario of coming from a
+       filename as a string view literal passed directly to load(), we won't
+       save anything */
     const auto result = _state->plugins.emplace(name, std::move(plugin));
     CORRADE_INTERNAL_ASSERT(result.second);
 
     /* The plugin is the best version of itself. If there was already an
        alias for this name, replace it. */
     {
+        /* std::map::find() would allocate a new String in order to find it,
+           unfortunately as the name slice is never null-terminated we can't
+           prevent anything with String::nullTerminatedView() */
+        /** @todo clean this up once we kill std::map */
         const auto alias = _state->aliases.find(name);
         if(alias != _state->aliases.end()) _state->aliases.erase(alias);
         CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({name, *result.first->second}).second);
@@ -948,9 +1005,12 @@ void AbstractManager::registerDynamicPlugin(const std::string& name, Containers:
 
 /* This function takes an alias name, since at the time of instantiation the
    real plugin name is not yet known */
-void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
+void AbstractManager::registerInstance(const Containers::StringView plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
     /** @todo assert proper interface */
-    auto found = _state->aliases.find(plugin);
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
     CORRADE_ASSERT(found != _state->aliases.end(),
         "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
@@ -962,8 +1022,11 @@ void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin
    done in order to avoid a nasty interaction with setPreferredPlugins() and
    potential other APIs that redirect an alias to some other plugin, which
    would then lead to the instance not being found */
-void AbstractManager::reregisterInstance(const std::string& plugin, AbstractPlugin& oldInstance, AbstractPlugin* const newInstance) {
-    auto found = _state->plugins.find(plugin);
+void AbstractManager::reregisterInstance(const Containers::StringView plugin, AbstractPlugin& oldInstance, AbstractPlugin* const newInstance) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->plugins.find(Containers::String::nullTerminatedView(plugin));
     CORRADE_INTERNAL_ASSERT(found != _state->plugins.end());
 
     auto pos = std::find(found->second->instances.begin(), found->second->instances.end(), &oldInstance);
@@ -975,8 +1038,11 @@ void AbstractManager::reregisterInstance(const std::string& plugin, AbstractPlug
     else found->second->instances.erase(pos);
 }
 
-Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const std::string& plugin) {
-    auto found = _state->aliases.find(plugin);
+Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const Containers::StringView plugin) {
+    /* Of course std::map::find() would allocate a new String in order to
+       find it, prevent that from happening by wrapping a view */
+    /** @todo clean this up once we kill std::map */
+    auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
 
     CORRADE_ASSERT(found != _state->aliases.end() && (found->second.loadState & LoadState::Loaded),
         "PluginManager::Manager::instantiate(): plugin" << plugin << "is not loaded", nullptr);
@@ -984,7 +1050,7 @@ Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const s
     return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, plugin)));
 }
 
-Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
+Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(const Containers::StringView plugin) {
     if(!(load(plugin) & LoadState::Loaded)) return nullptr;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -1003,10 +1069,10 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, instancer{nullptr}, module{nullptr} {
+AbstractManager::Plugin::Plugin(const Containers::StringView name, const Containers::StringView metadata): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{name, configuration}, instancer{nullptr}, module{nullptr} {
     /* If the path is empty, we don't use any plugin configuration file, so
        don't do any checks. */
-    if(metadata.empty()) {
+    if(!metadata) {
         loadState = LoadState::NotLoaded;
     } else {
         /** @todo ahem, this brancing seems a bit convoluted, error if

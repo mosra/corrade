@@ -26,15 +26,16 @@
 
 #include "Dog.h"
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class PitBull: public Dog {
     public:
-        explicit PitBull(AbstractManager& manager, const std::string& plugin): Dog{manager, plugin} {}
+        explicit PitBull(AbstractManager& manager, const Containers::StringView& plugin): Dog{manager, plugin} {}
 
-        std::string name() override { return "Rodriguez"; }
+        Containers::String name() override { return "Rodriguez"; }
 };
 
 }}}

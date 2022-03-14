@@ -32,7 +32,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class OldBread: public AbstractFood {
     public:
-        explicit OldBread(AbstractManager& manager, const std::string& plugin): AbstractFood{manager, plugin} {}
+        explicit OldBread(AbstractManager& manager, const Containers::StringView& plugin): AbstractFood{manager, plugin} {}
 
         bool isTasty() { return false; }
         int weight() { return 50; }

@@ -33,11 +33,11 @@
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
-#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/Utility.h"
 
-#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include "Corrade/Utility/StlForwardVector.h"
+#ifdef CORRADE_BUILD_DEPRECATED
+/* A lot of APIs used to take or return std::string before */
+#include "Corrade/Containers/StringStl.h"
 #endif
 
 namespace Corrade { namespace PluginManager {
@@ -62,8 +62,8 @@ Plugin interface classes have to provide the following:
     and finalize global state of given plugin library. See their documentation
     for details.
 -   A constructor with signature the same as
-    @ref AbstractPlugin(AbstractManager&, const std::string&) so the plugin
-    manager can load them
+    @ref AbstractPlugin(AbstractManager&, const Containers::StringView&) so the
+    plugin manager can load them
 -   A constructor with signature the same as @ref AbstractPlugin(), in case it
     makes sense to instantiate the plugin directly without a plugin manager
 
@@ -87,21 +87,27 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         /**
          * @brief Plugin interface string
          *
-         * Plugins implementing given interface have to define exactly the same
-         * interface string, otherwise they won't be loaded. This can be used
-         * to ensure the interface and plugin is correctly paired even in case
-         * where there is no ABI mismatch. A good practice is to use a "Java
+         * Returns a string that is then expected to be matched by plugin
+         * implementations in the @ref CORRADE_PLUGIN_REGISTER() macro call.
+         * Plugins that don't define the exact same interface string won't be
+         * loaded. This can be used to ensure the interface and plugin is
+         * correctly paired even in case where there is no ABI mismatch.
+         *
+         * You should override this function in your plugin interface and
+         * return something meaningful. A good practice is to use a "Java
          * package name"-style syntax, for example
          * @cpp "cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0" @ce. The
          * interface name should also contain version identifier to make sure
          * the plugin will not be loaded with incompatible interface version.
+         * The returned view is expected to be
+         * @ref Containers::StringViewFlag::Global.
          *
          * The default implementation returns an empty string, which is
          * technically valid, but note that keeping it empty will inhibit
          * various sanity checks when loading dynamic plugins, leading to
          * crashes and security issues.
          */
-        static std::string pluginInterface();
+        static Containers::StringView pluginInterface();
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /**
@@ -113,12 +119,15 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * entries have more priority than later, search stops once a directory
          * that exists is found. By default this function returns an empty
          * list, you can use the convenience @ref implicitPluginSearchPaths()
-         * helper for a consistent behavior on all platforms. See also
+         * helper for a consistent behavior on all platforms. If not using the
+         * helper, you're encouraged to use
+         * @ref Containers::String::nullTerminatedGlobalView() to return string
+         * literals without unnecessary copies. See also
          * @ref PluginManager-Manager-paths for more information.
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
-        static std::vector<std::string> pluginSearchPaths();
+        static Containers::Array<Containers::String> pluginSearchPaths();
 
         /**
          * @brief Plugin binary suffix
@@ -127,9 +136,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Used for discovering plugins on the filesystem. By default set to
          * platform's native extension for dynamic modules such as
          * @cpp ".dll" @ce or @cpp ".so" @ce, override this function in your
-         * plugin interface if you want a different suffix. On CMake side you
-         * can override the suffix by setting the `SUFFIX` property, for
-         * example:
+         * plugin interface if you want a different suffix. The returned view
+         * is expected to be @ref Containers::StringViewFlag::Global. With
+         * CMake you can override the suffix by setting the `SUFFIX` property,
+         * for example:
          *
          * @code{.cmake}
          * set_target_properties(MyPlugin PROPERTIES SUFFIX .mod)
@@ -140,7 +150,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * @see @ref pluginMetadataSuffix()
          */
-        static std::string pluginSuffix();
+        static Containers::StringView pluginSuffix();
         #endif
 
         /**
@@ -153,9 +163,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * static plugins have them bundled into the library. If empty, no
          * plugin-specific metadata file will be loaded (and thus it's also not
          * possible to specify inter-plugin dependencies and other properties).
-         * On CMake side the metadata file passed to
-         * @ref corrade-cmake-add-plugin "corrade_add_plugin()" or
-         * @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"
+         * The returned view is expected to be
+         * @ref Containers::StringViewFlag::Global. With CMake, the metadata
+         * file passed to @ref corrade-cmake-add-plugin "corrade_add_plugin()"
+         * or @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"
          * is expected to have the same extension or be set to @cpp "" @ce when
          * metadata are not used, for example:
          *
@@ -169,7 +180,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * @see @ref pluginSuffix()
          */
-        static std::string pluginMetadataSuffix();
+        static Containers::StringView pluginMetadataSuffix();
 
         /**
          * @brief Initialize plugin
@@ -226,11 +237,19 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         /**
          * @brief Plugin manager constructor
          *
-         * Used by plugin manager. Don't forget to redefine this constructor in
-         * all your subclasses.
+         * Used by the plugin manager. Don't forget to redefine this
+         * constructor in all your subclasses.
+         *
+         * The @p plugin parameter comes directly from
+         * @ref Manager::instantiate() or @ref Manager::loadAndInstantiate()
+         * --- i.e., if a @ref Containers::StringViewFlag::Global view got
+         * passed to these functions, it'll be global here as well.
          * @see @ref plugin(), @ref metadata()
          */
-        explicit AbstractPlugin(AbstractManager& manager, const std::string& plugin);
+        /* The plugin name is passed as a const& to make it possible for people
+           to implement plugins without even having to include the StringView
+           header. */
+        explicit AbstractPlugin(AbstractManager& manager, const Containers::StringView& plugin);
 
         /** @brief Copying is not allowed */
         AbstractPlugin(const AbstractPlugin&) = delete;
@@ -276,13 +295,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * @brief Identifier string
          *
          * Name under which the plugin was instantiated, either its true name
-         * or an alias. If the plugin was not instantiated via plugin manager,
-         * returns empty string. Use @cpp metadata()->name() @ce to get plugin
-         * true name unconditionally.
+         * or an alias. If the plugin was not instantiated via a plugin manager,
+         * returns an empty string. Use @ref PluginMetadata::name() to get the
+         * plugin true name unconditionally.
+         *
+         * The view points to memory owned by the plugin instance and is only
+         * guaranteed to stay valid until the instance gets destroyed.
          *
          * Can't be called on a moved-out instance.
          */
-        const std::string& plugin() const;
+        Containers::StringView plugin() const;
 
         /**
          * @brief Metadata
@@ -333,6 +355,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     by default.
 @param relativePath     A path where plugins are stored, relative to a usual
     library location
+@return A list of path to search for plugins. The returned strings are not
+    guaranteed to be mutable, as they might reference global string literals.
 @m_since{2020,06}
 
 Meant to be used to implement @ref AbstractPlugin::pluginSearchPaths().
@@ -378,11 +402,16 @@ Produces a list of search paths in this order:
     Windows and all relocatable installs, as it simply looks for the plugins
     next to the executable.
 
+You're encouraged to pass @p hardcodedPath and @p relativePath as
+@ref Containers::StringViewFlag::Global views (i.e., string view literals) ---
+the values in points 1 and 5 will then be non-owning references to them,
+avoiding copies.
+
 See also @ref PluginManager-Manager-paths for more information.
 @partialsupport Not available on platforms without
     @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
 */
-CORRADE_PLUGINMANAGER_EXPORT std::vector<std::string> implicitPluginSearchPaths(const std::string& libraryLocation, const std::string& hardcodedPath, const char* relativePath);
+CORRADE_PLUGINMANAGER_EXPORT Containers::Array<Containers::String> implicitPluginSearchPaths(Containers::StringView libraryLocation, Containers::StringView hardcodedPath, Containers::StringView relativePath);
 #endif
 
 }}
