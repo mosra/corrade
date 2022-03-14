@@ -245,6 +245,10 @@ Corrade type                    | ↭ | STL type
 @ref StringView                 | ⇆ | @ref std::string_view
 @ref MutableStringView          | → | @ref std::string_view
 
+Example:
+
+@snippet Containers-stl17.cpp StringView
+
 The @ref std::string_view type doesn't have any mutable counterpart, so there's
 no possibility to create a @ref MutableStringView out of it. Because
 @ref std::string_view doesn't preserve any information about the string origin,

@@ -223,6 +223,10 @@ Corrade type                    | ↭ | STL type
 @ref String                     | ← | @ref std::string_view (data copy)
 @ref String                     | → | @ref std::string_view
 
+Example:
+
+@snippet Containers-stl17.cpp String
+
 The @ref std::string_view type doesn't have any mutable counterpart, so there's
 no differentiation for a @cpp const @ce variant. While creating a
 @ref std::string_view from a @ref String creates a non-owning reference without

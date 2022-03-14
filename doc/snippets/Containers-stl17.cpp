@@ -27,6 +27,7 @@
 #include <string>
 
 #include "Corrade/Containers/OptionalStl.h"
+#include "Corrade/Containers/StringStlView.h"
 
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
@@ -48,5 +49,30 @@ std::optional<std::string> c(Containers::Optional<std::string>{"hello"});
 auto d = Containers::optional(std::optional<int>{17});
         // d is Containers::Optional<int>
 /* [Optional] */
+}
+
+{
+/* The include is already above, so doing it again here should be harmless */
+/* [StringView] */
+#include <Corrade/Containers/StringStlView.h>
+
+DOXYGEN_ELLIPSIS()
+
+std::string_view a = "Hello world!";
+Containers::StringView b = a.substr(5);
+/* [StringView] */
+static_cast<void>(b);
+}
+
+{
+/* The include is already above, so doing it again here should be harmless */
+/* [String] */
+#include <Corrade/Containers/StringStlView.h>
+
+DOXYGEN_ELLIPSIS()
+
+std::string_view a = "Hello world!";
+Containers::String b = a.substr(5);
+/* [String] */
 }
 }
