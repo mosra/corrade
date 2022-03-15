@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/Interconnect/Test")
+
 corrade_add_test(InterconnectTest Test.cpp LIBRARIES CorradeInterconnect)
 corrade_add_test(InterconnectStateMachineTest StateMachineTest.cpp LIBRARIES CorradeInterconnect)
 corrade_add_test(InterconnectBenchmark Benchmark.cpp LIBRARIES CorradeInterconnect)
@@ -31,10 +35,3 @@ corrade_add_test(InterconnectBenchmark Benchmark.cpp LIBRARIES CorradeInterconne
 add_library(InterconnectTestEmitterLibrary ${SHARED_OR_STATIC} EmitterLibrary.cpp)
 target_link_libraries(InterconnectTestEmitterLibrary PUBLIC CorradeInterconnect)
 corrade_add_test(InterconnectLibraryTest LibraryTest.cpp LIBRARIES CorradeInterconnect InterconnectTestEmitterLibrary)
-
-set_target_properties(
-    InterconnectTest
-    InterconnectStateMachineTest
-    InterconnectBenchmark
-    InterconnectLibraryTest
-    PROPERTIES FOLDER "Corrade/Interconnect/Test")

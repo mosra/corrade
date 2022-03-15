@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/TestSuite/Compare/Test")
+
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     set(FILETEST_DIR FileTestFiles)
     set(FILETEST_SAVE_DIR FileTestSaveFiles)
@@ -64,13 +68,3 @@ corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp
         FileTestFiles/hýždě.txt
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareStringToFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-set_target_properties(
-    TestSuiteCompareContainerTest
-    TestSuiteCompareFileTest
-    TestSuiteCompareFileToStringTest
-    TestSuiteCompareFloatingPointTest
-    TestSuiteCompareNumericTest
-    TestSuiteCompareStringTest
-    TestSuiteCompareStringToFileTest
-    PROPERTIES FOLDER "Corrade/TestSuite/Compare/Test")

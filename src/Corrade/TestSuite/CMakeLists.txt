@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/TestSuite")
+
 set(CorradeTestSuite_SRCS
     Comparator.cpp
     Tester.cpp
@@ -50,8 +54,7 @@ add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_HEADERS}
     ${CorradeTestSuite_PRIVATE_HEADERS})
 set_target_properties(CorradeTestSuite PROPERTIES
-    DEBUG_POSTFIX "-d"
-    FOLDER "Corrade/TestSuite")
+    DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)

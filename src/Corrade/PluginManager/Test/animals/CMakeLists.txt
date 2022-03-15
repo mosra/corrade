@@ -36,7 +36,6 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
         Bulldog Bulldog-metadata
         PitBull PitBull-metadata
         PROPERTIES
-            FOLDER "Corrade/PluginManager/Test"
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/animals
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/animals
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/animals)
@@ -56,7 +55,6 @@ set_target_properties(
     Canary Canary-dependencies
     Dird Dird-dependencies
     PROPERTIES
-        FOLDER "Corrade/PluginManager/Test"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/animals
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/animals
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/animals)

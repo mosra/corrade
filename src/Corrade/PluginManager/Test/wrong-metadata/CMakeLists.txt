@@ -30,7 +30,6 @@ corrade_add_plugin(WrongMetadata ${CMAKE_CURRENT_BINARY_DIR} "" WrongMetadata.co
 set_target_properties(
     WrongMetadata WrongMetadata-metadata
     PROPERTIES
-        FOLDER "Corrade/PluginManager/Test"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong-metadata
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong-metadata
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong-metadata)

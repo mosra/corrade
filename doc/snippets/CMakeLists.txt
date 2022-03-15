@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/doc/snippets")
+
 # On MSVC remove /W3, as we are replacing it with /W4
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -38,7 +42,6 @@ add_library(snippets STATIC
     Containers-stl.cpp
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
-set_target_properties(snippets PROPERTIES FOLDER "Corrade/doc/snippets")
 
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
@@ -51,8 +54,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             Containers-stl17.cpp)
         target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp17 PROPERTIES
-            CORRADE_CXX_STANDARD 17
-            FOLDER "Corrade/doc/snippets")
+            CORRADE_CXX_STANDARD 17)
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -64,21 +66,18 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             Containers-stl2a.cpp)
         target_link_libraries(snippets-cpp2a PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp2a PROPERTIES
-            CORRADE_CXX_STANDARD 20
-            FOLDER "Corrade/doc/snippets")
+            CORRADE_CXX_STANDARD 20)
     endif()
 endif()
 
 if(WITH_INTERCONNECT)
     add_library(snippets-Interconnect STATIC Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
-    set_target_properties(snippets-Interconnect PROPERTIES FOLDER "Corrade/doc/snippets")
 endif()
 
 if(WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
-    set_target_properties(snippets-PluginManager PROPERTIES FOLDER "Corrade/doc/snippets")
 endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
@@ -105,16 +104,6 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-iteration testsuite-iteration.cpp)
     add_executable(testsuite-benchmark testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
-    set_target_properties(
-        testsuite-basic
-        testsuite-templated
-        testsuite-repeated
-        testsuite-instanced
-        testsuite-save-diagnostic
-        testsuite-iteration
-        testsuite-benchmark
-        testsuite-benchmark-custom
-        PROPERTIES FOLDER "Corrade/doc/snippets")
 
     target_link_libraries(testsuite-basic CorradeTestSuite)
     target_link_libraries(testsuite-templated CorradeTestSuite)
@@ -129,5 +118,4 @@ endif()
 if(CORRADE_TARGET_ANDROID)
     add_library(snippets-android STATIC android.cpp)
     target_link_libraries(snippets-android PRIVATE CorradeUtility)
-    set_target_properties(snippets-android PROPERTIES FOLDER "Corrade/doc/snippets")
 endif()

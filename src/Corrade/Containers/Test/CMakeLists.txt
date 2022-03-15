@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/Containers/Test")
+
 corrade_add_test(ContainersAnyReferenceTest AnyReferenceTest.cpp)
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
@@ -85,34 +89,6 @@ set_property(TARGET
     ContainersStringViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
 
-set_target_properties(
-    ContainersArrayTest
-    ContainersArrayTupleTest
-    ContainersArrayViewTest
-    ContainersGrowableArrayTest
-    ContainersGrowableArraySa___FailTest
-    ContainersBigEnumSetTest
-    ContainersEnumSetTest
-    ContainersLinkedListTest
-    ContainersMoveReferenceTest
-    ContainersPairTest
-    ContainersPairStlTest
-    ContainersPointerTest
-    ContainersPointerStlTest
-    ContainersRawForwardListTest
-    ContainersReferenceTest
-    ContainersReferenceStlTest
-    ContainersScopeGuardTest
-    ContainersStaticArrayTest
-    ContainersStaticArrayViewTest
-    ContainersStridedArrayViewTest
-    ContainersStringTest
-    ContainersStringStlTest
-    ContainersStringViewTest
-    ContainersTripleTest
-    ContainersTripleStlTest
-    PROPERTIES FOLDER "Corrade/Containers/Test")
-
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -125,9 +101,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
         set_target_properties(
             ContainersOptionalStlTest
             ContainersStringStlViewTest
-            PROPERTIES
-                CORRADE_CXX_STANDARD 17
-                FOLDER "Corrade/Containers/Test")
+            PROPERTIES CORRADE_CXX_STANDARD 17)
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -144,8 +118,6 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             ContainersArrayViewStlSpanTest
             ContainersStaticArrayStlSpanTest
             ContainersStaticArrayViewStlSpanTest
-            PROPERTIES
-            CORRADE_CXX_STANDARD 20
-            FOLDER "Corrade/Containers/Test")
+            PROPERTIES CORRADE_CXX_STANDARD 20)
     endif()
 endif()

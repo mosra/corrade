@@ -37,7 +37,6 @@ set_target_properties(
     NoPluginFinalizer NoPluginFinalizer-metadata
     NoPluginInstancer NoPluginInstancer-metadata
     PROPERTIES
-        FOLDER "Corrade/PluginManager/Test"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong)
@@ -47,7 +46,6 @@ if(NOT CORRADE_TARGET_WINDOWS)
     corrade_add_plugin(UnresolvedReference ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf UnresolvedReference.cpp)
     set_target_properties(UnresolvedReference UnresolvedReference-metadata
         PROPERTIES
-            FOLDER "Corrade/PluginManager/Test"
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong)

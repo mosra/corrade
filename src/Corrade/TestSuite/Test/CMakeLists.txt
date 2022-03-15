@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/TestSuite/Test")
+
 corrade_add_test(TestSuiteArgumentsTest ArgumentsTest.cpp
     ARGUMENTS --arguments-value hello)
 
@@ -95,10 +99,3 @@ corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/c.txt
         ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/../BundledFilesTestFiles/d.txt@BundledFilesTestFiles/d.txt)
 target_include_directories(TestSuiteBundledFilesTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-set_target_properties(
-    TestSuiteFailingTest
-    TestSuiteTesterTest
-    TestSuiteBenchmarkStatsTest
-    TestSuiteBundledFilesTest
-    PROPERTIES FOLDER "Corrade/TestSuite/Test")

@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/Utility/Test")
+
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     set(UTILITY_TEST_DIR ".")
     set(UTILITY_BINARY_TEST_DIR "write")
@@ -181,9 +185,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             UtilityDebugStlStringViewTest
             UtilityFormatStlStringViewTest
             UtilityMacrosCpp17Test
-            PROPERTIES
-                CORRADE_CXX_STANDARD 17
-                FOLDER "Corrade/Utility/Test")
+            PROPERTIES CORRADE_CXX_STANDARD 17)
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -192,9 +194,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
         corrade_add_test(UtilityMacrosCpp20Test MacrosCpp20Test.cpp)
-        set_target_properties(UtilityMacrosCpp20Test PROPERTIES
-            CORRADE_CXX_STANDARD 20
-            FOLDER "Corrade/Utility/Test")
+        set_target_properties(UtilityMacrosCpp20Test PROPERTIES CORRADE_CXX_STANDARD 20)
     endif()
 endif()
 
@@ -244,8 +244,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
     corrade_add_test(UtilityStlMathTest StlMathTest.cpp)
     set_target_properties(UtilityStlMathTest PROPERTIES
-        CORRADE_CXX_STANDARD 17
-        FOLDER "Corrade/Containers/Test")
+        CORRADE_CXX_STANDARD 17)
 endif()
 
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
@@ -316,39 +315,6 @@ corrade_add_test(UtilityResourceCompileTest
 target_include_directories(UtilityResourceCompileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(UtilityResourceCompileTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 
-set_target_properties(
-    UtilityArgumentsTest
-    UtilityEndiannessTest
-    UtilityMurmurHash2Test
-    UtilityConfigurationTest
-    UtilityConfigurationValueTest
-    UtilityDebugTest
-    UtilityFatalTest
-    UtilityFormatTest
-    UtilityHashDigestTest
-    UtilityMacrosTest
-    UtilityMemoryTest
-    UtilityMoveTest
-    UtilityPathTest
-    UtilityResourceTest
-    UtilityResourceStaticTest
-    UtilityResourceCompileTest
-    UtilitySha1Test
-    UtilityStlForwardStringTest
-    UtilityStlForwardTupleTest
-    UtilityStlForwardVectorTest
-    UtilityStringTest
-    UtilityStringBenchmark
-    UtilitySystemTest
-    UtilityTypeTraitsTest
-    UtilityUnicodeTest
-
-    ResourceTestDataLib
-    ResourceTestData-dependencies
-    ResourceTestEmptyFileData-dependencies
-    ResourceTestNothingData-dependencies
-    PROPERTIES FOLDER "Corrade/Utility/Test")
-
 if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)
     add_library(UtilityGlobalStateAcrossLibrariesLibrary SHARED
         GlobalStateAcrossLibrariesLibrary.cpp
@@ -358,10 +324,6 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
     corrade_add_test(UtilityGlobalStateAcrossLibrariesTest
         GlobalStateAcrossLibrariesTest.cpp
         LIBRARIES UtilityGlobalStateAcrossLibrariesLibrary)
-    set_target_properties(
-        UtilityGlobalStateAcrossLibrariesLibrary
-        UtilityGlobalStateAcrossLibrariesTest
-        PROPERTIES FOLDER "Corrade/Utility/Test")
 endif()
 
 # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
@@ -373,11 +335,6 @@ if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS
     corrade_add_test(UtilityTweakableIntegrationTest TweakableIntegrationTest.cpp
         FILES TweakableIntegrationTest.cpp)
     target_include_directories(UtilityTweakableIntegrationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-    set_target_properties(
-        UtilityFileWatcherTest
-        UtilityTweakableTest
-        PROPERTIES FOLDER "Corrade/Utility/Test")
 endif()
 
 if(CORRADE_BUILD_DEPRECATED)
@@ -398,7 +355,4 @@ if(CORRADE_BUILD_DEPRECATED)
             PathTestFilesUtf8/šňůra/dummy
             PathTestFilesUtf8/hýždě)
     target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-    set_target_properties(
-        UtilityDirectoryTest
-        PROPERTIES FOLDER "Corrade/Utility/Test")
 endif()

@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/Utility")
+
 if(WITH_UTILITY)
     set(CorradeUtility_SRCS
         Debug.cpp
@@ -136,7 +140,6 @@ if(WITH_UTILITY)
     if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
         set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
-    set_target_properties(CorradeUtilityObjects PROPERTIES FOLDER "Corrade/Utility")
 
     # Main Utility library
     add_library(CorradeUtility ${SHARED_OR_STATIC}
@@ -150,9 +153,7 @@ if(WITH_UTILITY)
         INTERFACE_CORRADE_CXX_STANDARD 11)
     set_property(TARGET CorradeUtility APPEND PROPERTY
         COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
-    set_target_properties(CorradeUtility PROPERTIES
-        DEBUG_POSTFIX "-d"
-        FOLDER "Corrade/Utility")
+    set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
     if(NOT BUILD_STATIC)
         set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
     elseif(BUILD_STATIC_PIC)
@@ -178,9 +179,7 @@ if(WITH_UTILITY)
         # Library with graceful assert for testing
         add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
         target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
-        set_target_properties(CorradeUtilityTestLib PROPERTIES
-            DEBUG_POSTFIX "-d"
-            FOLDER "Corrade/Utility")
+        set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
         if(BUILD_STATIC_PIC)
             set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
         endif()
@@ -257,7 +256,6 @@ if(NOT CMAKE_CROSSCOMPILING)
     if(CORRADE_TARGET_UNIX)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
-    set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 
     # Corrade::rc target alias for superprojects

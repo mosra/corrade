@@ -35,7 +35,6 @@ set_target_properties(
     OldBread OldBread-metadata
     RottenTomato RottenTomato-metadata
     PROPERTIES
-        FOLDER "Corrade/PluginManager/Test"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/food
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/food
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/food)

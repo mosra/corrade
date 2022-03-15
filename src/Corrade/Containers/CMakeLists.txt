@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/Containers")
+
 set(CorradeContainers_HEADERS
     AnyReference.h
     Array.h
@@ -73,7 +77,6 @@ endif()
 add_custom_target(CorradeContainers-headers SOURCES
     ${CorradeContainers_HEADERS}
     ${CorradeContainers_PRIVATE_HEADERS})
-set_target_properties(CorradeContainers-headers PROPERTIES FOLDER "Corrade/Containers")
 
 install(FILES ${CorradeContainers_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Containers)
 

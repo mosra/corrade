@@ -26,8 +26,7 @@
 
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     corrade_add_plugin(InitFiniDynamic ${CMAKE_CURRENT_BINARY_DIR} "" InitFiniDynamic.conf InitFiniDynamic.cpp)
-    set_target_properties(InitFiniDynamic InitFiniDynamic-metadata
-        PROPERTIES FOLDER "Corrade/PluginManager/Test"
+    set_target_properties(InitFiniDynamic InitFiniDynamic-metadata PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/init-fini
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/init-fini
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/init-fini)
@@ -35,7 +34,6 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 endif()
 
 corrade_add_static_plugin(InitFiniStatic ${CMAKE_CURRENT_BINARY_DIR} ../dummy.conf InitFiniStatic.cpp)
-set_target_properties(InitFiniStatic InitFiniStatic-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(InitFiniStatic PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../$<CONFIG>)
 endif()

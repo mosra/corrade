@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade")
+
 if(NOT BUILD_STATIC)
     set(SHARED_OR_STATIC SHARED)
 else()
@@ -68,7 +72,6 @@ set(Corrade_HEADERS
 
 # Force IDEs to display all header files in project view
 add_custom_target(Corrade SOURCES ${Corrade_HEADERS})
-set_target_properties(Corrade PROPERTIES FOLDER "Corrade")
 
 install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 install(FILES

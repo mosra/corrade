@@ -27,7 +27,6 @@
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     corrade_add_plugin(DisabledMetadata ${CMAKE_CURRENT_BINARY_DIR} "" "" DisabledMetadata.cpp)
     set_target_properties(DisabledMetadata PROPERTIES
-        FOLDER "Corrade/PluginManager/Test"
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/disabled-metadata
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/disabled-metadata
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/disabled-metadata)
@@ -41,7 +40,6 @@ endif()
 
 corrade_add_static_plugin(DisabledMetadataStatic ${CMAKE_CURRENT_BINARY_DIR} "" "" DisabledMetadataStatic.cpp)
 set_target_properties(DisabledMetadataStatic PROPERTIES
-    FOLDER "Corrade/PluginManager/Test"
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/disabled-metadata
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/disabled-metadata
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/disabled-metadata)

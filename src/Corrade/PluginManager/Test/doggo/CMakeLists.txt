@@ -26,7 +26,6 @@
 
 corrade_add_plugin(Doggo ${CMAKE_CURRENT_BINARY_DIR} "" Doggo.conf Doggo.cpp)
 set_target_properties(Doggo Doggo-metadata PROPERTIES
-    FOLDER "Corrade/PluginManager/Test"
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/doggo
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/doggo
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/doggo)

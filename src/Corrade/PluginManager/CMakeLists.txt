@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/PluginManager")
+
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                    ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
@@ -57,16 +61,13 @@ endif()
 if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManagerObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-set_target_properties(CorradePluginManagerObjects PROPERTIES FOLDER "Corrade/PluginManager")
 
 # Main PluginManager library
 add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})
 target_include_directories(CorradePluginManager PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-set_target_properties(CorradePluginManager PROPERTIES
-    DEBUG_POSTFIX "-d"
-    FOLDER "Corrade/PluginManager")
+set_target_properties(CorradePluginManager PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
@@ -88,9 +89,7 @@ if(BUILD_TESTS)
         ${CorradePluginManager_GracefulAssert_SRCS})
     target_include_directories(CorradePluginManagerTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
     target_compile_definitions(CorradePluginManagerTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
-    set_target_properties(CorradePluginManagerTestLib PROPERTIES
-        DEBUG_POSTFIX "-d"
-        FOLDER "Corrade/PluginManager")
+    set_target_properties(CorradePluginManagerTestLib PROPERTIES DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
         set_target_properties(CorradePluginManagerTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()

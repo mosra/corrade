@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
+# property that would have to be set on each target separately.
+set(CMAKE_FOLDER "Corrade/PluginManager/Test")
+
 # CMake before 3.8 has broken $<TARGET_FILE*> expressions for iOS (see
 # https://gitlab.kitware.com/cmake/cmake/merge_requests/404) and since Corrade
 # doesn't support dynamic plugins on iOS, this sorta works around that. Should
@@ -93,13 +97,6 @@ corrade_add_test(PluginManagerAbstractPluginTest
     LIBRARIES CorradePluginManagerTestLib Canary)
 target_include_directories(PluginManagerAbstractPluginTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 
-set_target_properties(
-    PluginManagerManagerTest
-    PluginManagerManagerInitFiniTest
-    PluginManagerImportStaticTest
-    PluginManagerAbstractPluginTest
-    PROPERTIES FOLDER "Corrade/PluginManager/Test")
-
 if(CORRADE_BUILD_STATIC)
     # CMake < 3.4 does this implicitly, but 3.4+ not anymore (see CMP0065).
     # That's generally okay, *except if* the build is static, the executable
@@ -130,10 +127,6 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
         GlobalStateAcrossLibrariesTest.cpp
         LIBRARIES PluginManagerGlobalStateAcrossLibrariesLibrary)
     target_include_directories(PluginManagerGlobalStateAcrossLi___Test PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
-    set_target_properties(
-        PluginManagerGlobalStateAcrossLibrariesLibrary
-        PluginManagerGlobalStateAcrossLi___Test
-        PROPERTIES FOLDER "Corrade/PluginManager/Test")
 endif()
 
 add_subdirectory(animals)
