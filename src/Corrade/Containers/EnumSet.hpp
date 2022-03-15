@@ -63,6 +63,12 @@ template<class T, typename std::underlying_type<T>::type fullValue> Utility::Deb
     /* Print the empty value in case there is nothing */
     if(!value) return debug << empty;
 
+    /* The enum values should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Utility::Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Utility::Debug::Flag::NoSpace));
+
     /* Print known values, if set, and strip them out of the value */
     bool separate = false;
     for(const T e: enums) if(value >= e) {
@@ -80,6 +86,9 @@ template<class T, typename std::underlying_type<T>::type fullValue> Utility::Deb
         if(separate) debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
         debug << T(typename std::underlying_type<T>::type(value));
     }
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
 
     return debug;
 }

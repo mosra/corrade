@@ -50,6 +50,7 @@ struct EnumSetTest: TestSuite::Tester {
     void templateFriendOperators();
 
     void debug();
+    void debugPacked();
 };
 
 enum class Feature: int {
@@ -61,7 +62,8 @@ enum class Feature: int {
 
 Utility::Debug& operator<<(Utility::Debug& debug, Feature value) {
     switch(value) {
-        #define _c(value) case Feature::value: return debug << "Feature::" #value;
+        #define _c(value) case Feature::value: \
+            return debug << (debug.immediateFlags() & Utility::Debug::Flag::Packed ? "" : "Feature::") << Utility::Debug::nospace << #value;
         _c(Fast)
         _c(Cheap)
         _c(Tested)
@@ -77,7 +79,7 @@ typedef EnumSet<Feature, 15> Features;
 CORRADE_ENUMSET_OPERATORS(Features)
 
 Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
-    return enumSetDebugOutput(debug, value, "Features{}", {
+    return enumSetDebugOutput(debug, value, debug.immediateFlags() & Utility::Debug::Flag::Packed ? "{}" : "Features{}", {
         Feature::Fast,
         Feature::Cheap,
         Feature::Tested,
@@ -99,7 +101,8 @@ EnumSetTest::EnumSetTest() {
 
               &EnumSetTest::templateFriendOperators,
 
-              &EnumSetTest::debug});
+              &EnumSetTest::debug,
+              &EnumSetTest::debugPacked});
 }
 
 void EnumSetTest::construct() {
@@ -289,6 +292,15 @@ void EnumSetTest::debug() {
 
     Utility::Debug{&out} << Features{} << (Feature::Fast|Feature::Cheap) << (Feature(0xdead000)|Feature::Popular);
     CORRADE_COMPARE(out.str(), "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xdead000)\n");
+}
+
+void EnumSetTest::debugPacked() {
+    std::stringstream out;
+
+    /* Nested enum values should be printed packed, the actual set printing is
+       the same. The value in the middle is not packed. */
+    Utility::Debug{&out} << Debug::packed << Features{} << Debug::packed << (Feature::Fast|Feature::Cheap) << (Feature::Cheap|Feature::Popular) << Debug::packed << (Feature(0xdead000)|Feature::Popular);
+    CORRADE_COMPARE(out.str(), "{} Fast|Cheap Feature::Cheap|Feature::Popular Popular|Feature(0xdead000)\n");
 }
 
 }}}}
