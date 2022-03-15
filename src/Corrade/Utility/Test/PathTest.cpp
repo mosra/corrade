@@ -159,7 +159,8 @@ struct PathTest: TestSuite::Tester {
     void listSortPrecedence();
     void listNonexistent();
     void listNonNullTerminated();
-    void listUtf8();
+    void listUtf8Result();
+    void listUtf8Path();
 
     void size();
     void sizeEmpty();
@@ -349,7 +350,8 @@ PathTest::PathTest() {
               &PathTest::listSortPrecedence,
               &PathTest::listNonexistent,
               &PathTest::listNonNullTerminated,
-              &PathTest::listUtf8,
+              &PathTest::listUtf8Result,
+              &PathTest::listUtf8Path,
 
               &PathTest::size,
               &PathTest::sizeEmpty,
@@ -1851,7 +1853,7 @@ void PathTest::listNonNullTerminated() {
     }
 }
 
-void PathTest::listUtf8() {
+void PathTest::listUtf8Result() {
     const Containers::String list[]{".", "..", "hýždě", "šňůra"};
 
     Containers::Optional<Containers::Array<Containers::String>> actual = Path::list(_testDirUtf8, Path::ListFlag::SortAscending);
@@ -1886,6 +1888,21 @@ void PathTest::listUtf8() {
             Containers::arrayView(list),
             TestSuite::Compare::Container);
     }
+}
+
+void PathTest::listUtf8Path() {
+    const Containers::String list[]{".", "..", "dummy", "klíče"};
+
+    Containers::Optional<Containers::Array<Containers::String>> actual = Path::list(Path::join(_testDirUtf8, "šňůra"), Path::ListFlag::SortAscending);
+    CORRADE_VERIFY(actual);
+
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+    CORRADE_COMPARE_AS(*actual,
+        Containers::arrayView(list),
+        TestSuite::Compare::Container);
 }
 
 /* Checks if we are reading it as binary (CR+LF is not converted to LF),

@@ -222,6 +222,7 @@ corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
         PathTestFilesSymlink/file
         PathTestFilesSymlink/file-symlink
         PathTestFilesUtf8/šňůra/dummy
+        PathTestFilesUtf8/šňůra/klíče
         PathTestFilesUtf8/hýždě)
 target_include_directories(UtilityPathTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
