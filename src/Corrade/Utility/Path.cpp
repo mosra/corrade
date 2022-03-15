@@ -1071,6 +1071,9 @@ bool copy(const Containers::StringView from, const Containers::StringView to) {
     /* 128 kB: https://eklitzke.org/efficient-file-copying-on-linux. The 100 MB
        benchmark agrees, going below is significantly slower and going above is
        not any faster. */
+    /** @todo investigate if alignas(32) would make any practical difference
+        on any system (on glibc, fwrite() calls into mempcpy_avx_unaligned
+        always, regardless of the alignment) */
     char buffer[128*1024];
     std::size_t count;
     do {
