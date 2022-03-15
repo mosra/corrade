@@ -546,7 +546,7 @@ Containers::Optional<Containers::String> currentDirectory() {
     Containers::Array<wchar_t> path{NoInit, sizePlusOne};
     /* ... but retrieving the data returns size without it */
     CORRADE_INTERNAL_ASSERT_OUTPUT(GetCurrentDirectoryW(sizePlusOne, path) == sizePlusOne - 1);
-    return fromNativeSeparators(Unicode::narrow(path.except(1)));
+    return fromNativeSeparators(Unicode::narrow(path.exceptSuffix(1)));
 
     /* Use the root path on Emscripten */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -674,7 +674,7 @@ Containers::Optional<Containers::String> temporaryDirectory() {
        zero terminator */
     Containers::Array<wchar_t> path{NoInit, size};
     GetTempPathW(size, path);
-    return fromNativeSeparators(Unicode::narrow(path.except(2)));
+    return fromNativeSeparators(Unicode::narrow(path.exceptSuffix(2)));
     #else
     Error{} << "Utility::Path::temporaryDirectory(): not implemented on this platform";
     return {};
