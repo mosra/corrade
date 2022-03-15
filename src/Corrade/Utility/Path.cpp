@@ -157,7 +157,8 @@ Containers::Pair<Containers::StringView, Containers::StringView> split(const Con
     const Containers::StringView found = path.findLastOr('/', path.begin());
 
     /* Strip the trailing / from path unless it's the root */
-    return {path.prefix(found.begin() == path.begin() ? found.end() : found.begin()), path.suffix(found.end())};
+    const Containers::StringView head = path.prefix(found.end());
+    return {path.prefix(head == "/"_s || head == "//"_s ? found.end() : found.begin()), path.suffix(found.end())};
 }
 
 Containers::Pair<Containers::StringView, Containers::StringView> splitExtension(const Containers::StringView path) {

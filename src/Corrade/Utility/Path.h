@@ -156,15 +156,16 @@ CORRADE_UTILITY_EXPORT Containers::StringView toNativeSeparators(Containers::Str
 
 Returns a pair of @cpp {head, tail} @ce where `head` is everything before the
 last slash and `tail` is everything after. The `head` will never have a
-trailing slash except if it's the root. In all cases, calling @ref join() on
-the result will give back the original argument. Equivalent to Python
-@m_class{m-doc-external} [os.path.split()](https://docs.python.org/3/library/os.path.html#os.path.split).
+trailing slash except if it's the root (one or two slashes). In all cases,
+calling @ref join() on the result will give back the original argument.
+Equivalent to Python @m_class{m-doc-external} [os.path.split()](https://docs.python.org/3/library/os.path.html#os.path.split).
 For example:
 
 -   @cpp "path/to/file" @ce results in @cpp {"path/to/", "file"} @ce
 -   @cpp "file.txt" @ce results in @cpp {"", "file.txt"} @ce
 -   @cpp "/home/user/ @ce results in @cpp {"/home/user/", ""} @ce
 -   @cpp "/root" @ce results in @cpp {"/", "root"} @ce
+-   @cpp "//" @ce results in @cpp {"//", ""} @ce
 
 The implementation expects forward slashes as directory separators. Use
 @ref fromNativeSeparators() to convert from a platform-specific format.

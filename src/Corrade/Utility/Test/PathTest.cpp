@@ -552,9 +552,21 @@ void PathTest::split() {
     CORRADE_COMPARE(Path::split("/foo/bar/map.conf"),
         Containers::pair("/foo/bar"_s, "map.conf"_s));
 
+    /* Absolute network path */
+    CORRADE_COMPARE(Path::split("//computer/foo/bar/map.conf"),
+        Containers::pair("//computer/foo/bar"_s, "map.conf"_s));
+
     /* Not dropping the root slash */
     CORRADE_COMPARE(Path::split("/root"),
         Containers::pair("/"_s, "root"_s));
+    CORRADE_COMPARE(Path::split("/"),
+        Containers::pair("/"_s, ""_s));
+
+    /* Not dropping the double root slash */
+    CORRADE_COMPARE(Path::split("//computer"),
+        Containers::pair("//"_s, "computer"_s));
+    CORRADE_COMPARE(Path::split("//"),
+        Containers::pair("//"_s, ""_s));
 }
 
 void PathTest::splitFlags() {
