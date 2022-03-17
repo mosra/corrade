@@ -514,11 +514,12 @@ Containers::Optional<Containers::String> executableLocation() {
 Containers::Optional<Containers::String> currentDirectory() {
     /* POSIX. Needs a shitty loop because ... ugh. */
     #ifdef CORRADE_TARGET_UNIX
-    /** @todo use a String when it can grow on its own */
+    /** @todo use a String when it can grow on its own, and then call getcwd()
+        with path.size() + 1 again */
     Containers::Array<char> path;
     arrayResize(path, NoInit, 4 + 1);
     char* success;
-    while(!(success = getcwd(path, path.size() + 1))) {
+    while(!(success = getcwd(path, path.size()))) {
         /* Unexpected error, exit. Can be for example ENOENT when current
            working directory gets deleted while the program is running. */
         if(errno != ERANGE) {
