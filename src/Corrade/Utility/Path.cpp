@@ -466,13 +466,15 @@ Containers::Optional<Containers::String> executableLocation() {
     constexpr const char self[]{"/proc/self/exe"};
     /** @todo use a String when it can grow on its own */
     Containers::Array<char> path;
-    arrayResize(path, NoInit, 4 + 1);
+    arrayResize(path, NoInit, 4);
     ssize_t size;
     while((size = readlink(self, path, path.size())) == ssize_t(path.size()))
         arrayResize(path, NoInit, path.size()*2);
 
     /* readlink() doesn't put the null terminator into the array, do it
-       ourselves */
+       ourselves. The above loop guarantees that path.size() is always larger
+       than size -- if it would be equal, we'd try once more with a larger
+       buffer */
     CORRADE_INTERNAL_ASSERT(size && std::size_t(size) < path.size());
     path[size] = '\0';
     const auto deleter = path.deleter();
