@@ -202,6 +202,14 @@ endif()
 corrade_add_test(UtilityFatalTest FatalTest.cpp)
 set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
 
+corrade_add_test(UtilityJsonTest JsonTest.cpp
+    LIBRARIES CorradeUtilityTestLib
+    FILES
+        JsonTestFiles/error.json
+        JsonTestFiles/parse-error.json)
+target_compile_definitions(UtilityJsonTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
+target_include_directories(UtilityJsonTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 corrade_add_test(UtilityMemoryTest MemoryTest.cpp)
 target_compile_definitions(UtilityMemoryTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 

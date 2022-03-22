@@ -45,6 +45,7 @@
 #endif
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Json.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Path.h"
@@ -737,6 +738,19 @@ if(watcher.hasChanged()) {
 /* [FileWatcher] */
 }
 #endif
+
+{
+/* [Json-usage-basic] */
+Containers::Optional<Utility::Json> json = Utility::Json::fromFile("data.json",
+    Utility::Json::Option::ParseLiterals|
+    Utility::Json::Option::ParseFloats|
+    Utility::Json::Option::ParseStrings);
+if(!json)
+    Utility::Fatal{} << "Whoops!";
+
+DOXYGEN_ELLIPSIS()
+/* [Json-usage-basic] */
+}
 
 {
 int a = 2;

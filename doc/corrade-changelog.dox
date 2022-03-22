@@ -130,6 +130,8 @@ namespace Corrade {
 -   @ref Utility::ConfigurationGroup gained an ability to iterate through its
     values and subgroups using @relativeref{Utility::ConfigurationGroup,values()}
     and @relativeref{Utility::ConfigurationGroup,groups()}
+-   New @ref Corrade::Utility::Json class for tokenizing and parsing JSON files
+    into an immutable memory-efficient representation
 -   New @ref Corrade/Utility/Math.h header implementing @ref Utility::min() and
     @ref Utility::max() because having to @cpp #include <algorithm> @ce to get
     @ref std::min() and @ref std::max() is unacceptable.

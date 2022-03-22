@@ -57,6 +57,9 @@ class Warning;
 class Error;
 class Fatal;
 
+class Json;
+class JsonToken;
+
 /* Endianness used only statically */
 class MurmurHash2;
 

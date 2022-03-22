@@ -45,6 +45,7 @@ if(WITH_UTILITY)
         Arguments.cpp
         ConfigurationGroup.cpp
         Format.cpp
+        Json.cpp
         Resource.cpp
         String.cpp
         Unicode.cpp
@@ -69,6 +70,7 @@ if(WITH_UTILITY)
         Format.h
         FormatStl.h
         FormatStlStringView.h
+        Json.h
         Macros.h
         Math.h
         Memory.h
