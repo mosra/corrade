@@ -41,6 +41,7 @@ namespace Corrade { namespace Utility {
 
 /**
 @brief JSON parser
+@m_since_latest
 
 Tokenizes a JSON file together with optional parsing of selected token
 subtrees. Supports files over 4 GB and parsing of numeric values into 32-bit
@@ -832,9 +833,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      a valid value and may contain escape sequences if
          *      @ref isParsed() is not set.
          *
-         * Due to implementation complexity reasons,
-         * @ref Containers::StringViewFlag::Global is not preserved in this
-         * case, only for @ref asString().
+         * Returned view points to data owned by the originating @ref Json
+         * instance, or to the string passed to @ref Json::fromString() if it
+         * was called with @ref Containers::StringViewFlag::Global set. Due to
+         * implementation complexity reasons, the global flag is not preserved
+         * in the returned value here, only in case of @ref asString().
          */
         Containers::StringView data() const;
 
@@ -967,7 +970,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * using this function. Returned value points to data owned by the
          * originating @ref Json instance.
          *
-         *
          * @m_class{m-note m-warning}
          *
          * @par
@@ -1033,7 +1035,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed 64-bit floating point value
          *
-         * Expects that the value is already parsed as a
+         * Expects that the token is already parsed as a
          * @ref ParsedType::Double. If not, use @ref parseDouble() instead.
          * @see @ref Json::Option::ParseDoubles, @ref Json::parseDoubles()
          */
@@ -1056,7 +1058,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed 32-bit floating point value
          *
-         * Expects that the value is already parsed as a
+         * Expects that the token is already parsed as a
          * @ref ParsedType::Float. If not, use @ref parseFloat() instead.
          * @see @ref Json::Option::ParseFloats, @ref Json::parseFloats()
          */
@@ -1078,7 +1080,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed unsigned 32-bit integer value
          *
-         * Expects that the value is already parsed as a
+         * Expects that the token is already parsed as a
          * @ref ParsedType::UnsignedInt. If not, use @ref parseUnsignedInt()
          * instead.
          * @see @ref Json::parseUnsignedInts()
@@ -1101,7 +1103,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed signed 32-bit integer value
          *
-         * Expects that the value is already parsed as a
+         * Expects that the token is already parsed as a
          * @ref ParsedType::Int. If not, use @ref parseInt() instead.
          * @see @ref Json::parseInts()
          */
@@ -1148,7 +1150,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed signed 53-bit integer value
          *
-         * Expects that the value is already parsed as a
+         * Expects that the token is already parsed as a
          * @ref ParsedType::Long. If not, use @ref parseLong() instead.
          *
          * Available only on 64-bit targets due to limits of the internal
@@ -1195,7 +1197,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get a parsed string value
          *
-         * Expects that the value is @ref Type::String and @ref isParsed() is
+         * Expects that the token is a @ref Type::String and @ref isParsed() is
          * set. If @ref Json::fromString() was called with a global literal and
          * the string didn't contain any escape sequences, the returned view
          * has @ref Containers::StringViewFlag::Global set. If not, the view
