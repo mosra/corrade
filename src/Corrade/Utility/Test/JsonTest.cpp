@@ -104,6 +104,14 @@ struct JsonTest: TestSuite::Tester {
         void iterateArrayValues();
         void iterateArrayNotArray();
 
+        void findObjectKey();
+        void findObjectKeyNotFound();
+        void findObjectKeyNotObject();
+        void findObjectKeyNotParsed();
+        void findArrayIndex();
+        void findArrayIndexNotFound();
+        void findArrayIndexNotArray();
+
         void file();
         void fileReadError();
         void fileOptionReadError();
@@ -776,6 +784,14 @@ JsonTest::JsonTest() {
               &JsonTest::iterateArray,
               &JsonTest::iterateArrayValues,
               &JsonTest::iterateArrayNotArray,
+
+              &JsonTest::findObjectKey,
+              &JsonTest::findObjectKeyNotFound,
+              &JsonTest::findObjectKeyNotObject,
+              &JsonTest::findObjectKeyNotParsed,
+              &JsonTest::findArrayIndex,
+              &JsonTest::findArrayIndexNotFound,
+              &JsonTest::findArrayIndexNotArray,
 
               &JsonTest::file,
               &JsonTest::fileReadError,
@@ -2087,6 +2103,139 @@ void JsonTest::iterateArrayNotArray() {
     Error redirectError{&out};
     json->root().asArray();
     CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is a Utility::JsonToken::Type::Object\n");
+}
+
+void JsonTest::findObjectKey() {
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "hello": 3,
+        "this": ["or", "that"],
+        "wherever": true
+    })", Json::Option::ParseStringKeys);
+    CORRADE_VERIFY(json);
+
+    const JsonToken* found = json->root().find("this");
+    CORRADE_VERIFY(found);
+    CORRADE_COMPARE(found->data(), "[\"or\", \"that\"]");
+    CORRADE_COMPARE(json->root()["this"].data(), "[\"or\", \"that\"]");
+
+    /* It especially shouldn't look into subobjects or whatnot */
+    CORRADE_VERIFY(!json->root().find("that"));
+    /* operator[] tested below as it asserts */
+}
+
+void JsonTest::findObjectKeyNotFound() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "hello": 3,
+        "this": ["or", "that"],
+        "wherever": true
+    })", Json::Option::ParseStringKeys);
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root()["that"];
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::operator[](): key that not found\n");
+}
+
+void JsonTest::findObjectKeyNotObject() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("[]");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().find("this");
+    json->root()["this"];
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Array, not an object\n"
+        /* operator[]() delegates to find(), so the error is the same */
+        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Array, not an object\n");
+}
+
+void JsonTest::findObjectKeyNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "hello": 3,
+        "this": ["or", "that"],
+        "wherever": true
+    })");
+    CORRADE_VERIFY(json);
+    /* Parse "hello" and "wherever" but not "this" */
+    CORRADE_VERIFY(json->parseStrings(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseStrings(json->tokens()[6]));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().find("this");
+    json->root()["this"];
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::find(): key string isn't parsed\n"
+        /* operator[]() delegates to find(), so the error is the same */
+        "Utility::JsonToken::find(): key string isn't parsed\n");
+}
+
+void JsonTest::findArrayIndex() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        "hello",
+        ["this", "is"],
+        {"an": "array"}
+    ])");
+    CORRADE_VERIFY(json);
+
+    const JsonToken* found = json->root().find(1);
+    CORRADE_VERIFY(found);
+    CORRADE_COMPARE(found->data(), "[\"this\", \"is\"]");
+    CORRADE_COMPARE(json->root()[1].data(), "[\"this\", \"is\"]");
+
+    /* It especially shoulnd't count also nested tokens */
+    CORRADE_VERIFY(!json->root().find(3));
+    /* operator[] tested below as it asserts */
+}
+
+void JsonTest::findArrayIndexNotFound() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        "hello",
+        ["this", "is"],
+        {"an": "array"}
+    ])");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root()[3];
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::operator[](): index 3 not found\n");
+}
+
+void JsonTest::findArrayIndexNotArray() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().find(1);
+    json->root()[1];
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n"
+        /* operator[]() delegates to find(), so the error is the same */
+        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n");
 }
 
 void JsonTest::file() {

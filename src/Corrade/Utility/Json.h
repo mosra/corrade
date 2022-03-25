@@ -1020,6 +1020,70 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         JsonView<JsonArrayItem> asArray() const;
 
         /**
+         * @brief Find an object value by key
+         *
+         * Expects that the token is a @ref Type::Object and its keys have
+         * @ref isParsed() set. If @p key is found, returns the child token
+         * corresponding to its value, otherwise returns @cpp nullptr @ce.
+         *
+         * Note that there's no acceleration structure built at parse time and
+         * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
+         * @f$ n @f$ is the number of keys in given object. When looking up
+         * many keys in a larger object, it's thus recommended to iterate
+         * through @ref asObject() than to repeatedly call this function.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref Json::Option::ParseStringKeys,
+         *      @ref Json::parseStringKeys()
+         */
+        const JsonToken* find(Containers::StringView key) const;
+
+        /**
+         * @brief Find an array value by index
+         *
+         * Expects that the token is a @ref Type::Array. If @p index is found,
+         * returns the corresponding token, otherwise returns @cpp nullptr @ce.
+         *
+         * Note that there's no acceleration structure built at parse time and
+         * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
+         * @f$ n @f$ is the number of items in given array. When looking up
+         * many indices in a larger array, it's thus recommended to iterate
+         * through @ref asArray() than to repeatedly call this function.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type()
+         */
+        const JsonToken* find(std::size_t index) const;
+
+        /**
+         * @brief Access an object value by key
+         *
+         * Compared to @ref find(Containers::StringView) const expects also
+         * that @p key exists.
+         */
+        const JsonToken& operator[](Containers::StringView key) const;
+
+        /**
+         * @brief Access an array value by index
+         *
+         * Compared to @ref find(std::size_t) const expects also that @p index
+         * exists.
+         */
+        const JsonToken& operator[](std::size_t index) const;
+
+        /**
          * @brief Parse a null
          *
          * If the token is not a @ref Type::Null, returns

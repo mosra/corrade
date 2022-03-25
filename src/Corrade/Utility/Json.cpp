@@ -1467,6 +1467,56 @@ JsonView<JsonArrayItem> JsonToken::asArray() const {
         };
 }
 
+const JsonToken* JsonToken::find(const Containers::StringView key) const {
+    CORRADE_ASSERT(type() == Type::Object,
+        "Utility::JsonToken::find(): token is a" << type() << Debug::nospace << ", not an object", this);
+
+    for(const JsonToken *i = this + 1, *end = this + 1 +
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+    ; i != end; i = i->next()) {
+        CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", this);
+        /** @todo asStringInternal() to avoid the nested assert? */
+        if(i->asString() == key) return i->firstChild();
+    }
+
+    return nullptr;
+}
+
+const JsonToken& JsonToken::operator[](const Containers::StringView key) const {
+    const JsonToken* found = find(key);
+    CORRADE_ASSERT(found, "Utility::JsonToken::operator[](): key" << key << "not found", *this);
+    return *found;
+}
+
+const JsonToken* JsonToken::find(const std::size_t index) const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::find(): token is a" << type() << Debug::nospace << ", not an array", this);
+
+    std::size_t counter = 0;
+    for(const JsonToken *i = this + 1, *end = this + 1 +
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+    ; i != end; i = i->next())
+        if(counter++ == index) return i;
+
+    return nullptr;
+}
+
+const JsonToken& JsonToken::operator[](const std::size_t index) const {
+    const JsonToken* found = find(index);
+    /** @todo something better like "index N out of bounds for M elements",
+        would need an internal helper or some such to get the counter value */
+    CORRADE_ASSERT(found, "Utility::JsonToken::operator[](): index" << index << "not found", *this);
+    return *found;
+}
+
 Containers::Optional<std::nullptr_t> JsonToken::parseNull() const {
     if(type() != Type::Null) return {};
     if(isParsed()) return nullptr;
