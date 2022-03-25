@@ -30,6 +30,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -111,6 +112,27 @@ struct JsonTest: TestSuite::Tester {
         void findArrayIndex();
         void findArrayIndexNotFound();
         void findArrayIndexNotArray();
+
+        void asBoolArray();
+        void asBoolArrayNotAllSame();
+        void asBoolArrayNotAllParsed();
+        void asDoubleArray();
+        void asDoubleArrayNotAllSame();
+        void asFloatArray();
+        void asFloatArrayNotAllSame();
+        void asUnsignedIntArray();
+        void asUnsignedIntArrayNotAllSame();
+        void asIntArray();
+        void asIntArrayNotAllSame();
+        void asUnsignedLongArray();
+        void asUnsignedLongArrayNotAllSame();
+        #ifndef CORRADE_TARGET_32BIT
+        void asLongArray();
+        void asLongArrayNotAllSame();
+        #endif
+        void asSizeArray();
+        void asSizeArrayNotAllSame();
+        void asTypeArrayNotArray();
 
         void file();
         void fileReadError();
@@ -792,6 +814,27 @@ JsonTest::JsonTest() {
               &JsonTest::findArrayIndex,
               &JsonTest::findArrayIndexNotFound,
               &JsonTest::findArrayIndexNotArray,
+
+              &JsonTest::asBoolArray,
+              &JsonTest::asBoolArrayNotAllSame,
+              &JsonTest::asBoolArrayNotAllParsed,
+              &JsonTest::asDoubleArray,
+              &JsonTest::asDoubleArrayNotAllSame,
+              &JsonTest::asFloatArray,
+              &JsonTest::asFloatArrayNotAllSame,
+              &JsonTest::asUnsignedIntArray,
+              &JsonTest::asUnsignedIntArrayNotAllSame,
+              &JsonTest::asIntArray,
+              &JsonTest::asIntArrayNotAllSame,
+              &JsonTest::asUnsignedLongArray,
+              &JsonTest::asUnsignedLongArrayNotAllSame,
+              #ifndef CORRADE_TARGET_32BIT
+              &JsonTest::asLongArray,
+              &JsonTest::asLongArrayNotAllSame,
+              #endif
+              &JsonTest::asSizeArray,
+              &JsonTest::asSizeArrayNotAllSame,
+              &JsonTest::asTypeArrayNotArray,
 
               &JsonTest::file,
               &JsonTest::fileReadError,
@@ -2236,6 +2279,244 @@ void JsonTest::findArrayIndexNotArray() {
         "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n");
+}
+
+void JsonTest::asBoolArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        true, false, true
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Containers::StridedArrayView1D<const bool>> out = json->root().asBoolArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView({true, false, true}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asBoolArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        true, false, 0
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(!json->root().asBoolArray());
+}
+
+void JsonTest::asBoolArrayNotAllParsed() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        true, false, true
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseLiterals(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseLiterals(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asBoolArray());
+}
+
+void JsonTest::asDoubleArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseDoubles(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const double>> out = json->root().asDoubleArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView({35.5, -17.25, 0.25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asDoubleArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 1
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseDoubles(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseDoubles(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asDoubleArray());
+}
+
+void JsonTest::asFloatArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseFloats(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const float>> out = json->root().asFloatArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView({35.5f, -17.25f, 0.25f}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asFloatArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 1
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseFloats(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseFloats(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asFloatArray());
+}
+
+void JsonTest::asUnsignedIntArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = json->root().asUnsignedIntArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView<std::uint32_t>({35, 17, 25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asUnsignedIntArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asUnsignedIntArray());
+}
+
+void JsonTest::asIntArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseInts(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> out = json->root().asIntArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView<std::int32_t>({35, -17, 25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asIntArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseInts(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseInts(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asIntArray());
+}
+
+void JsonTest::asUnsignedLongArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = json->root().asUnsignedLongArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView<std::uint64_t>({35, 17, 25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asUnsignedLongArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asUnsignedLongArray());
+}
+
+#ifndef CORRADE_TARGET_32BIT
+void JsonTest::asLongArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseLongs(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> out = json->root().asLongArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView<std::int64_t>({35, -17, 25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asLongArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseLongs(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseLongs(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asLongArray());
+}
+#endif
+
+void JsonTest::asSizeArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseSizes(json->root()));
+
+    Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> out = json->root().asSizeArray();
+    CORRADE_VERIFY(out);
+    CORRADE_COMPARE_AS(*out,
+        Containers::arrayView<std::size_t>({35, 17, 25}),
+        TestSuite::Compare::Container);
+}
+
+void JsonTest::asSizeArrayNotAllSame() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 0.25
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseSizes(json->tokens()[1]));
+    CORRADE_VERIFY(json->parseSizes(json->tokens()[2]));
+    CORRADE_VERIFY(!json->root().asSizeArray());
+}
+
+void JsonTest::asTypeArrayNotArray() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asBoolArray();
+    json->root().asDoubleArray();
+    json->root().asFloatArray();
+    json->root().asUnsignedIntArray();
+    json->root().asIntArray();
+    json->root().asUnsignedLongArray();
+    #ifndef CORRADE_TARGET_32BIT
+    json->root().asLongArray();
+    #endif
+    json->root().asSizeArray();
+    const char* expected =
+        "Utility::JsonToken::asBoolArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asDoubleArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asFloatArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asIntArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        #ifndef CORRADE_TARGET_32BIT
+        "Utility::JsonToken::asLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        #else
+        "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
+        #endif
+        ;
+    CORRADE_COMPARE(out.str(), expected);
 }
 
 void JsonTest::file() {

@@ -36,6 +36,7 @@
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Path.h"
 
@@ -1686,6 +1687,151 @@ Containers::StringView JsonToken::asString() const {
 
     /* Otherwise take the cached version */
     return *_parsedString;
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const bool>> JsonToken::asBoolArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asBoolArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->type() != Type::Bool || !i->isParsed()) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedBool);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const double>> JsonToken::asDoubleArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asDoubleArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->parsedType() != ParsedType::Double) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedDouble);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const float>> JsonToken::asFloatArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asFloatArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->parsedType() != ParsedType::Float) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedFloat);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> JsonToken::asUnsignedIntArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asUnsignedIntArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->parsedType() != ParsedType::UnsignedInt) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedInt);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> JsonToken::asIntArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asIntArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->parsedType() != ParsedType::Int) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedInt);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> JsonToken::asUnsignedLongArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asUnsignedLongArray(): token is a" << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        if(i->parsedType() != ParsedType::UnsignedLong) return {};
+
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedLong);
+}
+
+#ifndef CORRADE_TARGET_32BIT
+Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> JsonToken::asLongArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asLongArray(): token is a" << type(), {});
+
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the parsedType() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + _childCount; i != end; ++i)
+        if(i->parsedType() != ParsedType::Long) return {};
+
+    return Containers::stridedArrayView(this + 1, _childCount).slice(&JsonToken::_parsedLong);
+}
+#endif
+
+Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> JsonToken::asSizeArray() const {
+    #ifndef CORRADE_TARGET_32BIT
+    Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = asUnsignedLongArray();
+    #else
+    Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = asUnsignedIntArray();
+    #endif
+    if(!out) return {};
+    return Containers::arrayCast<const std::size_t>(*out);
 }
 
 Containers::StringView JsonObjectItem::key() const {

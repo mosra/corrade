@@ -836,6 +836,27 @@ for(const Utility::JsonToken& node: nodes->asArray())
 }
 
 {
+Containers::Optional<Utility::Json> json;
+const Utility::JsonToken& node = json->root();
+/* [Json-usage-direct-array-access] */
+const Utility::JsonToken& nodeTranslation = node["translation"];
+Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
+if(!json->parseFloats(nodeTranslation) ||
+   !(translation = nodeTranslation.asFloatArray()) ||
+   translation->size() != 3)
+    Utility::Fatal{} << "Node translation is not a 3-component float vector";
+
+const Utility::JsonToken& nodeChildren = node["children"];
+Containers::Optional<Containers::StridedArrayView1D<const unsigned>> children;
+if(!json->parseUnsignedInts(nodeChildren) ||
+   !(children = nodeChildren.asUnsignedIntArray()))
+    Utility::Fatal{} << "Node children is not an index list";
+
+DOXYGEN_ELLIPSIS()
+/* [Json-usage-direct-array-access] */
+}
+
+{
 int a = 2;
 int d[5]{};
 int e[5]{};

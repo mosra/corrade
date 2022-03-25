@@ -130,6 +130,30 @@ in the loop:
 
 @snippet Utility.cpp Json-usage-iteration-values
 
+@subsection Utility-Json-usage-direct-array-access Direct access to numeric arrays
+
+Besides high-level array iteration, there's also a set of function for
+accessing homogeneous numeric arrays. Coming back to the glTF format, for
+example a node translation vector and child indices:
+
+@code{.json}
+{
+  "translation": [1.5, -0.5, 2.3],
+  "children": [2, 3, 4, 17, 399]
+}
+@endcode
+
+Similarly to handling the mesh reference above, accessing the first with
+property @ref JsonToken::asFloatArray() and the other with
+@relativeref{JsonToken,asUnsignedIntArray()} will let the parser catch
+unexpected non-index values in the children array. The functions return a view
+directly onto the parsed values, thus we need to first parse the particular
+token subtree as such. If the parsed type wouldn't match, if there would be
+unparsed numeric values left or if the array would contain other token types as
+well, the functions return @ref Containers::NullOpt.
+
+@snippet Utility.cpp Json-usage-direct-array-access
+
 @section Utility-Json-tokenization Tokenization and parsing process
 
 The tokenization process is largely inspired by [jsmn](https://github.com/zserge/jsmn)
@@ -1191,7 +1215,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is @ref Type::Bool and @ref isParsed() is
          * set. If not, use @ref parseBool() instead.
-         * @see @ref Json::Option::ParseLiterals, @ref Json::parseLiterals()
+         * @see @ref Json::Option::ParseLiterals, @ref Json::parseLiterals(),
+         *      @ref asBoolArray()
          */
         bool asBool() const;
 
@@ -1212,7 +1237,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Double. If not, use @ref parseDouble() instead.
-         * @see @ref Json::Option::ParseDoubles, @ref Json::parseDoubles()
+         * @see @ref Json::Option::ParseDoubles, @ref Json::parseDoubles(),
+         *      @ref asDoubleArray()
          */
         double asDouble() const;
 
@@ -1235,7 +1261,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Float. If not, use @ref parseFloat() instead.
-         * @see @ref Json::Option::ParseFloats, @ref Json::parseFloats()
+         * @see @ref Json::Option::ParseFloats, @ref Json::parseFloats(),
+         *      @ref asFloatArray()
          */
         float asFloat() const;
 
@@ -1258,7 +1285,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the token is already parsed as a
          * @ref ParsedType::UnsignedInt. If not, use @ref parseUnsignedInt()
          * instead.
-         * @see @ref Json::parseUnsignedInts()
+         * @see @ref Json::parseUnsignedInts(), @ref asUnsignedIntArray()
          */
         std::uint32_t asUnsignedInt() const;
 
@@ -1280,7 +1307,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Int. If not, use @ref parseInt() instead.
-         * @see @ref Json::parseInts()
+         * @see @ref Json::parseInts(), @ref asIntArray()
          */
         std::int32_t asInt() const;
 
@@ -1304,7 +1331,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the value is already parsed as a
          * @ref ParsedType::UnsignedLong. If not, use @ref parseUnsignedLong()
          * instead.
-         * @see @ref Json::parseUnsignedLongs()
+         * @see @ref Json::parseUnsignedLongs(), @ref asUnsignedLongArray()
          */
         std::uint64_t asUnsignedLong() const;
 
@@ -1332,7 +1359,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
          * can use either @ref ParsedType::Int, @ref ParsedType::Double or
          * parse the integer value always on-the-fly using @ref parseLong().
-         * @see @ref Json::parseLongs()
+         * @see @ref Json::parseLongs(), @ref asLongArray()
          */
         std::int64_t asLong() const;
         #endif
@@ -1382,6 +1409,173 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref Json::parseStrings(), @ref parseString()
          */
         Containers::StringView asString() const;
+
+        /**
+         * @brief Get a parsed boolean array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous parsed @ref Type::Bool, returns @ref Containers::NullOpt.
+         * The returned view points to data owned by the originating @ref Json
+         * instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         *      @ref Json::parseLiterals(), @ref parseBool(), @ref asBool()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const bool>> asBoolArray() const;
+
+        /**
+         * @brief Get a parsed 64-bit floating point array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::Double, returns
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(),
+         *      @ref Json::Option::ParseDoubles, @ref Json::parseDoubles(),
+         *      @ref parseDouble(), @ref asDouble()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const double>> asDoubleArray() const;
+
+        /**
+         * @brief Get a parsed 32-bit floating point array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::Float, returns
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(), @ref Json::Option::ParseFloats,
+         *      @ref Json::parseFloats(), @ref parseFloat(), @ref asFloat()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const float>> asFloatArray() const;
+
+        /**
+         * @brief Get a parsed unsigned 32-bit integer array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::UnsignedInt, returns
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(), @ref Json::parseUnsignedInts(),
+         *      @ref parseUnsignedInt(), @ref asUnsignedInt()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> asUnsignedIntArray() const;
+
+        /**
+         * @brief Get a parsed signed 32-bit integer array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::Int, returns
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(), @ref Json::parseInts(),
+         *      @ref parseInt(), @ref asInt()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> asIntArray() const;
+
+        /**
+         * @brief Get a parsed unsigned 52-bit integer array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::UnsignedLong, returns
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(),
+         *      @ref Json::parseUnsignedLongs(), @ref parseUnsignedLong(),
+         *      @ref asUnsignedLong()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> asUnsignedLongArray() const;
+
+        #ifndef CORRADE_TARGET_32BIT
+        /**
+         * @brief Get a parsed signed 53-bit integer value array
+         *
+         * Expects that the token is a @ref Type::Array. If the array is not
+         * homogeneous @ref ParsedType::Long, returns
+         * @ref Containers::NullOpt.
+         *
+         * Available only on 64-bit targets due to limits of the internal
+         * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
+         * can use either @ref asIntArray, @ref asDoubleArray() or parse the
+         * integer values one-by-one on-the-fly using @ref parseLong().
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(), @ref Json::parseLongs(),
+         *      @ref parseLong(), @ref asLong()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> asLongArray() const;
+        #endif
+
+        /**
+         * @brief Get a parsed size array
+         *
+         * Convenience function that calls into @ref asUnsignedIntArray() on
+         * @ref CORRADE_TARGET_32BIT "32-bit targets" and into
+         * @ref asUnsignedLongArray() on 64-bit.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref parsedType(), @ref Json::parseSizes(),
+         *      @ref parseSize(), @ref asSize()
+         */
+        Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> asSizeArray() const;
 
     private:
         friend Json;
