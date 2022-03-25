@@ -46,18 +46,89 @@ namespace Corrade { namespace Utility {
 Tokenizes a JSON file together with optional parsing of selected token
 subtrees. Supports files over 4 GB and parsing of numeric values into 32-bit
 floating-point, 32-bit and 52-/53-bit unsigned and signed integer types in
-addition to the general 64-bit floating-point representation. To optimize for
-parsing performance and minimal memory usage, the parsed token tree is an
-immutable view on the input JSON string.
+addition to the general 64-bit floating-point representation.
+
+To optimize for parsing performance and minimal memory usage, the parsed tokens
+are contained in a single contiguous allocation and form an immutable view on
+the input JSON string. As the intended usage is sequential processing of select
+parts of the file, there's no time spent building any acceleration structures
+for fast lookup of keys and array indices --- if that's desired, users are
+encouraged to build their own.
 
 @section Utility-Json-usage Basic usage
 
-@snippet Utility.cpp Json-usage-basic
+The following snippet opens a very minimal
+[glTF](https://www.khronos.org/gltf/) file, parses it including unescaping
+strings and converting numbers to floats, and accesses the known properties:
 
-The above opens a file, tokenizes it and performs literal, numeric and string
-value parsing, failing if the file contains an error. Read further for a
-detailed description of the parser output and customization of the parsing
-behavior.
+@m_class{m-row m-container-inflate}
+
+@parblock
+
+@m_div{m-col-l-4}
+@code{.json}
+{
+  "asset": {
+    "version": "2.0"
+  },
+  "nodes": [
+    …,
+    {
+      "name": "Chair",
+      "mesh": 5
+    }
+  ]
+}
+@endcode
+@m_enddiv
+
+@m_div{m-col-l-8}
+@snippet Utility.cpp Json-usage-basic
+@m_enddiv
+
+@endparblock
+
+The above --- apart from handling a parsing failure --- assumes that there's
+the node `i` we're looking for and that it contains the properties we want. But
+that is not always the case in a valid glTF file and so it could assert if we'd
+ask for something that's not there. This is how it would look with
+@ref JsonToken::find() used instead of @ref JsonToken::operator[]():
+
+@snippet Utility.cpp Json-usage-find
+
+The next level would be an invalid glTF file, for example where the root
+element is not an object, or the name isn't a string, etc. Those are still
+handled by assertions here, if a graceful handling would be desired, the code
+would either have to check the @ref JsonToken::type() or call into
+@ref JsonToken::parseString() etc. instead of @relativeref{JsonToken,asString()}
+etc.:
+
+@snippet Utility.cpp Json-usage-checks
+
+Furthermore, while numeric values in a JSON are defined to be of a
+floating-point type, often the values are meant to represent integer sizes or
+offsets --- such as here in case of the mesh index. Calling
+@ref JsonToken::parseUnsignedInt() instead of @relativeref{JsonToken,parseFloat()}
+will not only check that it's a numeric value, but also that it has no
+fractional part and is not negative:
+
+@snippet Utility.cpp Json-usage-checks2
+
+@subsection Utility-Json-usage-iteration Iterating objects and arrays
+
+While the above works sufficiently well for simple use cases, the parser and
+internal representation is optimized for linear consumption rather than lookup
+by keys or values. The preferred way to consume a parsed @ref Json instance is
+thus by iterating over object and array contents and building your own
+representation from it:
+
+@snippet Utility.cpp Json-usage-iteration
+
+Both @ref JsonObjectItem and @ref JsonArrayItem is implicitly convertible to a
+@ref JsonToken reference if the array index or object key wouldn't be needed
+in the loop:
+
+@snippet Utility.cpp Json-usage-iteration-values
 
 @section Utility-Json-tokenization Tokenization and parsing process
 
@@ -986,8 +1057,9 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is a @ref Type::Object, accessing
          * @ref JsonObjectItem::key() then expects that the key token has
-         * @ref isParsed() set. Iteration through object keys is performed
-         * using @ref next(), which has a @f$ \mathcal{O}(1) @f$ complexity.
+         * @ref isParsed() set. See @ref Utility-Json-usage-iteration for more
+         * information. Iteration through object keys is performed using
+         * @ref next(), which has a @f$ \mathcal{O}(1) @f$ complexity.
          *
          * @m_class{m-note m-warning}
          *
@@ -1004,8 +1076,9 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get an iterable array
          *
-         * Expects that the token is a @ref Type::Array. Iteration through
-         * array values is performed using @ref next(), which has a
+         * Expects that the token is a @ref Type::Array. See
+         * @ref Utility-Json-usage-iteration for more information. Iteration
+         * through array values is performed using @ref next(), which has a
          * @f$ \mathcal{O}(1) @f$ complexity.
          *
          * @m_class{m-note m-warning}
@@ -1440,7 +1513,8 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, JsonToken::ParsedType val
 @brief JSON object item
 @m_since_latest
 
-Returned when iterating @ref JsonToken::asObject().
+Returned when iterating @ref JsonToken::asObject(). See
+@ref Utility-Json-usage-iteration for more information.
 */
 class CORRADE_UTILITY_EXPORT JsonObjectItem {
     public:
@@ -1482,7 +1556,8 @@ class CORRADE_UTILITY_EXPORT JsonObjectItem {
 @brief JSON array item
 @m_since_latest
 
-Returned when iterating @ref JsonToken::asObject().
+Returned when iterating @ref JsonToken::asObject(). See
+@ref Utility-Json-usage-iteration for more information.
 */
 class JsonArrayItem {
     public:
@@ -1511,7 +1586,8 @@ class JsonArrayItem {
 @m_since_latest
 
 Iterator for @ref JsonView, which is returned from @ref JsonToken::asObject()
-and @ref JsonToken::asArray().
+and @ref JsonToken::asArray(). See @ref Utility-Json-usage-iteration for more
+information.
 */
 template<class T> class JsonIterator {
     public:
@@ -1556,7 +1632,8 @@ template<class T> class JsonIterator {
 @brief JSON object view
 @m_since_latest
 
-Returned from @ref JsonToken::asObject().
+Returned from @ref JsonToken::asObject(). See @ref Utility-Json-usage-iteration
+for more information.
 */
 template<class T> class JsonView {
     public:

@@ -31,6 +31,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/StridedArrayView.h"
@@ -740,16 +741,98 @@ if(watcher.hasChanged()) {
 #endif
 
 {
+std::size_t i{};
 /* [Json-usage-basic] */
-Containers::Optional<Utility::Json> json = Utility::Json::fromFile("data.json",
-    Utility::Json::Option::ParseLiterals|
-    Utility::Json::Option::ParseFloats|
-    Utility::Json::Option::ParseStrings);
+Containers::Optional<Utility::Json> json =
+    Utility::Json::fromFile("scene.gltf",
+        Utility::Json::Option::ParseLiterals|
+        Utility::Json::Option::ParseFloats|
+        Utility::Json::Option::ParseStrings);
 if(!json)
     Utility::Fatal{} << "Whoops!";
 
-DOXYGEN_ELLIPSIS()
+const Utility::JsonToken& nodeI = json->root()["nodes"][i];
+Utility::Debug{}
+    << "Node" << i << "is named" << nodeI["name"].asString()
+    << "and has a mesh" << nodeI["mesh"].asFloat();
 /* [Json-usage-basic] */
+}
+
+{
+Containers::Optional<Utility::Json> json;
+std::size_t i{};
+/* [Json-usage-find] */
+const Utility::JsonToken *nodes, *nodeI;
+if(!(nodes = json->root().find("nodes")) || !(nodeI = nodes->find(i)))
+    Utility::Fatal{} << "Node" << i << "is not in the file";
+
+if(const Utility::JsonToken* name = nodeI->find("name"))
+    Utility::Debug{} << "Node" << i << "is named" << name->asString();
+
+if(const Utility::JsonToken* mesh = nodeI->find("mesh"))
+    Utility::Debug{} << "Node" << i << "has a mesh" << mesh->asFloat();
+/* [Json-usage-find] */
+}
+
+{
+const Utility::JsonToken* nodeI{};
+std::size_t i{};
+/* [Json-usage-checks] */
+DOXYGEN_ELLIPSIS()
+if(nodeI->type() != Utility::JsonToken::Type::Object)
+    Utility::Fatal{} << "Node element is not an object";
+
+if(const Utility::JsonToken* name = nodeI->find("name")) {
+    if(Containers::Optional<Containers::String> value = name->parseString())
+        Utility::Debug{} << "Node" << i << "is named" << value;
+    else
+        Utility::Fatal{} << "Node name is not a string";
+}
+/* [Json-usage-checks] */
+
+/* [Json-usage-checks2] */
+if(const Utility::JsonToken* name = nodeI->find("mesh")) {
+    if(Containers::Optional<unsigned> value = name->parseUnsignedInt())
+        Utility::Debug{} << "Node" << i << "has a mesh" << value;
+    else
+        Utility::Fatal{} << "Node mesh is not an index";
+}
+/* [Json-usage-checks2] */
+}
+
+{
+const Utility::JsonToken *nodes{};
+/* [Json-usage-iteration] */
+struct Node {
+    Containers::StringView name;
+    unsigned mesh;
+};
+Containers::Array<Node> parsedNodes;
+
+for(Utility::JsonArrayItem node: nodes->asArray()) {
+    Utility::Debug{} << "Parsing node" << node.index();
+
+    Node parsedNode;
+    for(Utility::JsonObjectItem property: node.value().asObject()) {
+        if(property.key() == "name")
+            parsedNode.name = property.value().asString();
+        else if(property.key() == "mesh")
+            parsedNode.mesh = *property.value().parseUnsignedInt();
+        DOXYGEN_ELLIPSIS()
+    }
+
+    arrayAppend(parsedNodes, parsedNode);
+}
+/* [Json-usage-iteration] */
+}
+
+{
+const Utility::JsonToken *nodes{};
+/* [Json-usage-iteration-values] */
+Containers::Array<Containers::Reference<const Utility::JsonToken>> nodeMap;
+for(const Utility::JsonToken& node: nodes->asArray())
+    arrayAppend(nodeMap, node);
+/* [Json-usage-iteration-values] */
 }
 
 {
