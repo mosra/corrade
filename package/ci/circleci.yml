@@ -173,7 +173,7 @@ commands:
   make-expected-linux-dirs:
     steps:
     - run:
-        name: Create files expected by Utility::Directory tests on Linux
+        name: Create files expected by Utility::Path tests on Linux
         command: |
           mkdir -p ~/.config/autostart
           mkdir -p ~/.local
