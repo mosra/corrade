@@ -26,9 +26,13 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is stream-free */
@@ -90,6 +94,15 @@ struct JsonTest: TestSuite::Tester {
         void parseOptionError();
         void parseDirectError();
         void parseTokenNotOwned();
+
+        void iterator();
+        void iterateObject();
+        void iterateObjectValues();
+        void iterateObjectNotObject();
+        void iterateObjectKeyNotParsed();
+        void iterateArray();
+        void iterateArrayValues();
+        void iterateArrayNotArray();
 
         void file();
         void fileReadError();
@@ -753,6 +766,16 @@ JsonTest::JsonTest() {
         Containers::arraySize(ParseDirectErrorData));
 
     addTests({&JsonTest::parseTokenNotOwned,
+
+              &JsonTest::iterator,
+
+              &JsonTest::iterateObject,
+              &JsonTest::iterateObjectValues,
+              &JsonTest::iterateObjectNotObject,
+              &JsonTest::iterateObjectKeyNotParsed,
+              &JsonTest::iterateArray,
+              &JsonTest::iterateArrayValues,
+              &JsonTest::iterateArrayNotArray,
 
               &JsonTest::file,
               &JsonTest::fileReadError,
@@ -1932,6 +1955,138 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseStringKeys(): token not owned by the instance\n"
         "Utility::Json::parseStrings(): token not owned by the instance\n";
     CORRADE_COMPARE(out.str(), expected);
+}
+
+void JsonTest::iterator() {
+    Containers::Optional<Json> json = Json::fromString("[0, 1, 2]");
+    CORRADE_VERIFY(json);
+
+    JsonIterator<JsonArrayItem> a = json->root().asArray().begin();
+    JsonIterator<JsonArrayItem> b = ++json->root().asArray().begin();
+
+    CORRADE_VERIFY(a == a);
+    CORRADE_VERIFY(a != b);
+    CORRADE_VERIFY(b != a);
+    CORRADE_VERIFY(++a == b);
+    CORRADE_COMPARE((*b).value().data(), "1");
+}
+
+void JsonTest::iterateObject() {
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "hello": 3,
+        "this": ["is"],
+        "an": {"object": true}
+    })", Json::Option::ParseStringKeys);
+    CORRADE_VERIFY(json);
+
+    Containers::Array<Containers::Pair<Containers::StringView, Containers::StringView>> data;
+    for(JsonObjectItem a: json->root().asObject())
+        arrayAppend(data, InPlaceInit, a.key(), a.value().data());
+
+    CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::Pair<Containers::StringView, Containers::StringView>>({
+        {"hello", "3"},
+        {"this", "[\"is\"]"},
+        {"an", "{\"object\": true}"}
+    })), TestSuite::Compare::Container);
+}
+
+void JsonTest::iterateObjectValues() {
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "hello": 3,
+        "this": ["is"],
+        "an": {"object": true}
+    })", Json::Option::ParseStringKeys);
+    CORRADE_VERIFY(json);
+
+    Containers::Array<Containers::StringView> data;
+    for(const JsonToken& a: json->root().asObject())
+        arrayAppend(data, a.data());
+
+    CORRADE_COMPARE_AS(data, Containers::arrayView({
+        "3"_s,
+        "[\"is\"]"_s,
+        "{\"object\": true}"_s
+    }), TestSuite::Compare::Container);
+}
+
+void JsonTest::iterateObjectNotObject() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("[]");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asObject();
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is a Utility::JsonToken::Type::Array\n");
+}
+
+void JsonTest::iterateObjectKeyNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{\"key\": false}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    (*json->root().asObject().begin()).key();
+    CORRADE_COMPARE(out.str(), "Utility::JsonObjectItem::key(): string isn't parsed\n");
+}
+
+void JsonTest::iterateArray() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        "hello",
+        ["this", "is"],
+        {"an": "array"}
+    ])");
+    CORRADE_VERIFY(json);
+
+    Containers::Array<Containers::Pair<std::size_t, Containers::StringView>> data;
+    for(JsonArrayItem a: json->root().asArray())
+        arrayAppend(data, InPlaceInit, a.index(), a.value().data());
+
+    CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::Pair<std::size_t, Containers::StringView>>({
+        {0, "\"hello\""},
+        {1, "[\"this\", \"is\"]"},
+        {2, "{\"an\": \"array\"}"}
+    })), TestSuite::Compare::Container);
+}
+
+void JsonTest::iterateArrayValues() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        "hello",
+        ["this", "is"],
+        {"an": "array"}
+    ])");
+    CORRADE_VERIFY(json);
+
+    Containers::Array<Containers::StringView> tokens;
+    for(const JsonToken& a: json->root().asArray())
+        arrayAppend(tokens, a.data());
+
+    CORRADE_COMPARE_AS(tokens, Containers::arrayView({
+        "\"hello\""_s,
+        "[\"this\", \"is\"]"_s,
+        "{\"an\": \"array\"}"_s
+    }), TestSuite::Compare::Container);
+}
+
+void JsonTest::iterateArrayNotArray() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asArray();
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is a Utility::JsonToken::Type::Object\n");
 }
 
 void JsonTest::file() {

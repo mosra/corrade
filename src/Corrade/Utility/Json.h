@@ -982,6 +982,44 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         const JsonToken* parent() const;
 
         /**
+         * @brief Get an iterable object
+         *
+         * Expects that the token is a @ref Type::Object, accessing
+         * @ref JsonObjectItem::key() then expects that the key token has
+         * @ref isParsed() set. Iteration through object keys is performed
+         * using @ref next(), which has a @f$ \mathcal{O}(1) @f$ complexity.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type(), @ref Json::Option::ParseStringKeys,
+         *      @ref Json::parseStringKeys(), @ref parseString()
+         */
+        JsonView<JsonObjectItem> asObject() const;
+
+        /**
+         * @brief Get an iterable array
+         *
+         * Expects that the token is a @ref Type::Array. Iteration through
+         * array values is performed using @ref next(), which has a
+         * @f$ \mathcal{O}(1) @f$ complexity.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * @see @ref type()
+         */
+        JsonView<JsonArrayItem> asArray() const;
+
+        /**
          * @brief Parse a null
          *
          * If the token is not a @ref Type::Null, returns
@@ -1333,6 +1371,149 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, JsonToken::Type value);
 
 /** @debugoperatorclassenum{JsonToken,ParsedType} */
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, JsonToken::ParsedType value);
+
+/**
+@brief JSON object item
+@m_since_latest
+
+Returned when iterating @ref JsonToken::asObject().
+*/
+class CORRADE_UTILITY_EXPORT JsonObjectItem {
+    public:
+        /**
+         * @brief Key
+         *
+         * Equivalent to calling @ref JsonToken::asString() on the token.
+         */
+        Containers::StringView key() const;
+
+        /**
+         * @brief Value
+         *
+         * Equvialent to accessing @ref JsonToken::firstChild() on the token.
+         */
+        const JsonToken& value() const {
+            return *_token->firstChild();
+        }
+
+        /**
+         * @brief Value
+         *
+         * Equvialent to calling @ref value().
+         */
+        /*implicit*/ operator const JsonToken&() const {
+            return *_token->firstChild();
+        }
+
+    private:
+        friend JsonIterator<JsonObjectItem>;
+
+        /* The index is used only in JsonArrayItem, not here */
+        explicit JsonObjectItem(std::size_t, const JsonToken& token) noexcept: _token{&token} {}
+
+        const JsonToken* _token;
+};
+
+/**
+@brief JSON array item
+@m_since_latest
+
+Returned when iterating @ref JsonToken::asObject().
+*/
+class JsonArrayItem {
+    public:
+        /** @brief Array index */
+        std::size_t index() const { return _index; }
+
+        /** @brief Value */
+        const JsonToken& value() const { return *_token; }
+
+        /** @brief Value */
+        operator const JsonToken&() const {
+            return *_token;
+        }
+
+    private:
+        friend JsonIterator<JsonArrayItem>;
+
+        explicit JsonArrayItem(std::size_t index, const JsonToken& token) noexcept: _index{index}, _token{&token} {}
+
+        std::size_t _index;
+        const JsonToken* _token;
+};
+
+/**
+@brief JSON iterator
+@m_since_latest
+
+Iterator for @ref JsonView, which is returned from @ref JsonToken::asObject()
+and @ref JsonToken::asArray().
+*/
+template<class T> class JsonIterator {
+    public:
+        /** @brief Equality comparison */
+        bool operator==(const JsonIterator<T>& other) const {
+            /* _index is implicit, no need to compare */
+            return _token == other._token;
+        }
+
+        /** @brief Non-equality comparison */
+        bool operator!=(const JsonIterator<T>& other) const {
+            /* _index is implicit, no need to compare */
+            return _token != other._token;
+        }
+
+        /**
+         * @brief Advance to next position
+         *
+         * Implemented using @ref JsonToken::next().
+         */
+        JsonIterator<T>& operator++() {
+            ++_index;
+            _token = _token->next();
+            return *this;
+        }
+
+        /** @brief Dereference */
+        T operator*() const {
+            return T{_index, *_token};
+        }
+
+    private:
+        friend JsonView<T>;
+
+        explicit JsonIterator(std::size_t index, const JsonToken* token) noexcept: _index{index}, _token{token} {}
+
+        std::size_t _index;
+        const JsonToken* _token;
+};
+
+/**
+@brief JSON object view
+@m_since_latest
+
+Returned from @ref JsonToken::asObject().
+*/
+template<class T> class JsonView {
+    public:
+        /** @brief Iterator to the first element */
+        JsonIterator<T> begin() const { return JsonIterator<T>{0, _begin}; }
+        /** @overload */
+        JsonIterator<T> cbegin() const { return JsonIterator<T>{0, _begin}; }
+
+        /** @brief Iterator to (one item after) the last element */
+        JsonIterator<T> end() const { return JsonIterator<T>{0, _end}; }
+        /** @overload */
+        JsonIterator<T> cend() const { return JsonIterator<T>{0, _end}; }
+
+    private:
+        friend JsonToken;
+
+        explicit JsonView(const JsonToken* begin, const JsonToken* end) noexcept: _begin{begin}, _end{end} {}
+
+        const JsonToken* _begin;
+        const JsonToken* _end;
+};
 
 inline JsonToken::Type JsonToken::type() const {
     #ifndef CORRADE_TARGET_32BIT

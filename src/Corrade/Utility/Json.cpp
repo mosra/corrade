@@ -1439,6 +1439,34 @@ const JsonToken* JsonToken::parent() const {
     return prev->_data ? prev : nullptr;
 }
 
+JsonView<JsonObjectItem> JsonToken::asObject() const {
+    CORRADE_ASSERT(type() == Type::Object,
+        "Utility::JsonToken::asObject(): token is a" << type(),
+        (JsonView<JsonObjectItem>{this + 1, this + 1}));
+
+    return JsonView<JsonObjectItem>{this + 1, this + 1 +
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+        };
+}
+
+JsonView<JsonArrayItem> JsonToken::asArray() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::asArray(): token is a" << type(),
+        (JsonView<JsonArrayItem>{this + 1, this + 1}));
+
+    return JsonView<JsonArrayItem>{this + 1, this + 1 +
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+        };
+}
+
 Containers::Optional<std::nullptr_t> JsonToken::parseNull() const {
     if(type() != Type::Null) return {};
     if(isParsed()) return nullptr;
@@ -1608,6 +1636,13 @@ Containers::StringView JsonToken::asString() const {
 
     /* Otherwise take the cached version */
     return *_parsedString;
+}
+
+Containers::StringView JsonObjectItem::key() const {
+    CORRADE_ASSERT(_token->isParsed(),
+        "Utility::JsonObjectItem::key(): string isn't parsed", {});
+    /** @todo asStringInternal() to avoid the nested assert? */
+    return _token->asString();
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::Type value) {

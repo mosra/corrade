@@ -59,6 +59,10 @@ class Fatal;
 
 class Json;
 class JsonToken;
+class JsonArrayItem;
+class JsonObjectItem;
+template<class> class JsonView;
+template<class> class JsonIterator;
 
 /* Endianness used only statically */
 class MurmurHash2;
