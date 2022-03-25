@@ -102,6 +102,9 @@ struct JsonTest: TestSuite::Tester {
         void asTypeNotParsed();
         void asTypeWrongParsedType();
 
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        void tokenConstructCopy();
+        #endif
         void constructCopy();
         void constructMove();
 
@@ -760,9 +763,12 @@ JsonTest::JsonTest() {
 
               &JsonTest::asTypeWrongType,
               &JsonTest::asTypeNotParsed,
-              &JsonTest::asTypeWrongParsedType});
+              &JsonTest::asTypeWrongParsedType,
 
-    addTests({&JsonTest::constructCopy,
+              #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+              &JsonTest::tokenConstructCopy,
+              #endif
+              &JsonTest::constructCopy,
               &JsonTest::constructMove,
 
               &JsonTest::debugTokenType,
@@ -2120,6 +2126,12 @@ void JsonTest::asTypeWrongParsedType() {
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n";
     CORRADE_COMPARE(out.str(), expected);
 }
+
+#ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+void JsonTest::tokenConstructCopy() {
+    CORRADE_VERIFY(std::is_trivially_copyable<JsonToken>{});
+}
+#endif
 
 void JsonTest::constructCopy() {
     CORRADE_VERIFY(!std::is_copy_constructible<Json>{});
