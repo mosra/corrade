@@ -50,10 +50,10 @@ addition to the general 64-bit floating-point representation.
 
 To optimize for parsing performance and minimal memory usage, the parsed tokens
 are contained in a single contiguous allocation and form an immutable view on
-the input JSON string. As the intended usage is sequential processing of select
+the input JSON string. As the intended usage is sequential processing of chosen
 parts of the file, there's no time spent building any acceleration structures
 for fast lookup of keys and array indices --- if that's desired, users are
-encouraged to build their own.
+encouraged to build them on top of the parsed output.
 
 @section Utility-Json-usage Basic usage
 
@@ -88,18 +88,18 @@ strings and converting numbers to floats, and accesses the known properties:
 
 @endparblock
 
-The above --- apart from handling a parsing failure --- assumes that there's
-the node `i` we're looking for and that it contains the properties we want. But
-that is not always the case in a valid glTF file and so it could assert if we'd
-ask for something that's not there. This is how it would look with
+The above --- apart from handling a parsing failure --- assumes that the node
+`i` we're looking for exists in the file and contains the properties we want.
+But that might not always be the case and so it could assert if we'd ask for
+something that's not there. This is how it would look with
 @ref JsonToken::find() used instead of @ref JsonToken::operator[]():
 
 @snippet Utility.cpp Json-usage-find
 
-The next level would be an invalid glTF file, for example where the root
-element is not an object, or the name isn't a string, etc. Those are still
-handled by assertions here, if a graceful handling would be desired, the code
-would either have to check the @ref JsonToken::type() or call into
+The next level of error handling would be for an invalid glTF file, for example
+where the root element is not an object, or the name isn't a string. Those
+would still cause the above code to assert, if a graceful handling is desired
+instead, the code either has to check the @ref JsonToken::type() or call into
 @ref JsonToken::parseString() etc. instead of @relativeref{JsonToken,asString()}
 etc.:
 
@@ -108,9 +108,10 @@ etc.:
 Furthermore, while numeric values in a JSON are defined to be of a
 floating-point type, often the values are meant to represent integer sizes or
 offsets --- such as here in case of the mesh index. Calling
-@ref JsonToken::parseUnsignedInt() instead of @relativeref{JsonToken,parseFloat()}
-will not only check that it's a numeric value, but also that it has no
-fractional part and is not negative:
+@ref JsonToken::parseUnsignedInt() instead of
+@relativeref{JsonToken,parseFloat()} / @relativeref{JsonToken,asFloat()} will
+not only check that it's a numeric value, but also that it has no fractional
+part and is not negative:
 
 @snippet Utility.cpp Json-usage-checks2
 
@@ -118,9 +119,11 @@ fractional part and is not negative:
 
 While the above works sufficiently well for simple use cases, the parser and
 internal representation is optimized for linear consumption rather than lookup
-by keys or values. The preferred way to consume a parsed @ref Json instance is
-thus by iterating over object and array contents and building your own
-representation from it:
+by keys or values --- those are @f$ \mathcal{O}(n) @f$ operations here. The
+preferred way to consume a parsed @ref Json instance is thus by iterating over
+object and array contents using @ref JsonToken::asObject() and
+@relativeref{JsonToken,asArray()} and building your own representation from
+these:
 
 @snippet Utility.cpp Json-usage-iteration
 
@@ -129,6 +132,36 @@ Both @ref JsonObjectItem and @ref JsonArrayItem is implicitly convertible to a
 in the loop:
 
 @snippet Utility.cpp Json-usage-iteration-values
+
+@subsection Utility-Json-usage-selective-parsing Selective parsing
+
+In the snippets above, the @ref Options passed to @ref fromFile() or
+@ref fromString() caused the file to get fully parsed upfront including number
+conversion and string unescaping. While that's a convenient behavior that
+makes sense when consuming the whole file, doing all that might be unnecessary
+when you only need to access a small portion of a large file. In the following
+snippet, only string keys get parsed upfront so objects can be searched, but
+then we parse only contents of the particular node using
+@ref parseLiterals() and @ref parseStrings():
+
+@snippet Utility.cpp Json-usage-selective-parsing
+
+This way we also have a greater control over parsed numeric types. Commonly a
+JSON file contains a mixture of floating-point and integer numbers and thus a
+top-level @ref Option for parsing everything as integers makes little sense.
+But on a token level it's clearer which values are meant to be integers and
+which floats and so we can choose among @ref parseFloats(),
+@ref parseUnsignedInts(), @ref parseInts() etc. Similarly as with on-the-fly
+parsing of a single value with @ref JsonToken::parseUnsignedInt() shown above,
+these will produce errors when floating-point values appear where integers were
+expected:
+
+@snippet Utility.cpp Json-usage-selective-parsing2
+
+While a JSON number is defined to be of a @cpp double @ce type, often the full
+precision is not needed. If it indeed is, you can switch to
+@ref Option::ParseDoubles, @ref parseDoubles() or @ref JsonToken::parseDouble()
+instead of @ref Option::ParseFloats or @ref parseFloats() where needed.
 
 @subsection Utility-Json-usage-direct-array-access Direct access to numeric arrays
 
@@ -143,14 +176,12 @@ example a node translation vector and child indices:
 }
 @endcode
 
-Similarly to handling the mesh reference above, accessing the first with
-property @ref JsonToken::asFloatArray() and the other with
-@relativeref{JsonToken,asUnsignedIntArray()} will let the parser catch
-unexpected non-index values in the children array. The functions return a view
-directly onto the parsed values, thus we need to first parse the particular
-token subtree as such. If the parsed type wouldn't match, if there would be
-unparsed numeric values left or if the array would contain other token types as
-well, the functions return @ref Containers::NullOpt.
+We'll parse and access the first property with @ref JsonToken::asFloatArray()
+and the other with @relativeref{JsonToken,asUnsignedIntArray()}, again using
+that to catch unexpected non-index values in the children array. If the parsed
+type wouldn't match, if there would be unparsed numeric values left or if the
+array would contain other things than just numbers, the functions return
+@ref Containers::NullOpt.
 
 @snippet Utility.cpp Json-usage-direct-array-access
 
@@ -166,45 +197,21 @@ objects and arrays. @ref JsonToken::type() is then implicitly inferred from the
 first byte of the token, but no further parsing or validation of actual token
 values is done during the initial tokenization.
 
+This allows the application to reduce the initial processing time and memory
+footprint. Token parsing is a subsequent step, parsing the string range of a
+token as a literal, converting it to a number or interpreting string escape
+sequences. This step can then fail on its own, for example when an invalid
+literal value is encountered, when a Unicode escape is out of bounds or when a
+parsed integer doesn't fit into the output type size.
+
 Token hierarchy is defined as the following --- object tokens have string keys
 as children, string keys have object values as children, arrays have array
 values as children and values themselves have no children. As implied by the
-depth-first ordering, the first token child (if any) is ordered right after
-the token, and together with @ref JsonToken::childCount(), which is the count
-of all nested tokens, it's either possible to dive into the child token tree
-using @ref JsonToken::firstChild() or @ref JsonToken::children() or skip after
-the child token tree using @ref JsonToken::next().
-
-@subsection Utility-Json-tokenization-parsing Parsing token values
-
-As said above, tokens are implicitly not processed in any way. This allows the
-application to parse the values on-demand, reducing initial parsing time and
-memory footprint. Furthermore, the process is divided into literal, number,
-object key and string parsing. Which means that, if you  only need to fetch a
-number array in a single object key, you first parse only object keys to be
-able to search for them, and then parse just the numeric values on the actually
-found subtree.
-
-Parsing can be either performed by passing appropriate @ref Option values to
-@ref fromString() / @ref fromFile(), by subsequently calling the
-@ref parseLiterals(), @ref parseDoubles(), @ref parseStringKeys() or
-@ref parseStrings() on particular token trees, or by parsing individual tokens
-using @ref JsonToken::parseNull(), @ref JsonToken::parseBool(),
-@ref JsonToken::parseDouble() or @ref JsonToken::parseString().
-
-@subsection Utility-Json-tokenization-parsing-numeric Restricted numeric types
-
-While numeric values in a JSON are defined to be of a @cpp double @ce type,
-often the values are meant to represent integer sizes or offsets. To simplify
-error checking on the application side, the @ref parseUnsignedInts(),
-@ref parseInts(), @ref parseUnsignedLongs(), @ref parseLongs() and
-@ref parseSizes() can be called on token subtrees that are expected to only
-contain (unsigned) integer values, failing if any value doesn't satisfy such
-criteria.
-
-Often the full precision is not for floating-point values either, so you can
-choose between @ref Option::ParseDoubles and @ref Option::ParseFloats, or
-subsequently use either @ref parseDoubles() or @ref parseFloats() as desired.
+depth-first ordering, the first child token (if any) is ordered right after
+its parent token, and together with @ref JsonToken::childCount(), which is the
+count of all nested tokens, it's either possible to dive into the child token
+tree using @ref JsonToken::firstChild() or @ref JsonToken::children() or skip
+after the child token tree using @ref JsonToken::next().
 
 @section Utility-Json-representation Internal representation
 

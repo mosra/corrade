@@ -836,6 +836,34 @@ for(const Utility::JsonToken& node: nodes->asArray())
 }
 
 {
+std::size_t i{};
+/* [Json-usage-selective-parsing] */
+Containers::Optional<Utility::Json> json = Utility::Json::fromFile("scene.gltf",
+    Utility::Json::Option::ParseStringKeys);
+DOXYGEN_ELLIPSIS()
+
+const Utility::JsonToken* nodeI = json->root()["nodes"].find(i);
+if(!nodeI || !json->parseLiterals(*nodeI) || !json->parseStrings(*nodeI))
+    Utility::Fatal{} << "Can't parse node" << i;
+/* [Json-usage-selective-parsing] */
+
+/* [Json-usage-selective-parsing2] */
+for(Utility::JsonObjectItem property: nodeI->asObject()) {
+    if(property.key() == "mesh") {
+        json->parseUnsignedInts(property);
+        DOXYGEN_ELLIPSIS()
+    } else if(property.key() == "translation") {
+        json->parseFloats(property);
+        DOXYGEN_ELLIPSIS()
+    } else if(property.key() == "children") {
+        json->parseUnsignedInts(property);
+        DOXYGEN_ELLIPSIS()
+    } else DOXYGEN_ELLIPSIS(;)
+}
+/* [Json-usage-selective-parsing2] */
+}
+
+{
 Containers::Optional<Utility::Json> json;
 const Utility::JsonToken& node = json->root();
 /* [Json-usage-direct-array-access] */
@@ -852,7 +880,7 @@ if(!json->parseUnsignedInts(nodeChildren) ||
    !(children = nodeChildren.asUnsignedIntArray()))
     Utility::Fatal{} << "Node children is not an index list";
 
-DOXYGEN_ELLIPSIS()
+// use the translation and children arrays …
 /* [Json-usage-direct-array-access] */
 }
 
