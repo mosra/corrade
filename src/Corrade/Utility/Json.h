@@ -55,6 +55,9 @@ parts of the file, there's no time spent building any acceleration structures
 for fast lookup of keys and array indices --- if that's desired, users are
 encouraged to build them on top of the parsed output.
 
+The @ref JsonWriter class provides a write-only counterpart for saving a JSON
+file.
+
 @section Utility-Json-usage Usage
 
 The following snippet opens a very minimal

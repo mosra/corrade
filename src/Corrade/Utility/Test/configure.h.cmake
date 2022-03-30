@@ -28,6 +28,7 @@
 #define CONFIGURATION_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/ConfigurationTestFiles/"
 
 #define JSON_TEST_DIR "${UTILITY_TEST_DIR}/JsonTestFiles"
+#define JSONWRITER_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/JsonWriterTestFiles"
 
 #define PATH_TEST_DIR "${UTILITY_TEST_DIR}/PathTestFiles"
 #define PATH_TEST_DIR_SYMLINK "${UTILITY_TEST_DIR}/PathTestFilesSymlink"

@@ -63,6 +63,7 @@ class JsonArrayItem;
 class JsonObjectItem;
 template<class> class JsonView;
 template<class> class JsonIterator;
+class JsonWriter;
 
 /* Endianness used only statically */
 class MurmurHash2;

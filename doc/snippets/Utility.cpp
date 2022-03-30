@@ -34,6 +34,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/Arguments.h"
@@ -47,6 +48,7 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Json.h"
+#include "Corrade/Utility/JsonWriter.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Path.h"
@@ -882,6 +884,58 @@ if(!json->parseUnsignedInts(nodeChildren) ||
 
 // use the translation and children arrays …
 /* [Json-usage-direct-array-access] */
+}
+
+{
+/* [JsonWriter-usage1] */
+Utility::JsonWriter json{
+    Utility::JsonWriter::Option::Wrap|
+    Utility::JsonWriter::Option::TypographicalSpace, 2};
+/* [JsonWriter-usage1] */
+
+/* [JsonWriter-usage2] */
+json.beginObject()
+        .writeKey("asset").beginObject()
+            .writeKey("version").write("2.0")
+        .endObject()
+        .writeKey("nodes").beginArray()
+            .beginObject()
+                .writeKey("name").write("Chair")
+                .writeKey("mesh").write(5)
+            .endObject()
+        .endArray()
+    .endObject();
+/* [JsonWriter-usage2] */
+
+/* [JsonWriter-usage3] */
+if(!json.toFile("scene.gltf"))
+    Utility::Fatal{} << "Huh, can't write a file?";
+/* [JsonWriter-usage3] */
+}
+
+{
+Utility::JsonWriter json;
+/* [JsonWriter-usage-object-array-scope] */
+struct Node {
+    Containers::StringView name;
+    unsigned mesh;
+};
+Containers::ArrayView<const Node> nodes;
+
+DOXYGEN_ELLIPSIS()
+
+{
+    json.writeKey("nodes");
+    Containers::ScopeGuard jsonNodes = json.beginArrayScope();
+
+    for(const Node& node: nodes) {
+        Containers::ScopeGuard jsonNode = json.beginObjectScope();
+
+        json.writeKey("name").write(node.name)
+            .writeKey("mesh").write(node.mesh);
+    }
+}
+/* [JsonWriter-usage-object-array-scope] */
 }
 
 {

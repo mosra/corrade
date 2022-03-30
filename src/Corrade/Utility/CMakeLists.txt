@@ -46,6 +46,7 @@ if(WITH_UTILITY)
         ConfigurationGroup.cpp
         Format.cpp
         Json.cpp
+        JsonWriter.cpp
         Resource.cpp
         String.cpp
         Unicode.cpp
@@ -71,6 +72,7 @@ if(WITH_UTILITY)
         FormatStl.h
         FormatStlStringView.h
         Json.h
+        JsonWriter.h
         Macros.h
         Math.h
         Memory.h
