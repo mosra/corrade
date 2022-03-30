@@ -55,7 +55,7 @@ parts of the file, there's no time spent building any acceleration structures
 for fast lookup of keys and array indices --- if that's desired, users are
 encouraged to build them on top of the parsed output.
 
-@section Utility-Json-usage Basic usage
+@section Utility-Json-usage Usage
 
 The following snippet opens a very minimal
 [glTF](https://www.khronos.org/gltf/) file, parses it including unescaping
@@ -74,7 +74,7 @@ strings and converting numbers to floats, and accesses the known properties:
   "nodes": [
     …,
     {
-      "name": "Chair",
+      "name": "Fox",
       "mesh": 5
     }
   ]
@@ -83,7 +83,7 @@ strings and converting numbers to floats, and accesses the known properties:
 @m_enddiv
 
 @m_div{m-col-l-8}
-@snippet Utility.cpp Json-usage-basic
+@snippet Utility.cpp Json-usage
 @m_enddiv
 
 @endparblock
@@ -186,6 +186,9 @@ array would contain other things than just numbers, the functions return
 @snippet Utility.cpp Json-usage-direct-array-access
 
 @section Utility-Json-tokenization Tokenization and parsing process
+
+The class expects exactly one top-level JSON value, be it an object, array,
+literal, number or a string.
 
 The tokenization process is largely inspired by [jsmn](https://github.com/zserge/jsmn)
 --- the file gets processed to a flat list of @ref JsonToken instances, where
@@ -1830,11 +1833,11 @@ template<class T> class JsonIterator {
 };
 
 /**
-@brief JSON object view
+@brief JSON object and array view
 @m_since_latest
 
-Returned from @ref JsonToken::asObject(). See @ref Utility-Json-usage-iteration
-for more information.
+Returned from @ref JsonToken::asObject() and @ref JsonToken::asArray(). See
+@ref Utility-Json-usage-iteration for more information.
 */
 template<class T> class JsonView {
     public:

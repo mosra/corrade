@@ -742,7 +742,7 @@ if(watcher.hasChanged()) {
 
 {
 std::size_t i{};
-/* [Json-usage-basic] */
+/* [Json-usage] */
 Containers::Optional<Utility::Json> json =
     Utility::Json::fromFile("scene.gltf",
         Utility::Json::Option::ParseLiterals|
@@ -755,7 +755,7 @@ const Utility::JsonToken& nodeI = json->root()["nodes"][i];
 Utility::Debug{}
     << "Node" << i << "is named" << nodeI["name"].asString()
     << "and has a mesh" << nodeI["mesh"].asFloat();
-/* [Json-usage-basic] */
+/* [Json-usage] */
 }
 
 {
@@ -858,7 +858,7 @@ for(Utility::JsonObjectItem property: nodeI->asObject()) {
     } else if(property.key() == "children") {
         json->parseUnsignedInts(property);
         DOXYGEN_ELLIPSIS()
-    } else DOXYGEN_ELLIPSIS(;)
+    } else DOXYGEN_ELLIPSIS({})
 }
 /* [Json-usage-selective-parsing2] */
 }

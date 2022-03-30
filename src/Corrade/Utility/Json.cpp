@@ -926,7 +926,7 @@ bool parseStringInto(const char* const errorPrefix, const Debug::Flag flag, cons
                 *out = '\\';
                 break;
             case '/':
-                *out = '/';
+                *out = '/';  /* JSON, why, you're weird */
                 break;
             case 'b':
                 *out = '\b';
