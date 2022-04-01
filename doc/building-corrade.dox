@@ -81,7 +81,7 @@ checking out the Git repository and executing the @cb{.sh} conan create @ce
 command:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
+git clone https://github.com/mosra/corrade && cd corrade
 conan create . magnum/stable -tf package/conan/test_package
 @endcode
 
@@ -189,7 +189,7 @@ directory. They allow you to build and install the package directly from the
 source tree. Example usage:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
+git clone https://github.com/mosra/corrade && cd corrade
 cd package/archlinux
 makepkg -fp PKGBUILD # or any other PKGBUILD file
 @endcode
@@ -222,7 +222,7 @@ development `PKGBUILD` in `package/msys`, allowing you to package and install
 the currently checked out source tree. Example usage:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
+git clone https://github.com/mosra/corrade && cd corrade
 cd package/msys
 makepkg -fp PKGBUILD
 @endcode
@@ -248,7 +248,7 @@ Building is easy, just change directory to package root, link or copy
 `package/debian` directory there and run `dpkg-buildpackage`:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
+git clone https://github.com/mosra/corrade && cd corrade
 ln -s package/debian .
 dpkg-buildpackage --no-sign
 @endcode
@@ -271,7 +271,7 @@ Gentoo Git ebuild is available in the `package/gentoo` directory. Build and
 install the package like this:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
+git clone https://github.com/mosra/corrade && cd corrade
 cd package/gentoo
 sudo ebuild dev-libs/corrade/corrade-9999.ebuild manifest clean merge
 @endcode
@@ -347,7 +347,7 @@ repository with your favorite IDE or Git GUI, download currrent snapshot as a
 compressed archive or use the command line:
 
 @code{.sh}
-git clone git://github.com/mosra/corrade.git
+git clone https://github.com/mosra/corrade.git
 @endcode
 
 @subsection building-corrade-cmake CMake primer

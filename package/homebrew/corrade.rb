@@ -4,7 +4,7 @@ class Corrade < Formula
   url "https://github.com/mosra/corrade/archive/v2020.06.tar.gz"
   # wget https://github.com/mosra/corrade/archive/v2020.06.tar.gz -O - | sha256sum
   sha256 "2a62492ccc717422b72f2596a3e1a6a105b9574aa9467917f12d19ef3aab1341"
-  head "git://github.com/mosra/corrade.git"
+  head "https://github.com/mosra/corrade.git"
 
   depends_on "cmake"
 
