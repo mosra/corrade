@@ -158,7 +158,6 @@ struct PathTest: TestSuite::Tester {
     void listSkipDotAndDotDot();
     void listSkipEverything();
     void listSort();
-    void listSortPrecedence();
     void listNonexistent();
     void listNonNullTerminated();
     void listTrailingSlash();
@@ -352,7 +351,6 @@ PathTest::PathTest() {
               &PathTest::listSkipDotAndDotDot,
               &PathTest::listSkipEverything,
               &PathTest::listSort,
-              &PathTest::listSortPrecedence,
               &PathTest::listNonexistent,
               &PathTest::listNonNullTerminated,
               &PathTest::listTrailingSlash,
@@ -1865,11 +1863,19 @@ void PathTest::listSort() {
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             "file", "dir", "..", "."
         }), TestSuite::Compare::Container);
-    }
-}
+    } {
+        /* Ascending and descending together will pick ascending */
+        Containers::Optional<Containers::Array<Containers::String>> list = Path::list(_testDir, Path::ListFlag::SortAscending|Path::ListFlag::SortDescending);
+        CORRADE_VERIFY(list);
 
-void PathTest::listSortPrecedence() {
-    CORRADE_VERIFY((Path::ListFlag::SortAscending|Path::ListFlag::SortDescending) == Path::ListFlag::SortAscending);
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            ".", "..", "dir", "file"
+        }), TestSuite::Compare::Container);
+    }
 }
 
 void PathTest::listNonexistent() {
