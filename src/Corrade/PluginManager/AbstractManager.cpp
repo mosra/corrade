@@ -432,6 +432,7 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
             Utility::Path::join(_state->pluginDirectory, "*"_s + _state->pluginSuffix),
             Utility::Path::GlobFlag::SkipDirectories|
             Utility::Path::GlobFlag::SortAscending);
+        if(d) !Utility::Debug{} << d;
         if(d) for(const Containers::StringView filename: *d) {
             /* Dig plugin name from filename */
             const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix);
