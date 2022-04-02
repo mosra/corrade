@@ -220,9 +220,15 @@ corrade_add_test(UtilityMoveTest MoveTest.cpp)
 
 set(UtilityPathTest_SRCS PathTest.cpp)
 if(CORRADE_TARGET_IOS)
-    set_source_files_properties(PathTestFiles PROPERTIES
-        MACOSX_PACKAGE_LOCATION Resources)
-    list(APPEND PathDirectoryTest_SRCS PathTestFiles)
+    set_source_files_properties(
+        PathTestFiles
+        PathTestFilesSymlink
+        PathTestFilesUtf8
+        PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    list(APPEND PathDirectoryTest_SRCS
+        PathTestFiles
+        PathTestFilesSymlink
+        PathTestFilesUtf8)
 endif()
 corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
     FILES
@@ -351,9 +357,15 @@ endif()
 if(CORRADE_BUILD_DEPRECATED)
     set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
     if(CORRADE_TARGET_IOS)
-        set_source_files_properties(PathTestFiles PROPERTIES
-            MACOSX_PACKAGE_LOCATION Resources)
-        list(APPEND UtilityDirectoryTest_SRCS PathTestFiles)
+        set_source_files_properties(
+            PathTestFiles
+            PathTestFilesSymlink
+            PathTestFilesUtf8
+            PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        list(APPEND UtilityDirectoryTest_SRCS
+            PathTestFiles
+            PathTestFilesSymlink
+            PathTestFilesUtf8)
     endif()
     corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
         FILES
