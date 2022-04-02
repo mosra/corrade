@@ -63,58 +63,6 @@ class MapDeleter;
 #endif
 
 /**
-@brief Directory listing flag
-@m_since_latest
-
-@see @ref ListFlags, @ref list()
-*/
-enum class ListFlag: unsigned char {
-    /** Skip `.` and `..` directories */
-    SkipDotAndDotDot = 1 << 0,
-
-    /**
-     * Skip regular files
-     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
-     *      directories, as there's no concept of a special file.
-     */
-    SkipFiles = 1 << 1,
-
-    /** Skip directories (including `.` and `..`) */
-    SkipDirectories = 1 << 2,
-
-    /**
-     * Skip everything that is not a file or directory
-     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows"
-     *      and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", as these platforms
-     *      don't have a concept of a special file.
-     */
-    SkipSpecial = 1 << 3,
-
-    /**
-     * Sort items in ascending order. If both @ref ListFlag::SortAscending and
-     * @ref ListFlag::SortDescending is specified, ascending order is used.
-     */
-    SortAscending = (1 << 4) | (1 << 5),
-
-    /**
-     * Sort items in descending order. If both @ref ListFlag::SortAscending and
-     * @ref ListFlag::SortDescending is specified, ascending order is used.
-     */
-    SortDescending = 1 << 5
-};
-
-/**
-@brief Directory listing flags
-@m_since_latest
-
-@see @ref list()
-*/
-typedef Containers::EnumSet<ListFlag> ListFlags;
-
-CORRADE_ENUMSET_OPERATORS(ListFlags)
-
-/**
 @brief Convert path from native separators
 @m_since_latest
 
@@ -496,6 +444,58 @@ UTF-16 representation using @ref Unicode::narrow().
     format, if needed.
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<Containers::String> temporaryDirectory();
+
+/**
+@brief Directory listing flag
+@m_since_latest
+
+@see @ref ListFlags, @ref list()
+*/
+enum class ListFlag: unsigned char {
+    /** Skip `.` and `..` directories */
+    SkipDotAndDotDot = 1 << 0,
+
+    /**
+     * Skip regular files
+     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
+     *      directories, as there's no concept of a special file.
+     */
+    SkipFiles = 1 << 1,
+
+    /** Skip directories (including `.` and `..`) */
+    SkipDirectories = 1 << 2,
+
+    /**
+     * Skip everything that is not a file or directory
+     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows"
+     *      and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", as these platforms
+     *      don't have a concept of a special file.
+     */
+    SkipSpecial = 1 << 3,
+
+    /**
+     * Sort items in ascending order. If both @ref ListFlag::SortAscending and
+     * @ref ListFlag::SortDescending is specified, ascending order is used.
+     */
+    SortAscending = (1 << 4) | (1 << 5),
+
+    /**
+     * Sort items in descending order. If both @ref ListFlag::SortAscending and
+     * @ref ListFlag::SortDescending is specified, ascending order is used.
+     */
+    SortDescending = 1 << 5
+};
+
+/**
+@brief Directory listing flags
+@m_since_latest
+
+@see @ref list()
+*/
+typedef Containers::EnumSet<ListFlag> ListFlags;
+
+CORRADE_ENUMSET_OPERATORS(ListFlags)
 
 /**
 @brief List directory contents
