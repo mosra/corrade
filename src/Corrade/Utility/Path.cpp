@@ -700,6 +700,9 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     Containers::Array<Containers::String> list;
 
     dirent* entry;
+    /* readdir() should fail only if the directory pointer is invalid, which
+       we already checked above -- so the error handling is done oly for stat()
+       below */
     while((entry = readdir(directory)) != nullptr) {
         if((flags >= ListFlag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
@@ -725,6 +728,9 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
         if((flags & (ListFlag::SkipDirectories|ListFlag::SkipFiles|ListFlag::SkipSpecial)) && entry->d_type == DT_LNK) {
             /* stat() follows the symlink, lstat() doesn't */
             struct stat st;
+            /** @todo once we figure out a way to test, handle errors from
+                stat() (print warnings), add a to make those fail the whole
+                operation instead of carrying on; same in glob() */
             if(stat((join(path, entry->d_name)).data(), &st) == 0) {
                 if(flags >= ListFlag::SkipDirectories && S_ISDIR(st.st_mode))
                     continue;
@@ -735,7 +741,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
             }
         }
 
-        Containers::StringView file = entry->d_name;
+        const Containers::StringView file = entry->d_name;
         if((flags >= ListFlag::SkipDotAndDotDot) && (file == "."_s || file == ".."_s))
             continue;
 
