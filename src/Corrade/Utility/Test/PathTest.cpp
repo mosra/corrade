@@ -148,6 +148,7 @@ struct PathTest: TestSuite::Tester {
     void temporaryDirectoryUtf8();
 
     void list();
+    void listEmptyDirectory();
     void listSkipDirectories();
     void listSkipDirectoriesSymlinks();
     void listSkipFiles();
@@ -155,6 +156,7 @@ struct PathTest: TestSuite::Tester {
     void listSkipSpecial();
     void listSkipSpecialSymlink();
     void listSkipDotAndDotDot();
+    void listSkipEverything();
     void listSort();
     void listSortPrecedence();
     void listNonexistent();
@@ -340,6 +342,7 @@ PathTest::PathTest() {
               &PathTest::temporaryDirectoryUtf8,
 
               &PathTest::list,
+              &PathTest::listEmptyDirectory,
               &PathTest::listSkipDirectories,
               &PathTest::listSkipDirectoriesSymlinks,
               &PathTest::listSkipFiles,
@@ -347,6 +350,7 @@ PathTest::PathTest() {
               &PathTest::listSkipSpecial,
               &PathTest::listSkipSpecialSymlink,
               &PathTest::listSkipDotAndDotDot,
+              &PathTest::listSkipEverything,
               &PathTest::listSort,
               &PathTest::listSortPrecedence,
               &PathTest::listNonexistent,
@@ -1685,6 +1689,28 @@ void PathTest::list() {
     }
 }
 
+void PathTest::listEmptyDirectory() {
+    /* Create an empty directory. To be sure it's empty, recreate it. */
+    Containers::String emptyDir = Path::join(_writeTestDir, "EmptyDir");
+    if(Path::exists(emptyDir))
+        CORRADE_VERIFY(Path::remove(emptyDir));
+    CORRADE_VERIFY(Path::make(emptyDir));
+
+    /* It shouldn't fail if there's nothing inside */
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::list(emptyDir);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            ".", ".."
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
 void PathTest::listSkipDirectories() {
     Containers::Optional<Containers::Array<Containers::String>> list = Path::list(_testDir, Path::ListFlag::SkipDirectories);
     CORRADE_VERIFY(list);
@@ -1798,6 +1824,20 @@ void PathTest::listSkipDotAndDotDot() {
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             "dir", "file"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::listSkipEverything() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::list(_testDir, Path::ListFlag::SkipFiles|Path::ListFlag::SkipDirectories);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
         }), TestSuite::Compare::SortedContainer);
     }
 }
