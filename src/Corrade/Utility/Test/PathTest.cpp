@@ -1789,6 +1789,7 @@ void PathTest::listSkipSpecialSymlink() {
 
 void PathTest::listSkipDotAndDotDot() {
     Containers::Optional<Containers::Array<Containers::String>> list = Path::list(_testDir, Path::ListFlag::SkipDotAndDotDot);
+    CORRADE_VERIFY(list);
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
