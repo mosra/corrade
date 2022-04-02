@@ -800,9 +800,24 @@ Containers::Optional<Containers::Array<Containers::String>> glob(const Container
     if(!(flags & (GlobFlag::SortAscending|GlobFlag::SortDescending)))
         globFlags |= GLOB_NOSORT;
     glob_t out;
+    /* With musl (and with Emscripten that uses musl), an error from opening a
+       directory (such as when globbing `nonexistent/``*`) that happens at:
+        https://github.com/bminor/musl/blob/6d8a515796270eb6cec8a278cb353a078a10f09a/src/regex/glob.c#L127-L130
+       gets ignored by the code path that haldes the case of no matches, and so
+       we get GLOB_NOMATCH instead:
+        https://github.com/bminor/musl/blob/6d8a515796270eb6cec8a278cb353a078a10f09a/src/regex/glob.c#L261-L270
+       Fortunately the opendir() failure sets errno which we can subsequently
+       check... unless it's a version before
+        https://github.com/emscripten-core/emscripten/commit/e05e72d9c49fe15578e73934ce525a894d1b712a
+       which apparently neither sets the errno nor calls the error handler, so
+       we have no way to check anything. Apart from that, this is still not
+       100% bulletproof as is possible that something else would set errno even
+       in the successful scenario. */
+    errno = 0;
     const int result = glob(Containers::String::nullTerminatedView(pattern).data(), globFlags, nullptr, &out);
-    /* Having no results is fine, having an error is not */
-    if(result == GLOB_NOMATCH)
+    /* Having no results is fine, but only if we're not under musl that has the
+       bug explained above, so check errno as well */
+    if(result == GLOB_NOMATCH && !errno)
         return Containers::Array<Containers::String>{};
     if(result != 0) {
         Error err;

@@ -54,6 +54,10 @@
 #include "Corrade/Utility/System.h" /* isSandboxed() */
 #endif
 
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include <emscripten.h> /* XFAIL in globNonexistent() */
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct PathTest: TestSuite::Tester {
@@ -2308,6 +2312,10 @@ void PathTest::globSort() {
 void PathTest::globNonexistent() {
     std::ostringstream out;
     Error redirectError{&out};
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 3
+    /* https://github.com/emscripten-core/emscripten/commit/e05e72d9c49fe15578e73934ce525a894d1b712a */
+    CORRADE_EXPECT_FAIL("Emscripten < 3.0.0 has an old musl which doesn't seem to correctly propagate the error from opendir().");
+    #endif
     /* OTOH, non*existent would pass, returning 0 results. That's tested in
        globNoMatch(). */
     CORRADE_VERIFY(!Path::glob("nonexistent/*"));
