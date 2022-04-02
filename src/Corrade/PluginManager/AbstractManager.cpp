@@ -428,16 +428,11 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
         when the directory doesn't exist, as a lot of existing code and tests
         relies on it. Figure out a better solution. */
     if(Utility::Path::exists(_state->pluginDirectory)) {
-        Containers::Optional<Containers::Array<Containers::String>> d = Utility::Path::list(
-            _state->pluginDirectory,
-            Utility::Path::ListFlag::SkipDirectories|
-            Utility::Path::ListFlag::SkipDotAndDotDot|
-            Utility::Path::ListFlag::SortAscending);
+        Containers::Optional<Containers::Array<Containers::String>> d = Utility::Path::glob(
+            Utility::Path::join(_state->pluginDirectory, "*"_s + _state->pluginSuffix),
+            Utility::Path::GlobFlag::SkipDirectories|
+            Utility::Path::GlobFlag::SortAscending);
         if(d) for(const Containers::StringView filename: *d) {
-            /* File doesn't have module suffix, continue to next */
-            if(!filename.hasSuffix(_state->pluginSuffix))
-                continue;
-
             /* Dig plugin name from filename */
             const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix);
 
