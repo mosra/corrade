@@ -869,9 +869,35 @@ Containers::Optional<Containers::Array<Containers::String>> glob(const Container
     WIN32_FIND_DATAW data;
     HANDLE hFile = FindFirstFileW(Unicode::widen(pattern), &data);
     if(hFile == INVALID_HANDLE_VALUE) {
+        /* If we're matching `path/``*` and it returns ERROR_FILE_NOT_FOUND, it
+           means the path doesn't exist -- otherwise it would return at least a
+           `..`. This is a valid reason to error.
+
+           If we're however matching e.g. `path/``*.txt` and it returns
+           ERROR_FILE_NOT_FOUND, we should not error if `path` is an existing directory that just doesn't contain any text files. So then we
+           subsequently check if the path is a directory, and if it is, we
+           return an empty list, consistently with the Unix implementation
+           above. */
+        const unsigned int error = GetLastError();
+        if(error == ERROR_FILE_NOT_FOUND) {
+            const Containers::Pair<Containers::StringView, Containers::StringView> pathFilename = split(pattern);
+            /* Yes, this performs a second UTF-8 -> UTF-16 conversion
+               internally, because we need a smaller null-terminated string. An
+               alternative would be to cache the Unicode::widen(pattern) from
+               above, then somehow add a 16-bit zero to where the last 16-bit /
+               is, and then call the Windows API directly, but who wants to
+               write extra tests for all that? I don't. */
+            if(pathFilename.second() != "*"_s && isDirectory(pathFilename.first()))
+                return Containers::Array<Containers::String>{};
+        }
+
         Error err;
         err << "Utility::Path::glob(): can't glob" << pattern << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        /* Using the cached error from above and not GetLastError() in case
+           the isDirectory() call would produce another error internally. The
+           isDirectory() call also shouldn't be printing anything on its
+           own. */
+        Utility::Implementation::printWindowsErrorString(err, error);
         return {};
     }
     Containers::ScopeGuard closeHandle{hFile,
