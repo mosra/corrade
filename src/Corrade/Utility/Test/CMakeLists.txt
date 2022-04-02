@@ -237,6 +237,7 @@ corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
         PathTestFiles/dir/dummy
         PathTestFiles/file
         PathTestFilesGlob/.file.txt
+        PathTestFilesGlob/file.txtlol
         PathTestFilesGlob/file1.txt
         PathTestFilesGlob/file11.txt
         PathTestFilesGlob/file12.txt

@@ -2041,12 +2041,12 @@ void PathTest::globAll() {
     {
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     }
@@ -2123,12 +2123,12 @@ void PathTest::globSkipDirectories() {
         #endif
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "file1.txt", "file11.txt", "file12.txt"
+            "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".file.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".file.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     }
@@ -2214,12 +2214,12 @@ void PathTest::globSkipSpecial() {
         #endif
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     }
@@ -2269,12 +2269,12 @@ void PathTest::globSort() {
 
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::Container);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     } {
@@ -2283,12 +2283,12 @@ void PathTest::globSort() {
 
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "file12.txt", "file11.txt", "file1.txt", "dir.txt"
+            "file12.txt", "file11.txt", "file1.txt", "file.txtlol", "dir.txt"
         }), TestSuite::Compare::Container);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            "file12.txt", "file11.txt", "file1.txt", "dir.txt", ".file.txt", ".dir.txt", "..", "."
+            "file12.txt", "file11.txt", "file1.txt", "file.txtlol", "dir.txt", ".file.txt", ".dir.txt", "..", "."
         }), TestSuite::Compare::SortedContainer);
         #endif
     } {
@@ -2298,12 +2298,12 @@ void PathTest::globSort() {
 
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::Container);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     }
@@ -2343,12 +2343,12 @@ void PathTest::globNonNullTerminated() {
     {
         #ifndef CORRADE_TARGET_WINDOWS
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
-            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #else
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             /* Windows has no special treatment for dotfiles */
-            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file.txtlol", "file1.txt", "file11.txt", "file12.txt"
         }), TestSuite::Compare::SortedContainer);
         #endif
     }
