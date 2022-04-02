@@ -64,6 +64,7 @@
 #include <cstring>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <glob.h>
 #include <unistd.h>
 #ifdef CORRADE_TARGET_APPLE
 #include <mach-o/dyld.h>
@@ -750,15 +751,111 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
 
     closedir(directory);
 
+    if(flags & (ListFlag::SortAscending|ListFlag::SortDescending))
+        std::sort(list.begin(), list.end());
+    /* We don't have rbegin() / rend() on Array (would require a custom
+       iterator class or a StridedArrayView), so just reverse the result */
+    if(flags >= ListFlag::SortDescending && !(flags >= ListFlag::SortAscending))
+        std::reverse(list.begin(), list.end());
+
+    /* GCC 4.8 and Clang 3.8 need extra help here */
+    return Containers::optional(std::move(list));
+
+    /* Windows (not Store/Phone) is implemented via glob(), a subset of the
+       flag bits supported by both is expected to match */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    return glob(join(path, "*"_s), GlobFlag(static_cast<unsigned char>(flags)));
+    #else
+    #error
+    #endif
+
+    /* Other not implemented */
+    #else
+    Error{} << "Utility::Path::list(): not implemented on this platform";
+    static_cast<void>(path);
+    return {};
+    #endif
+}
+
+Containers::Optional<Containers::Array<Containers::String>> glob(const Containers::StringView pattern, GlobFlags flags) {
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    /* POSIX-compliant Unix, Emscripten */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Don't allow escaping * and ? with \ for consistency with Windows and to
+       avoid clashing with directory separators on Windows.
+
+       Also fail when encountering an, which means it'd fail also when stat()
+       on any file would fail, which is a different behavior from Path::list().
+       There's no way to separate the two cases except for attaching the error
+       handler and then ... um ... trying to figure out whether the failure
+       happened during opendir() or during stat()? The error handler carries no
+       state pointer, so that would be excessively shitty.
+
+       Without GLOB_ERR set, it would just try to carry on, ultimately claiming
+       a GLOB_NOMATCH. And a GLOB_NOMATCH is not an error state as it happens
+       when globbing an existing but empty directory. */
+    int globFlags = GLOB_NOESCAPE|GLOB_ERR;
+    /* The output is sorted by default which means we don't have to do that.
+       Disable it if not requested as an optimization. */
+    if(!(flags & (GlobFlag::SortAscending|GlobFlag::SortDescending)))
+        globFlags |= GLOB_NOSORT;
+    glob_t out;
+    const int result = glob(Containers::String::nullTerminatedView(pattern).data(), globFlags, nullptr, &out);
+    /* Having no results is fine, having an error is not */
+    if(result == GLOB_NOMATCH)
+        return Containers::Array<Containers::String>{};
+    if(result != 0) {
+        Error err;
+        err << "Utility::Path::glob(): can't glob" << pattern << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return {};
+    }
+
+    Containers::Array<Containers::String> list;
+
+    for(std::size_t i = 0; i != out.gl_pathc; ++i) {
+        /* If the pattern was a full path, the output returns a full path as
+           well. For consistency with list() and with the Windows API we return
+           just a filename portion. */
+        const Containers::StringView file = split(out.gl_pathv[i]).second();
+        if((flags >= GlobFlag::SkipDotAndDotDot) && (file == "."_s || file == ".."_s))
+            continue;
+
+        /* Compared to readdir() we don't implicitly get any entry type here,
+           so we have bear an extra overhead of stat() for every returned path
+           -- thus do it only if we're told to skip anything. If it fails for
+           the particular entry, treat it as "neither a file nor a directory"
+           and leave it in the list -- we're told to skip files/directories,
+           not "include only files/directories". */
+        if(flags & (GlobFlag::SkipDirectories|GlobFlag::SkipFiles|GlobFlag::SkipSpecial)) {
+            /* stat() follows the symlink, lstat() doesn't. This is equivalent
+               to what's done in Path::list(), except that here it's always and
+               not just for symlinks. */
+            struct stat st;
+            /* gl_pathv[i] is absolute if pattern was absolute, so no need to
+               prepend it again */
+            if(stat(out.gl_pathv[i], &st) == 0) {
+                if(flags >= GlobFlag::SkipDirectories && S_ISDIR(st.st_mode))
+                    continue;
+                if(flags >= GlobFlag::SkipFiles && S_ISREG(st.st_mode))
+                    continue;
+                if(flags >= GlobFlag::SkipSpecial && !S_ISDIR(st.st_mode) && !S_ISREG(st.st_mode))
+                    continue;
+            }
+        }
+
+        arrayAppend(list, file);
+    }
+
+    globfree(&out);
+
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATAW data;
-    /** @todo drop the StringView cast once widen(const std::string&) is
-        removed */
-    HANDLE hFile = FindFirstFileW(Unicode::widen(Containers::StringView{join(path, "*"_s)}), &data);
+    HANDLE hFile = FindFirstFileW(Unicode::widen(pattern), &data);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;
-        err << "Utility::Path::list(): can't list" << path << Debug::nospace << ":";
+        err << "Utility::Path::glob(): can't glob" << pattern << Debug::nospace << ":";
         Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return {};
     }
@@ -773,36 +870,51 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
 
     Containers::Array<Containers::String> list;
 
-    /* Explicitly add `.` for compatibility with other systems */
-    if(!(flags & (ListFlag::SkipDotAndDotDot|ListFlag::SkipDirectories)))
-        arrayAppend(list, "."_s);
+    /* Explicitly add `.` for compatibility with other systems if the glob
+       pattern would include it. Windows doesn't have any special treatment for
+       dotfiles, so `*` should match it as well, the same as it matches
+       `..`. */
+    if(!(flags & (GlobFlag::SkipDotAndDotDot|GlobFlag::SkipDirectories))) {
+        const Containers::StringView wildcard = split(pattern).second();
+        /** @todo not robust enough, ?, ** or .***** matches them as well */
+        if(wildcard == "*"_s || wildcard == ".*"_s)
+            arrayAppend(list, "."_s);
+    }
 
     while(FindNextFileW(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
-        if((flags >= ListFlag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+        if((flags >= GlobFlag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             continue;
-        if((flags >= ListFlag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+        if((flags >= GlobFlag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             continue;
         /** @todo symlink support */
         /** @todo are there any special files in WINAPI? */
 
-        /* Not testing for dot, as it is not listed on Windows. Also it doesn't
-           cause any unnecessary temporary allocation if SkipDotAndDotDot is
-           used because `..` fits easily into SSO. */
+        /* Not testing for `.`, as it is not listed on Windows -- we explicitly
+           added it above if it made sense. We could also check for the UTF-16
+           variant before creating a String instance, but `..` fits easily into
+           SSO so there's no unnecessary allocation being done. Plus `..`
+           appears just once for the whole call, so that's a constant overhead
+           factor. */
         Containers::String file = Unicode::narrow(data.cFileName);
-        if((flags >= ListFlag::SkipDotAndDotDot) && file == ".."_s)
+        if((flags >= GlobFlag::SkipDotAndDotDot) && file == ".."_s)
             continue;
 
         arrayAppend(list, std::move(file));
     }
+
+    /* Sorting done just here, Unix glob() can do it on its own so that's what
+       we use there instead. Reversal of the sorted list is done below for
+       both, however. */
+    if(flags & (GlobFlag::SortAscending|GlobFlag::SortDescending))
+        std::sort(list.begin(), list.end());
     #else
     #error
     #endif
 
-    if(flags & (ListFlag::SortAscending|ListFlag::SortDescending))
-        std::sort(list.begin(), list.end());
-    /* We don't have rbegin() / rend() on Array (would require a custom
-       iterator class or a StridedArrayView), so just reverse the result */
-    if(flags >= ListFlag::SortDescending && !(flags >= ListFlag::SortAscending))
+    /* On Unix the sorting was done by glob() already, on Windows via
+       std::sort(), so it's just the descending order left, which is done by
+       reversing the sorted list. */
+    if(flags >= GlobFlag::SortDescending && !(flags >= GlobFlag::SortAscending))
         std::reverse(list.begin(), list.end());
 
     /* GCC 4.8 and Clang 3.8 need extra help here */
@@ -810,7 +922,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
 
     /* Other not implemented */
     #else
-    Error{} << "Utility::Path::list(): not implemented on this platform";
+    Error{} << "Utility::Path::glob(): not implemented on this platform";
     static_cast<void>(path);
     return {};
     #endif

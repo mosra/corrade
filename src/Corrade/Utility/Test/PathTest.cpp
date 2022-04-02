@@ -164,6 +164,24 @@ struct PathTest: TestSuite::Tester {
     void listUtf8Result();
     void listUtf8Path();
 
+    void globAll();
+    void globSingleCharacter();
+    void globMultipleCharacters();
+    void globDotFiles();
+    void globNoMatch();
+    void globSkipDirectories();
+    void globSkipDirectoriesSymlinks();
+    void globSkipFiles();
+    void globSkipFilesSymlinks();
+    void globSkipSpecial();
+    void globSkipSpecialSymlink();
+    void globSkipDotAndDotDot();
+    void globSort();
+    void globNonexistent();
+    void globNonNullTerminated();
+    void globUtf8Result();
+    void globUtf8Path();
+
     void size();
     void sizeEmpty();
     void sizeNonSeekable();
@@ -244,6 +262,7 @@ struct PathTest: TestSuite::Tester {
     void mapWriteUtf8();
 
     Containers::String _testDir,
+        _testDirGlob,
         _testDirSymlink,
         _testDirUtf8,
         _writeTestDir;
@@ -357,6 +376,24 @@ PathTest::PathTest() {
               &PathTest::listUtf8Result,
               &PathTest::listUtf8Path,
 
+              &PathTest::globAll,
+              &PathTest::globSingleCharacter,
+              &PathTest::globMultipleCharacters,
+              &PathTest::globDotFiles,
+              &PathTest::globNoMatch,
+              &PathTest::globSkipDirectories,
+              &PathTest::globSkipDirectoriesSymlinks,
+              &PathTest::globSkipFiles,
+              &PathTest::globSkipFilesSymlinks,
+              &PathTest::globSkipSpecial,
+              &PathTest::globSkipSpecialSymlink,
+              &PathTest::globSkipDotAndDotDot,
+              &PathTest::globSort,
+              &PathTest::globNonexistent,
+              &PathTest::globNonNullTerminated,
+              &PathTest::globUtf8Result,
+              &PathTest::globUtf8Path,
+
               &PathTest::size,
               &PathTest::sizeEmpty,
               &PathTest::sizeNonSeekable,
@@ -453,6 +490,7 @@ PathTest::PathTest() {
         #endif
     ) {
         _testDir = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFiles");
+        _testDirGlob = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFilesGlob");
         _testDirSymlink = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFilesSymlink");
         _testDirUtf8 = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFilesUtf8");
         _writeTestDir = Path::join(*Path::homeDirectory(), "Library/Caches");
@@ -460,6 +498,7 @@ PathTest::PathTest() {
     #endif
     {
         _testDir = Containers::String::nullTerminatedView(PATH_TEST_DIR);
+        _testDirGlob = Containers::String::nullTerminatedView(PATH_TEST_DIR_GLOB);
         _testDirSymlink = Containers::String::nullTerminatedView(PATH_TEST_DIR_SYMLINK);
         _testDirUtf8 = Containers::String::nullTerminatedView(PATH_TEST_DIR_UTF8);
         _writeTestDir = Containers::String::nullTerminatedView(PATH_WRITE_TEST_DIR);
@@ -1891,9 +1930,10 @@ void PathTest::listNonexistent() {
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::list("nonexistent"));
     #ifdef CORRADE_TARGET_WINDOWS
-    /* Windows has its own code path and thus different errors */
+    /* On Windows it's implemented in terms of glob(), thus different prefix,
+       and because it's WINAPI, also different error code */
     CORRADE_COMPARE_AS(out.str(),
-        "Utility::Path::list(): can't list nonexistent: error 3 (",
+        "Utility::Path::glob(): can't glob nonexistent/*: error 3 (",
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Emscripten uses a different errno for "No such file or directory" */
@@ -1988,6 +2028,377 @@ void PathTest::listUtf8Path() {
     CORRADE_COMPARE_AS(*actual,
         Containers::arrayView(list),
         TestSuite::Compare::Container);
+}
+
+void PathTest::globAll() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"));
+    CORRADE_VERIFY(list);
+
+    {
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSingleCharacter() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "file1?.txt"));
+    CORRADE_VERIFY(list);
+
+    {
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::globMultipleCharacters() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*.txt"));
+    CORRADE_VERIFY(list);
+
+    {
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        {
+            CORRADE_EXPECT_FAIL("Somehow, while a * glob pattern works as expected, a *.txt glob pattern omits .dir.txt but not dir.txt or .file.txt.");
+            CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+                /* Windows has no special treatment for dotfiles */
+                ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            }), TestSuite::Compare::SortedContainer);
+        } {
+            /* To verify it's at least partially correct */
+            CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+                ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+            }), TestSuite::Compare::SortedContainer);
+        }
+        #endif
+    }
+}
+
+void PathTest::globDotFiles() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, ".*"));
+    CORRADE_VERIFY(list);
+
+    {
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            ".", "..", ".dir.txt", ".file.txt"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::globNoMatch() {
+    /* Unlike globNonexistent(), this shouldn't fail -- the path exists, it
+       just has no files matching the pattern */
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*.pdf"));
+    CORRADE_VERIFY(list);
+
+    {
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::globSkipDirectories() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SkipDirectories);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".file.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSkipDirectoriesSymlinks() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirSymlink, "*"), Path::GlobFlag::SkipDirectories);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Possible on Windows too, but there we'd need to first detect if the
+           Git clone has the symlinks preserved */
+        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        #endif
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "file", "file-symlink"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::globSkipFiles() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SkipFiles);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", "dir.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSkipFilesSymlinks() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirSymlink, "*"), Path::GlobFlag::SkipFiles);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Possible on Windows too, but there we'd need to first detect if the
+           Git clone has the symlinks preserved */
+        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir", "dir-symlink"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", "dir", "dir-symlink"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSkipSpecial() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SkipSpecial);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSkipSpecialSymlink() {
+    /* Symlinks should not be treated as special files, so they're shown */
+
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirSymlink, "*"), Path::GlobFlag::SkipSpecial);
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) has no idea about file types.");
+        #endif
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir", "dir-symlink", "file", "file-symlink"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", "dir", "dir-symlink", "file", "file-symlink"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globSkipDotAndDotDot() {
+    /* Without a leading dot, dot files are completely omitted (on Unix at
+       least) */
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, ".*"), Path::GlobFlag::SkipDotAndDotDot);
+    CORRADE_VERIFY(list);
+
+    {
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            ".dir.txt", ".file.txt"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::globSort() {
+    {
+        Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SortAscending);
+        CORRADE_VERIFY(list);
+
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::Container);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    } {
+        Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SortDescending);
+        CORRADE_VERIFY(list);
+
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "file12.txt", "file11.txt", "file1.txt", "dir.txt"
+        }), TestSuite::Compare::Container);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            "file12.txt", "file11.txt", "file1.txt", "dir.txt", ".file.txt", ".dir.txt", "..", "."
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    } {
+        /* Ascending and descending together will pick ascending */
+        Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*"), Path::GlobFlag::SortAscending|Path::GlobFlag::SortDescending);
+        CORRADE_VERIFY(list);
+
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::Container);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globNonexistent() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    /* OTOH, non*existent would pass, returning 0 results. That's tested in
+       globNoMatch(). */
+    CORRADE_VERIFY(!Path::glob("nonexistent/*"));
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Windows has its own code path and thus different errors */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::glob(): can't glob nonexistent/*: error 3 (",
+        TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::glob(): can't glob nonexistent/*: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::glob(): can't glob nonexistent/*: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void PathTest::globNonNullTerminated() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join(_testDirGlob, "*X").exceptSuffix(1));
+    CORRADE_VERIFY(list);
+
+    {
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #else
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", ".dir.txt", ".file.txt", "dir.txt", "file1.txt", "file11.txt", "file12.txt"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globUtf8Result() {
+    const Containers::String list[]{"hýždě", "šňůra"};
+
+    Containers::Optional<Containers::Array<Containers::String>> actual = Path::glob(Path::join(_testDirUtf8, "*"), Path::GlobFlag::SortAscending);
+    CORRADE_VERIFY(actual);
+
+    #ifdef CORRADE_TARGET_APPLE
+    /* Apple HFS+ stores filenames in a decomposed normalized form to avoid
+       e.g. `e` + `ˇ` and `ě` being treated differently. That makes sense. I
+       wonder why neither Linux nor Windows do this. */
+    const Containers::String listDecomposedUnicode[]{"hýždě", "šňůra"};
+    CORRADE_COMPARE_AS(list[1],
+        listDecomposedUnicode[1],
+        TestSuite::Compare::NotEqual);
+    #endif
+
+    #ifdef CORRADE_TARGET_APPLE
+    /* However, Apple systems still can use filesystems other than HFS+, so
+       be prepared that it can compare to either */
+    if((*actual)[1] == listDecomposedUnicode[1]) {
+        CORRADE_COMPARE_AS(*actual,
+            Containers::arrayView(listDecomposedUnicode),
+            TestSuite::Compare::Container);
+    } else
+    #endif
+    {
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(*actual,
+            Containers::arrayView(list),
+            TestSuite::Compare::Container);
+        #else
+        CORRADE_COMPARE_AS(*actual, Containers::array<Containers::String>({
+            /* Windows has no special treatment for dotfiles */
+            ".", "..", "hýždě", "šňůra"
+        }), TestSuite::Compare::SortedContainer);
+        #endif
+    }
+}
+
+void PathTest::globUtf8Path() {
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::glob(Path::join({_testDirUtf8, "šňůra", "*"}), Path::GlobFlag::SortAscending);
+    CORRADE_VERIFY(list);
+
+    #ifndef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+        "dummy", "klíče"
+    }), TestSuite::Compare::SortedContainer);
+    #else
+    CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+        /* Windows has no special treatment for dotfiles */
+        ".", "..", "dummy", "klíče"
+    }), TestSuite::Compare::SortedContainer);
+    #endif
 }
 
 /* Checks if we are reading it as binary (CR+LF is not converted to LF),

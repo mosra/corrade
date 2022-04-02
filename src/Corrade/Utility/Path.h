@@ -502,7 +502,108 @@ CORRADE_ENUMSET_OPERATORS(ListFlags)
 @m_since_latest
 
 If @p path is not a directory or it can't be opened, prints a message to
-@ref Error and returns @ref Containers::NullOpt.
+@ref Error and returns @ref Containers::NullOpt. On Windows, this function is
+implemented in terms of @ref glob() --- as @cpp glob(join(path, "*")) @ce.
+
+Expects that the @p path is in UTF-8. If it's already
+@ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
+directly, otherwise a null-terminated copy is allocated first. On Windows the
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
+passed to system APIs.
+@partialsupport On @ref CORRADE_TARGET_UNIX "Unix" platforms and
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed and
+    @ref ListFlag::SkipFiles and @ref ListFlag::SkipDirectories affects the
+    link target, not the link itself. This behavior is not implemented on
+    Windows at the moment.
+@see @ref glob(), @ref isDirectory(), @ref exists()
+*/
+CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<Containers::String>> list(Containers::StringView path, ListFlags flags = {});
+
+/**
+@brief Directory globbing flag
+@m_since_latest
+
+@see @ref GlobFlags, @ref glob()
+*/
+enum class GlobFlag: unsigned char {
+    /* Values have to be kept consistent with ListFlag, as on Windows list() is
+       implemented via glob(). However the two are deliberately separate to
+       make room for possible extensions affecting only glob() and not list()
+       (such as enabling platform-specific behavior) */
+
+    /** Skip `.` and `..` directories */
+    SkipDotAndDotDot = 1 << 0,
+
+    /**
+     * Skip regular files
+     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
+     *      directories, as there's no concept of a special file.
+     */
+    SkipFiles = 1 << 1,
+
+    /** Skip directories (including `.` and `..`) */
+    SkipDirectories = 1 << 2,
+
+    /**
+     * Skip everything that is not a file or directory
+     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows"
+     *      and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", as these platforms
+     *      don't have a concept of a special file.
+     */
+    SkipSpecial = 1 << 3,
+
+    /**
+     * Sort items in ascending order. If both @ref GlobFlag::SortAscending and
+     * @ref GlobFlag::SortDescending is specified, ascending order is used.
+     */
+    SortAscending = (1 << 4) | (1 << 5),
+
+    /**
+     * Sort items in descending order. If both @ref GlobFlag::SortAscending and
+     * @ref GlobFlag::SortDescending is specified, ascending order is used.
+     */
+    SortDescending = 1 << 5
+};
+
+/**
+@brief Directory globbing flags
+@m_since_latest
+
+@see @ref glob()
+*/
+typedef Containers::EnumSet<GlobFlag> GlobFlags;
+
+CORRADE_ENUMSET_OPERATORS(GlobFlags)
+
+/**
+@brief Glob directory contents
+@m_since_latest
+
+Expands upon @ref list() by allowing wildcard patterns in the path. An `*`
+matches zero or more characters, a `?` matches exactly one characters. As with
+@ref list(), the returned names are always relative to the last path component
+of @p pattern. If @p path is not a directory or it can't be opened, prints a
+message to @ref Error and returns @ref Containers::NullOpt. Usage examples:
+
+-   @cpp "path/‌*" @ce lists contents of `path`. Equivalent to calling
+    @ref list() with @cpp "path" @ce and with @ref ListFlag::SkipDotAndDotDot
+    on Unix systems. On Windows it's equivalent to @ref list() with empty
+    @ref ListFlags as the system doesn't have any special treatment for files
+    starting with a dot.
+-   @cpp "path/‌.*" @ce lists files starting with a dot in `path`, including
+    `.` and `..` directories. Equivalent to calling @ref list() with
+    @cpp "path" @ce and empty @ref ListFlags on both Unix systems and Windows.
+-   @cpp "path/‌*.txt" @ce returns all names ending with `.txt` in `path`.
+    If @ref GlobFlag::SkipDirectories is not set, this may include not just
+    files, but also directories.
+-   @cpp "path/tile2?.jpg" @ce would match for example `tile20.jpg` to
+    `tile29.jpg` but not `tile2.jpg` or `tile205.jpg`.
+
+The function is implemented using platform-specific APIs. While the subset
+shown above is guaranteed to work in a cross-platform way, behavior with other
+wildcard specifiers may differ between platforms. Behavior with wildcards
+appearing in the path instead of the filename is unspecified.
 
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
@@ -516,7 +617,9 @@ passed to system APIs.
     Windows at the moment.
 @see @ref isDirectory(), @ref exists()
 */
-CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<Containers::String>> list(Containers::StringView path, ListFlags flags = {});
+/* In the docs above, there's a Unicode ZWNJ between / and * to avoid compiler
+   warnings about nested block comments */
+CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<Containers::String>> glob(Containers::StringView pattern, GlobFlags flags = {});
 
 /**
 @brief File size

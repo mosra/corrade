@@ -1489,9 +1489,10 @@ void DirectoryTest::listNonexistent() {
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::list("nonexistent"), std::vector<std::string>{});
     #ifdef CORRADE_TARGET_WINDOWS
-    /* Windows has its own code path and thus different errors */
+    /* On Windows it's implemented in terms of glob(), thus different prefix,
+       and because it's WINAPI, also different error code */
     CORRADE_COMPARE_AS(out.str(),
-        "Utility::Path::list(): can't list nonexistent: error 3 (",
+        "Utility::Path::glob(): can't glob nonexistent/*: error 3 (",
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Emscripten uses a different errno for "No such file or directory" */
