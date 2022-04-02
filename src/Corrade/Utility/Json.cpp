@@ -405,11 +405,11 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 const std::size_t start = i++;
                 std::uint64_t escapedFlag = 0;
                 for(; i != size; ++i) {
-                    const char c = data[i];
+                    const char sc = data[i];
 
-                    if(c == '\"') break;
+                    if(sc == '\"') break;
 
-                    if(c == '\\') switch(data[++i]) {
+                    if(sc == '\\') switch(data[++i]) {
                         case '"':
                         case '\\':
                         case '/': /* JSON, why, you're weird */
@@ -514,12 +514,12 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                    and i points to the end to a character after. */
                 const std::size_t start = i;
                 for(; i != size; ++i) {
-                    const char c = data[i];
+                    const char lc = data[i];
 
                     /* Optimizing for the simplest check, deliberately not
                        doing any validation here */
-                    if(c == '\t' || c == '\r' || c == '\n' || c == ' ' ||
-                       c == ',' || c == ']' || c == '}') break;
+                    if(lc == '\t' || lc == '\r' || lc == '\n' || lc == ' ' ||
+                       lc == ',' || lc == ']' || lc == '}') break;
                 }
 
                 /* Decrement i as it's incremented again by the outer loop */
@@ -971,33 +971,33 @@ bool Json::parseLiterals(const JsonToken& token) {
         "Utility::Json::parseLiterals(): token not owned by the instance", {});
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
-        JsonToken& token = _state->tokens[i];
-        if(token.isParsed()) continue;
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.isParsed()) continue;
 
-        if(token.type() == JsonToken::Type::Null) {
-            if(!parseNullInto("Utility::Json::parseLiterals():", Error::Flag::NoNewlineAtTheEnd, token.data())) {
+        if(nestedToken.type() == JsonToken::Type::Null) {
+            if(!parseNullInto("Utility::Json::parseLiterals():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data())) {
                 Error err;
                 err << " at";
-                printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+                printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
                 return false;
             }
 
-        } else if(token.type() == JsonToken::Type::Bool) {
-            if(!parseBoolInto("Utility::Json::parseLiterals():", Error::Flag::NoNewlineAtTheEnd, token.data(), token._parsedBool)) {
+        } else if(nestedToken.type() == JsonToken::Type::Bool) {
+            if(!parseBoolInto("Utility::Json::parseLiterals():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedBool)) {
                 Error err;
                 err << " at";
-                printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+                printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
                 return false;
             }
         } else continue;
 
         /* Mark the token as parsed */
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeOther;
         #else
-        token._childCountFlagsTypeNan |= JsonToken::FlagParsed;
+        nestedToken._childCountFlagsTypeNan |= JsonToken::FlagParsed;
         #endif
     }
 
@@ -1013,33 +1013,33 @@ bool Json::parseDoubles(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::Double)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::Double)
             continue;
 
         /* Not saving to token._parsedDouble directly to avoid a failure
            corrupting the high bits storing token type and flags on 32bit */
         double parsed;
-        if(!parseDoubleInto("Utility::Json::parseDoubles():", Error::Flag::NoNewlineAtTheEnd, token.data(), parsed)) {
+        if(!parseDoubleInto("Utility::Json::parseDoubles():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), parsed)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
         /* On success save the parsed value and its type. On 32bit the parsed
            type is stored in the size, the lack of a NaN implying that it's
            parsed. */
-        token._parsedDouble = parsed;
+        nestedToken._parsedDouble = parsed;
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeDouble;
         #else
-        CORRADE_INTERNAL_ASSERT((token._childCountFlagsTypeNan & JsonToken::NanMask) != JsonToken::NanMask);
-        token._sizeParsedType = JsonToken::ParsedTypeDouble|
-            (token._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        CORRADE_INTERNAL_ASSERT((nestedToken._childCountFlagsTypeNan & JsonToken::NanMask) != JsonToken::NanMask);
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeDouble|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
     }
 
@@ -1055,28 +1055,28 @@ bool Json::parseFloats(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::Float)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::Float)
             continue;
 
-        if(!parseFloatInto("Utility::Json::parseFloats():", Error::Flag::NoNewlineAtTheEnd, token.data(), token._parsedFloat)) {
+        if(!parseFloatInto("Utility::Json::parseFloats():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedFloat)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
         /* Save the parsed token type. On 32bit it's contained in the size,
            clear the NaN bits to imply that it's parsed. */
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeFloat;
         #else
-        token._childCountFlagsTypeNan &= ~JsonToken::NanMask;
-        token._sizeParsedType = JsonToken::ParsedTypeFloat|
-            (token._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeFloat|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
     }
 
@@ -1092,28 +1092,28 @@ bool Json::parseUnsignedInts(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::UnsignedInt)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::UnsignedInt)
             continue;
 
-        if(!parseUnsignedIntInto("Utility::Json::parseUnsignedInts():", Error::Flag::NoNewlineAtTheEnd, token.data(), token._parsedUnsignedInt)) {
+        if(!parseUnsignedIntInto("Utility::Json::parseUnsignedInts():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedUnsignedInt)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
         /* Save the parsed token type. On 32bit it's contained in the size,
            clear the NaN bits to imply that it's parsed. */
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeUnsignedInt;
         #else
-        token._childCountFlagsTypeNan &= ~JsonToken::NanMask;
-        token._sizeParsedType = JsonToken::ParsedTypeUnsignedInt|
-            (token._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeUnsignedInt|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
     }
 
@@ -1129,28 +1129,28 @@ bool Json::parseInts(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::Int)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::Int)
             continue;
 
-        if(!parseIntInto("Utility::Json::parseInts():", Error::Flag::NoNewlineAtTheEnd, token.data(), token._parsedInt)) {
+        if(!parseIntInto("Utility::Json::parseInts():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedInt)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
         /* Save the parsed token type. On 32bit it's contained in the size,
            clear the NaN bits to imply that it's parsed. */
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeInt;
         #else
-        token._childCountFlagsTypeNan &= ~JsonToken::NanMask;
-        token._sizeParsedType = JsonToken::ParsedTypeInt|
-            (token._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeInt|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
     }
 
@@ -1166,33 +1166,33 @@ bool Json::parseUnsignedLongs(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::UnsignedLong)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::UnsignedLong)
             continue;
 
         /* Not saving to token._parsedUnsignedLong directly to avoid a failure
            corrupting the high bits storing token type and flags on 32bit */
         std::uint64_t parsed;
-        if(!parseUnsignedLongInto("Utility::Json::parseUnsignedLongs():", Error::Flag::NoNewlineAtTheEnd, token.data(), parsed)) {
+        if(!parseUnsignedLongInto("Utility::Json::parseUnsignedLongs():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), parsed)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
         /* On success save the parsed value and its type. On 32bit the parsed
            type is stored in the size, the NaN bits should be already all 0 for
            a 52-bit number. */
-        token._parsedUnsignedLong = parsed;
+        nestedToken._parsedUnsignedLong = parsed;
         #ifndef CORRADE_TARGET_32BIT
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeUnsignedLong;
         #else
-        CORRADE_INTERNAL_ASSERT(!(token._childCountFlagsTypeNan & JsonToken::NanMask));
-        token._sizeParsedType = JsonToken::ParsedTypeUnsignedLong|
-            (token._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        CORRADE_INTERNAL_ASSERT(!(nestedToken._childCountFlagsTypeNan & JsonToken::NanMask));
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeUnsignedLong|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
     }
 
@@ -1209,20 +1209,20 @@ bool Json::parseLongs(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
            doubles */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::Number ||
-           token.parsedType() == JsonToken::ParsedType::Int)
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::Number ||
+           nestedToken.parsedType() == JsonToken::ParsedType::Int)
             continue;
 
-        if(!parseLongInto("Utility::Json::parseLongs():", Error::Flag::NoNewlineAtTheEnd, token.data(), token._parsedLong)) {
+        if(!parseLongInto("Utility::Json::parseLongs():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedLong)) {
             Error err;
             err << " at";
-            printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+            printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
-        token._sizeFlagsParsedTypeType =
-            (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+        nestedToken._sizeFlagsParsedTypeType =
+            (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeLong;
     }
 
@@ -1247,14 +1247,14 @@ bool Json::parseStringKeys(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-string tokens, string tokens that are not keys or string
            tokens that are already parsed */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::String ||
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::String ||
             #ifndef CORRADE_TARGET_32BIT
-            !(token._sizeFlagsParsedTypeType & JsonToken::FlagStringKey) ||
-             (token._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
+            !(nestedToken._sizeFlagsParsedTypeType & JsonToken::FlagStringKey) ||
+             (nestedToken._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
             #else
-            !(token._childCountFlagsTypeNan & JsonToken::FlagStringKey) ||
-             (token._childCountFlagsTypeNan & JsonToken::FlagParsed)
+            !(nestedToken._childCountFlagsTypeNan & JsonToken::FlagStringKey) ||
+             (nestedToken._childCountFlagsTypeNan & JsonToken::FlagParsed)
             #endif
         )
             continue;
@@ -1264,15 +1264,15 @@ bool Json::parseStringKeys(const JsonToken& token) {
            parseString*() before using the string values. */
         if(
             #ifndef CORRADE_TARGET_32BIT
-            !(token._sizeFlagsParsedTypeType & JsonToken::FlagStringEscaped)
+            !(nestedToken._sizeFlagsParsedTypeType & JsonToken::FlagStringEscaped)
             #else
-            !(token._childCountFlagsTypeNan & JsonToken::FlagStringEscaped)
+            !(nestedToken._childCountFlagsTypeNan & JsonToken::FlagStringEscaped)
             #endif
         ) {
             #ifndef CORRADE_TARGET_32BIT
-            token._sizeFlagsParsedTypeType |= JsonToken::ParsedTypeOther;
+            nestedToken._sizeFlagsParsedTypeType |= JsonToken::ParsedTypeOther;
             #else
-            token._childCountFlagsTypeNan |= JsonToken::FlagParsed;
+            nestedToken._childCountFlagsTypeNan |= JsonToken::FlagParsed;
             #endif
 
         /* Otherwise parse it into a new entry in the cached string array. The
@@ -1284,20 +1284,20 @@ bool Json::parseStringKeys(const JsonToken& token) {
             CORRADE_INTERNAL_ASSERT(_state->strings.size() < arrayCapacity(_state->strings));
             Containers::String& out = arrayAppend(_state->strings, InPlaceInit);
 
-            if(!parseStringInto("Utility::Json::parseStringKeys():", Error::Flag::NoNewlineAtTheEnd, token.data(), out)) {
+            if(!parseStringInto("Utility::Json::parseStringKeys():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), out)) {
                 Error err;
                 err << " at";
-                printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+                printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
                 return false;
             }
 
-            token._parsedString = &out;
+            nestedToken._parsedString = &out;
             #ifndef CORRADE_TARGET_32BIT
-            token._sizeFlagsParsedTypeType =
-                (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+            nestedToken._sizeFlagsParsedTypeType =
+                (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
                 JsonToken::ParsedTypeOther;
             #else
-            token._childCountFlagsTypeNan |= JsonToken::FlagParsed;
+            nestedToken._childCountFlagsTypeNan |= JsonToken::FlagParsed;
             #endif
         }
     }
@@ -1313,12 +1313,12 @@ bool Json::parseStrings(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-string tokens or string tokens that are already parsed */
-        JsonToken& token = _state->tokens[i];
-        if(token.type() != JsonToken::Type::String ||
+        JsonToken& nestedToken = _state->tokens[i];
+        if(nestedToken.type() != JsonToken::Type::String ||
             #ifndef CORRADE_TARGET_32BIT
-             (token._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
+             (nestedToken._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
             #else
-             (token._childCountFlagsTypeNan & JsonToken::FlagParsed)
+             (nestedToken._childCountFlagsTypeNan & JsonToken::FlagParsed)
             #endif
         )
             continue;
@@ -1328,15 +1328,15 @@ bool Json::parseStrings(const JsonToken& token) {
            parseString*() before using the string values. */
         if(
             #ifndef CORRADE_TARGET_32BIT
-            !(token._sizeFlagsParsedTypeType & JsonToken::FlagStringEscaped)
+            !(nestedToken._sizeFlagsParsedTypeType & JsonToken::FlagStringEscaped)
             #else
-            !(token._childCountFlagsTypeNan & JsonToken::FlagStringEscaped)
+            !(nestedToken._childCountFlagsTypeNan & JsonToken::FlagStringEscaped)
             #endif
         ) {
             #ifndef CORRADE_TARGET_32BIT
-            token._sizeFlagsParsedTypeType |= JsonToken::ParsedTypeOther;
+            nestedToken._sizeFlagsParsedTypeType |= JsonToken::ParsedTypeOther;
             #else
-            token._childCountFlagsTypeNan |= JsonToken::FlagParsed;
+            nestedToken._childCountFlagsTypeNan |= JsonToken::FlagParsed;
             #endif
 
         /* Otherwise parse it into a new entry in the cached string array. The
@@ -1348,20 +1348,20 @@ bool Json::parseStrings(const JsonToken& token) {
             CORRADE_INTERNAL_ASSERT(_state->strings.size() < arrayCapacity(_state->strings));
             Containers::String& out = arrayAppend(_state->strings, InPlaceInit);
 
-            if(!parseStringInto("Utility::Json::parseStrings():", Error::Flag::NoNewlineAtTheEnd, token.data(), out)) {
+            if(!parseStringInto("Utility::Json::parseStrings():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), out)) {
                 Error err;
                 err << " at";
-                printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+                printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
                 return false;
             }
 
-            token._parsedString = &out;
+            nestedToken._parsedString = &out;
             #ifndef CORRADE_TARGET_32BIT
-            token._sizeFlagsParsedTypeType =
-                (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
+            nestedToken._sizeFlagsParsedTypeType =
+                (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
                 JsonToken::ParsedTypeOther;
             #else
-            token._childCountFlagsTypeNan |= JsonToken::FlagParsed;
+            nestedToken._childCountFlagsTypeNan |= JsonToken::FlagParsed;
             #endif
         }
     }
