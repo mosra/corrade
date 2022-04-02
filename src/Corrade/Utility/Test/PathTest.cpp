@@ -795,7 +795,7 @@ void PathTest::isDirectory() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
-            "iOS (in a simulator) thinks all paths are files.");
+            "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dir")));
     }
@@ -819,7 +819,7 @@ void PathTest::isDirectorySymlink() {
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
-            "iOS (in a simulator) thinks all paths are files.");
+            "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDirSymlink, "dir-symlink")));
     }
@@ -866,7 +866,7 @@ void PathTest::isDirectoryNonNullTerminated() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
-            "iOS (in a simulator) thinks all paths are files.");
+            "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dirX").exceptSuffix(1)));
     }
@@ -877,7 +877,7 @@ void PathTest::isDirectoryUtf8() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
-            "iOS (in a simulator) thinks all paths are files.");
+            "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDirUtf8, "šňůra")));
     }
@@ -2033,7 +2033,7 @@ void PathTest::sizeEarlyEof() {
 void PathTest::sizeDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     if(!std::getenv("SIMULATOR_UDID"))
-        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+        CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
     std::ostringstream out;
@@ -2202,7 +2202,7 @@ void PathTest::readEarlyEofString() {
 void PathTest::readDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     if(!std::getenv("SIMULATOR_UDID"))
-        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+        CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
     std::ostringstream out;
@@ -2560,7 +2560,7 @@ void PathTest::copyEmpty() {
 void PathTest::copyDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     if(!std::getenv("SIMULATOR_UDID"))
-        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+        CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
     Containers::String source = Path::join(_writeTestDir, "copySource.dat");
@@ -2885,7 +2885,7 @@ void PathTest::mapReadEmpty() {
 void PathTest::mapReadDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     if(!std::getenv("SIMULATOR_UDID"))
-        CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
+        CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
