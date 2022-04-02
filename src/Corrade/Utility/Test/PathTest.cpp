@@ -159,6 +159,7 @@ struct PathTest: TestSuite::Tester {
     void listSortPrecedence();
     void listNonexistent();
     void listNonNullTerminated();
+    void listTrailingSlash();
     void listUtf8Result();
     void listUtf8Path();
 
@@ -350,6 +351,7 @@ PathTest::PathTest() {
               &PathTest::listSortPrecedence,
               &PathTest::listNonexistent,
               &PathTest::listNonNullTerminated,
+              &PathTest::listTrailingSlash,
               &PathTest::listUtf8Result,
               &PathTest::listUtf8Path,
 
@@ -1852,6 +1854,22 @@ void PathTest::listNonexistent() {
 
 void PathTest::listNonNullTerminated() {
     Containers::Optional<Containers::Array<Containers::String>> list = Path::list((_testDir + "X").exceptSuffix(1));
+    CORRADE_VERIFY(list);
+
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
+            ".", "..", "dir", "file"
+        }), TestSuite::Compare::SortedContainer);
+    }
+}
+
+void PathTest::listTrailingSlash() {
+    /* Should have the same result as without */
+    Containers::Optional<Containers::Array<Containers::String>> list = Path::list(_testDir + "/");
     CORRADE_VERIFY(list);
 
     {
