@@ -1096,6 +1096,8 @@ void PathTest::removeDirectoryUtf8() {
 }
 
 void PathTest::moveFile() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     /* Old file */
     Containers::String oldFile = Path::join(_writeTestDir, "oldFile.txt");
     CORRADE_VERIFY(Path::write(oldFile, "a"_s));
@@ -1127,6 +1129,8 @@ void PathTest::moveDirectory() {
 }
 
 void PathTest::moveSourceNonexistent() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String to = Path::join(_writeTestDir, "empty");
 
     std::ostringstream out;
@@ -1178,6 +1182,8 @@ void PathTest::moveDestinationNoPermission() {
 }
 
 void PathTest::moveNonNullTerminated() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     /* Old file */
     Containers::String oldFile = Path::join(_writeTestDir, "oldFile.txt");
     CORRADE_VERIFY(Path::write(oldFile, "a"_s));
@@ -1195,6 +1201,8 @@ void PathTest::moveNonNullTerminated() {
 }
 
 void PathTest::moveUtf8() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     /* Old file */
     Containers::String oldFile = Path::join(_writeTestDir, "starý hýždě.txt");
     CORRADE_VERIFY(Path::write(oldFile, "a"_s));
@@ -2263,6 +2271,7 @@ void PathTest::readUtf8() {
 }
 
 void PathTest::write() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
     Containers::String file = Path::join(_writeTestDir, "file");
 
     if(Path::exists(file))
@@ -2301,6 +2310,7 @@ void PathTest::writeDisabledOverloads() {
 }
 
 void PathTest::writeEmpty() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
     Containers::String file = Path::join(_writeTestDir, "empty");
 
     if(Path::exists(file))
@@ -2311,6 +2321,8 @@ void PathTest::writeEmpty() {
 }
 
 void PathTest::writeDirectory() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::write(_writeTestDir, nullptr));
@@ -2367,6 +2379,8 @@ void PathTest::writeNoPermission() {
 }
 
 void PathTest::writeNonNullTerminated() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "file");
 
     if(Path::exists(file))
@@ -2377,6 +2391,8 @@ void PathTest::writeNonNullTerminated() {
 }
 
 void PathTest::writeUtf8() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "hýždě");
     if(Path::exists(file))
         CORRADE_VERIFY(Path::remove(file));
@@ -2387,6 +2403,8 @@ void PathTest::writeUtf8() {
 }
 
 void PathTest::append() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     constexpr const char expected[]{'h', 'e', 'l', 'l', 'o', '\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
 
     Containers::String file = Path::join(_writeTestDir, "file");
@@ -2424,6 +2442,8 @@ void PathTest::appendDisabledOverloads() {
 }
 
 void PathTest::appendToNonexistent() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "empty");
     if(Path::exists(file))
         CORRADE_VERIFY(Path::remove(file));
@@ -2434,6 +2454,8 @@ void PathTest::appendToNonexistent() {
 }
 
 void PathTest::appendEmpty() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "empty");
     if(Path::exists(file))
         CORRADE_VERIFY(Path::remove(file));
@@ -2445,6 +2467,8 @@ void PathTest::appendEmpty() {
 }
 
 void PathTest::appendDirectory() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::append(_writeTestDir, nullptr));
@@ -2500,6 +2524,8 @@ void PathTest::appendNoPermission() {
 }
 
 void PathTest::appendNonNullTerminated() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     constexpr const char expected[]{'h', 'e', 'l', 'l', 'o', '\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
 
     Containers::String file = Path::join(_writeTestDir, "file");
@@ -2513,6 +2539,8 @@ void PathTest::appendNonNullTerminated() {
 }
 
 void PathTest::appendUtf8() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "hýždě");
     if(Path::exists(file))
         CORRADE_VERIFY(Path::remove(file));
@@ -2523,6 +2551,8 @@ void PathTest::appendUtf8() {
 }
 
 void PathTest::prepareFileToCopy() {
+    Path::make(_writeTestDir);
+
     if(Path::exists(Path::join(_writeTestDir, "copySource.dat")))
         return;
 
@@ -2607,6 +2637,8 @@ void PathTest::copyDirectory() {
 }
 
 void PathTest::copyReadNonexistent() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::copy("nonexistent", Path::join(_writeTestDir, "empty")));
@@ -2655,6 +2687,8 @@ void PathTest::copyWriteNoPermission() {
 }
 
 void PathTest::copyNonNullTerminated() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String source = Path::join(_writeTestDir, "copySource.dat");
     CORRADE_VERIFY(Path::exists(source));
 
@@ -2667,6 +2701,8 @@ void PathTest::copyNonNullTerminated() {
 }
 
 void PathTest::copyUtf8() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String output = Path::join(_writeTestDir, "hýždě");
     if(Path::exists(output))
         CORRADE_VERIFY(Path::remove(output));
@@ -2679,6 +2715,8 @@ void PathTest::copyUtf8() {
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 void PathTest::prepareFileToBenchmarkCopy() {
+    Path::make(_writeTestDir);
+
     if(Path::exists(Path::join(_writeTestDir, "copyBenchmarkSource.dat")))
         return;
 
@@ -2743,6 +2781,7 @@ void PathTest::copy100MMap() {
 
 void PathTest::map() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
     Containers::String file = Path::join(_writeTestDir, "mappedFile");
     CORRADE_VERIFY(Path::write(file, Containers::arrayView(Data)));
 
@@ -2771,6 +2810,7 @@ void PathTest::map() {
 
 void PathTest::mapEmpty() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
     Containers::String file = Path::join(_writeTestDir, "mappedEmpty");
     CORRADE_VERIFY(Path::write(file, nullptr));
 
@@ -2795,6 +2835,8 @@ void PathTest::mapEmpty() {
 
 void PathTest::mapDirectory() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::map(_writeTestDir));
@@ -2831,6 +2873,8 @@ void PathTest::mapNonexistent() {
 
 void PathTest::mapNonNullTerminated() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     Containers::String file = Path::join(_writeTestDir, "mappedFile");
     CORRADE_VERIFY(Path::write(file, Containers::arrayView(Data)));
 
@@ -2889,6 +2933,8 @@ void PathTest::mapReadDirectory() {
     #endif
 
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::mapRead(_writeTestDir));
@@ -2946,6 +2992,8 @@ void PathTest::mapReadUtf8() {
 
 void PathTest::mapWrite() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     {
         Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "mappedWriteFile"), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
@@ -2962,6 +3010,8 @@ void PathTest::mapWrite() {
 
 void PathTest::mapWriteEmpty() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     {
         Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "mappedWriteEmpty"), 0);
         CORRADE_VERIFY(mappedFile);
@@ -2977,6 +3027,8 @@ void PathTest::mapWriteEmpty() {
 
 void PathTest::mapWriteDirectory() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Path::mapWrite(_writeTestDir, 64));
@@ -3039,6 +3091,8 @@ void PathTest::mapWriteNoPermission() {
 
 void PathTest::mapWriteNonNullTerminated() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     {
         Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "mappedWriteFileX").exceptSuffix(1), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
@@ -3055,6 +3109,8 @@ void PathTest::mapWriteNonNullTerminated() {
 
 void PathTest::mapWriteUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
     {
         Containers::Optional<Containers::Array<char, Path::MapDeleter>> mappedFile = Path::mapWrite(Path::join(_writeTestDir, "hýždě chlípníka"), Containers::arraySize(Data));
         CORRADE_VERIFY(mappedFile);
