@@ -867,7 +867,14 @@ Containers::Optional<Containers::Array<Containers::String>> glob(const Container
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATAW data;
-    HANDLE hFile = FindFirstFileW(Unicode::widen(pattern), &data);
+    /* Originally this used FindFirstFileW(), but that one implicitly includes
+       8.3 filenames in the match. That sounded just like an unnecessary but
+       harmless work at first, but turns out it affects how files with
+       extensions longer than 3 characters are processed. So if globbing for
+       `*.txt` and there's a `*.txtlol` file, it'd match it as well, because
+       its 8.3 form is something like FILE~1.TXT. Haha. */
+    /** @todo there's also FIND_FIRST_EX_CASE_SENSITIVE, expose? */
+    HANDLE hFile = FindFirstFileExW(Unicode::widen(pattern), FindExInfoBasic, &data, FindExSearchNameMatch, nullptr, 0);
     if(hFile == INVALID_HANDLE_VALUE) {
         /* If we're matching `path/``*` and it returns ERROR_FILE_NOT_FOUND, it
            means the path doesn't exist -- otherwise it would return at least a
