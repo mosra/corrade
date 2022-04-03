@@ -27,11 +27,11 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
 #include "Corrade/Utility/Move.h"
-#if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT_UNREACHABLE) || !defined(CORRADE_ASSUME))
+#if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT_UNREACHABLE))
 #ifndef CORRADE_STANDARD_ASSERT
 #include <cstdlib>
 
@@ -39,6 +39,10 @@
 #elif !defined(NDEBUG)
 #include <cassert>
 #endif
+#endif
+
+#ifdef CORRADE_BUILD_DEPRECATED /* CORRADE_ASSUME() used to be defined here */
+#include "Corrade/Utility/Macros.h"
 #endif
 
 namespace Corrade { namespace Utility {
@@ -578,39 +582,6 @@ You can override this implementation by placing your own
         Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Reached unreachable code at " __FILE__ ":" CORRADE_LINE_STRING; \
         std::abort();                                                       \
     } while(false)
-#endif
-#endif
-
-/** @hideinitializer
-@brief Assume a condition
-@m_since{2020,06}
-
-Compared to @ref CORRADE_INTERNAL_ASSERT() this macro does not handle the case
-when the condition isn't @cpp true @ce in any way --- only provides a hint to
-the compiler, possibly improving performance. Uses a compiler builtin on GCC,
-Clang and MSVC; expands to an empty @cpp do while @ce otherwise. Example usage:
-
-@snippet Utility.cpp CORRADE_ASSUME
-
-You can override this implementation by placing your own
-@cpp #define CORRADE_ASSUME @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
-@see @ref CORRADE_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE(),
-    @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
-*/
-#ifndef CORRADE_ASSUME
-#ifdef __clang__
-#define CORRADE_ASSUME(condition) __builtin_assume(condition)
-#elif defined(_MSC_VER)
-#define CORRADE_ASSUME(condition) __assume(condition)
-#elif defined(__GNUC__)
-#define CORRADE_ASSUME(condition)                                           \
-    do {                                                                    \
-        if(!(condition)) __builtin_unreachable(); \
-    } while(false)
-#else
-#define CORRADE_ASSUME(condition) do {} while(false)
 #endif
 #endif
 

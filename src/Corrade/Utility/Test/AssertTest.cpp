@@ -108,8 +108,6 @@ void AssertTest::test() {
 
     int e = CORRADE_INTERNAL_ASSERT_EXPRESSION(c + (_failInternalAssertExpression ? -3 : 3))/2;
 
-    CORRADE_ASSUME(a != 1);
-
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);

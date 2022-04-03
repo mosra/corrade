@@ -48,6 +48,7 @@ struct MacrosTest: TestSuite::Tester {
     void fallthrough();
     void cxxStandard();
     void alwaysNeverInline();
+    void assume();
     void likelyUnlikely();
     void function();
     void lineString();
@@ -65,6 +66,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::fallthrough,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
+              &MacrosTest::assume,
               &MacrosTest::likelyUnlikely,
               &MacrosTest::function,
               &MacrosTest::lineString,
@@ -192,6 +194,16 @@ CORRADE_NEVER_INLINE int neverInline() { return 37; }
 
 void MacrosTest::alwaysNeverInline() {
     CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
+}
+
+void MacrosTest::assume() {
+    int a = 5;
+
+    /* Compiles to __builtin_unreachable on GCC, so putting a misassumptions
+       here would cause things to catch fire. Elsewhere it may be similar. */
+    CORRADE_ASSUME(a != 0);
+
+    CORRADE_COMPARE(a, 5);
 }
 
 void MacrosTest::likelyUnlikely() {

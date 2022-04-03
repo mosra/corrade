@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -435,6 +435,39 @@ elsewhere. Example usage:
 #define CORRADE_NEVER_INLINE __declspec(noinline)
 #else
 #define CORRADE_NEVER_INLINE
+#endif
+
+/** @hideinitializer
+@brief Assume a condition
+@m_since{2020,06}
+
+Compared to @ref CORRADE_INTERNAL_ASSERT() this macro does not handle the case
+when the condition isn't @cpp true @ce in any way --- only provides a hint to
+the compiler, possibly improving performance. Uses a compiler builtin on GCC,
+Clang and MSVC; expands to an empty @cpp do while @ce otherwise. Example usage:
+
+@snippet Utility.cpp CORRADE_ASSUME
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSUME @ce before including the
+@ref Corrade/Utility/Macros.h header.
+
+@see @ref CORRADE_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE(),
+    @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
+*/
+#ifndef CORRADE_ASSUME
+#ifdef __clang__
+#define CORRADE_ASSUME(condition) __builtin_assume(condition)
+#elif defined(_MSC_VER)
+#define CORRADE_ASSUME(condition) __assume(condition)
+#elif defined(__GNUC__)
+#define CORRADE_ASSUME(condition)                                           \
+    do {                                                                    \
+        if(!(condition)) __builtin_unreachable(); \
+    } while(false)
+#else
+#define CORRADE_ASSUME(condition) do {} while(false)
+#endif
 #endif
 
 /** @hideinitializer

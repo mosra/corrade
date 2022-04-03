@@ -469,6 +469,11 @@ namespace Corrade {
     deprecated as they were originally introduced for compatibility with GCC
     4.7 and older and aren't needed anymore. Use the standard C++11
     @cpp alignas() @ce and @cpp [[noreturn]] @ce attributes instead.
+-   The @ref CORRADE_ASSUME() macro is moved from @ref Corrade/Utility/Assert.h
+    to @ref Corrade/Utility/Macros.h, as it's a lightweight annotation that
+    doesn't depend on any debug output. If @ref CORRADE_BUILD_DEPRECATED is
+    enabled, the @ref Corrade/Utility/Assert.h pulls it in for backwards
+    compatibility.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` variable, needed for installations
     into older Android NDKs, is obsolete and no longer needed for NDK r19+. It
     still does what's expected on builds with `BUILD_DEPRECATED` enabled,
