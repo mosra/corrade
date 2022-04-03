@@ -267,10 +267,12 @@ class CORRADE_UTILITY_EXPORT Arguments {
             UnknownArgument,
 
             /**
-             * Superfluous unnamed argument (i.e., there's more than how many
-             * was added with @ref addArgument()). The function receives the
-             * full argument value. If not handled, the default diagnostic is
-             * for example:
+             * Superfluous positional argument (i.e., there's more than how
+             * many was added with @ref addArgument() or
+             * @ref addFinalOptionalArgument() and there's no
+             * @ref addArrayArgument()). The function receives the full
+             * argument value. If not handled, the default diagnostic is for
+             * example:
              *
              * @code{.shell-session}
              * Superfluous command-line argument /dev/null
@@ -283,8 +285,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
              * non-boolean option name is specified as the last element of the
              * argument list and no value follows. The function receives the
              * long key name (even if short key might be specified on the
-             * command line). At this point all arguments are parsed and you
-             * can query the instance
+             * command line) without the leading `--`. At this point all
+             * arguments are parsed and you can access them with @ref value(),
+             * @ref arrayValueCount(), @ref arrayValue() or @ref isSet() to
+             * implement advanced logic, for example allowing certain arguments
+             * to be unset depending on value of others.
              *
              * If not handled, the default diagnostic is for example:
              *
@@ -296,9 +301,12 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
             /**
              * Missing argument. The function receives the long key name. At
-             * this point all arguments are parsed and you can access them via
-             * @ref value() and @ref isSet(). If not handled, the default
-             * diagnostic is for example:
+             * this point all arguments are parsed and you can access them with
+             * @ref value(), @ref arrayValueCount(), @ref arrayValue() or
+             * @ref isSet() to implement advanced logic, for example allowing
+             * certain arguments to be unset depending on value of others.
+             *
+             * If not handled, the default diagnostic is for example:
              *
              * @code{.shell-session}
              * Missing command-line argument output
@@ -385,7 +393,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         bool isParsed() const;
 
         /**
-         * @brief Add mandatory argument
+         * @brief Add a mandatory positional argument
          *
          * After calling @cpp addArgument("argument") @ce the argument will be
          * displayed in argument list like the following. Call @ref setHelp()
@@ -410,7 +418,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addArgument(std::string key);
 
         /**
-         * @brief Add a mandatory array argument
+         * @brief Add a mandatory positional array argument
          * @m_since_latest
          *
          * Compared to @ref addArgument(), which requires exactly one argument
@@ -442,7 +450,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addArrayArgument(std::string key);
 
         /**
-         * @brief Add named mandatory argument with both short and long key alternative
+         * @brief Add a mandatory named argument with both a short and a long key alternative
          *
          * After calling @cpp addNamedArgument('a', "argument") @ce the
          * argument will be displayed in help text like the following. Argument
@@ -467,7 +475,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addNamedArgument(char shortKey, std::string key);
 
         /**
-         * @brief Add named mandatory argument with long key only
+         * @brief Add a mandatory named argument with a long key only
          *
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
@@ -492,7 +500,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         }
 
         /**
-         * @brief Add option with both short and long key alternative
+         * @brief Add an option with both a short and a long key alternative
          *
          * After calling @cpp addOption('o', "option") @ce the option will be
          * displayed in help text like the following. Option value is just
@@ -525,7 +533,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addOption(char shortKey, std::string key, std::string defaultValue = std::string());
 
         /**
-         * @brief Add option with long key only
+         * @brief Add an option with a long key only
          *
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
@@ -546,7 +554,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         }
 
         /**
-         * @brief Add an array option with both short and long key alternative
+         * @brief Add an array option with both a short and a long key alternative
          * @m_since{2020,06}
          *
          * Compared to @ref addOption(), which remembers only the last value
@@ -577,7 +585,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addArrayOption(char shortKey, std::string key);
 
         /**
-         * @brief Add an array option with long key only
+         * @brief Add an array option with a long key only
          * @m_since{2020,06}
          *
          * Similar to the above, the only difference is that the usage and help
@@ -596,7 +604,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         }
 
         /**
-         * @brief Add boolean option with both short and long key alternative
+         * @brief Add a boolean option with both a short and a long key alternative
          *
          * If the option is present, the option has a @cpp true @ce value,
          * otherwise it has a @cpp false @ce value. Unlike above functions, the
@@ -624,7 +632,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addBooleanOption(char shortKey, std::string key);
 
         /**
-         * @brief Add boolean option with long key only
+         * @brief Add a boolean option with a long key only
          *
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
@@ -642,10 +650,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
         }
 
         /**
-         * @brief Add final optional argument
+         * @brief Add a final optional argument
          * @m_since{2019,10}
          *
-         * Always parsed as the last after all other unnamed arguments.
+         * Always parsed as the last after all other positional arguments.
          * Compared to arguments added with @ref addArgument() this one doesn't
          * need to be present; compared to options added with @ref addOption()
          * it doesn't need to be specified together with option name. There can
