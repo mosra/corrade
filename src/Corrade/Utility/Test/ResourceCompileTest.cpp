@@ -112,9 +112,9 @@ void ResourceCompileTest::compileEmptyFile() {
 }
 
 void ResourceCompileTest::compileFrom() {
-    const std::string compiled = Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources.conf"));
-    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestData", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
         TestSuite::Compare::StringToFile);
 }
 
@@ -126,26 +126,25 @@ void ResourceCompileTest::compileFromNothing() {
 }
 
 void ResourceCompileTest::compileFromUtf8Filenames() {
-    const std::string compiled = Implementation::resourceCompileFrom("ResourceTestUtf8Data",
-        Path::join(RESOURCE_TEST_DIR, "hýždě.conf"));
-    CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "hýždě.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestUtf8Data", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
         TestSuite::Compare::StringToFile);
 }
 
 void ResourceCompileTest::compileFromNonexistentResource() {
     std::ostringstream out;
     Error redirectError{&out};
-
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", "nonexistent.conf").empty());
     CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
 }
 
 void ResourceCompileTest::compileFromNonexistentFile() {
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf");
+
     std::ostringstream out;
     Error redirectError{&out};
-
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
+    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", conf).empty());
     /* There's an error message from Path::read() before */
     CORRADE_COMPARE_AS(out.str(),
         "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n",
@@ -170,7 +169,6 @@ void ResourceCompileTest::compileFromEmptyGroup() {
 void ResourceCompileTest::compileFromEmptyFilename() {
     std::ostringstream out;
     Error redirectError{&out};
-
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
@@ -179,7 +177,6 @@ void ResourceCompileTest::compileFromEmptyFilename() {
 void ResourceCompileTest::compileFromEmptyAlias() {
     std::ostringstream out;
     Error redirectError{&out};
-
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
