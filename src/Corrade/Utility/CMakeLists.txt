@@ -64,6 +64,7 @@ if(WITH_UTILITY)
         ConfigurationGroup.h
         ConfigurationValue.h
         Debug.h
+        DebugAssert.h
         DebugStl.h
         DebugStlStringView.h
         Endianness.h

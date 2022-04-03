@@ -47,83 +47,104 @@ set_tests_properties(UtilityArgumentsTest
     PROPERTIES ENVIRONMENT "ARGUMENTSTEST_SIZE=1337;ARGUMENTSTEST_VERBOSE=ON;ARGUMENTSTEST_COLOR=OFF;ARGUMENTSTEST_UNICODE=hýždě")
 
 add_library(AssertTestObjects OBJECT AssertTest.cpp)
+add_library(DebugAssertTestObjects OBJECT AssertTest.cpp)
 target_include_directories(AssertTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+target_include_directories(DebugAssertTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_definitions(DebugAssertTestObjects PRIVATE "TEST_DEBUG_ASSERT")
 corrade_add_test(UtilityAssertTest
     $<TARGET_OBJECTS:AssertTestObjects>
+    ${PROJECT_SOURCE_DIR}/src/dummy.cpp)
+corrade_add_test(UtilityDebugAssertTest
+    $<TARGET_OBJECTS:DebugAssertTestObjects>
     ${PROJECT_SOURCE_DIR}/src/dummy.cpp)
 # WILL_FAIL doesn't work for abort() on desktop, test this only on embedded
 # then. Oh well. Also the tests could be just one executable added multiple
 # times with different arguments, but corrade_add_test() doesn't support that,
 # so I'm doing it at least via an OBJECTS library.
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
-    corrade_add_test(UtilityAssertTestFailAssert
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-assert true)
-    set_tests_properties(UtilityAssertTestFailAssert PROPERTIES
-        PASS_REGULAR_EXPRESSION "A should be zero")
-    corrade_add_test(UtilityAssertTestFailConstexprAssert
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-constexpr-assert true)
-    set_tests_properties(UtilityAssertTestFailConstexprAssert PROPERTIES
-        PASS_REGULAR_EXPRESSION "b can't be zero")
-    corrade_add_test(UtilityAssertTestFailInternalAssert
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-internal-assert true)
-    set_tests_properties(UtilityAssertTestFailInternalAssert PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
-    corrade_add_test(UtilityAssertTestFailInternalC___Assert
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-internal-constexpr-assert true)
-    set_tests_properties(UtilityAssertTestFailInternalC___Assert PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion b failed at ")
-    corrade_add_test(UtilityAssertTestFailAssertOutput
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-assert-output true)
-    set_tests_properties(UtilityAssertTestFailAssertOutput PROPERTIES
-        PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
-    corrade_add_test(UtilityAssertTestFailInternalA___Output
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-internal-assert-output true)
-    set_tests_properties(UtilityAssertTestFailInternalA___Output PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
-    corrade_add_test(UtilityAssertTestFailInter___Expression
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-internal-assert-expression true)
-    set_tests_properties(UtilityAssertTestFailInter___Expression PROPERTIES
-        PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
-    corrade_add_test(UtilityAssertTestFailAssertUnreachable
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-assert-unreachable true)
-    set_tests_properties(UtilityAssertTestFailAssertUnreachable PROPERTIES
-        PASS_REGULAR_EXPRESSION "C should be 3")
-    corrade_add_test(UtilityAssertTestFailInte___Unreachable
-        $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
-        ARGUMENTS --fail-on-internal-assert-unreachable true)
-    set_tests_properties(UtilityAssertTestFailInte___Unreachable PROPERTIES
-        PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
+    foreach(debug "" "Debug")
+        corrade_add_test(Utility${debug}AssertTestFailAssert
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-assert true)
+        set_tests_properties(Utility${debug}AssertTestFailAssert PROPERTIES
+            PASS_REGULAR_EXPRESSION "A should be zero")
+        corrade_add_test(Utility${debug}AssertTestFailConstexprAssert
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-constexpr-assert true)
+        set_tests_properties(Utility${debug}AssertTestFailConstexprAssert PROPERTIES
+            PASS_REGULAR_EXPRESSION "b can't be zero")
+        corrade_add_test(Utility${debug}AssertTestFailInternalAssert
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-internal-assert true)
+        set_tests_properties(Utility${debug}AssertTestFailInternalAssert PROPERTIES
+            PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
+        corrade_add_test(Utility${debug}AssertTestFailInternalC___Assert
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-internal-constexpr-assert true)
+        set_tests_properties(Utility${debug}AssertTestFailInternalC___Assert PROPERTIES
+            PASS_REGULAR_EXPRESSION "Assertion b failed at ")
+        corrade_add_test(Utility${debug}AssertTestFailAssertOutput
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-assert-output true)
+        set_tests_properties(Utility${debug}AssertTestFailAssertOutput PROPERTIES
+            PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
+        corrade_add_test(Utility${debug}AssertTestFailInternalA___Output
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-internal-assert-output true)
+        set_tests_properties(Utility${debug}AssertTestFailInternalA___Output PROPERTIES
+            PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
+        corrade_add_test(Utility${debug}AssertTestFailInter___Expression
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-internal-assert-expression true)
+        set_tests_properties(Utility${debug}AssertTestFailInter___Expression PROPERTIES
+            PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
+        corrade_add_test(Utility${debug}AssertTestFailAssertUnreachable
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-assert-unreachable true)
+        set_tests_properties(Utility${debug}AssertTestFailAssertUnreachable PROPERTIES
+            PASS_REGULAR_EXPRESSION "C should be 3")
+        corrade_add_test(Utility${debug}AssertTestFailInte___Unreachable
+            $<TARGET_OBJECTS:${debug}AssertTestObjects>
+            ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+            ARGUMENTS --fail-on-internal-assert-unreachable true)
+        set_tests_properties(Utility${debug}AssertTestFailInte___Unreachable PROPERTIES
+            PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
+    endforeach()
 endif()
 
 # The same as above, but using CORRADE_STANDARD_ASSERT
 corrade_add_test(UtilityAssertStandardTest AssertTest.cpp)
+corrade_add_test(UtilityDebugAssertStandardTest AssertTest.cpp)
 target_compile_definitions(UtilityAssertStandardTest PRIVATE
     "CORRADE_STANDARD_ASSERT")
+target_compile_definitions(UtilityDebugAssertStandardTest PRIVATE
+    "CORRADE_STANDARD_ASSERT" "TEST_DEBUG_ASSERT")
 
 corrade_add_test(UtilityAssertDisabledTest AssertDisabledTest.cpp)
+corrade_add_test(UtilityDebugAssertDisabledTest AssertDisabledTest.cpp)
+target_compile_definitions(UtilityDebugAssertDisabledTest PRIVATE
+    "TEST_DEBUG_ASSERT")
 # The same, but using CORRADE_STANDARD_ASSERT and NDEBUG
 corrade_add_test(UtilityAssertStandardDisabledTest AssertDisabledTest.cpp)
+corrade_add_test(UtilityDebugAssertStandardDis___Test AssertDisabledTest.cpp)
 target_compile_definitions(UtilityAssertStandardDisabledTest PRIVATE
     "CORRADE_STANDARD_ASSERT" "NDEBUG")
+target_compile_definitions(UtilityDebugAssertStandardDis___Test PRIVATE
+    "CORRADE_STANDARD_ASSERT" "NDEBUG" "TEST_DEBUG_ASSERT")
 
 corrade_add_test(UtilityAssertGracefulTest AssertGracefulTest.cpp)
+corrade_add_test(UtilityDebugAssertGracefulTest AssertGracefulTest.cpp)
+target_compile_definitions(UtilityDebugAssertGracefulTest PRIVATE
+    "TEST_DEBUG_ASSERT")
+
 corrade_add_test(UtilityEndiannessTest EndiannessTest.cpp)
 corrade_add_test(UtilityErrorStringTest ErrorStringTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)

@@ -160,8 +160,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(),
-    @ref CORRADE_ASSUME()
+@see @ref CORRADE_DEBUG_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(),
+    @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSUME()
 */
 #ifndef CORRADE_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -220,7 +220,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_CONSTEXPR_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
+@see @ref CORRADE_CONSTEXPR_DEBUG_ASSERT(),
+    @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
 */
 #ifndef CORRADE_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -263,7 +264,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT_OUTPUT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSUME()
+@see @ref CORRADE_DEBUG_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
+    @ref CORRADE_ASSUME()
 */
 #ifndef CORRADE_ASSERT_OUTPUT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -316,7 +318,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT_UNREACHABLE @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSERT(),
+@see @ref CORRADE_DEBUG_ASSERT_UNREACHABLE(),
+    @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSUME()
 */
 #ifndef CORRADE_ASSERT_UNREACHABLE
@@ -387,7 +390,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
+@see @ref CORRADE_INTERNAL_DEBUG_ASSERT(),
+    @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
     @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME()
 */
 #ifndef CORRADE_INTERNAL_ASSERT
@@ -427,7 +431,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_CONSTEXPR_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_CONSTEXPR_ASSERT()
+@see @ref CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT(),
+    @ref CORRADE_CONSTEXPR_ASSERT()
 */
 #ifndef CORRADE_INTERNAL_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -462,7 +467,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_OUTPUT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
+@see @ref CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(),
+    @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
 */
 #ifndef CORRADE_INTERNAL_ASSERT_OUTPUT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -531,6 +537,8 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_EXPRESSION @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
+@see @ref CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION()
+
 @todo In C++14 this could use an inline templated lambda, which means we could
     drop the template function, do it inline and *also* make the standard
     assert actually working.
@@ -570,6 +578,8 @@ warnings or errors. Example usage:
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_UNREACHABLE @ce before including the
 @ref Corrade/Utility/Assert.h header.
+
+@see @ref CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE()
 */
 #ifndef CORRADE_INTERNAL_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))

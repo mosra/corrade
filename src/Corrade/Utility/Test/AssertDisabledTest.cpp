@@ -26,13 +26,38 @@
 
 #include <sstream>
 
-#ifndef CORRADE_NO_ASSERT
+#if defined(TEST_DEBUG_ASSERT) && !defined(CORRADE_IS_DEBUG_BUILD)
+/* for debug asserts do nothing, they should be disabled in release builds */
+#elif !defined(CORRADE_NO_ASSERT)
 #define CORRADE_NO_ASSERT
 #endif
 
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
+
+#ifdef TEST_DEBUG_ASSERT
+#include "Corrade/Utility/DebugAssert.h"
+#define TESTED_ASSERT CORRADE_DEBUG_ASSERT
+#define TESTED_CONSTEXPR_ASSERT CORRADE_CONSTEXPR_DEBUG_ASSERT
+#define TESTED_ASSERT_OUTPUT CORRADE_DEBUG_ASSERT_OUTPUT
+#define TESTED_ASSERT_UNREACHABLE CORRADE_DEBUG_ASSERT_UNREACHABLE
+#define TESTED_INTERNAL_ASSERT CORRADE_INTERNAL_DEBUG_ASSERT
+#define TESTED_INTERNAL_CONSTEXPR_ASSERT CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT
+#define TESTED_INTERNAL_ASSERT_OUTPUT CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT
+#define TESTED_INTERNAL_ASSERT_EXPRESSION CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION
+#define TESTED_INTERNAL_ASSERT_UNREACHABLE CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE
+#else
+#include "Corrade/Utility/Assert.h"
+#define TESTED_ASSERT CORRADE_ASSERT
+#define TESTED_CONSTEXPR_ASSERT CORRADE_CONSTEXPR_ASSERT
+#define TESTED_ASSERT_OUTPUT CORRADE_ASSERT_OUTPUT
+#define TESTED_ASSERT_UNREACHABLE CORRADE_ASSERT_UNREACHABLE
+#define TESTED_INTERNAL_ASSERT CORRADE_INTERNAL_ASSERT
+#define TESTED_INTERNAL_CONSTEXPR_ASSERT CORRADE_INTERNAL_CONSTEXPR_ASSERT
+#define TESTED_INTERNAL_ASSERT_OUTPUT CORRADE_INTERNAL_ASSERT_OUTPUT
+#define TESTED_INTERNAL_ASSERT_EXPRESSION CORRADE_INTERNAL_ASSERT_EXPRESSION
+#define TESTED_INTERNAL_ASSERT_UNREACHABLE CORRADE_INTERNAL_ASSERT_UNREACHABLE
+#endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -47,33 +72,41 @@ AssertDisabledTest::AssertDisabledTest() {
     addTests({&AssertDisabledTest::test,
               &AssertDisabledTest::constexprTest});
 
-    #ifdef CORRADE_STANDARD_ASSERT
+    #if defined(TEST_DEBUG_ASSERT) && defined(CORRADE_STANDARD_ASSERT)
+    setTestName("Corrade::Utility::Test::DebugAssertStandardDisabledTest");
+    #elif defined(TEST_DEBUG_ASSERT)
+    setTestName("Corrade::Utility::Test::DebugAssertDisabledTest");
+    #elif defined(CORRADE_STANDARD_ASSERT)
     setTestName("Corrade::Utility::Test::AssertStandardDisabledTest");
     #endif
 }
 
 void AssertDisabledTest::test() {
+    #if defined(TEST_DEBUG_ASSERT) && !defined(CORRADE_IS_DEBUG_BUILD) && defined(CORRADE_NO_ASSERT)
+    CORRADE_WARN("CORRADE_NO_ASSERT is defined for a debug assert test in a release build.");
+    #endif
+
     #ifndef __clang_analyzer__
     std::ostringstream out;
     Error redirectError{&out};
 
     int a = 0;
-    CORRADE_ASSERT(a, "A should be zero", );
-    int b = [&](){ CORRADE_ASSERT(a, "A should be zero!", 7); return 3; }();
-    CORRADE_INTERNAL_ASSERT(b);
+    TESTED_ASSERT(a, "A should be zero", );
+    int b = [&](){ TESTED_ASSERT(a, "A should be zero!", 7); return 3; }();
+    TESTED_INTERNAL_ASSERT(b);
 
     auto foo = [&](){ ++a; return false; };
-    CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed", );
-    int c = [&](){ CORRADE_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
-    CORRADE_INTERNAL_ASSERT_OUTPUT(foo());
+    TESTED_ASSERT_OUTPUT(foo(), "foo() should succeed", );
+    int c = [&](){ TESTED_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
+    TESTED_INTERNAL_ASSERT_OUTPUT(foo());
 
     /* These *still* compile to __builtin_unreachable, so we shouldn't trigger
        them */
-    [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("c should be 3", ); }();
-    int d = [&](){ if(c != 3) CORRADE_ASSERT_UNREACHABLE("c should be 3!", 7); return 3; }();
-    if(c != 3) CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    [&](){ if(c != 3) TESTED_ASSERT_UNREACHABLE("c should be 3", ); }();
+    int d = [&](){ if(c != 3) TESTED_ASSERT_UNREACHABLE("c should be 3!", 7); return 3; }();
+    if(c != 3) TESTED_INTERNAL_ASSERT_UNREACHABLE();
 
-    int e = CORRADE_INTERNAL_ASSERT_EXPRESSION(2 + 4)/2;
+    int e = TESTED_INTERNAL_ASSERT_EXPRESSION(2 + 4)/2;
 
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
@@ -87,11 +120,11 @@ void AssertDisabledTest::test() {
 }
 
 constexpr int divide(int a, int b) {
-    return CORRADE_CONSTEXPR_ASSERT(b, "b can't be zero"), a/(b + 5);
+    return TESTED_CONSTEXPR_ASSERT(b, "b can't be zero"), a/(b + 5);
 }
 
 constexpr int divideInternal(int a, int b) {
-    return CORRADE_INTERNAL_CONSTEXPR_ASSERT(b), a/(b + 5);
+    return TESTED_INTERNAL_CONSTEXPR_ASSERT(b), a/(b + 5);
 }
 
 void AssertDisabledTest::constexprTest() {
