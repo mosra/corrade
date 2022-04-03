@@ -66,8 +66,16 @@ Arguments:
 -   `name` --- exported symbol name
 -   `resources.conf` --- resource configuration file (see @ref Utility::Resource
     for format description)
--   `output.cpp` --- output file
+-   `output.cpp` --- output file; ignored if `--dependencies` is present
+-   `--dependencies` --- print a list of files the compiled resource is made of
+    and exit
 -   `-h`, `--help` --- display this help message and exit
+
+The `--dependencies` option is meant to be used by build systems to track
+transitive dependencies. It prints one file path per line with the path to the
+`resources.conf` prepended -- if it's passed as an absolute path, the printed
+paths are absolute, if not then relative. The configuration file itself is not
+a part of the printed list.
 */
 
 }
@@ -79,10 +87,33 @@ int main(int argc, char** argv) {
     Utility::Arguments args;
     args.addArgument("name").setHelp("name", "exported symbol name")
         .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
-        .addArgument("output").setHelp("output", "output file", "output.cpp")
-        .setCommand("corrade-rc")
-        .setGlobalHelp("Corrade resource compiler.")
+        .addArgument("output").setHelp("output", "output file; ignored if --dependencies is present", "output.cpp")
+        .addBooleanOption("dependencies").setHelp("dependencies", "print a list of files the compiled resource is made of and exit")
+        .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
+            /* If --info is passed, we don't need the output argument */
+            if(error == Utility::Arguments::ParseError::MissingArgument &&
+                key == "output" && args.isSet("dependencies")) return true;
+
+            /* Handle all other errors as usual */
+            return false;
+        })
+        .setGlobalHelp(R"(Corrade resource compiler.
+
+The --dependencies option is meant to be used by build systems to track
+transitive dependencies. It prints one file path per line with the path to the
+resources.conf prepended -- if it's passed as an absolute path, the printed
+paths are absolute, if not then relative. The configuration file itself is not
+a part of the printed list.)")
         .parse(argc, argv);
+
+    /* Print dependencies and exit, if requested */
+    if(args.isSet("dependencies")) {
+        Containers::Optional<Containers::Array<Containers::String>> dependencies = Utility::Implementation::resourceDependencies(args.value("conf"));
+        if(!dependencies) return 4;
+        for(const Containers::String& filename: *dependencies)
+            Utility::Debug{} << filename;
+        return 0;
+    }
 
     /* Remove previous output file. Only if it exists, to not print an error
        message when compiling for the first time. If it fails, die as well --

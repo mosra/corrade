@@ -32,6 +32,8 @@
 #include <sstream>
 #include <vector>
 
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Utility/Configuration.h"
@@ -246,6 +248,38 @@ std::string resourceCompileFrom(const std::string& name, const std::string& conf
     std::sort(fileData.begin(), fileData.end(), lessFilename);
 
     return resourceCompile(name, group, fileData);
+}
+
+Containers::Optional<Containers::Array<Containers::String>> resourceDependencies(const Containers::StringView configurationFile) {
+    if(!Path::exists(configurationFile)) {
+        Error() << "    Error: file" << configurationFile << "does not exist";
+        return {};
+    }
+
+    const Containers::StringView path = Path::split(configurationFile).first();
+    const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
+
+    /* A subset of what's done in resourceCompileFrom(), keep in sync */
+    std::vector<const ConfigurationGroup*> files = conf.groups("file");
+    Containers::Array<Containers::String> out;
+    arrayReserve(out, files.size());
+    for(const auto file: files) {
+        const Containers::StringView filename = file->value<Containers::StringView>("filename");
+
+        /* This would mean printing a whole directory on the output with
+           unforeseeable consequences for unsuspecting build systems, so fail
+           in that case */
+        if(!filename) {
+            Error() << "    Error: filename of file" << out.size() + 1 << "in group" << conf.value("group") << "is empty";
+            return {};
+        }
+
+        /* Absolute paths to keep it as simple as possible for the consumers */
+        arrayAppend(out, Path::join(path, filename));
+    }
+
+    /* GCC 4.8 and Clang 3.8 need extra help here */
+    return Containers::optional(std::move(out));
 }
 
 }}}}
