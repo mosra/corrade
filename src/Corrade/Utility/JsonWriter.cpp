@@ -33,6 +33,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::writeValue() */
+#include "Corrade/Utility/Macros.h" /* CORRADE_FALLTHROUGH */
 #include "Corrade/Utility/Path.h"
 
 namespace Corrade { namespace Utility {

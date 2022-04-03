@@ -57,6 +57,7 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_THREAD_LOCAL */
 
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"

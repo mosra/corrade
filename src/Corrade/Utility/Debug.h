@@ -35,7 +35,6 @@
 #include <type_traits>
 #include <utility> /** @todo consider putting this away as well (900 LOC) */
 
-#include "Corrade/Utility/Macros.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/Utility.h"
