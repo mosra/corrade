@@ -43,6 +43,7 @@ struct ResourceCompileTest: TestSuite::Tester {
     void compileEmptyFile();
 
     void compileFrom();
+    void compileFromNothing();
     void compileFromUtf8Filenames();
     void compileFromNonexistentResource();
     void compileFromNonexistentFile();
@@ -58,6 +59,7 @@ ResourceCompileTest::ResourceCompileTest() {
               &ResourceCompileTest::compileEmptyFile,
 
               &ResourceCompileTest::compileFrom,
+              &ResourceCompileTest::compileFromNothing,
               &ResourceCompileTest::compileFromUtf8Filenames,
               &ResourceCompileTest::compileFromNonexistentResource,
               &ResourceCompileTest::compileFromNonexistentFile,
@@ -113,6 +115,13 @@ void ResourceCompileTest::compileFrom() {
     const std::string compiled = Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources.conf"));
     CORRADE_COMPARE_AS(compiled, Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceCompileTest::compileFromNothing() {
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-nothing.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestNothingData", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
         TestSuite::Compare::StringToFile);
 }
 

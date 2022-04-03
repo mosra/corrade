@@ -324,6 +324,7 @@ corrade_add_test(UtilityResourceCompileTest
         ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
         ResourceTestFiles/resources.conf
+        ResourceTestFiles/resources-nothing.conf
         ResourceTestFiles/resources-empty-alias.conf
         ResourceTestFiles/resources-empty-filename.conf
         ResourceTestFiles/resources-empty-group.conf
