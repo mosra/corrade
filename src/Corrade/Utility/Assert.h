@@ -220,7 +220,7 @@ You can override this implementation by placing your own
 @cpp #define CORRADE_CONSTEXPR_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
 
-@see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_ASSUME()
+@see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
 */
 #ifndef CORRADE_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -306,7 +306,9 @@ defined, this macro compiles to @cpp assert(!"unreachable code") @ce. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
 @cpp NDEBUG @ce are defined), this macro hints to the compiler that given code
 is not reachable, possibly helping the optimizer (using a compiler builtin on
-GCC, Clang and MSVC; calling @ref std::abort() otherwise). Example usage:
+GCC, Clang and MSVC; calling @ref std::abort() otherwise). A @cpp return @ce
+statement can thus be safely omitted in a code path following this macro
+without causing any compiler warnings or errors. Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
 
@@ -424,6 +426,8 @@ compiles to @cpp static_cast<void>(0) @ce.
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_CONSTEXPR_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header.
+
+@see @ref CORRADE_CONSTEXPR_ASSERT()
 */
 #ifndef CORRADE_INTERNAL_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
@@ -557,7 +561,9 @@ line is printed to error output and the application aborts. If
 if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this
 macro hints to the compiler that given code is not reachable, possibly helping
 the optimizer (using a compiler builtin on GCC, Clang and MSVC; calling
-@ref std::abort() otherwise). Example usage:
+@ref std::abort() otherwise). A @cpp return @ce statement can thus be safely
+omitted in a code path following this macro without causing any compiler
+warnings or errors. Example usage:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT_UNREACHABLE
 
