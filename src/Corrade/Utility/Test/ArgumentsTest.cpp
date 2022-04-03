@@ -110,6 +110,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseUnknownArgument();
     void parseUnknownShortArgument();
     void parseSuperfluousArgument();
+    void parsePositionalArgumentAsNamed();
+    void parsePositionalArrayArgumentAsNamed();
+    void parsePositionalFinalOptionalArgumentAsNamed();
     void parseSingleDash();
     void parseArgumentAfterSeparator();
     void parseInvalidShortArgument();
@@ -209,6 +212,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
+              &ArgumentsTest::parsePositionalArgumentAsNamed,
+              &ArgumentsTest::parsePositionalArrayArgumentAsNamed,
+              &ArgumentsTest::parsePositionalFinalOptionalArgumentAsNamed,
               &ArgumentsTest::parseSingleDash,
               &ArgumentsTest::parseArgumentAfterSeparator,
               &ArgumentsTest::parseInvalidShortArgument,
@@ -1071,6 +1077,66 @@ void ArgumentsTest::parseSuperfluousArgument() {
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument error\n");
 }
 
+void ArgumentsTest::parsePositionalArgumentAsNamed() {
+    Arguments args;
+    args.addArgument("file");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::PositionalArgumentAsNamed);
+        CORRADE_COMPARE(key, "file");
+        return false;
+    });
+
+    const char* argv[] = { "", "--file", "foo" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --file\n");
+}
+
+void ArgumentsTest::parsePositionalArrayArgumentAsNamed() {
+    Arguments args;
+    args.addArrayArgument("files");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::PositionalArgumentAsNamed);
+        CORRADE_COMPARE(key, "files");
+        return false;
+    });
+
+    const char* argv[] = { "", "--files", "foo" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --files\n");
+}
+
+void ArgumentsTest::parsePositionalFinalOptionalArgumentAsNamed() {
+    Arguments args;
+    args.addFinalOptionalArgument("output");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::PositionalArgumentAsNamed);
+        CORRADE_COMPARE(key, "output");
+        return false;
+    });
+
+    const char* argv[] = { "", "--output", "foo" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --output\n");
+}
+
 void ArgumentsTest::parseSingleDash() {
     Arguments args;
     args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
@@ -1686,6 +1752,9 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
                 case Arguments::ParseError::UnknownArgument:
                     CORRADE_COMPARE(key, "halp");
                     return true;
+                case Arguments::ParseError::PositionalArgumentAsNamed:
+                    CORRADE_COMPARE(key, "input");
+                    return true;
                 case Arguments::ParseError::MissingValue:
                     CORRADE_COMPARE(key, "output");
                     return true;
@@ -1704,11 +1773,11 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
             return true;
         }, &count);
 
-    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--output" };
+    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--input", "--output" };
     /* The parsing should ignore the errors, not die where it shouldn't, but
        still extracting the valid optionas */
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(count, 7);
+    CORRADE_COMPARE(count, 8);
     CORRADE_VERIFY(args.isSet("hello"));
 }
 
@@ -1726,6 +1795,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
                 case Arguments::ParseError::InvalidArgument:
                 case Arguments::ParseError::UnknownShortArgument:
                 case Arguments::ParseError::UnknownArgument:
+                case Arguments::ParseError::PositionalArgumentAsNamed:
                 case Arguments::ParseError::MissingValue:
                 case Arguments::ParseError::MissingArgument:
                     break;

@@ -580,7 +580,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         /* Value for given argument. The shortOptionPackOffset is zero in case
            we're not coming from a short option pack */
         if(valueFor) {
-            if(/*valueFor->type == Type::Argument || */valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
+            if(valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
                 _values[valueFor->id] = argv[i] + shortOptionPackOffset;
             } else if(valueFor->type == Type::ArrayOption) {
@@ -710,6 +710,38 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
                 _booleans[found->id] = true;
                 parsedArguments[found-_entries.begin()] = true;
+
+            /* Positional argument passed as a named is an error. Theoretically
+               this could be allowed, but with a lot extra logic, unintuitive
+               corner cases and potentially confusing behavior:
+
+                - When processing remaining positional arguments, we'd have to
+                  skip positional arguments that were already passed as named.
+                  While a positional argument can be specified just once, the
+                  named argument can be multiple times, overwriting previous
+                  values.
+                - Specifying positional arguments as named would mean they
+                  could get specified in a different order, making the
+                  invocations harder to parse for the next person
+                - There are complex interactions with positional array
+                  arguments and final optional arguments. If an array argument
+                  is also specified as a named one, do the remaining positional
+                  arguments also count into the array? Or not and thus they're
+                  treated as superfluous? If some positional argument is
+                  already specified as named and there's also a final optional
+                  argument, should an extra argument be treated as superfluous
+                  or as the optional one?
+
+               Ultimately, in a lot of cases the help text replaces the actual
+               key name with stuff like `image.png` or `output.cpp`, which
+               would made it unclear what's the actual key supposed to be. So
+               better to just not allow this. */
+            } else if(found->type == Type::Argument || found->type == Type::ArrayArgument) {
+                if(_parseErrorCallback(*this, ParseError::PositionalArgumentAsNamed, found->key))
+                    continue;
+
+                Error{} << "Positional command-line argument specified as --" << Debug::nospace << found->key;
+                return false;
 
             /* Value option, save in next cycle */
             } else valueFor = found;
@@ -1135,6 +1167,7 @@ Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
         _c(UnknownShortArgument)
         _c(UnknownArgument)
         _c(SuperfluousArgument)
+        _c(PositionalArgumentAsNamed)
         _c(MissingValue)
         _c(MissingArgument)
         #undef _c

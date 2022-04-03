@@ -281,6 +281,19 @@ class CORRADE_UTILITY_EXPORT Arguments {
             SuperfluousArgument,
 
             /**
+             * A positional argument was specified as named. The function
+             * receives the key name without the leading `--`. If not handled,
+             * the default diagnostic is for example:
+             *
+             * @code{.shell-session}
+             * Positional command-line argument specified as --file
+             * @endcode
+             *
+             * @m_since_latest
+             */
+            PositionalArgumentAsNamed,
+
+            /**
              * Missing value for an argument. Happens when a named argument or
              * non-boolean option name is specified as the last element of the
              * argument list and no value follows. The function receives the
