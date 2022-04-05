@@ -46,12 +46,12 @@ TripleStlTest::TripleStlTest() {
 void TripleStlTest::convertCopy() {
     std::tuple<float, int, bool> a{35.0f, 4, true};
 
-    Triple<float, int, bool> b{a};
+    Triple<float, int, bool> b = a;
     CORRADE_COMPARE(b.first(), 35.0f);
     CORRADE_COMPARE(b.second(), 4);
     CORRADE_COMPARE(b.third(), true);
 
-    std::tuple<float, int, bool> c(b);
+    std::tuple<float, int, bool> c = b;
     CORRADE_COMPARE(std::get<0>(c), 35.0f);
     CORRADE_COMPARE(std::get<1>(c), 4);
     CORRADE_COMPARE(std::get<2>(c), true);
@@ -66,7 +66,7 @@ void TripleStlTest::convertCopy() {
 void TripleStlTest::convertMove() {
     std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> a{pointer(new float{35.0f}), pointer(new int{4}), Pointer<bool>{Corrade::InPlaceInit, true}};
 
-    Triple<Pointer<float>, Pointer<int>, Pointer<bool>> b{std::move(a)};
+    Triple<Pointer<float>, Pointer<int>, Pointer<bool>> b = std::move(a);
     CORRADE_COMPARE(*b.first(), 35.0f);
     CORRADE_COMPARE(*b.second(), 4);
     CORRADE_COMPARE(*b.third(), true);
@@ -74,7 +74,7 @@ void TripleStlTest::convertMove() {
     CORRADE_VERIFY(!std::get<1>(a));
     CORRADE_VERIFY(!std::get<2>(a));
 
-    std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> c(std::move(b));
+    std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> c = std::move(b);
     CORRADE_COMPARE(*std::get<0>(c), 35.0f);
     CORRADE_COMPARE(*std::get<1>(c), 4);
     CORRADE_COMPARE(*std::get<2>(c), true);

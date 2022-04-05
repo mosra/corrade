@@ -1001,12 +1001,12 @@ void TripleTest::constructMoveMoveMoveMake() {
 void TripleTest::convertCopy() {
     FloatIntFlag a{35.0f, 7, true};
 
-    Triple<float, int, bool> b{a};
+    Triple<float, int, bool> b = a;
     CORRADE_COMPARE(b.first(), 35.0f);
     CORRADE_COMPARE(b.second(), 7);
     CORRADE_COMPARE(b.third(), true);
 
-    FloatIntFlag c(b);
+    FloatIntFlag c = b;
     CORRADE_COMPARE(c.a, 35.0f);
     CORRADE_COMPARE(c.b, 7);
     CORRADE_COMPARE(c.c, true);
@@ -1022,22 +1022,18 @@ void TripleTest::convertCopy() {
     CORRADE_VERIFY(!std::is_constructible<Triple<int, float, bool>, FloatIntFlag>::value);
     CORRADE_VERIFY(std::is_constructible<FloatIntFlag, Triple<float, int, bool>>::value);
     CORRADE_VERIFY(!std::is_constructible<FloatIntFlag, Triple<int, float, bool>>::value);
-
-    /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<const FloatIntFlag&, Triple<float, int, bool>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Triple<float, int, bool>&, FloatIntFlag>::value);
 }
 
 void TripleTest::convertMove() {
     BoolPtrDouble a{true, new int{7}, 1.5};
     CORRADE_COMPARE(*a.b, 7);
 
-    Triple<bool, int*, double> b{Utility::move(a)};
+    Triple<bool, int*, double> b = Utility::move(a);
     CORRADE_COMPARE(b.first(), true);
     CORRADE_COMPARE(*b.second(), 7);
     CORRADE_COMPARE(b.third(), 1.5);
 
-    BoolPtrDouble c(Utility::move(b));
+    BoolPtrDouble c = Utility::move(b);
     CORRADE_COMPARE(c.a, true);
     CORRADE_COMPARE(*c.b, 7);
     CORRADE_COMPARE(c.c, 1.5);
@@ -1060,10 +1056,6 @@ void TripleTest::convertMove() {
     CORRADE_VERIFY(!std::is_constructible<Triple<bool, int*, double>, const BoolPtrDouble&>::value);
     CORRADE_VERIFY(!std::is_constructible<BoolPtrDouble, Triple<bool, int*, double>&>::value);
     CORRADE_VERIFY(!std::is_constructible<BoolPtrDouble, const Triple<bool, int*, double>&>::value);
-
-    /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<BoolPtrDouble&&, Triple<bool, int*, double>>::value);
-    CORRADE_VERIFY(!std::is_convertible<Triple<bool, int*, double>&&, BoolPtrDouble>::value);
 }
 
 void TripleTest::copy() {

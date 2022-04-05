@@ -71,8 +71,8 @@ There's also a three-element variant, called a @ref Triple.
 
 @section Containers-Pair-stl STL compatibility
 
-Instances of @ref Pair are *explicitly* copy- and move-convertible to and
-from @ref std::pair if you include @ref Corrade/Containers/PairStl.h. The
+Instances of @ref Pair are implicitly copy- and move-convertible to and from
+@ref std::pair if you include @ref Corrade/Containers/PairStl.h. The
 conversion is provided in a separate header to avoid overhead from an
 unconditional @cpp #include <utility> @ce. Additionally, the @ref pair(T&&)
 overload also allows for such a conversion. Example:
@@ -204,21 +204,21 @@ template<class F, class S> class Pair {
          *
          * @see @ref Containers-Pair-stl, @ref pair(T&&)
          */
-        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::from(std::declval<const T&>()))> explicit Pair(const T& other) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value): Pair{Implementation::PairConverter<F, S, T>::from(other)} {}
+        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::from(std::declval<const T&>()))> /*implicit*/ Pair(const T& other) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value): Pair{Implementation::PairConverter<F, S, T>::from(other)} {}
 
         /**
          * @brief Move-construct a pair from external representation
          *
          * @see @ref Containers-Pair-stl, @ref pair(T&&)
          */
-        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::from(std::declval<T&&>()))> explicit Pair(T&& other) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value): Pair{Implementation::PairConverter<F, S, T>::from(Utility::move(other))} {}
+        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::from(std::declval<T&&>()))> /*implicit*/ Pair(T&& other) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value): Pair{Implementation::PairConverter<F, S, T>::from(Utility::move(other))} {}
 
         /**
          * @brief Copy-convert the pair to external representation
          *
          * @see @ref Containers-Pair-stl
          */
-        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::to(std::declval<const Pair<F, S>&>()))> explicit operator T() const & {
+        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::to(std::declval<const Pair<F, S>&>()))> /*implicit*/ operator T() const & {
             return Implementation::PairConverter<F, S, T>::to(*this);
         }
 
@@ -227,7 +227,7 @@ template<class F, class S> class Pair {
          *
          * @see @ref Containers-Pair-stl
          */
-        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::to(std::declval<Pair<F, S>&&>()))> explicit operator T() && {
+        template<class T, class = decltype(Implementation::PairConverter<F, S, T>::to(std::declval<Pair<F, S>&&>()))> /*implicit*/ operator T() && {
             return Implementation::PairConverter<F, S, T>::to(Utility::move(*this));
         }
 

@@ -69,8 +69,8 @@ and have extra flexibility in how the internals are defined.
 
 @section Containers-Triple-stl STL compatibility
 
-Instances of @ref Triple are *explicitly* copy- and move-convertible to and
-from a three-element @ref std::tuple if you include
+Instances of @ref Triple are implicitly copy- and move-convertible to and from
+a three-element @ref std::tuple if you include
 @ref Corrade/Containers/TripleStl.h. The conversion is provided in a separate
 header to avoid overhead from an unconditional @cpp #include <tuple> @ce.
 Additionally, the @ref triple(T&&) overload also allows for such a conversion.
@@ -242,21 +242,21 @@ template<class F, class S, class T> class Triple {
          *
          * @see @ref Containers-Triple-stl, @ref triple(T&&)
          */
-        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::from(std::declval<const U&>()))> explicit Triple(const U& other) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value && std::is_nothrow_copy_constructible<T>::value): Triple{Implementation::TripleConverter<F, S, T, U>::from(other)} {}
+        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::from(std::declval<const U&>()))> /*implicit*/ Triple(const U& other) noexcept(std::is_nothrow_copy_constructible<F>::value && std::is_nothrow_copy_constructible<S>::value && std::is_nothrow_copy_constructible<T>::value): Triple{Implementation::TripleConverter<F, S, T, U>::from(other)} {}
 
         /**
          * @brief Move-construct a triple from external representation
          *
          * @see @ref Containers-Triple-stl, @ref triple(T&&)
          */
-        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::from(std::declval<U&&>()))> explicit Triple(U&& other) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value && std::is_nothrow_move_constructible<T>::value): Triple{Implementation::TripleConverter<F, S, T, U>::from(Utility::move(other))} {}
+        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::from(std::declval<U&&>()))> /*implicit*/ Triple(U&& other) noexcept(std::is_nothrow_move_constructible<F>::value && std::is_nothrow_move_constructible<S>::value && std::is_nothrow_move_constructible<T>::value): Triple{Implementation::TripleConverter<F, S, T, U>::from(Utility::move(other))} {}
 
         /**
          * @brief Copy-convert the triple to external representation
          *
          * @see @ref Containers-Triple-stl
          */
-        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::to(std::declval<const Triple<F, S, T>&>()))> explicit operator U() const & {
+        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::to(std::declval<const Triple<F, S, T>&>()))> /*implicit*/ operator U() const & {
             return Implementation::TripleConverter<F, S, T, U>::to(*this);
         }
 
@@ -265,7 +265,7 @@ template<class F, class S, class T> class Triple {
          *
          * @see @ref Containers-Triple-stl
          */
-        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::to(std::declval<Triple<F, S, T>&&>()))> explicit operator U() && {
+        template<class U, class = decltype(Implementation::TripleConverter<F, S, T, U>::to(std::declval<Triple<F, S, T>&&>()))> /*implicit*/ operator U() && {
             return Implementation::TripleConverter<F, S, T, U>::to(Utility::move(*this));
         }
 

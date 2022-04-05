@@ -624,11 +624,11 @@ void PairTest::constructMoveMoveMake() {
 void PairTest::convertCopy() {
     FloatInt a{35.0f, 7};
 
-    Pair<float, int> b{a};
+    Pair<float, int> b = a;
     CORRADE_COMPARE(b.first(), 35.0f);
     CORRADE_COMPARE(b.second(), 7);
 
-    FloatInt c(b);
+    FloatInt c = b;
     CORRADE_COMPARE(c.a, 35.0f);
     CORRADE_COMPARE(c.b, 7);
 
@@ -642,21 +642,17 @@ void PairTest::convertCopy() {
     CORRADE_VERIFY(!std::is_constructible<Pair<int, float>, FloatInt>::value);
     CORRADE_VERIFY(std::is_constructible<FloatInt, Pair<float, int>>::value);
     CORRADE_VERIFY(!std::is_constructible<FloatInt, Pair<int, float>>::value);
-
-    /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<const FloatInt&, Pair<float, int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Pair<float, int>&, FloatInt>::value);
 }
 
 void PairTest::convertMove() {
     BoolPtr a{true, new int{7}};
     CORRADE_COMPARE(*a.b, 7);
 
-    Pair<bool, int*> b{Utility::move(a)};
+    Pair<bool, int*> b = Utility::move(a);
     CORRADE_COMPARE(b.first(), true);
     CORRADE_COMPARE(*b.second(), 7);
 
-    BoolPtr c(Utility::move(b));
+    BoolPtr c = Utility::move(b);
     CORRADE_COMPARE(c.a, true);
     CORRADE_COMPARE(*c.b, 7);
 
@@ -677,10 +673,6 @@ void PairTest::convertMove() {
     CORRADE_VERIFY(!std::is_constructible<Pair<bool, int*>, const BoolPtr&>::value);
     CORRADE_VERIFY(!std::is_constructible<BoolPtr, Pair<bool, int*>&>::value);
     CORRADE_VERIFY(!std::is_constructible<BoolPtr, const Pair<bool, int*>&>::value);
-
-    /* Implicit conversion is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<BoolPtr&&, Pair<bool, int*>>::value);
-    CORRADE_VERIFY(!std::is_convertible<Pair<bool, int*>&&, BoolPtr>::value);
 }
 
 void PairTest::copy() {
