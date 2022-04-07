@@ -314,6 +314,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
+-   @ref Containers::arrayReserve() was not correctly propagating an explicit
+    allocator argument when checking for capacity, using always the implicit
+    one, and thus resulting in unnecessary reallocation in some cases
+    @ref Containers::arrayAppend(Array<T>&, std::initializer_list<T>) was not
+    correctly propagating an explicit allocator argument, causing the array to
+    be always reallocated using the implicit one
 -   @ref Utility::Path::list() was leaking the file handle on Windows (see
     [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable

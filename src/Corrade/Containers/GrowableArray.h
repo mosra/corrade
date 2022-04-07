@@ -1096,7 +1096,7 @@ template<class T, class Allocator> std::size_t arrayReserve(Array<T>& array, con
 
     /* If the capacity is large enough, nothing to do (even if we have the
        array allocated by something different) */
-    const std::size_t currentCapacity = arrayCapacity(array);
+    const std::size_t currentCapacity = arrayCapacity<T, Allocator>(array);
     if(currentCapacity >= capacity) return currentCapacity;
 
     /* Otherwise allocate a new array, move the previous data there and replace
@@ -1284,7 +1284,7 @@ template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const 
 }
 
 template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
-    return arrayAppend(array, {values.begin(), values.size()});
+    return arrayAppend<T, Allocator>(array, {values.begin(), values.size()});
 }
 
 template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const ArrayView<const T> values) {
