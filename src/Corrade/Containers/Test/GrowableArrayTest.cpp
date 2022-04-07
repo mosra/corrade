@@ -1761,6 +1761,8 @@ void GrowableArrayTest::castInvalid() {
 void GrowableArrayTest::explicitAllocatorParameter() {
     Array<int> a;
     arrayReserve<ArrayNewAllocator>(a, 10);
+    /* Calling it again should be a no-op if it correctly checks for capacity */
+    arrayReserve<ArrayNewAllocator>(a, 8);
     CORRADE_VERIFY(!arrayIsGrowable(a));
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);
@@ -1777,21 +1779,26 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     const int six = 6;
     {
         int& value = arrayAppend<ArrayNewAllocator>(a, six);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(value, 6);
     } {
         int& value = arrayAppend<ArrayNewAllocator>(a, Corrade::InPlaceInit, 7);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(value, 7);
     } {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[2], 10);
     } {
         const int values[]{11, 12, 13};
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, arrayView(values));
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[1], 12);
     } {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, Corrade::NoInit, 2);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 2);
         view[0] = 14;
         view[1] = 15;
@@ -1800,13 +1807,22 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_COMPARE(a.size(), 15);
 
     arrayRemoveSuffix<ArrayNewAllocator>(a);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    /* After this it will finally lose the growable status */
     arrayShrink<ArrayNewAllocator>(a);
+    CORRADE_VERIFY(!arrayIsGrowable<ArrayNewAllocator>(a));
+    CORRADE_VERIFY(!a.deleter());
     CORRADE_COMPARE(a.size(), 14);
 
     Array<Movable> b;
     arrayResize<ArrayNewAllocator>(b, Corrade::DirectInit, 5, Movable{6});
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
+
     arrayAppend<ArrayNewAllocator>(b, Movable{1});
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
+
     arrayAppend<ArrayNewAllocator>(b, Corrade::InPlaceInit, 2);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
     CORRADE_COMPARE(b.size(), 7);
 }
 
