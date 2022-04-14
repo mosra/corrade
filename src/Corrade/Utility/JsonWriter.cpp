@@ -91,7 +91,7 @@ struct JsonWriter::State {
     /** @todo use a String once it's growable */
     Containers::Array<char> whitespace;
     /* A stack of prefix lengths into the whitespace string above. If it
-       contains just a single zero value, we're at the top level. Prefix sizes
+       contains just a single value, we're at the top level. Prefix sizes
        masked with LevelPrefixMask, leftmost bit of second and following values
        indicates if given level is an object or array (LevelIsArray). */
     Containers::Array<std::uint32_t> levels;
@@ -130,7 +130,7 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation):
     }
 
     /* Initialize the whitespace prefix stack with a root value. Once the size
-       becomes 1 again, we're at the document end. */
+       of the levels array becomes 1 again, we're at the document end. */
     arrayAppend(_state->levels, _state->whitespace.size());
 }
 
