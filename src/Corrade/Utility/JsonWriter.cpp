@@ -170,6 +170,24 @@ void JsonWriter::finalizeDocument() {
     state.expecting = Expecting::DocumentEnd;
 }
 
+bool JsonWriter::isEmpty() const {
+    /* No need for any explicit handling for terminating \0 like in size() here
+       -- the array is empty initially (and toString() would fail because the
+       value isn't complete, thus we don't need a sentinel \0 in that case) */
+    /** @todo drop this comment once growable String is used */
+    return _state->out.isEmpty();
+}
+
+std::size_t JsonWriter::size() const {
+    const State& state = *_state;
+
+    /* Due to the lack of growable Strings, once finalizeDocument() is called
+       the array contains also the terminating null character, so strip it
+       away. Otherwise not. */
+    /** @todo drop this workaround once growable String is used */
+    return state.out.size() - (state.expecting == Expecting::DocumentEnd ? 1 : 0);
+}
+
 JsonWriter& JsonWriter::beginObject() {
     State& state = *_state;
     CORRADE_ASSERT(

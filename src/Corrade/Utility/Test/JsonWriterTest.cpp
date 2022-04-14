@@ -48,6 +48,8 @@ struct JsonWriterTest: TestSuite::Tester {
     public:
         explicit JsonWriterTest();
 
+        void emptyState();
+
         void singleObject();
         void singleArray();
         void singleNull();
@@ -286,7 +288,9 @@ const struct {
 };
 
 JsonWriterTest::JsonWriterTest() {
-    addInstancedTests({&JsonWriterTest::singleObject,
+    addInstancedTests({&JsonWriterTest::emptyState,
+
+                       &JsonWriterTest::singleObject,
                        &JsonWriterTest::singleArray,
                        &JsonWriterTest::singleNull,
                        &JsonWriterTest::singleBoolean,
@@ -353,54 +357,89 @@ JsonWriterTest::JsonWriterTest() {
               &JsonWriterTest::constructMove});
 }
 
+void JsonWriterTest::emptyState() {
+    auto&& data = SingleValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation};
+    CORRADE_COMPARE(json.size(), 0);
+    CORRADE_VERIFY(json.isEmpty());
+}
+
 void JsonWriterTest::singleObject() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .beginObject()
-        .endObject()
-        .toString(), format("{{}}{}", data.finalNewline));
+    json.beginObject();
+
+    /* At this point, the size should be a single character */
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), 1);
+
+    json.endObject();
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "{}"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::singleArray() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .beginArray()
-        .endArray()
-        .toString(), format("[]{}", data.finalNewline));
+    json.beginArray();
+
+    /* At this point, the size should be a single character */
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), 1);
+
+    json.endArray();
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "[]"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::singleNull() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .write(nullptr)
-        .toString(), format("null{}", data.finalNewline));
+    json.write(nullptr);
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "null"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::singleBoolean() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .write(true)
-        .toString(), format("true{}", data.finalNewline));
+    json.write(true);
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "true"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 template<class> struct NameTraits;
@@ -421,36 +460,49 @@ template<class T> void JsonWriterTest::singleNumber() {
     setTestCaseDescription(data.name);
     setTestCaseTemplateName(NameTraits<T>::name());
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .write(T{35})
-        .toString(), format("35{}", data.finalNewline));
+    json.write(T{35});
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "35"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::singleString() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .write("hello")
-        .toString(), format("\"hello\"{}", data.finalNewline));
+    json.write("hello");
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "\"hello\""_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::singleRawJson() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Except for the final newline, the result should be same regardless of
-       the indentation setting */
     JsonWriter json{data.options, data.indentation};
-    CORRADE_COMPARE(json
-        .writeJson("{\"key\": none, /* HEY JSON HOW ARE YA */ }")
-        .toString(), format("{{\"key\": none, /* HEY JSON HOW ARE YA */ }}{}", data.finalNewline));
+    json
+        .writeJson("{\"key\": none, /* HEY JSON HOW ARE YA */ }");
+
+    /* Except for the final newline, the result should be same regardless of
+       the indentation setting. The final newline should be added and counted
+       into size() even before toString() is called. */
+    Containers::String expected = "{\"key\": none, /* HEY JSON HOW ARE YA */ }"_s + data.finalNewline;
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), expected.size());
+    CORRADE_COMPARE(json.toString(), expected);
 }
 
 void JsonWriterTest::simpleObject() {

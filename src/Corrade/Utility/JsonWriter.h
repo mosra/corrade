@@ -228,6 +228,29 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         JsonWriter& operator=(JsonWriter&&) noexcept;
 
         /**
+         * @brief Whether the writer is empty
+         *
+         * Returns @cpp true @ce if no bytes were written yet --- i.e., if no
+         * @ref beginObject() / @ref beginObjectScope(), @ref beginArray() /
+         * @ref beginArrayScope(), @ref writeKey(), @ref write() or
+         * @ref writeJson() was called yet.
+         * @see @ref size()
+         */
+        bool isEmpty() const;
+
+        /**
+         * @brief Byte size of the output written so far
+         *
+         * Unlike @ref toString() or @ref toFile(), this function can be called
+         * at any point, even if the top-level JSON value isn't completely
+         * written yet. When the top-level value *is* complete, the returned
+         * size is equal to size of the data returned from @ref toString() and
+         * @ref toFile().
+         * @see @ref isEmpty()
+         */
+        std::size_t size() const;
+
+        /**
          * @brief Begin an object
          * @return Reference to self (for method chaining)
          *
@@ -462,7 +485,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Containers::StringViewFlag::NullTerminated set, points to data
          * owned by the @ref JsonWriter instance and is valid until the end of
          * its lifetime.
-         * @see @ref toFile()
+         * @see @ref toFile(), @ref size()
          */
         Containers::StringView toString() const;
 
@@ -471,7 +494,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          *
          * Expected to be called only once a complete top-level JSON value is
          * written. Returns @cpp false @ce if the file can't be written.
-         * @see @ref toString()
+         * @see @ref toString(), @ref size()
          */
         bool toFile(Containers::StringView filename) const;
 
