@@ -101,7 +101,7 @@ struct JsonWriter::State {
     bool needsCommaBefore = false;
 };
 
-JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation):
+JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, const std::uint32_t initialIndentation):
     /* Since a Writer instance is write-only, it isn't expected to be used as a
        placeholder the same way as, say, an empty String. So we shouldn't need
        to optimize for an overhead-free or noexcept default construction. */
@@ -117,11 +117,17 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation):
     _state->colonAndSpace = {ColonAndSpace, options & Option::TypographicalSpace ? 2u : 1u};
 
     /* If we're wrapping, initialize the whitespace string with a single
-       newline, and a newline + \0 to put at document end. Spaces will get
-       added to it as we dive deeper. If we're not, then there's a space after
-       every comma instead, and no final newline, only the \0. */
+       newline and the initial indentation, and a newline + \0 to put at
+       document end. Spaces will get added to it as we dive deeper. If we're
+       not, then there's a space after every comma instead, and no final
+       newline, only the \0. */
     if(options & Option::Wrap) {
         arrayAppend(_state->whitespace, '\n');
+        /** @todo arrayAppend(DirectInit, size, Args&&...) might be useful
+            here, calling memset internally if possible */
+        for(char& i: arrayAppend(_state->whitespace, NoInit, initialIndentation))
+            i = ' ';
+
         _state->commaAndSpace = {CommaAndSpace, 1};
         _state->finalNewlineNull = {FinalNewline, 2};
     } else {

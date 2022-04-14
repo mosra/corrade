@@ -120,7 +120,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         /**
          * @brief Pretty-printing option
          *
-         * @see @ref Options, @ref JsonWriter(Options, std::uint32_t)
+         * @see @ref Options, @ref JsonWriter(Options, std::uint32_t, std::uint32_t)
          */
         enum class Option {
             /**
@@ -152,10 +152,11 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
              *
              * Indentation before object keys and array values is controlled
              * with the @p indentation parameter passed to the
-             * @ref JsonWriter(Options, std::uint32_t) constructor. Nested
-             * object and array values use one indentation level more for their
-             * contents. Use @ref Option::TypographicalSpace to add a space
-             * after the `:` in object keys.
+             * @ref JsonWriter(Options, std::uint32_t, std::uint32_t)
+             * constructor. Nested object and array values use one indentation
+             * level more for their contents. Use
+             * @ref Option::TypographicalSpace to add a space after the `:` in
+             * object keys.
              */
             Wrap = 1 << 0,
 
@@ -184,7 +185,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         /**
          * @brief Pretty-printing options
          *
-         * @see @ref JsonWriter(Options, std::uint32_t)
+         * @see @ref JsonWriter(Options, std::uint32_t, std::uint32_t)
          */
         typedef Containers::EnumSet<Option> Options;
 
@@ -196,16 +197,21 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @param indentation   Number of spaces used for each indentation
          *      level. Has no effect if @ref Option::Wrap is not set. Expected
          *      to be at most @cpp 8 @ce.
+         * @param initialIndentation Number of spaces used for initial
+         *      indentation of second and following lines, useful when
+         *      combining output of multiple writers together. Has no effect if
+         *      @ref Option::Wrap is not set.
          */
-        explicit JsonWriter(Options options, std::uint32_t indentation);
+        explicit JsonWriter(Options options, std::uint32_t indentation, std::uint32_t initialIndentation = 0);
 
         /**
          * @brief Construct a compact JSON writer
          *
-         * Equivalent to calling @ref JsonWriter(Options, std::uint32_t)
-         * with an empty @ref Options and @cpp 0 @ce for @p indentation.
+         * Equivalent to calling @ref JsonWriter(Options, std::uint32_t, std::uint32_t)
+         * with an empty @ref Options and @cpp 0 @ce for both @p indentation
+         * and @p initialIndentation.
          */
-        explicit JsonWriter(): JsonWriter{{}, 0} {}
+        explicit JsonWriter(): JsonWriter{{}, 0, 0} {}
 
         /** @brief Copying is not allowed */
         JsonWriter(const JsonWriter&) = delete;

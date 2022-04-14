@@ -104,79 +104,67 @@ struct JsonWriterTest: TestSuite::Tester {
 const struct {
     const char* name;
     JsonWriter::Options options;
-    std::uint32_t indentation;
+    std::uint32_t indentation, initialIndentation;
     const char* finalNewline;
 } SingleValueData[]{
-    {"", {}, 0, ""},
-    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, "\n"}
+    {"", {}, 0, 0, ""},
+    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, "\n"}
 };
 
 const struct {
     const char* name;
     JsonWriter::Options options;
-    std::uint32_t indentation;
+    std::uint32_t indentation, initialIndentation;
     const char* expected;
 } SimpleObjectData[]{
-    {"", {}, 0,
+    {"", {}, 0, 0,
         R"({"key":true,"anotherObject":{},"number":-35.765,"nestedArray":[],"that":null})"},
-    {"no wrapping, non-zero indent", {}, 8,
+    {"no wrapping, non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
         R"({"key":true,"anotherObject":{},"number":-35.765,"nestedArray":[],"that":null})"},
     {"typographical space, non-zero indent",
-        JsonWriter::Option::TypographicalSpace, 7,
+        JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
         R"({"key": true, "anotherObject": {}, "number": -35.765, "nestedArray": [], "that": null})"},
-    {"two-space indent",
-        JsonWriter::Option::Wrap, 2,
+    {"four-space indent",
+        JsonWriter::Option::Wrap, 4, 0,
         R"({
-  "key":true,
-  "anotherObject":{},
-  "number":-35.765,
-  "nestedArray":[],
-  "that":null
+    "key":true,
+    "anotherObject":{},
+    "number":-35.765,
+    "nestedArray":[],
+    "that":null
 }
 )"},
-    {"four-space indent and a typographical space",
-        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4,
+    {"nine-space initial indent, two space indent and a typographical space",
+        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9,
         R"({
-    "key": true,
-    "anotherObject": {},
-    "number": -35.765,
-    "nestedArray": [],
-    "that": null
-}
+           "key": true,
+           "anotherObject": {},
+           "number": -35.765,
+           "nestedArray": [],
+           "that": null
+         }
 )"},
 };
 
 const struct {
     const char* name;
     JsonWriter::Options options;
-    std::uint32_t indentation;
+    std::uint32_t indentation, initialIndentation;
     const char* expected;
 } SimpleArrayData[]{
-    {"", {}, 0,
+    {"", {}, 0, 0,
         R"([true,"hello",{},-35.765,[],null])"},
-    {"non-zero indent", {}, 8,
+    {"non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
         R"([true,"hello",{},-35.765,[],null])"},
     {"typographical space, non-zero indent",
-        JsonWriter::Option::TypographicalSpace, 7,
+        JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
         R"([true, "hello", {}, -35.765, [], null])"},
-    {"two-space indent",
-        JsonWriter::Option::Wrap, 2,
-        R"([
-  true,
-  "hello",
-  {},
-  -35.765,
-  [],
-  null
-]
-)"},
-    {"four-space indent and a typographical space",
-        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4,
-        /* No change in expected output compared to above */
+    {"four-space indent",
+        JsonWriter::Option::Wrap, 4, 0,
         R"([
     true,
     "hello",
@@ -186,55 +174,42 @@ const struct {
     null
 ]
 )"},
+    {"nine-space initial indent, two-space indent and a typographical space",
+        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9,
+        /* No change in expected output compared to above */
+        R"([
+           true,
+           "hello",
+           {},
+           -35.765,
+           [],
+           null
+         ]
+)"},
 };
 
 const struct {
     const char* name;
     JsonWriter::Options options;
-    std::uint32_t indentation;
+    std::uint32_t indentation, initialIndentation;
     const char* expected;
 } NestedData[]{
-    {"", {}, 0,
+    {"", {}, 0, 0,
         R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"braces":{"again":{}}},-15.75,"bye!",[]])"},
-    {"non-zero indent", {}, 8,
+    {"non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
         R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"braces":{"again":{}}},-15.75,"bye!",[]])"},
     {"typographical space, non-zero indent",
-        JsonWriter::Option::TypographicalSpace, 7,
+        JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
         R"([{"hello": 5, "yes": true, "matrix": [[0, 1], [2, 3]], "braces": {"again": {}}}, -15.75, "bye!", []])"},
-    {"two-space indent",
-        JsonWriter::Option::Wrap, 2,
-        R"([
-  {
-    "hello":5,
-    "yes":true,
-    "matrix":[
-      [
-        0,
-        1
-      ],
-      [
-        2,
-        3
-      ]
-    ],
-    "braces":{
-      "again":{}
-    }
-  },
-  -15.75,
-  "bye!",
-  []
-]
-)"},
-    {"four-space indent and a typographical space",
-        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4,
+    {"four-space indent",
+        JsonWriter::Option::Wrap, 4, 0,
         R"([
     {
-        "hello": 5,
-        "yes": true,
-        "matrix": [
+        "hello":5,
+        "yes":true,
+        "matrix":[
             [
                 0,
                 1
@@ -244,14 +219,39 @@ const struct {
                 3
             ]
         ],
-        "braces": {
-            "again": {}
+        "braces":{
+            "again":{}
         }
     },
     -15.75,
     "bye!",
     []
 ]
+)"},
+    {"nine-space initial indent, two-space indent and a typographical space",
+        JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9,
+        R"([
+           {
+             "hello": 5,
+             "yes": true,
+             "matrix": [
+               [
+                 0,
+                 1
+               ],
+               [
+                 2,
+                 3
+               ]
+             ],
+             "braces": {
+               "again": {}
+             }
+           },
+           -15.75,
+           "bye!",
+           []
+         ]
 )"},
 };
 
@@ -361,7 +361,7 @@ void JsonWriterTest::emptyState() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     CORRADE_COMPARE(json.size(), 0);
     CORRADE_VERIFY(json.isEmpty());
 }
@@ -370,7 +370,7 @@ void JsonWriterTest::singleObject() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.beginObject();
 
     /* At this point, the size should be a single character */
@@ -392,7 +392,7 @@ void JsonWriterTest::singleArray() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.beginArray();
 
     /* At this point, the size should be a single character */
@@ -414,7 +414,7 @@ void JsonWriterTest::singleNull() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.write(nullptr);
 
     /* Except for the final newline, the result should be same regardless of
@@ -430,7 +430,7 @@ void JsonWriterTest::singleBoolean() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.write(true);
 
     /* Except for the final newline, the result should be same regardless of
@@ -460,7 +460,7 @@ template<class T> void JsonWriterTest::singleNumber() {
     setTestCaseDescription(data.name);
     setTestCaseTemplateName(NameTraits<T>::name());
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.write(T{35});
 
     /* Except for the final newline, the result should be same regardless of
@@ -476,7 +476,7 @@ void JsonWriterTest::singleString() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.write("hello");
 
     /* Except for the final newline, the result should be same regardless of
@@ -492,7 +492,7 @@ void JsonWriterTest::singleRawJson() {
     auto&& data = SingleValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json
         .writeJson("{\"key\": none, /* HEY JSON HOW ARE YA */ }");
 
@@ -509,7 +509,7 @@ void JsonWriterTest::simpleObject() {
     auto&& data = SimpleObjectData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
 
     Containers::StringView out = json
         .beginObject()
@@ -527,7 +527,7 @@ void JsonWriterTest::simpleArray() {
     auto&& data = SimpleArrayData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
 
     Containers::StringView out = json
         .beginArray()
@@ -546,7 +546,7 @@ void JsonWriterTest::nested() {
     auto&& data = NestedData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    JsonWriter json{data.options, data.indentation};
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
 
     Containers::StringView out = json
         .beginArray()
