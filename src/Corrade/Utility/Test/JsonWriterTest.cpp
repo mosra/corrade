@@ -104,11 +104,11 @@ struct JsonWriterTest: TestSuite::Tester {
 const struct {
     const char* name;
     JsonWriter::Options options;
-    std::uint32_t indentation, spacing;
+    std::uint32_t indentation;
     const char* finalNewline;
 } SingleValueData[]{
-    {"", {}, 0, 0, ""},
-    {"wrap & indent", JsonWriter::Option::Wrap, 4, 1, "\n"}
+    {"", {}, 0, ""},
+    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, "\n"}
 };
 
 const struct {
