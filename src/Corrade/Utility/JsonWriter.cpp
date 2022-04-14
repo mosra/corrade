@@ -162,18 +162,31 @@ void JsonWriter::writeCommaNewlineIndentInternal() {
     arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back() & LevelPrefixMask)});
 }
 
-void JsonWriter::finalizeDocument() {
+void JsonWriter::finalizeValue() {
     State& state = *_state;
 
-    /* Add a \n if we're wrapping and a \0. We can't arrayRemoveSuffix() it
-       to make it sentinel because that would trigger ASAN complaint when
-       it gets accessed, so instead the size has to be patched in toString()
-       and toFile(). */
-    /** @todo drop workarounds once growable String exists */
-    arrayAppend(state.out, state.finalNewlineNull);
+    /* If we're at the root or got back to it after ending an object or array,
+       finalize the document */
+    if(state.levels.size() == 1) {
+        /* Add a \n if we're wrapping and a \0. We can't arrayRemoveSuffix() it
+           to make it sentinel because that would trigger ASAN complaint when
+           it gets accessed, so instead the size has to be patched in
+           toString() and toFile(). */
+        /** @todo drop workarounds once growable String exists */
+        arrayAppend(state.out, state.finalNewlineNull);
 
-    /* Not expecting any more JSON crap after this point */
-    state.expecting = Expecting::DocumentEnd;
+        /* Not expecting any more JSON after this point */
+        state.expecting = Expecting::DocumentEnd;
+
+    /* Otherwise expect either an array value or an object key depending on
+       where we ended up */
+    } else if(state.levels.back() & LevelIsArray) {
+        state.expecting = Expecting::ArrayValueOrArrayEnd;
+        state.needsCommaBefore = true;
+    } else {
+        state.expecting = Expecting::ObjectKeyOrEnd;
+        state.needsCommaBefore = true;
+    }
 }
 
 bool JsonWriter::isEmpty() const {
@@ -235,16 +248,9 @@ JsonWriter& JsonWriter::endObject() {
     /* Object closing brace */
     arrayAppend(state.out, '}');
 
-    /* If we're back at the root, finalize the document. Otherwise expect
-       either an array value or an object key depending on where we ended
-       up. */
-    if(state.levels.size() == 1)
-        finalizeDocument();
-    else if(state.levels.back() & LevelIsArray)
-        state.expecting = Expecting::ArrayValueOrArrayEnd;
-    else
-        state.expecting = Expecting::ObjectKeyOrEnd;
-    state.needsCommaBefore = true;
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
 
     return *this;
 }
@@ -290,16 +296,9 @@ JsonWriter& JsonWriter::endArray() {
     /* Array closing brace */
     arrayAppend(state.out, ']');
 
-    /* If we're back at the root, finalize the document. Otherwise expect
-       either an array value or an object key depending on where we ended
-       up. */
-    if(state.levels.size() == 1)
-        finalizeDocument();
-    else if(state.levels.back() & LevelIsArray)
-        state.expecting = Expecting::ArrayValueOrArrayEnd;
-    else
-        state.expecting = Expecting::ObjectKeyOrEnd;
-    state.needsCommaBefore = true;
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
 
     return *this;
 }
@@ -390,15 +389,9 @@ JsonWriter& JsonWriter::writeInternal(const Containers::StringView literal) {
     /** @todo F.F.S. what's up with the crazy casts */
     arrayAppend(state.out, Containers::ArrayView<const char>{literal});
 
-    /* If we're at the root, finalize the document. Otherwise expect either an
-       array value or an object key depending on where we are. */
-    if(state.levels.size() == 1)
-        finalizeDocument();
-    else if(state.levels.back() & LevelIsArray)
-        state.expecting = Expecting::ArrayValueOrArrayEnd;
-    else
-        state.expecting = Expecting::ObjectKeyOrEnd;
-    state.needsCommaBefore = true;
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
 
     return *this;
 }
@@ -478,15 +471,9 @@ JsonWriter& JsonWriter::write(const Containers::StringView value) {
 
     writeStringLiteralInternal(value);
 
-    /* If we're at the root, finalize the document. Otherwise expect either an
-       array value or an object key depending on where we are. */
-    if(state.levels.size() == 1)
-        finalizeDocument();
-    else if(state.levels.back() & LevelIsArray)
-        state.expecting = Expecting::ArrayValueOrArrayEnd;
-    else
-        state.expecting = Expecting::ObjectKeyOrEnd;
-    state.needsCommaBefore = true;
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
 
     return *this;
 }
@@ -506,15 +493,9 @@ JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {
     /** @todo F.F.S. what's up with the crazy casts */
     arrayAppend(state.out, Containers::ArrayView<const char>{json});
 
-    /* If we're at the root, finalize the document. Otherwise expect either an
-       array value or an object key depending on where we are. */
-    if(state.levels.size() == 1)
-        finalizeDocument();
-    else if(state.levels.back() & LevelIsArray)
-        state.expecting = Expecting::ArrayValueOrArrayEnd;
-    else
-        state.expecting = Expecting::ObjectKeyOrEnd;
-    state.needsCommaBefore = true;
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
 
     return *this;
 }

@@ -514,7 +514,8 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         /* Writes a comma if not at the start or at when object value is
            expected and indents if not when object value is expected */
         CORRADE_UTILITY_LOCAL void writeCommaNewlineIndentInternal();
-        CORRADE_UTILITY_LOCAL void finalizeDocument();
+        /* Decides what to expect next after a value got written */
+        CORRADE_UTILITY_LOCAL void finalizeValue();
 
         /* Writes a string, without and comma, newline or indent. Used by
            writeString() and writeObjectKey(). */
