@@ -78,6 +78,8 @@ struct JsonWriterTest: TestSuite::Tester {
         void toFileFailed();
 
         void tooBigIndent();
+        void currentArraySizeNoValue();
+        void currentArraySizeObject();
         void objectEndButNoObject();
         void arrayEndButNoArray();
         void arrayEndButObjectEndExpected();
@@ -330,6 +332,8 @@ JsonWriterTest::JsonWriterTest() {
               &JsonWriterTest::toFileFailed,
 
               &JsonWriterTest::tooBigIndent,
+              &JsonWriterTest::currentArraySizeNoValue,
+              &JsonWriterTest::currentArraySizeObject,
               &JsonWriterTest::objectEndButNoObject,
               &JsonWriterTest::arrayEndButNoArray,
               &JsonWriterTest::arrayEndButObjectEndExpected,
@@ -395,9 +399,11 @@ void JsonWriterTest::singleArray() {
     JsonWriter json{data.options, data.indentation, data.initialIndentation};
     json.beginArray();
 
-    /* At this point, the size should be a single character */
+    /* At this point, the size should be a single character, and 0 items in the
+       array */
     CORRADE_VERIFY(!json.isEmpty());
     CORRADE_COMPARE(json.size(), 1);
+    CORRADE_COMPARE(json.currentArraySize(), 0);
 
     json.endArray();
 
@@ -528,17 +534,31 @@ void JsonWriterTest::simpleArray() {
     setTestCaseDescription(data.name);
 
     JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
 
-    Containers::StringView out = json
-        .beginArray()
-            .write(true)
-            .write("hello")
-            .beginObject().endObject()
-            .write(-35.765f)
-            .beginArray().endArray()
-            .write(nullptr)
-        .endArray()
-        .toString();
+    json.write(true);
+    CORRADE_COMPARE(json.currentArraySize(), 1);
+
+    json.write("hello");
+    CORRADE_COMPARE(json.currentArraySize(), 2);
+
+    json.beginObject().endObject();
+    CORRADE_COMPARE(json.currentArraySize(), 3);
+
+    json.write(-35.765f);
+    CORRADE_COMPARE(json.currentArraySize(), 4);
+
+    json.beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json.endArray();
+    CORRADE_COMPARE(json.currentArraySize(), 5);
+
+    json.write(nullptr);
+    CORRADE_COMPARE(json.currentArraySize(), 6);
+
+    Containers::StringView out = json.endArray().toString();
     CORRADE_COMPARE(out, data.expected);
 }
 
@@ -548,30 +568,48 @@ void JsonWriterTest::nested() {
 
     JsonWriter json{data.options, data.indentation, data.initialIndentation};
 
-    Containers::StringView out = json
-        .beginArray()
-            .beginObject()
+    json.beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json    .beginObject()
                 .writeKey("hello").write(5)
                 .writeKey("yes").write(true)
                 .writeKey("matrix")
-                    .beginArray()
-                        .beginArray()
-                            .write(0).write(1)
-                        .endArray()
-                        .beginArray()
-                            .write(2).write(3)
-                        .endArray()
-                    .endArray()
+                    .beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json                .beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json                    .write(0).write(1);
+    CORRADE_COMPARE(json.currentArraySize(), 2);
+
+    json                .endArray();
+    CORRADE_COMPARE(json.currentArraySize(), 1);
+
+    json                .beginArray();
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json                    .write(2).write(3);
+    CORRADE_COMPARE(json.currentArraySize(), 2);
+
+    json                .endArray();
+    CORRADE_COMPARE(json.currentArraySize(), 2);
+
+    json            .endArray()
                 .writeKey("braces")
                     .beginObject()
                         .writeKey("again").beginObject().endObject()
                     .endObject()
-            .endObject()
-            .write(-15.75)
+            .endObject();
+    CORRADE_COMPARE(json.currentArraySize(), 1);
+
+    json    .write(-15.75)
             .write("bye!")
-            .beginArray().endArray()
-        .endArray()
-        .toString();
+            .beginArray().endArray();
+    CORRADE_COMPARE(json.currentArraySize(), 4);
+
+    Containers::StringView out = json.endArray().toString();
     CORRADE_COMPARE(out, data.expected);
 }
 
@@ -727,6 +765,35 @@ void JsonWriterTest::tooBigIndent() {
     Error redirectError{&out};
     JsonWriter{{}, 9};
     CORRADE_COMPARE(out.str(), "Utility::JsonWriter: indentation can be at most 8 characters, got 9\n");
+}
+
+void JsonWriterTest::currentArraySizeNoValue() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    JsonWriter json;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json.currentArraySize();
+    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::currentArraySize(): not in an array\n");
+}
+
+void JsonWriterTest::currentArraySizeObject() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    JsonWriter json;
+    json.beginArray()
+            .beginObject()
+            .writeKey("hello");
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json.currentArraySize();
+    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::currentArraySize(): not in an array\n");
 }
 
 void JsonWriterTest::objectEndButNoObject() {

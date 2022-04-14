@@ -30,6 +30,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::writeValue() */
@@ -58,12 +59,6 @@ enum class Expecting {
     DocumentEnd
 };
 
-/* See State::levels for details */
-enum: std::uint32_t {
-    LevelPrefixMask = 0x7fffffffu,
-    LevelIsArray = 0x80000000u
-};
-
 constexpr const char* EightSpaces = "        ";
 constexpr const char* ColonAndSpace = ": ";
 constexpr const char* CommaAndSpace = ", ";
@@ -90,11 +85,10 @@ struct JsonWriter::State {
        indentation. If the option is not set, this string is empty. */
     /** @todo use a String once it's growable */
     Containers::Array<char> whitespace;
-    /* A stack of prefix lengths into the whitespace string above. If it
-       contains just a single value, we're at the top level. Prefix sizes
-       masked with LevelPrefixMask, leftmost bit of second and following values
-       indicates if given level is an object or array (LevelIsArray). */
-    Containers::Array<std::uint32_t> levels;
+    /* A stack of (<prefix length into the whitespace string above>, <array
+       item count if an array, ~size_t{} otherwise>). If it contains just a
+       single value, we're at the top level. */
+    Containers::Array<Containers::Pair<std::size_t, std::size_t>> levels;
     /* Indicates that a first value at given level is being written, thus no
        comma before. Gets reset in beginObject(), beginArray() and
        writeObjectKey(), gets set right after a value gets written. */
@@ -137,7 +131,7 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, c
 
     /* Initialize the whitespace prefix stack with a root value. Once the size
        of the levels array becomes 1 again, we're at the document end. */
-    arrayAppend(_state->levels, _state->whitespace.size());
+    arrayAppend(_state->levels, InPlaceInit, _state->whitespace.size(), ~std::size_t{});
 }
 
 JsonWriter::JsonWriter(JsonWriter&&) noexcept = default;
@@ -159,7 +153,7 @@ void JsonWriter::writeCommaNewlineIndentInternal() {
 
     /* Newline and indent */
     /** @todo F.F.S. what's up with the crazy casts */
-    arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back() & LevelPrefixMask)});
+    arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
 }
 
 void JsonWriter::finalizeValue() {
@@ -179,8 +173,10 @@ void JsonWriter::finalizeValue() {
         state.expecting = Expecting::DocumentEnd;
 
     /* Otherwise expect either an array value or an object key depending on
-       where we ended up */
-    } else if(state.levels.back() & LevelIsArray) {
+       where we ended up. If it's an array value, increase the array size
+       counter for the value we just wrote. */
+    } else if(state.levels.back().second() != ~std::size_t{}) {
+        ++state.levels.back().second();
         state.expecting = Expecting::ArrayValueOrArrayEnd;
         state.needsCommaBefore = true;
     } else {
@@ -219,8 +215,8 @@ JsonWriter& JsonWriter::beginObject() {
     writeCommaNewlineIndentInternal();
     arrayAppend(state.out, '{');
 
-    /* Indent next level further */
-    if(arrayAppend(state.levels, (state.levels.back() & LevelPrefixMask) + state.indentation.size()) > state.whitespace.size())
+    /* Indent next level further; mark this as an object */
+    if(arrayAppend(state.levels, InPlaceInit, state.levels.back().first() + state.indentation.size(), ~std::size_t{}).first() > state.whitespace.size())
         arrayAppend(state.whitespace, state.indentation);
 
     /* Next expectig an object key or end */
@@ -243,7 +239,7 @@ JsonWriter& JsonWriter::endObject() {
        an indent in that case, otherwise nothing. */
     if(state.needsCommaBefore)
         /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back() & LevelPrefixMask)});
+        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
 
     /* Object closing brace */
     arrayAppend(state.out, '}');
@@ -267,8 +263,8 @@ JsonWriter& JsonWriter::beginArray() {
     writeCommaNewlineIndentInternal();
     arrayAppend(state.out, '[');
 
-    /* Indent next level further */
-    if(arrayAppend(state.levels, LevelIsArray|((state.levels.back() & LevelPrefixMask) + state.indentation.size())) > state.whitespace.size())
+    /* Indent next level further; mark this as an array with 0 items so far */
+    if(arrayAppend(state.levels, InPlaceInit, state.levels.back().first() + state.indentation.size(), 0u).first() > state.whitespace.size())
         arrayAppend(state.whitespace, state.indentation);
 
     /* Next expectig a value or end */
@@ -291,7 +287,7 @@ JsonWriter& JsonWriter::endArray() {
        an indent in that case, otherwise nothing. */
     if(state.needsCommaBefore)
         /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back() & LevelPrefixMask)});
+        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
 
     /* Array closing brace */
     arrayAppend(state.out, ']');
@@ -315,6 +311,13 @@ Containers::ScopeGuard JsonWriter::beginArrayScope() {
     return Containers::ScopeGuard{this, [](JsonWriter* self) {
         self->endArray();
     }};
+}
+
+std::size_t JsonWriter::currentArraySize() const {
+    const std::size_t size = _state->levels.back().second();
+    CORRADE_ASSERT(size != ~std::size_t{},
+        "Utility::JsonWriter::currentArraySize(): not in an array", {});
+    return size;
 }
 
 void JsonWriter::writeStringLiteralInternal(const Containers::StringView string) {

@@ -320,6 +320,21 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         Containers::ScopeGuard beginArrayScope();
 
         /**
+         * @brief Size of the currently written array
+         *
+         * Returns the count of values present so far in a currently written
+         * array. In case of nested arrays returns a size of the leaf array, to
+         * get size of the parent arrays you have to @ref endArray() the
+         * children first or query the size before a @ref beginArray() call of
+         * the child.
+         *
+         * Expects that an array is currently being written --- i.e.,
+         * @ref beginArray() / @ref beginArrayScope() was recently called with
+         * no @ref endArray() or @ref beginObject() call happening after.
+         */
+        std::size_t currentArraySize() const;
+
+        /**
          * @brief Write an object key
          * @return Reference to self (for method chaining)
          *
