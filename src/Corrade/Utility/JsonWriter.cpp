@@ -123,7 +123,13 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, c
             i = ' ';
 
         _state->commaAndSpace = {CommaAndSpace, 1};
-        _state->finalNewlineNull = {FinalNewline, 2};
+
+        /* If there's initial indentation, assume the output will be put into
+           other JSON writers and thus a newline at the end isn't desired */
+        if(!initialIndentation)
+            _state->finalNewlineNull = {FinalNewline, 2};
+        else
+            _state->finalNewlineNull = {FinalNewline + 1, 1};
     } else {
         _state->commaAndSpace = {CommaAndSpace, options & Option::TypographicalSpace ? 2u : 1u};
         _state->finalNewlineNull = {FinalNewline + 1, 1};

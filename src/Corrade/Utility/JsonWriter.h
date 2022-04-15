@@ -132,8 +132,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
              *
              * @m_class{m-noindent}
              *
-             * into the following, including also a final newline at document
-             * end:
+             * into the following:
              *
              * @code{.json}
              * [
@@ -149,6 +148,12 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
              *   }
              * ]
              * @endcode
+             *
+             * If @p initialIndentation is zero, the formatted output is
+             * treated as a top-level JSON document and includes also a final
+             * newline at the end. Otherwise it's assumed that the output will
+             * be subsequently put inside another JSON document and thus a
+             * newline is not added as it may break the formatting.
              *
              * Indentation before object keys and array values is controlled
              * with the @p indentation parameter passed to the

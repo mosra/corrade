@@ -110,7 +110,8 @@ const struct {
     const char* finalNewline;
 } SingleValueData[]{
     {"", {}, 0, 0, ""},
-    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, "\n"}
+    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 0, "\n"},
+    {"wrap & indent & initial indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, ""}
 };
 
 const struct {
@@ -146,8 +147,7 @@ const struct {
            "number": -35.765,
            "nestedArray": [],
            "that": null
-         }
-)"},
+         })"}, /* no final newline */
 };
 
 const struct {
@@ -186,8 +186,7 @@ const struct {
            -35.765,
            [],
            null
-         ]
-)"},
+         ])"},  /* no final newline */
 };
 
 const struct {
@@ -253,8 +252,7 @@ const struct {
            -15.75,
            "bye!",
            []
-         ]
-)"},
+         ])"},  /* no final newline */
 };
 
 const struct {
