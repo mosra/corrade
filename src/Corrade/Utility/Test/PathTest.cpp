@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
@@ -148,6 +149,7 @@ struct PathTest: TestSuite::Tester {
     void temporaryDirectoryUtf8();
 
     void list();
+    void listIterateRangeFor();
     void listEmptyDirectory();
     void listSkipDirectories();
     void listSkipDirectoriesSymlinks();
@@ -341,6 +343,7 @@ PathTest::PathTest() {
               &PathTest::temporaryDirectoryUtf8,
 
               &PathTest::list,
+              &PathTest::listIterateRangeFor,
               &PathTest::listEmptyDirectory,
               &PathTest::listSkipDirectories,
               &PathTest::listSkipDirectoriesSymlinks,
@@ -1693,6 +1696,32 @@ void PathTest::list() {
             ".", "..", "dir", "file"
         }), TestSuite::Compare::SortedContainer);
     }
+}
+
+void PathTest::listIterateRangeFor() {
+    /* Verify that the directory can be listed to make the unconditional
+       dereference in the for() below unlikely to assert */
+    CORRADE_VERIFY(Path::list(_testDir));
+
+    /* It should not happen that the original Optional somehow gets out of
+       scope before we get to iterating the array contained in it. This is a
+       yet-unsolved problem in C++ with std::optional and other STL containers:
+       http://josuttis.com/download/std/D2012R0_fix_rangebasedfor_201029.pdf
+
+       However, in this case, and unlike with std::make, the operator*()
+       returns a T instead of T&&, and the reference lifetime extension takes
+       care of the rest. See also OptionalTest::accessRvalueLifetimeExtension(). */
+    Containers::Array<Containers::String> out;
+    for(Containers::String& a: *Path::list(_testDir))
+        arrayAppend(out, a);
+
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+    CORRADE_COMPARE_AS(out, Containers::array<Containers::String>({
+        ".", "..", "dir", "file"
+    }), TestSuite::Compare::SortedContainer);
 }
 
 void PathTest::listEmptyDirectory() {
