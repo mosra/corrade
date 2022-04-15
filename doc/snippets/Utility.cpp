@@ -939,6 +939,56 @@ DOXYGEN_ELLIPSIS()
 }
 
 {
+struct Mesh {
+    Containers::StringView name;
+    int mode;
+};
+Containers::ArrayView<const Mesh> meshes;
+/* [JsonWriter-usage-combining-writers] */
+Utility::JsonWriter gltfMeshes{
+    Utility::JsonWriter::Option::Wrap|
+    Utility::JsonWriter::Option::TypographicalSpace, 2, 2};
+Utility::JsonWriter gltfNodes{
+    Utility::JsonWriter::Option::Wrap|
+    Utility::JsonWriter::Option::TypographicalSpace, 2, 2};
+
+for(const Mesh& mesh: meshes) {
+    /* Open the mesh and node arrays if they're empty */
+    if(gltfMeshes.isEmpty()) gltfMeshes.beginArray();
+    if(gltfNodes.isEmpty()) gltfNodes.beginArray();
+
+    std::size_t gltfMeshId = gltfMeshes.currentArraySize();
+    Containers::ScopeGuard gltfMesh = gltfMeshes.beginObjectScope();
+    gltfMeshes.writeKey("name").write(mesh.name)
+              .writeKey("mode").write(mesh.mode)
+              DOXYGEN_ELLIPSIS();
+
+    Containers::ScopeGuard gltfNode = gltfNodes.beginObjectScope();
+    gltfNodes.writeKey("name").write(mesh.name)
+             .writeKey("mesh").write(gltfMeshId)
+             DOXYGEN_ELLIPSIS();
+}
+
+Utility::JsonWriter gltf{
+    Utility::JsonWriter::Option::Wrap|
+    Utility::JsonWriter::Option::TypographicalSpace, 2};
+gltf.beginObject();
+
+/* Close and add the mesh and node arrays if they're non-empty */
+if(!gltfMeshes.isEmpty()) {
+    gltfMeshes.endArray();
+    gltf.writeKey("meshes").write(gltfMeshes.toString());
+}
+if(!gltfNodes.isEmpty()) {
+    gltfNodes.endArray();
+    gltf.writeKey("nodes").write(gltfNodes.toString());
+}
+
+gltf.endObject();
+/* [JsonWriter-usage-combining-writers] */
+}
+
+{
 int a = 2;
 int d[5]{};
 int e[5]{};

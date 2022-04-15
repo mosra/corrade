@@ -51,8 +51,8 @@ floating-point representation.
 To optimize for writing performance and minimal memory usage, the class
 provides a write-only stream-like interface, formatting the JSON string on the
 fly. It is thus not possible to go for example go back and add values to
-existing objects or arrays --- if that's desired, users are encouraged to build
-an intermediate mutable storage first and only then feed it to this class.
+existing objects or arrays --- if that's desired, one option is to use multiple
+@ref JsonWriter instances and concatenate them together, as shown later on.
 
 @section Utility-JsonWriter-usage Usage
 
@@ -114,6 +114,24 @@ call to @ref endObject() or @ref endArray() at the end of scope, which may be
 useful when writing deeply nested hierarchies:
 
 @snippet Utility.cpp JsonWriter-usage-object-array-scope
+
+@subsection Utility-JsonWriter-usage-combining-writers Combining multiple writers together
+
+While the streaming nature of the writer doesn't allow to add new values to
+multiple places in the file, this can be achieved by populating multiple
+@ref JsonWriter instances and then combining their formatted output together
+using @ref writeJson(). The following snippet first creates standalone glTF
+node and mesh arrays and then combines them together to a complete glTF file,
+with each node having exactly one assigned mesh:
+
+@snippet Utility.cpp JsonWriter-usage-combining-writers
+
+Note the `initialIndentation` parameter passed to the @ref JsonWriter(Options, std::uint32_t, std::uint32_t)
+constructor, which will make indentation of the nested arrays match the
+surroundings in the final file. The @ref currentArraySize() index is used to
+know the ID of the currently added mesh instead of having to increment a
+counter by hand, and finally @ref isEmpty() is used to know whether there's any
+meshes at all, in which case the list is completely omitted in the final file.
 */
 class CORRADE_UTILITY_EXPORT JsonWriter {
     public:
