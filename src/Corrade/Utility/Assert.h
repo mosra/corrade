@@ -36,13 +36,10 @@
 #include <cstdlib>
 
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_LINE_STRING */
 #elif !defined(NDEBUG)
 #include <cassert>
 #endif
-#endif
-
-#ifdef CORRADE_BUILD_DEPRECATED /* CORRADE_ASSUME() used to be defined here */
-#include "Corrade/Utility/Macros.h"
 #endif
 
 namespace Corrade { namespace Utility {
