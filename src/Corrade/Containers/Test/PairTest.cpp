@@ -125,6 +125,7 @@ struct PairTest: TestSuite::Tester {
     void compare();
     void access();
     void accessRvalue();
+    void accessRvalueLifetimeExtension();
 
     void debug();
 
@@ -159,6 +160,7 @@ PairTest::PairTest() {
     addTests({&PairTest::compare,
               &PairTest::access,
               &PairTest::accessRvalue,
+              &PairTest::accessRvalueLifetimeExtension,
 
               &PairTest::debug,
 
@@ -814,6 +816,44 @@ void PairTest::accessRvalue() {
     CORRADE_COMPARE(cb1.a, 15);
     CORRADE_COMPARE(cb2.a, 13);
     #endif
+}
+
+void PairTest::accessRvalueLifetimeExtension() {
+    struct DiesLoudly {
+        DiesLoudly() = default;
+        DiesLoudly(const DiesLoudly&) = delete;
+        DiesLoudly(DiesLoudly&& other): orphaned{true} {
+            other.orphaned = false;
+        }
+
+        ~DiesLoudly() {
+            if(orphaned) Debug{} << "dying!";
+        }
+
+        bool orphaned = true;
+    };
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        /* Here a reference lifetime extension should kick in, causing the
+           output of first() and second() to be destroyed only at the end of
+           scope, and not already at the ;. A more common case of this would be
+           with temporary expressions in a range-for loop, see
+           OptionalTest::accessRvalueLifetimeExtension() for an example. */
+        auto&& first = Pair<DiesLoudly, int>{DiesLoudly{}, 0}.first();
+        auto&& second = Pair<int, DiesLoudly>{0, DiesLoudly{}}.second();
+        Debug{} << "shouldn't be dead yet";
+
+        /* So the compiler doesn't complain about the variables being unused
+           (even though it's a load-bearing reference) */
+        CORRADE_VERIFY(&first);
+        CORRADE_VERIFY(&second);
+    }
+    CORRADE_COMPARE(out.str(),
+        "shouldn't be dead yet\n"
+        "dying!\n"
+        "dying!\n");
 }
 
 void PairTest::debug() {

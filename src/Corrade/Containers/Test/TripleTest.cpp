@@ -136,6 +136,7 @@ struct TripleTest: TestSuite::Tester {
     void compare();
     void access();
     void accessRvalue();
+    void accessRvalueLifetimeExtension();
 
     void debug();
 
@@ -178,6 +179,7 @@ TripleTest::TripleTest() {
     addTests({&TripleTest::compare,
               &TripleTest::access,
               &TripleTest::accessRvalue,
+              &TripleTest::accessRvalueLifetimeExtension,
 
               &TripleTest::debug,
 
@@ -1230,6 +1232,47 @@ void TripleTest::accessRvalue() {
     CORRADE_COMPARE(cb2.a, 13);
     CORRADE_COMPARE(cb3.a, 17);
     #endif
+}
+
+void TripleTest::accessRvalueLifetimeExtension() {
+    struct DiesLoudly {
+        DiesLoudly() = default;
+        DiesLoudly(const DiesLoudly&) = delete;
+        DiesLoudly(DiesLoudly&& other): orphaned{true} {
+            other.orphaned = false;
+        }
+
+        ~DiesLoudly() {
+            if(orphaned) Debug{} << "dying!";
+        }
+
+        bool orphaned = true;
+    };
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        /* Here a reference lifetime extension should kick in, causing the
+           output of first(), second() and third() to be destroyed only at the
+           end of scope, and not already at the ;. A more common case of this
+           would be with temporary expressions in a range-for loop, see
+           OptionalTest::accessRvalueLifetimeExtension() for an example. */
+        auto&& first = Triple<DiesLoudly, int, int>{DiesLoudly{}, 0, 0}.first();
+        auto&& second = Triple<int, DiesLoudly, int>{0, DiesLoudly{}, 0}.second();
+        auto&& third = Triple<int, int, DiesLoudly>{0, 0, DiesLoudly{}}.third();
+        Debug{} << "shouldn't be dead yet";
+
+        /* So the compiler doesn't complain about the variables being unused
+           (even though it's a load-bearing reference) */
+        CORRADE_VERIFY(&first);
+        CORRADE_VERIFY(&second);
+        CORRADE_VERIFY(&third);
+    }
+    CORRADE_COMPARE(out.str(),
+        "shouldn't be dead yet\n"
+        "dying!\n"
+        "dying!\n"
+        "dying!\n");
 }
 
 void TripleTest::debug() {

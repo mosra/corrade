@@ -146,6 +146,7 @@ struct OptionalTest: TestSuite::Tester {
 
     void access();
     void accessRvalue();
+    void accessRvalueLifetimeExtension();
     void accessInvalid();
 
     void debug();
@@ -205,6 +206,7 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::access,
               &OptionalTest::accessRvalue,
+              &OptionalTest::accessRvalueLifetimeExtension,
               &OptionalTest::accessInvalid,
 
               &OptionalTest::debug,
@@ -972,6 +974,45 @@ void OptionalTest::accessRvalue() {
     const Movable&& cb = *Utility::move(ca);
     CORRADE_COMPARE(cb.a, 1337);
     #endif
+}
+
+void OptionalTest::accessRvalueLifetimeExtension() {
+    struct DiesLoudly {
+        DiesLoudly() = default;
+        DiesLoudly(const DiesLoudly&) = delete;
+        DiesLoudly(DiesLoudly&& other): orphaned{true} {
+            other.orphaned = false;
+        }
+
+        ~DiesLoudly() {
+            if(orphaned) Debug{} << "dying!";
+        }
+
+        bool orphaned = true;
+    };
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        /* Here a reference lifetime extension should kick in, causing the
+           output of operator*() to be destroyed only at the end of scope, and
+           not already at the ;. A more common case of this would be with
+           temporary expressions in a range-for loop, such as with
+
+            for(auto&& file: *Utility::Path::list(path))
+                // if the lifetime was not extended, it would iterate an
+                // already-destroyed Array
+        */
+        auto&& value = *Optional<DiesLoudly>{DiesLoudly{}};
+        Debug{} << "shouldn't be dead yet";
+
+        /* So the compiler doesn't complain about the variables being unused
+           (even though it's a load-bearing reference) */
+        CORRADE_VERIFY(&value);
+    }
+    CORRADE_COMPARE(out.str(),
+        "shouldn't be dead yet\n"
+        "dying!\n");
 }
 
 void OptionalTest::accessInvalid() {
