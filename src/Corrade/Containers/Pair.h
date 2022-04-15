@@ -243,7 +243,10 @@ template<class F, class S> class Pair {
 
         /** @brief First element */
         F& first() & { return _first; }
-        F&& first() && { return Utility::move(_first); } /**< @overload */
+        /* Not F&& because that'd cause nasty dangling reference issues in
+           common code. See the accessRvalueLifetimeExtension() test for
+           details. */
+        F first() && { return Utility::move(_first); } /**< @overload */
         constexpr const F& first() const & { return _first; } /**< @overload */
         #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
         /** @overload */
@@ -255,7 +258,10 @@ template<class F, class S> class Pair {
 
         /** @brief Second element */
         S& second() & { return _second; }
-        S&& second() && { return Utility::move(_second); } /**< @overload */
+        /* Not S&& because that'd cause nasty dangling reference issues in
+           common code. See the accessRvalueLifetimeExtension() test for
+           details. */
+        S second() && { return Utility::move(_second); } /**< @overload */
         constexpr const S& second() const & { return _second; } /**< @overload */
         #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
         /** @overload */

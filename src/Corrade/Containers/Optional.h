@@ -338,7 +338,10 @@ template<class T> class Optional {
         }
 
         /** @overload */
-        T&& operator*() && {
+        /* Not T&& because that'd cause nasty dangling reference issues in
+           common code. See the accessRvalueLifetimeExtension() test for
+           details. */
+        T operator*() && {
             CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
             return Utility::move(_value);
         }
