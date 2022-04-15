@@ -353,7 +353,7 @@ template<class T> class Optional {
         /** @overload */
         /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
            well), so disabling it there. See also the corresponding test, same
-           is in Pair. */
+           is in Pair and Triple. */
         const T&& operator*() const && {
             CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
             return Utility::move(_value);

@@ -249,7 +249,7 @@ template<class F, class S> class Pair {
         /** @overload */
         /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
            well), so disabling it there. See also the corresponding test, same
-           is in Optional. */
+           is in Optional and Triple. */
         constexpr const F&& first() const && { return Utility::move(_first); }
         #endif
 
@@ -261,7 +261,7 @@ template<class F, class S> class Pair {
         /** @overload */
         /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
            well), so disabling it there. See also the corresponding test, same
-           is in Optional. */
+           is in Optional and Triple. */
         constexpr const S&& second() const && { return Utility::move(_second); }
         #endif
 
