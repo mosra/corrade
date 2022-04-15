@@ -888,13 +888,13 @@ if(!json->parseUnsignedInts(nodeChildren) ||
 
 {
 /* [JsonWriter-usage1] */
-Utility::JsonWriter json{
+Utility::JsonWriter gltf{
     Utility::JsonWriter::Option::Wrap|
     Utility::JsonWriter::Option::TypographicalSpace, 2};
 /* [JsonWriter-usage1] */
 
 /* [JsonWriter-usage2] */
-json.beginObject()
+gltf.beginObject()
         .writeKey("asset").beginObject()
             .writeKey("version").write("2.0")
         .endObject()
@@ -908,13 +908,13 @@ json.beginObject()
 /* [JsonWriter-usage2] */
 
 /* [JsonWriter-usage3] */
-if(!json.toFile("scene.gltf"))
+if(!gltf.toFile("scene.gltf"))
     Utility::Fatal{} << "Huh, can't write a file?";
 /* [JsonWriter-usage3] */
 }
 
 {
-Utility::JsonWriter json;
+Utility::JsonWriter gltf;
 /* [JsonWriter-usage-object-array-scope] */
 struct Node {
     Containers::StringView name;
@@ -925,13 +925,13 @@ Containers::ArrayView<const Node> nodes;
 DOXYGEN_ELLIPSIS()
 
 {
-    json.writeKey("nodes");
-    Containers::ScopeGuard jsonNodes = json.beginArrayScope();
+    gltf.writeKey("nodes");
+    Containers::ScopeGuard gltfNodes = gltf.beginArrayScope();
 
     for(const Node& node: nodes) {
-        Containers::ScopeGuard jsonNode = json.beginObjectScope();
+        Containers::ScopeGuard gltfNode = gltf.beginObjectScope();
 
-        json.writeKey("name").write(node.name)
+        gltf.writeKey("name").write(node.name)
             .writeKey("mesh").write(node.mesh);
     }
 }
