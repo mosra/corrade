@@ -804,18 +804,6 @@ void PairTest::accessRvalue() {
     Movable b2 = Pair<int, Movable>{5, Movable{3}}.second();
     CORRADE_COMPARE(b1.a, 5);
     CORRADE_COMPARE(b2.a, 3);
-
-    #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-    /* first() const && causes ambiguous overload on GCC 4.8 (and I assume
-       4.9 as well), so disabling it there. It's not a widely needed feature
-       (const&&, *why*) so I think this is okay. */
-    const Pair<Movable, int> ca1{Movable{15}, 13};
-    const Pair<int, Movable> ca2{15, Movable{13}};
-    const Movable&& cb1 = Utility::move(ca1).first();
-    const Movable&& cb2 = Utility::move(ca2).second();
-    CORRADE_COMPARE(cb1.a, 15);
-    CORRADE_COMPARE(cb2.a, 13);
-    #endif
 }
 
 void PairTest::accessRvalueLifetimeExtension() {

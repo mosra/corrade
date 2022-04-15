@@ -286,13 +286,6 @@ template<class F, class S, class T> class Triple {
            details. */
         F first() && { return Utility::move(_first); } /**< @overload */
         constexpr const F& first() const & { return _first; } /**< @overload */
-        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-        /** @overload */
-        /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
-           well), so disabling it there. See also the corresponding test, same
-           is in Pair and Optional. */
-        constexpr const F&& first() const && { return Utility::move(_first); }
-        #endif
 
         /** @brief Second element */
         S& second() & { return _second; }
@@ -301,13 +294,6 @@ template<class F, class S, class T> class Triple {
            details. */
         S second() && { return Utility::move(_second); } /**< @overload */
         constexpr const S& second() const & { return _second; } /**< @overload */
-        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-        /** @overload */
-        /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
-           well), so disabling it there. See also the corresponding test, same
-           is in Pair and Optional. */
-        constexpr const S&& second() const && { return Utility::move(_second); }
-        #endif
 
         /** @brief Third element */
         T& third() & { return _third; }
@@ -316,13 +302,13 @@ template<class F, class S, class T> class Triple {
            details. */
         T third() && { return Utility::move(_third); } /**< @overload */
         constexpr const T& third() const & { return _third; } /**< @overload */
-        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-        /** @overload */
-        /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
-           well), so disabling it there. See also the corresponding test, same
-           is in Pair and Optional. */
-        constexpr const T&& third() const && { return Utility::move(_third); }
-        #endif
+
+        /* No const&& overloads right now. There's one theoretical use case,
+           where an API could return a `const Triple<T>`, and then if there
+           would be a `first() const&&` overload returning a `T` (and not
+           `T&&`), it could get picked over the `const T&`, solving the same
+           problem as the `first() &&` above. At the moment I don't see a
+           practical reason to return a const value, so this isn't handled. */
 
     private:
         F _first;

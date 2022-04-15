@@ -1217,21 +1217,6 @@ void TripleTest::accessRvalue() {
     CORRADE_COMPARE(b1.a, 5);
     CORRADE_COMPARE(b2.a, 3);
     CORRADE_COMPARE(b3.a, 7);
-
-    #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-    /* first() const && causes ambiguous overload on GCC 4.8 (and I assume
-       4.9 as well), so disabling it there. It's not a widely needed feature
-       (const&&, *why*) so I think this is okay. */
-    const Triple<Movable, int, int> ca1{Movable{15}, 13, 17};
-    const Triple<int, Movable, int> ca2{15, Movable{13}, 17};
-    const Triple<int, int, Movable> ca3{15, 13, Movable{17}};
-    const Movable&& cb1 = Utility::move(ca1).first();
-    const Movable&& cb2 = Utility::move(ca2).second();
-    const Movable&& cb3 = Utility::move(ca3).third();
-    CORRADE_COMPARE(cb1.a, 15);
-    CORRADE_COMPARE(cb2.a, 13);
-    CORRADE_COMPARE(cb3.a, 17);
-    #endif
 }
 
 void TripleTest::accessRvalueLifetimeExtension() {

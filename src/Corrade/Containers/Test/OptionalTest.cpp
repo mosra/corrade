@@ -965,15 +965,6 @@ void OptionalTest::access() {
 void OptionalTest::accessRvalue() {
     Movable b = *Optional<Movable>{Corrade::InPlaceInit, 42};
     CORRADE_COMPARE(b.a, 42);
-
-    #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-    /* operator*() const && causes ambiguous overload on GCC 4.8 (and I assume
-       4.9 as well), so disabling it there. It's not a widely needed feature
-       (const&&, *why*) so I think this is okay. */
-    const Optional<Movable> ca{Movable{1337}};
-    const Movable&& cb = *Utility::move(ca);
-    CORRADE_COMPARE(cb.a, 1337);
-    #endif
 }
 
 void OptionalTest::accessRvalueLifetimeExtension() {

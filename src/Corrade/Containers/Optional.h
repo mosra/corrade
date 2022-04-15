@@ -352,16 +352,12 @@ template<class T> class Optional {
             return _value;
         }
 
-        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
-        /** @overload */
-        /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
-           well), so disabling it there. See also the corresponding test, same
-           is in Pair and Triple. */
-        const T&& operator*() const && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
-            return Utility::move(_value);
-        }
-        #endif
+        /* No const&& overload right now. There's one theoretical use case,
+           where an API could return a `const Optional<T>`, and then if there
+           would be a `operator*() const&&` overload returning a `T` (and not
+           `T&&`), it could get picked over the `const T&`, solving the same
+           problem as the `operator*() &&` above. At the moment I don't see a
+           practical reason to return a const value, so this isn't handled. */
 
         /**
          * @brief Emplace a new value
