@@ -998,7 +998,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */
-        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t): _data{data}, _sizePlusFlags{sizePlusFlags} {}
+        constexpr explicit BasicStringView(T* data, std::size_t sizePlusFlags, std::nullptr_t) noexcept: _data{data}, _sizePlusFlags{sizePlusFlags} {}
 
         T* _data;
         std::size_t _sizePlusFlags;
