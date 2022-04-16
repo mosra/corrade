@@ -772,6 +772,17 @@ void StringViewTest::compareNonEquality() {
     CORRADE_VERIFY(!(hello > d));  CORRADE_VERIFY(d > hello);
     CORRADE_VERIFY(!(hello > e));  CORRADE_VERIFY(e > hello);
 
+    /* Null terminator in the middle -- it should not stop at it */
+    CORRADE_VERIFY("null\0hella"_s < "null\0hello"_s);
+    CORRADE_VERIFY("null\0hella"_s <= "null\0hello"_s);
+    CORRADE_VERIFY(!("null\0hella"_s >= "null\0hello"_s));
+    CORRADE_VERIFY(!("null\0hella"_s > "null\0hello"_s));
+
+    CORRADE_VERIFY(!("null\0helly"_s < "null\0hello"_s));
+    CORRADE_VERIFY(!("null\0helly"_s <= "null\0hello"_s));
+    CORRADE_VERIFY("null\0helly"_s >= "null\0hello"_s);
+    CORRADE_VERIFY("null\0helly"_s > "null\0hello"_s);
+
     /* Comparing with an empty view should also work */
     CORRADE_VERIFY(!(StringView{} < StringView{}));
     CORRADE_VERIFY(StringView{} < hello);
@@ -1256,6 +1267,10 @@ void StringViewTest::hasPrefix() {
     CORRADE_VERIFY("overcomplicated"_s.hasPrefix("over"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasPrefix("oven"));
 
+    /* Null terminator in the middle -- it should not stop at it */
+    CORRADE_VERIFY("hello\0world"_s.hasPrefix("hello\0w"_s));
+    CORRADE_VERIFY(!"hello\0world"_s.hasPrefix("hello\0W"_s));
+
     CORRADE_VERIFY("hello"_s.hasPrefix('h'));
     CORRADE_VERIFY(!"hello"_s.hasPrefix('e'));
 }
@@ -1273,6 +1288,10 @@ void StringViewTest::hasSuffix() {
     CORRADE_VERIFY("overcomplicated"_s.hasSuffix("complicated"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("somplicated"));
     CORRADE_VERIFY(!"overcomplicated"_s.hasSuffix("overcomplicated even more"));
+
+    /* Null terminator in the middle -- it should not stop at it */
+    CORRADE_VERIFY("hello\0world"_s.hasSuffix("o\0world"_s));
+    CORRADE_VERIFY(!"hello\0world"_s.hasSuffix("o\0World"_s));
 
     CORRADE_VERIFY("hello"_s.hasSuffix('o'));
     CORRADE_VERIFY(!"hello"_s.hasSuffix('l'));
@@ -1444,7 +1463,7 @@ void StringViewTest::trimmedNullView() {
 }
 
 void StringViewTest::find() {
-    StringView a = "hello cursed world!"_s;
+    StringView a = "hello cursed\0world!"_s;
 
     /* Right at the start */
     {
@@ -1478,7 +1497,23 @@ void StringViewTest::find() {
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
 
-    /* Should not read the null terminator either */
+    /* Should accept a null terminator in the middle */
+    } {
+        CORRADE_VERIFY(a.contains("cursed\0world"_s));
+
+        StringView found = a.find("cursed\0world"_s);
+        CORRADE_COMPARE(found, "cursed\0world"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* Should not stop comparing at it however */
+    } {
+        CORRADE_VERIFY(!a.contains("cursed\0W"_s));
+
+        StringView found = a.find("cursed\0W"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* And should not read the final null terminator either */
     } {
         CORRADE_VERIFY(!a.contains("world!\0"_s));
 
@@ -1518,11 +1553,12 @@ void StringViewTest::find() {
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
 
-    /* Should not read the null terminator either */
+    /* Should not read the null terminator character either */
     } {
-        CORRADE_VERIFY(!a.contains('\0'));
+        /* There's a \0 in the middle, skip that */
+        CORRADE_VERIFY(!a.exceptPrefix(15).contains('\0'));
 
-        StringView found = a.find('\0');
+        StringView found = a.exceptPrefix(15).find('\0');
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
     }
@@ -1738,7 +1774,7 @@ void StringViewTest::findLast() {
     /* Mostly similar to find(), except that it doesn't check contains() (which
        is internally the same algorithm as find()) */
 
-    StringView a = "hello cursed world!"_s;
+    StringView a = "hello cursed\0world!"_s;
 
     /* Right at the end */
     {
@@ -1764,7 +1800,19 @@ void StringViewTest::findLast() {
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
 
-    /* Should not read the null terminator */
+    /* Should accept a null terminator in the middle */
+    } {
+        StringView found = a.findLast("cursed\0world"_s);
+        CORRADE_COMPARE(found, "cursed\0world"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* Should not stop comparing at it however */
+    } {
+        StringView found = a.findLast("cursed\0W"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* And should not read the final null terminator either */
     } {
         StringView found = a.findLast("world!\0"_s);
         CORRADE_VERIFY(!found.data());
@@ -1794,9 +1842,10 @@ void StringViewTest::findLast() {
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
 
-    /* Should not read the null terminator either */
+    /* Should not read the null terminator character either */
     } {
-        StringView found = a.findLast('\0');
+        /* There's a \0 in the middle, skip that */
+        StringView found = a.exceptPrefix(15).findLast('\0');
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
     }
