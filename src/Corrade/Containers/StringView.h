@@ -337,7 +337,15 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * The @ref BasicStringView(std::nullptr_t) overload (which is a
          * default constructor) is additionally @cpp constexpr @ce.
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept;
+        #else
+        /* The template has to be here in order to avoid ambiguity when
+           creating a StringView from something that's not exactly
+           ArrayView<T>, leading to both the ArrayView<T> and T* constructors
+           being picked */
+        template<class U, class = typename std::enable_if<std::is_same<typename std::decay<U>::type, typename std::remove_const<T>::type*>::value || std::is_same<typename std::decay<U>::type, T*>::value>::type> /*implicit*/ BasicStringView(U&& data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
+        #endif
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -983,6 +991,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         friend CORRADE_UTILITY_EXPORT bool operator>=(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT bool operator>(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
+
+        /* Used by the char* constructor, delinlined because it calls into
+           std::strlen() */
+        explicit BasicStringView(T* data, StringViewFlags flags, std::nullptr_t) noexcept;
 
         /* Used by slice() to skip unneeded checks in the public constexpr
            constructor */

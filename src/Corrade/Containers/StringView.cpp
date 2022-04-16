@@ -39,7 +39,7 @@
 
 namespace Corrade { namespace Containers {
 
-template<class T> BasicStringView<T>::BasicStringView(T* const data, const StringViewFlags flags) noexcept: BasicStringView{data,
+template<class T> BasicStringView<T>::BasicStringView(T* const data, const StringViewFlags flags, std::nullptr_t) noexcept: BasicStringView{data,
     data ? std::strlen(data) : 0,
     flags|(data ? StringViewFlag::NullTerminated : StringViewFlag::Global)} {}
 

@@ -101,6 +101,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructConstexpr();
     template<class T, class From> void constructCharPointer();
     template<class T, class From> void constructCharArray();
+    void constructCharPointerArrayDisallowed();
     void constructPointerNull();
     void constructPointerNullSize();
     void constructPointerFlags();
@@ -114,6 +115,8 @@ struct StringViewTest: TestSuite::Tester {
 
     template<class T> void convertArrayView();
     template<class T> void convertVoidArrayView();
+    void convertConstFromArrayView();
+    void convertConstFromArray();
     void convertExternalView();
     void convertConstFromExternalView();
     void convertToConstExternalView();
@@ -197,6 +200,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructCharArray<const char, const char>,
               &StringViewTest::constructCharArray<const char, char>,
               &StringViewTest::constructCharArray<char, char>,
+              &StringViewTest::constructCharPointerArrayDisallowed,
               &StringViewTest::constructPointerNull,
               &StringViewTest::constructPointerNullSize,
               &StringViewTest::constructPointerFlags,
@@ -210,6 +214,8 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
+              &StringViewTest::convertConstFromArrayView,
+              &StringViewTest::convertConstFromArray,
               &StringViewTest::convertVoidArrayView<const char>,
               &StringViewTest::convertVoidArrayView<char>,
               &StringViewTest::convertExternalView,
@@ -379,6 +385,21 @@ template<class T, class From> void StringViewTest::constructCharArray() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, From*>::value);
 }
 
+void StringViewTest::constructCharPointerArrayDisallowed() {
+    /* To verify the crazy ambiguity-preventing SFINAE doesn't accidentally
+       allow creating a MutableStringView from a const pointer */
+
+    CORRADE_VERIFY(std::is_convertible<char*, StringView>::value);
+    CORRADE_VERIFY(std::is_convertible<char*, MutableStringView>::value);
+    CORRADE_VERIFY(std::is_convertible<const char*, StringView>::value);
+    CORRADE_VERIFY(!std::is_convertible<const char*, MutableStringView>::value);
+
+    CORRADE_VERIFY(std::is_convertible<char[], StringView>::value);
+    CORRADE_VERIFY(std::is_convertible<char[], MutableStringView>::value);
+    CORRADE_VERIFY(std::is_convertible<const char[], StringView>::value);
+    CORRADE_VERIFY(!std::is_convertible<const char[], MutableStringView>::value);
+}
+
 void StringViewTest::constructPointerNull() {
     StringView view = static_cast<const char*>(nullptr);
     CORRADE_VERIFY(!view);
@@ -538,6 +559,35 @@ template<class T> void StringViewTest::convertArrayView() {
     ArrayView<T> array2 = string;
     CORRADE_COMPARE(array2.size(), 7); /* keeps the same size */
     CORRADE_COMPARE(static_cast<const void*>(array2.data()), &data[0]);
+}
+
+void StringViewTest::convertConstFromArrayView() {
+    char data[] = "hello!";
+    ArrayView<char> array = data;
+    CORRADE_COMPARE(array.size(), 7); /* includes the null terminator */
+
+    /* Tests mainly that this doesn't lead to an ambigous overload with the
+       char* constructor. `string = array` doesn't work because there's no
+       direct coversion from ArrayView<char> to StringView, only through
+       ArrayView<const char>. */
+    StringView string{array};
+    CORRADE_COMPARE(string.size(), 7); /* keeps the same size */
+    CORRADE_COMPARE(string.flags(), StringViewFlags{});
+    CORRADE_COMPARE(static_cast<const void*>(string.data()), &data[0]);
+}
+
+void StringViewTest::convertConstFromArray() {
+    Array<char> array{Corrade::InPlaceInit, {'h', 'e', 'l', 'l'}};
+    CORRADE_COMPARE(array.size(), 4);
+
+    /* Tests mainly that this doesn't lead to an ambigous overload with the
+       char* constructor. `string = array` doesn't work because there's no
+       direct coversion from Array<char> to StringView, only through
+       ArrayView<const char>. */
+    StringView string{array};
+    CORRADE_COMPARE(string.size(), 4); /* keeps the same size */
+    CORRADE_COMPARE(string.flags(), StringViewFlags{});
+    CORRADE_COMPARE(static_cast<const void*>(string.data()), &array[0]);
 }
 
 template<class T> void StringViewTest::convertVoidArrayView() {
