@@ -104,6 +104,7 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPlugin();
     void dynamicPluginLoadAndInstantiate();
     void dynamicPluginFilePath();
+    void dynamicPluginFilePathRelative();
     void dynamicPluginFilePathLoadAndInstantiate();
     void dynamicPluginFilePathConflictsWithLoadedPlugin();
     void dynamicPluginFilePathRemoveOnFail();
@@ -191,6 +192,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPlugin,
               &ManagerTest::dynamicPluginLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePath,
+              &ManagerTest::dynamicPluginFilePathRelative,
               &ManagerTest::dynamicPluginFilePathLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin,
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
@@ -721,6 +723,16 @@ void ManagerTest::dynamicPluginFilePath() {
     CORRADE_VERIFY(animal);
     CORRADE_COMPARE(animal->name(), "Doug");
     CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+}
+
+void ManagerTest::dynamicPluginFilePathRelative() {
+    /** @todo test once Path::setCurrent() exists -- on Windows this would work
+        even without Path::currentDirectory() prepended, on Linux it would work
+        if the path would contain a slash somewhere (so ./Dog.so works but
+        Dog.so not) */
+    /** @todo also, once setCurrent() exists, test also graceful handling in
+        case CWD gets deleted */
+    CORRADE_SKIP("Not sure how to test this.");
 }
 
 void ManagerTest::dynamicPluginFilePathLoadAndInstantiate() {

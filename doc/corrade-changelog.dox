@@ -356,6 +356,11 @@ namespace Corrade {
 -   Calling @ref PluginManager::AbstractManager::setPreferredPlugins() with a
     plugin of given alias being instantiated led to an internal assertion when
     the plugin got later unloaded.
+-   Fixed @ref PluginManager::AbstractManager::load() and
+    @relativeref{PluginManager::AbstractManager,loadAndInstantiate()} to
+    properly interpret non-absolute plugin filenames as relative to current
+    working directory instead of passing them directly to OS APIs, which then
+    attempt to load them from OS-specific locations and fail
 -   @ref TestSuite::Compare::SortedContainer no longer modifies order of
     referenced elements when non-owning views are passed to it
 

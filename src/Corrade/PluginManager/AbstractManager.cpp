@@ -567,7 +567,21 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
            plugin of this name, replace it. */
         Containers::Pointer<Plugin> data{new Plugin{name,
             _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}}};
-        const LoadState state = loadInternal(*data, plugin);
+        /* Explicitly join the filename with current working directory, since
+           that's how the metadata were loaded above. Without that, the OS APIs
+           would search in LD_LIBRARY_PATH and C:/Windows/system32 and
+           elsewhere, with current directory being considered either quite late
+           (step 5 on Windows https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#standard-search-order-for-desktop-applications)
+           or not at all (with dlopen()). This should also prevent some random
+           other plugin binary being picked up by accident.
+
+           On the other hand, the implicit behavior wouldn't make sense anyway
+           because the metadata are loaded from a completely different
+           location. */
+        /** @todo this assumes currentDirectory() doesn't fail, which it might
+            if it gets deleted underneath a running program -- once Utility::Path::isAbsolute() exists, use that to query it only when
+            needed and then fail gracefully in that case */
+        const LoadState state = loadInternal(*data, Utility::Path::join(*Utility::Path::currentDirectory(), plugin));
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
                checked above that it's *not* loaded) */
