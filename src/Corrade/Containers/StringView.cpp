@@ -311,7 +311,7 @@ template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) co
     const std::size_t prefixSize = prefix.size();
     if(size() < prefixSize) return false;
 
-    return std::strncmp(_data, prefix._data, prefixSize) == 0;
+    return std::memcmp(_data, prefix._data, prefixSize) == 0;
 }
 
 template<class T> bool BasicStringView<T>::hasPrefix(const char prefix) const {
@@ -324,7 +324,7 @@ template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) co
     const std::size_t suffixSize = suffix.size();
     if(size < suffixSize) return false;
 
-    return std::strncmp(_data + size - suffixSize, suffix._data, suffixSize) == 0;
+    return std::memcmp(_data + size - suffixSize, suffix._data, suffixSize) == 0;
 }
 
 template<class T> bool BasicStringView<T>::hasSuffix(const char suffix) const {
