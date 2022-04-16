@@ -99,7 +99,8 @@ struct StringViewTest: TestSuite::Tester {
     void constructDefaultConstexpr();
     template<class T> void construct();
     void constructConstexpr();
-    template<class T> void constructPointer();
+    template<class T, class From> void constructCharPointer();
+    template<class T, class From> void constructCharArray();
     void constructPointerNull();
     void constructPointerNullSize();
     void constructPointerFlags();
@@ -190,8 +191,12 @@ StringViewTest::StringViewTest() {
               &StringViewTest::construct<const char>,
               &StringViewTest::construct<char>,
               &StringViewTest::constructConstexpr,
-              &StringViewTest::constructPointer<const char>,
-              &StringViewTest::constructPointer<char>,
+              &StringViewTest::constructCharPointer<const char, const char>,
+              &StringViewTest::constructCharPointer<const char, char>,
+              &StringViewTest::constructCharPointer<char, char>,
+              &StringViewTest::constructCharArray<const char, const char>,
+              &StringViewTest::constructCharArray<const char, char>,
+              &StringViewTest::constructCharArray<char, char>,
               &StringViewTest::constructPointerNull,
               &StringViewTest::constructPointerNullSize,
               &StringViewTest::constructPointerFlags,
@@ -343,10 +348,27 @@ void StringViewTest::constructConstexpr() {
     }
 }
 
-template<class T> void StringViewTest::constructPointer() {
-    setTestCaseTemplateName(NameFor<T>::name());
+template<class T, class From> void StringViewTest::constructCharPointer() {
+    setTestCaseTemplateName({NameFor<T>::name(), NameFor<From>::name()});
 
-    char string[] = "hello\0world!";
+    From string[] = "hello\0world!";
+    From* pointer = string;
+    const BasicStringView<T> view = pointer;
+    CORRADE_VERIFY(view);
+    CORRADE_VERIFY(!view.isEmpty());
+    CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
+    CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, From*>::value);
+}
+
+template<class T, class From> void StringViewTest::constructCharArray() {
+    setTestCaseTemplateName({NameFor<T>::name(), NameFor<From>::name()});
+
+    /* In all cases it should be interpreted the same as with a pointer, never
+       with the array being taken as an ArrayView */
+    From string[] = "hello\0world!";
     const BasicStringView<T> view = string;
     CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
@@ -354,7 +376,7 @@ template<class T> void StringViewTest::constructPointer() {
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, T*>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStringView<T>, From*>::value);
 }
 
 void StringViewTest::constructPointerNull() {
@@ -388,7 +410,7 @@ void StringViewTest::constructPointerNullSize() {
 
 void StringViewTest::constructPointerFlags() {
     char string[] = "hello\0world!";
-    StringView view{string, StringViewFlag::Global};
+    StringView view = {string, StringViewFlag::Global};
     CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
