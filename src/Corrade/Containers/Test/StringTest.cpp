@@ -1072,7 +1072,7 @@ void StringTest::convertArray() {
     CORRADE_VERIFY(!a.isSmall());
 
     Array<char> array = std::move(a);
-    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "Allocated hello\0for a verbose world"_s);
+    CORRADE_COMPARE(StringView{array}, "Allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
     /* The original allocation includes a null terminator, it should be here as
        well */
@@ -1091,7 +1091,7 @@ void StringTest::convertArraySmall() {
     CORRADE_VERIFY(a.isSmall());
 
     Array<char> array = std::move(a);
-    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "this\0world"_s);
+    CORRADE_COMPARE(StringView{array}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
     /* The newly allocated array should include the null terminator */
     CORRADE_COMPARE(array[array.size()], '\0');
@@ -1107,7 +1107,7 @@ void StringTest::convertArraySmall() {
 void StringTest::convertArraySmallAllocatedInit() {
     String a{AllocatedInit, "this\0world"_s};
     Array<char> array = std::move(a);
-    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "this\0world"_s);
+    CORRADE_COMPARE(StringView{array}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
 
     CORRADE_VERIFY(a.isSmall());
@@ -1122,7 +1122,7 @@ void StringTest::convertArrayCustomDeleter() {
 
     String a{data, Containers::arraySize(data) - 1, deleter};
     Array<char> array = std::move(a);
-    CORRADE_COMPARE(StringView{ArrayView<const char>(array)}, "Statically allocated hello\0for a verbose world"_s);
+    CORRADE_COMPARE(StringView{array}, "Statically allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), deleter);
 
     /* State should be the same as with release(), so of a default-constructed

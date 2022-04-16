@@ -2175,7 +2175,7 @@ void PathTest::readNonSeekable() {
     CORRADE_VERIFY(data->deleter());
     /* But it shouldn't contain null bytes anywhere (which would point to
        issues with growing the array) */
-    CORRADE_COMPARE_AS(Containers::StringView{Containers::ArrayView<const char>(*data)}, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE_AS(Containers::StringView{*data}, "\0"_s, TestSuite::Compare::StringNotContains);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
