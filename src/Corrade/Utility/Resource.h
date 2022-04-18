@@ -124,6 +124,22 @@ compiled into the same executable. But apart from that, you'd need the name
 only if you deal with @ref Utility-Resource-usage-static "resources in static libraries"
 as explained below.
 
+@m_class{m-block m-danger}
+
+@par Resources and CMake targets in different directories
+    Due to limitations of the CMake @cmake add_custom_command() @ce command,
+    it's important to have the @cmake corrade_add_resource() @ce call in the
+    same directory as the @cmake add_executable() @ce or
+    @cmake add_library() @ce consuming its output. Otherwise CMake will attempt
+    to find the to-be-generated file already during a configure step and fail.
+@par
+    If you have the `resources.conf` file in a different directory, you can
+    reference it via an absolute or relative path, such as
+@par
+    @code{.cmake}
+    corrade_add_resource(MyGame_RESOURCES Data/resources.conf)
+    @endcode
+
 @subsection Utility-Resource-compilation-manual Compiling the resources manually
 
 If you're not using CMake, you can execute the @ref corrade-rc "corrade-rc"
