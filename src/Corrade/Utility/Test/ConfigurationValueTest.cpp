@@ -27,6 +27,7 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
@@ -77,6 +78,7 @@ struct ConfigurationValueTest: TestSuite::Tester {
 
     void stlString();
     void stringView();
+    void stringViewArray();
     void string();
     void unsignedInteger();
     void signedInteger();
@@ -96,6 +98,7 @@ struct ConfigurationValueTest: TestSuite::Tester {
 ConfigurationValueTest::ConfigurationValueTest() {
     addTests({&ConfigurationValueTest::stlString,
               &ConfigurationValueTest::stringView,
+              &ConfigurationValueTest::stringViewArray,
               &ConfigurationValueTest::string,
               &ConfigurationValueTest::unsignedInteger,
               &ConfigurationValueTest::signedInteger,
@@ -147,6 +150,26 @@ void ConfigurationValueTest::stringView() {
 
     /* Non-existent value is an empty view */
     CORRADE_COMPARE(c.value<Containers::StringView>("nonexistent"), ""_s);
+}
+
+void ConfigurationValueTest::stringViewArray() {
+    using namespace Containers::Literals;
+
+    /* The returned views shouldn't point to some garbage temporaries */
+
+    Configuration c;
+    c.addValue("value", "hello");
+    c.addValue("value", "world");
+    /* Have at least one long enough to bypass SSO */
+    c.addValue("value", "this is many values set for a single key");
+    CORRADE_COMPARE_AS(c.values<Containers::StringView>("value"),
+        (std::vector<Containers::StringView>{"hello", "world", "this is many values set for a single key"}),
+        TestSuite::Compare::Container);
+
+    /* Non-existent value is an empty vector */
+    CORRADE_COMPARE_AS(c.values<Containers::StringView>("values"),
+        (std::vector<Containers::StringView>{}),
+        TestSuite::Compare::Container);
 }
 
 void ConfigurationValueTest::string() {
