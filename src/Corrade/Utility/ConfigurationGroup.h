@@ -473,7 +473,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
 
         /* Returns nullptr in case the key is not found */
         const std::string* valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
-        std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
+        std::vector<const std::string*> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
         bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
         void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
 
@@ -673,7 +673,12 @@ template<> inline std::string ConfigurationGroup::value(const std::string& key, 
     return value ? *value : std::string{};
 }
 template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
-    return valuesInternal(key, flags);
+    std::vector<const std::string*> stringValues = valuesInternal(key, flags);
+    std::vector<std::string> values;
+    values.reserve(stringValues.size());
+    for(const std::string* i: stringValues)
+        values.push_back(*i);
+    return values;
 }
 #endif
 
@@ -686,11 +691,11 @@ template<class T> inline T ConfigurationGroup::value(const std::string& key, con
 }
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
-    std::vector<std::string> stringValues = valuesInternal(key, flags);
+    std::vector<const std::string*> stringValues = valuesInternal(key, flags);
     std::vector<T> values;
     values.reserve(stringValues.size());
-    for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
-        values.push_back(ConfigurationValue<T>::fromString(*it, flags));
+    for(const std::string* i: stringValues)
+        values.push_back(ConfigurationValue<T>::fromString(*i, flags));
 
     return values;
 }

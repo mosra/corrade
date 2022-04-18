@@ -309,11 +309,11 @@ const std::string* ConfigurationGroup::valueInternal(const std::string& key, con
     return it != _values.end() ? &it->value : nullptr;
 }
 
-std::vector<std::string> ConfigurationGroup::valuesInternal(const std::string& key, ConfigurationValueFlags) const {
-    std::vector<std::string> found;
+std::vector<const std::string*> ConfigurationGroup::valuesInternal(const std::string& key, ConfigurationValueFlags) const {
+    std::vector<const std::string*> found;
 
     for(const Value& value: _values)
-        if(value.key == key) found.push_back(value.value);
+        if(value.key == key) found.push_back(&value.value);
 
     return found;
 }
