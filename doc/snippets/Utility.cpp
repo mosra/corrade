@@ -939,6 +939,21 @@ DOXYGEN_ELLIPSIS()
 }
 
 {
+Utility::JsonWriter gltf;
+/* [JsonWriter-usage-write-array] */
+struct Node {
+    DOXYGEN_ELLIPSIS()
+    float matrix[16];
+    Containers::Array<unsigned> children;
+};
+DOXYGEN_ELLIPSIS(Node node;)
+
+gltf.writeKey("matrix").writeArray(node.matrix, 4)
+    .writeKey("children").writeArray(node.children);
+/* [JsonWriter-usage-write-array] */
+}
+
+{
 struct Mesh {
     Containers::StringView name;
     int mode;

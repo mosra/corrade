@@ -33,6 +33,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::writeValue() */
 #include "Corrade/Utility/Macros.h" /* CORRADE_FALLTHROUGH */
 #include "Corrade/Utility/Path.h"
@@ -74,6 +75,9 @@ struct JsonWriter::State {
     Containers::ArrayView<const char> indentation;
     /* Contains a colon or comma and a following space if needed */
     Containers::ArrayView<const char> colonAndSpace, commaAndSpace;
+    /* Comma and a following space if needed in case of arrays written by
+       writeArray() */
+    Containers::ArrayView<const char> arrayCommaAndSpace;
     /* Contains the final newline at document end if needed */
     Containers::ArrayView<const char> finalNewlineNull;
 
@@ -123,6 +127,7 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, c
             i = ' ';
 
         _state->commaAndSpace = {CommaAndSpace, 1};
+        _state->arrayCommaAndSpace = {CommaAndSpace, options & Option::TypographicalSpace ? 2u : 1u};
 
         /* If there's initial indentation, assume the output will be put into
            other JSON writers and thus a newline at the end isn't desired */
@@ -132,6 +137,7 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, c
             _state->finalNewlineNull = {FinalNewline + 1, 1};
     } else {
         _state->commaAndSpace = {CommaAndSpace, options & Option::TypographicalSpace ? 2u : 1u};
+        _state->arrayCommaAndSpace = {CommaAndSpace, options & Option::TypographicalSpace ? 2u : 1u};
         _state->finalNewlineNull = {FinalNewline + 1, 1};
     }
 
@@ -485,6 +491,234 @@ JsonWriter& JsonWriter::write(const Containers::StringView value) {
     finalizeValue();
 
     return *this;
+}
+
+void JsonWriter::initializeValueArrayInternal(const std::size_t valueCount, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], );
+
+    /* Comma, newline and indent, array opening brace */
+    writeCommaNewlineIndentInternal();
+    arrayAppend(state.out, '[');
+
+    /* If we have values and are told to wrap, indent next level further; mark
+       this as an array */
+    if(valueCount && wrapAfter)
+        if(arrayAppend(state.levels, InPlaceInit, state.levels.back().first() + state.indentation.size(), 0u).first() > state.whitespace.size())
+            arrayAppend(state.whitespace, state.indentation);
+}
+
+void JsonWriter::writeArrayCommaNewlineIndentInternal(const std::size_t i, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+
+    /* Newline and indent if we're wrapping and either at the beginning or
+       after a desired value count */
+    if(wrapAfter && i % wrapAfter == 0) {
+        /* Comma after previous value (and potential space, if not wrapping) */
+        if(i) arrayAppend(state.out, state.commaAndSpace);
+
+        /* And a newline and indent */
+        /** @todo F.F.S. what's up with the crazy casts */
+        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+
+    /* Otherwise just a comma (and potential space) after */
+    } else if(i) arrayAppend(state.out, state.arrayCommaAndSpace);
+}
+
+void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    /* If we have values and are told to wrap, one nesting level back */
+    if(valueCount && wrapAfter) {
+        /* There's at least one level and it's an array with uncounted items,
+           as done in the initializeValueArrayInternal() counterpart */
+        CORRADE_INTERNAL_ASSERT(state.levels.back().second() == 0);
+        arrayRemoveSuffix(state.levels, 1);
+
+        /* Add a newline and an indent */
+        /** @todo F.F.S. what's up with the crazy casts */
+        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+    }
+
+    /* Array closing brace */
+    arrayAppend(state.out, ']');
+
+    /* Decide what to expect next or finalize the document if the top level
+       value got written */
+    finalizeValue();
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const float> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        const float value = values[i];
+        CORRADE_ASSERT(!std::isnan(value) && !std::isinf(value),
+            "Utility::JsonWriter::writeArray(): invalid floating-point value" << value, *this);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", value)});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<float> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const double> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        const float value = values[i];
+        CORRADE_ASSERT(!std::isnan(value) && !std::isinf(value),
+            "Utility::JsonWriter::writeArray(): invalid floating-point value" << value, *this);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", value)});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<double> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::uint32_t> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", values[i])});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::uint32_t> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::int32_t> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", values[i])});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::int32_t> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long long> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        const unsigned long long value = values[i];
+        CORRADE_ASSERT(value < 1ull << 52,
+            "Utility::JsonWriter::writeArray(): too large integer value" << value, *this);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", value)});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<unsigned long long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayCast<const typename std::conditional<sizeof(unsigned long) == 8, unsigned long long, unsigned int>::type>(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<unsigned long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long long> values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        const long long value = values[i];
+        CORRADE_ASSERT(value >= -(1ll << 52) && value < (1ll << 52),
+            "Utility::JsonWriter::writeArray(): too small or large integer value" << value, *this);
+
+        /* Should be sufficiently large */
+        /** @todo use the direct string conversion APIs once they exist */
+        char buffer[127];
+        arrayAppend(state.out, {buffer, formatInto(buffer, "{}", value)});
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<long long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayCast<const typename std::conditional<sizeof(long) == 8, long long, int>::type>(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<long> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
 JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {

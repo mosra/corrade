@@ -29,6 +29,7 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/ScopeGuard.h"
+#include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -57,6 +58,9 @@ struct JsonWriterTest: TestSuite::Tester {
         template<class T> void singleNumber();
         void singleString();
         void singleRawJson();
+
+        template<class T> void singleEmptyNumberArray();
+        template<class T> void singleNumberArray();
 
         void simpleObject();
         void simpleArray();
@@ -111,6 +115,45 @@ const struct {
     {"", {}, 0, 0, ""},
     {"wrap, typographical space, indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 0, "\n"},
     {"wrap, typographical space, indent, initial indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, ""}
+};
+
+const struct {
+    const char* name;
+    JsonWriter::Options options;
+    std::uint32_t indentation, initialIndentation, wrapAfter;
+    Containers::StringView expectedEmpty, expected;
+} SingleArrayValueData[]{
+    {"", {}, 0, 0, 0,
+        R"([])",
+        R"([1,2,3,4])"},
+    {"no wrapping, non-zero indent, wrap after 1", {}, 8, 56, 1,
+        /* Wrap after and indent should get ignored */
+        R"([])",
+        R"([1,2,3,4])"},
+    {"no wrapping, typographical space, non-zero indent, wrap after 1", JsonWriter::Option::TypographicalSpace, 8, 56, 1,
+        /* Wrap after and indent should get ignored */
+        R"([])",
+        R"([1, 2, 3, 4])"},
+    {"four-space indent, wrap after 0", JsonWriter::Option::Wrap, 4, 0, 0,
+        /* All on the same line so no wrapping */
+        R"([]
+)",
+        R"([1,2,3,4]
+)"},
+    {"four-space indent, wrap after 2", JsonWriter::Option::Wrap, 4, 0, 2,
+        R"([]
+)",
+        R"([
+    1,2,
+    3,4
+]
+)"},
+    {"nine-space initial indent, two-space indent and a typographical space, wrap after 2", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9, 2,
+        R"([])",  /* no final newline */
+        R"([
+           1, 2,
+           3, 4
+         ])"} /* no final newline */
 };
 
 const struct {
@@ -195,14 +238,14 @@ const struct {
     const char* expected;
 } NestedData[]{
     {"", {}, 0, 0,
-        R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"braces":{"again":{}}},-15.75,"bye!",[]])"},
+        R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"matrixAsArray":[0,1,2,3],"braces":{"again":{}}},-15.75,"bye!",[]])"},
     {"non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
-        R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"braces":{"again":{}}},-15.75,"bye!",[]])"},
+        R"([{"hello":5,"yes":true,"matrix":[[0,1],[2,3]],"matrixAsArray":[0,1,2,3],"braces":{"again":{}}},-15.75,"bye!",[]])"},
     {"typographical space, non-zero indent",
         JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
-        R"([{"hello": 5, "yes": true, "matrix": [[0, 1], [2, 3]], "braces": {"again": {}}}, -15.75, "bye!", []])"},
+        R"([{"hello": 5, "yes": true, "matrix": [[0, 1], [2, 3]], "matrixAsArray": [0, 1, 2, 3], "braces": {"again": {}}}, -15.75, "bye!", []])"},
     {"four-space indent",
         JsonWriter::Option::Wrap, 4, 0,
         R"([
@@ -218,6 +261,10 @@ const struct {
                 2,
                 3
             ]
+        ],
+        "matrixAsArray":[
+            0,1,
+            2,3
         ],
         "braces":{
             "again":{}
@@ -243,6 +290,10 @@ const struct {
                  2,
                  3
                ]
+             ],
+             "matrixAsArray": [
+               0, 1,
+               2, 3
              ],
              "braces": {
                "again": {}
@@ -307,6 +358,25 @@ JsonWriterTest::JsonWriterTest() {
                        &JsonWriterTest::singleString,
                        &JsonWriterTest::singleRawJson},
         Containers::arraySize(SingleValueData));
+
+    addInstancedTests<JsonWriterTest>({
+        &JsonWriterTest::singleEmptyNumberArray<float>,
+        &JsonWriterTest::singleEmptyNumberArray<double>,
+        &JsonWriterTest::singleEmptyNumberArray<std::uint32_t>,
+        &JsonWriterTest::singleEmptyNumberArray<std::int32_t>,
+        &JsonWriterTest::singleEmptyNumberArray<std::uint64_t>,
+        &JsonWriterTest::singleEmptyNumberArray<std::int64_t>,
+        &JsonWriterTest::singleEmptyNumberArray<TheOtherUnsignedLongType>,
+        &JsonWriterTest::singleEmptyNumberArray<TheOtherLongType>,
+        &JsonWriterTest::singleNumberArray<float>,
+        &JsonWriterTest::singleNumberArray<double>,
+        &JsonWriterTest::singleNumberArray<std::uint32_t>,
+        &JsonWriterTest::singleNumberArray<std::int32_t>,
+        &JsonWriterTest::singleNumberArray<std::uint64_t>,
+        &JsonWriterTest::singleNumberArray<std::int64_t>,
+        &JsonWriterTest::singleNumberArray<TheOtherUnsignedLongType>,
+        &JsonWriterTest::singleNumberArray<TheOtherLongType>,
+    }, Containers::arraySize(SingleArrayValueData));
 
     addInstancedTests({&JsonWriterTest::simpleObject},
         Containers::arraySize(SimpleObjectData));
@@ -514,6 +584,32 @@ void JsonWriterTest::singleRawJson() {
     CORRADE_COMPARE(json.toString(), expected);
 }
 
+template<class T> void JsonWriterTest::singleEmptyNumberArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+    setTestCaseTemplateName(NameTraits<T>::name());
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.writeArray(Containers::StridedArrayView1D<const T>{}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expectedEmpty.size());
+    CORRADE_COMPARE(json.toString(), data.expectedEmpty);
+}
+
+template<class T> void JsonWriterTest::singleNumberArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+    setTestCaseTemplateName(NameTraits<T>::name());
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.writeArray({T(1), T(2), T(3), T(4)}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expected.size());
+    CORRADE_COMPARE(json.toString(), data.expected);
+}
+
 void JsonWriterTest::simpleObject() {
     auto&& data = SimpleObjectData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -600,6 +696,7 @@ void JsonWriterTest::nested() {
     CORRADE_COMPARE(json.currentArraySize(), 2);
 
     json            .endArray()
+                .writeKey("matrixAsArray").writeArray({0, 1, 2, 3}, 2)
                 .writeKey("braces")
                     .beginObject()
                         .writeKey("again").beginObject().endObject()
@@ -864,9 +961,11 @@ void JsonWriterTest::valueButObjectKeyExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
+        .writeArray({5})
         .writeJson("false");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
 
@@ -910,9 +1009,11 @@ void JsonWriterTest::valueButDocumentEndExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
+        .writeArray({5})
         .writeJson("/* HI JSON CAN YOU COMMENT */");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
         "Utility::JsonWriter::writeJson(): expected document end\n");
 }
 
@@ -997,7 +1098,11 @@ void JsonWriterTest::invalidFloat() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.floatValue);
-    CORRADE_COMPARE(out.str(), formatString("Utility::JsonWriter::write(): invalid floating-point value {}\n", data.message));
+    json.writeArray({3.5f, 7.6f, data.floatValue});
+    CORRADE_COMPARE(out.str(), formatString(
+        "Utility::JsonWriter::write(): invalid floating-point value {0}\n"
+        "Utility::JsonWriter::writeArray(): invalid floating-point value {0}\n",
+        data.message));
 }
 
 void JsonWriterTest::invalidDouble() {
@@ -1013,7 +1118,11 @@ void JsonWriterTest::invalidDouble() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.doubleValue);
-    CORRADE_COMPARE(out.str(), formatString("Utility::JsonWriter::write(): invalid floating-point value {}\n", data.message));
+    json.writeArray({3.5, 7.6, data.doubleValue});
+    CORRADE_COMPARE(out.str(), formatString(
+        "Utility::JsonWriter::write(): invalid floating-point value {0}\n"
+        "Utility::JsonWriter::writeArray(): invalid floating-point value {0}\n",
+        data.message));
 }
 
 void JsonWriterTest::invalidUnsignedLong() {
@@ -1026,7 +1135,10 @@ void JsonWriterTest::invalidUnsignedLong() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(4503599627370496ull);
-    CORRADE_COMPARE(out.str(), formatString("Utility::JsonWriter::write(): too large integer value 4503599627370496\n"));
+    json.writeArray({3ull, 7ull, 4503599627370496ull});
+    CORRADE_COMPARE(out.str(), formatString(
+        "Utility::JsonWriter::write(): too large integer value 4503599627370496\n"
+        "Utility::JsonWriter::writeArray(): too large integer value 4503599627370496\n"));
 }
 
 void JsonWriterTest::invalidLong() {
@@ -1042,7 +1154,12 @@ void JsonWriterTest::invalidLong() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.value);
-    CORRADE_COMPARE(out.str(), formatString("Utility::JsonWriter::write(): too small or large integer value {}\n", data.message));
+    /* FFS, C and C++ types!! */
+    json.writeArray({std::int64_t(3), std::int64_t(-7), data.value});
+    CORRADE_COMPARE(out.str(), formatString(
+        "Utility::JsonWriter::write(): too small or large integer value {0}\n"
+        "Utility::JsonWriter::writeArray(): too small or large integer value {0}\n",
+        data.message));
 }
 
 void JsonWriterTest::constructCopy() {
