@@ -286,6 +286,9 @@ const struct {
         "4503599627370496"},
 };
 
+typedef typename std::conditional<std::is_same<std::uint64_t, unsigned long>::value, unsigned long long, unsigned long>::type TheOtherUnsignedLongType;
+typedef typename std::conditional<std::is_same<std::int64_t, long>::value, long long, long>::type TheOtherLongType;
+
 JsonWriterTest::JsonWriterTest() {
     addInstancedTests({&JsonWriterTest::emptyState,
 
@@ -299,6 +302,8 @@ JsonWriterTest::JsonWriterTest() {
                        &JsonWriterTest::singleNumber<std::int32_t>,
                        &JsonWriterTest::singleNumber<std::uint64_t>,
                        &JsonWriterTest::singleNumber<std::int64_t>,
+                       &JsonWriterTest::singleNumber<TheOtherUnsignedLongType>,
+                       &JsonWriterTest::singleNumber<TheOtherLongType>,
                        &JsonWriterTest::singleString,
                        &JsonWriterTest::singleRawJson},
         Containers::arraySize(SingleValueData));
@@ -455,6 +460,8 @@ _c(std::uint32_t)
 _c(std::int32_t)
 _c(std::uint64_t)
 _c(std::int64_t)
+_c(TheOtherUnsignedLongType)
+_c(TheOtherLongType)
 #undef _c
 
 template<class T> void JsonWriterTest::singleNumber() {
