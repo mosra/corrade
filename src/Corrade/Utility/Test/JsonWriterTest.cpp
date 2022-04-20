@@ -88,7 +88,6 @@ struct JsonWriterTest: TestSuite::Tester {
         void objectKeyButValueExpected();
         void objectKeyButDocumentEndExpected();
         void valueButDocumentEndExpected();
-        void rawJsonButDocumentEndExpected();
         void toStringOrFileNoValue();
         void toStringOrFileIncompleteObject();
         void toStringOrFileIncompleteObjectValue();
@@ -110,8 +109,8 @@ const struct {
     const char* finalNewline;
 } SingleValueData[]{
     {"", {}, 0, 0, ""},
-    {"wrap & indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 0, "\n"},
-    {"wrap & indent & initial indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, ""}
+    {"wrap, typographical space, indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 0, "\n"},
+    {"wrap, typographical space, indent, initial indent", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 4, 56, ""}
 };
 
 const struct {
@@ -125,7 +124,7 @@ const struct {
     {"no wrapping, non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
         R"({"key":true,"anotherObject":{},"number":-35.765,"nestedArray":[],"that":null})"},
-    {"typographical space, non-zero indent",
+    {"no wrapping, typographical space, non-zero indent",
         JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
         R"({"key": true, "anotherObject": {}, "number": -35.765, "nestedArray": [], "that": null})"},
@@ -158,10 +157,10 @@ const struct {
 } SimpleArrayData[]{
     {"", {}, 0, 0,
         R"([true,"hello",{},-35.765,[],null])"},
-    {"non-zero indent", {}, 8, 56,
+    {"no wrapping, non-zero indent", {}, 8, 56,
         /* Indent should get ignored */
         R"([true,"hello",{},-35.765,[],null])"},
-    {"typographical space, non-zero indent",
+    {"no wrapping, typographical space, non-zero indent",
         JsonWriter::Option::TypographicalSpace, 7, 134,
         /* Indent should get ignored */
         R"([true, "hello", {}, -35.765, [], null])"},
@@ -340,7 +339,6 @@ JsonWriterTest::JsonWriterTest() {
               &JsonWriterTest::objectKeyButValueExpected,
               &JsonWriterTest::objectKeyButDocumentEndExpected,
               &JsonWriterTest::valueButDocumentEndExpected,
-              &JsonWriterTest::rawJsonButDocumentEndExpected,
               &JsonWriterTest::toStringOrFileNoValue,
               &JsonWriterTest::toStringOrFileIncompleteObject,
               &JsonWriterTest::toStringOrFileIncompleteObjectValue,
@@ -858,8 +856,11 @@ void JsonWriterTest::valueButObjectKeyExpected() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json.write("hello");
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::write(): expected an object key or object end\n");
+    json.write("hello")
+        .writeJson("false");
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonWriter::write(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
 
 void JsonWriterTest::objectKeyButValueExpected() {
@@ -901,22 +902,11 @@ void JsonWriterTest::valueButDocumentEndExpected() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json.write("hello");
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::write(): expected document end\n");
-}
-
-void JsonWriterTest::rawJsonButDocumentEndExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
-
-    JsonWriter json;
-    json.write("hi");
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    json.writeJson("/* HI JSON CAN YOU COMMENT */");
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::writeJson(): expected document end\n");
+    json.write("hello")
+        .writeJson("/* HI JSON CAN YOU COMMENT */");
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonWriter::write(): expected document end\n"
+        "Utility::JsonWriter::writeJson(): expected document end\n");
 }
 
 void JsonWriterTest::toStringOrFileNoValue() {
