@@ -68,8 +68,6 @@ constexpr const char* FinalNewline = "\n";
 }
 
 struct JsonWriter::State {
-    Expecting expecting;
-
     /* Contains spaces needed for a single indetation level */
     /** @todo use a StringView once growable */
     Containers::ArrayView<const char> indentation;
@@ -93,6 +91,8 @@ struct JsonWriter::State {
        item count if an array, ~size_t{} otherwise>). If it contains just a
        single value, we're at the top level. */
     Containers::Array<Containers::Pair<std::size_t, std::size_t>> levels;
+
+    Expecting expecting;
     /* Indicates that a first value at given level is being written, thus no
        comma before. Gets reset in beginObject(), beginArray() and
        writeObjectKey(), gets set right after a value gets written. */
