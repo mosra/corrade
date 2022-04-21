@@ -92,7 +92,7 @@ struct JsonWriter::State {
        single value, we're at the top level. */
     Containers::Array<Containers::Pair<std::size_t, std::size_t>> levels;
 
-    Expecting expecting;
+    Expecting expecting = Expecting::Value;
     /* Indicates that a first value at given level is being written, thus no
        comma before. Gets reset in beginObject(), beginArray() and
        writeObjectKey(), gets set right after a value gets written. */
@@ -107,8 +107,6 @@ JsonWriter::JsonWriter(const Options options, const std::uint32_t indentation, c
 {
     CORRADE_ASSERT(indentation <= 8,
         "Utility::JsonWriter: indentation can be at most 8 characters, got" << indentation, );
-
-    _state->expecting = Expecting::Value;
 
     /* Initialize the indentation and after-colon spacing strings */
     _state->indentation = {EightSpaces, options & Option::Wrap ? indentation : 0};
