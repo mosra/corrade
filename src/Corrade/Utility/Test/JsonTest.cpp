@@ -78,9 +78,7 @@ struct JsonTest: TestSuite::Tester {
         void parseUnsignedLong();
         void parseUnsignedLongs();
         void parseLong();
-        #ifndef CORRADE_TARGET_32BIT
         void parseLongs();
-        #endif
         void parseSize();
         void parseSizes();
         void parseString();
@@ -126,10 +124,8 @@ struct JsonTest: TestSuite::Tester {
         void asIntArrayNotAllSame();
         void asUnsignedLongArray();
         void asUnsignedLongArrayNotAllSame();
-        #ifndef CORRADE_TARGET_32BIT
         void asLongArray();
         void asLongArrayNotAllSame();
-        #endif
         void asSizeArray();
         void asSizeArrayNotAllSame();
         void asTypeArrayNotArray();
@@ -415,11 +411,9 @@ const struct {
     {"unsigned longs", &Json::parseUnsignedLongs, 1,
         18, 13, 24, 21 - 2,
         JsonToken::ParsedType::UnsignedLong, "35"},
-    #ifndef CORRADE_TARGET_32BIT
     {"longs", &Json::parseLongs, 1,
         18, 13, 24, 21 - 2,
         JsonToken::ParsedType::Long, "35"},
-    #endif
     {"sizes", &Json::parseSizes, 1,
         18, 13, 24, 21 - 2,
         JsonToken::ParsedType::Size, "35"},
@@ -461,11 +455,9 @@ const struct {
     {"unsigned long literal too long", &Json::parseUnsignedLongs,
         "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678",
         "parseUnsignedLongs(): too long numeric literal 12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"},
-    #ifndef CORRADE_TARGET_32BIT
     {"long literal too long", &Json::parseLongs,
         "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678",
         "parseLongs(): too long numeric literal 12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"},
-    #endif
     {"invalid double literal", &Json::parseDoubles,
         "78.5x",
         "parseDoubles(): invalid floating-point literal 78.5x"},
@@ -481,11 +473,9 @@ const struct {
     {"invalid unsigned long literal", &Json::parseUnsignedLongs,
         "78x",
         "parseUnsignedLongs(): invalid unsigned integer literal 78x"},
-    #ifndef CORRADE_TARGET_32BIT
     {"invalid long literal", &Json::parseLongs,
         "-78x",
         "parseLongs(): invalid integer literal -78x"},
-    #endif
     {"unsigned integer literal with an exponent", &Json::parseUnsignedInts,
         "78e5",
         "parseUnsignedInts(): invalid unsigned integer literal 78e5"},
@@ -495,11 +485,9 @@ const struct {
     {"unsigned long literal with an exponent", &Json::parseUnsignedLongs,
         "78e5",
         "parseUnsignedLongs(): invalid unsigned integer literal 78e5"},
-    #ifndef CORRADE_TARGET_32BIT
     {"long literal with an exponent", &Json::parseLongs,
         "78e5",
         "parseLongs(): invalid integer literal 78e5"},
-    #endif
     {"unsigned integer literal with a period", &Json::parseUnsignedInts,
         "78.0",
         "parseUnsignedInts(): invalid unsigned integer literal 78.0"},
@@ -509,11 +497,9 @@ const struct {
     {"unsigned long literal with a period", &Json::parseUnsignedLongs,
         "78.0",
         "parseUnsignedLongs(): invalid unsigned integer literal 78.0"},
-    #ifndef CORRADE_TARGET_32BIT
     {"long literal with a period", &Json::parseLongs,
         "78.0",
         "parseLongs(): invalid integer literal 78.0"},
-    #endif
     {"unsigned integer literal with a minus", &Json::parseUnsignedInts,
         "-78",
         /** @todo what the fuck stroul(), returning 18446744073709551538?! */
@@ -539,14 +525,12 @@ const struct {
     {"unsigned long literal too large", &Json::parseUnsignedLongs,
         "4503599627370496",
         "parseUnsignedLongs(): too large integer literal 4503599627370496"},
-    #ifndef CORRADE_TARGET_32BIT
     {"long literal too small", &Json::parseLongs,
         "-4503599627370497",
         "parseLongs(): too small or large integer literal -4503599627370497"},
     {"long literal too large", &Json::parseLongs,
         "4503599627370496",
         "parseLongs(): too small or large integer literal 4503599627370496"},
-    #endif
     /* NAN or INF without a leading - fails during parse already */
     {"negative double INF literal", &Json::parseDoubles,
         "-INF",
@@ -607,11 +591,9 @@ const struct {
     {"unsigned long literal with leading zero", &Json::parseUnsignedLongs,
         "045",
         nullptr},
-    #ifndef CORRADE_TARGET_32BIT
     {"long literal with leading zero", &Json::parseLongs,
         "-045",
         nullptr},
-    #endif
     {"hexadecimal double literal", &Json::parseDoubles,
         "0x355P6",
         nullptr},
@@ -627,11 +609,9 @@ const struct {
     {"hexadecimal unsigned long literal", &Json::parseUnsignedLongs,
         "0XABC",
         "parseUnsignedLongs(): invalid unsigned integer literal 0XABC"},
-    #ifndef CORRADE_TARGET_32BIT
     {"hexadecimal long literal", &Json::parseLongs,
         "-0xabc",
         "parseLongs(): invalid integer literal -0xabc"},
-    #endif
     {"invalid unicode escape", &Json::parseStrings,
         "\"\\undefined\"",
         "parseStrings(): sorry, unicode escape sequences are not implemented yet"},
@@ -758,10 +738,7 @@ JsonTest::JsonTest() {
         Containers::arraySize(ParseUnsignedLongData));
 
     addInstancedTests({&JsonTest::parseLong,
-                       #ifndef CORRADE_TARGET_32BIT
-                       &JsonTest::parseLongs
-                       #endif
-                       },
+                       &JsonTest::parseLongs},
         Containers::arraySize(ParseLongData));
 
     addInstancedTests({&JsonTest::parseSize,
@@ -828,10 +805,8 @@ JsonTest::JsonTest() {
               &JsonTest::asIntArrayNotAllSame,
               &JsonTest::asUnsignedLongArray,
               &JsonTest::asUnsignedLongArrayNotAllSame,
-              #ifndef CORRADE_TARGET_32BIT
               &JsonTest::asLongArray,
               &JsonTest::asLongArrayNotAllSame,
-              #endif
               &JsonTest::asSizeArray,
               &JsonTest::asSizeArrayNotAllSame,
               &JsonTest::asTypeArrayNotArray,
@@ -1629,7 +1604,6 @@ void JsonTest::parseLong() {
     CORRADE_COMPARE(json->root().parseLong(), data.expected);
 }
 
-#ifndef CORRADE_TARGET_32BIT
 void JsonTest::parseLongs() {
     auto&& data = ParseLongData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -1662,7 +1636,6 @@ void JsonTest::parseLongs() {
         CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
     }
 }
-#endif
 
 void JsonTest::parseSize() {
     #ifndef CORRADE_TARGET_32BIT
@@ -1903,11 +1876,9 @@ void JsonTest::reparseNumberDifferentType() {
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::UnsignedLong);
     CORRADE_COMPARE(token.asUnsignedLong(), 35);
 
-    #ifndef CORRADE_TARGET_32BIT
     CORRADE_VERIFY(json->parseLongs(token));
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Long);
     CORRADE_COMPARE(token.asLong(), 35);
-    #endif
 
     CORRADE_VERIFY(json->parseSizes(token));
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Size);
@@ -1992,9 +1963,7 @@ void JsonTest::parseTokenNotOwned() {
     json->parseUnsignedInts(token);
     json->parseInts(token);
     json->parseUnsignedLongs(token);
-    #ifndef CORRADE_TARGET_32BIT
     json->parseLongs(token);
-    #endif
     json->parseSizes(token);
     json->parseStringKeys(token);
     json->parseStrings(token);
@@ -2005,8 +1974,8 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseUnsignedInts(): token not owned by the instance\n"
         "Utility::Json::parseInts(): token not owned by the instance\n"
         "Utility::Json::parseUnsignedLongs(): token not owned by the instance\n"
-        #ifndef CORRADE_TARGET_32BIT
         "Utility::Json::parseLongs(): token not owned by the instance\n"
+        #ifndef CORRADE_TARGET_32BIT
         "Utility::Json::parseUnsignedLongs(): token not owned by the instance\n"
         #else
         "Utility::Json::parseUnsignedInts(): token not owned by the instance\n"
@@ -2432,7 +2401,6 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
     CORRADE_VERIFY(!json->root().asUnsignedLongArray());
 }
 
-#ifndef CORRADE_TARGET_32BIT
 void JsonTest::asLongArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
@@ -2456,7 +2424,6 @@ void JsonTest::asLongArrayNotAllSame() {
     CORRADE_VERIFY(json->parseLongs(json->tokens()[2]));
     CORRADE_VERIFY(!json->root().asLongArray());
 }
-#endif
 
 void JsonTest::asSizeArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
@@ -2498,9 +2465,7 @@ void JsonTest::asTypeArrayNotArray() {
     json->root().asUnsignedIntArray();
     json->root().asIntArray();
     json->root().asUnsignedLongArray();
-    #ifndef CORRADE_TARGET_32BIT
     json->root().asLongArray();
-    #endif
     json->root().asSizeArray();
     const char* expected =
         "Utility::JsonToken::asBoolArray(): token is a Utility::JsonToken::Type::Object\n"
@@ -2509,8 +2474,8 @@ void JsonTest::asTypeArrayNotArray() {
         "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asIntArray(): token is a Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
-        #ifndef CORRADE_TARGET_32BIT
         "Utility::JsonToken::asLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        #ifndef CORRADE_TARGET_32BIT
         "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
         #else
         "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
@@ -2609,9 +2574,7 @@ void JsonTest::asTypeWrongType() {
     root.asUnsignedInt();
     root.asInt();
     root.asUnsignedLong();
-    #ifndef CORRADE_TARGET_32BIT
     root.asLong();
-    #endif
     root.asSize();
     root.asString();
     const char* expected =
@@ -2622,9 +2585,7 @@ void JsonTest::asTypeWrongType() {
         "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
         "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
         "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        #ifndef CORRADE_TARGET_32BIT
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        #endif
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
         "Utility::JsonToken::asString(): token is a parsed Utility::JsonToken::Type::Object\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -2649,9 +2610,7 @@ void JsonTest::asTypeNotParsed() {
     json->tokens()[3].asUnsignedInt();
     json->tokens()[3].asInt();
     json->tokens()[3].asUnsignedLong();
-    #ifndef CORRADE_TARGET_32BIT
     json->tokens()[3].asLong();
-    #endif
     json->tokens()[3].asSize();
     json->tokens()[4].asString();
     const char* expected =
@@ -2662,9 +2621,7 @@ void JsonTest::asTypeNotParsed() {
         "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
         "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
         "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        #ifndef CORRADE_TARGET_32BIT
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        #endif
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
         "Utility::JsonToken::asString(): token is an unparsed Utility::JsonToken::Type::String\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -2695,9 +2652,7 @@ void JsonTest::asTypeWrongParsedType() {
     json->tokens()[4].asUnsignedInt();
     json->tokens()[3].asInt();
     json->tokens()[3].asUnsignedLong();
-    #ifndef CORRADE_TARGET_32BIT
     json->tokens()[4].asLong();
-    #endif
     json->tokens()[4].asSize();
     const char* expected =
         "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Float\n"
@@ -2705,9 +2660,7 @@ void JsonTest::asTypeWrongParsedType() {
         "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
         "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
         "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
-        #ifndef CORRADE_TARGET_32BIT
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
-        #endif
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n";
     CORRADE_COMPARE(out.str(), expected);
 }

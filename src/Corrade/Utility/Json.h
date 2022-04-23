@@ -553,7 +553,6 @@ class CORRADE_UTILITY_EXPORT Json {
          */
         bool parseUnsignedLongs(const JsonToken& token);
 
-        #ifndef CORRADE_TARGET_32BIT
         /**
          * @brief Parse numbers in given token tree as signed 53-bit integer values
          *
@@ -568,16 +567,12 @@ class CORRADE_UTILITY_EXPORT Json {
          * JSON), prints an error and returns @cpp false @ce. Expects that
          * @p token references a token owned by this instance.
          *
-         * Available only on 64-bit targets due to limits of the internal
-         * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
-         * can use either @ref parseInts(), @ref parseDoubles() or parse the
-         * integer value always on-the-fly using
+         * A single token can be also parsed on-the-fly using
          * @ref JsonToken::parseLong().
          * @see @ref parseDoubles(), @ref parseUnsignedLongs(),
          *      @ref parseInts(), @ref parseSizes()
          */
         bool parseLongs(const JsonToken& token);
-        #endif
 
         /**
          * @brief Parse numbers in given token tree as size values
@@ -882,12 +877,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * any the values have a non-zero fractional part, if they have an
              * exponent, if they're negative or if they can't fit into 53 bits
              * (which is the representable signed integer range in a JSON).
-             *
-             * Available only on 64-bit targets due to limits of the internal
-             * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets"
-             * you can use either @ref ParsedType::Int, @ref ParsedType::Double
-             * or parse the integer value always on-the-fly using
-             * @ref parseLong().
              */
             #ifndef CORRADE_TARGET_32BIT
             Long
@@ -895,6 +884,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
                 = 6ull << 58
                 #endif
                 ,
+            #else
+            Long = 6ull << 29,
             #endif
 
             /**
@@ -1370,21 +1361,14 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          */
         Containers::Optional<std::int64_t> parseLong() const;
 
-        #ifndef CORRADE_TARGET_32BIT
         /**
          * @brief Get a parsed signed 53-bit integer value
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Long. If not, use @ref parseLong() instead.
-         *
-         * Available only on 64-bit targets due to limits of the internal
-         * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
-         * can use either @ref ParsedType::Int, @ref ParsedType::Double or
-         * parse the integer value always on-the-fly using @ref parseLong().
          * @see @ref Json::parseLongs(), @ref asLongArray()
          */
         std::int64_t asLong() const;
-        #endif
 
         /**
          * @brief Parse a size value
@@ -1554,7 +1538,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> asUnsignedLongArray() const;
 
-        #ifndef CORRADE_TARGET_32BIT
         /**
          * @brief Get a parsed signed 53-bit integer value array
          *
@@ -1562,11 +1545,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * homogeneous @ref ParsedType::Long, returns
          * @ref Containers::NullOpt. The returned view points to data owned by
          * the originating @ref Json instance.
-         *
-         * Available only on 64-bit targets due to limits of the internal
-         * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
-         * can use either @ref asIntArray, @ref asDoubleArray() or parse the
-         * integer values one-by-one on-the-fly using @ref parseLong().
          *
          * @m_class{m-note m-warning}
          *
@@ -1579,7 +1557,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref parseLong(), @ref asLong()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> asLongArray() const;
-        #endif
 
         /**
          * @brief Get a parsed size array
@@ -1635,7 +1612,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
             /* Size is the remaining 55 bits of _sizeFlagsParsedTypeType */
             SizeMask = (1ull << 55) - 1,
             #else
-            NanMask = 0x7ffull << 52, /* 0b11111111111 */
+            SignMask = 0x800ull << 52, /* 0b100000000000 */
+            NanMask = 0x7ffull << 52,  /* 0b011111111111 */
             ChildCountMask = 0xffffffffull,
 
             /* Matching public Type, stored in _childCountFlagsTypeNan before
@@ -1669,6 +1647,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
             ParsedTypeUnsignedInt = 3u << 29,
             ParsedTypeInt = 4u << 29,
             ParsedTypeUnsignedLong = 5u << 29,
+            ParsedTypeLong = 6u << 29,
             /* ParsedTypeOther does not apply here */
 
             /* If NaN is not set, size is the remaining 28 bits of
@@ -1711,9 +1690,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
             double _parsedDouble;
             float _parsedFloat;
             std::uint64_t _parsedUnsignedLong;
-            #ifndef CORRADE_TARGET_32BIT
             std::int64_t _parsedLong;
-            #endif
             std::uint32_t _parsedUnsignedInt;
             std::int32_t _parsedInt;
             Containers::String* _parsedString;
@@ -1878,7 +1855,7 @@ inline JsonToken::Type JsonToken::type() const {
     return Type(_sizeFlagsParsedTypeType & TypeMask);
     #else
     /* If NaN is set, the type is stored */
-    if((_childCountFlagsTypeNan & NanMask) == NanMask)
+    if((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask)
         return Type(_childCountFlagsTypeNan & TypeMask);
     /* Otherwise it's implicitly a number */
     return Type::Number;
@@ -1890,7 +1867,7 @@ inline bool JsonToken::isParsed() const {
     return _sizeFlagsParsedTypeType & ParsedTypeMask;
     #else
     /* If NaN is set, it's parsed if any bit of the parsed type is set */
-    if((_childCountFlagsTypeNan & NanMask) == NanMask)
+    if((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask)
         return _childCountFlagsTypeNan & FlagParsed;
     /* Otherwise it's an already parsed number */
     return true;
@@ -1902,7 +1879,7 @@ inline JsonToken::ParsedType JsonToken::parsedType() const {
     return ParsedType(_sizeFlagsParsedTypeType & ParsedTypeMask);
     #else
     /* If NaN is set, the parsed type is either None or Other */
-    if((_childCountFlagsTypeNan & NanMask) == NanMask)
+    if((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask)
         return _childCountFlagsTypeNan & FlagParsed ?
             ParsedType::Other : ParsedType::None;
     /* Otherwise it's a number and the parsed type is stored in size */
@@ -1920,7 +1897,7 @@ inline const JsonToken* JsonToken::firstChild() const {
         return this + 1;
     #else
     /* The token has a child if it's not a parsed number and */
-    if(((_childCountFlagsTypeNan & NanMask) == NanMask) &&
+    if(((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask) &&
       /* it's an object with non-zero child count */
     ((((_childCountFlagsTypeNan & TypeMask) == TypeObject ||
        (_childCountFlagsTypeNan & TypeMask) == TypeArray) &&
@@ -1974,13 +1951,11 @@ inline std::uint64_t JsonToken::asUnsignedLong() const {
     return _parsedUnsignedLong;
 }
 
-#ifndef CORRADE_TARGET_32BIT
 inline std::int64_t JsonToken::asLong() const {
     CORRADE_ASSERT(parsedType() == ParsedType::Long,
         "Utility::JsonToken::asLong(): token is a" << type() << "parsed as" << parsedType(), {});
     return _parsedLong;
 }
-#endif
 
 inline std::size_t JsonToken::asSize() const {
     CORRADE_ASSERT(parsedType() == ParsedType::Size,

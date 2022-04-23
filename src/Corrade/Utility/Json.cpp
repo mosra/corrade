@@ -133,36 +133,26 @@ And then the final 64bit value is either:
 In the 32bit case it's not desired to limit sizes too much below 4 GB, so we
 can't reuse the top bits for anything. Instead, the NaN value is abused
 similarly to what JS engines do to efficiently store data. A 64-bit double
-value is NaN if the 11-bit exponent is set to all 1s. The sign bit is used to
-distinguish between a negative and a positive NaN, but the remaining 52 bits
-can be whatever else. Since JSON has no way to store NaN values, let alone NaNs
-with custom bit patterns, we're free to reuse the storage for anything else.
+value is a (signed) NaN or (signed) infinity if the 11-bit exponent is set to
+all 1s. Since JSON has no way to store NaN or infinity values, let alone NaNs
+with custom bit patterns, we can abuse the remaining 53 bits to store whatever
+else.
 
-Thus, if the exponent is *not* a NaN, it's a parsed numeric value. Not just a
-double, 32-bit ints or floats fit in the lower 52 bits as well without causing
-the NaN to accidentally go all 1s, and moreover 52-bit unsigned ints can fit
-there as well. Not 52-bit negative ints however, because the sign extension
-would cause the NaN to be all 1s, so this is a limitation of the 32-bit
-representation -- 53-bit signed ints thus can only be retrieved as a double or
-parsed on-the-fly, without storing them inside the token. Then, since a string
-representation of a number is unlikely to be thousands of characters (the
-parsing code even caps numeric literals at 127 chars at the moment), we can
-reuse the top bits of size instead. Thus:
+1.  +-----------+-----------+
+    |  pointer  |   size    |
+    +-+-----+---+-----------+
+    |0| NaN | … |   data    |
+    +-+-----+---+-----------+
 
-    +---------+------+--+      +---------+------+--+      +---------+---------+
-    | pointer | size |  |      | pointer | size |  |      | pointer |  size   |
-    +---------+------+--+  or  ++------+-+------+--+  or  ++-----+--+---------+
-    |   double number   |      || 0..0 | number    |      || NaN |    ...     |
-    +-------------------+      ++------+-----------+      ++-----+------------+
-
-If the exponent is a NaN (all 1s), the remaining 52 bits store these bits of
-information:
+First the initial state that happens right after tokenization --- if the
+exponent is a NaN (all 1s) and the sign is 0, the remaining 52 bits store these
+bits of information:
 
 -   3 bits for token type, same as in the 64-bit case,
 -   1 bit for whether it's parsed, which is always 1 for objects and arrays and
     always 0 for numbers (parsing numbers will switch them to the non-NaN
     representation),
--   3 bits for whether a string contains any scape characters, whether it's
+-   3 bits for whether a string contains any escape characters, whether it's
     global or whether it's a key or a value, same as in the 64-bit case
 
 And the lower 32 bits to store one of the following if the parsed bit is set:
@@ -171,11 +161,53 @@ And the lower 32 bits to store one of the following if the parsed bit is set:
 -   a pointer to an external parsed string,
 -   or child count for objects and arrays.
 
-Otherwise, if the exponent is not a NaN (all 0s, or some 0s and some 1s), then
-the top 3 bits store the parsed number type, same as in the 64-bit case; and
-the remaining 64 bits store a double, float, (unsigned) int or unsigned long
-value. As said above not a signed long, as that would clash with the NaN
-pattern.
+2.  +-----------+---------+-+
+    |  pointer  |  size   |…|
+    +-----------+---------+-+
+    |?| ??? |      ...      |
+    +-+-----+---------------+
+
+Otherwise (i.e., in all other cases except a NaN and sign being 0), the token
+is a parsed 32-bit or 64-bit number. In order to fit 64-bit numbers as well, we
+can't abuse any bits for anything, but since a string representation of a
+number is unlikely to be thousands of characters (the parsing code even caps
+numeric literals at 127 chars at the moment), we can reuse the top bits of size
+instead:
+
+-   3 bits for parsed number type, same as in the 64-bit case
+
+The actual type of data stored in the 64-bit field then depends on the parsed
+type identifier, of course, but let's enumerate all cases for clarity:
+
+2a. +-----------+---------+-+
+    |  pointer  |  size   |…|
+    +-----------+---------+-+
+    |1| NaN |     -int      |
+    +-+-----+---------------+
+
+If the exponent is a NaN and the sign is 1, the upper bits is how a negative
+53-bit number looks like when expanded to 64-bit. Meaning, it's possible to
+directly store negative 64-bit integers in the bit pattern of a double.
+
+2b. +-----------+---------+-+    +-----------+---------+-+
+    |  pointer  |  size   |…|    |  pointer  |  size   |…|
+    +-----------+---------+-+ or +-----------+---------+-+
+    |0| 0…0 | +int / double |    |0| 0…0 |   |  number   |
+    +-+-----+---------------+    +-+-----+---+-----------+
+
+Conversely, if the exponent is all zeros and the sign is 0, the rest can be a
+positive 52-bit integer. But this bit pattern can be also a double, or there
+can be a 32-bit value stored in the bottom half --- the type field stored in
+the upper 3 bits of size will disambiguate.
+
+2c. +-----------+---------+-+
+    |  pointer  |  size   |…|
+    +-----------+---------+-+
+    |     double number     |
+    +-----------------------+
+
+Finally, if the exponent is anything else than all 1s or all 0s, it's a general
+double number.
 
 */
 
@@ -1075,7 +1107,7 @@ bool Json::parseFloats(const JsonToken& token) {
             (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeFloat;
         #else
-        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._childCountFlagsTypeNan &= ~(JsonToken::NanMask|JsonToken::SignMask);
         nestedToken._sizeParsedType = JsonToken::ParsedTypeFloat|
             (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
@@ -1112,7 +1144,7 @@ bool Json::parseUnsignedInts(const JsonToken& token) {
             (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeUnsignedInt;
         #else
-        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._childCountFlagsTypeNan &= ~(JsonToken::NanMask|JsonToken::SignMask);
         nestedToken._sizeParsedType = JsonToken::ParsedTypeUnsignedInt|
             (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
@@ -1149,7 +1181,7 @@ bool Json::parseInts(const JsonToken& token) {
             (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeInt;
         #else
-        nestedToken._childCountFlagsTypeNan &= ~JsonToken::NanMask;
+        nestedToken._childCountFlagsTypeNan &= ~(JsonToken::NanMask|JsonToken::SignMask);
         nestedToken._sizeParsedType = JsonToken::ParsedTypeInt|
             (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
@@ -1183,15 +1215,15 @@ bool Json::parseUnsignedLongs(const JsonToken& token) {
         }
 
         /* On success save the parsed value and its type. On 32bit the parsed
-           type is stored in the size, the NaN bits should be already all 0 for
-           a 52-bit number. */
+           type is stored in the size, the NaN and sign bits should be already
+           all 0 for a 52-bit number. */
         nestedToken._parsedUnsignedLong = parsed;
         #ifndef CORRADE_TARGET_32BIT
         nestedToken._sizeFlagsParsedTypeType =
             (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeUnsignedLong;
         #else
-        CORRADE_INTERNAL_ASSERT(!(nestedToken._childCountFlagsTypeNan & JsonToken::NanMask));
+        CORRADE_INTERNAL_ASSERT((nestedToken._childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == 0);
         nestedToken._sizeParsedType = JsonToken::ParsedTypeUnsignedLong|
             (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
         #endif
@@ -1200,7 +1232,6 @@ bool Json::parseUnsignedLongs(const JsonToken& token) {
     return true;
 }
 
-#ifndef CORRADE_TARGET_32BIT
 bool Json::parseLongs(const JsonToken& token) {
     /* Get an index into the array */
     const std::size_t tokenIndex = &token - _state->tokens;
@@ -1215,21 +1246,36 @@ bool Json::parseLongs(const JsonToken& token) {
            nestedToken.parsedType() == JsonToken::ParsedType::Int)
             continue;
 
-        if(!parseLongInto("Utility::Json::parseLongs():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), nestedToken._parsedLong)) {
+        /* Not saving to token._parsedUnsignedLong directly to avoid a failure
+           corrupting the high bits storing token type and flags on 32bit */
+        std::int64_t parsed;
+        if(!parseLongInto("Utility::Json::parseLongs():", Error::Flag::NoNewlineAtTheEnd, nestedToken.data(), parsed)) {
             Error err;
             err << " at";
             printFilePosition(err, _state->filename, _state->string.prefix(nestedToken._data));
             return false;
         }
 
+        /* On success save the parsed value and its type. On 32bit the parsed
+           type is stored in the size, the NaN and sign bits should be already
+           either all 0 for a positive 52-bit number or all 1 for a negative
+           53-bit number. */
+        nestedToken._parsedLong = parsed;
+        #ifndef CORRADE_TARGET_32BIT
         nestedToken._sizeFlagsParsedTypeType =
             (nestedToken._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
             JsonToken::ParsedTypeLong;
+        #else
+        CORRADE_INTERNAL_ASSERT(
+            (nestedToken._childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == 0 ||
+            (nestedToken._childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == (JsonToken::NanMask|JsonToken::SignMask));
+        nestedToken._sizeParsedType = JsonToken::ParsedTypeLong|
+            (nestedToken._sizeParsedType & ~JsonToken::ParsedTypeMask);
+        #endif
     }
 
     return true;
 }
-#endif
 
 bool Json::parseSizes(const JsonToken& token) {
     #ifndef CORRADE_TARGET_32BIT
@@ -1385,8 +1431,8 @@ Containers::StringView JsonToken::data() const {
     #ifndef CORRADE_TARGET_32BIT
     return {_data, _sizeFlagsParsedTypeType & SizeMask};
     #else
-    /* If NaN is set, the full size is used */
-    if((_childCountFlagsTypeNan & NanMask) == NanMask)
+    /* If NaN is set and sign is 0, the full size is used */
+    if((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask)
         return {_data, _sizeParsedType};
     /* Otherwise it's likely small and the top is repurposed */
     return {_data, _sizeParsedType & SizeMask};
@@ -1410,16 +1456,16 @@ std::size_t JsonToken::childCount() const {
     /* Otherwise value types have no children */
     } else return 0;
     #else
-    /* If NaN is set, the child count is stored for objects and arrays,
-       implicit as grandchild count + 1 for string keys (where we have to again
-       branch on a NaN), and 0 otherwise */
-    if((_childCountFlagsTypeNan & NanMask) == NanMask) {
+    /* If NaN is set and sign is 0, the child count is stored for objects and
+       arrays, implicit as grandchild count + 1 for string keys (where we have
+       to again branch on a NaN), and 0 otherwise */
+    if((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask) {
         if((_childCountFlagsTypeNan & TypeMask) == TypeObject ||
            (_childCountFlagsTypeNan & TypeMask) == TypeArray) {
             return _childCountFlagsTypeNan & ChildCountMask;
         } else if(_childCountFlagsTypeNan & FlagStringKey) {
             const JsonToken& child = *(this + 1);
-            return ((child._childCountFlagsTypeNan & NanMask) == NanMask &&
+            return ((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask &&
                     child._childCountFlagsTypeNan & (TypeObject|TypeArray) ?
                 child._childCountFlagsTypeNan & ChildCountMask : 0) + 1;
         } else return 0;
@@ -1589,9 +1635,7 @@ Containers::Optional<std::uint64_t> JsonToken::parseUnsignedLong() const {
 
 Containers::Optional<std::int64_t> JsonToken::parseLong() const {
     if(type() != Type::Number) return {};
-    #ifndef CORRADE_TARGET_32BIT
     if(parsedType() == ParsedType::Long) return _parsedLong;
-    #endif
 
     std::int64_t out;
     if(parseLongInto("Utility::JsonToken::parseLong():", {}, data(), out))
@@ -1810,20 +1854,25 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> JsonTo
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedLong);
 }
 
-#ifndef CORRADE_TARGET_32BIT
 Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> JsonToken::asLongArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asLongArray(): token is a" << type(), {});
 
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
-    for(const JsonToken *i = this + 1, *end = this + 1 + _childCount; i != end; ++i)
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         if(i->parsedType() != ParsedType::Long) return {};
 
-    return Containers::stridedArrayView(this + 1, _childCount).slice(&JsonToken::_parsedLong);
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedLong);
 }
-#endif
 
 Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> JsonToken::asSizeArray() const {
     #ifndef CORRADE_TARGET_32BIT
@@ -1873,9 +1922,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::ParsedType va
         _c(UnsignedInt)
         _c(Int)
         _c(UnsignedLong)
-        #ifndef CORRADE_TARGET_32BIT
         _c(Long)
-        #endif
         _c(Other)
         #undef _c
         /* LCOV_EXCL_STOP */
