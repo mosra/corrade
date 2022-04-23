@@ -439,6 +439,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::asNull() and @ref JsonToken::asBool(). Non-literal
          * tokens and tokens that are already parsed are skipped. If an invalid
          * value is encountered, prints an error and returns @cpp false @ce.
+         * Expects that @p token references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseLiterals specified during the initial
@@ -457,7 +458,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::asDouble(). Non-numeric tokens and numeric tokens
          * that are already parsed as doubles are skipped, numeric tokens
          * parsed as other types are reparsed. If an invalid value is
-         * encountered, prints an error and returns @cpp false @ce.
+         * encountered, prints an error and returns @cpp false @ce. Expects
+         * that @p token references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseDoubles specified during the initial
@@ -476,7 +478,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::asFloat(). Non-numeric tokens and numeric tokens
          * that are already parsed as floats are skipped, numeric tokens parsed
          * as other types are reparsed. If an invalid value is encountered,
-         * prints an error and returns @cpp false @ce.
+         * prints an error and returns @cpp false @ce. Expects that @p token
+         * references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseFloats specified during the initial
@@ -497,7 +500,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * tokens parsed as other types are reparsed. If an invalid value,
          * a literal with a fractional or exponent part or a negative value is
          * encountered or a value doesn't fit into a 32-bit representation,
-         * prints an error and returns @cpp false @ce.
+         * prints an error and returns @cpp false @ce. Expects that @p token
+         * references a token owned by this instance.
          *
          * A single token can be also parsed on-the-fly using
          * @ref JsonToken::parseUnsignedInt().
@@ -517,7 +521,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * other types are reparsed. If an invalid value, a literal with a
          * fractional or exponent part is encountered or a value doesn't fit
          * into a 32-bit representation, prints an error and returns
-         * @cpp false @ce.
+         * @cpp false @ce. Expects that @p token references a token owned by
+         * this instance.
          *
          * A single token can be also parsed on-the-fly using
          * @ref JsonToken::parseInt().
@@ -538,7 +543,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * literal with a fractional or exponent part or a negative value is
          * encountered or a value doesn't fit into 52 bits (which is the
          * representable unsigned integer range in a JSON), prints an error and
-         * returns @cpp false @ce.
+         * returns @cpp false @ce. Expects that @p token references a token
+         * owned by this instance.
          *
          * A single token can be also parsed on-the-fly using
          * @ref JsonToken::parseUnsignedLong().
@@ -559,7 +565,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * other types are reparsed. If an invalid value, a literal with a
          * fractional or exponent part is encountered or a value doesn't fit
          * into 53 bits (which is the representable signed integer range in a
-         * JSON), prints an error and returns @cpp false @ce.
+         * JSON), prints an error and returns @cpp false @ce. Expects that
+         * @p token references a token owned by this instance.
          *
          * Available only on 64-bit targets due to limits of the internal
          * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you
@@ -595,7 +602,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * subset of @ref parseStringKeys(). Non-string tokens, string tokens
          * that are not object keys and string tokens that are already parsed
          * are skipped. If an invalid value is encountered, prints an error and
-         * returns @cpp false @ce.
+         * returns @cpp false @ce. Expects that @p token references a token
+         * owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseStringKeys specified during the initial
@@ -613,6 +621,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * is a superset of @ref parseStringKeys(). Non-string tokens and
          * string tokens that are already parsed are skipped. If an invalid
          * value is encountered, prints an error and returns @cpp false @ce.
+         * Expects that @p token references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseStrings specified during the initial
@@ -1551,7 +1560,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is a @ref Type::Array. If the array is not
          * homogeneous @ref ParsedType::Long, returns
-         * @ref Containers::NullOpt.
+         * @ref Containers::NullOpt. The returned view points to data owned by
+         * the originating @ref Json instance.
          *
          * Available only on 64-bit targets due to limits of the internal
          * representation. On @ref CORRADE_TARGET_32BIT "32-bit targets" you

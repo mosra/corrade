@@ -971,6 +971,7 @@ bool Json::parseLiterals(const JsonToken& token) {
         "Utility::Json::parseLiterals(): token not owned by the instance", {});
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
+        /* Skip tokens that are already parsed */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.isParsed()) continue;
 
@@ -1054,7 +1055,7 @@ bool Json::parseFloats(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
-           doubles */
+           floats */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
            nestedToken.parsedType() == JsonToken::ParsedType::Float)
@@ -1091,7 +1092,7 @@ bool Json::parseUnsignedInts(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
-           doubles */
+           unsigned ints */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
            nestedToken.parsedType() == JsonToken::ParsedType::UnsignedInt)
@@ -1128,7 +1129,7 @@ bool Json::parseInts(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
-           doubles */
+           ints */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
            nestedToken.parsedType() == JsonToken::ParsedType::Int)
@@ -1165,7 +1166,7 @@ bool Json::parseUnsignedLongs(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
-           doubles */
+           unsigned longs */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
            nestedToken.parsedType() == JsonToken::ParsedType::UnsignedLong)
@@ -1208,7 +1209,7 @@ bool Json::parseLongs(const JsonToken& token) {
 
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip non-number tokens or tokens that are already parsed as
-           doubles */
+           longs */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
            nestedToken.parsedType() == JsonToken::ParsedType::Int)

@@ -68,7 +68,7 @@ constexpr const char* FinalNewline = "\n";
 }
 
 struct JsonWriter::State {
-    /* Contains spaces needed for a single indetation level */
+    /* Contains spaces needed for a single indentation level */
     /** @todo use a StringView once growable */
     Containers::ArrayView<const char> indentation;
     /* Contains a colon or comma and a following space if needed */
