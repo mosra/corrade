@@ -639,9 +639,8 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a null token
          *
-         * If @p token is not a @ref JsonToken::Type::Null, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, prints
-         * an error and returns @ref Containers::NullOpt. If
+         * If @p token is not a @ref JsonToken::Type::Null or is not a valid
+         * null value, prints an error and returns @ref Containers::NullOpt. If
          * @ref JsonToken::isParsed() is already set, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
@@ -652,12 +651,11 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a boolean token
          *
-         * If @p token is not a @ref JsonToken::Type::Bool, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, prints
-         * an error and returns @ref Containers::NullOpt. If
-         * @ref JsonToken::isParsed() is already set, returns the cached value,
-         * otherwise caches the parsed result. Expects that @p token references
-         * a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Bool or is not a valid
+         * boolean value, prints an error and returns @ref Containers::NullOpt.
+         * If @ref JsonToken::isParsed() is already set, returns the cached
+         * value, otherwise caches the parsed result. Expects that @p token
+         * references a token owned by this instance.
          * @see @ref JsonToken::asBool()
          */
         Containers::Optional<bool> parseBool(const JsonToken& token);
@@ -665,12 +663,11 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a 64-bit floating point token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, prints
-         * an error and returns @ref Containers::NullOpt. If the token is
-         * already parsed as @ref JsonToken::ParsedType::Double, returns the
-         * cached value, otherwise caches the parsed result. Expects that
-         * @p token references a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Number or is not a valid
+         * numeric value, prints an error and returns @ref Containers::NullOpt.
+         * If the token is already parsed as @ref JsonToken::ParsedType::Double,
+         * returns the cached value, otherwise caches the parsed result.
+         * Expects that @p token references a token owned by this instance.
          * @see @ref JsonToken::asDouble()
          */
         Containers::Optional<double> parseDouble(const JsonToken& token);
@@ -678,14 +675,14 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a 32-bit floating point token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, prints
-         * an error and returns @ref Containers::NullOpt. Precision that
-         * doesn't fit into the 32-bit floating point representation is
-         * truncated, use @ref parseDouble() to get the full precision. If the
-         * token is already parsed as @ref JsonToken::ParsedType::Float,
-         * returns the cached value, otherwise caches the parsed result.
-         * Expects that @p token references a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Number or is not a valid
+         * numeric value, prints an error and returns @ref Containers::NullOpt.
+         * Precision that doesn't fit into the 32-bit floating point
+         * representation is truncated, use @ref parseDouble() to get the full
+         * precision. If the token is already parsed as
+         * @ref JsonToken::ParsedType::Float, returns the cached value,
+         * otherwise caches the parsed result. Expects that @p token references
+         * a token owned by this instance.
          * @see @ref JsonToken::asFloat()
          */
         Containers::Optional<float> parseFloat(const JsonToken& token);
@@ -693,10 +690,9 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse an unsigned 32-bit integer token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, has a
-         * fractional or exponent part, is negative or doesn't fit into a
-         * 32-bit representation, prints an error and returns
+         * If @p token is not a @ref JsonToken::Type::Number, is not a valid
+         * numeric value, has a fractional or exponent part, is negative or
+         * doesn't fit into a 32-bit representation, prints an error and returns
          * @ref Containers::NullOpt. If the token is already parsed as
          * @ref JsonToken::ParsedType::UnsignedInt, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
@@ -708,13 +704,13 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a signed 32-bit integer token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt, If it is, but is not a valid value, has a
-         * fractional or exponent part or doesn't fit into a 32-bit
-         * representation, prints an error and returns @ref Containers::NullOpt.
-         * If the token is already parsed as @ref JsonToken::ParsedType::Int,
-         * returns the cached value, otherwise caches the parsed result.
-         * Expects that @p token references a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Number, is not a valid
+         * numeric value, has a fractional or exponent part or doesn't fit into
+         * a 32-bit representation, prints an error and returns
+         * @ref Containers::NullOpt. If the token is already parsed as
+         * @ref JsonToken::ParsedType::Int, returns the cached value, otherwise
+         * caches the parsed result. Expects that @p token references a token
+         * owned by this instance.
          * @see @ref JsonToken::asInt()
          */
         Containers::Optional<std::int32_t> parseInt(const JsonToken& token);
@@ -722,14 +718,14 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse an unsigned 52-bit integer token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, has a
-         * fractional or exponent part, is negative or doesn't fit into 52 bits
-         * (which is the representable unsigned integer range in a JSON),
-         * prints an error and returns @ref Containers::NullOpt. If the token
-         * is already parsed as @ref JsonToken::ParsedType::UnsignedLong,
-         * returns the cached value, otherwise caches the parsed result.
-         * Expects that @p token references a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Number, is not a valid
+         * numeric value, has a fractional or exponent part, is negative or
+         * doesn't fit into 52 bits (which is the representable unsigned
+         * integer range in a JSON), prints an error and returns
+         * @ref Containers::NullOpt. If the token is already parsed as
+         * @ref JsonToken::ParsedType::UnsignedLong, returns the cached value,
+         * otherwise caches the parsed result. Expects that @p token references
+         * a token owned by this instance.
          * @see @ref JsonToken::asUnsignedLong()
          */
         Containers::Optional<std::uint64_t> parseUnsignedLong(const JsonToken& token);
@@ -737,14 +733,13 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a signed 53-bit integer token
          *
-         * If @p token is not a @ref JsonToken::Type::Number, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, has a
-         * fractional or exponent part or doesn't fit into 53 bits (which is
-         * the representable signed integer range in a JSON), prints an error
-         * and returns @ref Containers::NullOpt. If the token is already parsed
-         * as @ref JsonToken::ParsedType::Long, returns the cached value,
-         * otherwise caches the parsed result. Expects that @p token references
-         * a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::Number,  is not a valid
+         * nnumeric value, has a fractional or exponent part or doesn't fit
+         * into 53 bits (which is the representable signed integer range in a
+         * JSON), prints an error and returns @ref Containers::NullOpt. If the
+         * token is already parsed as @ref JsonToken::ParsedType::Long, returns
+         * the cached value, otherwise caches the parsed result. Expects that
+         * @p token references a token owned by this instance.
          * @see @ref JsonToken::asLong()
          */
         Containers::Optional<std::int64_t> parseLong(const JsonToken& token);
@@ -765,12 +760,11 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Check and parse a string token
          *
-         * If @p token is not a @ref JsonToken::Type::String, returns
-         * @ref Containers::NullOpt. If it is, but is not a valid value, prints
-         * an error and returns @ref Containers::NullOpt. If
-         * @ref JsonToken::isParsed() is already set, returns the cached value,
-         * otherwise caches the parsed result. Expects that @p token references
-         * a token owned by this instance.
+         * If @p token is not a @ref JsonToken::Type::String or is not a valid
+         * string value, prints an error and returns @ref Containers::NullOpt.
+         * If @ref JsonToken::isParsed() is already set, returns the cached
+         * value, otherwise caches the parsed result. Expects that @p token
+         * references a token owned by this instance.
          * @see @ref JsonToken::asString()
          */
         Containers::Optional<Containers::StringView> parseString(const JsonToken& token);

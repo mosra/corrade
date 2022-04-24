@@ -732,7 +732,7 @@ const struct {
     {"null but a numeric token",
         [](Json& json) { return !!json.parseNull(json.root()); },
         "35.7",
-        nullptr},
+        "parseNull(): expected a null, got Utility::JsonToken::Type::Number"},
     {"bool",
         [](Json& json) { return !!json.parseBool(json.root()); },
         "fail",
@@ -740,7 +740,7 @@ const struct {
     {"bool but a null token",
         [](Json& json) { return !!json.parseBool(json.root()); },
         "null",
-        nullptr},
+        "parseBool(): expected a bool, got Utility::JsonToken::Type::Null"},
     {"double",
         [](Json& json) { return !!json.parseDouble(json.root()); },
         "75x",
@@ -748,7 +748,7 @@ const struct {
     {"double but a string token",
         [](Json& json) { return !!json.parseDouble(json.root()); },
         "\"75\"",
-        nullptr},
+        "parseDouble(): expected a number, got Utility::JsonToken::Type::String"},
     {"float",
         [](Json& json) { return !!json.parseFloat(json.root()); },
         "75x",
@@ -756,7 +756,7 @@ const struct {
     {"float but a bool token",
         [](Json& json) { return !!json.parseFloat(json.root()); },
         "false",
-        nullptr},
+        "parseFloat(): expected a number, got Utility::JsonToken::Type::Bool"},
     {"unsigned int",
         [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "75x",
@@ -764,7 +764,7 @@ const struct {
     {"unsigned int but a null token",
         [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "null",
-        nullptr},
+        "parseUnsignedInt(): expected a number, got Utility::JsonToken::Type::Null"},
     {"int",
         [](Json& json) { return !!json.parseInt(json.root()); },
         "75x",
@@ -772,7 +772,7 @@ const struct {
     {"int but an array token",
         [](Json& json) { return !!json.parseInt(json.root()); },
         "[]",
-        nullptr},
+        "parseInt(): expected a number, got Utility::JsonToken::Type::Array"},
     {"unsigned long",
         [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "75x",
@@ -780,7 +780,7 @@ const struct {
     {"unsigned long but an object token",
         [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "{}",
-        nullptr},
+        "parseUnsignedLong(): expected a number, got Utility::JsonToken::Type::Object"},
     {"long",
         [](Json& json) { return !!json.parseLong(json.root()); },
         "75x",
@@ -788,7 +788,7 @@ const struct {
     {"long but a string token",
         [](Json& json) { return !!json.parseLong(json.root()); },
         "\"75\"",
-        nullptr},
+        "parseLong(): expected a number, got Utility::JsonToken::Type::String"},
     {"size",
         [](Json& json) { return !!json.parseSize(json.root()); },
         "75x",
@@ -796,7 +796,7 @@ const struct {
     {"size but a bool token",
         [](Json& json) { return !!json.parseSize(json.root()); },
         "true",
-        nullptr},
+        "parseSize(): expected a number, got Utility::JsonToken::Type::Bool"},
     {"string",
         [](Json& json) { return !!json.parseString(json.root()); },
         "\"\\undefined\"",
@@ -804,7 +804,7 @@ const struct {
     {"string but a null token",
         [](Json& json) { return !!json.parseString(json.root()); },
         "null",
-        nullptr}
+        "parseString(): expected a string, got Utility::JsonToken::Type::Null"}
 };
 
 JsonTest::JsonTest() {
@@ -2057,10 +2057,7 @@ void JsonTest::parseSingleError() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!data.function(*json));
-    if(data.message)
-        CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:3:6\n", data.message));
-    else
-        CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:3:6\n", data.message));
 }
 
 void JsonTest::parseTokenNotOwned() {

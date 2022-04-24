@@ -1494,8 +1494,12 @@ Containers::Optional<std::nullptr_t> Json::parseNull(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseNull(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Null)
+    if(token.type() != JsonToken::Type::Null) {
+        Error err;
+        err << "Utility::Json::parseNull(): expected a null, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseNullInternal("Utility::Json::parseNull():", const_cast<JsonToken&>(token)))
         return {};
     return nullptr;
@@ -1505,8 +1509,12 @@ Containers::Optional<bool> Json::parseBool(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseBool(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Bool)
+    if(token.type() != JsonToken::Type::Bool) {
+        Error err;
+        err << "Utility::Json::parseBool(): expected a bool, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseBoolInternal("Utility::Json::parseBool():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedBool;
@@ -1516,8 +1524,12 @@ Containers::Optional<double> Json::parseDouble(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseDouble(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseDouble(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseDoubleInternal("Utility::Json::parseDouble():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedDouble;
@@ -1527,8 +1539,12 @@ Containers::Optional<float> Json::parseFloat(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseFloat(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseFloat(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseFloatInternal("Utility::Json::parseFloat():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedFloat;
@@ -1538,8 +1554,12 @@ Containers::Optional<std::uint32_t> Json::parseUnsignedInt(const JsonToken& toke
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseUnsignedInt(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseUnsignedInt(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseUnsignedIntInternal("Utility::Json::parseUnsignedInt():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedUnsignedInt;
@@ -1549,8 +1569,12 @@ Containers::Optional<std::int32_t> Json::parseInt(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseInt(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseInt(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseIntInternal("Utility::Json::parseInt():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedInt;
@@ -1560,8 +1584,12 @@ Containers::Optional<std::uint64_t> Json::parseUnsignedLong(const JsonToken& tok
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseUnsignedLong(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseUnsignedLong(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseUnsignedLongInternal("Utility::Json::parseUnsignedLong():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedUnsignedLong;
@@ -1571,8 +1599,12 @@ Containers::Optional<std::int64_t> Json::parseLong(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseLong(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseLong(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseLongInternal("Utility::Json::parseLong():", const_cast<JsonToken&>(token)))
         return {};
     return token._parsedLong;
@@ -1582,8 +1614,12 @@ Containers::Optional<std::size_t> Json::parseSize(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseSize(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::Number)
+    if(token.type() != JsonToken::Type::Number) {
+        Error err;
+        err << "Utility::Json::parseSize(): expected a number, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!
         #ifndef CORRADE_TARGET_32BIT
         parseUnsignedLongInternal
@@ -1605,8 +1641,12 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken& 
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseString(): token not owned by the instance", {});
 
-    if(token.type() != JsonToken::Type::String)
+    if(token.type() != JsonToken::Type::String) {
+        Error err;
+        err << "Utility::Json::parseString(): expected a string, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
         return {};
+    }
     if(!parseStringInternal("Utility::Json::parseString():", const_cast<JsonToken&>(token)))
         return {};
 
