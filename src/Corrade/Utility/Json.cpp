@@ -1710,9 +1710,9 @@ Containers::StringView JsonToken::asString() const {
     /* If the string is not escaped, reference it directly */
     if(
         #ifndef CORRADE_TARGET_32BIT
-        !(_sizeFlagsParsedTypeType & JsonToken::FlagStringEscaped)
+        !(_sizeFlagsParsedTypeType & FlagStringEscaped)
         #else
-        !(_childCountFlagsTypeNan & JsonToken::FlagStringEscaped)
+        !(_childCountFlagsTypeNan & FlagStringEscaped)
         #endif
     )
         return {_data + 1,
