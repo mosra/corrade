@@ -63,35 +63,26 @@ struct JsonTest: TestSuite::Tester {
 
         void error();
 
-        void parseNull();
         void parseNulls();
-        void parseBool();
         void parseBools();
-        void parseDouble();
         void parseDoubles();
-        void parseFloat();
         void parseFloats();
-        void parseUnsignedInt();
         void parseUnsignedInts();
-        void parseInt();
         void parseInts();
-        void parseUnsignedLong();
         void parseUnsignedLongs();
-        void parseLong();
         void parseLongs();
-        void parseSize();
         void parseSizes();
-        void parseString();
         void parseStringKeys();
         void parseStrings();
 
         void parseOption();
         void parseSubtree();
         void reparseNumberDifferentType();
+        void reparseSingleNumberDifferentType();
 
         void parseError();
         void parseOptionError();
-        void parseDirectError();
+        void parseSingleError();
         void parseTokenNotOwned();
 
         void iterator();
@@ -260,120 +251,153 @@ const struct {
 
 const struct {
     const char* name;
-    const char* json;
-    bool expected;
-} ParseBoolData[]{
-    {"true", "true", true},
-    {"false", "false", false}
+    bool singleValue;
+} ParseNullData[]{
+    {"", false},
+    {"single value", true}
 };
 
 const struct {
     const char* name;
     const char* json;
+    bool singleValue;
+    bool expected;
+} ParseBoolData[]{
+    {"true", "true", false, true},
+    {"false", "false", false, false},
+    {"single value", "true", true, true}
+};
+
+const struct {
+    const char* name;
+    const char* json;
+    bool singleValue;
     double expected;
 } ParseDoubleOrFloatData[]{
-    {"", "35.7", 35.7},
-    {"negative", "-35.7", -35.7},
-    {"negative zero", "-0", -0.0}, /** @todo check this more precisely */
-    {"exponent", "-3550.0e-2", -35.5},
-    {"exponent uppercase", "-35.5E2", -3550},
-    {"exponent explicit plus", "-35.5E+2", -3550},
+    {"", "35.7", false, 35.7},
+    {"negative", "-35.7", false, -35.7},
+    {"negative zero", "-0", false, -0.0}, /** @todo check this more precisely */
+    {"exponent", "-3550.0e-2", false, -35.5},
+    {"exponent uppercase", "-35.5E2", false, -3550},
+    {"exponent explicit plus", "-35.5E+2", false, -3550},
     {"127 characters",
        "1234.567890123456789012345678901234567890" /* 40 chars on a line */
         "1234567890123456789012345678901234567890"
-        "1234567890123456789012345678901234567890123456", 1234.567890123456789}
+        "1234567890123456789012345678901234567890123456", false, 1234.567890123456789},
+    {"single value", "35.7", true, 35.7}
 };
 
 const struct {
     const char* name;
     const char* json;
+    bool singleValue;
     std::uint32_t expected;
 } ParseUnsignedIntData[]{
-    {"", "357", 357},
-    {"zero", "0", 0},
-    {"max value", "4294967295", 4294967295},
+    {"", "357", false, 357},
+    {"zero", "0", false, 0},
+    {"max value", "4294967295", false, 4294967295},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "00000000000000000000000000000000000000901234567", 901234567}
+        "00000000000000000000000000000000000000901234567", false, 901234567},
+    {"single value", "357", true, 357}
 };
 
 const struct {
     const char* name;
     const char* json;
+    bool singleValue;
     std::int32_t expected;
 } ParseIntData[]{
-    {"", "357", 357},
-    {"negative", "-464", -464},
-    {"min value", "-2147483648", -2147483648},
-    {"max value", "2147483647", 2147483647},
+    {"", "357", false, 357},
+    {"negative", "-464", false, -464},
+    {"min value", "-2147483648", false, -2147483648},
+    {"max value", "2147483647", false, 2147483647},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
        "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "0000000000000000000000000000000000000090123456", -90123456}
+        "0000000000000000000000000000000000000090123456", false, -90123456},
+    {"single value", "-357", true, -357}
 };
 
 const struct {
     const char* name;
     const char* json;
+    bool singleValue;
     std::uint64_t expected;
 } ParseUnsignedLongData[]{
-    {"", "357", 357},
-    {"zero", "0", 0},
-    {"max 52bit value", "4503599627370495", 4503599627370495ull},
+    {"", "357", false, 357},
+    {"zero", "0", false, 0},
+    {"max 52bit value", "4503599627370495", false, 4503599627370495ull},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "00000000000000000000000000000002345678901234567", 2345678901234567ull}
+        "00000000000000000000000000000002345678901234567", false, 2345678901234567ull},
+    {"single value", "357", true, 357}
 };
 
 const struct {
     const char* name;
     const char* json;
+    bool singleValue;
     std::int64_t expected;
 } ParseLongData[]{
-    {"", "357", 357},
-    {"negative", "-464", -464},
-    {"min 53bit value", "-4503599627370496", -4503599627370496ll},
-    {"max 53bit value", "4503599627370495", 4503599627370495ll},
+    {"", "357", false, 357},
+    {"negative", "-464", false, -464},
+    {"min 53bit value", "-4503599627370496", false, -4503599627370496ll},
+    {"max 53bit value", "4503599627370495", false, 4503599627370495ll},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "0000000000000000000000000000000234567890123456", -234567890123456ll}
+        "0000000000000000000000000000000234567890123456", false, -234567890123456ll},
+    {"single value", "-357", true, -357}
 };
 
 const struct {
     const char* name;
     const Containers::StringView json;
+    bool singleValue;
     const Containers::StringView expected;
 } ParseStringData[]{
     {"",
-        "\"hello!\"",
+        "\"hello!\"", false,
         "hello!"},
     {"empty",
-        "\"\"",
+        "\"\"", false,
         ""},
     {"escapes",
-        "\"\\\"\\\\\\/\\b\\f\\n\\r\\t\"",
+        "\"\\\"\\\\\\/\\b\\f\\n\\r\\t\"", false,
         "\"\\/\b\f\n\r\t"},
     /* Unicode escapes deliberately not supported right now */
     /** @todo handle also surrogate pairs, add a helper to the Unicode lib
         first https://en.wikipedia.org/wiki/JSON#Character_encoding */
     {"SSO string with escapes",
-        "\"\\\\\"",
+        "\"\\\\\"", false,
         "\\"},
     {"non-SSO string with escapes",
-        "\"this is a very long escaped\\nstring, \\\"yes\\\"!\"",
+        "\"this is a very long escaped\\nstring, \\\"yes\\\"!\"", false,
         "this is a very long escaped\nstring, \"yes\"!"},
     {"global literal",
-        "\"hello!\""_s,
+        "\"hello!\""_s, false,
         "hello!"_s},
     {"global escaped literal",
-        "\"hell\\\"o\\\"!\""_s,
+        "\"hell\\\"o\\\"!\""_s, false,
+        "hell\"o\"!"},
+    {"single value",
+        "\"hello!\"", true,
+        "hello!"},
+    {"single escaped value",
+        "\"hell\\\"o\\\"!\"", true,
+        "hell\"o\"!"},
+    {"single global value",
+        "\"hello!\""_s, true,
+        "hello!"_s},
+    {"single global escaped value",
+        "\"hell\\\"o\\\"!\""_s, true,
         "hell\"o\"!"}
 };
 
@@ -697,68 +721,88 @@ const struct {
 
 const struct {
     const char* name;
-    bool(*function)(const JsonToken&);
+    bool(*function)(Json&);
     const char* json;
     const char* message;
-} ParseDirectErrorData[]{
-    {"null", [](const JsonToken& token) { return !!token.parseNull(); },
+} ParseSingleErrorData[]{
+    {"null",
+        [](Json& json) { return !!json.parseNull(json.root()); },
         "none",
         "parseNull(): invalid null literal none"},
-    {"null but a numeric token", [](const JsonToken& token) { return !!token.parseNull(); },
+    {"null but a numeric token",
+        [](Json& json) { return !!json.parseNull(json.root()); },
         "35.7",
         nullptr},
-    {"bool", [](const JsonToken& token) { return !!token.parseBool(); },
+    {"bool",
+        [](Json& json) { return !!json.parseBool(json.root()); },
         "fail",
         "parseBool(): invalid bool literal fail"},
-    {"bool but a null token", [](const JsonToken& token) { return !!token.parseBool(); },
+    {"bool but a null token",
+        [](Json& json) { return !!json.parseBool(json.root()); },
         "null",
         nullptr},
-    {"double", [](const JsonToken& token) { return !!token.parseDouble(); },
+    {"double",
+        [](Json& json) { return !!json.parseDouble(json.root()); },
         "75x",
         "parseDouble(): invalid floating-point literal 75x"},
-    {"double but a string token", [](const JsonToken& token) { return !!token.parseDouble(); },
+    {"double but a string token",
+        [](Json& json) { return !!json.parseDouble(json.root()); },
         "\"75\"",
         nullptr},
-    {"float", [](const JsonToken& token) { return !!token.parseFloat(); },
+    {"float",
+        [](Json& json) { return !!json.parseFloat(json.root()); },
         "75x",
         "parseFloat(): invalid floating-point literal 75x"},
-    {"float but a bool token", [](const JsonToken& token) { return !!token.parseFloat(); },
+    {"float but a bool token",
+        [](Json& json) { return !!json.parseFloat(json.root()); },
         "false",
         nullptr},
-    {"unsigned int", [](const JsonToken& token) { return !!token.parseUnsignedInt(); },
+    {"unsigned int",
+        [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "75x",
         "parseUnsignedInt(): invalid unsigned integer literal 75x"},
-    {"unsigned int but a null token", [](const JsonToken& token) { return !!token.parseUnsignedInt(); },
+    {"unsigned int but a null token",
+        [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "null",
         nullptr},
-    {"int", [](const JsonToken& token) { return !!token.parseInt(); },
+    {"int",
+        [](Json& json) { return !!json.parseInt(json.root()); },
         "75x",
         "parseInt(): invalid integer literal 75x"},
-    {"int but an array token", [](const JsonToken& token) { return !!token.parseInt(); },
+    {"int but an array token",
+        [](Json& json) { return !!json.parseInt(json.root()); },
         "[]",
         nullptr},
-    {"unsigned long", [](const JsonToken& token) { return !!token.parseUnsignedLong(); },
+    {"unsigned long",
+        [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "75x",
         "parseUnsignedLong(): invalid unsigned integer literal 75x"},
-    {"unsigned long but an object token", [](const JsonToken& token) { return !!token.parseUnsignedLong(); },
+    {"unsigned long but an object token",
+        [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "{}",
         nullptr},
-    {"long", [](const JsonToken& token) { return !!token.parseLong(); },
+    {"long",
+        [](Json& json) { return !!json.parseLong(json.root()); },
         "75x",
         "parseLong(): invalid integer literal 75x"},
-    {"long but a string token", [](const JsonToken& token) { return !!token.parseLong(); },
+    {"long but a string token",
+        [](Json& json) { return !!json.parseLong(json.root()); },
         "\"75\"",
         nullptr},
-    {"size", [](const JsonToken& token) { return !!token.parseSize(); },
+    {"size",
+        [](Json& json) { return !!json.parseSize(json.root()); },
         "75x",
         "parseSize(): invalid unsigned integer literal 75x"},
-    {"size but a bool token", [](const JsonToken& token) { return !!token.parseSize(); },
+    {"size but a bool token",
+        [](Json& json) { return !!json.parseSize(json.root()); },
         "true",
         nullptr},
-    {"string", [](const JsonToken& token) { return !!token.parseString(); },
+    {"string",
+        [](Json& json) { return !!json.parseString(json.root()); },
         "\"\\undefined\"",
         "parseString(): sorry, unicode escape sequences are not implemented yet"},
-    {"string but a null token", [](const JsonToken& token) { return !!token.parseString(); },
+    {"string but a null token",
+        [](Json& json) { return !!json.parseString(json.root()); },
         "null",
         nullptr}
 };
@@ -778,39 +822,31 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::error},
         Containers::arraySize(ErrorData));
 
-    addTests({&JsonTest::parseNull,
-              &JsonTest::parseNulls});
+    addInstancedTests({&JsonTest::parseNulls},
+        Containers::arraySize(ParseNullData));
 
-    addInstancedTests({&JsonTest::parseBool,
-                       &JsonTest::parseBools},
+    addInstancedTests({&JsonTest::parseBools},
         Containers::arraySize(ParseBoolData));
 
-    addInstancedTests({&JsonTest::parseDouble,
-                       &JsonTest::parseDoubles},
+    addInstancedTests({&JsonTest::parseDoubles},
         Containers::arraySize(ParseDoubleOrFloatData));
 
-    addInstancedTests({&JsonTest::parseFloat,
-                       &JsonTest::parseFloats},
+    addInstancedTests({&JsonTest::parseFloats},
         Containers::arraySize(ParseDoubleOrFloatData));
 
-    addInstancedTests({&JsonTest::parseUnsignedInt,
-                       &JsonTest::parseUnsignedInts},
+    addInstancedTests({&JsonTest::parseUnsignedInts},
         Containers::arraySize(ParseUnsignedIntData));
 
-    addInstancedTests({&JsonTest::parseInt,
-                       &JsonTest::parseInts},
+    addInstancedTests({&JsonTest::parseInts},
         Containers::arraySize(ParseIntData));
 
-    addInstancedTests({&JsonTest::parseUnsignedLong,
-                       &JsonTest::parseUnsignedLongs},
+    addInstancedTests({&JsonTest::parseUnsignedLongs},
         Containers::arraySize(ParseUnsignedLongData));
 
-    addInstancedTests({&JsonTest::parseLong,
-                       &JsonTest::parseLongs},
+    addInstancedTests({&JsonTest::parseLongs},
         Containers::arraySize(ParseLongData));
 
-    addInstancedTests({&JsonTest::parseSize,
-                       &JsonTest::parseSizes},
+    addInstancedTests({&JsonTest::parseSizes},
         #ifndef CORRADE_TARGET_32BIT
         Containers::arraySize(ParseUnsignedLongData)
         #else
@@ -818,8 +854,7 @@ JsonTest::JsonTest() {
         #endif
     );
 
-    addInstancedTests({&JsonTest::parseString,
-                       &JsonTest::parseStringKeys,
+    addInstancedTests({&JsonTest::parseStringKeys,
                        &JsonTest::parseStrings},
         Containers::arraySize(ParseStringData));
 
@@ -829,7 +864,8 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::parseSubtree},
         Containers::arraySize(ParseSubtreeData));
 
-    addTests({&JsonTest::reparseNumberDifferentType});
+    addTests({&JsonTest::reparseNumberDifferentType,
+              &JsonTest::reparseSingleNumberDifferentType});
 
     addInstancedTests({&JsonTest::parseError},
         Containers::arraySize(ParseErrorData));
@@ -837,8 +873,8 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::parseOptionError},
         Containers::arraySize(ParseOptionErrorData));
 
-    addInstancedTests({&JsonTest::parseDirectError},
-        Containers::arraySize(ParseDirectErrorData));
+    addInstancedTests({&JsonTest::parseSingleError},
+        Containers::arraySize(ParseSingleErrorData));
 
     addTests({&JsonTest::parseTokenNotOwned,
 
@@ -1381,13 +1417,10 @@ void JsonTest::nested() {
     CORRADE_COMPARE(emptyArray.next(), json->tokens().end());
 }
 
-void JsonTest::parseNull() {
-    Containers::Optional<Json> json = Json::fromString("null");
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseNull(), nullptr);
-}
-
 void JsonTest::parseNulls() {
+    auto&& data = ParseNullData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
     Containers::String jsonData = "null";
     Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
@@ -1401,7 +1434,10 @@ void JsonTest::parseNulls() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseLiterals(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseLiterals(json->root()));
+        else
+            CORRADE_COMPARE(json->parseNull(json->root()), nullptr);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1410,21 +1446,11 @@ void JsonTest::parseNulls() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asNull(), nullptr);
-        CORRADE_COMPARE(json->root().parseNull(), nullptr);
 
         /* Corrupt the original string. Next time it should use the cached
            value */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseBool() {
-    auto&& data = ParseBoolData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseBool(), data.expected);
 }
 
 void JsonTest::parseBools() {
@@ -1444,7 +1470,10 @@ void JsonTest::parseBools() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseLiterals(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseLiterals(json->root()));
+        else
+            CORRADE_COMPARE(json->parseBool(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1453,21 +1482,11 @@ void JsonTest::parseBools() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asBool(), data.expected);
-        CORRADE_COMPARE(json->root().parseBool(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseDouble() {
-    auto&& data = ParseDoubleOrFloatData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseDouble(), data.expected);
 }
 
 void JsonTest::parseDoubles() {
@@ -1487,7 +1506,10 @@ void JsonTest::parseDoubles() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseDoubles(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseDoubles(json->root()));
+        else
+            CORRADE_COMPARE(json->parseDouble(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1496,21 +1518,11 @@ void JsonTest::parseDoubles() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asDouble(), data.expected);
-        CORRADE_COMPARE(json->root().parseDouble(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseFloat() {
-    auto&& data = ParseDoubleOrFloatData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseFloat(), float(data.expected));
 }
 
 void JsonTest::parseFloats() {
@@ -1530,7 +1542,10 @@ void JsonTest::parseFloats() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseFloats(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseFloats(json->root()));
+        else
+            CORRADE_COMPARE(json->parseFloat(json->root()), float(data.expected));
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1539,21 +1554,11 @@ void JsonTest::parseFloats() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asFloat(), float(data.expected));
-        CORRADE_COMPARE(json->root().parseFloat(), float(data.expected));
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseUnsignedInt() {
-    auto&& data = ParseUnsignedIntData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseUnsignedInt(), data.expected);
 }
 
 void JsonTest::parseUnsignedInts() {
@@ -1573,7 +1578,10 @@ void JsonTest::parseUnsignedInts() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
+        else
+            CORRADE_COMPARE(json->parseUnsignedInt(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1582,21 +1590,11 @@ void JsonTest::parseUnsignedInts() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asUnsignedInt(), data.expected);
-        CORRADE_COMPARE(json->root().parseUnsignedInt(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseInt() {
-    auto&& data = ParseIntData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseInt(), data.expected);
 }
 
 void JsonTest::parseInts() {
@@ -1616,7 +1614,10 @@ void JsonTest::parseInts() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseInts(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseInts(json->root()));
+        else
+            CORRADE_COMPARE(json->parseInt(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1625,21 +1626,11 @@ void JsonTest::parseInts() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asInt(), data.expected);
-        CORRADE_COMPARE(json->root().parseInt(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseUnsignedLong() {
-    auto&& data = ParseUnsignedLongData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseUnsignedLong(), data.expected);
 }
 
 void JsonTest::parseUnsignedLongs() {
@@ -1659,7 +1650,10 @@ void JsonTest::parseUnsignedLongs() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
+        else
+            CORRADE_COMPARE(json->parseUnsignedLong(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1668,21 +1662,11 @@ void JsonTest::parseUnsignedLongs() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asUnsignedLong(), data.expected);
-        CORRADE_COMPARE(json->root().parseUnsignedLong(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseLong() {
-    auto&& data = ParseLongData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseLong(), data.expected);
 }
 
 void JsonTest::parseLongs() {
@@ -1702,7 +1686,10 @@ void JsonTest::parseLongs() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseLongs(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseLongs(json->root()));
+        else
+            CORRADE_COMPARE(json->parseLong(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1711,25 +1698,11 @@ void JsonTest::parseLongs() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asLong(), data.expected);
-        CORRADE_COMPARE(json->root().parseLong(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseSize() {
-    #ifndef CORRADE_TARGET_32BIT
-    auto&& data = ParseUnsignedLongData[testCaseInstanceId()];
-    #else
-    auto&& data = ParseUnsignedIntData[testCaseInstanceId()];
-    #endif
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseSize(), data.expected);
 }
 
 void JsonTest::parseSizes() {
@@ -1753,7 +1726,10 @@ void JsonTest::parseSizes() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseSizes(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseSizes(json->root()));
+        else
+            CORRADE_COMPARE(json->parseSize(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1762,21 +1738,11 @@ void JsonTest::parseSizes() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
         CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asSize(), data.expected);
-        CORRADE_COMPARE(json->root().parseSize(), data.expected);
 
         /* Corrupt the original string. Next time it should use the cached
            value. */
         jsonData[0] = 'x';
     }
-}
-
-void JsonTest::parseString() {
-    auto&& data = ParseStringData[testCaseInstanceId()];
-    setTestCaseDescription(data.name);
-
-    Containers::Optional<Json> json = Json::fromString(data.json);
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->root().parseString(), Containers::String{data.expected});
 }
 
 void JsonTest::parseStringKeys() {
@@ -1802,7 +1768,10 @@ void JsonTest::parseStringKeys() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseStringKeys(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseStringKeys(json->root()));
+        else
+            CORRADE_COMPARE(json->parseString(token), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(token.isParsed());
@@ -1817,7 +1786,6 @@ void JsonTest::parseStringKeys() {
         CORRADE_COMPARE(token.asString(), data.expected);
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(token.parseString(), Containers::String{data.expected});
 
         /* If the input is global but escaped (i.e., expected no longer global),
            corrupt the original string. Next time it should use the cached
@@ -1850,7 +1818,10 @@ void JsonTest::parseStrings() {
        behavior, internally it should just skip parsing */
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
-        CORRADE_VERIFY(json->parseStrings(json->root()));
+        if(!data.singleValue)
+            CORRADE_VERIFY(json->parseStrings(json->root()));
+        else
+            CORRADE_COMPARE(json->parseString(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -1865,7 +1836,6 @@ void JsonTest::parseStrings() {
         CORRADE_COMPARE(json->root().asString(), data.expected);
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(json->root().parseString(), Containers::String{data.expected});
 
         /* If the input is global but escaped (i.e., expected no longer global),
            corrupt the original string. Next time it should use the cached
@@ -2001,6 +1971,40 @@ void JsonTest::reparseNumberDifferentType() {
     CORRADE_COMPARE(token.asDouble(), 35.0);
 }
 
+void JsonTest::reparseSingleNumberDifferentType() {
+    /* It should be possible to reparse a token with different numeric types
+       several times over */
+
+    Containers::Optional<Json> json = Json::fromString("35");
+    CORRADE_VERIFY(json);
+
+    const JsonToken& token = json->root();
+    CORRADE_COMPARE(json->parseDouble(token), 35.0);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Double);
+
+    CORRADE_COMPARE(json->parseFloat(token), 35.0f);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+
+    CORRADE_COMPARE(json->parseUnsignedInt(token), 35);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::UnsignedInt);
+
+    CORRADE_COMPARE(json->parseInt(token), 35);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Int);
+
+    CORRADE_COMPARE(json->parseUnsignedLong(token), 35);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::UnsignedLong);
+
+    CORRADE_COMPARE(json->parseLong(token), 35);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Long);
+
+    CORRADE_COMPARE(json->parseSize(token), 35);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Size);
+
+    /* ... and back again */
+    CORRADE_COMPARE(json->parseDouble(token), 35.0);
+    CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Double);
+}
+
 void JsonTest::parseError() {
     auto&& data = ParseErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -2039,22 +2043,22 @@ void JsonTest::parseOptionError() {
     CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
 }
 
-void JsonTest::parseDirectError() {
+void JsonTest::parseSingleError() {
     /* The particular corner cases got all tested in parseError(), here just
        verifying that the error gets correctly propagated also when using
-       JsonToken::parseWhatever() */
+       Json::parseWhatever() */
 
-    auto&& data = ParseDirectErrorData[testCaseInstanceId()];
+    auto&& data = ParseSingleErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::Optional<Json> json = Json::fromString(format("\n\n     {}", data.json));
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!data.function(json->root()));
+    CORRADE_VERIFY(!data.function(*json));
     if(data.message)
-        CORRADE_COMPARE(out.str(), formatString("Utility::JsonToken::{}\n", data.message));
+        CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:3:6\n", data.message));
     else
         CORRADE_COMPARE(out.str(), "");
 }
@@ -2081,6 +2085,17 @@ void JsonTest::parseTokenNotOwned() {
     json->parseSizes(token);
     json->parseStringKeys(token);
     json->parseStrings(token);
+
+    json->parseNull(token);
+    json->parseBool(token);
+    json->parseDouble(token);
+    json->parseFloat(token);
+    json->parseUnsignedInt(token);
+    json->parseInt(token);
+    json->parseUnsignedLong(token);
+    json->parseLong(token);
+    json->parseSize(token);
+    json->parseString(token);
     const char* expected =
         "Utility::Json::parseLiterals(): token not owned by the instance\n"
         "Utility::Json::parseDoubles(): token not owned by the instance\n"
@@ -2095,7 +2110,18 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseUnsignedInts(): token not owned by the instance\n"
         #endif
         "Utility::Json::parseStringKeys(): token not owned by the instance\n"
-        "Utility::Json::parseStrings(): token not owned by the instance\n";
+        "Utility::Json::parseStrings(): token not owned by the instance\n"
+
+        "Utility::Json::parseNull(): token not owned by the instance\n"
+        "Utility::Json::parseBool(): token not owned by the instance\n"
+        "Utility::Json::parseDouble(): token not owned by the instance\n"
+        "Utility::Json::parseFloat(): token not owned by the instance\n"
+        "Utility::Json::parseUnsignedInt(): token not owned by the instance\n"
+        "Utility::Json::parseInt(): token not owned by the instance\n"
+        "Utility::Json::parseUnsignedLong(): token not owned by the instance\n"
+        "Utility::Json::parseLong(): token not owned by the instance\n"
+        "Utility::Json::parseSize(): token not owned by the instance\n"
+        "Utility::Json::parseString(): token not owned by the instance\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 

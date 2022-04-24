@@ -777,6 +777,7 @@ if(const Utility::JsonToken* mesh = nodeI->find("mesh"))
 }
 
 {
+Containers::Optional<Utility::Json> json;
 const Utility::JsonToken* nodeI{};
 std::size_t i{};
 /* [Json-usage-checks] */
@@ -785,19 +786,19 @@ if(nodeI->type() != Utility::JsonToken::Type::Object)
     Utility::Fatal{} << "Node element is not an object";
 
 if(const Utility::JsonToken* name = nodeI->find("name")) {
-    if(Containers::Optional<Containers::String> value = name->parseString())
+    if(Containers::Optional<Containers::StringView> value = json->parseString(*name))
         Utility::Debug{} << "Node" << i << "is named" << value;
     else
-        Utility::Fatal{} << "Node name is not a string";
+        Utility::Fatal{} << "Node name is not a valid string";
 }
 /* [Json-usage-checks] */
 
 /* [Json-usage-checks2] */
 if(const Utility::JsonToken* name = nodeI->find("mesh")) {
-    if(Containers::Optional<unsigned> value = name->parseUnsignedInt())
+    if(Containers::Optional<unsigned> value = json->parseUnsignedInt(*name))
         Utility::Debug{} << "Node" << i << "has a mesh" << value;
     else
-        Utility::Fatal{} << "Node mesh is not an index";
+        Utility::Fatal{} << "Node mesh is not a valid index";
 }
 /* [Json-usage-checks2] */
 }
@@ -819,7 +820,7 @@ for(Utility::JsonArrayItem node: nodes->asArray()) {
         if(property.key() == "name")
             parsedNode.name = property.value().asString();
         else if(property.key() == "mesh")
-            parsedNode.mesh = *property.value().parseUnsignedInt();
+            parsedNode.mesh = property.value().asFloat();
         DOXYGEN_ELLIPSIS()
     }
 
@@ -850,18 +851,21 @@ if(!nodeI || !json->parseLiterals(*nodeI) || !json->parseStrings(*nodeI))
 /* [Json-usage-selective-parsing] */
 
 /* [Json-usage-selective-parsing2] */
-for(Utility::JsonObjectItem property: nodeI->asObject()) {
-    if(property.key() == "mesh") {
-        json->parseUnsignedInts(property);
-        DOXYGEN_ELLIPSIS()
-    } else if(property.key() == "translation") {
-        json->parseFloats(property);
-        DOXYGEN_ELLIPSIS()
-    } else if(property.key() == "children") {
-        json->parseUnsignedInts(property);
-        DOXYGEN_ELLIPSIS()
-    } else DOXYGEN_ELLIPSIS({})
+if(const Utility::JsonToken* mesh = nodeI->find("mesh")) {
+    Containers::Optional<unsigned> id = json->parseUnsignedInt(*mesh);
+    if(!id)
+        Utility::Fatal{} << "Node" << i << "has invalid mesh reference";
+    DOXYGEN_ELLIPSIS()
 }
+
+if(const Utility::JsonToken* camera = nodeI->find("camera")) {
+    Containers::Optional<unsigned> id = json->parseUnsignedInt(*camera);
+    if(!id)
+        Utility::Fatal{} << "Node" << i << "has invalid camera reference";
+    DOXYGEN_ELLIPSIS()
+}
+
+DOXYGEN_ELLIPSIS()
 /* [Json-usage-selective-parsing2] */
 }
 
