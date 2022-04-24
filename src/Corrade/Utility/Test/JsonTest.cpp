@@ -701,33 +701,63 @@ const struct {
     {"null", [](const JsonToken& token) { return !!token.parseNull(); },
         "none",
         "parseNull(): invalid null literal none"},
+    {"null but a numeric token", [](const JsonToken& token) { return !!token.parseNull(); },
+        "35.7",
+        nullptr},
     {"bool", [](const JsonToken& token) { return !!token.parseBool(); },
         "fail",
         "parseBool(): invalid bool literal fail"},
+    {"bool but a null token", [](const JsonToken& token) { return !!token.parseBool(); },
+        "null",
+        nullptr},
     {"double", [](const JsonToken& token) { return !!token.parseDouble(); },
         "75x",
         "parseDouble(): invalid floating-point literal 75x"},
+    {"double but a string token", [](const JsonToken& token) { return !!token.parseDouble(); },
+        "\"75\"",
+        nullptr},
     {"float", [](const JsonToken& token) { return !!token.parseFloat(); },
         "75x",
         "parseFloat(): invalid floating-point literal 75x"},
+    {"float but a bool token", [](const JsonToken& token) { return !!token.parseFloat(); },
+        "false",
+        nullptr},
     {"unsigned int", [](const JsonToken& token) { return !!token.parseUnsignedInt(); },
         "75x",
         "parseUnsignedInt(): invalid unsigned integer literal 75x"},
+    {"unsigned int but a null token", [](const JsonToken& token) { return !!token.parseUnsignedInt(); },
+        "null",
+        nullptr},
     {"int", [](const JsonToken& token) { return !!token.parseInt(); },
         "75x",
         "parseInt(): invalid integer literal 75x"},
+    {"int but an array token", [](const JsonToken& token) { return !!token.parseInt(); },
+        "[]",
+        nullptr},
     {"unsigned long", [](const JsonToken& token) { return !!token.parseUnsignedLong(); },
         "75x",
         "parseUnsignedLong(): invalid unsigned integer literal 75x"},
+    {"unsigned long but an object token", [](const JsonToken& token) { return !!token.parseUnsignedLong(); },
+        "{}",
+        nullptr},
     {"long", [](const JsonToken& token) { return !!token.parseLong(); },
         "75x",
         "parseLong(): invalid integer literal 75x"},
+    {"long but a string token", [](const JsonToken& token) { return !!token.parseLong(); },
+        "\"75\"",
+        nullptr},
     {"size", [](const JsonToken& token) { return !!token.parseSize(); },
         "75x",
         "parseSize(): invalid unsigned integer literal 75x"},
+    {"size but a bool token", [](const JsonToken& token) { return !!token.parseSize(); },
+        "true",
+        nullptr},
     {"string", [](const JsonToken& token) { return !!token.parseString(); },
         "\"\\undefined\"",
-        "parseString(): sorry, unicode escape sequences are not implemented yet"}
+        "parseString(): sorry, unicode escape sequences are not implemented yet"},
+    {"string but a null token", [](const JsonToken& token) { return !!token.parseString(); },
+        "null",
+        nullptr}
 };
 
 JsonTest::JsonTest() {
@@ -1977,7 +2007,10 @@ void JsonTest::parseDirectError() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!data.function(json->root()));
-    CORRADE_COMPARE(out.str(), formatString("Utility::JsonToken::{}\n", data.message));
+    if(data.message)
+        CORRADE_COMPARE(out.str(), formatString("Utility::JsonToken::{}\n", data.message));
+    else
+        CORRADE_COMPARE(out.str(), "");
 }
 
 void JsonTest::parseTokenNotOwned() {
