@@ -745,58 +745,58 @@ if(watcher.hasChanged()) {
 {
 std::size_t i{};
 /* [Json-usage] */
-Containers::Optional<Utility::Json> json =
+Containers::Optional<Utility::Json> gltf =
     Utility::Json::fromFile("scene.gltf",
         Utility::Json::Option::ParseLiterals|
         Utility::Json::Option::ParseFloats|
         Utility::Json::Option::ParseStrings);
-if(!json)
+if(!gltf)
     Utility::Fatal{} << "Whoops!";
 
-const Utility::JsonToken& nodeI = json->root()["nodes"][i];
+const Utility::JsonToken& gltfNode = gltf->root()["nodes"][i];
 Utility::Debug{}
-    << "Node" << i << "is named" << nodeI["name"].asString()
-    << "and has a mesh" << nodeI["mesh"].asFloat();
+    << "Node" << i << "is named" << gltfNode["name"].asString()
+    << "and has a mesh" << gltfNode["mesh"].asFloat();
 /* [Json-usage] */
 }
 
 {
-Containers::Optional<Utility::Json> json;
+Containers::Optional<Utility::Json> gltf;
 std::size_t i{};
 /* [Json-usage-find] */
-const Utility::JsonToken *nodes, *nodeI;
-if(!(nodes = json->root().find("nodes")) || !(nodeI = nodes->find(i)))
+const Utility::JsonToken * gltfNodes, *gltfNode;
+if(!(gltfNodes = gltf->root().find("nodes")) || !(gltfNode = gltfNodes->find(i)))
     Utility::Fatal{} << "Node" << i << "is not in the file";
 
-if(const Utility::JsonToken* name = nodeI->find("name"))
-    Utility::Debug{} << "Node" << i << "is named" << name->asString();
+if(const Utility::JsonToken* gltfName = gltfNode->find("name"))
+    Utility::Debug{} << "Node" << i << "is named" << gltfName->asString();
 
-if(const Utility::JsonToken* mesh = nodeI->find("mesh"))
-    Utility::Debug{} << "Node" << i << "has a mesh" << mesh->asFloat();
+if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh"))
+    Utility::Debug{} << "Node" << i << "has a mesh" << gltfMesh->asFloat();
 /* [Json-usage-find] */
 }
 
 {
-Containers::Optional<Utility::Json> json;
-const Utility::JsonToken* nodeI{};
+Containers::Optional<Utility::Json> gltf;
+const Utility::JsonToken* gltfNode{};
 std::size_t i{};
 /* [Json-usage-checks] */
 DOXYGEN_ELLIPSIS()
-if(nodeI->type() != Utility::JsonToken::Type::Object)
+if(gltfNode->type() != Utility::JsonToken::Type::Object)
     Utility::Fatal{} << "Node element is not an object";
 
-if(const Utility::JsonToken* name = nodeI->find("name")) {
-    if(Containers::Optional<Containers::StringView> value = json->parseString(*name))
-        Utility::Debug{} << "Node" << i << "is named" << value;
+if(const Utility::JsonToken* gltfName = gltfNode->find("name")) {
+    if(Containers::Optional<Containers::StringView> s = gltf->parseString(*gltfName))
+        Utility::Debug{} << "Node" << i << "is named" << s;
     else
         Utility::Fatal{} << "Node name is not a valid string";
 }
 /* [Json-usage-checks] */
 
 /* [Json-usage-checks2] */
-if(const Utility::JsonToken* name = nodeI->find("mesh")) {
-    if(Containers::Optional<unsigned> value = json->parseUnsignedInt(*name))
-        Utility::Debug{} << "Node" << i << "has a mesh" << value;
+if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh")) {
+    if(Containers::Optional<unsigned> n = gltf->parseUnsignedInt(*gltfMesh))
+        Utility::Debug{} << "Node" << i << "has a mesh" << n;
     else
         Utility::Fatal{} << "Node mesh is not a valid index";
 }
@@ -804,62 +804,62 @@ if(const Utility::JsonToken* name = nodeI->find("mesh")) {
 }
 
 {
-const Utility::JsonToken *nodes{};
+const Utility::JsonToken *gltfNodes{};
 /* [Json-usage-iteration] */
 struct Node {
     Containers::StringView name;
     unsigned mesh;
 };
-Containers::Array<Node> parsedNodes;
+Containers::Array<Node> nodes;
 
-for(Utility::JsonArrayItem node: nodes->asArray()) {
-    Utility::Debug{} << "Parsing node" << node.index();
+for(Utility::JsonArrayItem gltfNode: gltfNodes->asArray()) {
+    Utility::Debug{} << "Parsing node" << gltfNode.index();
 
-    Node parsedNode;
-    for(Utility::JsonObjectItem property: node.value().asObject()) {
-        if(property.key() == "name")
-            parsedNode.name = property.value().asString();
-        else if(property.key() == "mesh")
-            parsedNode.mesh = property.value().asFloat();
+    Node node;
+    for(Utility::JsonObjectItem gltfNodeProperty: gltfNode.value().asObject()) {
+        if(gltfNodeProperty.key() == "name")
+            node.name = gltfNodeProperty.value().asString();
+        else if(gltfNodeProperty.key() == "mesh")
+            node.mesh = gltfNodeProperty.value().asFloat();
         DOXYGEN_ELLIPSIS()
     }
 
-    arrayAppend(parsedNodes, parsedNode);
+    arrayAppend(nodes, node);
 }
 /* [Json-usage-iteration] */
 }
 
 {
-const Utility::JsonToken *nodes{};
+const Utility::JsonToken *gltfNodes{};
 /* [Json-usage-iteration-values] */
-Containers::Array<Containers::Reference<const Utility::JsonToken>> nodeMap;
-for(const Utility::JsonToken& node: nodes->asArray())
-    arrayAppend(nodeMap, node);
+Containers::Array<Containers::Reference<const Utility::JsonToken>> gltfNodeMap;
+for(const Utility::JsonToken& gltfNode: gltfNodes->asArray())
+    arrayAppend(gltfNodeMap, gltfNode);
 /* [Json-usage-iteration-values] */
 }
 
 {
 std::size_t i{};
 /* [Json-usage-selective-parsing] */
-Containers::Optional<Utility::Json> json = Utility::Json::fromFile("scene.gltf",
+Containers::Optional<Utility::Json> gltf = Utility::Json::fromFile("scene.gltf",
     Utility::Json::Option::ParseStringKeys);
 DOXYGEN_ELLIPSIS()
 
-const Utility::JsonToken* nodeI = json->root()["nodes"].find(i);
-if(!nodeI || !json->parseLiterals(*nodeI) || !json->parseStrings(*nodeI))
+const Utility::JsonToken* gltfNode = gltf->root()["nodes"].find(i);
+if(!gltfNode || !gltf->parseLiterals(*gltfNode) || !gltf->parseStrings(*gltfNode))
     Utility::Fatal{} << "Can't parse node" << i;
 /* [Json-usage-selective-parsing] */
 
 /* [Json-usage-selective-parsing2] */
-if(const Utility::JsonToken* mesh = nodeI->find("mesh")) {
-    Containers::Optional<unsigned> id = json->parseUnsignedInt(*mesh);
+if(const Utility::JsonToken* gltfNodeMesh = gltfNode->find("mesh")) {
+    Containers::Optional<unsigned> id = gltf->parseUnsignedInt(*gltfNodeMesh);
     if(!id)
         Utility::Fatal{} << "Node" << i << "has invalid mesh reference";
     DOXYGEN_ELLIPSIS()
 }
 
-if(const Utility::JsonToken* camera = nodeI->find("camera")) {
-    Containers::Optional<unsigned> id = json->parseUnsignedInt(*camera);
+if(const Utility::JsonToken* camera = gltfNode->find("camera")) {
+    Containers::Optional<unsigned> id = gltf->parseUnsignedInt(*camera);
     if(!id)
         Utility::Fatal{} << "Node" << i << "has invalid camera reference";
     DOXYGEN_ELLIPSIS()
@@ -870,20 +870,20 @@ DOXYGEN_ELLIPSIS()
 }
 
 {
-Containers::Optional<Utility::Json> json;
-const Utility::JsonToken& node = json->root();
+Containers::Optional<Utility::Json> gltf;
+const Utility::JsonToken& gltfNode = gltf->root();
 /* [Json-usage-direct-array-access] */
-const Utility::JsonToken& nodeTranslation = node["translation"];
+const Utility::JsonToken& gltfNodeTranslation = gltfNode["translation"];
 Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
-if(!json->parseFloats(nodeTranslation) ||
-   !(translation = nodeTranslation.asFloatArray()) ||
+if(!gltf->parseFloats(gltfNodeTranslation) ||
+   !(translation = gltfNodeTranslation.asFloatArray()) ||
    translation->size() != 3)
     Utility::Fatal{} << "Node translation is not a 3-component float vector";
 
-const Utility::JsonToken& nodeChildren = node["children"];
+const Utility::JsonToken& gltfNodeChildren = gltfNode["children"];
 Containers::Optional<Containers::StridedArrayView1D<const unsigned>> children;
-if(!json->parseUnsignedInts(nodeChildren) ||
-   !(children = nodeChildren.asUnsignedIntArray()))
+if(!gltf->parseUnsignedInts(gltfNodeChildren) ||
+   !(children = gltfNodeChildren.asUnsignedIntArray()))
     Utility::Fatal{} << "Node children is not an index list";
 
 // use the translation and children arrays …
