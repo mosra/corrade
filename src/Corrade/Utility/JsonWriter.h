@@ -54,6 +54,8 @@ fly. It is thus not possible to go for example go back and add values to
 existing objects or arrays --- if that's desired, one option is to use multiple
 @ref JsonWriter instances and concatenate them together, as shown later on.
 
+@experimental
+
 @section Utility-JsonWriter-usage Usage
 
 The following writes a very minimal glTF file, pretty-printed with two-space

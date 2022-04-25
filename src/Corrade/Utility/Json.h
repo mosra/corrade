@@ -58,6 +58,8 @@ encouraged to build them on top of the parsed output.
 The @ref JsonWriter class provides a write-only counterpart for saving a JSON
 file.
 
+@experimental
+
 @section Utility-Json-usage Usage
 
 The following snippet opens a very minimal
@@ -933,6 +935,8 @@ class CORRADE_UTILITY_EXPORT Json {
 
 Represents an object, array, null, boolean, numeric or a string value in a JSON
 file. See the @ref Json class documentation for more information.
+
+@experimental
 */
 class CORRADE_UTILITY_EXPORT JsonToken {
     public:
@@ -1872,6 +1876,8 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, JsonToken::ParsedType val
 
 Returned when iterating @ref JsonToken::asObject(). See
 @ref Utility-Json-usage-iteration for more information.
+
+@experimental
 */
 class CORRADE_UTILITY_EXPORT JsonObjectItem {
     public:
@@ -1915,6 +1921,8 @@ class CORRADE_UTILITY_EXPORT JsonObjectItem {
 
 Returned when iterating @ref JsonToken::asObject(). See
 @ref Utility-Json-usage-iteration for more information.
+
+@experimental
 */
 class JsonArrayItem {
     public:
@@ -1945,6 +1953,8 @@ class JsonArrayItem {
 Iterator for @ref JsonView, which is returned from @ref JsonToken::asObject()
 and @ref JsonToken::asArray(). See @ref Utility-Json-usage-iteration for more
 information.
+
+@experimental
 */
 template<class T> class JsonIterator {
     public:
@@ -1991,6 +2001,8 @@ template<class T> class JsonIterator {
 
 Returned from @ref JsonToken::asObject() and @ref JsonToken::asArray(). See
 @ref Utility-Json-usage-iteration for more information.
+
+@experimental
 */
 template<class T> class JsonView {
     public:
