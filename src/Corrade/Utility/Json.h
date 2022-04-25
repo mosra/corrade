@@ -292,7 +292,7 @@ class CORRADE_UTILITY_EXPORT Json {
             ParseDoubles = 1 << 1,
 
             /**
-             * Parse all numbers as 32-bit floating point values. Causes all
+             * Parse all numbers as 32-bit floating-point values. Causes all
              * @ref JsonToken instances of @ref JsonToken::Type::Number to
              * become @ref JsonToken::ParsedType::Float and be accessible
              * through @ref JsonToken::asFloat(). If both
@@ -661,7 +661,7 @@ class CORRADE_UTILITY_EXPORT Json {
         Containers::Optional<bool> parseBool(const JsonToken& token);
 
         /**
-         * @brief Check and parse a 64-bit floating point token
+         * @brief Check and parse a 64-bit floating-point token
          *
          * If @p token is not a @ref JsonToken::Type::Number or is not a valid
          * numeric value, prints an error and returns @ref Containers::NullOpt.
@@ -673,11 +673,11 @@ class CORRADE_UTILITY_EXPORT Json {
         Containers::Optional<double> parseDouble(const JsonToken& token);
 
         /**
-         * @brief Check and parse a 32-bit floating point token
+         * @brief Check and parse a 32-bit floating-point token
          *
          * If @p token is not a @ref JsonToken::Type::Number or is not a valid
          * numeric value, prints an error and returns @ref Containers::NullOpt.
-         * Precision that doesn't fit into the 32-bit floating point
+         * Precision that doesn't fit into the 32-bit floating-point
          * representation is truncated, use @ref parseDouble() to get the full
          * precision. If the token is already parsed as
          * @ref JsonToken::ParsedType::Float, returns the cached value,
@@ -697,7 +697,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::UnsignedInt, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asUnsignedInt()
+         * @see @ref JsonToken::asUnsignedInt(), @ref parseSize()
          */
         Containers::Optional<std::uint32_t> parseUnsignedInt(const JsonToken& token);
 
@@ -726,7 +726,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asUnsignedLong()
+         * @see @ref JsonToken::asUnsignedLong(), @ref parseSize()
          */
         Containers::Optional<std::uint64_t> parseUnsignedLong(const JsonToken& token);
 
@@ -1370,7 +1370,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         bool asBool() const;
 
         /**
-         * @brief Get a parsed 64-bit floating point value
+         * @brief Get a parsed 64-bit floating-point value
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Double. If not, use @ref Json::parseDouble()
@@ -1381,7 +1381,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         double asDouble() const;
 
         /**
-         * @brief Get a parsed 32-bit floating point value
+         * @brief Get a parsed 32-bit floating-point value
          *
          * Expects that the token is already parsed as a
          * @ref ParsedType::Float. If not, use @ref Json::parseFloat() instead.
@@ -1396,7 +1396,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the token is already parsed as a
          * @ref ParsedType::UnsignedInt. If not, use
          * @ref Json::parseUnsignedInt() instead.
-         * @see @ref Json::parseUnsignedInts(), @ref asUnsignedIntArray()
+         * @see @ref Json::parseUnsignedInts(), @ref asUnsignedIntArray(),
+         *      @ref asSize()
          */
         std::uint32_t asUnsignedInt() const;
 
@@ -1415,7 +1416,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the value is already parsed as a
          * @ref ParsedType::UnsignedLong. If not, use
          * @ref Json::parseUnsignedLong() instead.
-         * @see @ref Json::parseUnsignedLongs(), @ref asUnsignedLongArray()
+         * @see @ref Json::parseUnsignedLongs(), @ref asUnsignedLongArray(),
+         *      @ref asSize()
          */
         std::uint64_t asUnsignedLong() const;
 
