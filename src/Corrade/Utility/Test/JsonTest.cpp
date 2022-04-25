@@ -372,6 +372,9 @@ const struct {
     {"global literal",
         "\"hello!\""_s,
         "hello!"_s},
+    {"global escaped literal",
+        "\"hell\\\"o\\\"!\""_s,
+        "hell\"o\"!"}
 };
 
 const struct {
@@ -1792,7 +1795,7 @@ void JsonTest::parseStringKeys() {
         /** @todo how to actually verify? by corrupting the JSON underneath? */
         CORRADE_COMPARE(token.asString(), data.expected);
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
-            data.json.flags() & ~Containers::StringViewFlag::NullTerminated);
+            data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
         CORRADE_COMPARE(token.parseString(), Containers::String{data.expected});
     }
 }
@@ -1825,7 +1828,7 @@ void JsonTest::parseStrings() {
         /** @todo how to actually verify? by corrupting the JSON underneath? */
         CORRADE_COMPARE(json->root().asString(), data.expected);
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
-            data.json.flags() & ~Containers::StringViewFlag::NullTerminated);
+            data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
         CORRADE_COMPARE(json->root().parseString(), Containers::String{data.expected});
     }
 }
