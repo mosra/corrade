@@ -1243,7 +1243,7 @@ bool Json::parseLongs(const JsonToken& token) {
            longs */
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::Number ||
-           nestedToken.parsedType() == JsonToken::ParsedType::Int)
+           nestedToken.parsedType() == JsonToken::ParsedType::Long)
             continue;
 
         /* Not saving to token._parsedUnsignedLong directly to avoid a failure

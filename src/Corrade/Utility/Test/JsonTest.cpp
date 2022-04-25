@@ -1388,12 +1388,14 @@ void JsonTest::parseNull() {
 }
 
 void JsonTest::parseNulls() {
-    Containers::Optional<Json> json = Json::fromString("null");
+    Containers::String jsonData = "null";
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Null);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), "null");
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1405,12 +1407,14 @@ void JsonTest::parseNulls() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Null);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data(), "null");
-
-        /* both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asNull(), nullptr);
         CORRADE_COMPARE(json->root().parseNull(), nullptr);
+
+        /* Corrupt the original string. Next time it should use the cached
+           value */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1427,12 +1431,14 @@ void JsonTest::parseBools() {
     auto&& data = ParseBoolData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Bool);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1444,12 +1450,14 @@ void JsonTest::parseBools() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Bool);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asBool(), data.expected);
         CORRADE_COMPARE(json->root().parseBool(), data.expected);
+
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1466,12 +1474,14 @@ void JsonTest::parseDoubles() {
     auto&& data = ParseDoubleOrFloatData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1483,15 +1493,14 @@ void JsonTest::parseDoubles() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Double);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asDouble(), data.expected);
         CORRADE_COMPARE(json->root().parseDouble(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseFloat(), float(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1508,12 +1517,14 @@ void JsonTest::parseFloats() {
     auto&& data = ParseDoubleOrFloatData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1525,15 +1536,14 @@ void JsonTest::parseFloats() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Float);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asFloat(), float(data.expected));
         CORRADE_COMPARE(json->root().parseFloat(), float(data.expected));
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), data.expected);
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1550,12 +1560,14 @@ void JsonTest::parseUnsignedInts() {
     auto&& data = ParseUnsignedIntData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1567,15 +1579,14 @@ void JsonTest::parseUnsignedInts() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::UnsignedInt);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asUnsignedInt(), data.expected);
         CORRADE_COMPARE(json->root().parseUnsignedInt(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1592,12 +1603,14 @@ void JsonTest::parseInts() {
     auto&& data = ParseIntData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1609,15 +1622,14 @@ void JsonTest::parseInts() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Int);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asInt(), data.expected);
         CORRADE_COMPARE(json->root().parseInt(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1634,12 +1646,14 @@ void JsonTest::parseUnsignedLongs() {
     auto&& data = ParseUnsignedLongData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1651,15 +1665,14 @@ void JsonTest::parseUnsignedLongs() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::UnsignedLong);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asUnsignedLong(), data.expected);
         CORRADE_COMPARE(json->root().parseUnsignedLong(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1676,12 +1689,14 @@ void JsonTest::parseLongs() {
     auto&& data = ParseLongData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1693,15 +1708,14 @@ void JsonTest::parseLongs() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Long);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asLong(), data.expected);
         CORRADE_COMPARE(json->root().parseLong(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1726,12 +1740,14 @@ void JsonTest::parseSizes() {
     #endif
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* Should point to the original string so we can change it below */
+    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1743,15 +1759,14 @@ void JsonTest::parseSizes() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Size);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
         CORRADE_COMPARE(json->root().asSize(), data.expected);
         CORRADE_COMPARE(json->root().parseSize(), data.expected);
 
-        /* Parsing as a different type should parse from scratch */
-        CORRADE_COMPARE(json->root().parseDouble(), double(data.expected));
+        /* Corrupt the original string. Next time it should use the cached
+           value. */
+        jsonData[0] = 'x';
     }
 }
 
@@ -1776,7 +1791,12 @@ void JsonTest::parseStringKeys() {
     CORRADE_VERIFY(!token.isParsed());
     CORRADE_COMPARE(token.type(), JsonToken::Type::String);
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(token.data(), data.json);
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.json.flags() & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(token.data().data(), static_cast<void*>(jsonData.data() + 1));
+    else
+        CORRADE_COMPARE(token.data(), data.json);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1788,15 +1808,23 @@ void JsonTest::parseStringKeys() {
         CORRADE_VERIFY(token.isParsed());
         CORRADE_COMPARE(token.type(), JsonToken::Type::String);
         CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(token.data(), data.json);
-
-        /* Both functions should return a cached value, preserving the global
-           flag */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        if(data.json.flags() & Containers::StringViewFlag::Global) {
+            CORRADE_COMPARE(token.data().data(), static_cast<void*>(jsonData.data() + 1));
+            CORRADE_COMPARE(token.data().size(), data.json.size());
+        } else {
+            CORRADE_COMPARE(token.data(), data.json);
+        }
         CORRADE_COMPARE(token.asString(), data.expected);
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
         CORRADE_COMPARE(token.parseString(), Containers::String{data.expected});
+
+        /* If the input is global but escaped (i.e., expected no longer global),
+           corrupt the original string. Next time it should use the cached
+           string. */
+        if((data.json.flags() & Containers::StringViewFlag::Global) &&
+          !(data.expected.flags() & Containers::StringViewFlag::Global))
+            jsonData[2] = 'x';
     }
 }
 
@@ -1804,12 +1832,19 @@ void JsonTest::parseStrings() {
     auto&& data = ParseStringData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString(data.json);
+    /* Fake-propagate original global flags here */
+    Containers::String jsonData = data.json;
+    Containers::Optional<Json> json = Json::fromString({jsonData.data(), jsonData.size(), data.json.flags()});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::String);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), data.json);
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.json.flags() & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    else
+        CORRADE_COMPARE(json->root().data(), data.json);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -1821,15 +1856,23 @@ void JsonTest::parseStrings() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::String);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data(), data.json);
-
-        /* Both functions should return a cached value, preserving the global
-           flag */
-        /** @todo how to actually verify? by corrupting the JSON underneath? */
+        if(data.json.flags() & Containers::StringViewFlag::Global) {
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+            CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        } else {
+            CORRADE_COMPARE(json->root().data(), jsonData);
+        }
         CORRADE_COMPARE(json->root().asString(), data.expected);
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
         CORRADE_COMPARE(json->root().parseString(), Containers::String{data.expected});
+
+        /* If the input is global but escaped (i.e., expected no longer global),
+           corrupt the original string. Next time it should use the cached
+           string. */
+        if((data.json.flags() & Containers::StringViewFlag::Global) &&
+          !(data.expected.flags() & Containers::StringViewFlag::Global))
+            jsonData[1] = 'x';
     }
 }
 
