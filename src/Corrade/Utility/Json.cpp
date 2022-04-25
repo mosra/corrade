@@ -1677,6 +1677,269 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken& 
     return Containers::StringView{*token._parsedString};
 }
 
+Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBoolArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseBoolArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseBoolArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Bool) {
+            Error err;
+            err << "Utility::Json::parseBoolArray(): expected a bool, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseBoolInternal("Utility::Json::parseBoolArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedBool);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDoubleArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseDoubleArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseDoubleArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseDoubleArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseDoubleInternal("Utility::Json::parseDoubleArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedDouble);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFloatArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseFloatArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseFloatArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseFloatArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseFloatInternal("Utility::Json::parseFloatArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedFloat);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::parseUnsignedIntArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseUnsignedIntArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseUnsignedIntArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseUnsignedIntInternal("Utility::Json::parseUnsignedIntArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedUnsignedInt);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::parseIntArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseIntArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseIntArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseIntArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseIntInternal("Utility::Json::parseIntArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedInt);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::parseUnsignedLongArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseUnsignedLongArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseUnsignedLongArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseUnsignedLongInternal("Utility::Json::parseUnsignedLongArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedUnsignedLong);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::parseLongArray(const JsonToken& token) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseLongArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseLongArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::Number) {
+            Error err;
+            err << "Utility::Json::parseLongArray(): expected a number, got" << i->type() << "at";
+            printFilePosition(err, _state->filename, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseLongInternal("Utility::Json::parseLongArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedLong);
+}
+
+Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> Json::parseSizeArray(const JsonToken& token) {
+    #ifndef CORRADE_TARGET_32BIT
+    const Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = parseUnsignedLongArray(token);
+    #else
+    const Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = parseUnsignedIntArray(token);
+    #endif
+    if(!out) return {};
+
+    return Containers::arrayCast<const std::size_t>(*out);
+}
+
 Containers::StringView JsonToken::data() const {
     /* This could technically be made to preserve the Global flag, but on 32bit
        it would mean it'd have to be stored in two places -- either in the NaN
@@ -1857,7 +2120,7 @@ Containers::StringView JsonToken::asString() const {
     return *_parsedString;
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const bool>> JsonToken::asBoolArray() const {
+Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asBoolArray(): token is a" << type(), {});
 
@@ -1868,16 +2131,19 @@ Containers::Optional<Containers::StridedArrayView1D<const bool>> JsonToken::asBo
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the type() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->type() != Type::Bool || !i->isParsed()) return {};
+        CORRADE_ASSERT(i->type() == Type::Bool && i->isParsed(),
+            "Utility::JsonToken::asBoolArray(): token" << i - this - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedBool);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const double>> JsonToken::asDoubleArray() const {
+Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asDoubleArray(): token is a" << type(), {});
 
@@ -1888,16 +2154,19 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> JsonToken::as
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::Double) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::Double,
+            "Utility::JsonToken::asDoubleArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedDouble);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const float>> JsonToken::asFloatArray() const {
+Containers::StridedArrayView1D<const float> JsonToken::asFloatArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asFloatArray(): token is a" << type(), {});
 
@@ -1908,16 +2177,19 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> JsonToken::asF
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::Float) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::Float,
+            "Utility::JsonToken::asFloatArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedFloat);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> JsonToken::asUnsignedIntArray() const {
+Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asUnsignedIntArray(): token is a" << type(), {});
 
@@ -1928,16 +2200,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> JsonTo
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::UnsignedInt) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::UnsignedInt,
+            "Utility::JsonToken::asUnsignedIntArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedInt);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> JsonToken::asIntArray() const {
+Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asIntArray(): token is a" << type(), {});
 
@@ -1948,16 +2223,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> JsonTok
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::Int) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::Int,
+            "Utility::JsonToken::asIntArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedInt);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> JsonToken::asUnsignedLongArray() const {
+Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asUnsignedLongArray(): token is a" << type(), {});
 
@@ -1968,16 +2246,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> JsonTo
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::UnsignedLong) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::UnsignedLong,
+            "Utility::JsonToken::asUnsignedLongArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedLong);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> JsonToken::asLongArray() const {
+Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray() const {
     CORRADE_ASSERT(type() == Type::Array,
         "Utility::JsonToken::asLongArray(): token is a" << type(), {});
 
@@ -1988,23 +2269,26 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> JsonTok
         _childCountFlagsTypeNan & ChildCountMask
         #endif
         ;
+    #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
        instead of with i->next(). If a nested object or array would be
        encountered, the parsedType() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
-        if(i->parsedType() != ParsedType::Long) return {};
+        CORRADE_ASSERT(i->parsedType() == ParsedType::Long,
+            "Utility::JsonToken::asLongArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedLong);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> JsonToken::asSizeArray() const {
-    #ifndef CORRADE_TARGET_32BIT
-    Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = asUnsignedLongArray();
-    #else
-    Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = asUnsignedIntArray();
-    #endif
-    if(!out) return {};
-    return Containers::arrayCast<const std::size_t>(*out);
+Containers::StridedArrayView1D<const std::size_t> JsonToken::asSizeArray() const {
+    return Containers::arrayCast<const std::size_t>(
+        #ifndef CORRADE_TARGET_32BIT
+        asUnsignedLongArray()
+        #else
+        asUnsignedIntArray()
+        #endif
+    );
 }
 
 Containers::StringView JsonObjectItem::key() const {

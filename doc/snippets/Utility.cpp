@@ -873,18 +873,16 @@ DOXYGEN_ELLIPSIS()
 Containers::Optional<Utility::Json> gltf;
 const Utility::JsonToken& gltfNode = gltf->root();
 /* [Json-usage-direct-array-access] */
-const Utility::JsonToken& gltfNodeTranslation = gltfNode["translation"];
 Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
-if(!gltf->parseFloats(gltfNodeTranslation) ||
-   !(translation = gltfNodeTranslation.asFloatArray()) ||
-   translation->size() != 3)
-    Utility::Fatal{} << "Node translation is not a 3-component float vector";
+if(const Utility::JsonToken* gltfNodeTranslation = gltfNode.find("translation"))
+    if(!(translation = gltf->parseFloatArray(*gltfNodeTranslation)) ||
+         translation->size() != 3)
+        Utility::Fatal{} << "Node translation is not a 3-component float vector";
 
-const Utility::JsonToken& gltfNodeChildren = gltfNode["children"];
 Containers::Optional<Containers::StridedArrayView1D<const unsigned>> children;
-if(!gltf->parseUnsignedInts(gltfNodeChildren) ||
-   !(children = gltfNodeChildren.asUnsignedIntArray()))
-    Utility::Fatal{} << "Node children is not an index list";
+if(const Utility::JsonToken* gltfNodeChildren = gltfNode.find("children"))
+    if(!(children = gltf->parseUnsignedIntArray(*gltfNodeChildren)))
+        Utility::Fatal{} << "Node children is not an index list";
 
 // use the translation and children arrays …
 /* [Json-usage-direct-array-access] */
