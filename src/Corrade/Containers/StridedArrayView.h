@@ -74,12 +74,12 @@ namespace Implementation {
            (which complains about the inability to circumvent this, but not
            about the stupidity of this warning being trigerred in a template
            code) */
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 102
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wtype-limits"
         #endif
         return (first > index ? size[first] : 1)*strideForSizeInternal(size, index, Sequence<next...>{});
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 102
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
         #pragma GCC diagnostic pop
         #endif
     }
