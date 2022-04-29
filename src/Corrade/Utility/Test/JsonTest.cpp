@@ -100,11 +100,11 @@ struct JsonTest: TestSuite::Tester {
 
         void iterator();
         void iterateObject();
-        void iterateObjectValues();
+        void iterateObjectTokens();
         void iterateObjectNotObject();
         void iterateObjectKeyNotParsed();
         void iterateArray();
-        void iterateArrayValues();
+        void iterateArrayTokens();
         void iterateArrayNotArray();
 
         void findObjectKey();
@@ -1067,11 +1067,11 @@ JsonTest::JsonTest() {
               &JsonTest::iterator,
 
               &JsonTest::iterateObject,
-              &JsonTest::iterateObjectValues,
+              &JsonTest::iterateObjectTokens,
               &JsonTest::iterateObjectNotObject,
               &JsonTest::iterateObjectKeyNotParsed,
               &JsonTest::iterateArray,
-              &JsonTest::iterateArrayValues,
+              &JsonTest::iterateArrayTokens,
               &JsonTest::iterateArrayNotArray,
 
               &JsonTest::findObjectKey,
@@ -2682,7 +2682,7 @@ void JsonTest::iterateObject() {
     })), TestSuite::Compare::Container);
 }
 
-void JsonTest::iterateObjectValues() {
+void JsonTest::iterateObjectTokens() {
     Containers::Optional<Json> json = Json::fromString(R"({
         "hello": 3,
         "this": ["is"],
@@ -2695,9 +2695,9 @@ void JsonTest::iterateObjectValues() {
         arrayAppend(data, a.data());
 
     CORRADE_COMPARE_AS(data, Containers::arrayView({
-        "3"_s,
-        "[\"is\"]"_s,
-        "{\"object\": true}"_s
+        "\"hello\""_s,
+        "\"this\""_s,
+        "\"an\""_s
     }), TestSuite::Compare::Container);
 }
 
@@ -2748,7 +2748,7 @@ void JsonTest::iterateArray() {
     })), TestSuite::Compare::Container);
 }
 
-void JsonTest::iterateArrayValues() {
+void JsonTest::iterateArrayTokens() {
     Containers::Optional<Json> json = Json::fromString(R"([
         "hello",
         ["this", "is"],

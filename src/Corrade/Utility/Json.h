@@ -131,8 +131,8 @@ these:
 @snippet Utility.cpp Json-usage-iteration
 
 Both @ref JsonObjectItem and @ref JsonArrayItem is implicitly convertible to a
-@ref JsonToken reference if the array index or object key wouldn't be needed
-in the loop:
+@ref JsonToken reference, giving back either the object key (of which the value
+is @ref JsonToken::firstChild()) or array value.
 
 @snippet Utility.cpp Json-usage-iteration-values
 
@@ -1900,12 +1900,13 @@ class CORRADE_UTILITY_EXPORT JsonObjectItem {
         }
 
         /**
-         * @brief Value
+         * @brief Key token
          *
-         * Equvialent to calling @ref value().
+         * Key is retrivable as @ref JsonToken::asString() on the returned
+         * token, value as @ref JsonToken::firstChild().
          */
         /*implicit*/ operator const JsonToken&() const {
-            return *_token->firstChild();
+            return *_token;
         }
 
     private:
