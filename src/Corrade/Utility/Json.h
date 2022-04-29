@@ -243,6 +243,8 @@ strings the general assumption is that most of them (and especially object
 keys) don't contain any escape characters and thus can be returned as views on
 the input string. Strings containing escape characters are parsed on-demand and
 allocated separately.
+
+@see @ref JsonView, @ref JsonArrayItem, @ref JsonObjectItem
 */
 class CORRADE_UTILITY_EXPORT Json {
     public:
