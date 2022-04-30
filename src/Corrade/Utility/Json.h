@@ -152,13 +152,13 @@ including file, line and column info.
 
 @subsection Utility-Json-usage-iteration Iterating objects and arrays
 
-While the above works sufficiently well for simple use cases, the parser and
-internal representation is optimized for linear consumption rather than lookup
-by keys or values --- those are @f$ \mathcal{O}(n) @f$ operations here. The
-preferred way to consume a parsed @ref Json instance is thus by iterating over
-object and array contents using @ref JsonToken::asObject() and
+So far, we only accessed object and array elements by a concrete key or an
+index. Because the internal representation is optimized for linear consumption
+rather than lookup by keys or values, those are @f$ \mathcal{O}(n) @f$
+operations. If the whole file is being consumed, a more efficient way may be
+iterating over object and array contents using @ref JsonToken::asObject() and
 @relativeref{JsonToken,asArray()} and building your own representation from
-these:
+these instead:
 
 @snippet Utility.cpp Json-usage-iteration
 
@@ -237,8 +237,11 @@ is parsed, it's stored inside. Simply put, the representation exploits the
 fact that a token either has children or is a value, but never both. For
 strings the general assumption is that most of them (and especially object
 keys) don't contain any escape characters and thus can be returned as views on
-the input string. Strings containing escape characters are parsed on-demand and
-allocated separately.
+the input string. Strings containing escape characters are allocated
+separately, either upfront if @ref Option::ParseStrings is set (or if
+@ref Option::ParseStringKeys is set and object keys contain escaped values), or
+on-demand if @ref parseStrings() / @ref parseStringKeys() / @ref parseString()
+is used.
 
 @see @ref JsonView, @ref JsonArrayItem, @ref JsonObjectItem
 */
