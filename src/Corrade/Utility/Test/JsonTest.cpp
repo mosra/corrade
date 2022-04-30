@@ -3310,24 +3310,26 @@ void JsonTest::asTypeWrongType() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("{}");
+    Containers::Optional<Json> json = Json::fromString("[{}]");
     CORRADE_VERIFY(json);
-
-    const JsonToken& root = json->root();
 
     std::ostringstream out;
     Error redirectError{&out};
-    root.asNull();
-    root.asBool();
-    root.asDouble();
-    root.asFloat();
-    root.asUnsignedInt();
-    root.asInt();
-    root.asUnsignedLong();
-    root.asLong();
-    root.asSize();
-    root.asString();
+    json->tokens()[0].asObject();
+    json->tokens()[1].asArray();
+    json->tokens()[1].asNull();
+    json->tokens()[1].asBool();
+    json->tokens()[1].asDouble();
+    json->tokens()[1].asFloat();
+    json->tokens()[1].asUnsignedInt();
+    json->tokens()[1].asInt();
+    json->tokens()[1].asUnsignedLong();
+    json->tokens()[1].asLong();
+    json->tokens()[1].asSize();
+    json->tokens()[1].asString();
     const char* expected =
+        "Utility::JsonToken::asObject(): token is a Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asArray(): token is a Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asNull(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asBool(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
