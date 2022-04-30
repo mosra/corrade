@@ -324,12 +324,12 @@ struct FunctionPointer {
        doesn't. Unfortunately __extension__ that's used inside PluginManager
        doesn't work here (it apparently works only when going from void* to a
        function pointer). */
-    #if defined(__GNUC__) && __GNUC__ < 5
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wpedantic"
     #endif
     template<class R, class ...Args> /*implicit*/ FunctionPointer(R(*address)(Args...)): address{reinterpret_cast<const void*>(address)} {}
-    #ifdef __GNUC__
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
     #pragma GCC diagnostic pop
     #endif
     const void* address;

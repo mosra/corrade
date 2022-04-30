@@ -1054,7 +1054,7 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
         "noexcept move-constructible type is required");
     for(T *src = array, *end = src + prevSize, *dst = newArray; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__ < 5
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
         Implementation::construct(*dst, Utility::move(*src));
         #else
         new(dst) T{Utility::move(*src)};
