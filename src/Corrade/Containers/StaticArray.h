@@ -597,9 +597,9 @@ template<std::size_t size_, class T> class StaticArray {
     private:
         explicit StaticArray(Corrade::DefaultInitT, std::true_type) {}
         /* GCC 5.3 is not able to initialize non-movable types inside
-           constructor initializer list. Reported here:
+           constructor initializer list. Reported here, fixed on 10.3:
            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395 */
-        #if !defined(__GNUC__) || defined(__clang__)
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
         explicit StaticArray(Corrade::DefaultInitT, std::false_type): _data{} {}
         #else
         explicit StaticArray(Corrade::DefaultInitT, std::false_type) {
