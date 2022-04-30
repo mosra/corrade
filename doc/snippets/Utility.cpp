@@ -764,7 +764,7 @@ Utility::Debug{}
 Containers::Optional<Utility::Json> gltf;
 std::size_t i{};
 /* [Json-usage-find] */
-const Utility::JsonToken * gltfNodes, *gltfNode;
+const Utility::JsonToken *gltfNodes, *gltfNode;
 if(!(gltfNodes = gltf->root().find("nodes")) || !(gltfNode = gltfNodes->find(i)))
     Utility::Fatal{} << "Node" << i << "is not in the file";
 
@@ -787,7 +787,7 @@ if(gltfNode->type() != Utility::JsonToken::Type::Object)
 
 if(const Utility::JsonToken* gltfName = gltfNode->find("name")) {
     if(Containers::Optional<Containers::StringView> s = gltf->parseString(*gltfName))
-        Utility::Debug{} << "Node" << i << "is named" << s;
+        Utility::Debug{} << "Node" << i << "is named" << *s;
     else
         Utility::Fatal{} << "Node name is not a valid string";
 }
@@ -796,7 +796,7 @@ if(const Utility::JsonToken* gltfName = gltfNode->find("name")) {
 /* [Json-usage-checks2] */
 if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh")) {
     if(Containers::Optional<unsigned> n = gltf->parseUnsignedInt(*gltfMesh))
-        Utility::Debug{} << "Node" << i << "has a mesh" << n;
+        Utility::Debug{} << "Node" << i << "has a mesh" << *n;
     else
         Utility::Fatal{} << "Node mesh is not a valid index";
 }
