@@ -30,6 +30,8 @@
 #include "Corrade/Interconnect/Receiver.h"
 #include "Corrade/Interconnect/StateMachine.h"
 
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+
 using namespace Corrade;
 
 int main() {
@@ -66,18 +68,13 @@ Interconnect::disconnect(postman, c);
 /* [Emitter-connect] */
 }
 
-#if defined(__GNUC__) || defined( __clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif
 {
 /* [Emitter-connect-member-slot] */
 class Mailbox: public Interconnect::Receiver {
     public:
-        void addMessage(const std::string& message, int price) {}
+        void addMessage(const std::string& message, int price) {
+            DOXYGEN_ELLIPSIS(static_cast<void>(message); static_cast<void>(price);)
+        }
 };
 
 Postman postman;
@@ -86,11 +83,6 @@ Interconnect::connect(postman, &Postman::messageDelivered,
                       mailbox, &Mailbox::addMessage);
 /* [Emitter-connect-member-slot] */
 }
-#if defined(__GNUC__) || defined( __clang__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 {
 /* [Emitter-disconnectSignal] */
