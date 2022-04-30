@@ -63,6 +63,8 @@ struct JsonTest: TestSuite::Tester {
 
         void error();
 
+        void parseObjects();
+        void parseArrays();
         void parseNulls();
         void parseBools();
         void parseDoubles();
@@ -78,7 +80,7 @@ struct JsonTest: TestSuite::Tester {
         void parseOption();
         void parseSubtree();
 
-        void parseEmptyArray();
+        void parseEmptyObjectOrArray();
         void parseBoolArray();
         void parseDoubleArray();
         void parseFloatArray();
@@ -102,18 +104,22 @@ struct JsonTest: TestSuite::Tester {
         void iterateObject();
         void iterateObjectTokens();
         void iterateObjectNotObject();
+        void iterateObjectNotParsed();
         void iterateObjectKeyNotParsed();
         void iterateArray();
         void iterateArrayTokens();
         void iterateArrayNotArray();
+        void iterateArrayNotParsed();
 
         void findObjectKey();
         void findObjectKeyNotFound();
         void findObjectKeyNotObject();
         void findObjectKeyNotParsed();
+        void findObjectKeyKeyNotParsed();
         void findArrayIndex();
         void findArrayIndexNotFound();
         void findArrayIndexNotArray();
+        void findArrayIndexNotParsed();
 
         void asBoolArray();
         void asBoolArrayNotAllSame();
@@ -133,6 +139,7 @@ struct JsonTest: TestSuite::Tester {
         void asSizeArray();
         void asSizeArrayNotAllSame();
         void asTypeArrayNotArray();
+        void asTypeArrayNotParsed();
 
         void file();
         void fileReadError();
@@ -260,6 +267,22 @@ const struct {
     {"comma after a root array",
         "[],",
         "expected document end but got , at <in>:1:3"},
+};
+
+const struct {
+    const char* name;
+    bool singleValue;
+} ParseObjectData[]{
+    {"", false},
+    {"single value", true}
+};
+
+const struct {
+    const char* name;
+    bool singleValue;
+} ParseArrayData[]{
+    {"", false},
+    {"single value", true}
 };
 
 const struct {
@@ -421,23 +444,29 @@ const struct {
     JsonToken::ParsedType parsedType;
     const char* tokenData;
 } ParseOptionData[]{
+    {"objects", Json::Option::ParseLiterals,
+        2, 12, 27 - 10,
+        JsonToken::ParsedType::Other, "{}"},
+    {"arrays", Json::Option::ParseLiterals,
+        4, 14, 27 - 10,
+        JsonToken::ParsedType::Other, "[]"},
     {"nulls", Json::Option::ParseLiterals,
-        2, 8, 17 - 4,
+        6, 16, 27 - 10,
         JsonToken::ParsedType::Other, "null"},
     {"bools", Json::Option::ParseLiterals,
-        4, 10, 17 - 4,
+        8, 18, 27 - 10,
         JsonToken::ParsedType::Other, "true"},
     {"doubles", Json::Option::ParseDoubles,
-        12, 16, 17 - 2,
+        20, 24, 27 - 2,
         JsonToken::ParsedType::Double, "35"},
     {"floats", Json::Option::ParseFloats,
-        12, 16, 17 - 2,
+        20, 24, 27 - 2,
         JsonToken::ParsedType::Float, "35"},
     {"string keys", Json::Option::ParseStringKeys,
-        17, 13, 17 - 9,
+        25, 21, 27 - 13,
         JsonToken::ParsedType::Other, "\"string\""},
     {"strings", Json::Option::ParseStrings,
-        18, 14, 17 - 11,
+        26, 22, 27 - 15,
         JsonToken::ParsedType::Other, "\"hello\""},
 };
 
@@ -449,74 +478,89 @@ const struct {
     JsonToken::ParsedType parsedType;
     const char* tokenData;
 } ParseSubtreeData[]{
+    {"objects", &Json::parseLiterals, 1,
+        24, 17, 30, 32 - 12,
+        JsonToken::ParsedType::Other, "{}"},
+    {"arrays", &Json::parseLiterals, 1,
+        25, 18, 31, 32 - 12,
+        JsonToken::ParsedType::Other, "[]"},
     {"nulls", &Json::parseLiterals, 1,
-        3, 9, 22, 21 - 4,
+        3, 9, 26, 32 - 12,
         JsonToken::ParsedType::Other, "null"},
     {"bools", &Json::parseLiterals, 1,
-        5, 11, 23, 21 - 4,
+        5, 11, 27, 32 - 12,
         JsonToken::ParsedType::Other, "true"},
     {"doubles", &Json::parseDoubles, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::Double, "35"},
     {"floats", &Json::parseFloats, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::Float, "35"},
     {"unsigned ints", &Json::parseUnsignedInts, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::UnsignedInt, "35"},
     {"ints", &Json::parseInts, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::Int, "35"},
     {"unsigned longs", &Json::parseUnsignedLongs, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::UnsignedLong, "35"},
     {"longs", &Json::parseLongs, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::Long, "35"},
     {"sizes", &Json::parseSizes, 1,
-        18, 13, 24, 21 - 2,
+        20, 13, 28, 32 - 2,
         JsonToken::ParsedType::Size, "35"},
     {"string keys", &Json::parseStringKeys, 6,
-        6, 14, 19, 21 - 5,
+        6, 14, 21, 32 - 5,
         JsonToken::ParsedType::Other, "\"nested\""},
     {"strings", &Json::parseStrings, 1,
-        21, 16, 25, 21 - 11,
+        23, 16, 29, 32 - 11,
         JsonToken::ParsedType::Other, "\"hello\""}
 };
 
 const struct {
     const char* name;
+    const char* json;
     Containers::Optional<std::size_t>(*function)(Json&);
-} EmptyArrayData[]{
-    {"bool", [](Json& json) {
+} EmptyObjectOrArrayData[]{
+    {"object", "{}", [](Json& json) {
+        const auto out = json.parseObject(json.root());
+        return out && out->begin() == out->end() ? Containers::optional(std::size_t{}) : Containers::NullOpt;
+    }},
+    {"array", "[]", [](Json& json) {
+        const auto out = json.parseArray(json.root());
+        return out && out->begin() == out->end() ? Containers::optional(std::size_t{}) : Containers::NullOpt;
+    }},
+    {"bool array", "[]", [](Json& json) {
         const auto out = json.parseBoolArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"double", [](Json& json) {
+    {"double array", "[]", [](Json& json) {
         const auto out = json.parseDoubleArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"float", [](Json& json) {
+    {"float array", "[]", [](Json& json) {
         const auto out = json.parseFloatArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"unsigned int", [](Json& json) {
+    {"unsigned int array", "[]", [](Json& json) {
         const auto out = json.parseUnsignedIntArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"int", [](Json& json) {
+    {"int array", "[]", [](Json& json) {
         const auto out = json.parseIntArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"unsigned long", [](Json& json) {
+    {"unsigned long array", "[]", [](Json& json) {
         const auto out = json.parseUnsignedLongArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"long", [](Json& json) {
+    {"long array", "[]", [](Json& json) {
         const auto out = json.parseLongArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
-    {"size", [](Json& json) {
+    {"size array", "[]", [](Json& json) {
         const auto out = json.parseSizeArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
@@ -776,86 +820,98 @@ const struct {
     const char* json;
     const char* message;
 } ParseSingleErrorData[]{
+    {"object but an array",
+        [](Json& json) { return !!json.parseObject(json.root()); },
+        "[]",
+        "parseObject(): expected an object, got Utility::JsonToken::Type::Array at <in>:3:6"},
+    {"object but a bad key",
+        [](Json& json) { return !!json.parseObject(json.root()); },
+        "{\"\\undefined\": 3}",
+        "parseObject(): sorry, unicode escape sequences are not implemented yet at <in>:3:7"},
+    {"array but an object",
+        [](Json& json) { return !!json.parseArray(json.root()); },
+        "{}",
+        "parseArray(): expected an array, got Utility::JsonToken::Type::Object at <in>:3:6"},
     {"null",
         [](Json& json) { return !!json.parseNull(json.root()); },
         "none",
-        "parseNull(): invalid null literal none"},
+        "parseNull(): invalid null literal none at <in>:3:6"},
     {"null but a numeric token",
         [](Json& json) { return !!json.parseNull(json.root()); },
         "35.7",
-        "parseNull(): expected a null, got Utility::JsonToken::Type::Number"},
+        "parseNull(): expected a null, got Utility::JsonToken::Type::Number at <in>:3:6"},
     {"bool",
         [](Json& json) { return !!json.parseBool(json.root()); },
         "fail",
-        "parseBool(): invalid bool literal fail"},
+        "parseBool(): invalid bool literal fail at <in>:3:6"},
     {"bool but a null token",
         [](Json& json) { return !!json.parseBool(json.root()); },
         "null",
-        "parseBool(): expected a bool, got Utility::JsonToken::Type::Null"},
+        "parseBool(): expected a bool, got Utility::JsonToken::Type::Null at <in>:3:6"},
     {"double",
         [](Json& json) { return !!json.parseDouble(json.root()); },
         "75x",
-        "parseDouble(): invalid floating-point literal 75x"},
+        "parseDouble(): invalid floating-point literal 75x at <in>:3:6"},
     {"double but a string token",
         [](Json& json) { return !!json.parseDouble(json.root()); },
         "\"75\"",
-        "parseDouble(): expected a number, got Utility::JsonToken::Type::String"},
+        "parseDouble(): expected a number, got Utility::JsonToken::Type::String at <in>:3:6"},
     {"float",
         [](Json& json) { return !!json.parseFloat(json.root()); },
         "75x",
-        "parseFloat(): invalid floating-point literal 75x"},
+        "parseFloat(): invalid floating-point literal 75x at <in>:3:6"},
     {"float but a bool token",
         [](Json& json) { return !!json.parseFloat(json.root()); },
         "false",
-        "parseFloat(): expected a number, got Utility::JsonToken::Type::Bool"},
+        "parseFloat(): expected a number, got Utility::JsonToken::Type::Bool at <in>:3:6"},
     {"unsigned int",
         [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "75x",
-        "parseUnsignedInt(): invalid unsigned integer literal 75x"},
+        "parseUnsignedInt(): invalid unsigned integer literal 75x at <in>:3:6"},
     {"unsigned int but a null token",
         [](Json& json) { return !!json.parseUnsignedInt(json.root()); },
         "null",
-        "parseUnsignedInt(): expected a number, got Utility::JsonToken::Type::Null"},
+        "parseUnsignedInt(): expected a number, got Utility::JsonToken::Type::Null at <in>:3:6"},
     {"int",
         [](Json& json) { return !!json.parseInt(json.root()); },
         "75x",
-        "parseInt(): invalid integer literal 75x"},
+        "parseInt(): invalid integer literal 75x at <in>:3:6"},
     {"int but an array token",
         [](Json& json) { return !!json.parseInt(json.root()); },
         "[]",
-        "parseInt(): expected a number, got Utility::JsonToken::Type::Array"},
+        "parseInt(): expected a number, got Utility::JsonToken::Type::Array at <in>:3:6"},
     {"unsigned long",
         [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "75x",
-        "parseUnsignedLong(): invalid unsigned integer literal 75x"},
+        "parseUnsignedLong(): invalid unsigned integer literal 75x at <in>:3:6"},
     {"unsigned long but an object token",
         [](Json& json) { return !!json.parseUnsignedLong(json.root()); },
         "{}",
-        "parseUnsignedLong(): expected a number, got Utility::JsonToken::Type::Object"},
+        "parseUnsignedLong(): expected a number, got Utility::JsonToken::Type::Object at <in>:3:6"},
     {"long",
         [](Json& json) { return !!json.parseLong(json.root()); },
         "75x",
-        "parseLong(): invalid integer literal 75x"},
+        "parseLong(): invalid integer literal 75x at <in>:3:6"},
     {"long but a string token",
         [](Json& json) { return !!json.parseLong(json.root()); },
         "\"75\"",
-        "parseLong(): expected a number, got Utility::JsonToken::Type::String"},
+        "parseLong(): expected a number, got Utility::JsonToken::Type::String at <in>:3:6"},
     {"size",
         [](Json& json) { return !!json.parseSize(json.root()); },
         "75x",
-        "parseSize(): invalid unsigned integer literal 75x"},
+        "parseSize(): invalid unsigned integer literal 75x at <in>:3:6"},
     {"size but a bool token",
         [](Json& json) { return !!json.parseSize(json.root()); },
         "true",
-        "parseSize(): expected a number, got Utility::JsonToken::Type::Bool"},
+        "parseSize(): expected a number, got Utility::JsonToken::Type::Bool at <in>:3:6"},
     {"string",
         [](Json& json) { return !!json.parseString(json.root()); },
         "\"\\undefined\"",
-        "parseString(): sorry, unicode escape sequences are not implemented yet"},
+        "parseString(): sorry, unicode escape sequences are not implemented yet at <in>:3:6"},
     {"string but a null token",
         [](Json& json) { return !!json.parseString(json.root()); },
         "null",
-        "parseString(): expected a string, got Utility::JsonToken::Type::Null"}
+        "parseString(): expected a string, got Utility::JsonToken::Type::Null at <in>:3:6"}
 };
 
 const struct {
@@ -992,6 +1048,12 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::error},
         Containers::arraySize(ErrorData));
 
+    addInstancedTests({&JsonTest::parseObjects},
+        Containers::arraySize(ParseObjectData));
+
+    addInstancedTests({&JsonTest::parseArrays},
+        Containers::arraySize(ParseArrayData));
+
     addInstancedTests({&JsonTest::parseNulls},
         Containers::arraySize(ParseNullData));
 
@@ -1034,8 +1096,8 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::parseSubtree},
         Containers::arraySize(ParseSubtreeData));
 
-    addInstancedTests({&JsonTest::parseEmptyArray},
-        Containers::arraySize(EmptyArrayData));
+    addInstancedTests({&JsonTest::parseEmptyObjectOrArray},
+        Containers::arraySize(EmptyObjectOrArrayData));
 
     addTests({&JsonTest::parseBoolArray,
               &JsonTest::parseDoubleArray,
@@ -1069,18 +1131,22 @@ JsonTest::JsonTest() {
               &JsonTest::iterateObject,
               &JsonTest::iterateObjectTokens,
               &JsonTest::iterateObjectNotObject,
+              &JsonTest::iterateObjectNotParsed,
               &JsonTest::iterateObjectKeyNotParsed,
               &JsonTest::iterateArray,
               &JsonTest::iterateArrayTokens,
               &JsonTest::iterateArrayNotArray,
+              &JsonTest::iterateArrayNotParsed,
 
               &JsonTest::findObjectKey,
               &JsonTest::findObjectKeyNotFound,
               &JsonTest::findObjectKeyNotObject,
               &JsonTest::findObjectKeyNotParsed,
+              &JsonTest::findObjectKeyKeyNotParsed,
               &JsonTest::findArrayIndex,
               &JsonTest::findArrayIndexNotFound,
               &JsonTest::findArrayIndexNotArray,
+              &JsonTest::findArrayIndexNotParsed,
 
               &JsonTest::asBoolArray,
               &JsonTest::asBoolArrayNotAllSame,
@@ -1100,6 +1166,7 @@ JsonTest::JsonTest() {
               &JsonTest::asSizeArray,
               &JsonTest::asSizeArrayNotAllSame,
               &JsonTest::asTypeArrayNotArray,
+              &JsonTest::asTypeArrayNotParsed,
 
               &JsonTest::file,
               &JsonTest::fileReadError,
@@ -1141,7 +1208,7 @@ void JsonTest::singleObject() {
     CORRADE_COMPARE(&json->root(), &object);
     CORRADE_COMPARE(object.data(), "{  \n \r  }");
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
-    CORRADE_VERIFY(object.isParsed());
+    CORRADE_VERIFY(!object.isParsed());
     CORRADE_COMPARE(object.childCount(), 0);
     CORRADE_COMPARE(object.children().size(), 0);
     CORRADE_VERIFY(!object.firstChild());
@@ -1158,7 +1225,7 @@ void JsonTest::singleArray() {
     CORRADE_COMPARE(&json->root(), &array);
     CORRADE_COMPARE(array.data(), "[  \n \r  ]");
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
-    CORRADE_VERIFY(array.isParsed());
+    CORRADE_VERIFY(!array.isParsed());
     CORRADE_COMPARE(array.childCount(), 0);
     CORRADE_COMPARE(array.children().size(), 0);
     CORRADE_VERIFY(!array.firstChild());
@@ -1298,11 +1365,11 @@ void JsonTest::simpleObject() {
     CORRADE_COMPARE(bool2.data(), "true");
     CORRADE_COMPARE(bool2.type(), JsonToken::Type::Bool);
 
-    /* No tokens should be parsed, except for objects and arrays */
-    for(const JsonToken& i: json->tokens())
-        CORRADE_COMPARE(i.isParsed(),
-           i.type() == JsonToken::Type::Object ||
-           i.type() == JsonToken::Type::Array);
+    /* No tokens should be parsed */
+    for(const JsonToken& i: json->tokens()) {
+        CORRADE_ITERATION(i.data());
+        CORRADE_VERIFY(!i.isParsed());
+    }
 
     /* Verify keys */
     for(std::size_t i = 0; i != 8; ++i) {
@@ -1399,11 +1466,11 @@ void JsonTest::simpleArray() {
     CORRADE_COMPARE(bool2.data(), "true");
     CORRADE_COMPARE(bool2.type(), JsonToken::Type::Bool);
 
-    /* No tokens should be parsed, except for objects and arrays */
-    for(const JsonToken& i: json->tokens())
-        CORRADE_COMPARE(i.isParsed(),
-           i.type() == JsonToken::Type::Object ||
-           i.type() == JsonToken::Type::Array);
+    /* No tokens should be parsed */
+    for(const JsonToken& i: json->tokens()) {
+        CORRADE_ITERATION(i.data());
+        CORRADE_VERIFY(!i.isParsed());
+    }
 
     /* Verify traversal */
     CORRADE_COMPARE(array.childCount(), 8);
@@ -1548,11 +1615,11 @@ void JsonTest::nested() {
     CORRADE_COMPARE(emptyArray.data(), "[]");
     CORRADE_COMPARE(emptyArray.type(), JsonToken::Type::Array);
 
-    /* No tokens should be parsed, except for objects and arrays */
-    for(const JsonToken& i: json->tokens())
-        CORRADE_COMPARE(i.isParsed(),
-           i.type() == JsonToken::Type::Object ||
-           i.type() == JsonToken::Type::Array);
+    /* No tokens should be parsed */
+    for(const JsonToken& i: json->tokens()) {
+        CORRADE_ITERATION(i.data());
+        CORRADE_VERIFY(!i.isParsed());
+    }
 
     /* Verify child counts */
     CORRADE_COMPARE(array.childCount(), 20);
@@ -1601,6 +1668,94 @@ void JsonTest::nested() {
     CORRADE_COMPARE(number.next(), &bye);
     CORRADE_COMPARE(bye.next(), &emptyArray);
     CORRADE_COMPARE(emptyArray.next(), json->tokens().end());
+}
+
+void JsonTest::parseObjects() {
+    auto&& data = ParseObjectData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::Optional<Json> json = Json::fromString("{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(!json->root().isParsed());
+    CORRADE_COMPARE(json->root().type(), JsonToken::Type::Object);
+    CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
+    CORRADE_COMPARE(json->root().data(), "{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+
+    /* Calling the parse function several times should have the same observed
+       behavior, internally it should just skip parsing */
+    for(std::size_t iteration: {0, 1}) {
+        CORRADE_ITERATION(iteration);
+        if(!data.singleValue) {
+            CORRADE_VERIFY(json->parseLiterals(json->root()));
+
+            /* The keys should not be parsed */
+            CORRADE_VERIFY(!json->tokens()[1].isParsed());
+            CORRADE_VERIFY(!json->tokens()[5].isParsed());
+            CORRADE_VERIFY(!json->tokens()[7].isParsed());
+            CORRADE_VERIFY(!json->tokens()[9].isParsed());
+        } else {
+            Containers::Optional<JsonView<JsonObjectItem>> out = json->parseObject(json->root());
+            CORRADE_VERIFY(out);
+
+            /* Direct keys should be parsed, nested keys not */
+            CORRADE_VERIFY(json->tokens()[1].isParsed());
+            CORRADE_VERIFY(json->tokens()[5].isParsed());
+            CORRADE_VERIFY(json->tokens()[7].isParsed());
+            CORRADE_VERIFY(!json->tokens()[9].isParsed());
+
+            /* The view should span the whole object */
+            Containers::Array<Containers::StringView> keys;
+            for(JsonObjectItem i: *out)
+                arrayAppend(keys, i.key());
+            CORRADE_COMPARE_AS(keys, Containers::arrayView({
+                "a"_s, "c"_s, "d"_s
+            }), TestSuite::Compare::Container);
+        }
+
+        /* The token data should not get corrupted by this */
+        CORRADE_VERIFY(json->root().isParsed());
+        CORRADE_COMPARE(json->root().type(), JsonToken::Type::Object);
+        CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
+        CORRADE_COMPARE(json->root().data(), "{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+    }
+}
+
+void JsonTest::parseArrays() {
+    auto&& data = ParseArrayData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::Optional<Json> json = Json::fromString("[\"a\", [{}], 3]");
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(!json->root().isParsed());
+    CORRADE_COMPARE(json->root().type(), JsonToken::Type::Array);
+    CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
+    CORRADE_COMPARE(json->root().data(), "[\"a\", [{}], 3]");
+
+    /* Calling the parse function several times should have the same observed
+       behavior, internally it should just skip parsing */
+    for(std::size_t iteration: {0, 1}) {
+        CORRADE_ITERATION(iteration);
+        if(!data.singleValue) {
+            CORRADE_VERIFY(json->parseLiterals(json->root()));
+        } else {
+            Containers::Optional<JsonView<JsonArrayItem>> out = json->parseArray(json->root());
+            CORRADE_VERIFY(out);
+
+            /* The view should span the whole array */
+            Containers::Array<Containers::StringView> tokens;
+            for(JsonArrayItem i: *out)
+                arrayAppend(tokens, i.value().data());
+            CORRADE_COMPARE_AS(tokens, Containers::arrayView({
+                "\"a\""_s, "[{}]"_s, "3"_s
+            }), TestSuite::Compare::Container);
+        }
+
+        /* The token data should not get corrupted by this */
+        CORRADE_VERIFY(json->root().isParsed());
+        CORRADE_COMPARE(json->root().type(), JsonToken::Type::Array);
+        CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
+        CORRADE_COMPARE(json->root().data(), "[\"a\", [{}], 3]");
+    }
 }
 
 void JsonTest::parseNulls() {
@@ -2037,9 +2192,13 @@ void JsonTest::parseOption() {
     setTestCaseDescription(data.name);
 
     Containers::Optional<Json> json = Json::fromString(R"({
+        "object": {},
+        "array": [],
         "null": null,
         "bool": true,
         "nested": {
+            "object": {},
+            "array": [],
             "null": null,
             "bool": true,
             "number": 35,
@@ -2049,7 +2208,7 @@ void JsonTest::parseOption() {
         "string": "hello"
     })", data.option);
     CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->tokens().size(), 19);
+    CORRADE_COMPARE(json->tokens().size(), 27);
 
     const JsonToken& tokenParsed = json->tokens()[data.tokenParsed];
     CORRADE_COMPARE(tokenParsed.data(), data.tokenData);
@@ -2079,21 +2238,27 @@ void JsonTest::parseSubtree() {
                 "bool": true,
                 "number": 35,
                 "nested": [
-                    "hello"
+                    "hello",
+                    {},
+                    []
                 ]
             },
             "number": 35,
             "nested": [
-                "hello"
+                "hello",
+                {},
+                []
             ]
         },
         null,
         true,
         35,
-        "hello"
+        "hello",
+        {},
+        []
     ])");
     CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->tokens().size(), 26);
+    CORRADE_COMPARE(json->tokens().size(), 32);
     CORRADE_VERIFY(((*json).*data.function)(json->tokens()[data.parseRoot]));
 
     const JsonToken& tokenParsed = json->tokens()[data.tokenParsed];
@@ -2115,15 +2280,16 @@ void JsonTest::parseSubtree() {
     CORRADE_COMPARE(notParsedCount, data.tokenNotParsedCount);
 }
 
-void JsonTest::parseEmptyArray() {
-    auto&& data = EmptyArrayData[testCaseInstanceId()];
+void JsonTest::parseEmptyObjectOrArray() {
+    auto&& data = EmptyObjectOrArrayData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString("[]");
+    Containers::Optional<Json> json = Json::fromString(data.json);
     CORRADE_VERIFY(json);
 
     Containers::Optional<std::size_t> size = data.function(*json);
     CORRADE_COMPARE(size, 0);
+    CORRADE_VERIFY(json->root().isParsed());
 }
 
 void JsonTest::parseBoolArray() {
@@ -2142,6 +2308,7 @@ void JsonTest::parseBoolArray() {
             true, false, true, false
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_VERIFY(i.value().isParsed());
@@ -2169,6 +2336,7 @@ void JsonTest::parseDoubleArray() {
             35.7, -42.4, 0.0, 1.0e5
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::Double);
@@ -2196,6 +2364,7 @@ void JsonTest::parseFloatArray() {
             35.7f, -42.4f, 0.0f, 1.0e5f
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::Float);
@@ -2223,6 +2392,7 @@ void JsonTest::parseUnsignedIntArray() {
             357u, 424u, 0u, 1234567890u
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::UnsignedInt);
@@ -2250,6 +2420,7 @@ void JsonTest::parseIntArray() {
             357, -424, 0, 1234567890
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::Int);
@@ -2277,6 +2448,7 @@ void JsonTest::parseUnsignedLongArray() {
             357ull, 424ull, 0ull, 123456789012345ull
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::UnsignedLong);
@@ -2304,6 +2476,7 @@ void JsonTest::parseLongArray() {
             357ll, -424ll, 0ll, -123456789012345ll
         }), TestSuite::Compare::Container);
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::Long);
@@ -2343,6 +2516,7 @@ void JsonTest::parseSizeArray() {
         }), TestSuite::Compare::Container);
         #endif
 
+        CORRADE_VERIFY(json->root().isParsed());
         for(JsonArrayItem i: json->root().asArray()) {
             CORRADE_ITERATION(i.index());
             CORRADE_COMPARE(i.value().parsedType(), JsonToken::ParsedType::Size);
@@ -2544,7 +2718,7 @@ void JsonTest::parseSingleError() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!data.function(*json));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:3:6\n", data.message));
+    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
 }
 
 void JsonTest::parseArrayError() {
@@ -2587,6 +2761,8 @@ void JsonTest::parseTokenNotOwned() {
     json->parseStringKeys(token);
     json->parseStrings(token);
 
+    json->parseObject(token);
+    json->parseArray(token);
     json->parseNull(token);
     json->parseBool(token);
     json->parseDouble(token);
@@ -2622,6 +2798,8 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseStringKeys(): token not owned by the instance\n"
         "Utility::Json::parseStrings(): token not owned by the instance\n"
 
+        "Utility::Json::parseObject(): token not owned by the instance\n"
+        "Utility::Json::parseArray(): token not owned by the instance\n"
         "Utility::Json::parseNull(): token not owned by the instance\n"
         "Utility::Json::parseBool(): token not owned by the instance\n"
         "Utility::Json::parseDouble(): token not owned by the instance\n"
@@ -2650,8 +2828,9 @@ void JsonTest::parseTokenNotOwned() {
 }
 
 void JsonTest::iterator() {
-    Containers::Optional<Json> json = Json::fromString("[0, 1, 2]");
+    Containers::Optional<Json> json = Json::fromString("[0, 1, 2]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->root().isParsed());
 
     JsonIterator<JsonArrayItem> a = json->root().asArray().begin();
     JsonIterator<JsonArrayItem> b = ++json->root().asArray().begin();
@@ -2668,7 +2847,7 @@ void JsonTest::iterateObject() {
         "hello": 3,
         "this": ["is"],
         "an": {"object": true}
-    })", Json::Option::ParseStringKeys);
+    })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::Pair<Containers::StringView, Containers::StringView>> data;
@@ -2687,7 +2866,7 @@ void JsonTest::iterateObjectTokens() {
         "hello": 3,
         "this": ["is"],
         "an": {"object": true}
-    })", Json::Option::ParseStringKeys);
+    })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::StringView> data;
@@ -2706,13 +2885,27 @@ void JsonTest::iterateObjectNotObject() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("[]");
+    Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
     Error redirectError{&out};
     json->root().asObject();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is a Utility::JsonToken::Type::Array\n");
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n");
+}
+
+void JsonTest::iterateObjectNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asObject();
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n");
 }
 
 void JsonTest::iterateObjectKeyNotParsed() {
@@ -2720,7 +2913,7 @@ void JsonTest::iterateObjectKeyNotParsed() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("{\"key\": false}");
+    Containers::Optional<Json> json = Json::fromString("{\"key\": false}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -2734,7 +2927,7 @@ void JsonTest::iterateArray() {
         "hello",
         ["this", "is"],
         {"an": "array"}
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::Pair<std::size_t, Containers::StringView>> data;
@@ -2753,7 +2946,7 @@ void JsonTest::iterateArrayTokens() {
         "hello",
         ["this", "is"],
         {"an": "array"}
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::StringView> tokens;
@@ -2772,13 +2965,27 @@ void JsonTest::iterateArrayNotArray() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("{}");
+    Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
     Error redirectError{&out};
     json->root().asArray();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is a Utility::JsonToken::Type::Object\n");
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n");
+}
+
+void JsonTest::iterateArrayNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("[]");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asArray();
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n");
 }
 
 void JsonTest::findObjectKey() {
@@ -2786,7 +2993,7 @@ void JsonTest::findObjectKey() {
         "hello": 3,
         "this": ["or", "that"],
         "wherever": true
-    })", Json::Option::ParseStringKeys);
+    })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
     const JsonToken* found = json->root().find("this");
@@ -2808,7 +3015,7 @@ void JsonTest::findObjectKeyNotFound() {
         "hello": 3,
         "this": ["or", "that"],
         "wherever": true
-    })", Json::Option::ParseStringKeys);
+    })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -2822,7 +3029,7 @@ void JsonTest::findObjectKeyNotObject() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("[]");
+    Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -2830,12 +3037,30 @@ void JsonTest::findObjectKeyNotObject() {
     json->root().find("this");
     json->root()["this"];
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Array, not an object\n"
+        "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Array, expected a parsed object\n"
         /* operator[]() delegates to find(), so the error is the same */
-        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Array, not an object\n");
+        "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Array, expected a parsed object\n");
 }
 
 void JsonTest::findObjectKeyNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().find("this");
+    json->root()["this"];
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Object, expected a parsed object\n"
+        /* operator[]() delegates to find(), so the error is the same */
+        "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Object, expected a parsed object\n");
+}
+
+void JsonTest::findObjectKeyKeyNotParsed() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
@@ -2844,7 +3069,7 @@ void JsonTest::findObjectKeyNotParsed() {
         "hello": 3,
         "this": ["or", "that"],
         "wherever": true
-    })");
+    })", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     /* Parse "hello" and "wherever" but not "this" */
     CORRADE_VERIFY(json->parseStrings(json->tokens()[1]));
@@ -2865,7 +3090,7 @@ void JsonTest::findArrayIndex() {
         "hello",
         ["this", "is"],
         {"an": "array"}
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     const JsonToken* found = json->root().find(1);
@@ -2887,7 +3112,7 @@ void JsonTest::findArrayIndexNotFound() {
         "hello",
         ["this", "is"],
         {"an": "array"}
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -2901,7 +3126,7 @@ void JsonTest::findArrayIndexNotArray() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("{}");
+    Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -2909,9 +3134,27 @@ void JsonTest::findArrayIndexNotArray() {
     json->root().find(1);
     json->root()[1];
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n"
+        "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Object, expected a parsed array\n"
         /* operator[]() delegates to find(), so the error is the same */
-        "Utility::JsonToken::find(): token is a Utility::JsonToken::Type::Object, not an array\n");
+        "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Object, expected a parsed array\n");
+}
+
+void JsonTest::findArrayIndexNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("[]");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().find(1);
+    json->root()[1];
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n"
+        /* operator[]() delegates to find(), so the error is the same */
+        "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n");
 }
 
 void JsonTest::asBoolArray() {
@@ -2953,6 +3196,7 @@ void JsonTest::asBoolArrayNotAllParsed() {
         true, false, true
     ])");
     CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseArray(json->tokens()[0]));
     CORRADE_VERIFY(json->parseLiterals(json->tokens()[1]));
     CORRADE_VERIFY(json->parseLiterals(json->tokens()[2]));
 
@@ -2966,7 +3210,7 @@ void JsonTest::asBoolArrayNotAllParsed() {
 void JsonTest::asDoubleArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseDoubles(json->root()));
 
@@ -2984,7 +3228,7 @@ void JsonTest::asDoubleArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 1
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseDoubles(json->tokens()[1]));
     CORRADE_VERIFY(json->parseDoubles(json->tokens()[2]));
@@ -2999,7 +3243,7 @@ void JsonTest::asDoubleArrayNotAllSame() {
 void JsonTest::asFloatArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseFloats(json->root()));
 
@@ -3017,7 +3261,7 @@ void JsonTest::asFloatArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 1
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseFloats(json->tokens()[1]));
     CORRADE_VERIFY(json->parseFloats(json->tokens()[2]));
@@ -3032,7 +3276,7 @@ void JsonTest::asFloatArrayNotAllSame() {
 void JsonTest::asUnsignedIntArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
 
@@ -3050,7 +3294,7 @@ void JsonTest::asUnsignedIntArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[1]));
     CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[2]));
@@ -3065,7 +3309,7 @@ void JsonTest::asUnsignedIntArrayNotAllSame() {
 void JsonTest::asIntArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseInts(json->root()));
 
@@ -3083,7 +3327,7 @@ void JsonTest::asIntArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseInts(json->tokens()[1]));
     CORRADE_VERIFY(json->parseInts(json->tokens()[2]));
@@ -3098,7 +3342,7 @@ void JsonTest::asIntArrayNotAllSame() {
 void JsonTest::asUnsignedLongArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
 
@@ -3116,7 +3360,7 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[1]));
     CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[2]));
@@ -3131,7 +3375,7 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
 void JsonTest::asLongArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseLongs(json->root()));
 
@@ -3149,7 +3393,7 @@ void JsonTest::asLongArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseLongs(json->tokens()[1]));
     CORRADE_VERIFY(json->parseLongs(json->tokens()[2]));
@@ -3164,7 +3408,7 @@ void JsonTest::asLongArrayNotAllSame() {
 void JsonTest::asSizeArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseSizes(json->root()));
 
@@ -3182,7 +3426,7 @@ void JsonTest::asSizeArrayNotAllSame() {
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
-    ])");
+    ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseSizes(json->tokens()[1]));
     CORRADE_VERIFY(json->parseSizes(json->tokens()[2]));
@@ -3204,7 +3448,7 @@ void JsonTest::asTypeArrayNotArray() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("{}");
+    Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -3218,17 +3462,52 @@ void JsonTest::asTypeArrayNotArray() {
     json->root().asLongArray();
     json->root().asSizeArray();
     const char* expected =
-        "Utility::JsonToken::asBoolArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asDoubleArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asFloatArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asIntArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asBoolArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asDoubleArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asFloatArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedIntArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asIntArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedLongArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asLongArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         #ifndef CORRADE_TARGET_32BIT
-        "Utility::JsonToken::asUnsignedLongArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedLongArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         #else
-        "Utility::JsonToken::asUnsignedIntArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asUnsignedIntArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        #endif
+        ;
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void JsonTest::asTypeArrayNotParsed() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString("[]");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asBoolArray();
+    json->root().asDoubleArray();
+    json->root().asFloatArray();
+    json->root().asUnsignedIntArray();
+    json->root().asIntArray();
+    json->root().asUnsignedLongArray();
+    json->root().asLongArray();
+    json->root().asSizeArray();
+    const char* expected =
+        "Utility::JsonToken::asBoolArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asDoubleArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asFloatArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asUnsignedIntArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asIntArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asUnsignedLongArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asLongArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        #ifndef CORRADE_TARGET_32BIT
+        "Utility::JsonToken::asUnsignedLongArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        #else
+        "Utility::JsonToken::asUnsignedIntArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         #endif
         ;
     CORRADE_COMPARE(out.str(), expected);
@@ -3310,7 +3589,7 @@ void JsonTest::asTypeWrongType() {
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
     #endif
 
-    Containers::Optional<Json> json = Json::fromString("[{}]");
+    Containers::Optional<Json> json = Json::fromString("[{}]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
@@ -3328,8 +3607,8 @@ void JsonTest::asTypeWrongType() {
     json->tokens()[1].asSize();
     json->tokens()[1].asString();
     const char* expected =
-        "Utility::JsonToken::asObject(): token is a Utility::JsonToken::Type::Array\n"
-        "Utility::JsonToken::asArray(): token is a Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asNull(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asBool(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
@@ -3349,12 +3628,14 @@ void JsonTest::asTypeNotParsed() {
     #endif
 
     Containers::Optional<Json> json = Json::fromString(R"([
-        nOOO, fALSE, -yey, "\uhh"
+        nOOO, fALSE, -yey, "\uhh", {}
     ])");
     CORRADE_VERIFY(json);
 
     std::ostringstream out;
     Error redirectError{&out};
+    json->tokens()[5].asObject();
+    json->tokens()[0].asArray();
     json->tokens()[1].asNull();
     json->tokens()[2].asBool();
     json->tokens()[3].asDouble();
@@ -3366,6 +3647,8 @@ void JsonTest::asTypeNotParsed() {
     json->tokens()[3].asSize();
     json->tokens()[4].asString();
     const char* expected =
+        "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         "Utility::JsonToken::asNull(): token is an unparsed Utility::JsonToken::Type::Null\n"
         "Utility::JsonToken::asBool(): token is an unparsed Utility::JsonToken::Type::Bool\n"
         "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"

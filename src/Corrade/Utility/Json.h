@@ -101,22 +101,54 @@ something that's not there. This is how it would look with
 
 @snippet Utility.cpp Json-usage-find
 
-The next level of error handling would be for an invalid glTF file, for example
-where the root element is not an object, or the name isn't a string. Those
-would still cause the above code to assert, if a graceful handling is desired
-instead, the code either has to check the @ref JsonToken::type() or call into
-@ref parseString() etc. instead of @ref JsonToken::asString() etc.:
+@subsection Utility-Json-usage-selective-parsing Selective parsing
 
-@snippet Utility.cpp Json-usage-checks
+As shown above, the @ref Option values passed to @ref fromFile() or
+@ref fromString() cause the file to get fully parsed upfront including number
+conversion and string unescaping. While that's a convenient behavior that
+makes sense when consuming the whole file, doing all that might be unnecessary
+when you only need to access a small portion of a large file. In the following
+snippet, all literals and string keys get parsed upfront so objects and arrays
+can be searched, but then we parse only contents of the particular node using
+@ref parseStrings() and  @ref parseFloats():
 
-Furthermore, while numeric values in a JSON are defined to be of a
-floating-point type, often the values are meant to represent integer sizes or
-offsets --- such as here in case of the mesh index. Calling
-@ref parseUnsignedInt() instead of @ref parseFloat() /
-@ref JsonToken::asFloat() will not only check that it's a numeric value, but
-also that it has no fractional part and is not negative:
+@snippet Utility.cpp Json-usage-selective-parsing
 
-@snippet Utility.cpp Json-usage-checks2
+This way we also have a greater control over parsed numeric types. Instead of
+parsing everything as a float using @ref Option::ParseFloats or
+@ref parseFloats(), we can parse values that are meant to be integers using
+@ref parseUnsignedInts(), @ref parseInts() etc., enforcing a desired numeric
+type on a particular subset of the document. Which means, if the mesh ID in the
+following snippet has a fractional part or is negative, we get an error:
+
+@snippet Utility.cpp Json-usage-selective-parsing-numeric-types
+
+Finally, while a JSON number is defined to be of a @cpp double @ce type, often
+the full precision is not needed and so we parsed everything as floats. If the
+precision indeed is important, you can switch to @ref Option::ParseDoubles /
+@ref parseDoubles() instead where needed.
+
+@subsection Utility-Json-usage-checked-selective-parsing Checked selective parsing
+
+At this point, the code can handle variations in *valid* glTF files, but isn't
+immune from files that don't follow the spec --- for example where the root
+element is not an object, or a name isn't a string. Those would still cause the
+`find()` and `as*()` APIs to assert.
+
+If we omit all `Parse*` @ref Options in @ref fromString() / @ref fromFile(),
+the instance will behave as if nothing was parsed yet. Thus any call to
+@ref JsonToken::operator[](), @ref JsonToken::asString(),
+@ref JsonToken::asFloat() etc. will assert unless given token was explicitly
+previously checked and parsed using @ref parseObject(), @ref parseArray(),
+@ref parseString(), @ref parseFloat() etc. That ensures there are no accidental
+hardcoded assumptions about the layout of the file:
+
+@snippet Utility.cpp Json-usage-checked-selective-parsing
+
+A possibly non-obvious side-effect of using various @cpp parse*() @ce APIs
+instead of checking @ref JsonToken::type() yourself is that if they fail, they
+will print a detailed error message about what exactly failed and where ---
+including file, line and column info.
 
 @subsection Utility-Json-usage-iteration Iterating objects and arrays
 
@@ -135,42 +167,6 @@ Both @ref JsonObjectItem and @ref JsonArrayItem is implicitly convertible to a
 is @ref JsonToken::firstChild()) or array value.
 
 @snippet Utility.cpp Json-usage-iteration-values
-
-@subsection Utility-Json-usage-selective-parsing Selective parsing
-
-In the snippets above, the @ref Options passed to @ref fromFile() or
-@ref fromString() caused the file to get fully parsed upfront including number
-conversion and string unescaping. While that's a convenient behavior that
-makes sense when consuming the whole file, doing all that might be unnecessary
-when you only need to access a small portion of a large file. In the following
-snippet, only string keys get parsed upfront so objects can be searched, but
-then we parse only contents of the particular node using
-@ref parseLiterals() and @ref parseStrings():
-
-@snippet Utility.cpp Json-usage-selective-parsing
-
-This way we also have a greater control over parsed numeric types. Commonly a
-JSON file contains a mixture of floating-point and integer numbers and thus a
-top-level @ref Option for parsing everything as integers makes little sense.
-But on a token level it's clearer which values are meant to be integers and
-which floats and so we can choose among @ref parseFloats(),
-@ref parseUnsignedInts(), @ref parseInts() etc., enforcing a desired numeric
-type on a particular subset of the document.
-
-These will produce errors when numeric values don't fit the requested type,
-however not, for example, when a string or array appears where a number was
-expected. That's what the singular @ref parseFloat(), @ref parseUnsignedInt(),
-@ref parseInt() etc. are for, which either return the parsed value directly or
-fail if the token is not numeric or doesn't fit the requested type, as shown
-below:
-
-@snippet Utility.cpp Json-usage-selective-parsing2
-
-While a JSON number is defined to be of a @cpp double @ce type, often the
-full precision is not needed. If it indeed is, you can switch to
-@ref Option::ParseDoubles / @ref parseDoubles() / @ref parseDouble()
-instead of @ref Option::ParseFloats / @ref parseFloats() / @ref parseFloat()
-where needed.
 
 @subsection Utility-Json-usage-direct-array-access Direct access to numeric arrays
 
@@ -255,17 +251,32 @@ class CORRADE_UTILITY_EXPORT Json {
          */
         enum class Option {
             /**
-             * Parse the @cb{.json} null @ce, @cb{.json} true @ce and
-             * @cb{.json} false @ce values. Causes all @ref JsonToken instances
-             * of @ref JsonToken::Type::Null and @ref JsonToken::Type::Bool to
-             * have @ref JsonToken::isParsed() set and be accessible through
-             * @ref JsonToken::asNull() and @ref JsonToken::asBool().
+             * Parse objects, arrays, @cb{.json} null @ce, @cb{.json} true @ce
+             * and @cb{.json} false @ce values. Causes all @ref JsonToken
+             * instances of @ref JsonToken::Type::Object,
+             * @relativeref{JsonToken::Type,Array},
+             * @relativeref{JsonToken::Type,Null} and
+             * @relativeref{JsonToken::Type,Bool} to have
+             * @ref JsonToken::isParsed() set and be accessible through
+             * @ref JsonToken::asObject(), @relativeref{JsonToken,asArray()},
+             * @relativeref{JsonToken,operator[](std::size_t) const},
+             * @relativeref{JsonToken,find(std::size_t) const},
+             * @relativeref{JsonToken,asNull()} and
+             * @relativeref{JsonToken,asBool()}.
              *
              * Invalid values will cause @ref fromString() / @ref fromFile()
              * to print an error and return @ref Containers::NullOpt. This
              * operation can be also performed selectively later using
              * @ref parseLiterals(), or directly for particular tokens using
-             * @ref parseNull() or @ref parseBool().
+             * @ref parseObject(), @ref parseArray(), @ref parseNull() or
+             * @ref parseBool().
+             *
+             * Note that using @ref JsonToken::operator[](Containers::StringView) const,
+             * @ref JsonToken::find(Containers::StringView) const or accessing
+             * @ref JsonObjectItem::key() requires object keys to be parsed as
+             * well --- either with @ref parseStringKeys(),
+             * @ref Option::ParseStringKeys during the initial call or with
+             * @ref parseObject() that parses both an object and its keys.
              */
             ParseLiterals = 1 << 0,
 
@@ -441,22 +452,36 @@ class CORRADE_UTILITY_EXPORT Json {
         const JsonToken& root() const;
 
         /**
-         * @brief Parse `null`, `true` and `false` literals in given token tree
+         * @brief Parse objects, arrays, `null`, `true` and `false` values in given token tree
          *
-         * Causes all @ref JsonToken instances of @ref JsonToken::Type::Null
-         * and @ref JsonToken::Type::Bool in @p token and its children to have
-         * @ref JsonToken::isParsed() set and be accessible through
-         * @ref JsonToken::asNull() and @ref JsonToken::asBool(). Non-literal
-         * tokens and tokens that are already parsed are skipped. If an invalid
-         * value is encountered, prints a message to @ref Error and returns
+         * Causes all @ref JsonToken instances of @ref JsonToken::Type::Object,
+         * @relativeref{JsonToken::Type,Array},
+         * @relativeref{JsonToken::Type,Null} and
+         * @relativeref{JsonToken::Type,Bool} to have @ref JsonToken::isParsed()
+         * set and be accessible through @ref JsonToken::asObject(),
+         * @relativeref{JsonToken,asArray()},
+         * @relativeref{JsonToken,operator[](std::size_t) const},
+         * @relativeref{JsonToken,find(std::size_t) const},
+         * @relativeref{JsonToken,asNull()} and
+         * @relativeref{JsonToken,asBool()}. Tokens of other types and tokens
+         * that are already parsed are skipped. If an invalid value is
+         * encountered, prints a message to @ref Error and returns
          * @cpp false @ce. Expects that @p token references a token owned by
          * this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseLiterals specified during the initial
          * @ref fromString() or @ref fromFile() call. Checking a single token
-         * for a null or boolean type and parsing it as can be done using
-         * @ref parseNull() or @ref parseBool().
+         * for an object, array, null or boolean type and parsing it as can be
+         * done using @ref parseObject(), @ref parseArray(), @ref parseNull()
+         * or @ref parseBool().
+         *
+         * Note that using @ref JsonToken::operator[](Containers::StringView) const,
+         * @ref JsonToken::find(Containers::StringView) const or accessing
+         * @ref JsonObjectItem::key() requires object keys to be parsed as well
+         * --- either with @ref parseStringKeys(), @ref Option::ParseStringKeys
+         * during the initial call or with @ref parseObject() that parses both
+         * an object and its keys.
          */
         bool parseLiterals(const JsonToken& token);
 
@@ -646,6 +671,31 @@ class CORRADE_UTILITY_EXPORT Json {
         bool parseStrings(const JsonToken& token);
 
         /**
+         * @brief Check and parse an object token
+         *
+         * If @p token is not a @ref JsonToken::Type::Object or does not have
+         * valid string values in its keys, prints a message to @ref Error and
+         * returns @ref Containers::NullOpt. If @ref JsonToken::isParsed() is
+         * already set on the object and all its keys, returns the object view
+         * directly, otherwise caches the parsed results first. Expects that
+         * @p token references a token owned by this instance.
+         * @see @ref JsonToken::asObject()
+         */
+        Containers::Optional<JsonView<JsonObjectItem>> parseObject(const JsonToken& token);
+
+        /**
+         * @brief Check and parse an array token
+         *
+         * If @p token is not a @ref JsonToken::Type::Array, prints a message
+         * to @ref Error and returns @cpp false @ce. If
+         * @ref JsonToken::isParsed() is already set on the array, returns the
+         * array view directly, otherwise marks it as parsed first. Expects
+         * that @p token references a token owned by this instance.
+         * @see @ref JsonToken::asArray()
+         */
+        Containers::Optional<JsonView<JsonArrayItem>> parseArray(const JsonToken& token);
+
+        /**
          * @brief Check and parse a null token
          *
          * If @p token is not a @ref JsonToken::Type::Null or is not a valid
@@ -791,10 +841,10 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Bool tokens, or the tokens are not valid
          * boolean values, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
-         * set for all tokens, returns the cached values, otherwise caches the
-         * parsed results. Expects that @p token references a token owned by
-         * this instance, the returned view points to data owned by this
-         * instance.
+         * set for the array and all tokens inside, returns the cached values,
+         * otherwise caches the parsed results. Expects that @p token
+         * references a token owned by this instance, the returned view points
+         * to data owned by this instance.
          * @see @ref Json::Option::ParseLiterals, @ref parseLiterals(),
          *      @ref parseBool(), @ref JsonToken::asBoolArray()
          */
@@ -806,7 +856,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, or the tokens are not
          * valid numeric values, prints a message to @ref Error and returns
-         * @ref Containers::NullOpt. If all tokens are already parsed as
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for the array and all tokens inside are already parsed as
          * @ref JsonToken::ParsedType::Double, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
@@ -824,11 +875,13 @@ class CORRADE_UTILITY_EXPORT Json {
          * valid numeric values, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. Precision that doesn't fit into the 32-bit
          * floating-point representation is truncated, use
-         * @ref parseDoubleArray() to get the full precision. If all tokens are
-         * already parsed as @ref JsonToken::ParsedType::Float, returns the
-         * cached values, otherwise caches the parsed results. Expects that
-         * @p token references a token owned by this instance, the returned
-         * view points to data owned by this instance.
+         * @ref parseDoubleArray() to get the full precision. If
+         * @ref JsonToken::isParsed() is already set for the array and all
+         * tokens inside are already parsed as
+         * @ref JsonToken::ParsedType::Float, returns the cached values,
+         * otherwise caches the parsed results. Expects that @p token
+         * references a token owned by this instance, the returned view points
+         * to data owned by this instance.
          * @see @ref Json::Option::ParseFloats, @ref parseFloats(),
          *      @ref parseFloat(), @ref JsonToken::asFloatArray()
          */
@@ -841,11 +894,13 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part, are negative or
          * don't fit into a 32-bit representation, prints a message to
-         * @ref Error and returns @ref Containers::NullOpt. If all tokens are
-         * already parsed as @ref JsonToken::ParsedType::UnsignedInt, returns
-         * the cached values, otherwise caches the parsed results. Expects that
-         * @p token references a token owned by this instance, the returned
-         * view points to data owned by this instance.
+         * @ref Error and returns @ref Containers::NullOpt. If
+         * @ref JsonToken::isParsed() is already set for the array and all
+         * tokens inside are already parsed as
+         * @ref JsonToken::ParsedType::UnsignedInt, returns the cached values,
+         * otherwise caches the parsed results. Expects that @p token
+         * references a token owned by this instance, the returned view points
+         * to data owned by this instance.
          * @see @ref parseUnsignedInts(), @ref parseUnsignedInt(),
          *      @ref JsonToken::asUnsignedIntArray(), @ref parseSizeArray()
          */
@@ -858,7 +913,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part or don't fit into
          * a 32-bit representation, prints a message to @ref Error and returns
-         * @ref Containers::NullOpt. If all tokens are already parsed as
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for the array and all tokens inside are already parsed as
          * @ref JsonToken::ParsedType::Int, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
@@ -875,7 +931,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * numeric values, have a fractional or exponent part, are negative or
          * don't fit into 52 bits (which is the representable unsigned integer
          * range in a JSON), prints a message to @ref Error and returns
-         * @ref Containers::NullOpt. If all tokens are already parsed as
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for the array and all tokens inside are already parsed as
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
@@ -893,7 +950,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * numeric values, have a fractional or exponent part or don't fit into
          * 53 bits (which is the representable signed integer range in a JSON),
          * prints a message to @ref Error and returns @ref Containers::NullOpt.
-         * If all tokens are already parsed as @ref JsonToken::ParsedType::Long,
+         * If @ref JsonToken::isParsed() is already set for the array and all
+         * tokens are already parsed as @ref JsonToken::ParsedType::Long,
          * returns the cached values, otherwise caches the parsed results.
          * Expects that @p token references a token owned by this instance, the
          * returned view points to data owned by this instance.
@@ -924,6 +982,7 @@ class CORRADE_UTILITY_EXPORT Json {
         /* These are here because they need friended JsonToken, they're not on
            JsonToken in order to print nice file/line info on error (and access
            the string cache in case of parseStringInternal()) */
+        CORRADE_UTILITY_LOCAL void parseObjectArrayInternal(JsonToken& token);
         CORRADE_UTILITY_LOCAL bool parseNullInternal(const char* errorPrefix, JsonToken& token);
         CORRADE_UTILITY_LOCAL bool parseBoolInternal(const char* errorPrefix, JsonToken& token);
         CORRADE_UTILITY_LOCAL bool parseDoubleInternal(const char* errorPrefix, JsonToken& token);
@@ -1255,13 +1314,13 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Whether the token value is parsed
          *
-         * Set implicitly for @ref Type::Object and @ref Type::Array, for other
-         * token types it means the value can be accessed directly by
-         * @ref asNull(), @ref asBool(), @ref asDouble(), @ref asFloat(),
-         * @ref asUnsignedInt(), @ref asInt(), @ref asUnsignedLong(),
-         * @ref asLong(), @ref asSize() or @ref asString() function based on
-         * @ref type() and @ref parsedType() and the call will not fail. If not
-         * set, the value has to be parsed first.
+         * If set, the value can be accessed directly by @ref asObject(),
+         * @ref asArray(), @ref asNull(), @ref asBool(), @ref asDouble(),
+         * @ref asFloat(), @ref asUnsignedInt(), @ref asInt(),
+         * @ref asUnsignedLong(), @ref asLong(), @ref asSize() or
+         * @ref asString() function based on @ref type() and @ref parsedType()
+         * and the call will not fail. If not set, the value has to be parsed
+         * first.
          *
          * Tokens can be parsed during the initial run by passing
          * @ref Json::Option::ParseLiterals,
@@ -1277,7 +1336,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @relativeref{Json,parseLongs()}, @relativeref{Json,parseSizes()},
          * @relativeref{Json,parseStringKeys()} or
          * @relativeref{Json,parseStrings()}; or on a per-token basis using
-         * @ref Json::parseNull(), @relativeref{Json,parseBool()},
+         * @ref Json::parseObject(), @relativeref{Json,parseArray()},
+         * @relativeref{Json,parseNull()}, @relativeref{Json,parseBool()},
          * @relativeref{Json,parseDouble()}, @relativeref{Json,parseFloat()},
          * @relativeref{Json,parseUnsignedInt()}, @relativeref{Json,parseInt()},
          * @relativeref{Json,parseUnsignedLong()},
@@ -1395,11 +1455,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         /**
          * @brief Get an iterable object
          *
-         * Expects that the token is a @ref Type::Object, accessing
-         * @ref JsonObjectItem::key() then expects that the key token has
-         * @ref isParsed() set. See @ref Utility-Json-usage-iteration for more
-         * information. Iteration through object keys is performed using
-         * @ref next(), which has a @f$ \mathcal{O}(1) @f$ complexity.
+         * Expects that the token is a @ref Type::Object and @ref isParsed() is
+         * set, accessing @ref JsonObjectItem::key() then expects that the key
+         * token has @ref isParsed() set. See @ref Utility-Json-usage-iteration
+         * for more information. Iteration through object keys is performed
+         * using @ref next(), which has a @f$ \mathcal{O}(1) @f$ complexity.
          *
          * @m_class{m-note m-warning}
          *
@@ -1408,18 +1468,20 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type(), @ref Json::Option::ParseStringKeys,
-         *      @ref Json::parseStringKeys(), @ref Json::parseString()
+         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         *      @ref Json::Option::ParseStringKeys, @ref Json::parseLiterals(),
+         *      @ref Json::parseStringKeys(), @ref Json::parseObject(),
+         *      @ref Json::parseString()
          */
         JsonView<JsonObjectItem> asObject() const;
 
         /**
          * @brief Get an iterable array
          *
-         * Expects that the token is a @ref Type::Array. See
-         * @ref Utility-Json-usage-iteration for more information. Iteration
-         * through array values is performed using @ref next(), which has a
-         * @f$ \mathcal{O}(1) @f$ complexity.
+         * Expects that the token is a @ref Type::Array and @ref isParsed() is
+         * set. See @ref Utility-Json-usage-iteration for more information.
+         * Iteration through array values is performed using @ref next(), which
+         * has a @f$ \mathcal{O}(1) @f$ complexity.
          *
          * @m_class{m-note m-warning}
          *
@@ -1428,16 +1490,18 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type()
+         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         *      @ref Json::parseLiterals(), @ref Json::parseArray()
          */
         JsonView<JsonArrayItem> asArray() const;
 
         /**
          * @brief Find an object value by key
          *
-         * Expects that the token is a @ref Type::Object and its keys have
-         * @ref isParsed() set. If @p key is found, returns the child token
-         * corresponding to its value, otherwise returns @cpp nullptr @ce.
+         * Expects that the token is a @ref Type::Object, @ref isParsed() is
+         * set and its keys have @ref isParsed() set as well. If @p key is
+         * found, returns the child token corresponding to its value, otherwise
+         * returns @cpp nullptr @ce.
          *
          * Note that there's no acceleration structure built at parse time and
          * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
@@ -1452,16 +1516,18 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type(), @ref Json::Option::ParseStringKeys,
-         *      @ref Json::parseStringKeys()
+         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         *      @ref Json::Option::ParseStringKeys, @ref Json::parseLiterals(),
+         *      @ref Json::parseStringKeys(), @ref Json::parseObject()
          */
         const JsonToken* find(Containers::StringView key) const;
 
         /**
          * @brief Find an array value by index
          *
-         * Expects that the token is a @ref Type::Array. If @p index is found,
-         * returns the corresponding token, otherwise returns @cpp nullptr @ce.
+         * Expects that the token is a @ref Type::Array and @ref isParsed() is
+         * set. If @p index is found, returns the corresponding token,
+         * otherwise returns @cpp nullptr @ce.
          *
          * Note that there's no acceleration structure built at parse time and
          * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
@@ -1476,7 +1542,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type()
+         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         *      @ref Json::parseLiterals(), @ref Json::parseArray()
          */
         const JsonToken* find(std::size_t index) const;
 
@@ -2026,6 +2093,7 @@ template<class T> class JsonView {
         JsonIterator<T> cend() const { return JsonIterator<T>{0, _end}; }
 
     private:
+        friend Json;
         friend JsonToken;
 
         explicit JsonView(const JsonToken* begin, const JsonToken* end) noexcept: _begin{begin}, _end{end} {}
