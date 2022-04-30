@@ -73,13 +73,17 @@ namespace Implementation {
            relevant bug is https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95148
            (which complains about the inability to circumvent this, but not
            about the stupidity of this warning being trigerred in a template
-           code) */
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
+           code).
+
+           Also explicitly check we're not on Clang because certain Clang-based
+           IDEs inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does. */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wtype-limits"
         #endif
         return (first > index ? size[first] : 1)*strideForSizeInternal(size, index, Sequence<next...>{});
-        #if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
         #pragma GCC diagnostic pop
         #endif
     }

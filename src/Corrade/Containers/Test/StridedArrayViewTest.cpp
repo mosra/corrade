@@ -567,17 +567,26 @@ void StridedArrayViewTest::dimensionsConstructNoInit() {
        value this stupidly */
     new(&a)Size3D{Corrade::NoInit};
     {
-        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        /* Explicitly check we're not on Clang because certain Clang-based IDEs
+           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL_IF(a[0] != 1, "GCC 10+ misoptimizes and overwrites the value.");
         #endif
         CORRADE_COMPARE(a[0], 1);
     } {
-        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        /* Explicitly check we're not on Clang because certain Clang-based IDEs
+           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL_IF(a[1] != 37, "GCC 10+ misoptimizes and overwrites the value.");
         #endif
         CORRADE_COMPARE(a[1], 37);
     } {
-        #if defined(__GNUC__) && __GNUC__ >= 10 && __OPTIMIZE__
+        /* Explicitly check we're not on Clang because certain Clang-based IDEs
+           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL_IF(a[2] != 4564, "GCC 10+ misoptimizes and overwrites the value.");
         #endif
         CORRADE_COMPARE(a[2], 4564);

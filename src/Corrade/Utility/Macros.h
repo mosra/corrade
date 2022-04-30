@@ -290,8 +290,12 @@ their own specific macro always as they otherwise complain about use of a C++17
 feature when compiling as C++11 or C++14.
 */
 /* GCC 7 supports [[maybe_unused]] in some cases (function arguments), but not
-   e.g. unused constructors. GCC 10 does, so using that as the min version. */
-#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10
+   e.g. unused constructors. GCC 10 does, so using that as the min version.
+
+   Explicitly checking we're not on Clang because certain Clang-based IDEs
+   inherit __GNUC__ if GCC is used instead of leaving it at 4 like Clang itself
+   does, and thus this macro would cause a warning in the IDE. */
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10
 #define CORRADE_UNUSED [[maybe_unused]]
 /* Clang unfortunately warns that [[maybe_unused]] is a C++17 extension, so we
    use this instead of attempting to suppress the warning like we had to do
@@ -327,7 +331,10 @@ non-empty only on 2019 16.6+ and only if compiling under C++17, as it warns
 otherwise as well. Defined as empty on older GCC and MSVC --- these versions
 don't warn about the fallthrough, so there's no need to suppress anything.
 */
-#if (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926 && CORRADE_CXX_STANDARD >= 201703) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7)
+/* Explicitly checking we're not on Clang because certain Clang-based IDEs
+   inherit __GNUC__ if GCC is used instead of leaving it at 4 like Clang itself
+   does, and thus this macro would cause a warning in the IDE. */
+#if (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926 && CORRADE_CXX_STANDARD >= 201703) || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7)
 #define CORRADE_FALLTHROUGH [[fallthrough]];
 /* Clang unfortunately warns that [[fallthrough]] is a C++17 extension, so we
    use this instead of attempting to suppress the warning like we had to do
@@ -509,8 +516,13 @@ but the behavior is highly dependent on compiler-specific heuristics.
 /* While the GCC 9 changelog mentions experimental support for [[likely]] and
    [[unlikely]], it warns that "attributes at the beginning of statement are
    ignored" (??). Version 10 treats them properly. For MSVC using > 201703
-   because 16.6 reports 201705 when compiling as C++20. */
-#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+   because 16.6 reports 201705 when compiling as C++20.
+
+   For the GCC branch explicitly checking we're not on Clang because certain
+   Clang-based IDEs inherit __GNUC__ if GCC is used instead of leaving it at 4
+   like Clang itself does, and thus this macro would cause a warning in the
+   IDE if it didn't have Clang 12+. */
+#if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
 #define CORRADE_LIKELY(...) (__VA_ARGS__) [[likely]]
 #elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_LIKELY(...) (__builtin_expect((__VA_ARGS__), 1))
@@ -534,8 +546,13 @@ mark boundary conditions in tight loops, for example:
 /* While the GCC 9 changelog mentions experimental support for [[likely]] and
    [[unlikely]], it warns that "attributes at the beginning of statement are
    ignored" (??). Version 10 treats them properly. For MSVC using > 201703
-   because 16.6 reports 201705 when compiling as C++20. */
-#if (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
+   because 16.6 reports 201705 when compiling as C++20.
+
+   For the GCC branch explicitly checking we're not on Clang because certain
+   Clang-based IDEs inherit __GNUC__ if GCC is used instead of leaving it at 4
+   like Clang itself does, and thus this macro would cause a warning in the
+   IDE if it didn't have Clang 12+. */
+#if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10) || (CORRADE_CXX_STANDARD > 201703 && ((defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 12) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)))
 #define CORRADE_UNLIKELY(...) (__VA_ARGS__) [[unlikely]]
 #elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_UNLIKELY(...) (__builtin_expect((__VA_ARGS__), 0))
