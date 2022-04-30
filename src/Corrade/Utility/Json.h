@@ -374,8 +374,8 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * By default performs only tokenization, not parsing any literals. Use
          * @p options to enable parsing of particular token types as well. If
-         * a tokenization or parsing error happens, prints an error and returns
-         * @ref Containers::NullOpt.
+         * a tokenization or parsing error happens, prints a message to
+         * @ref Error and returns @ref Containers::NullOpt.
          *
          * If the @p string is @ref Containers::StringViewFlag::Global, the
          * parsed tokens will reference it, returning also global string
@@ -396,7 +396,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * By default performs only tokenization, not parsing any literals. Use
          * @p options to enable parsing of particular token types as well. If
          * the file can't be read, or a tokenization or parsing error happens,
-         * prints an error and returns @ref Containers::NullOpt.
+         * prints a message to @ref Error and returns @ref Containers::NullOpt.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         static Containers::Optional<Json> fromFile(Containers::StringView filename, Options options = {});
@@ -448,8 +448,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::isParsed() set and be accessible through
          * @ref JsonToken::asNull() and @ref JsonToken::asBool(). Non-literal
          * tokens and tokens that are already parsed are skipped. If an invalid
-         * value is encountered, prints an error and returns @cpp false @ce.
-         * Expects that @p token references a token owned by this instance.
+         * value is encountered, prints a message to @ref Error and returns
+         * @cpp false @ce. Expects that @p token references a token owned by
+         * this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseLiterals specified during the initial
@@ -468,8 +469,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::asDouble(). Non-numeric tokens and numeric tokens
          * that are already parsed as doubles are skipped, numeric tokens
          * parsed as other types are reparsed. If an invalid value is
-         * encountered, prints an error and returns @cpp false @ce. Expects
-         * that @p token references a token owned by this instance.
+         * encountered, prints a message to @ref Error and returns
+         * @cpp false @ce. Expects that @p token references a token owned by
+         * this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseDoubles specified during the initial
@@ -489,8 +491,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::asFloat(). Non-numeric tokens and numeric tokens
          * that are already parsed as floats are skipped, numeric tokens parsed
          * as other types are reparsed. If an invalid value is encountered,
-         * prints an error and returns @cpp false @ce. Expects that @p token
-         * references a token owned by this instance.
+         * prints a message to @ref Error and returns @cpp false @ce. Expects
+         * that @p token references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseFloats specified during the initial
@@ -512,8 +514,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * tokens parsed as other types are reparsed. If an invalid value,
          * a literal with a fractional or exponent part or a negative value is
          * encountered or a value doesn't fit into a 32-bit representation,
-         * prints an error and returns @cpp false @ce. Expects that @p token
-         * references a token owned by this instance.
+         * prints a message to @ref Error and returns @cpp false @ce. Expects
+         * that @p token references a token owned by this instance.
          *
          * Checking a single token for a numeric type and parsing it as an
          * unsigned int can be done using @ref parseUnsignedInt().
@@ -532,9 +534,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * are already parsed as int are skipped, numeric tokens parsed as
          * other types are reparsed. If an invalid value, a literal with a
          * fractional or exponent part is encountered or a value doesn't fit
-         * into a 32-bit representation, prints an error and returns
-         * @cpp false @ce. Expects that @p token references a token owned by
-         * this instance.
+         * into a 32-bit representation, prints a message to @ref Error and
+         * returns @cpp false @ce. Expects that @p token references a token
+         * owned by this instance.
          *
          * Checking a single token for a numeric type and parsing it as an int
          * can be done using @ref parseUnsignedInt().
@@ -554,9 +556,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * tokens parsed as other types are reparsed. If an invalid value, a
          * literal with a fractional or exponent part or a negative value is
          * encountered or a value doesn't fit into 52 bits (which is the
-         * representable unsigned integer range in a JSON), prints an error and
-         * returns @cpp false @ce. Expects that @p token references a token
-         * owned by this instance.
+         * representable unsigned integer range in a JSON), prints a message to
+         * @ref Error and returns @cpp false @ce. Expects that @p token
+         * references a token owned by this instance.
          *
          * Checking a single token for a numeric type and parsing it as an
          * unsigned long can be done using @ref parseUnsignedInt().
@@ -576,8 +578,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * other types are reparsed. If an invalid value, a literal with a
          * fractional or exponent part is encountered or a value doesn't fit
          * into 53 bits (which is the representable signed integer range in a
-         * JSON), prints an error and returns @cpp false @ce. Expects that
-         * @p token references a token owned by this instance.
+         * JSON), prints a message to @ref Error and returns @cpp false @ce.
+         * Expects that @p token references a token owned by this instance.
          *
          * Checking a single token for a numeric type and parsing it as a long
          * can be done using @ref parseLong().
@@ -611,9 +613,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * accessible through @ref JsonToken::asString(). The operation is a
          * subset of @ref parseStringKeys(). Non-string tokens, string tokens
          * that are not object keys and string tokens that are already parsed
-         * are skipped. If an invalid value is encountered, prints an error and
-         * returns @cpp false @ce. Expects that @p token references a token
-         * owned by this instance.
+         * are skipped. If an invalid value is encountered, prints a message to
+         * @ref Error and returns @cpp false @ce. Expects that @p token
+         * references a token owned by this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseStringKeys specified during the initial
@@ -631,8 +633,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * and be accessible through @ref JsonToken::asString(). The operation
          * is a superset of @ref parseStringKeys(). Non-string tokens and
          * string tokens that are already parsed are skipped. If an invalid
-         * value is encountered, prints an error and returns @cpp false @ce.
-         * Expects that @p token references a token owned by this instance.
+         * value is encountered, prints a message to @ref Error and returns
+         * @cpp false @ce. Expects that @p token references a token owned by
+         * this instance.
          *
          * Passing @ref root() as @p token has the same effect as
          * @ref Option::ParseStrings specified during the initial
@@ -646,10 +649,10 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a null token
          *
          * If @p token is not a @ref JsonToken::Type::Null or is not a valid
-         * null value, prints an error and returns @ref Containers::NullOpt. If
-         * @ref JsonToken::isParsed() is already set, returns the cached value,
-         * otherwise caches the parsed result. Expects that @p token references
-         * a token owned by this instance.
+         * null value, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set, returns the cached value, otherwise caches the parsed result.
+         * Expects that @p token references a token owned by this instance.
          * @see @ref JsonToken::asNull()
          */
         Containers::Optional<std::nullptr_t> parseNull(const JsonToken& token);
@@ -658,10 +661,10 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a boolean token
          *
          * If @p token is not a @ref JsonToken::Type::Bool or is not a valid
-         * boolean value, prints an error and returns @ref Containers::NullOpt.
-         * If @ref JsonToken::isParsed() is already set, returns the cached
-         * value, otherwise caches the parsed result. Expects that @p token
-         * references a token owned by this instance.
+         * boolean value, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set, returns the cached value, otherwise caches the parsed result.
+         * Expects that @p token references a token owned by this instance.
          * @see @ref JsonToken::asBool()
          */
         Containers::Optional<bool> parseBool(const JsonToken& token);
@@ -670,10 +673,11 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a 64-bit floating-point token
          *
          * If @p token is not a @ref JsonToken::Type::Number or is not a valid
-         * numeric value, prints an error and returns @ref Containers::NullOpt.
-         * If the token is already parsed as @ref JsonToken::ParsedType::Double,
-         * returns the cached value, otherwise caches the parsed result.
-         * Expects that @p token references a token owned by this instance.
+         * numeric value, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If the token is already parsed as
+         * @ref JsonToken::ParsedType::Double, returns the cached value,
+         * otherwise caches the parsed result. Expects that @p token references
+         * a token owned by this instance.
          * @see @ref JsonToken::asDouble()
          */
         Containers::Optional<double> parseDouble(const JsonToken& token);
@@ -682,10 +686,10 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a 32-bit floating-point token
          *
          * If @p token is not a @ref JsonToken::Type::Number or is not a valid
-         * numeric value, prints an error and returns @ref Containers::NullOpt.
-         * Precision that doesn't fit into the 32-bit floating-point
-         * representation is truncated, use @ref parseDouble() to get the full
-         * precision. If the token is already parsed as
+         * numeric value, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. Precision that doesn't fit into the 32-bit
+         * floating-point representation is truncated, use @ref parseDouble()
+         * to get the full precision. If the token is already parsed as
          * @ref JsonToken::ParsedType::Float, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
@@ -698,11 +702,11 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * If @p token is not a @ref JsonToken::Type::Number, is not a valid
          * numeric value, has a fractional or exponent part, is negative or
-         * doesn't fit into a 32-bit representation, prints an error and returns
-         * @ref Containers::NullOpt. If the token is already parsed as
-         * @ref JsonToken::ParsedType::UnsignedInt, returns the cached value,
-         * otherwise caches the parsed result. Expects that @p token references
-         * a token owned by this instance.
+         * doesn't fit into a 32-bit representation, prints a message to
+         * @ref Error and returns @ref Containers::NullOpt. If the token is
+         * already parsed as @ref JsonToken::ParsedType::UnsignedInt, returns
+         * the cached value, otherwise caches the parsed result. Expects that
+         * @p token references a token owned by this instance.
          * @see @ref JsonToken::asUnsignedInt(), @ref parseSize()
          */
         Containers::Optional<std::uint32_t> parseUnsignedInt(const JsonToken& token);
@@ -712,7 +716,7 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * If @p token is not a @ref JsonToken::Type::Number, is not a valid
          * numeric value, has a fractional or exponent part or doesn't fit into
-         * a 32-bit representation, prints an error and returns
+         * a 32-bit representation, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If the token is already parsed as
          * @ref JsonToken::ParsedType::Int, returns the cached value, otherwise
          * caches the parsed result. Expects that @p token references a token
@@ -727,7 +731,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Number, is not a valid
          * numeric value, has a fractional or exponent part, is negative or
          * doesn't fit into 52 bits (which is the representable unsigned
-         * integer range in a JSON), prints an error and returns
+         * integer range in a JSON), prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If the token is already parsed as
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
@@ -742,10 +746,11 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Number,  is not a valid
          * nnumeric value, has a fractional or exponent part or doesn't fit
          * into 53 bits (which is the representable signed integer range in a
-         * JSON), prints an error and returns @ref Containers::NullOpt. If the
-         * token is already parsed as @ref JsonToken::ParsedType::Long, returns
-         * the cached value, otherwise caches the parsed result. Expects that
-         * @p token references a token owned by this instance.
+         * JSON), prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If the token is already parsed as
+         * @ref JsonToken::ParsedType::Long, returns the cached value,
+         * otherwise caches the parsed result. Expects that @p token references
+         * a token owned by this instance.
          * @see @ref JsonToken::asLong()
          */
         Containers::Optional<std::int64_t> parseLong(const JsonToken& token);
@@ -767,12 +772,12 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a string token
          *
          * If @p token is not a @ref JsonToken::Type::String or is not a valid
-         * string value, prints an error and returns @ref Containers::NullOpt.
-         * If @ref JsonToken::isParsed() is already set, returns the cached
-         * value, otherwise caches the parsed result. Expects that @p token
-         * references a token owned by this instance. If @ref fromString() was
-         * called with a global literal and the string didn't contain any
-         * escape sequences, the returned view has
+         * string value, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set, returns the cached value, otherwise caches the parsed result.
+         * Expects that @p token references a token owned by this instance. If
+         * @ref fromString() was called with a global literal and the string
+         * didn't contain any escape sequences, the returned view has
          * @ref Containers::StringViewFlag::Global set. If not, the view points
          * to data owned by this instance.
          * @see @ref JsonToken::asString()
@@ -784,11 +789,12 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Bool tokens, or the tokens are not valid
-         * boolean values, prints an error and returns @ref Containers::NullOpt.
-         * If @ref JsonToken::isParsed() is already set for all tokens, returns
-         * the cached values, otherwise caches the parsed results. Expects that
-         * @p token references a token owned by this instance, the returned
-         * view points to data owned by this instance.
+         * boolean values, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for all tokens, returns the cached values, otherwise caches the
+         * parsed results. Expects that @p token references a token owned by
+         * this instance, the returned view points to data owned by this
+         * instance.
          * @see @ref Json::Option::ParseLiterals, @ref parseLiterals(),
          *      @ref parseBool(), @ref JsonToken::asBoolArray()
          */
@@ -799,7 +805,7 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, or the tokens are not
-         * valid numeric values, prints an error and returns
+         * valid numeric values, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If all tokens are already parsed as
          * @ref JsonToken::ParsedType::Double, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
@@ -815,7 +821,7 @@ class CORRADE_UTILITY_EXPORT Json {
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, or the tokens are not
-         * valid numeric values, prints an error and returns
+         * valid numeric values, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. Precision that doesn't fit into the 32-bit
          * floating-point representation is truncated, use
          * @ref parseDoubleArray() to get the full precision. If all tokens are
@@ -834,12 +840,12 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part, are negative or
-         * don't fit into a 32-bit representation, prints an error and returns
-         * @ref Containers::NullOpt. If all tokens are already parsed as
-         * @ref JsonToken::ParsedType::UnsignedInt, returns the cached values,
-         * otherwise caches the parsed results. Expects that @p token
-         * references a token owned by this instance, the returned view points
-         * to data owned by this instance.
+         * don't fit into a 32-bit representation, prints a message to
+         * @ref Error and returns @ref Containers::NullOpt. If all tokens are
+         * already parsed as @ref JsonToken::ParsedType::UnsignedInt, returns
+         * the cached values, otherwise caches the parsed results. Expects that
+         * @p token references a token owned by this instance, the returned
+         * view points to data owned by this instance.
          * @see @ref parseUnsignedInts(), @ref parseUnsignedInt(),
          *      @ref JsonToken::asUnsignedIntArray(), @ref parseSizeArray()
          */
@@ -851,7 +857,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part or don't fit into
-         * a 32-bit representation, prints an error and returns
+         * a 32-bit representation, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If all tokens are already parsed as
          * @ref JsonToken::ParsedType::Int, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
@@ -868,7 +874,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part, are negative or
          * don't fit into 52 bits (which is the representable unsigned integer
-         * range in a JSON), prints an error and returns
+         * range in a JSON), prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If all tokens are already parsed as
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
@@ -886,11 +892,11 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part or don't fit into
          * 53 bits (which is the representable signed integer range in a JSON),
-         * prints an error and returns @ref Containers::NullOpt. If all tokens
-         * are already parsed as @ref JsonToken::ParsedType::Long, returns the
-         * cached values, otherwise caches the parsed results. Expects that
-         * @p token references a token owned by this instance, the returned
-         * view points to data owned by this instance.
+         * prints a message to @ref Error and returns @ref Containers::NullOpt.
+         * If all tokens are already parsed as @ref JsonToken::ParsedType::Long,
+         * returns the cached values, otherwise caches the parsed results.
+         * Expects that @p token references a token owned by this instance, the
+         * returned view points to data owned by this instance.
          * @see @ref parseLongs(), @ref parseLong(),
          *      @ref JsonToken::asLongArray()
          */
