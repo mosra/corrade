@@ -567,7 +567,7 @@ void StaticArrayViewTest::slicePointer() {
        GCC <= 5 chokes on that, because for it doing pointer arithmetic on
        _data is apparently not constexpr. Note that the above slice() call
        worked correctly on it (both pointers treated as constexpr?). */
-    #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 5
+    #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ > 5
     constexpr ConstArrayView cc = ca.prefix(Array5 + 3);
     CORRADE_COMPARE(cc.size(), 3);
     CORRADE_COMPARE(cc[0], 1);

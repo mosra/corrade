@@ -1910,7 +1910,7 @@ This macro is meant to be called in a test case in a
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
-#ifndef _MSC_VER
+#ifndef CORRADE_TARGET_MSVC
 #define CORRADE_BENCHMARK(batchSize)                                        \
     Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__); \
     for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Corrade::TestSuite::Tester::instance().createBenchmarkRunner(batchSize))

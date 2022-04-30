@@ -31,7 +31,7 @@ using namespace Corrade;
 
 namespace {
 
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
@@ -49,7 +49,7 @@ float fastinvsqrt(float number) {
     y = y*(threehalfs - (x2*y*y));
     return y;
 }
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #pragma GCC diagnostic pop
 #endif
 

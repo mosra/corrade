@@ -142,13 +142,13 @@ void TypeTraitsTest::hasTypeComma() {
 
 struct Type {};
 struct NonIterableType {};
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
 #endif
 int* begin(Type) { return nullptr; }
 int* end(Type) { return nullptr; }
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic pop
 #endif
 struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};

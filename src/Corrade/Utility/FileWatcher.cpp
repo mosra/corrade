@@ -68,7 +68,7 @@ FileWatcher::FileWatcher(const std::string& filename, Flags flags):
 }
 
 FileWatcher::FileWatcher(FileWatcher&&)
-    #ifdef __GNUC__
+    #ifdef CORRADE_TARGET_GCC
     noexcept(std::is_nothrow_move_constructible<std::string>::value)
     #else
     noexcept
@@ -87,7 +87,7 @@ bool FileWatcher::isValid() const {
 
 FileWatcher& FileWatcher::operator=(FileWatcher&&)
     /* See the header for details */
-    #ifdef __GNUC__
+    #ifdef CORRADE_TARGET_GCC
     noexcept(std::is_nothrow_move_assignable<std::string>::value)
     #else
     noexcept

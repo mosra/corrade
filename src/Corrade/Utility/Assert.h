@@ -321,9 +321,9 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#if defined(__GNUC__)
+#if defined(CORRADE_TARGET_GCC)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __builtin_unreachable()
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
 #else
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) std::abort()
@@ -580,9 +580,9 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_INTERNAL_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#if defined(__GNUC__)
+#if defined(CORRADE_TARGET_GCC)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __builtin_unreachable()
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __assume(0)
 #else
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() std::abort()

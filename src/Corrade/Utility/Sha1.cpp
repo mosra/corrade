@@ -100,7 +100,7 @@ Sha1& Sha1::operator<<(const std::string& data) {
    code. However note that this also forces it in case O0 was used. The
    actual line affected seems to be  Digest d = Digest::fromByteArray(...). A
    report with further details: https://github.com/mosra/corrade/issues/45 */
-#if defined(__GNUC__) && !defined(__clang__) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
 #pragma GCC push_options
 #pragma GCC optimize ("O2")
 #endif
@@ -136,7 +136,7 @@ Sha1::Digest Sha1::digest() {
     _bufferSize = 0;
     return d;
 }
-#if defined(__GNUC__) && !defined(__clang__) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
 #pragma GCC pop_options
 #endif
 

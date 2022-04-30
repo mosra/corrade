@@ -113,7 +113,7 @@ std::vector<std::string> Arguments::environment() {
     /* System environment provided by Node.js. Hopefully nobody uses \b in
        environment variables. (Can't use \0 because Emscripten chokes on it.) */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
-    #ifdef __clang__
+    #ifdef CORRADE_TARGET_CLANG
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Winvalid-pp-token"
     #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
@@ -128,7 +128,7 @@ std::vector<std::string> Arguments::environment() {
         stringToUTF8(env, memory, bytes);
         return memory;
     }));
-    #ifdef __clang__
+    #ifdef CORRADE_TARGET_CLANG
     #pragma GCC diagnostic pop
     #endif
     char* e = env;
@@ -508,7 +508,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         #ifndef CORRADE_TARGET_WINDOWS
         const char* const env = std::getenv(entry.environment.data());
         #ifdef CORRADE_TARGET_EMSCRIPTEN
-        #ifdef __clang__
+        #ifdef CORRADE_TARGET_CLANG
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
         #endif
@@ -526,7 +526,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             }
             return 0;
         }, entry.environment.data()));
-        #ifdef __clang__
+        #ifdef CORRADE_TARGET_CLANG
         #pragma GCC diagnostic pop
         #endif
         #endif

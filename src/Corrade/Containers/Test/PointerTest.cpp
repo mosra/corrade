@@ -165,7 +165,7 @@ struct Immovable {
 int Immovable::constructed = 0;
 int Immovable::destructed = 0;
 
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-member-function"
 #endif
@@ -178,7 +178,7 @@ struct Throwable {
     Throwable& operator=(const Throwable&) { return *this; }
     Throwable& operator=(Throwable&&) { return *this; }
 };
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic pop
 #endif
 

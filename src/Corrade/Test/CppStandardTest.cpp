@@ -58,12 +58,12 @@ void CppStandardTest::test() {
 
     #ifdef COMPILING_AS_CPP11
     {
-        #ifdef _MSC_VER
+        #ifdef CORRADE_TARGET_MSVC
         CORRADE_EXPECT_FAIL("MSVC always compiles at least as C++14.");
         #endif
         CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201103L);
     }
-    #ifdef _MSC_VER
+    #ifdef CORRADE_TARGET_MSVC
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
     #endif
     #elif defined(COMPILING_AS_CPP14)

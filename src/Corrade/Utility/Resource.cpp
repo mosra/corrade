@@ -70,7 +70,7 @@ struct ResourceGlobals {
    in a single app we want to ensure there's just one global symbol. On Linux
    it's apparently enough to just export, macOS needs the weak attribute. */
 CORRADE_VISIBILITY_EXPORT
-    #ifdef __GNUC__
+    #ifdef CORRADE_TARGET_GCC
     __attribute__((weak))
     #else
     /* uh oh? the test will fail, probably */

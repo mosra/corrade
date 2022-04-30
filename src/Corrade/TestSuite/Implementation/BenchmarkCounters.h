@@ -40,9 +40,9 @@
 
 /* For RDTSC */
 #ifdef CORRADE_TARGET_X86
-#ifdef __GNUC__
+#ifdef CORRADE_TARGET_GCC
 #include <x86intrin.h>
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #include <intrin.h>
 #endif
 #endif

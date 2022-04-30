@@ -53,7 +53,7 @@ information.
 */
 /* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
    __apple_build_version__ according to https://stackoverflow.com/a/19391724 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9))) || (defined(_MSC_VER) && _MSC_VER >= 1926)
+#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)) || (defined(CORRADE_TARGET_CLANG) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9))) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)
 #define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 namespace Implementation { struct DebugSourceLocation; }
 #endif
@@ -780,7 +780,7 @@ CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 namespace Implementation {
     struct CORRADE_UTILITY_EXPORT DebugSourceLocation {
-        #if defined(__GNUC__) || defined(__clang__) || defined(_MSC_VER)
+        #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC)
         /* Not using std::experimental::source_location because it's not in
            libc++ 9 yet and GCC version has a C++14 usage of constexpr */
         /*implicit*/ DebugSourceLocation(Debug&& debug, const char* file = __builtin_FILE(), int line = __builtin_LINE());

@@ -41,7 +41,7 @@ asserts.
 #include "Corrade/Utility/Assert.h"
 #endif
 
-#if (defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG))) && (!defined(CORRADE_DEBUG_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE)) && !defined(__GNUC__) && !defined(_MSC_VER)
+#if (defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG))) && (!defined(CORRADE_DEBUG_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE)) && !defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_MSVC)
 #include <cstdlib> /* std::abort() where unreachable builtin not available */
 #endif
 
@@ -131,9 +131,9 @@ You can override this implementation by placing your own
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue)              \
     CORRADE_ASSERT_UNREACHABLE(message, returnValue)
 #else
-#if defined(__GNUC__)
+#if defined(CORRADE_TARGET_GCC)
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) __builtin_unreachable()
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
 #else
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) std::abort()
@@ -250,9 +250,9 @@ You can override this implementation by placing your own
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE()                         \
     CORRADE_INTERNAL_ASSERT_UNREACHABLE()
 #else
-#if defined(__GNUC__)
+#if defined(CORRADE_TARGET_GCC)
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() __builtin_unreachable()
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() __assume(0)
 #else
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() std::abort()

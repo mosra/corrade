@@ -127,7 +127,7 @@ void ArrayViewStlTest::convertFromConstArrayEmpty() {
     /* GCC 4.8 complains about missing initializers when {} is used here,
        however Clang on libc++ doesn't allow the opposite. */
     const std::array<float, 0> a
-        #if !(defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5)
+        #if !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5)
         {}
         #endif
         ;
@@ -193,7 +193,7 @@ void ArrayViewStlTest::convertVoidFromConstArrayEmpty() {
     /* GCC 4.8 complains about missing initializers when {} is used here,
        however Clang on libc++ doesn't allow the opposite. */
     const std::array<float, 0> a
-        #if !(defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5)
+        #if !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_GCC) && __GNUC__ < 5)
         {}
         #endif
         ;

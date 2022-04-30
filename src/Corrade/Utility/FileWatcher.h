@@ -121,7 +121,7 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
 
         /** @brief Move constructor */
         FileWatcher(FileWatcher&&)
-            #ifdef __GNUC__
+            #ifdef CORRADE_TARGET_GCC
             noexcept(std::is_nothrow_move_constructible<std::string>::value)
             #else
             noexcept
@@ -140,7 +140,7 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
                using libstdc++ < 5.5. Since it's impossible to check for a
                libstdc++ version when using Clang (the version number is A
                RELEASE DATE, wtf!), I'm checking for it this way. */
-            #ifdef __GNUC__
+            #ifdef CORRADE_TARGET_GCC
             noexcept(std::is_nothrow_move_assignable<std::string>::value)
             #else
             noexcept

@@ -463,11 +463,11 @@ You can override this implementation by placing your own
     @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifndef CORRADE_ASSUME
-#ifdef __clang__
+#ifdef CORRADE_TARGET_CLANG
 #define CORRADE_ASSUME(condition) __builtin_assume(condition)
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ASSUME(condition) __assume(condition)
-#elif defined(__GNUC__)
+#elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_ASSUME(condition)                                           \
     do {                                                                    \
         if(!(condition)) __builtin_unreachable(); \

@@ -167,7 +167,7 @@ namespace {
    in a single app we want to ensure there's just one global symbol. On Linux
    it's apparently enough to just export, macOS needs the weak attribute. */
 CORRADE_VISIBILITY_EXPORT
-    #ifdef __GNUC__
+    #ifdef CORRADE_TARGET_GCC
     __attribute__((weak))
     #else
     /* uh oh? the test will fail, probably */
@@ -687,7 +687,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check plugin version */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
     int (*version)() = reinterpret_cast<int(*)()>(
@@ -726,7 +726,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check interface string */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(
@@ -763,7 +763,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin initializer */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
     void(*initializer)() = reinterpret_cast<void(*)()>(
@@ -791,7 +791,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin finalizer */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
     void(*finalizer)() = reinterpret_cast<void(*)()>(
@@ -819,7 +819,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin instancer */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(
