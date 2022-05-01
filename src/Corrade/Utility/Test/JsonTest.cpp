@@ -406,43 +406,44 @@ const struct {
     const Containers::StringView json;
     bool singleValue;
     const Containers::StringView expected;
+    const char* expectFail;
 } ParseStringData[]{
     {"",
         "\"hello!\"", false,
-        "hello!"},
+        "hello!", nullptr},
     {"empty",
         "\"\"", false,
-        ""},
+        "", nullptr},
     {"escapes",
         "\"\\\"\\\\\\/\\b\\f\\n\\r\\t\"", false,
-        "\"\\/\b\f\n\r\t"},
+        "\"\\/\b\f\n\r\t", nullptr},
     /* Unicode escapes deliberately not supported right now */
     /** @todo handle also surrogate pairs, add a helper to the Unicode lib
         first https://en.wikipedia.org/wiki/JSON#Character_encoding */
     {"SSO string with escapes",
         "\"\\\\\"", false,
-        "\\"},
+        "\\", nullptr},
     {"non-SSO string with escapes",
         "\"this is a very long escaped\\nstring, \\\"yes\\\"!\"", false,
-        "this is a very long escaped\nstring, \"yes\"!"},
+        "this is a very long escaped\nstring, \"yes\"!", nullptr},
     {"global literal",
         "\"hello!\""_s, false,
-        "hello!"_s},
+        "hello!"_s, nullptr},
     {"global escaped literal",
         "\"hell\\\"o\\\"!\""_s, false,
-        "hell\"o\"!"},
+        "hell\"o\"!", nullptr},
     {"single value",
         "\"hello!\"", true,
-        "hello!"},
+        "hello!", nullptr},
     {"single escaped value",
         "\"hell\\\"o\\\"!\"", true,
-        "hell\"o\"!"},
+        "hell\"o\"!", nullptr},
     {"single global value",
         "\"hello!\""_s, true,
-        "hello!"_s},
+        "hello!"_s, nullptr},
     {"single global escaped value",
         "\"hell\\\"o\\\"!\""_s, true,
-        "hell\"o\"!"}
+        "hell\"o\"!", nullptr}
 };
 
 const struct {
@@ -582,97 +583,97 @@ const struct {
 } ParseErrorData[]{
     {"invalid null literal", &Json::parseLiterals,
         "no!",
-        "parseLiterals(): invalid null literal no!"},
+        "parseLiterals(): invalid null literal no! at <in>:3:6"},
     {"invalid true literal", &Json::parseLiterals,
         "toomuch",
-        "parseLiterals(): invalid bool literal toomuch"},
+        "parseLiterals(): invalid bool literal toomuch at <in>:3:6"},
     {"invalid false literal", &Json::parseLiterals,
         "foe",
-        "parseLiterals(): invalid bool literal foe"},
+        "parseLiterals(): invalid bool literal foe at <in>:3:6"},
     {"double literal too long", &Json::parseDoubles, /* 40 chars on a line */
        "1234.567890123456789012345678901234567890"
         "1234567890123456789012345678901234567890"
         "12345678901234567890123456789012345678901234567",
-        "parseDoubles(): too long numeric literal 1234.567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"},
+        "parseDoubles(): too long numeric literal 1234.567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567 at <in>:3:6"},
     {"float literal too long", &Json::parseFloats, /* 40 chars on a line */
        "1234.567890123456789012345678901234567890"
         "1234567890123456789012345678901234567890"
         "12345678901234567890123456789012345678901234567",
-        "parseFloats(): too long numeric literal 1234.567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"},
+        "parseFloats(): too long numeric literal 1234.567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567 at <in>:3:6"},
     {"unsigned int literal too long", &Json::parseUnsignedInts,
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
         "000000000000000000000000000000000000000012345678",
-        "parseUnsignedInts(): too long numeric literal 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012345678"},
+        "parseUnsignedInts(): too long numeric literal 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012345678 at <in>:3:6"},
     {"int literal too long", &Json::parseInts,
       // 1234567890123456789012345678901234567890 (40 chars on a line)
        "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
         "00000000000000000000000000000000000000001234567",
-        "parseInts(): too long numeric literal -0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001234567"},
+        "parseInts(): too long numeric literal -0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001234567 at <in>:3:6"},
     {"unsigned long literal too long", &Json::parseUnsignedLongs,
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
         "000000000000000000000000000000000000000012345678",
-        "parseUnsignedLongs(): too long numeric literal 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012345678"},
+        "parseUnsignedLongs(): too long numeric literal 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012345678 at <in>:3:6"},
     {"long literal too long", &Json::parseLongs,
       // 1234567890123456789012345678901234567890 (40 chars on a line)
        "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
         "00000000000000000000000000000000000000001234567",
-        "parseLongs(): too long numeric literal -0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001234567"},
+        "parseLongs(): too long numeric literal -0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001234567 at <in>:3:6"},
     {"invalid double literal", &Json::parseDoubles,
         "78.5x",
-        "parseDoubles(): invalid floating-point literal 78.5x"},
+        "parseDoubles(): invalid floating-point literal 78.5x at <in>:3:6"},
     {"invalid float literal", &Json::parseFloats,
         "78.5x",
-        "parseFloats(): invalid floating-point literal 78.5x"},
+        "parseFloats(): invalid floating-point literal 78.5x at <in>:3:6"},
     {"invalid unsigned integer literal", &Json::parseUnsignedInts,
         "78x",
-        "parseUnsignedInts(): invalid unsigned integer literal 78x"},
+        "parseUnsignedInts(): invalid unsigned integer literal 78x at <in>:3:6"},
     {"invalid integer literal", &Json::parseInts,
         "-78x",
-        "parseInts(): invalid integer literal -78x"},
+        "parseInts(): invalid integer literal -78x at <in>:3:6"},
     {"invalid unsigned long literal", &Json::parseUnsignedLongs,
         "78x",
-        "parseUnsignedLongs(): invalid unsigned integer literal 78x"},
+        "parseUnsignedLongs(): invalid unsigned integer literal 78x at <in>:3:6"},
     {"invalid long literal", &Json::parseLongs,
         "-78x",
-        "parseLongs(): invalid integer literal -78x"},
+        "parseLongs(): invalid integer literal -78x at <in>:3:6"},
     {"unsigned integer literal with an exponent", &Json::parseUnsignedInts,
         "78e5",
-        "parseUnsignedInts(): invalid unsigned integer literal 78e5"},
+        "parseUnsignedInts(): invalid unsigned integer literal 78e5 at <in>:3:6"},
     {"integer literal with an exponent", &Json::parseInts,
         "78e5",
-        "parseInts(): invalid integer literal 78e5"},
+        "parseInts(): invalid integer literal 78e5 at <in>:3:6"},
     {"unsigned long literal with an exponent", &Json::parseUnsignedLongs,
         "78e5",
-        "parseUnsignedLongs(): invalid unsigned integer literal 78e5"},
+        "parseUnsignedLongs(): invalid unsigned integer literal 78e5 at <in>:3:6"},
     {"long literal with an exponent", &Json::parseLongs,
         "78e5",
-        "parseLongs(): invalid integer literal 78e5"},
+        "parseLongs(): invalid integer literal 78e5 at <in>:3:6"},
     {"unsigned integer literal with a period", &Json::parseUnsignedInts,
         "78.0",
-        "parseUnsignedInts(): invalid unsigned integer literal 78.0"},
+        "parseUnsignedInts(): invalid unsigned integer literal 78.0 at <in>:3:6"},
     {"integer literal with a period", &Json::parseInts,
         "78.0",
-        "parseInts(): invalid integer literal 78.0"},
+        "parseInts(): invalid integer literal 78.0 at <in>:3:6"},
     {"unsigned long literal with a period", &Json::parseUnsignedLongs,
         "78.0",
-        "parseUnsignedLongs(): invalid unsigned integer literal 78.0"},
+        "parseUnsignedLongs(): invalid unsigned integer literal 78.0 at <in>:3:6"},
     {"long literal with a period", &Json::parseLongs,
         "78.0",
-        "parseLongs(): invalid integer literal 78.0"},
+        "parseLongs(): invalid integer literal 78.0 at <in>:3:6"},
     {"unsigned integer literal with a minus", &Json::parseUnsignedInts,
         "-78",
         /** @todo what the fuck stroul(), returning 18446744073709551538?! */
-        "parseUnsignedInts(): too large integer literal -78"},
+        "parseUnsignedInts(): too large integer literal -78 at <in>:3:6"},
     {"unsigned long literal with a minus", &Json::parseUnsignedLongs,
         "-78",
         /** @todo what the fuck stroull(), returning 18446744073709551538?! */
-        "parseUnsignedLongs(): too large integer literal -78"},
+        "parseUnsignedLongs(): too large integer literal -78 at <in>:3:6"},
     /* std::strtoull() returns 1 in this case, very useful */
     /** @todo fix once we have our own parsing routines */
     {"large unsigned long literal with a minus", &Json::parseUnsignedLongs,
@@ -680,22 +681,22 @@ const struct {
         nullptr},
     {"unsigned integer literal too large", &Json::parseUnsignedInts,
         "4294967296",
-        "parseUnsignedInts(): too large integer literal 4294967296"},
+        "parseUnsignedInts(): too large integer literal 4294967296 at <in>:3:6"},
     {"integer literal too small", &Json::parseInts,
         "-2147483649",
-        "parseInts(): too small or large integer literal -2147483649"},
+        "parseInts(): too small or large integer literal -2147483649 at <in>:3:6"},
     {"integer literal too large", &Json::parseInts,
         "2147483648",
-        "parseInts(): too small or large integer literal 2147483648"},
+        "parseInts(): too small or large integer literal 2147483648 at <in>:3:6"},
     {"unsigned long literal too large", &Json::parseUnsignedLongs,
         "4503599627370496",
-        "parseUnsignedLongs(): too large integer literal 4503599627370496"},
+        "parseUnsignedLongs(): too large integer literal 4503599627370496 at <in>:3:6"},
     {"long literal too small", &Json::parseLongs,
         "-4503599627370497",
-        "parseLongs(): too small or large integer literal -4503599627370497"},
+        "parseLongs(): too small or large integer literal -4503599627370497 at <in>:3:6"},
     {"long literal too large", &Json::parseLongs,
         "4503599627370496",
-        "parseLongs(): too small or large integer literal 4503599627370496"},
+        "parseLongs(): too small or large integer literal 4503599627370496 at <in>:3:6"},
     /* NAN or INF without a leading - fails during parse already */
     {"negative double INF literal", &Json::parseDoubles,
         "-INF",
@@ -705,7 +706,7 @@ const struct {
         #ifndef CORRADE_TARGET_32BIT
         nullptr
         #else
-        "parseDoubles(): invalid floating-point literal -INF"
+        "parseDoubles(): invalid floating-point literal -INF at <in>:3:6"
         #endif
     },
     {"negative float INF literal", &Json::parseFloats,
@@ -719,7 +720,7 @@ const struct {
         #ifndef CORRADE_TARGET_32BIT
         nullptr
         #else
-        "parseDoubles(): invalid floating-point literal -NAN"
+        "parseDoubles(): invalid floating-point literal -NAN at <in>:3:6"
         #endif
     },
     {"negative float NaN literal", &Json::parseFloats,
@@ -767,19 +768,19 @@ const struct {
         nullptr},
     {"hexadecimal unsigned int literal", &Json::parseUnsignedInts,
         "0xabc",
-        "parseUnsignedInts(): invalid unsigned integer literal 0xabc"},
+        "parseUnsignedInts(): invalid unsigned integer literal 0xabc at <in>:3:6"},
     {"hexadecimal int literal", &Json::parseInts,
         "-0XABC",
-        "parseInts(): invalid integer literal -0XABC"},
+        "parseInts(): invalid integer literal -0XABC at <in>:3:6"},
     {"hexadecimal unsigned long literal", &Json::parseUnsignedLongs,
         "0XABC",
-        "parseUnsignedLongs(): invalid unsigned integer literal 0XABC"},
+        "parseUnsignedLongs(): invalid unsigned integer literal 0XABC at <in>:3:6"},
     {"hexadecimal long literal", &Json::parseLongs,
         "-0xabc",
-        "parseLongs(): invalid integer literal -0xabc"},
+        "parseLongs(): invalid integer literal -0xabc at <in>:3:6"},
     {"invalid unicode escape", &Json::parseStrings,
         "\"\\undefined\"",
-        "parseStrings(): sorry, unicode escape sequences are not implemented yet"},
+        "parseStrings(): sorry, unicode escape sequences are not implemented yet at <in>:3:6"},
     /** @todo test for \u alone, or just 3 chars, invalid surrogates */
     /* These are deliberately not handled at the moment */
     {"zero byte", &Json::parseStrings,
@@ -2177,7 +2178,10 @@ void JsonTest::parseStringKeys() {
         } else {
             CORRADE_COMPARE(token.data(), data.json);
         }
-        CORRADE_COMPARE(token.asString(), data.expected);
+        {
+            CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
+            CORRADE_COMPARE(token.asString(), data.expected);
+        }
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
 
@@ -2227,7 +2231,10 @@ void JsonTest::parseStrings() {
         } else {
             CORRADE_COMPARE(json->root().data(), jsonData);
         }
-        CORRADE_COMPARE(json->root().asString(), data.expected);
+        {
+            CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
+            CORRADE_COMPARE(json->root().asString(), data.expected);
+        }
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
             data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
 
@@ -2734,7 +2741,7 @@ void JsonTest::parseError() {
     CORRADE_EXPECT_FAIL_IF(!data.message, "Not implemented yet.");
     CORRADE_VERIFY(!((*json).*data.function)(json->root()));
     if(!data.message) return;
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:3:6\n", data.message));
+    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
 
     /* Verify that the JSON token doesn't get corrupted by the error */
     CORRADE_VERIFY(!token.isParsed());
