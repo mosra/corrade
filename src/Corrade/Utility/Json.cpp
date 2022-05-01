@@ -39,6 +39,7 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Path.h"
+#include "Corrade/Utility/Unicode.h"
 
 namespace Corrade { namespace Utility {
 
@@ -1268,10 +1269,50 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonToken& token) 
                 *out = '\r';
                 break;
             case 'u': {
-                Error err;
-                err << errorPrefix << "sorry, unicode escape sequences are not implemented yet at";
-                printFilePosition(err, _state->filename, _state->string.prefix(token._data));
-                return false;
+                /* Parse the hexadecimal Unicode codepoint. The input pointer
+                   is incremented in the outer loop, thus this increments it
+                   only four times out of five. */
+                /** @todo handle also surrogate pairs, add a helper to the
+                    Unicode lib first https://en.wikipedia.org/wiki/JSON#Character_encoding */
+                const char* const unicodeBegin = in - 1;
+                const char* unicodeEnd = in + 4;
+                char32_t character = 0;
+                if(unicodeEnd >= end) {
+                    /* Handled below together with values out of range */
+                    unicodeEnd = end;
+                    character = ~char32_t{};
+                } else for(; in != unicodeEnd; ++in) {
+                    character <<= 4;
+                    const char uc = in[1];
+                    if(uc >= '0' && uc <= '9') character |= uc - '0';
+                    else if(uc >= 'A' && uc <= 'F') character |= 10 + uc - 'A';
+                    else if(uc >= 'a' && uc <= 'f') character |= 10 + uc - 'a';
+                    else {
+                        /* Handled below together with values out of range */
+                        character = ~char32_t{};
+                        break;
+                    }
+                }
+
+                /* Convert the unicode codepoint to UTF-8. At this point, since
+                   the encoding it 16 bit, it won't happen that Unicode::utf8()
+                   returns 0, but it's future-proofed for UTF-16 surrogate
+                   pairs when they get implemented. */
+                char utf8[4];
+                std::size_t utf8Size;
+                if(character == ~char32_t{} || !(utf8Size = Unicode::utf8(character, utf8))) {
+                    Error err;
+                    err << errorPrefix << "invalid unicode escape sequence" << Containers::StringView{unicodeBegin, std::size_t(unicodeEnd - unicodeBegin)} << "at";
+                    printFilePosition(err, _state->filename, _state->string.prefix(unicodeBegin));
+                    return false;
+                }
+
+                /* Copy it to the output. The output pointer is incremented in
+                   the outer loop, thus this increments it one time less. */
+                for(std::size_t i = 0; i != utf8Size; ++i)
+                    out[i] = utf8[i];
+                out += utf8Size - 1;
+                break;
             }
             default: CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         } else *out = c;
