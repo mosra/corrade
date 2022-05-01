@@ -124,20 +124,28 @@ struct JsonTest: TestSuite::Tester {
         void asBoolArray();
         void asBoolArrayNotAllSame();
         void asBoolArrayNotAllParsed();
+        void asBoolArrayUnexpectedSize();
         void asDoubleArray();
         void asDoubleArrayNotAllSame();
+        void asDoubleArrayUnexpectedSize();
         void asFloatArray();
         void asFloatArrayNotAllSame();
+        void asFloatArrayUnexpectedSize();
         void asUnsignedIntArray();
         void asUnsignedIntArrayNotAllSame();
+        void asUnsignedIntArrayUnexpectedSize();
         void asIntArray();
         void asIntArrayNotAllSame();
+        void asIntArrayUnexpectedSize();
         void asUnsignedLongArray();
         void asUnsignedLongArrayNotAllSame();
+        void asUnsignedLongArrayUnexpectedSize();
         void asLongArray();
         void asLongArrayNotAllSame();
+        void asLongArrayUnexpectedSize();
         void asSizeArray();
         void asSizeArrayNotAllSame();
+        void asSizeArrayUnexpectedSize();
         void asTypeArrayNotArray();
         void asTypeArrayNotParsed();
 
@@ -932,6 +940,10 @@ const struct {
         [](Json& json) { return !!json.parseBoolArray(json.root()); },
         "\n   {}",
         "parseBoolArray(): expected an array, got Utility::JsonToken::Type::Object"},
+    {"bool but unexpected size",
+        [](Json& json) { return !!json.parseBoolArray(json.root(), 4); },
+        "\n   [true, false, true]",
+        "parseBoolArray(): expected a 4-element array, got 3"},
     {"double",
         [](Json& json) { return !!json.parseDoubleArray(json.root()); },
         "[5.3,\n   3.f, 4]",
@@ -944,6 +956,10 @@ const struct {
         [](Json& json) { return !!json.parseDoubleArray(json.root()); },
         "\n   true",
         "parseDoubleArray(): expected an array, got Utility::JsonToken::Type::Bool"},
+    {"double but unexpected size",
+        [](Json& json) { return !!json.parseDoubleArray(json.root(), 4); },
+        "\n   [5.3, -3.0, 4]",
+        "parseDoubleArray(): expected a 4-element array, got 3"},
     {"float",
         [](Json& json) { return !!json.parseFloatArray(json.root()); },
         "[5.3,\n   3.f, 4]",
@@ -956,6 +972,10 @@ const struct {
         [](Json& json) { return !!json.parseFloatArray(json.root()); },
         "\n   null",
         "parseFloatArray(): expected an array, got Utility::JsonToken::Type::Null"},
+    {"float but unexpected size",
+        [](Json& json) { return !!json.parseFloatArray(json.root(), 4); },
+        "\n   [5.3, -3.0, 4]",
+        "parseFloatArray(): expected a 4-element array, got 3"},
     {"unsigned int",
         [](Json& json) { return !!json.parseUnsignedIntArray(json.root()); },
         "[53,\n   3.f, 4]",
@@ -968,6 +988,10 @@ const struct {
         [](Json& json) { return !!json.parseUnsignedIntArray(json.root()); },
         "\n   \"56\"",
         "parseUnsignedIntArray(): expected an array, got Utility::JsonToken::Type::String"},
+    {"unsigned int but unexpected size",
+        [](Json& json) { return !!json.parseUnsignedIntArray(json.root(), 4); },
+        "\n   [53, 3, 4]",
+        "parseUnsignedIntArray(): expected a 4-element array, got 3"},
     {"int",
         [](Json& json) { return !!json.parseIntArray(json.root()); },
         "[-53,\n   3.f, 4]",
@@ -980,6 +1004,10 @@ const struct {
         [](Json& json) { return !!json.parseIntArray(json.root()); },
         "\n   true",
         "parseIntArray(): expected an array, got Utility::JsonToken::Type::Bool"},
+    {"int but unexpected size",
+        [](Json& json) { return !!json.parseIntArray(json.root(), 4); },
+        "\n   [-53, 3, 4]",
+        "parseIntArray(): expected a 4-element array, got 3"},
     {"unsigned long",
         [](Json& json) { return !!json.parseUnsignedLongArray(json.root()); },
         "[53,\n   3.f, 4]",
@@ -992,6 +1020,10 @@ const struct {
         [](Json& json) { return !!json.parseUnsignedLongArray(json.root()); },
         "\n   \"56\"",
         "parseUnsignedLongArray(): expected an array, got Utility::JsonToken::Type::String"},
+    {"unsigned long but unexpected size",
+        [](Json& json) { return !!json.parseUnsignedLongArray(json.root(), 4); },
+        "\n   [53, 3, 4]",
+        "parseUnsignedLongArray(): expected a 4-element array, got 3"},
     {"long",
         [](Json& json) { return !!json.parseLongArray(json.root()); },
         "[-53,\n   3.f, 4]",
@@ -1004,6 +1036,10 @@ const struct {
         [](Json& json) { return !!json.parseLongArray(json.root()); },
         "\n   true",
         "parseLongArray(): expected an array, got Utility::JsonToken::Type::Bool"},
+    {"long but unexpected size",
+        [](Json& json) { return !!json.parseLongArray(json.root(), 4); },
+        "\n   [-53, 3, 4]",
+        "parseLongArray(): expected a 4-element array, got 3"},
     {"size",
         [](Json& json) { return !!json.parseSizeArray(json.root()); },
         "[53,\n   3.f, 4]",
@@ -1029,6 +1065,15 @@ const struct {
         "parseUnsignedLongArray(): expected an array, got Utility::JsonToken::Type::String"
         #else
         "parseUnsignedIntArray(): expected an array, got Utility::JsonToken::Type::String"
+        #endif
+        },
+    {"size but unexpected size",
+        [](Json& json) { return !!json.parseSizeArray(json.root(), 4); },
+        "\n   [53, 3, 4]",
+        #ifndef CORRADE_TARGET_32BIT
+        "parseUnsignedLongArray(): expected a 4-element array, got 3"
+        #else
+        "parseUnsignedIntArray(): expected a 4-element array, got 3"
         #endif
         },
 };
@@ -1151,20 +1196,28 @@ JsonTest::JsonTest() {
               &JsonTest::asBoolArray,
               &JsonTest::asBoolArrayNotAllSame,
               &JsonTest::asBoolArrayNotAllParsed,
+              &JsonTest::asBoolArrayUnexpectedSize,
               &JsonTest::asDoubleArray,
               &JsonTest::asDoubleArrayNotAllSame,
+              &JsonTest::asDoubleArrayUnexpectedSize,
               &JsonTest::asFloatArray,
               &JsonTest::asFloatArrayNotAllSame,
+              &JsonTest::asFloatArrayUnexpectedSize,
               &JsonTest::asUnsignedIntArray,
               &JsonTest::asUnsignedIntArrayNotAllSame,
+              &JsonTest::asUnsignedIntArrayUnexpectedSize,
               &JsonTest::asIntArray,
               &JsonTest::asIntArrayNotAllSame,
+              &JsonTest::asIntArrayUnexpectedSize,
               &JsonTest::asUnsignedLongArray,
               &JsonTest::asUnsignedLongArrayNotAllSame,
+              &JsonTest::asUnsignedLongArrayUnexpectedSize,
               &JsonTest::asLongArray,
               &JsonTest::asLongArrayNotAllSame,
+              &JsonTest::asLongArrayUnexpectedSize,
               &JsonTest::asSizeArray,
               &JsonTest::asSizeArrayNotAllSame,
+              &JsonTest::asSizeArrayUnexpectedSize,
               &JsonTest::asTypeArrayNotArray,
               &JsonTest::asTypeArrayNotParsed,
 
@@ -3207,6 +3260,23 @@ void JsonTest::asBoolArrayNotAllParsed() {
         "Utility::JsonToken::asBoolArray(): token 2 is an unparsed Utility::JsonToken::Type::Bool\n");
 }
 
+void JsonTest::asBoolArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        true, false, true
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asBoolArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asBoolArray(): expected a 4-element array, got 3\n");
+}
+
 void JsonTest::asDoubleArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 0.25
@@ -3238,6 +3308,24 @@ void JsonTest::asDoubleArrayNotAllSame() {
     json->root().asDoubleArray();
     CORRADE_COMPARE(out.str(),
         "Utility::JsonToken::asDoubleArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
+}
+
+void JsonTest::asDoubleArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 0.25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseDoubles(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asDoubleArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asDoubleArray(): expected a 4-element array, got 3\n");
 }
 
 void JsonTest::asFloatArray() {
@@ -3273,6 +3361,24 @@ void JsonTest::asFloatArrayNotAllSame() {
         "Utility::JsonToken::asFloatArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
+void JsonTest::asFloatArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.5, -17.25, 0.25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseFloats(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asFloatArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asFloatArray(): expected a 4-element array, got 3\n");
+}
+
 void JsonTest::asUnsignedIntArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
@@ -3304,6 +3410,24 @@ void JsonTest::asUnsignedIntArrayNotAllSame() {
     json->root().asUnsignedIntArray();
     CORRADE_COMPARE(out.str(),
         "Utility::JsonToken::asUnsignedIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
+}
+
+void JsonTest::asUnsignedIntArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asUnsignedIntArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asUnsignedIntArray(): expected a 4-element array, got 3\n");
 }
 
 void JsonTest::asIntArray() {
@@ -3339,6 +3463,24 @@ void JsonTest::asIntArrayNotAllSame() {
         "Utility::JsonToken::asIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
+void JsonTest::asIntArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseInts(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asIntArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asIntArray(): expected a 4-element array, got 3\n");
+}
+
 void JsonTest::asUnsignedLongArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
@@ -3372,6 +3514,24 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
         "Utility::JsonToken::asUnsignedLongArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
+void JsonTest::asUnsignedLongArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asUnsignedLongArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asUnsignedLongArray(): expected a 4-element array, got 3\n");
+}
+
 void JsonTest::asLongArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
@@ -3403,6 +3563,24 @@ void JsonTest::asLongArrayNotAllSame() {
     json->root().asLongArray();
     CORRADE_COMPARE(out.str(),
         "Utility::JsonToken::asLongArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
+}
+
+void JsonTest::asLongArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, -17, 25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseLongs(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asLongArray(4);
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asLongArray(): expected a 4-element array, got 3\n");
 }
 
 void JsonTest::asSizeArray() {
@@ -3440,6 +3618,29 @@ void JsonTest::asSizeArrayNotAllSame() {
     #else
     CORRADE_COMPARE(out.str(),
         "Utility::JsonToken::asUnsignedIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
+    #endif
+}
+
+void JsonTest::asSizeArrayUnexpectedSize() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35, 17, 25
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->parseSizes(json->root()));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().asSizeArray(4);
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asUnsignedLongArray(): expected a 4-element array, got 3\n");
+    #else
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::asUnsignedIntArray(): expected a 4-element array, got 3\n");
     #endif
 }
 

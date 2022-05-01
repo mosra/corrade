@@ -1736,7 +1736,7 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken& 
     return Containers::StringView{*token._parsedString};
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBoolArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBoolArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseBoolArray(): token not owned by the instance", {});
 
@@ -1770,10 +1770,19 @@ Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBool
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseBoolArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedBool);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDoubleArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDoubleArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseDoubleArray(): token not owned by the instance", {});
 
@@ -1807,10 +1816,19 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseDoubleArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedDouble);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFloatArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFloatArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseFloatArray(): token not owned by the instance", {});
 
@@ -1844,10 +1862,19 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseFloatArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedFloat);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::parseUnsignedIntArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::parseUnsignedIntArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseUnsignedIntArray(): token not owned by the instance", {});
 
@@ -1881,10 +1908,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseUnsignedIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedUnsignedInt);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::parseIntArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::parseIntArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseIntArray(): token not owned by the instance", {});
 
@@ -1918,10 +1954,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedInt);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::parseUnsignedLongArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::parseUnsignedLongArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseUnsignedLongArray(): token not owned by the instance", {});
 
@@ -1955,10 +2000,19 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseUnsignedLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedUnsignedLong);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::parseLongArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::parseLongArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseLongArray(): token not owned by the instance", {});
 
@@ -1992,14 +2046,23 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
             return {};
     }
 
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->filename, _state->string.prefix(token._data));
+        return {};
+    }
+
     return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedLong);
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> Json::parseSizeArray(const JsonToken& token) {
+Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> Json::parseSizeArray(const JsonToken& token, const std::size_t expectedSize) {
     #ifndef CORRADE_TARGET_32BIT
-    const Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = parseUnsignedLongArray(token);
+    const Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = parseUnsignedLongArray(token, expectedSize);
     #else
-    const Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = parseUnsignedIntArray(token);
+    const Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = parseUnsignedIntArray(token, expectedSize);
     #endif
     if(!out) return {};
 
@@ -2186,7 +2249,7 @@ Containers::StringView JsonToken::asString() const {
     return *_parsedString;
 }
 
-Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray() const {
+Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asBoolArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2204,12 +2267,18 @@ Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray() const {
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->type() == Type::Bool && i->isParsed(),
             "Utility::JsonToken::asBoolArray(): token" << i - this - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asBoolArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedBool);
 }
 
-Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray() const {
+Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asDoubleArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2227,12 +2296,18 @@ Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray() const {
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::Double,
             "Utility::JsonToken::asDoubleArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asDoubleArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedDouble);
 }
 
-Containers::StridedArrayView1D<const float> JsonToken::asFloatArray() const {
+Containers::StridedArrayView1D<const float> JsonToken::asFloatArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asFloatArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2250,12 +2325,18 @@ Containers::StridedArrayView1D<const float> JsonToken::asFloatArray() const {
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::Float,
             "Utility::JsonToken::asFloatArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asFloatArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedFloat);
 }
 
-Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArray() const {
+Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asUnsignedIntArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2273,12 +2354,18 @@ Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArra
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::UnsignedInt,
             "Utility::JsonToken::asUnsignedIntArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asUnsignedIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedInt);
 }
 
-Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray() const {
+Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asIntArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2296,12 +2383,18 @@ Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray() const
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::Int,
             "Utility::JsonToken::asIntArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedInt);
 }
 
-Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArray() const {
+Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asUnsignedLongArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2319,12 +2412,18 @@ Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArr
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::UnsignedLong,
             "Utility::JsonToken::asUnsignedLongArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asUnsignedLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedUnsignedLong);
 }
 
-Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray() const {
+Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asLongArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
@@ -2342,17 +2441,23 @@ Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray() cons
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->parsedType() == ParsedType::Long,
             "Utility::JsonToken::asLongArray(): token" << i - this - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
     #endif
 
     return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedLong);
 }
 
-Containers::StridedArrayView1D<const std::size_t> JsonToken::asSizeArray() const {
+Containers::StridedArrayView1D<const std::size_t> JsonToken::asSizeArray(const std::size_t expectedSize) const {
     return Containers::arrayCast<const std::size_t>(
         #ifndef CORRADE_TARGET_32BIT
-        asUnsignedLongArray()
+        asUnsignedLongArray(expectedSize)
         #else
-        asUnsignedIntArray()
+        asUnsignedIntArray(expectedSize)
         #endif
     );
 }

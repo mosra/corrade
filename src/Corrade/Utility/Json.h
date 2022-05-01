@@ -841,8 +841,9 @@ class CORRADE_UTILITY_EXPORT Json {
          * @brief Check and parse a boolean array
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
-         * just @ref JsonToken::Type::Bool tokens, or the tokens are not valid
-         * boolean values, prints a message to @ref Error and returns
+         * just @ref JsonToken::Type::Bool tokens, the tokens are not valid
+         * boolean values, or @p expectedSize is not @cpp 0 @ce and the array
+         * has different size, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
          * set for the array and all tokens inside, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
@@ -851,14 +852,15 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref Json::Option::ParseLiterals, @ref parseLiterals(),
          *      @ref parseBool(), @ref JsonToken::asBoolArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const bool>> parseBoolArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const bool>> parseBoolArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse a 64-bit floating-point array
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
-         * just @ref JsonToken::Type::Number tokens, or the tokens are not
-         * valid numeric values, prints a message to @ref Error and returns
+         * just @ref JsonToken::Type::Number tokens, the tokens are not valid
+         * numeric values, or @p expectedSize is not @cpp 0 @ce and the array
+         * has different size, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
          * set for the array and all tokens inside are already parsed as
          * @ref JsonToken::ParsedType::Double, returns the cached values,
@@ -868,14 +870,15 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref Json::Option::ParseDoubles, @ref parseDoubles(),
          *      @ref parseDouble(), @ref JsonToken::asDoubleArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const double>> parseDoubleArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const double>> parseDoubleArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse a 32-bit floating-point array
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
-         * just @ref JsonToken::Type::Number tokens, or the tokens are not
-         * valid numeric values, prints a message to @ref Error and returns
+         * just @ref JsonToken::Type::Number tokens, the tokens are not valid
+         * numeric values, or @p expectedSize is not @cpp 0 @ce and the array
+         * has different size, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. Precision that doesn't fit into the 32-bit
          * floating-point representation is truncated, use
          * @ref parseDoubleArray() to get the full precision. If
@@ -888,7 +891,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref Json::Option::ParseFloats, @ref parseFloats(),
          *      @ref parseFloat(), @ref JsonToken::asFloatArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const float>> parseFloatArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const float>> parseFloatArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse an unsigned 32-bit integer array
@@ -896,7 +899,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part, are negative or
-         * don't fit into a 32-bit representation, prints a message to
+         * don't fit into a 32-bit representation, or @p expectedSize is not
+         * @cpp 0 @ce and the array has different size, prints a message to
          * @ref Error and returns @ref Containers::NullOpt. If
          * @ref JsonToken::isParsed() is already set for the array and all
          * tokens inside are already parsed as
@@ -907,7 +911,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref parseUnsignedInts(), @ref parseUnsignedInt(),
          *      @ref JsonToken::asUnsignedIntArray(), @ref parseSizeArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> parseUnsignedIntArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> parseUnsignedIntArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse a signed 32-bit integer array
@@ -915,16 +919,17 @@ class CORRADE_UTILITY_EXPORT Json {
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part or don't fit into
-         * a 32-bit representation, prints a message to @ref Error and returns
-         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
-         * set for the array and all tokens inside are already parsed as
-         * @ref JsonToken::ParsedType::Int, returns the cached values,
+         * a 32-bit representation, or @p expectedSize is not @cpp 0 @ce and
+         * the array has different size, prints a message to @ref Error and
+         * returns @ref Containers::NullOpt. If @ref JsonToken::isParsed() is
+         * already set for the array and all tokens inside are already parsed
+         * as @ref JsonToken::ParsedType::Int, returns the cached values,
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref parseInts(), @ref parseInt(), @ref JsonToken::asIntArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> parseIntArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> parseIntArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse an unsigned 52-bit integer array
@@ -933,7 +938,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part, are negative or
          * don't fit into 52 bits (which is the representable unsigned integer
-         * range in a JSON), prints a message to @ref Error and returns
+         * range in a JSON), or @p expectedSize is not @cpp 0 @ce and the array
+         * has different size, prints a message to @ref Error and returns
          * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
          * set for the array and all tokens inside are already parsed as
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached values,
@@ -943,7 +949,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref parseUnsignedLongs(), @ref parseUnsignedLong(),
          *      @ref JsonToken::asUnsignedLongArray(), @ref parseSizeArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> parseUnsignedLongArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> parseUnsignedLongArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse a signed 52-bit integer array
@@ -952,16 +958,18 @@ class CORRADE_UTILITY_EXPORT Json {
          * just @ref JsonToken::Type::Number tokens, the tokens are not valid
          * numeric values, have a fractional or exponent part or don't fit into
          * 53 bits (which is the representable signed integer range in a JSON),
-         * prints a message to @ref Error and returns @ref Containers::NullOpt.
-         * If @ref JsonToken::isParsed() is already set for the array and all
-         * tokens are already parsed as @ref JsonToken::ParsedType::Long,
-         * returns the cached values, otherwise caches the parsed results.
-         * Expects that @p token references a token owned by this instance, the
-         * returned view points to data owned by this instance.
+         * or @p expectedSize is not @cpp 0 @ce and the array has different
+         * size, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for the array and all tokens are already parsed as
+         * @ref JsonToken::ParsedType::Long, returns the cached values,
+         * otherwise caches the parsed results. Expects that @p token
+         * references a token owned by this instance, the returned view points
+         * to data owned by this instance.
          * @see @ref parseLongs(), @ref parseLong(),
          *      @ref JsonToken::asLongArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> parseLongArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> parseLongArray(const JsonToken& token, std::size_t expectedSize = 0);
 
         /**
          * @brief Check and parse a size array
@@ -972,7 +980,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @see @ref parseSizes(), @ref parseSize(),
          *      @ref JsonToken::asSizeArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> parseSizeArray(const JsonToken& token);
+        Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> parseSizeArray(const JsonToken& token, std::size_t expectedSize = 0);
 
     private:
         struct State;
@@ -1673,7 +1681,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @brief Get a parsed boolean array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * @ref Type::Bool tokens, already parsed. If not, use
+         * @ref Type::Bool tokens and exactly @p expectedSize elements if it's
+         * not @cpp 0 @ce, already parsed. If not, use
          * @ref Json::parseBoolArray() instead. The returned view points to
          * data owned by the originating @ref Json instance.
          *
@@ -1684,17 +1693,20 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref asBool()
          */
-        Containers::StridedArrayView1D<const bool> asBoolArray() const;
+        Containers::StridedArrayView1D<const bool> asBoolArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed 64-bit floating-point array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::Double. If not,
-         * use @ref Json::parseDoubleArray() instead. The returned view points
-         * to data owned by the originating @ref Json instance.
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::Double. If not, use
+         * @ref Json::parseDoubleArray() instead. The returned view points to
+         * data owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1703,17 +1715,20 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asDouble()
          */
-        Containers::StridedArrayView1D<const double> asDoubleArray() const;
+        Containers::StridedArrayView1D<const double> asDoubleArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed 32-bit floating-point array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::Float. If not,
-         * use @ref Json::parseFloatArray() instead. The returned view points
-         * to data owned by the originating @ref Json instance.
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::Float. If not, use
+         * @ref Json::parseFloatArray() instead. The returned view points to
+         * data owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1722,17 +1737,20 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asFloat()
          */
-        Containers::StridedArrayView1D<const float> asFloatArray() const;
+        Containers::StridedArrayView1D<const float> asFloatArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed unsigned 32-bit integer array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::UnsignedInt. If
-         * not, use @ref Json::parseUnsignedIntArray() instead. The returned
-         * view points to data owned by the originating @ref Json instance.
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::UnsignedInt. If not,
+         * use @ref Json::parseUnsignedIntArray() instead. The returned view
+         * points to data owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1741,16 +1759,19 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asUnsignedInt(),
          *      @ref asSizeArray()
          */
-        Containers::StridedArrayView1D<const std::uint32_t> asUnsignedIntArray() const;
+        Containers::StridedArrayView1D<const std::uint32_t> asUnsignedIntArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed signed 32-bit integer array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::Int. If not, use
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::Int. If not, use
          * @ref Json::parseIntArray() instead. The returned view points to data
          * owned by the originating @ref Json instance.
          *
@@ -1761,17 +1782,20 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asInt()
          */
-        Containers::StridedArrayView1D<const std::int32_t> asIntArray() const;
+        Containers::StridedArrayView1D<const std::int32_t> asIntArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed unsigned 52-bit integer array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::UnsignedLong. If
-         * not, use @ref Json::parseUnsignedLongArray() instead. The returned
-         * view points to data owned by the originating @ref Json instance.
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::UnsignedLong. If not,
+         * use @ref Json::parseUnsignedLongArray() instead. The returned view
+         * points to data owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1780,16 +1804,19 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asUnsignedLong(),
          *      @ref asSizeArray()
          */
-        Containers::StridedArrayView1D<const std::uint64_t> asUnsignedLongArray() const;
+        Containers::StridedArrayView1D<const std::uint64_t> asUnsignedLongArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed signed 53-bit integer value array
          *
          * Expects that the token is a @ref Type::Array consisting of just
-         * numeric tokens already parsed as @ref ParsedType::Long. If not, use
+         * numeric tokens and exactly @p expectedSize elements if it's not
+         * @cpp 0 @ce, already parsed as @ref ParsedType::Long. If not, use
          * @ref Json::parseLongArray() instead. The returned view points to
          * data owned by the originating @ref Json instance.
          *
@@ -1800,9 +1827,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asLong()
          */
-        Containers::StridedArrayView1D<const std::int64_t> asLongArray() const;
+        Containers::StridedArrayView1D<const std::int64_t> asLongArray(std::size_t expectedSize = 0) const;
 
         /**
          * @brief Get a parsed size array
@@ -1818,9 +1847,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
          * @see @ref type(), @ref parsedType(), @ref asSize()
          */
-        Containers::StridedArrayView1D<const std::size_t> asSizeArray() const;
+        Containers::StridedArrayView1D<const std::size_t> asSizeArray(std::size_t expectedSize = 0) const;
 
     private:
         friend Json;
