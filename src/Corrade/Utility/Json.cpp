@@ -1294,13 +1294,13 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonToken& token) 
                 /** @todo handle also surrogate pairs, add a helper to the
                     Unicode lib first https://en.wikipedia.org/wiki/JSON#Character_encoding */
                 const char* const unicodeBegin = in - 1;
-                const char* unicodeEnd = in + 4;
+                const char* unicodeEnd = in + 5;
                 char32_t character = 0;
-                if(unicodeEnd >= end) {
+                if(unicodeEnd > end) {
                     /* Handled below together with values out of range */
                     unicodeEnd = end;
                     character = ~char32_t{};
-                } else for(; in != unicodeEnd; ++in) {
+                } else for(; in != unicodeEnd - 1; ++in) {
                     character <<= 4;
                     const char uc = in[1];
                     if(uc >= '0' && uc <= '9') character |= uc - '0';
