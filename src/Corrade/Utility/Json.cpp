@@ -282,21 +282,22 @@ Containers::NullOptT printError(const Containers::StringView filename, Expecting
 }
 
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const Containers::StringView string_) {
-    Containers::Pointer<State> out{InPlaceInit};
+    Json json;
+    json._state.emplace();
 
     /* Make a copy of the input string if not marked as global */
     const std::uint64_t globalStringFlag = string_.flags() & Containers::StringViewFlag::Global ? std::uint64_t(JsonToken::FlagStringGlobal) : 0;
     if(globalStringFlag)
-        out->string = string_;
+        json._state->string = string_;
     else
-        out->string = out->storage = string_;
+        json._state->string = json._state->storage = string_;
 
     /* Save also the filename for subsequent error reporting */
-    out->filename = Containers::String::nullTerminatedGlobalView(filename);
+    json._state->filename = Containers::String::nullTerminatedGlobalView(filename);
 
     /* A sentinel token at the start, to limit Json::parent() */
     constexpr JsonToken sentinel{ValueInit};
-    arrayAppend(out->tokens, sentinel);
+    arrayAppend(json._state->tokens, sentinel);
 
     /* Remember surrounding object or array token index to update its size,
        child count and check matching braces when encountering } / ] */
@@ -310,8 +311,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     std::size_t escapedStringCount = 0;
 
     /* Go through the file byte by byte */
-    const std::size_t size = out->string.size();
-    const char* const data = out->string.data();
+    const std::size_t size = json._state->string.size();
+    const char* const data = json._state->string.data();
     for(std::size_t i = 0; i != size; ++i) {
         const char c = data[i];
 
@@ -321,7 +322,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
             case '[': {
                 if(expecting != Expecting::ValueOrArrayEnd &&
                    expecting != Expecting::Value)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* Token holding the whole object / array */
                 JsonToken token{NoInit};
@@ -339,8 +340,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     JsonToken::NanMask|objectOrArrayTokenIndex|
                     (c == '{' ? JsonToken::TypeObject : JsonToken::TypeArray);
                 #endif
-                objectOrArrayTokenIndex = out->tokens.size();
-                arrayAppend(out->tokens, token);
+                objectOrArrayTokenIndex = json._state->tokens.size();
+                arrayAppend(json._state->tokens, token);
 
                 /* If we're in an object, we're expecting an object key (or
                    end) next, otherwise a value (or end) */
@@ -355,10 +356,10 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                    expecting != Expecting::ValueOrArrayEnd &&
                    expecting != Expecting::CommaOrObjectEnd &&
                    expecting != Expecting::CommaOrArrayEnd)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* Get the object / array token, check that the brace matches */
-                JsonToken& token = out->tokens[objectOrArrayTokenIndex];
+                JsonToken& token = json._state->tokens[objectOrArrayTokenIndex];
                 const bool isObject = (token.
                     #ifndef CORRADE_TARGET_32BIT
                     _sizeFlagsParsedTypeType
@@ -368,20 +369,20 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     & JsonToken::TypeMask) == JsonToken::TypeObject;
                 if((c == '}') != isObject) {
                     Error err;
-                    err << ErrorPrefix << "unexpected" << out->string.slice(i, i + 1) << "at";
-                    printFilePosition(err, filename, out->string.prefix(i));
+                    err << ErrorPrefix << "unexpected" << json._state->string.slice(i, i + 1) << "at";
+                    printFilePosition(err, filename, json._state->string.prefix(i));
                     err << "for an" << (c == ']' ? "object" : "array") << "starting at";
                     /* Printing the filename again, because it will make a
                        useful clickable link in terminal even though a bit
                        redundant */
-                    printFilePosition(err, filename, out->string.prefix(token._data));
+                    printFilePosition(err, filename, json._state->string.prefix(token._data));
                     return {};
                 }
 
                 /* The child count field was abused to store the previous
                    object / array index. Restore it and set the actual child
                    count to the field. */
-                const std::size_t tokenChildCount = out->tokens.size() - objectOrArrayTokenIndex - 1;
+                const std::size_t tokenChildCount = json._state->tokens.size() - objectOrArrayTokenIndex - 1;
                 objectOrArrayTokenIndex =
                     #ifndef CORRADE_TARGET_32BIT
                     token._childCount
@@ -411,7 +412,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 if(!objectOrArrayTokenIndex)
                     expecting = Expecting::DocumentEnd;
                 else
-                    expecting = (out->tokens[objectOrArrayTokenIndex].
+                    expecting = (json._state->tokens[objectOrArrayTokenIndex].
                         #ifndef CORRADE_TARGET_32BIT
                         _sizeFlagsParsedTypeType
                         #else
@@ -430,7 +431,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                    expecting != Expecting::ValueOrArrayEnd &&
                    expecting != Expecting::ObjectKey &&
                    expecting != Expecting::ObjectKeyOrEnd)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* At the end of the loop, start points to the initial " and i
                    points to the final ". Remember if we encountered any
@@ -458,8 +459,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                             break;
                         default: {
                             Error err;
-                            err << ErrorPrefix << "unexpected string escape sequence" << out->string.slice(i - 1, i + 1) << "at";
-                            printFilePosition(err, filename, out->string.prefix(i - 1));
+                            err << ErrorPrefix << "unexpected string escape sequence" << json._state->string.slice(i - 1, i + 1) << "at";
+                            printFilePosition(err, filename, json._state->string.prefix(i - 1));
                             return {};
                         }
                     }
@@ -468,7 +469,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 if(i == size) {
                     Error err;
                     err << ErrorPrefix << "file too short, unterminated string literal starting at";
-                    printFilePosition(err, filename, out->string.prefix(start));
+                    printFilePosition(err, filename, json._state->string.prefix(start));
                     return {};
                 }
 
@@ -509,7 +510,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     if(!objectOrArrayTokenIndex)
                         expecting = Expecting::DocumentEnd;
                     else
-                        expecting = (out->tokens[objectOrArrayTokenIndex].
+                        expecting = (json._state->tokens[objectOrArrayTokenIndex].
                             #ifndef CORRADE_TARGET_32BIT
                             _sizeFlagsParsedTypeType
                             #else
@@ -519,7 +520,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                             Expecting::CommaOrObjectEnd : Expecting::CommaOrArrayEnd;
                 } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 
-                arrayAppend(out->tokens, token);
+                arrayAppend(json._state->tokens, token);
 
             } break;
 
@@ -542,7 +543,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
             case 'f': {
                 if(expecting != Expecting::Value &&
                    expecting != Expecting::ValueOrArrayEnd)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* At the end of the loop, start points to the initial letter
                    and i points to the end to a character after. */
@@ -577,14 +578,14 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 token._childCountFlagsTypeNan = JsonToken::NanMask|tokenType;
                 #endif
 
-                arrayAppend(out->tokens, token);
+                arrayAppend(json._state->tokens, token);
 
                 /* Expecting a comma or end next, depending on what the parent
                    is */
                 if(!objectOrArrayTokenIndex)
                     expecting = Expecting::DocumentEnd;
                 else
-                    expecting = (out->tokens[objectOrArrayTokenIndex].
+                    expecting = (json._state->tokens[objectOrArrayTokenIndex].
                         #ifndef CORRADE_TARGET_32BIT
                         _sizeFlagsParsedTypeType
                         #else
@@ -599,7 +600,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
             /* Colon after an object key */
             case ':': {
                 if(expecting != Expecting::ObjectKeyColon)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* Expecting a value next */
                 expecting = Expecting::Value;
@@ -609,11 +610,11 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
             case ',': {
                 if(expecting != Expecting::CommaOrObjectEnd &&
                    expecting != Expecting::CommaOrArrayEnd)
-                    return printError(filename, expecting, c, out->string.prefix(i));
+                    return printError(filename, expecting, c, json._state->string.prefix(i));
 
                 /* If we're in an object, expecting a key next, otherwise a
                    value next */
-                expecting = (out->tokens[objectOrArrayTokenIndex].
+                expecting = (json._state->tokens[objectOrArrayTokenIndex].
                     #ifndef CORRADE_TARGET_32BIT
                     _sizeFlagsParsedTypeType
                     #else
@@ -632,8 +633,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
             default: {
                 Error err;
-                err << ErrorPrefix << "unexpected" << out->string.slice(i, i + 1) << "at";
-                printFilePosition(err, filename, out->string.prefix(i));
+                err << ErrorPrefix << "unexpected" << json._state->string.slice(i, i + 1) << "at";
+                printFilePosition(err, filename, json._state->string.prefix(i));
                 return {};
             }
         }
@@ -648,32 +649,30 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
         Error err;
         err << ErrorPrefix << "file too short, expected"
             << ExpectingString[int(expecting)] << "at";
-        printFilePosition(err, filename, out->string);
+        printFilePosition(err, filename, json._state->string);
         return {};
     }
 
     if(objectOrArrayTokenIndex != 0) {
         Error err;
         err << ErrorPrefix << "file too short, expected closing";
-        const JsonToken& token = out->tokens[objectOrArrayTokenIndex];
+        const JsonToken& token = json._state->tokens[objectOrArrayTokenIndex];
         if(expecting == Expecting::CommaOrObjectEnd)
             err << "} for object";
         else if(expecting == Expecting::CommaOrArrayEnd)
             err << "] for array";
         else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         err << "starting at";
-        printFilePosition(err, filename, out->string.prefix(token._data));
+        printFilePosition(err, filename, json._state->string.prefix(token._data));
         return {};
     }
 
     /* Reserve memory for parsed string instances -- since the tokens reference
        them through a pointer, it has to be an immovable allocation */
     /** @todo use a non-reallocating allocator once it exists */
-    arrayReserve(out->strings, escapedStringCount);
+    arrayReserve(json._state->strings, escapedStringCount);
 
     /* All good */
-    Json json;
-    json._state = std::move(out);
     /* GCC 4.8 and Clang 3.8 need a bit of help here */
     return Containers::optional(std::move(json));
 }
