@@ -3802,8 +3802,7 @@ void JsonTest::fromFileParseOptionError() {
 }
 
 void JsonTest::fromFileParseError() {
-    /* The filename should get remembered even for subsequent parse() calls,
-       but of course not for JsonToken::parse() */
+    /* The filename should get remembered even for subsequent parse() calls */
 
     Containers::String filename = Path::join(JSON_TEST_DIR, "parse-error.json");
     Containers::Optional<Json> json = Json::fromFile(filename);
@@ -3813,7 +3812,10 @@ void JsonTest::fromFileParseError() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!json->parseDoubles(json->root()));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::parseDoubles(): invalid floating-point literal -haha at {}:2:5\n", filename));
+    CORRADE_VERIFY(!json->parseDouble(json->tokens()[1]));
+    CORRADE_COMPARE(out.str(), formatString(
+        "Utility::Json::parseDoubles(): invalid floating-point literal -haha at {0}:2:5\n"
+        "Utility::Json::parseDouble(): invalid floating-point literal -haha at {0}:2:5\n", filename));
 }
 
 void JsonTest::asTypeWrongType() {
