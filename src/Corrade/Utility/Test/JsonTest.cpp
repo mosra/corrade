@@ -149,6 +149,11 @@ struct JsonTest: TestSuite::Tester {
         void asTypeArrayNotArray();
         void asTypeArrayNotParsed();
 
+        void fromStringFilenameOffsetError();
+        void fromStringFilenameOffsetErrorSubsequentLine();
+        void fromStringFilenameOffsetParseOptionError();
+        void fromStringFilenameOffsetParseError();
+
         void fromFile();
         void fromFileReadError();
         void fromFileOptionReadError();
@@ -1245,6 +1250,11 @@ JsonTest::JsonTest() {
               &JsonTest::asSizeArrayUnexpectedSize,
               &JsonTest::asTypeArrayNotArray,
               &JsonTest::asTypeArrayNotParsed,
+
+              &JsonTest::fromStringFilenameOffsetError,
+              &JsonTest::fromStringFilenameOffsetErrorSubsequentLine,
+              &JsonTest::fromStringFilenameOffsetParseOptionError,
+              &JsonTest::fromStringFilenameOffsetParseError,
 
               &JsonTest::fromFile,
               &JsonTest::fromFileReadError,
@@ -3743,6 +3753,64 @@ void JsonTest::asTypeArrayNotParsed() {
         #endif
         ;
     CORRADE_COMPARE(out.str(), expected);
+}
+
+void JsonTest::fromStringFilenameOffsetError() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    /* Also verify that empty filename behaves the same as no filename passed */
+    CORRADE_VERIFY(!Json::fromString("{35: false}"));
+    CORRADE_VERIFY(!Json::fromString("{35: false}", ""));
+    CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json"));
+    CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json", 17));
+    CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json", 17, 25));
+    CORRADE_COMPARE(out.str(),
+        "Utility::Json: expected \" or } but got 3 at <in>:1:2\n"
+        "Utility::Json: expected \" or } but got 3 at <in>:1:2\n"
+        "Utility::Json: expected \" or } but got 3 at fail.json:1:2\n"
+        /* Counting from 1, so the offset doesn't get used as-is */
+        "Utility::Json: expected \" or } but got 3 at fail.json:18:2\n"
+        "Utility::Json: expected \" or } but got 3 at fail.json:18:27\n");
+}
+
+void JsonTest::fromStringFilenameOffsetErrorSubsequentLine() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Json::fromString("{\n  35: false}", "fail.json"));
+    CORRADE_VERIFY(!Json::fromString("{\n  35: false}", "fail.json", 17, 25));
+    CORRADE_COMPARE(out.str(),
+        "Utility::Json: expected \" or } but got 3 at fail.json:2:3\n"
+        /* The column offset should get ignored for second and subsequent
+           lines */
+        "Utility::Json: expected \" or } but got 3 at fail.json:19:3\n");
+}
+
+void JsonTest::fromStringFilenameOffsetParseOptionError() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Json::fromString("[-haha]", Json::Option::ParseDoubles, "fail.json"));
+    CORRADE_VERIFY(!Json::fromString("[-haha]", Json::Option::ParseDoubles, "fail.json", 17, 25));
+    CORRADE_COMPARE(out.str(),
+        "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:1:2\n"
+        /* Counting from 1, so the offset doesn't get used as-is */
+        "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:18:27\n");
+}
+
+void JsonTest::fromStringFilenameOffsetParseError() {
+    /* The filename should get remembered even for subsequent parse() calls */
+
+    Containers::Optional<Json> json = Json::fromString("[-haha]", "fail.json", 17, 25);
+    CORRADE_VERIFY(json);
+    CORRADE_COMPARE(json->tokens().size(), 2);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!json->parseDoubles(json->root()));
+    CORRADE_VERIFY(!json->parseDouble(json->tokens()[1]));
+    CORRADE_COMPARE(out.str(),
+        "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:18:27\n"
+        /* Counting from 1, so the offset doesn't get used as-is */
+        "Utility::Json::parseDouble(): invalid floating-point literal -haha at fail.json:18:27\n");
 }
 
 void JsonTest::fromFile() {

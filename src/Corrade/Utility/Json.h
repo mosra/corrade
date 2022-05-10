@@ -385,6 +385,14 @@ class CORRADE_UTILITY_EXPORT Json {
 
         /**
          * @brief Parse a JSON string
+         * @param string        JSON string to parse
+         * @param options       Parsing options
+         * @param filename      Filename to use for error reporting. If not
+         *      set, `<in>` is printed in error messages.
+         * @param lineOffset    Initial line offset in the file for error
+         *      reporting
+         * @param columnOffset  Initial column offset in the file for error
+         *      reporting
          *
          * By default performs only tokenization, not parsing any literals. Use
          * @p options to enable parsing of particular token types as well. If
@@ -394,15 +402,28 @@ class CORRADE_UTILITY_EXPORT Json {
          * If the @p string is @ref Containers::StringViewFlag::Global, the
          * parsed tokens will reference it, returning also global string
          * literals. Otherwise a copy is made internally.
+         *
+         * The @p filename, @p lineOffset and @p columnOffset parameters have
+         * no effect on actual parsing and are used only to enhance error
+         * messages. Line offset is added to the reported line always but
+         * column offset is used only if the happens on the first line of the
+         * JSON string, errors on subsequent lines are reported without the
+         * initial column offset.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        static Containers::Optional<Json> fromString(Containers::StringView string, Options options = {});
+        static Containers::Optional<Json> fromString(Containers::StringView string, Options options = {}, Containers::StringView filename = {}, std::size_t lineOffset = 0, std::size_t columnOffset = 0);
         #else
         /* For binary size savings -- the base implementation does only minimal
-           tokenization and thus the parsing code can be DCE'd if unused */
+           tokenization and thus the parsing code can be DCE'd if unused.
+           Besides that, the other overloads are explicit to avoid having to
+           include a StringView in the header. */
         static Containers::Optional<Json> fromString(Containers::StringView string);
         static Containers::Optional<Json> fromString(Containers::StringView string, Options options);
+        static Containers::Optional<Json> fromString(Containers::StringView string, Options options, Containers::StringView filename, std::size_t lineOffset = 0, std::size_t columnOffset = 0);
         #endif
+
+        /** @overload */
+        static Containers::Optional<Json> fromString(Containers::StringView string, Containers::StringView filename, std::size_t lineOffset = 0, std::size_t columnOffset = 0);
 
         /**
          * @brief Parse a JSON file
@@ -987,9 +1008,11 @@ class CORRADE_UTILITY_EXPORT Json {
 
         explicit CORRADE_UTILITY_LOCAL Json();
 
-        /* These are here because they need friended JsonToken */
-        CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, Containers::StringView string);
-        CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, Containers::StringView string, Options options);
+        /* These are here because they need friended JsonToken and/or access to
+           State */
+        CORRADE_UTILITY_LOCAL void printFilePosition(Debug& out, Containers::StringView string) const;
+        CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string);
+        CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string, Options options);
         /* These are here because they need friended JsonToken, they're not on
            JsonToken in order to print nice file/line info on error (and access
            the string cache in case of parseStringInternal()) */
