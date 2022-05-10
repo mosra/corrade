@@ -149,12 +149,12 @@ struct JsonTest: TestSuite::Tester {
         void asTypeArrayNotArray();
         void asTypeArrayNotParsed();
 
-        void file();
-        void fileReadError();
-        void fileOptionReadError();
-        void fileError();
-        void fileParseOptionError();
-        void fileParseError();
+        void fromFile();
+        void fromFileReadError();
+        void fromFileOptionReadError();
+        void fromFileError();
+        void fromFileParseOptionError();
+        void fromFileParseError();
 
         void asTypeWrongType();
         void asTypeNotParsed();
@@ -1246,12 +1246,12 @@ JsonTest::JsonTest() {
               &JsonTest::asTypeArrayNotArray,
               &JsonTest::asTypeArrayNotParsed,
 
-              &JsonTest::file,
-              &JsonTest::fileReadError,
-              &JsonTest::fileOptionReadError,
-              &JsonTest::fileError,
-              &JsonTest::fileParseOptionError,
-              &JsonTest::fileParseError,
+              &JsonTest::fromFile,
+              &JsonTest::fromFileReadError,
+              &JsonTest::fromFileOptionReadError,
+              &JsonTest::fromFileError,
+              &JsonTest::fromFileParseOptionError,
+              &JsonTest::fromFileParseError,
 
               &JsonTest::asTypeWrongType,
               &JsonTest::asTypeNotParsed,
@@ -3745,7 +3745,7 @@ void JsonTest::asTypeArrayNotParsed() {
     CORRADE_COMPARE(out.str(), expected);
 }
 
-void JsonTest::file() {
+void JsonTest::fromFile() {
     /* The file has a parse error, but tokenization should succeed */
     Containers::Optional<Json> json = Json::fromFile(Path::join(JSON_TEST_DIR, "parse-error.json"));
     CORRADE_VERIFY(json);
@@ -3760,7 +3760,7 @@ void JsonTest::file() {
     CORRADE_COMPARE(number.type(), JsonToken::Type::Number);
 }
 
-void JsonTest::fileReadError() {
+void JsonTest::fromFileReadError() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromFile("nonexistent"));
@@ -3770,7 +3770,7 @@ void JsonTest::fileReadError() {
         TestSuite::Compare::StringHasSuffix);
 }
 
-void JsonTest::fileOptionReadError() {
+void JsonTest::fromFileOptionReadError() {
     /* The options parameter is a separate file loading code path, test it as
        well */
 
@@ -3783,7 +3783,7 @@ void JsonTest::fileOptionReadError() {
         TestSuite::Compare::StringHasSuffix);
 }
 
-void JsonTest::fileError() {
+void JsonTest::fromFileError() {
     Containers::String filename = Path::join(JSON_TEST_DIR, "error.json");
 
     std::ostringstream out;
@@ -3792,7 +3792,7 @@ void JsonTest::fileError() {
     CORRADE_COMPARE(out.str(), formatString("Utility::Json: expected a value but got ] at {}:3:1\n", filename));
 }
 
-void JsonTest::fileParseOptionError() {
+void JsonTest::fromFileParseOptionError() {
     Containers::String filename = Path::join(JSON_TEST_DIR, "parse-error.json");
 
     std::ostringstream out;
@@ -3801,7 +3801,7 @@ void JsonTest::fileParseOptionError() {
     CORRADE_COMPARE(out.str(), formatString("Utility::Json::parseDoubles(): invalid floating-point literal -haha at {}:2:5\n", filename));
 }
 
-void JsonTest::fileParseError() {
+void JsonTest::fromFileParseError() {
     /* The filename should get remembered even for subsequent parse() calls,
        but of course not for JsonToken::parse() */
 
