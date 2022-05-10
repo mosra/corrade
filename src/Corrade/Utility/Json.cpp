@@ -298,17 +298,20 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     constexpr JsonToken sentinel{ValueInit};
     arrayAppend(out->tokens, sentinel);
 
-    /* Go through the file byte by byte */
-    const std::size_t size = out->string.size();
-    const char* const data = out->string.data();
     /* Remember surrounding object or array token index to update its size,
        child count and check matching braces when encountering } / ] */
     std::size_t objectOrArrayTokenIndex = 0;
+
     /* Remember what token to expect next */
     Expecting expecting = Expecting::Value;
+
     /* Remember how many strings contain escape codes to allocate an immovable
        storage for them */
     std::size_t escapedStringCount = 0;
+
+    /* Go through the file byte by byte */
+    const std::size_t size = out->string.size();
+    const char* const data = out->string.data();
     for(std::size_t i = 0; i != size; ++i) {
         const char c = data[i];
 
