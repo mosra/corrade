@@ -2178,7 +2178,7 @@ std::size_t JsonToken::childCount() const {
             return _childCountFlagsTypeNan & ChildCountMask;
         } else if(_childCountFlagsTypeNan & FlagStringKey) {
             const JsonToken& child = *(this + 1);
-            return ((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask &&
+            return ((child._childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask &&
                     child._childCountFlagsTypeNan & (TypeObject|TypeArray) ?
                 child._childCountFlagsTypeNan & ChildCountMask : 0) + 1;
         } else return 0;
