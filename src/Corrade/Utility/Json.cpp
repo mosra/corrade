@@ -1559,9 +1559,9 @@ bool Json::parseStrings(const JsonToken& token) {
         JsonToken& nestedToken = _state->tokens[i];
         if(nestedToken.type() != JsonToken::Type::String ||
             #ifndef CORRADE_TARGET_32BIT
-             (nestedToken._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
+            (nestedToken._sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask)
             #else
-             (nestedToken._childCountFlagsTypeNan & JsonToken::FlagParsed)
+            (nestedToken._childCountFlagsTypeNan & JsonToken::FlagParsed)
             #endif
         )
             continue;
