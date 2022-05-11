@@ -94,6 +94,8 @@ struct JsonTest: TestSuite::Tester {
         void reparseSingleNumberDifferentType();
         void reparseNumberArrayDifferentType();
 
+        void parsedObjectChildAccess();
+
         void parseError();
         void parseOptionError();
         void parseSingleError();
@@ -1185,7 +1187,9 @@ JsonTest::JsonTest() {
 
               &JsonTest::reparseNumberDifferentType,
               &JsonTest::reparseSingleNumberDifferentType,
-              &JsonTest::reparseNumberArrayDifferentType});
+              &JsonTest::reparseNumberArrayDifferentType,
+
+              &JsonTest::parsedObjectChildAccess});
 
     addInstancedTests({&JsonTest::parseError},
         Containers::arraySize(ParseErrorData));
@@ -2757,6 +2761,60 @@ void JsonTest::reparseNumberArrayDifferentType() {
         CORRADE_COMPARE_AS(*out, Containers::arrayView({
             35.0, 17.0
         }), TestSuite::Compare::Container);
+    }
+}
+
+void JsonTest::parsedObjectChildAccess() {
+    /* Verify that child count and first child access of object keys stays the
+       same after the contents get parsed -- for object keys the child count is
+       implicitly the count of the value + 1, and it shouldn't get clobbered
+       when the value gets parsed */
+
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "null": null,
+        "bool": false,
+        "float": 3.5,
+        "double": 3.5,
+        "unsigned int": 15,
+        "int": -15,
+        "unsigned long": 15,
+        "long": -15,
+        "string": "string",
+        "escaped\nstring": "escaped\nstring",
+        "array": [],
+        "object": {}
+    })");
+    CORRADE_VERIFY(json);
+
+    const JsonToken& object = json->root();
+    for(const Utility::JsonToken& i: *json->parseObject(object)) {
+        CORRADE_ITERATION(i.data());
+        CORRADE_COMPARE(i.childCount(), 1);
+        CORRADE_VERIFY(i.firstChild());
+        CORRADE_VERIFY(!i.firstChild()->isParsed());
+    }
+
+    /* Parse the values in reverse order so in case some causes the child count
+       to be misreported, it doesn't affect (-> crash) search of the remaining
+       keys */
+    CORRADE_VERIFY(json->parseObject(object["object"]));
+    CORRADE_VERIFY(json->parseArray(object["array"]));
+    CORRADE_VERIFY(json->parseString(object["escaped\nstring"]));
+    CORRADE_VERIFY(json->parseString(object["string"]));
+    CORRADE_VERIFY(json->parseLong(object["long"]));
+    CORRADE_VERIFY(json->parseUnsignedLong(object["unsigned long"]));
+    CORRADE_VERIFY(json->parseInt(object["int"]));
+    CORRADE_VERIFY(json->parseUnsignedInt(object["unsigned int"]));
+    CORRADE_VERIFY(json->parseDouble(object["double"]));
+    CORRADE_VERIFY(json->parseFloat(object["float"]));
+    CORRADE_VERIFY(json->parseBool(object["bool"]));
+    CORRADE_VERIFY(json->parseNull(object["null"]));
+
+    for(const Utility::JsonToken& i: object.asObject()) {
+        CORRADE_ITERATION(i.data());
+        CORRADE_COMPARE(i.childCount(), 1);
+        CORRADE_VERIFY(i.firstChild());
+        CORRADE_VERIFY(i.firstChild()->isParsed());
     }
 }
 
