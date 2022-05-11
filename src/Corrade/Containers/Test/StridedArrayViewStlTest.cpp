@@ -28,6 +28,7 @@
 
 #include "Corrade/Containers/StridedArrayViewStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -36,10 +37,12 @@ struct StridedArrayViewStlTest: TestSuite::Tester {
     explicit StridedArrayViewStlTest();
 
     void lowerBound();
+    void unique();
 };
 
 StridedArrayViewStlTest::StridedArrayViewStlTest() {
-    addTests({&StridedArrayViewStlTest::lowerBound});
+    addTests({&StridedArrayViewStlTest::lowerBound,
+              &StridedArrayViewStlTest::unique});
 }
 
 void StridedArrayViewStlTest::lowerBound() {
@@ -69,6 +72,28 @@ void StridedArrayViewStlTest::lowerBound() {
         auto it = std::lower_bound(keys.begin(), keys.end(), 55);
         CORRADE_VERIFY(it == keys.end());
     }
+}
+
+void StridedArrayViewStlTest::unique() {
+    struct Foo {
+        int key;
+        double value;
+    };
+
+    Foo foos[]{
+        {2, 0.1},
+        {7, 5.6},
+        {7, 7.8},
+        {16, 2.2},
+        {16, 0.3}
+    };
+    Containers::StridedArrayView1D<int> keys = Containers::stridedArrayView(foos).slice(&Foo::key);
+
+    std::size_t count = std::unique(keys.begin(), keys.end()) - keys.begin();
+    CORRADE_COMPARE(count, 3);
+    CORRADE_COMPARE_AS(keys.prefix(count),
+        Containers::stridedArrayView({2, 7, 16}),
+        TestSuite::Compare::Container);
 }
 
 }}}}
