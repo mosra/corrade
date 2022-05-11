@@ -1910,6 +1910,13 @@ template<unsigned dimensions, class T> class StridedIterator {
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ StridedIterator(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, std::size_t i) noexcept: _data{data}, _size{size}, _stride{stride}, _i{i} {}
+
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* Needed by MSVC 2015 to make StridedIterator usable with
+           std::unique() -- it wants to default-construct it, for some reason.
+           See StridedArrayViewStlTest::unique() for a repro case. */
+        /*implicit*/ StridedIterator(): _data{}, _size{}, _stride{}, _i{} {}
+        #endif
         #endif
 
         /** @brief Equality comparison */
