@@ -59,9 +59,11 @@ class Fatal;
 
 class Json;
 class JsonToken;
-class JsonArrayItem;
 class JsonObjectItem;
+class JsonArrayItem;
 template<class> class JsonView;
+typedef JsonView<JsonObjectItem> JsonObjectView;
+typedef JsonView<JsonArrayItem> JsonArrayView;
 template<class> class JsonIterator;
 class JsonWriter;
 

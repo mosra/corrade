@@ -705,7 +705,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @p token references a token owned by this instance.
          * @see @ref JsonToken::asObject()
          */
-        Containers::Optional<JsonView<JsonObjectItem>> parseObject(const JsonToken& token);
+        Containers::Optional<JsonObjectView> parseObject(const JsonToken& token);
 
         /**
          * @brief Check and parse an array token
@@ -717,7 +717,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * that @p token references a token owned by this instance.
          * @see @ref JsonToken::asArray()
          */
-        Containers::Optional<JsonView<JsonArrayItem>> parseArray(const JsonToken& token);
+        Containers::Optional<JsonArrayView> parseArray(const JsonToken& token);
 
         /**
          * @brief Check and parse a null token
@@ -1507,7 +1507,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref Json::parseStringKeys(), @ref Json::parseObject(),
          *      @ref Json::parseString()
          */
-        JsonView<JsonObjectItem> asObject() const;
+        JsonObjectView asObject() const;
 
         /**
          * @brief Get an iterable array
@@ -1527,7 +1527,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref type(), @ref Json::Option::ParseLiterals,
          *      @ref Json::parseLiterals(), @ref Json::parseArray()
          */
-        JsonView<JsonArrayItem> asArray() const;
+        JsonArrayView asArray() const;
 
         /**
          * @brief Find an object value by key
@@ -2132,8 +2132,10 @@ template<class T> class JsonIterator {
 @brief JSON object and array view
 @m_since_latest
 
-Returned from @ref JsonToken::asObject() and @ref JsonToken::asArray(). See
+Returned from @ref Json::parseObject(), @ref Json::parseArray(),
+@ref JsonToken::asObject() and @ref JsonToken::asArray(). See
 @ref Utility-Json-usage-iteration for more information.
+@see @ref JsonObjectView, @ref JsonArrayView
 
 @experimental
 */
@@ -2158,6 +2160,28 @@ template<class T> class JsonView {
         const JsonToken* _begin;
         const JsonToken* _end;
 };
+
+/**
+@brief JSON object view
+@m_since_latest
+
+Returned from @ref Json::parseObject() and @ref JsonToken::asObject(). See
+@ref Utility-Json-usage-iteration for more information.
+
+@experimental
+*/
+typedef JsonView<JsonObjectItem> JsonObjectView;
+
+/**
+@brief JSON array view
+@m_since_latest
+
+Returned from @ref Json::parseArray() and @ref JsonToken::asArray(). See
+@ref Utility-Json-usage-iteration for more information.
+
+@experimental
+*/
+typedef JsonView<JsonArrayItem> JsonArrayView;
 
 inline JsonToken::Type JsonToken::type() const {
     #ifndef CORRADE_TARGET_32BIT
