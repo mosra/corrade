@@ -95,6 +95,8 @@ struct JsonTest: TestSuite::Tester {
         void reparseNumberArrayDifferentType();
 
         void parsedObjectChildAccess();
+        void parsedObjectFind();
+        void parsedArrayFind();
 
         void parseError();
         void parseOptionError();
@@ -1189,7 +1191,9 @@ JsonTest::JsonTest() {
               &JsonTest::reparseSingleNumberDifferentType,
               &JsonTest::reparseNumberArrayDifferentType,
 
-              &JsonTest::parsedObjectChildAccess});
+              &JsonTest::parsedObjectChildAccess,
+              &JsonTest::parsedObjectFind,
+              &JsonTest::parsedArrayFind});
 
     addInstancedTests({&JsonTest::parseError},
         Containers::arraySize(ParseErrorData));
@@ -2816,6 +2820,43 @@ void JsonTest::parsedObjectChildAccess() {
         CORRADE_VERIFY(i.firstChild());
         CORRADE_VERIFY(i.firstChild()->isParsed());
     }
+}
+
+void JsonTest::parsedObjectFind() {
+    Containers::Optional<Json> json = Json::fromString(R"({
+        "a": "key",
+        "another": 3
+    })");
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->root());
+    CORRADE_VERIFY(object);
+
+    const Utility::JsonToken* another = object->find("another");
+    CORRADE_VERIFY(another);
+    CORRADE_COMPARE(another->data(), "3");
+    CORRADE_COMPARE((*object)["another"].data(), "3");
+
+    CORRADE_VERIFY(!object->find("different"));
+}
+
+void JsonTest::parsedArrayFind() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        "value",
+        "another",
+        3
+    ])");
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->root());
+    CORRADE_VERIFY(array);
+
+    const Utility::JsonToken* value = array->find(2);
+    CORRADE_VERIFY(value);
+    CORRADE_COMPARE(value->data(), "3");
+    CORRADE_COMPARE((*array)[2].data(), "3");
+
+    CORRADE_VERIFY(!array->find(3));
 }
 
 void JsonTest::parseError() {

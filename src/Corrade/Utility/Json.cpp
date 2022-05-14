@@ -1573,6 +1573,23 @@ bool Json::parseStrings(const JsonToken& token) {
     return true;
 }
 
+/* Has to be defined before it gets used by any other function, otherwise the
+   export macro gets ignored */
+template<class T> const JsonToken* JsonView<T>::find(const typename T::KeyType key) const {
+    /* _begin is the first child of the enclosing array/object, so parent() is
+       an O(1) operation in this case (and it's never null) */
+    return _begin->parent()->find(key);
+}
+
+template<class T> const JsonToken& JsonView<T>::operator[](const typename T::KeyType key) const {
+    /* _begin is the first child of the enclosing array/object, so parent() is
+       an O(1) operation in this case (and it's never null) */
+    return (*_begin->parent())[key];
+}
+
+template class CORRADE_UTILITY_EXPORT JsonView<JsonObjectItem>;
+template class CORRADE_UTILITY_EXPORT JsonView<JsonArrayItem>;
+
 Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
         "Utility::Json::parseObject(): token not owned by the instance", {});
