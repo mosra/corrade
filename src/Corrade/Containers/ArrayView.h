@@ -461,7 +461,7 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief View suffix until a pointer
+         * @brief View suffix after a pointer
          *
          * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
          * @cpp nullptr @ce and the original array isn't, returns zero-sized

@@ -498,7 +498,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         }
 
         /**
-         * @brief View suffix until a pointer
+         * @brief View suffix after a pointer
          *
          * Equivalent to @cpp string.slice(begin, string.end()) @ce. If
          * @p begin is @cpp nullptr @ce and the original view isn't, returns a
