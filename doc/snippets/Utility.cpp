@@ -56,6 +56,8 @@
 #include "Corrade/Utility/Sha1.h"
 #include "Corrade/Utility/StlMath.h"
 
+#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+
 /* [Tweakable-disable-header] */
 #define CORRADE_TWEAKABLE
 #include "Corrade/Utility/Tweakable.h"
@@ -63,8 +65,6 @@
 
 /* [ConfigurationValue] */
 #include <Corrade/Utility/ConfigurationGroup.h>
-
-#define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
 struct Foo {
     int a, b;
