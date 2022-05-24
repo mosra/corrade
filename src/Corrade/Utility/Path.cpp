@@ -259,8 +259,18 @@ namespace {
    append(), copy() destination or map() / mapWrite), there the opening itself fails already. On Windows, opening directories fails in any case, so there
    we don't need to do anything either. */
 bool isDirectory(const int fd) {
+    #ifdef CORRADE_TARGET_IOS
+    /* iOS used to return false for S_ISDIR() since Xcode 7.3 and including
+       11.4, but as of Xcode 11.5, it returns true. Which is a totally crappy
+       behavior, so we just return false always. Might be a simulator-specific
+       bug, but as there's no official documented way to detect a simulator, I
+       won't even bother. */
+    static_cast<void>(fd);
+    return false;
+    #else
     struct stat st;
     return fstat(fd, &st) == 0 && S_ISDIR(st.st_mode);
+    #endif
 }
 #endif
 
@@ -275,7 +285,14 @@ bool isDirectory(const Containers::StringView path) {
     /** @todo symlink support */
     const DWORD fileAttributes = GetFileAttributesW(Unicode::widen(path));
     return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
-
+    #elif defined(CORRADE_TARGET_IOS)
+    /* iOS used to return false for S_ISDIR() since Xcode 7.3 and including
+       11.4, but as of Xcode 11.5, it returns true. Which is a totally crappy
+       behavior, so we just return false always. Might be a simulator-specific
+       bug, but as there's no official documented way to detect a simulator, I
+       won't even bother. */
+    static_cast<void>(path);
+    return false;
     #elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     /* using stat() instead of lstat() as that follows symlinks and that's what
        is desired in most cases */
