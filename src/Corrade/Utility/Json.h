@@ -2149,9 +2149,10 @@ template<class T> class JsonIterator {
 Returned from @ref Json::parseObject(), @ref Json::parseArray(),
 @ref JsonToken::asObject() and @ref JsonToken::asArray(). See
 @ref Utility-Json-usage-iteration for more information.
-@see @ref JsonObjectView, @ref JsonArrayView
 
 @experimental
+
+@see @ref JsonObjectView, @ref JsonArrayView
 */
 template<class T> class JsonView {
     public:
