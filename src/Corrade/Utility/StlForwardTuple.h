@@ -31,7 +31,7 @@
 @m_since{2019,10}
 
 On @ref CORRADE_TARGET_LIBCXX "libc++", @ref CORRADE_TARGET_LIBSTDCXX "libstdc++"
-7+ and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
+and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
 implementation-specific STL header containing just the forward declaration of
 @ref std::tuple. On other implementations where forward declaration is unknown
 is equivalent to @cpp #include <tuple> @ce.
@@ -57,9 +57,18 @@ is equivalent to @cpp #include <tuple> @ce.
 #ifdef CORRADE_TARGET_LIBCXX
 /* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163 */
 #include <__tuple>
-#elif defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE >= 7
-/* https://github.com/gcc-mirror/gcc/blob/releases/gcc-7.1.0/libstdc++-v3/include/std/type_traits#L2557-L2558 */
+#elif defined(CORRADE_TARGET_LIBSTDCXX)
+#if _GLIBCXX_RELEASE >= 7 && _GLIBCXX_RELEASE < 12
+/* https://github.com/gcc-mirror/gcc/blob/releases/gcc-7.1.0/libstdc++-v3/include/std/type_traits#L2557-L2558
+   gone in GCC 12 with https://github.com/gcc-mirror/gcc/commit/261d5a4a459bd49942e53bc83334ccc7154a09d5 */
 #include <type_traits>
+#else
+/* There's a second forward declaration
+   in https://github.com/gcc-mirror/gcc/blob/releases/gcc-12.1.0/libstdc++-v3/include/bits/stl_pair.h#L89
+   since GCC 4.6, but for a sound sleep including the whole header, which isn't
+   that much bigger than <type_traits> anyway. */
+#include <utility>
+#endif
 #elif defined(CORRADE_TARGET_DINKUMWARE)
 /* MSVC has it defined next to std::pair */
 #include <utility>
