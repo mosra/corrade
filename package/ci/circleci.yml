@@ -65,21 +65,27 @@ commands:
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
           sudo apt install -y ninja-build gcc cmake $LCOV_PACKAGES << parameters.extra >>
 
+  # ninja needs python@3.9 as a dependency FOR SOME FUCKING REASON and when THE
+  # DAMN THING installs it, it proceeds with reinstalling python@2. FROM
+  # SOURCES! FUCK! and then it fails to link it because NO SHIT, python@3.9 is
+  # already installed! HOW THE FUCK ARE PEOPLE ABLE TO DEAL WITH SUCH CURSED
+  # SHIT ALL THE TIME?! FUCK OFF
+  #
+  # TODO: Needed only on 10.3 and 11.4, not on 11.5 anymore, remove once those
+  #   images are not used anymore.
+  macos-remove-python-curse:
+    steps:
+    - run:
+        name: Remove Python 2 curse
+        command: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall python@2
+
   install-base-macos:
     parameters:
       extra:
         type: string
         default: ""
     steps:
-    - run:
-        # ninja needs python@3.9 as a dependency FOR SOME FUCKING REASON and
-        # when THE DAMN THING installs it, it proceeds with reinstalling
-        # python@2. FROM SOURCES! FUCK! and then it fails to link it because
-        # NO SHIT, python@3.9 is already installed! HOW THE FUCK ARE PEOPLE
-        # ABLE TO DEAL WITH SUCH CURSED SHIT ALL THE TIME?! FUCK OFF
-        name: Remove Python 2 curse
-        command: |
-          HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall python@2
     - run:
         name: Install base packages
         # As usual, homebrew takes five minutes to update and then explodes in
@@ -302,6 +308,7 @@ jobs:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
     steps:
+    - macos-remove-python-curse
     - install-base-macos
     - build:
         script: unix-desktop.sh
@@ -315,6 +322,7 @@ jobs:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
     steps:
+    - macos-remove-python-curse
     - install-base-macos
     - build:
         script: unix-desktop.sh
