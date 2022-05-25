@@ -1630,7 +1630,7 @@ void StringViewTest::findEmpty() {
        to the first byte */
     {
         StringView a = "hello";
-        CORRADE_VERIFY(a.contains("hello"));
+        CORRADE_VERIFY(a.contains(""));
 
         StringView found = a.find("");
         CORRADE_COMPARE(found, "");
@@ -1911,17 +1911,17 @@ void StringViewTest::findLastEmpty() {
        (which is internally the same algorithm as find()) */
 
     /* Finding an empty string inside a string should return a zero-sized view
-       to the first byte */
+       to one item after the last byte */
     {
         StringView a = "hello";
-        StringView found = a.find("");
+        StringView found = a.findLast("");
         CORRADE_COMPARE(found, "");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 5);
 
     /* Finding an empty string inside an empty string should do the same */
     } {
         StringView a = "";
-        StringView found = a.find("");
+        StringView found = a.findLast("");
         CORRADE_VERIFY(a.data());
         CORRADE_COMPARE(found, "");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
@@ -2012,7 +2012,8 @@ void StringViewTest::findLastFlags() {
 }
 
 void StringViewTest::findLastOr() {
-    /* Duplicated word to ensure it's not delegated to findOr() */
+    /* Mostly similar to findOr(). Duplicated word to ensure it's not delegated
+       to findOr(). */
     StringView a = "hello hello world";
 
     /* Verify the returned pointer vs the usual find() */
