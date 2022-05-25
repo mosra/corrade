@@ -210,7 +210,7 @@ inline const char* findNotAny(const char* const data, const std::size_t size, co
 
 inline const char* findLastNotAny(const char* const data, const size_t size, const char* const characters, std::size_t characterCount) {
     for(const char* i = data + size; i != data; --i)
-        if(!std::memchr(characters, *(i - 1), characterCount)) return i;
+        if(!std::memchr(characters, *(i - 1), characterCount)) return i - 1;
     return {};
 }
 
@@ -438,7 +438,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
     T* const found = const_cast<T*>(findLastNotAny(_data, size(), characters._data, characters.size()));
-    return prefix(found ? found : _data);
+    return prefix(found ? found + 1 : _data);
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
