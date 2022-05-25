@@ -848,9 +848,11 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * algorithms, especially @ref std::boyer_moore_searcher and its
          * variants. Those algorithms on the other hand have to perform certain
          * preprocessing of the input and keep extra state and due to that
-         * overhead aren't generally suited for one-time searches.
+         * overhead aren't generally suited for one-time searches. Consider
+         * using @ref find(char) const instead for single-byte substrings.
          *
-         * Consider using @ref find(char) const for single-byte substrings.
+         * This function is equivalent to calling @relativeref{std::string,find()}
+         * on a @ref std::string or a @ref std::string_view.
          * @see @ref contains(), @ref findLast(), @ref findOr()
          */
         /* Technically it would be enough to have just one overload with a
@@ -918,9 +920,12 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
          * one-time searches in non-performance-critical code. See the
          * documentation of @ref find() for further information and suggested
-         * alternatives.
+         * alternatives. Consider using @ref findLast(char) const instead for
+         * single-byte substrings.
          *
-         * Consider using @ref findLast(char) const for single-byte substrings.
+         * This function is equivalent to calling @relativeref{std::string,rfind()}
+         * on a @ref std::string or a @ref std::string_view.
+         * @m_keywords{rfind()}
          * @see @ref findLastOr()
          */
         /* Technically it would be enough to have just one overload with a

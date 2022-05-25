@@ -469,6 +469,9 @@ template<template<class T> class Allocator, class T> inline bool arrayIsGrowable
 
 For a growable array returns its capacity, for a non-growable array returns
 @ref Array::size().
+
+This function is equivalent to calling @relativeref{std::vector,capacity()} on
+a @ref std::vector.
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayCapacity(Array<T>& array);
@@ -503,6 +506,10 @@ without being reallocated to a growable version.
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the original
 container, @f$ \mathcal{O}(1) @f$ if the capacity is already large enough or
 if the reallocation can be done in-place.
+
+This function is equivalent to calling @relativeref{std::vector,reserve()} on
+a @ref std::vector.
+@m_keywords{reserve()}
 @see @ref arrayCapacity(), @ref arrayIsGrowable(),
     @ref Containers-Array-growable
 */
@@ -602,6 +609,10 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @m_since{2020,06}
 
 Alias to @ref arrayResize(Array<T>&, ValueInitT, std::size_t).
+
+This function is equivalent to calling @relativeref{std::vector,resize()} on
+a @ref std::vector.
+@m_keywords{resize()}
 @see @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
@@ -703,6 +714,10 @@ template<template<class> class Allocator, class T, class... Args> inline void ar
 
 Calls @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args)
 with @p value.
+
+This function is equivalent to calling @relativeref{std::vector,resize()} on
+a @ref std::vector.
+@m_keywords{resize()}
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
@@ -739,6 +754,10 @@ array and @ref Array::size() increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential.
+
+This function is equivalent to calling @relativeref{std::vector,push_back()} on
+a @ref std::vector.
+@m_keywords{push_back()}
 @see @ref arrayCapacity(), @ref arrayIsGrowable(),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, ArrayView<const T>),
@@ -772,6 +791,10 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 Similar to @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&)
 except that the new element is constructed using placement-new with provided
 @p args.
+
+This function is equivalent to calling @relativeref{std::vector,emplace_back()}
+on a @ref std::vector.
+@m_keywords{emplace_back()}
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, ArrayView<const T>),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -924,6 +947,10 @@ Expects that @p count is not larger than @ref Array::size(). If the array is
 not growable, all its elements except the suffix are first reallocated to a
 growable version. Otherwise, a destructor is called on removed elements and the
 @ref Array::size() is decreased by @p count.
+
+With @p count set to @cpp 1 @ce, this function is equivalent to calling
+@relativeref{std::vector,pop_back()} on a @ref std::vector.
+@m_keywords{pop_back()}
 @see @ref arrayIsGrowable(), @ref arrayResize()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1);
@@ -955,6 +982,10 @@ assumed to be already as small as possible, and nothing is done.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @f$ \mathcal{O}(1) @f$ if the array is already non-growable.
+
+This function is equivalent to calling @relativeref{std::vector,shrink_to_fit()}
+on a @ref std::vector.
+@m_keywords{shrink_to_fit()}
 @see @ref arrayShrink(Array<T>&, DefaultInitT), @ref arrayIsGrowable(),
     @ref Containers-Array-growable
 */
