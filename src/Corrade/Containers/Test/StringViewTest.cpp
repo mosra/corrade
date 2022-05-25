@@ -1646,6 +1646,16 @@ void StringViewTest::findEmpty() {
         CORRADE_COMPARE(found, "");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
 
+    /* Finding a null view inside an empty string should do the same */
+    } {
+        StringView a = "";
+        CORRADE_VERIFY(a.contains(nullptr));
+
+        StringView found = a.find(nullptr);
+        CORRADE_VERIFY(a.data());
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
     /* Finding an empty string inside a null view should behave the same as
        if nothing was found at all */
     } {
@@ -1922,6 +1932,14 @@ void StringViewTest::findLastEmpty() {
     } {
         StringView a = "";
         StringView found = a.findLast("");
+        CORRADE_VERIFY(a.data());
+        CORRADE_COMPARE(found, "");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Finding a null view inside an empty string should do the same */
+    } {
+        StringView a = "";
+        StringView found = a.findLast(nullptr);
         CORRADE_VERIFY(a.data());
         CORRADE_COMPARE(found, "");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
