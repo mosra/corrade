@@ -193,42 +193,45 @@ inline const char* findLast(const char* const data, const std::size_t size, cons
    std::find_first_of() because I doubt STL implementations explicitly optimize
    for that case. Yes, std::string::find_first_of() probably would have that,
    but I'd first need to allocate to make use of that and FUCK NO. */
-inline const char* findAny(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
-    for(; begin != end; ++begin)
-        if(std::memchr(characters, *begin, characterCount)) return begin;
-    return end;
+inline const char* findAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
+    for(const char* i = data, *end = data + size; i != end; ++i)
+        if(std::memchr(characters, *i, characterCount)) return i;
+    return {};
 }
 
 /* Variants of the above. Not sure if those even have any vaguely corresponding
    C lib API. Probably not. */
 
-inline const char* findNotAny(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
-    for(; begin != end; ++begin)
-        if(!std::memchr(characters, *begin, characterCount)) return begin;
-    return end;
+inline const char* findNotAny(const char* const data, const std::size_t size, const char* const characters, std::size_t characterCount) {
+    for(const char* i = data, *end = data + size; i != end; ++i)
+        if(!std::memchr(characters, *i, characterCount)) return i;
+    return {};
 }
 
-inline const char* findLastNotAny(const char* const begin, const char* end, const char* const characters, std::size_t characterCount) {
-    for(; end != begin; --end)
-        if(!std::memchr(characters, *(end - 1), characterCount)) return end;
-    return begin;
+inline const char* findLastNotAny(const char* const data, const size_t size, const char* const characters, std::size_t characterCount) {
+    for(const char* i = data + size; i != data; --i)
+        if(!std::memchr(characters, *(i - 1), characterCount)) return i;
+    return {};
 }
 
 }
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithoutEmptyParts(const Containers::StringView delimiters) const {
     Array<BasicStringView<T>> parts;
-    const char* const characters = delimiters.begin();
+    const char* const characters = delimiters._data;
     const std::size_t characterCount = delimiters.size();
-    T* const end = this->end();
     T* oldpos = _data;
+    T* const end = _data + size();
 
     while(oldpos < end) {
-        T* const pos = const_cast<T*>(findAny(oldpos, end, characters, characterCount));
-        if(pos != oldpos)
-            arrayAppend(parts, slice(oldpos, pos));
-
-        oldpos = pos + 1;
+        if(T* const pos = const_cast<T*>(findAny(oldpos, end - oldpos, characters, characterCount))) {
+            if(pos != oldpos)
+                arrayAppend(parts, slice(oldpos, pos));
+            oldpos = pos + 1;
+        } else {
+            arrayAppend(parts, slice(oldpos, end));
+            break;
+        }
     }
 
     return parts;
@@ -419,7 +422,9 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
-    return suffix(const_cast<T*>(findNotAny(_data, end(), characters.data(), characters.size())));
+    const std::size_t size = this->size();
+    T* const found = const_cast<T*>(findNotAny(_data, size, characters._data, characters.size()));
+    return suffix(found ? found : _data + size);
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
@@ -432,7 +437,8 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
-    return prefix(const_cast<T*>(findLastNotAny(_data, end(), characters.data(), characters.size())));
+    T* const found = const_cast<T*>(findLastNotAny(_data, size(), characters._data, characters.size()));
+    return prefix(found ? found : _data);
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
