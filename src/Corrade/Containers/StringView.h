@@ -837,9 +837,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Find a substring
          *
          * Returns a view pointing to the first found substring. If not found,
-         * an empty @cpp nullptr @ce view with no @ref StringViewFlags is
-         * returned. The function uses @ref slice() internally, meaning it
-         * propagates the @ref flags() as appropriate.
+         * an empty @cpp nullptr @ce view is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate, except in case of a failure, where it always returns no
+         * @ref StringViewFlags.
          *
          * Note that the function operates with a @f$ \mathcal{O}(nm) @f$
          * complexity and as such is meant mainly for one-time searches in
@@ -912,9 +913,10 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @brief Find the last occurence of a substring
          *
          * Returns a view pointing to the last found substring. If not found,
-         * an empty @cpp nullptr @ce view with no @ref StringViewFlags is
-         * returned. The function uses @ref slice() internally, meaning it
-         * propagates the @ref flags() as appropriate.
+         * an empty @cpp nullptr @ce view is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate, except in case of a failure, where it always returns no
+         * @ref StringViewFlags.
          *
          * Similarly as with @ref find(), note that the function operates with
          * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
@@ -1067,7 +1069,7 @@ CORRADE_UTILITY_EXPORT bool operator>(StringView a, StringView b);
 
 For joining more than one string prefer to use @ref StringView::join() to avoid
 needless temporary allocations.
-@todo mutable && overloads that reus the growable string storage instead of
+@todo mutable && overloads that reuse the growable string storage instead of
     allocating new, when growable strings are a thing
 */
 CORRADE_UTILITY_EXPORT String operator+(StringView a, StringView b);

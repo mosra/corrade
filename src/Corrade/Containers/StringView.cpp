@@ -455,7 +455,8 @@ template<class T> BasicStringView<T> BasicStringView<T>::findOr(const StringView
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
     /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant */
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
     return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
 }
 
@@ -464,7 +465,8 @@ template<class T> BasicStringView<T> BasicStringView<T>::findOr(const char chara
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant */
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
     return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
 }
 
@@ -475,7 +477,8 @@ template<class T> BasicStringView<T> BasicStringView<T>::findLastOr(const String
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
     /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant */
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
     return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
 }
 
@@ -484,7 +487,8 @@ template<class T> BasicStringView<T> BasicStringView<T>::findLastOr(const char c
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant */
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
     return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
 }
 

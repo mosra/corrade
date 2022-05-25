@@ -1059,14 +1059,14 @@ class CORRADE_UTILITY_EXPORT String {
         StringView findLastOr(char character, const char* fail) const; /**< @overload */
 
         /**
-         * @brief Whether the view contains a substring
+         * @brief Whether the string contains a substring
          *
          * Equivalent to @ref BasicStringView::contains(StringView) const.
          */
         bool contains(StringView substring) const;
 
         /**
-         * @brief Whether the view contains a character
+         * @brief Whether the string contains a character
          *
          * Equivalent to @ref BasicStringView::contains(char) const.
          */
