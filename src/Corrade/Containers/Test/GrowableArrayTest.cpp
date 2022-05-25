@@ -88,6 +88,7 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<class T> void resizeDefaultInit();
     template<class T> void resizeValueInit();
     void resizeDirectInit();
+    void resizeCopy();
 
     template<class T, class Init> void resizeFromNonGrowableToLess();
     template<class T, class Init> void resizeFromGrowableToLess();
@@ -256,6 +257,7 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::resizeValueInit<int>,
               &GrowableArrayTest::resizeValueInit<Movable>,
               &GrowableArrayTest::resizeDirectInit,
+              &GrowableArrayTest::resizeCopy,
 
               &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::NoInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::NoInitT>,
@@ -860,6 +862,19 @@ void GrowableArrayTest::resizeDirectInit() {
 
     Array<int> a;
     arrayResize(a, Corrade::DirectInit, 3, 754831);
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(a[0], 754831);
+    CORRADE_COMPARE(a[1], 754831);
+    CORRADE_COMPARE(a[2], 754831);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::resizeCopy() {
+    /* This doesn't have any special handling for trivial/non-trivial types, no
+       need to test twice */
+
+    Array<int> a;
+    arrayResize(a, 3, 754831);
     CORRADE_COMPARE(a.size(), 3);
     CORRADE_COMPARE(a[0], 754831);
     CORRADE_COMPARE(a[1], 754831);
@@ -1772,6 +1787,7 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayResize<ArrayNewAllocator>(a, 3);
     arrayResize<ArrayNewAllocator>(a, Corrade::NoInit, 4);
     arrayResize<ArrayNewAllocator>(a, Corrade::DirectInit, 5, 6);
+    arrayResize<ArrayNewAllocator>(a, 5, 6);
     CORRADE_VERIFY(!arrayIsGrowable(a));
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(a.size(), 5);

@@ -541,6 +541,7 @@ Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the new container,
 size.
 @see @ref Array::size(), @ref arrayCapacity(), @ref arrayIsGrowable(),
     @ref arrayRemoveSuffix(), @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
@@ -573,6 +574,7 @@ the new elements at the end are not default-initialized, but value-initialized
 (i.e., trivial types zero-initialized and default constructor called
 otherwise).
 @see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref Containers-Array-growable
@@ -600,7 +602,8 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @m_since{2020,06}
 
 Alias to @ref arrayResize(Array<T>&, ValueInitT, std::size_t).
-@see @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
+@see @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref Containers-Array-growable
@@ -633,6 +636,7 @@ Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
 uninitialized state instead.
 @see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -664,6 +668,7 @@ Similar to @ref arrayResize(Array<T>&, ValueInitT, std::size_t) except that
 the new elements at the end are constructed using placement-new with provided
 @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
@@ -689,6 +694,38 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args) {
     arrayResize<T, Allocator<T>>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
+}
+#endif
+
+/**
+@brief Resize an array to given size, copy-constructing new elements using the provided value
+@m_since_latest
+
+Calls @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args)
+with @p value.
+@see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(Array<T>& array, std::size_t size, const typename std::common_type<T>::type& value) {
+    arrayResize<T, Allocator>(array, Corrade::DirectInit, size, value);
+}
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, std::size_t size, const typename std::common_type<T>::type& value) {
+    arrayResize<T, Allocator<T>>(array, size, value);
 }
 #endif
 
