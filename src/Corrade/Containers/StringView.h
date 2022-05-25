@@ -889,14 +889,15 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * The @p fail value can be @cpp nullptr @ce or any other pointer, but
          * commonly it's set to either @ref begin() or @ref end(). For example
-         * here when getting the basename and an extension from a file path:
+         * here when getting the basename and an extension from a file path,
+         * similarly to what @ref Utility::Path::split() and
+         * @relativeref{Utility::Path,splitExtension()} does:
          *
          * @snippet Containers.cpp StringView-findOr
          *
          * Consider using @ref findOr(char, T*) const for single-byte
          * substrings.
          * @see @ref findLastOr()
-         * @todoc reference the Path functions for this once they're done
          */
         BasicStringView<T> findOr(StringView substring, T* fail) const;
 
