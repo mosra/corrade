@@ -132,7 +132,7 @@ namespace {
    std::find_first_of() because I doubt STL implementations explicitly optimize
    for that case. Yes, std::string::find_first_of() probably would have that,
    but I'd first need to allocate to make use of that and FUCK NO. */
-inline const char* findFirstOf(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
+inline const char* findAny(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
     for(; begin != end; ++begin)
         if(std::memchr(characters, *begin, characterCount)) return begin;
     return end;
@@ -141,13 +141,13 @@ inline const char* findFirstOf(const char* begin, const char* const end, const c
 /* Variants of the above. Not sure if those even have any vaguely corresponding
    C lib API. Probably not. */
 
-inline const char* findFirstNotOf(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
+inline const char* findNotAny(const char* begin, const char* const end, const char* const characters, std::size_t characterCount) {
     for(; begin != end; ++begin)
         if(!std::memchr(characters, *begin, characterCount)) return begin;
     return end;
 }
 
-inline const char* findLastNotOf(const char* const begin, const char* end, const char* const characters, std::size_t characterCount) {
+inline const char* findLastNotAny(const char* const begin, const char* end, const char* const characters, std::size_t characterCount) {
     for(; end != begin; --end)
         if(!std::memchr(characters, *(end - 1), characterCount)) return end;
     return begin;
@@ -163,7 +163,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithou
     T* oldpos = _data;
 
     while(oldpos < end) {
-        T* const pos = const_cast<T*>(findFirstOf(oldpos, end, characters, characterCount));
+        T* const pos = const_cast<T*>(findAny(oldpos, end, characters, characterCount));
         if(pos != oldpos)
             arrayAppend(parts, slice(oldpos, pos));
 
@@ -358,7 +358,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
-    return suffix(const_cast<T*>(findFirstNotOf(_data, end(), characters.data(), characters.size())));
+    return suffix(const_cast<T*>(findNotAny(_data, end(), characters.data(), characters.size())));
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
@@ -371,7 +371,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
-    return prefix(const_cast<T*>(findLastNotOf(_data, end(), characters.data(), characters.size())));
+    return prefix(const_cast<T*>(findLastNotAny(_data, end(), characters.data(), characters.size())));
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
