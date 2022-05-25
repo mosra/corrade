@@ -660,7 +660,7 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @brief Resize an array to given size, constructing new elements using provided arguments
 @m_since{2020,06}
 
-Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
+Similar to @ref arrayResize(Array<T>&, ValueInitT, std::size_t) except that
 the new elements at the end are constructed using placement-new with provided
 @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
