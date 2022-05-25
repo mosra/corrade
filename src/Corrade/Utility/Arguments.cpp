@@ -516,7 +516,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             ERROR - [JSC_LANGUAGE_FEATURE] This language feature is only
             supported for ECMASCRIPT6 mode or better: const declaration. */
         char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
-            var name = UTF8ToString($0);
+            var name = UTF8ToString($0, $1);
             if(typeof process !== 'undefined' && name in process.env) {
                 var env = process.env[name];
                 var bytes = lengthBytesUTF8(env) + 1;
@@ -525,7 +525,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 return memory;
             }
             return 0;
-        }, entry.environment.data()));
+        }, entry.environment.data(), entry.environment.size()));
         #ifdef CORRADE_TARGET_CLANG
         #pragma GCC diagnostic pop
         #endif
