@@ -1195,6 +1195,18 @@ static_cast<void>(extension);
 }
 
 {
+/* [StringView-findAnyOr] */
+Containers::StringView string = DOXYGEN_ELLIPSIS({});
+
+/* A word is everything until the next space character, or the whole string if
+   there's no space */
+Containers::StringView foundSpace = string.findAnyOr(" \n\r\t", string.end());
+Containers::StringView word = string.prefix(foundSpace.begin());
+/* [StringView-findAnyOr] */
+static_cast<void>(word);
+}
+
+{
 using namespace Containers::Literals;
 /* [String-usage-literal-null] */
 Containers::String a = "hello\0world!";         // a.size() == 5

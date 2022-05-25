@@ -182,6 +182,16 @@ struct StringViewTest: TestSuite::Tester {
     void findLastFlags();
     void findLastOr();
 
+    void findAny();
+    void findAnyEmpty();
+    void findAnyFlags();
+    void findAnyOr();
+
+    void findLastAny();
+    void findLastAnyEmpty();
+    void findLastAnyFlags();
+    void findLastAnyOr();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -277,6 +287,16 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findLastEmpty,
               &StringViewTest::findLastFlags,
               &StringViewTest::findLastOr,
+
+              &StringViewTest::findAny,
+              &StringViewTest::findAnyEmpty,
+              &StringViewTest::findAnyFlags,
+              &StringViewTest::findAnyOr,
+
+              &StringViewTest::findLastAny,
+              &StringViewTest::findLastAnyEmpty,
+              &StringViewTest::findLastAnyFlags,
+              &StringViewTest::findLastAnyOr,
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
@@ -2061,6 +2081,309 @@ void StringViewTest::findLastOr() {
     } {
         StringView found = a.findLastOr('p', a.end());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findAny() {
+    /* Duplicated characters to test it's not delegated to findLastAny() */
+    StringView a = "hello\0world"_s;
+
+    /* Right at the start. Characters not part of the string should not cause
+       it to fail. */
+    {
+        CORRADE_VERIFY(a.containsAny("eh!"));
+
+        StringView found = a.findAny("eh!");
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* In the middle. Duplicate characters should not cause any issues. */
+    } {
+        CORRADE_VERIFY(a.containsAny("olo"));
+
+        StringView found = a.findAny("olo");
+        CORRADE_COMPARE(found, "l");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+
+    /* Right at the end */
+    } {
+        CORRADE_VERIFY(a.containsAny("bud"));
+
+        StringView found = a.findAny("bud");
+        CORRADE_COMPARE(found, "d");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 10);
+
+    /* Single character to search for, equivalent to just find(c) */
+    } {
+        CORRADE_VERIFY(a.containsAny("w"));
+
+        StringView found = a.findAny("w");
+        CORRADE_COMPARE(found, "w");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* No character from the set found */
+    } {
+        CORRADE_VERIFY(!a.containsAny("pub"));
+
+        StringView found = a.findAny("pub");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Sbould accept a null terminator */
+    } {
+        CORRADE_VERIFY(a.containsAny("p\0b"_s));
+
+        StringView found = a.findAny("p\0b"_s);
+        CORRADE_COMPARE(found, "\0"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 5);
+
+    /* Should not stop at it however */
+    } {
+        CORRADE_VERIFY(a.containsAny("p\0ttery"_s));
+
+        StringView found = a.findAny("p\0ttery"_s);
+        CORRADE_COMPARE(found, "e"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 1);
+
+    /* And should not read the final null terminator either */
+    } {
+        /* There's a \0 in the middle, skip that */
+        CORRADE_VERIFY(!a.exceptPrefix(8).containsAny("\0"_s));
+
+        StringView found = a.exceptPrefix(8).findAny("\0"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findAnyEmpty() {
+    /* Finding an empty set should behave the same as if nothing was found at
+       all */
+    {
+        StringView a = "hello";
+        CORRADE_VERIFY(!a.containsAny(""));
+
+        StringView found = a.findAny("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding anything in an empty string should behave the same as as if
+       nothing was found at all */
+    } {
+        StringView a = "";
+        CORRADE_VERIFY(!a.containsAny("lel"));
+
+        StringView found = a.findAny("lel");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding a null view inside an empty string should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a = "";
+        CORRADE_VERIFY(!a.containsAny(nullptr));
+
+        StringView found = a.findAny(nullptr);
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding an empty string inside a null view should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a{nullptr};
+        CORRADE_VERIFY(!a.containsAny(""));
+
+        StringView found = a.findAny("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+    }
+}
+
+void StringViewTest::findAnyFlags() {
+    StringView a = "hello"_s;
+
+    /* Right at the start should preserve just the global flag */
+    {
+        StringView found = a.findAny("ho!");
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* At the end also null-terminated */
+    } {
+        StringView found = a.findAny("ow");
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Not found should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
+    } {
+        StringView found = a.find("pub");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    }
+}
+
+void StringViewTest::findAnyOr() {
+    /* Duplicated characters to test that it's not delegated to
+       findLastAnyOr() */
+    StringView a = "hello world";
+
+    /* Verify the returned pointer vs the usual findAny() */
+    {
+        StringView found = a.findAnyOr("lol", a.begin());
+        CORRADE_COMPARE(found, "l");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 2));
+    } {
+        StringView found = a.findAny("pub");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findAnyOr("pub", a.begin());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findLastAny() {
+    /* Mostly similar to findAny(), except that it doesn't check containsAny()
+       (which is internally the same algorithm as findAny()). Duplicated
+       characters to test that it's not delegated to findAny(). */
+    StringView a = "hello\0world"_s;
+
+    /* Right at the end. Characters not part of the string should not cause
+       it to fail. */
+    {
+        StringView found = a.findLastAny("duh!");
+        CORRADE_COMPARE(found, "d");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 10);
+
+    /* In the middle. Duplicate characters should not cause any issues. */
+    } {
+        StringView found = a.findLastAny("olo");
+        CORRADE_COMPARE(found, "l");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 9);
+
+    /* Right at the start */
+    } {
+        StringView found = a.findLastAny("uhu");
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Single character to search for, equivalent to just find(c) */
+    } {
+        StringView found = a.findLastAny("w");
+        CORRADE_COMPARE(found, "w");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
+
+    /* No character from the set found */
+    } {
+        StringView found = a.findLastAny("pub");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+
+    /* Sbould accept a null terminator */
+    } {
+        StringView found = a.findLastAny("p\0b"_s);
+        CORRADE_COMPARE(found, "\0"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 5);
+
+    /* Should not stop at it however */
+    } {
+        StringView found = a.findLastAny("p\0ttery"_s);
+        CORRADE_COMPARE(found, "r"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 8);
+
+    /* And should not read the final null terminator either */
+    } {
+        /* There's a \0 in the middle, skip that */
+        StringView found = a.exceptPrefix(8).findLastAny("\0"_s);
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findLastAnyEmpty() {
+    /* Mostly similar to findAnyEmpty(), except that it doesn't check
+       containsAny() (which is internally the same algorithm as findAny()) */
+
+    /* Finding an empty set should behave the same as if nothing was found at
+       all */
+    {
+        StringView a = "hello";
+        StringView found = a.findLastAny("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding anything in an empty string should behave the same as as if
+       nothing was found at all */
+    } {
+        StringView a = "";
+        StringView found = a.findLastAny("lel");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding a null view inside an empty string should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a = "";
+        StringView found = a.findLastAny(nullptr);
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+
+    /* Finding an empty string inside a null view should behave the same as
+       if nothing was found at all */
+    } {
+        StringView a{nullptr};
+        StringView found = a.findLastAny("");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_VERIFY(!found.data());
+    }
+}
+
+void StringViewTest::findLastAnyFlags() {
+    /* Mostly similar to findAnyFlags() */
+
+    StringView a = "hello"_s;
+
+    /* Right at the start should preserve just the global flag */
+    {
+        StringView found = a.findLastAny("uhu");
+        CORRADE_COMPARE(found, "h");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* At the end also null-terminated */
+    } {
+        StringView found = a.findLastAny("ow!");
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Not found should be no flags, as the failed view isn't meant to be used
+       for anything anyway */
+    } {
+        StringView found = a.findLastAny("pub");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    }
+}
+
+void StringViewTest::findLastAnyOr() {
+    /* Mostly similar to findAnyOr(). Duplicated characters to test that it's
+       not delegated to findAnyOr(). */
+    StringView a = "hello world";
+
+    /* Verify the returned pointer vs the usual findLastAny() */
+    {
+        StringView found = a.findLastAnyOr("lol", a.begin());
+        CORRADE_COMPARE(found, "l");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 9));
+    } {
+        StringView found = a.findLastAny("pub");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_VERIFY(found.isEmpty());
+    } {
+        StringView found = a.findLastAnyOr("pub", a.begin());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }

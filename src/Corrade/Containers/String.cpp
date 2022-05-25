@@ -765,6 +765,42 @@ bool String::contains(const char character) const {
     return StringView{*this}.contains(character);
 }
 
+MutableStringView String::findAny(const StringView characters) {
+    return MutableStringView{*this}.findAny(characters);
+}
+
+StringView String::findAny(const StringView characters) const {
+    return StringView{*this}.findAny(characters);
+}
+
+MutableStringView String::findAnyOr(const StringView characters, char* fail) {
+    return MutableStringView{*this}.findAnyOr(characters, fail);
+}
+
+StringView String::findAnyOr(const StringView characters, const char* fail) const {
+    return StringView{*this}.findAnyOr(characters, fail);
+}
+
+MutableStringView String::findLastAny(const StringView characters) {
+    return MutableStringView{*this}.findLastAny(characters);
+}
+
+StringView String::findLastAny(const StringView characters) const {
+    return StringView{*this}.findLastAny(characters);
+}
+
+MutableStringView String::findLastAnyOr(const StringView characters, char* fail) {
+    return MutableStringView{*this}.findLastAnyOr(characters, fail);
+}
+
+StringView String::findLastAnyOr(const StringView characters, const char* fail) const {
+    return StringView{*this}.findLastAnyOr(characters, fail);
+}
+
+bool String::containsAny(const StringView substring) const {
+    return StringView{*this}.containsAny(substring);
+}
+
 char* String::release() {
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});

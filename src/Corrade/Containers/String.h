@@ -1073,6 +1073,45 @@ class CORRADE_UTILITY_EXPORT String {
         bool contains(char character) const;
 
         /**
+         * @brief Find any character from given set
+         *
+         * Equivalent to @ref BasicStringView::findAny().
+         */
+        MutableStringView findAny(StringView characters);
+        StringView findAny(StringView characters) const; /**< @overload */
+
+        /**
+         * @brief Find any character from given set with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findAnyOr().
+         */
+        MutableStringView findAnyOr(StringView characters, char* fail);
+        StringView findAnyOr(StringView characters, const char* fail) const; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of any character from given set
+         *
+         * Equivalent to @ref BasicStringView::findLastAny().
+         */
+        MutableStringView findLastAny(StringView characters);
+        StringView findLastAny(StringView characters) const; /**< @overload */
+
+        /**
+         * @brief Find the last occurence of any character from given set with a custom failure pointer
+         *
+         * Equivalent to @ref BasicStringView::findLastAnyOr().
+         */
+        MutableStringView findLastAnyOr(StringView characters, char* fail);
+        StringView findLastAnyOr(StringView characters, const char* fail) const; /**< @overload */
+
+        /**
+         * @brief Whether the string contains any character from given set
+         *
+         * Equivalent to @ref BasicStringView::containsAny().
+         */
+        bool containsAny(StringView substring) const;
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

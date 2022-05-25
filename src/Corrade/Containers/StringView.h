@@ -172,6 +172,10 @@ checks that a view starts (or ends) with given string and then removes it:
 </li>
 </ul>
 
+@subsection Containers-BasicStringView-usage-find Character and substring lookup
+
+@todoc document once also the findNotAny() and findLastNotAny() variants exist
+
 @subsection Containers-BasicStringView-usage-c-string-conversion Converting StringView instances to null-terminated C strings
 
 If possible when interacting with 3rd party APIs, passing a string together
@@ -854,7 +858,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
-         * @see @ref contains(), @ref findLast(), @ref findOr()
+         * @see @ref contains(), @ref findLast(), @ref findOr(), @ref findAny()
          */
         /* Technically it would be enough to have just one overload with a
            default value for the fail parameter. But then `find(foo, pointer)`
@@ -897,7 +901,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * Consider using @ref findOr(char, T*) const for single-byte
          * substrings.
-         * @see @ref findLastOr()
+         * @see @ref findLastOr(), @ref findAnyOr()
          */
         BasicStringView<T> findOr(StringView substring, T* fail) const;
 
@@ -929,7 +933,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * This function is equivalent to calling @relativeref{std::string,rfind()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{rfind()}
-         * @see @ref findLastOr()
+         * @see @ref findLastOr(), @ref findLastAny()
          */
         /* Technically it would be enough to have just one overload with a
            default value for the fail parameter, see above why it's not */
@@ -957,6 +961,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * pointing to the @p fail value instead of @cpp nullptr @ce, which is
          * useful to avoid explicit handling of cases where the substring
          * wasn't found. See @ref findOr() for an example use case.
+         * @see @ref findLastAnyOr()
          */
         BasicStringView<T> findLastOr(StringView substring, T* fail) const;
 
@@ -975,6 +980,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * A slightly lighter variant of @ref find() useful when you only want
          * to know if a substring was found or not. Consider using
          * @ref contains(char) const for single-byte substrings.
+         * @see @ref containsAny()
          */
         bool contains(StringView substring) const;
 
@@ -985,6 +991,83 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * one byte.
          */
         bool contains(char character) const;
+
+        /**
+         * @brief Find any character from given set
+         *
+         * Returns a view pointing to the first found character from the set.
+         * If no characters from @p characters are found, an empty
+         * @cpp nullptr @ce view is returned. The function uses @ref slice()
+         * internally, meaning it propagates the @ref flags() as appropriate,
+         * except in case of a failure, where it always returns no
+         * @ref StringViewFlags.
+         *
+         * This function is equivalent to calling @relativeref{std::string,find_first_of()}
+         * on a @ref std::string or a @ref std::string_view.
+         * @m_keywords{find_first_of()}
+         * @see @ref containsAny(), @ref findLastAny(), @ref findAnyOr(),
+         *      @ref find()
+         */
+        BasicStringView<T> findAny(StringView characters) const {
+            return findAnyOr(characters, nullptr);
+        }
+
+        /**
+         * @brief Find any character from given set with a custom failure pointer
+         *
+         * Like @ref findAny(StringView) const, but returns an empty view
+         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
+         * useful to avoid explicit handling of cases where no character was
+         * found.
+         *
+         * The @p fail value can be @cpp nullptr @ce or any other pointer, but
+         * commonly it's set to either @ref begin() or @ref end(). For example
+         * here when getting everything until the next space character:
+         *
+         * @snippet Containers.cpp StringView-findAnyOr
+         *
+         * @see @ref findLastAnyOr(), @ref findOr()
+         */
+        BasicStringView<T> findAnyOr(StringView characters, T* fail) const;
+
+        /**
+         * @brief Find the last occurence of any character from given set
+         *
+         * Returns a view pointing to the last found character from the set.
+         * If no characters from @p characters are found, an empty
+         * @cpp nullptr @ce view is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate, except in case of a failure, where it always returns no
+         * @ref StringViewFlags.
+         *
+         * This function is equivalent to calling @relativeref{std::string,find_last_of()}
+         * on a @ref std::string or a @ref std::string_view.
+         * @m_keywords{find_last_of()}
+         * @see @ref findLastAnyOr(), @ref findLast()
+         */
+        BasicStringView<T> findLastAny(StringView characters) const {
+            return findLastAnyOr(characters, nullptr);
+        }
+
+        /**
+         * @brief Find the last occurence of any character from given set with a custom failure pointer
+         *
+         * Like @ref findLastAny(StringView) const, but returns an empty view
+         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
+         * useful to avoid explicit handling of cases where the substring
+         * wasn't found. See @ref findAnyOr() for an example use case.
+         * @see @ref findLastOr()
+         */
+        BasicStringView<T> findLastAnyOr(StringView characters, T* fail) const;
+
+        /**
+         * @brief Whether the view contains any character from given set
+         *
+         * A slightly lighter variant of @ref findAny() useful when you only
+         * want to know if a character was found or not.
+         * @see @ref contains()
+         */
+        bool containsAny(StringView substring) const;
 
     private:
         /* Needed for mutable/immutable conversion */

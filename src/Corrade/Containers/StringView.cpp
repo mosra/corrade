@@ -202,6 +202,12 @@ inline const char* findAny(const char* const data, const std::size_t size, const
 /* Variants of the above. Not sure if those even have any vaguely corresponding
    C lib API. Probably not. */
 
+inline const char* findLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
+    for(const char* i = data + size; i != data; --i)
+        if(std::memchr(characters, *(i - 1), characterCount)) return i - 1;
+    return {};
+}
+
 inline const char* findNotAny(const char* const data, const std::size_t size, const char* const characters, std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
         if(!std::memchr(characters, *i, characterCount)) return i;
@@ -224,7 +230,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithou
     T* const end = _data + size();
 
     while(oldpos < end) {
-        if(T* const pos = const_cast<T*>(findAny(oldpos, end - oldpos, characters, characterCount))) {
+        if(T* const pos = const_cast<T*>(Containers::findAny(oldpos, end - oldpos, characters, characterCount))) {
             if(pos != oldpos)
                 arrayAppend(parts, slice(oldpos, pos));
             oldpos = pos + 1;
@@ -500,6 +506,30 @@ template<class T> bool BasicStringView<T>::contains(const StringView substring) 
 
 template<class T> bool BasicStringView<T>::contains(const char character) const {
     return Containers::find(_data, size(), character);
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::findAnyOr(const StringView characters, T* const fail) const {
+    if(const char* const found = Containers::findAny(_data, size(), characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> BasicStringView<T> BasicStringView<T>::findLastAnyOr(const StringView characters, T* const fail) const {
+    if(const char* const found = Containers::findLastAny(_data, size(), characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> bool BasicStringView<T>::containsAny(const StringView characters) const {
+    return Containers::findAny(_data, size(), characters._data, characters.size());
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

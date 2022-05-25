@@ -182,6 +182,11 @@ struct StringTest: TestSuite::Tester {
     template<class T> void findLast();
     template<class T> void findLastOr();
 
+    template<class T> void findAny();
+    template<class T> void findAnyOr();
+    template<class T> void findLastAny();
+    template<class T> void findLastAnyOr();
+
     void release();
     void releaseDeleterSmall();
 
@@ -312,6 +317,15 @@ StringTest::StringTest() {
               &StringTest::findLast<const String>,
               &StringTest::findLastOr<String>,
               &StringTest::findLastOr<const String>,
+
+              &StringTest::findAny<String>,
+              &StringTest::findAny<const String>,
+              &StringTest::findAnyOr<String>,
+              &StringTest::findAnyOr<const String>,
+              &StringTest::findLastAny<String>,
+              &StringTest::findLastAny<const String>,
+              &StringTest::findLastAnyOr<String>,
+              &StringTest::findLastAnyOr<const String>,
 
               &StringTest::release,
               &StringTest::releaseDeleterSmall,
@@ -2190,6 +2204,116 @@ template<class T> void StringTest::findLastOr() {
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
         typename ConstTraits<T>::ViewType found = a.findLastOr('c', a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    }
+}
+
+template<class T> void StringTest::findAny() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    /* Duplicated characters to test that it's not delegated to findAnyOr() */
+    T a{"hello world"};
+    {
+        CORRADE_VERIFY(a.containsAny("eh!"));
+
+        typename ConstTraits<T>::ViewType found = a.findAny("eh!");
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        CORRADE_VERIFY(a.containsAny("bud"));
+
+        typename ConstTraits<T>::ViewType found = a.findAny("bud");
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        CORRADE_VERIFY(!a.containsAny("pub"));
+
+        typename ConstTraits<T>::ViewType found = a.findAny("pub");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+    }
+}
+
+template<class T> void StringTest::findAnyOr() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* Mostly the same as findAny(), except that we expect a different pointer
+       in case of failure. Non-failure cases are kept to verify it's not
+       propagated to findLastAnyOr() by accident. */
+
+    T a{"hello world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findAnyOr("eh!", a.end());
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findAnyOr("bud", a.end());
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findAnyOr("pub", a.end());
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    }
+}
+
+template<class T> void StringTest::findLastAny() {
+    /* Mostly the same as findAny(), except that we don't test containsAny()
+       which is implemented with the same algorithm as findAny() */
+
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    /* Duplicated characters to test that it's not delegated to
+       findLastAnyOr() */
+    T a{"hello world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("uhu");
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("duh!");
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("pub");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+    }
+}
+
+template<class T> void StringTest::findLastAnyOr() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* Mostly the same as findLastAny(), except that we expect a different
+       pointer in case of failure. Non-failure cases are kept to verify it's
+       not propagated to findAnyOr() by accident. */
+
+    T a{"hello world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findLastAnyOr("uhu", a.end());
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAnyOr("duh!", a.end());
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAnyOr("pub", a.end());
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
