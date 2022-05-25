@@ -618,6 +618,36 @@ String operator+(const StringView a, const StringView b) {
     return result;
 }
 
+String operator+(const char a, const StringView b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
+
+    String result{Corrade::NoInit, 1 + bSize};
+
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    char* out = result.data();
+    out[0] = a;
+    if(bSize) std::memcpy(out + 1, b._data, bSize);
+
+    return result;
+}
+
+String operator+(const StringView a, const char b) {
+    /* Not using the size() accessor to speed up debug builds */
+    const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
+
+    String result{Corrade::NoInit, aSize + 1};
+
+    /* Apparently memcpy() can't be called with null pointers, even if size is
+       zero. I call that bullying. */
+    char* out = result.data();
+    if(aSize) std::memcpy(out, a._data, aSize);
+    out[aSize] = b;
+
+    return result;
+}
+
 Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
     debug << "Containers::StringViewFlag" << Utility::Debug::nospace;
 
