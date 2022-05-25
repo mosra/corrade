@@ -539,7 +539,11 @@ size, it's kept as such, without being reallocated to a growable version.
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the new container,
 @f$ \mathcal{O}(1) @f$ if current container size is already exactly of given
 size.
-@see @ref arrayCapacity(), @ref arrayIsGrowable(), @ref arrayRemoveSuffix()
+@see @ref Array::size(), @ref arrayCapacity(), @ref arrayIsGrowable(),
+    @ref arrayRemoveSuffix(), @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, Corrade::DefaultInitT, std::size_t size);
@@ -568,7 +572,10 @@ Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but value-initialized
 (i.e., trivial types zero-initialized and default constructor called
 otherwise).
-@see @ref Array::size(), @ref arrayIsGrowable(), @ref Containers-Array-growable
+@see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, Corrade::ValueInitT, std::size_t size);
 
@@ -593,6 +600,10 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @m_since{2020,06}
 
 Alias to @ref arrayResize(Array<T>&, ValueInitT, std::size_t).
+@see @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(Array<T>& array, std::size_t size) {
     return arrayResize<T, Allocator>(array, Corrade::ValueInit, size);
@@ -621,8 +632,11 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
 uninitialized state instead.
-@see @ref Array::size(), @ref arrayIsGrowable(), @ref Containers-Array-growable,
-    @ref arrayAppend(Array<T>&, NoInitT, std::size_t)
+@see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
+    @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, Corrade::NoInitT, std::size_t size);
 
@@ -649,6 +663,10 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are constructed using placement-new with provided
 @p args.
+@see @ref arrayResize(Array<T>&, std::size_t),
+    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class... Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
 
@@ -684,7 +702,12 @@ array and @ref Array::size() increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential.
-@see @ref arrayCapacity(), @ref arrayIsGrowable(), @ref Containers-Array-growable
+@see @ref arrayCapacity(), @ref arrayIsGrowable(),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, ArrayView<const T>),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value);
 
@@ -712,6 +735,10 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 Similar to @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&)
 except that the new element is constructed using placement-new with provided
 @p args.
+@see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, ArrayView<const T>),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
 
@@ -743,6 +770,10 @@ template<template<class> class Allocator, class T, class... Args> inline T& arra
 @m_since{2020,06}
 
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
+@see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref arrayAppend(Array<T>&, ArrayView<const T>),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, typename std::common_type<T>::type&& value) {
     return arrayAppend<T, Allocator>(array, Corrade::InPlaceInit, Utility::move(value));
@@ -771,7 +802,10 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 
 Like @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
 but inserting multiple values at once.
-@see @ref arrayResize(Array<T>&, NoInitT, std::size_t)
+@see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, ArrayView<const T> values);
 
@@ -821,6 +855,11 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayApp
 A lower-level variant of @ref arrayAppend(Array<T>& array, ArrayView<const T>)
 where the new values are meant to be initialized in-place after, instead of
 being copied from a pre-existing location.
+@see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, Corrade::NoInitT, std::size_t count);
 
