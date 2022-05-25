@@ -75,6 +75,7 @@ struct StringTest: TestSuite::Tester {
 
     void constructDefault();
     void constructTakeOwnership();
+    void constructTakeOwnershipImplicitSize();
     void constructTakeOwnershipNull();
     void constructTakeOwnershipNotNullTerminated();
     void constructTakeOwnershipTooLarge();
@@ -205,6 +206,7 @@ StringTest::StringTest() {
 
               &StringTest::constructDefault,
               &StringTest::constructTakeOwnership,
+              &StringTest::constructTakeOwnershipImplicitSize,
               &StringTest::constructTakeOwnershipNull,
               &StringTest::constructTakeOwnershipNotNullTerminated,
               &StringTest::constructTakeOwnershipTooLarge,
@@ -386,6 +388,26 @@ void StringTest::constructTakeOwnership() {
     CORRADE_COMPARE((StringView{data, 12}), "iello\0world?"_s);
 }
 
+void StringTest::constructTakeOwnershipImplicitSize() {
+    /* Everything after \0 gets ignored */
+    char data[] = "hello\0world!";
+
+    {
+        String a{data, [](char* data, std::size_t size) {
+            ++data[0];
+            data[size - 1] = '?';
+        }};
+        CORRADE_VERIFY(a);
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!a.isEmpty());
+        CORRADE_COMPARE(a.size(), 5);
+        CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
+        CORRADE_VERIFY(a.deleter());
+    }
+
+    CORRADE_COMPARE((StringView{data, 12}), "iell?\0world!"_s);
+}
+
 void StringTest::constructTakeOwnershipNull() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
@@ -396,7 +418,10 @@ void StringTest::constructTakeOwnershipNull() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{data, 5, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), "Containers::String: can only take ownership of a non-null null-terminated array\n");
+    String b{data, [](char*, std::size_t) {}};
+    CORRADE_COMPARE(out.str(),
+        "Containers::String: can only take ownership of a non-null null-terminated array\n"
+        "Containers::String: can only take ownership of a non-null null-terminated array\n");
 }
 
 void StringTest::constructTakeOwnershipNotNullTerminated() {
@@ -409,6 +434,8 @@ void StringTest::constructTakeOwnershipNotNullTerminated() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{data, 1, [](char*, std::size_t) {}};
+    /* The size-less constructor uses strlen(), so it will either find a \0
+       somewhere random or will crash */
     CORRADE_COMPARE(out.str(), "Containers::String: can only take ownership of a non-null null-terminated array\n");
 }
 
@@ -422,6 +449,7 @@ void StringTest::constructTakeOwnershipTooLarge() {
     std::ostringstream out;
     Error redirectError{&out};
     String a{data, ~std::size_t{}, [](char*, std::size_t) {}};
+    /* Can't really test this with the size-less constructor */
     #ifndef CORRADE_TARGET_32BIT
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^62 bytes, got 18446744073709551615\n");

@@ -421,6 +421,20 @@ class CORRADE_UTILITY_EXPORT String {
         explicit String(char* data, std::size_t size, Deleter deleter) noexcept;
 
         /**
+         * @brief Take ownership of an external data array with implicit size
+         *
+         * Calculates the size using @ref std::strlen() and calls
+         * @ref String(char*, std::size_t, Deleter).
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit String(char* data, Deleter deleter) noexcept;
+        #else
+        /* Gets ambigous when calling String{ptr, 0}. FFS, zero as null pointer
+           was deprecated in C++11 already, why is this still a problem?! */
+        template<class T> String(typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, char*>::type data, T deleter) noexcept: String{deleter, nullptr, data} {}
+        #endif
+
+        /**
          * @brief Take ownership of an immutable external data array
          *
          * Casts away the @cpp const @ce and delegates to
@@ -434,12 +448,41 @@ class CORRADE_UTILITY_EXPORT String {
         explicit String(const char* data, std::size_t size, Deleter deleter) noexcept: String{const_cast<char*>(data), size, deleter} {}
 
         /**
+         * @brief Take ownership of an external data array with implicit size
+         *
+         * Calculates the size using @ref std::strlen() and calls
+         * @ref String(const char*, std::size_t, Deleter).
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit String(const char* data, Deleter deleter) noexcept;
+        #else
+        /* Gets ambigous when calling String{ptr, 0}. FFS, zero as null pointer
+           was deprecated in C++11 already, why is this still a problem?! */
+        template<class T> String(typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, const char*>::type data, T deleter) noexcept: String{deleter, nullptr, const_cast<char*>(data)} {}
+        #endif
+
+        /**
          * @brief Taking ownership of a null pointer is not allowed
          *
          * Since the @ref String class provides a guarantee of null-terminated
          * strings, @p data *can't* be @cpp nullptr @ce.
          */
         explicit String(std::nullptr_t, std::size_t size, Deleter deleter) = delete;
+
+        /**
+         * @brief Taking ownership of a null pointer is not allowed
+         *
+         * Since the @ref String class provides a guarantee of null-terminated
+         * strings, @p data *can't* be @cpp nullptr @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit String(std::nullptr_t, Deleter deleter) = delete;
+        #else
+        /* Gets ambigous when calling String{nullptr, 0}. FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T> String(typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, std::nullptr_t>::type, T) noexcept = delete;
+        #endif
 
         /**
          * @brief Create a zero-initialized string of given size
@@ -1127,6 +1170,11 @@ class CORRADE_UTILITY_EXPORT String {
         char* release();
 
     private:
+        /* Delegated to from the (templated) String(char*, Deleter). Argument
+           order shuffled together with a null parameter to avoid accidental
+           ambiguous overloads. */
+        explicit String(Deleter deleter, std::nullptr_t, char* data) noexcept;
+
         CORRADE_UTILITY_LOCAL void construct(Corrade::NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();

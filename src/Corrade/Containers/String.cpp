@@ -223,6 +223,18 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     _large.deleter = deleter;
 }
 
+String::String(void(*deleter)(char*, std::size_t), std::nullptr_t, char* const data) noexcept: String{
+    data,
+    /* If data is null, strlen() would crash before reaching our assert inside
+       the delegated-to constructor */
+    #ifndef CORRADE_NO_ASSERT
+    data ? std::strlen(data) : 0,
+    #else
+    std::strlen(data),
+    #endif
+    deleter
+} {}
+
 String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
