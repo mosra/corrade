@@ -48,7 +48,7 @@ constexpr const unsigned int Constants[4] = { 0x5A827999,
                                               0x8F1BBCDC,
                                               0xCA62C1D6 };
 
-unsigned int leftrotate(unsigned int data, unsigned int shift) {
+CORRADE_ALWAYS_INLINE unsigned int leftrotate(unsigned int data, unsigned int shift) {
     return data << shift | data >> (32 - shift);
 }
 
@@ -163,7 +163,7 @@ void Sha1::processChunk(const char* data) {
         _digest[3],
         _digest[4]
     };
-    unsigned int f, constant, temp;
+    unsigned int f, temp;
 
     /* Main loop */
     for(int i = 0; i < 20; ++i) {
