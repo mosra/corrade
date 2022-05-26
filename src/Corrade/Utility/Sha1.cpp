@@ -166,23 +166,43 @@ void Sha1::processChunk(const char* data) {
     unsigned int f, constant, temp;
 
     /* Main loop */
-    for(int i = 0; i != 80; ++i) {
-        if(i < 20) {
-            f = d[3] ^ (d[1] & (d[2] ^ d[3]));
-            constant = Constants[0];
-        } else if(i < 40) {
-            f = d[1] ^ d[2] ^ d[3];
-            constant = Constants[1];
-        } else if(i < 60) {
-            f = (d[1] & d[2]) | (d[3] & (d[1] | d[2]));
-            constant = Constants[2];
-        } else {
-            f = d[1] ^ d[2] ^ d[3];
-            constant = Constants[3];
-        }
+    for(int i = 0; i < 20; ++i) {
+        f = d[3] ^ (d[1] & (d[2] ^ d[3]));
 
-        temp =
-            leftrotate(d[0], 5) + f + d[4] + constant + extended[i];
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[0] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 20; i < 40; ++i) {
+        f = d[1] ^ d[2] ^ d[3];
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[1] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 40; i < 60; ++i) {
+        f = (d[1] & d[2]) | (d[3] & (d[1] | d[2]));
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[2] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 60; i != 80; ++i) {
+        f = d[1] ^ d[2] ^ d[3];
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[3] + extended[i];
         d[4] = d[3];
         d[3] = d[2];
         d[2] = leftrotate(d[1], 30);
