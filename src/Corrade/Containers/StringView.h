@@ -316,7 +316,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         /**
          * @brief Construct from an @ref ArrayView
          *
-         * The resulting view has the same size as @p other, by default no
+         * The resulting view has the same size as @p data, by default no
          * null-termination is assumed.
          */
         /* Not constexpr/inline to avoid header dependency on ArrayView.h */
@@ -370,8 +370,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * The resulting view has the same size as this string @ref size() ---
          * the null terminator, if any, is not counted into it.
          */
-        operator ArrayView<T>() const noexcept;
-        operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept; /**< @overload */
+        /*implicit*/ operator ArrayView<T>() const noexcept;
+        /*implicit*/ operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept; /**< @overload */
 
         /** @todo convert mutable to const ArrayView, how to do without having
             to do it via a template (and thus including ArrayView?) */
