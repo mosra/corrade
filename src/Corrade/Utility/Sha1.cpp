@@ -156,9 +156,14 @@ void Sha1::processChunk(const char* data) {
         extended[i] = leftrotate((extended[i-3] ^ extended[i-8] ^ extended[i-14] ^ extended[i-16]), 1);
 
     /* Initialize value for this chunk */
-    unsigned int d[5];
+    unsigned int d[5]{
+        _digest[0],
+        _digest[1],
+        _digest[2],
+        _digest[3],
+        _digest[4]
+    };
     unsigned int f, constant, temp;
-    std::copy(_digest, _digest+5, d);
 
     /* Main loop */
     for(int i = 0; i != 80; ++i) {
