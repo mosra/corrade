@@ -120,8 +120,8 @@ Sha1::Digest Sha1::digest() {
     _bufferSize += 8;
 
     /* Process remaining chunks */
-    for(std::size_t i = 0; i != _bufferSize/64; ++i) {
-        processChunk(_buffer+i*64);
+    for(std::size_t i = 0; i != _bufferSize; i += 64) {
+        processChunk(_buffer + i);
     }
 
     /* Convert digest from big endian */
