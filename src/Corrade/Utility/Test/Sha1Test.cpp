@@ -45,6 +45,8 @@ struct Sha1Test: TestSuite::Tester {
     void iterative();
     void iterativeSecondEmpty();
     void reuse();
+
+    void benchmark();
 };
 
 Sha1Test::Sha1Test() {
@@ -58,6 +60,8 @@ Sha1Test::Sha1Test() {
 
     addTests({&Sha1Test::iterativeSecondEmpty,
               &Sha1Test::reuse});
+
+    addBenchmarks({&Sha1Test::benchmark}, 10);
 }
 
 void Sha1Test::emptyString() {
@@ -131,6 +135,17 @@ void Sha1Test::reuse() {
     /* Filling again, it gives the same output */
     hasher << std::string{String.data(), String.size()};
     CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
+}
+
+void Sha1Test::benchmark() {
+    Containers::Array<char> randomData{NoInit, 128*1024};
+
+    Sha1 hasher;
+    CORRADE_BENCHMARK(25) {
+        hasher << Containers::ArrayView<const char>{randomData};
+    }
+
+    CORRADE_VERIFY(!hasher.digest().hexString().empty());
 }
 
 }}}}
