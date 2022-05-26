@@ -131,7 +131,7 @@ Sha1::Digest Sha1::digest() {
     const Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    std::copy(InitialDigest, InitialDigest+5, _digest);
+    std::memcpy(_digest, InitialDigest, sizeof(InitialDigest));
     _dataSize = 0;
     _bufferSize = 0;
     return d;
