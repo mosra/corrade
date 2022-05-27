@@ -26,7 +26,7 @@
 
 #include <sstream>
 
-#if defined(TEST_DEBUG_ASSERT) && !defined(CORRADE_IS_DEBUG_BUILD)
+#if defined(TEST_DEBUG_ASSERT) && !defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)
 /* for debug asserts do nothing, they should be disabled in release builds */
 #elif !defined(CORRADE_NO_ASSERT)
 #define CORRADE_NO_ASSERT
