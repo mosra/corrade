@@ -113,8 +113,6 @@ commands:
         command: |
           sudo apt update
           sudo apt install -y ninja-build
-          # CMake should be installed, check what version it is
-          cmake --version
 
   install-gcc-4_8:
     steps:
@@ -171,13 +169,16 @@ commands:
     parameters:
       version:
         type: string
+      sudo:
+        type: string
+        default: ""
     steps:
     - run:
         name: Install CMake << parameters.version >>
         command: |
           version_short=<< parameters.version >>
           version_short="${version_short%.*}"
-          apt install -y wget
+          << parameters.sudo >> apt install -y wget
           mkdir -p $HOME/cmake && cd $HOME/cmake
           wget -nc --no-check-certificate https://cmake.org/files/v$version_short/cmake-<< parameters.version >>-Linux-x86_64.tar.gz
           tar --strip-components=1 -xzf cmake-<< parameters.version >>-Linux-x86_64.tar.gz
@@ -353,6 +354,11 @@ jobs:
     executor: android-29
     steps:
     - install-base-android
+    # We need ctest --timeout for flaky adb push, which is since 3.17. The
+    # image had 3.16.3 by default, so it's just a small jump.
+    - install-cmake:
+        version: "3.17.5"
+        sudo: sudo
     - build:
         script: android-x86.sh
 
