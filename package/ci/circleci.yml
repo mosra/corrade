@@ -113,6 +113,8 @@ commands:
         command: |
           sudo apt update
           sudo apt install -y ninja-build
+          # CMake should be installed, check what version it is
+          cmake --version
 
   install-gcc-4_8:
     steps:
