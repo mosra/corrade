@@ -1767,6 +1767,16 @@ void PathTest::executableLocationUtf8() {
 
 void PathTest::homeDirectory() {
     Containers::Optional<Containers::String> homeDirectory = Path::homeDirectory();
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Inverse of the check in homeDirectoryInvalid() below, see there for more
+       information */
+    if(!std::getenv("HOMEPATH") || !Path::exists(std::getenv("HOMEPATH"))) {
+        CORRADE_VERIFY(!homeDirectory);
+        CORRADE_SKIP("%HOMEPATH% doesn't exist, can't test.");
+    }
+    #endif
+
     CORRADE_VERIFY(homeDirectory);
     CORRADE_VERIFY(*homeDirectory);
     CORRADE_INFO("Home directory found as:" << homeDirectory);
@@ -1813,8 +1823,37 @@ void PathTest::homeDirectory() {
 }
 
 void PathTest::homeDirectoryInvalid() {
-    /* Could be tested by temporarily removing $HOME, but ... ahem */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* The query fails for system accounts, and system accounts apparently have
+       no access to environment, so checking if %HOMEPATH% is missing:
+       https://serverfault.com/questions/292040/win-service-running-under-localservice-account-cannot-access-environment-variabl
+
+       Additionally this can be reproduced by temporarily removing / renaming
+       the user directory, such as with `ren C:\Users\appveyor\Documents Doc`.
+       Then the environment variable is set, but the query fails. */
+    /** @todo Note that, however, %HOMEPATH% returns just `C:/Users/appveyor`,
+        so this check *isn't* enough. And there's no alternative way to query
+        the location other than what homeDirectory() itself does, so... */
+    if(std::getenv("HOMEPATH") && Path::exists(std::getenv("HOMEPATH")))
+        CORRADE_SKIP("%HOMEPATH% exists, can't test.");
+
+    Containers::String out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::homeDirectory());
+    /** @todo It produces 1008 (An attempt was made to reference a token that
+        does not exist.) for the second failure, but the first failure in
+        homeDirectory() above is error 2 (The system cannot find the file
+        specified.). Am I triggering some other error in between, or does the
+        first lookup trigger some OS-internal update that makes it fail earlier
+        or differently the second time? */
+    CORRADE_COMPARE_AS(out,
+        "Utility::Path::homeDirectory(): can't retrieve FOLDERID_Documents: error 1008 (",
+        TestSuite::Compare::StringHasPrefix);
+
+    #else
+    /* On Unix could be tested by temporarily removing $HOME, but ... ahem */
     CORRADE_SKIP("Not sure how to test this.");
+    #endif
 }
 
 void PathTest::homeDirectoryUtf8() {
@@ -1823,6 +1862,16 @@ void PathTest::homeDirectoryUtf8() {
 
 void PathTest::configurationDirectory() {
     Containers::Optional<Containers::String> configurationDirectory = Path::configurationDirectory("Corrade");
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Inverse of the check in configurationDirectoryInvalid() below, see there
+       for more information */
+    if(!std::getenv("APPDATA") || !Path::exists(std::getenv("APPDATA"))) {
+        CORRADE_VERIFY(!configurationDirectory);
+        CORRADE_SKIP("%APPDATA% doesn't exist, can't test.");
+    }
+    #endif
+
     CORRADE_VERIFY(configurationDirectory);
     CORRADE_VERIFY(*configurationDirectory);
     CORRADE_INFO("Configuration dir found as:" << configurationDirectory);
@@ -1886,9 +1935,35 @@ void PathTest::configurationDirectory() {
 }
 
 void PathTest::configurationDirectoryInvalid() {
-    /* Could be tested by temporarily removing $XDG_CONFIG_HOME and $HOME, but
-       ... ahem */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* The query fails for system accounts, and system accounts apparently have
+       no access to environment, so checking if %HOMEPATH% is missing:
+       https://serverfault.com/questions/292040/win-service-running-under-localservice-account-cannot-access-environment-variabl
+
+       Additionally, similarly to homeDirectoryInvalid(), this can be
+       *theoretically* reproduced by temporarily removing / renaming the dir,
+       such as with `ren C:/Users/appveyor/AppData/Roaming Roam` (although in
+       my test that failed with "Access denied"). Then the environment variable
+       is set, but the query fails. */
+    if(std::getenv("APPDATA") && Path::exists(std::getenv("APPDATA")))
+        CORRADE_SKIP("%APPDATA% exists, can't test.");
+
+    Containers::String out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::configurationDirectory("Corrade"));
+    /** @todo Assuming the same repro as with homeDirectoryInvalid(), i.e., a
+        rename, it should also produce an error 1008 for the second failure,
+        but the first failure in configurationDirectory() above would be error
+        2. Like with homeDirectory() failing, figure out what's going on. */
+    CORRADE_COMPARE_AS(out,
+        "Utility::Path::configurationDirectory(): can't retrieve FOLDERID_RoamingAppData: error 1008 (",
+        TestSuite::Compare::StringHasPrefix);
+
+    #else
+    /* On Unix could be tested by temporarily removing $XDG_CONFIG_HOME and
+       $HOME, but ... ahem */
     CORRADE_SKIP("Not sure how to test this.");
+    #endif
 }
 
 void PathTest::configurationDirectoryUtf8() {

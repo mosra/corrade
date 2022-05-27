@@ -706,8 +706,8 @@ Containers::Optional<Containers::String> homeDirectory() {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    wchar_t* h = nullptr;
-    Containers::ScopeGuard guard{h,
+    wchar_t* path = nullptr;
+    Containers::ScopeGuard guard{path,
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* MSVC 2015 is unable to cast the parameter for CoTaskMemFree */
         [](wchar_t* path){ CoTaskMemFree(path); }
@@ -715,10 +715,15 @@ Containers::Optional<Containers::String> homeDirectory() {
         CoTaskMemFree
         #endif
     };
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, nullptr, &h) == S_OK);
-    return fromNativeSeparators(Unicode::narrow(h));
+    /* This could fail for example with E_INVALIDARG for system accounts
+       without a home folder */
+    if(SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, nullptr, &path) != S_OK) {
+        Error err;
+        err << "Utility::Path::homeDirectory(): can't retrieve FOLDERID_Documents:";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return {};
+    }
+    return fromNativeSeparators(Unicode::narrow(path));
 
     /* Other */
     #else
@@ -768,11 +773,12 @@ Containers::Optional<Containers::String> configurationDirectory(const Containers
         CoTaskMemFree
         #endif
     };
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, nullptr, &path) == S_OK);
-    if(path[0] == L'\0') {
-        Error{} << "Utility::Path::configurationDirectory(): can't retrieve CSIDL_APPDATA";
+    /* This could fail for example with E_INVALIDARG for system accounts
+       without a home folder */
+    if(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, nullptr, &path) != S_OK) {
+        Error err;
+        err << "Utility::Path::configurationDirectory(): can't retrieve FOLDERID_RoamingAppData:";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return {};
     }
     return join(fromNativeSeparators(Unicode::narrow(path)), applicationName);

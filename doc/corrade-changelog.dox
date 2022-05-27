@@ -629,6 +629,11 @@ namespace Corrade {
     @relativeref{Utility::Path,configurationDirectory()} to not use an old
     Windows API that tends to prefer OneDrive over local user directories
     (see [mosra/corrade#144](https://github.com/mosra/corrade/pull/144))
+-   @ref Utility::Path::homeDirectory() and
+    @relativeref{Utility::Path,configurationDirectory()} now gracefully handle
+    the (very rare) cases where the directories aren't available on Windows due
+    to the user having no profile (see [mosra/corrade#132](https://github.com/mosra/corrade/issues/132)
+    and [mosra/corrade#141](https://github.com/mosra/corrade/pull/141))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable
     array utils, @ref Containers::Optional, @ref Containers::Pointer and
     @ref Containers::StaticArray where using @cpp T{b} @ce or
