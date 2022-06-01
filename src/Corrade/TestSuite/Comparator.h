@@ -110,6 +110,23 @@ CORRADE_TESTSUITE_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, Compa
 /** @debugoperatorenum{ComparisonStatusFlags} */
 CORRADE_TESTSUITE_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ComparisonStatusFlags value);
 
+namespace Implementation {
+
+class CORRADE_TESTSUITE_EXPORT ComparatorBase {
+    public:
+        explicit ComparatorBase(): actualValue{}, expectedValue{} {}
+
+        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, Containers::StringView path);
+
+    protected:
+        void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected, void(*printer)(Utility::Debug&, const void*));
+
+        const void* actualValue;
+        const void* expectedValue;
+};
+
+}
+
 /**
 @brief Default comparator implementation
 
@@ -202,10 +219,8 @@ In the above case, the message will look for example like this:
 
 @include testsuite-save-diagnostic.ansi
 */
-template<class T> class Comparator {
+template<class T> class Comparator: public Implementation::ComparatorBase {
     public:
-        explicit Comparator();
-
         /**
          * @brief Compare two values
          *
@@ -230,6 +245,8 @@ template<class T> class Comparator {
          */
         void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected);
 
+        /* Defined in the base class already */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         /**
          * @brief Save a diagnostic
          *
@@ -247,19 +264,9 @@ template<class T> class Comparator {
          * (and the function not being called at all if
          * @ref ComparisonStatusFlag::Diagnostic is not present as well).
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
         void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, Containers::StringView path);
-        #else
-        /* using const& to avoid having to include StringView.h */
-        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, const Containers::StringView& path);
         #endif
-
-    private:
-        const T* actualValue;
-        const T* expectedValue;
 };
-
-template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
 
 template<class T> ComparisonStatusFlags Comparator<T>::operator()(const T& actual, const T& expected) {
     if(actual == expected) return {};
@@ -269,17 +276,12 @@ template<class T> ComparisonStatusFlags Comparator<T>::operator()(const T& actua
     return ComparisonStatusFlag::Failed;
 }
 
-template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) {
-    CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
-    out << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
-      << *actualValue << Utility::Debug::newline << "        but expected\n       " << *expectedValue;
+template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected) {
+    Implementation::ComparatorBase::printMessage(status, out, actual, expected,
+        [](Utility::Debug& out, const void* value) {
+            out << *static_cast<const T*>(value);
+        });
 }
-
-/* LCOV_EXCL_START */
-template<class T> void Comparator<T>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, const Containers::StringView&) {
-    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-}
-/* LCOV_EXCL_STOP */
 
 namespace Implementation {
 
