@@ -4,9 +4,9 @@ orbs:
   codecov: codecov/codecov@1.1.1
 
 executors:
-  ubuntu-16_04:
+  ubuntu-18_04:
     docker:
-    - image: ubuntu:xenial-20201014
+    - image: ubuntu:bionic-20220427
   xcode-10_3:
     macos:
       # Since 2021-09-15, images older than 10.3 are dropped by CircleCI. This
@@ -49,7 +49,8 @@ commands:
         command: |
           apt update
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
-          apt install -y ninja-build $LCOV_PACKAGES << parameters.extra >>
+          # libidn11 needed by CMake
+          apt install -y ninja-build libidn11 $LCOV_PACKAGES << parameters.extra >>
 
   install-base-linux-arm64:
     parameters:
@@ -125,45 +126,17 @@ commands:
           echo 'export CC=gcc-4.8' >> $BASH_ENV
           echo 'export CXX=g++-4.8' >> $BASH_ENV
 
-  install-clang-3_8:
+  # While we want to make sure the project builds on GCC 4.8 as certain
+  # embedded toolchains still use it, for Clang we just pick the version
+  # available in the oldest supported distro.
+  install-clang:
     steps:
     - run:
-        name: Install Clang 3.8
-        # https://askubuntu.com/questions/787383/how-to-install-llvm-3-9
-        # because the `deb` commands from https://apt.llvm.org don't work
-        #
-        # The software-properties-common need to be installed in order to have
-        # apt-add-repository. Sigh, adding a repository should be a core
-        # feature ffs!
-        #
-        # The apt-transport-https needs to be installed because
-        #  E: The method driver /usr/lib/apt/methods/https could not be found.
-        #  N: Is the package apt-transport-https installed?
-        #
-        # For some reason, CMake needs a working C compiler, so provice CC as
-        # well for the case when default gcc isn't installed.
-        #
-        # The llvm-symbolizer link needs to be set in order to have usable
-        # symbols in the output. This affects suppressions as well, meaning
-        # they won't work if the symbols are not resolvable. It's not enough to
-        # just `export ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.8`
-        # because it then complains that
-        #
-        #   External symbolizer path is set to '/usr/bin/llvm-symbolizer-3.8'
-        #   which isn't a known symbolizer. Please set the path to the
-        #   llvm-symbolizer binary or other known tool.
-        #
-        # Probably because because it detects tool type based on the filename?
-        # Ugh.
+        name: Install Clang
         command: |
-          apt install -y software-properties-common apt-transport-https wget
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-          apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main"
-          apt update
-          apt install -y clang-3.8
-          echo 'export CC=clang-3.8' >> $BASH_ENV
-          echo 'export CXX=clang++-3.8' >> $BASH_ENV
-          ln -s /usr/bin/llvm-symbolizer{-3.8,}
+          apt install -y clang
+          echo 'export CC=clang' >> $BASH_ENV
+          echo 'export CXX=clang++' >> $BASH_ENV
 
   install-cmake:
     parameters:
@@ -223,7 +196,7 @@ commands:
 
 jobs:
   linux:
-    executor: ubuntu-16_04
+    executor: ubuntu-18_04
     environment:
       CMAKE_CXX_FLAGS: --coverage
       LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
@@ -255,7 +228,7 @@ jobs:
     - lcov
 
   linux-static:
-    executor: ubuntu-16_04
+    executor: ubuntu-18_04
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       # https://stackoverflow.com/questions/53648244/specifying-the-string-value-yes-in-a-yaml-property
@@ -274,7 +247,7 @@ jobs:
     - lcov
 
   linux-nondeprecated:
-    executor: ubuntu-16_04
+    executor: ubuntu-18_04
     environment:
       # STUPID yml interprets unquoted OFF as a boolean
       BUILD_DEPRECATED: "OFF"
@@ -290,13 +263,13 @@ jobs:
         script: unix-desktop.sh
 
   linux-sanitizers:
-    executor: ubuntu-16_04
+    executor: ubuntu-18_04
     environment:
       CMAKE_CXX_FLAGS: -fsanitize=address
       CONFIGURATION: Debug
     steps:
     - install-base-linux
-    - install-clang-3_8
+    - install-clang
     - install-cmake:
         version: "3.4.3"
     - make-expected-linux-dirs
@@ -304,13 +277,13 @@ jobs:
         script: unix-desktop.sh
 
   linux-threadsanitizer:
-    executor: ubuntu-16_04
+    executor: ubuntu-18_04
     environment:
       CMAKE_CXX_FLAGS: -fsanitize=thread
       CONFIGURATION: Debug
     steps:
     - install-base-linux
-    - install-clang-3_8
+    - install-clang
     - install-cmake:
         version: "3.4.3"
     - make-expected-linux-dirs
