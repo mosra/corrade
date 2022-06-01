@@ -132,11 +132,28 @@ commands:
   install-clang:
     steps:
     - run:
+        # For some reason, CMake needs a working C compiler, so provice CC as
+        # well for the case when default gcc isn't installed.
+        #
+        # The llvm-symbolizer link needs to be set in order to have usable
+        # symbols in the output. This affects suppressions as well, meaning
+        # they won't work if the symbols are not resolvable. It's not enough to
+        # just `export ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-6.0`
+        # because it then complains that
+        #
+        #   External symbolizer path is set to '/usr/bin/llvm-symbolizer-6.0'
+        #   which isn't a known symbolizer. Please set the path to the
+        #   llvm-symbolizer binary or other known tool.
+        #
+        # Probably because because it detects tool type based on the filename?
+        # Ugh.
         name: Install Clang
         command: |
           apt install -y clang
           echo 'export CC=clang' >> $BASH_ENV
           echo 'export CXX=clang++' >> $BASH_ENV
+          ls -l /usr/bin/llvm-symbolizer-6.0
+          ln -s /usr/bin/llvm-symbolizer{-6.0,}
 
   install-cmake:
     parameters:
