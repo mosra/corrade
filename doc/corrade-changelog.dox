@@ -322,6 +322,10 @@ namespace Corrade {
     @ref Containers::arrayAppend(Array<T>&, std::initializer_list<T>) was not
     correctly propagating an explicit allocator argument, causing the array to
     be always reallocated using the implicit one
+-   @ref Utility::Path::libraryLocation() documentation now mentions caveats
+    related to position-independent code on Unix platforms and the
+    corresponding test was fixed to ensure the preconditions are met. See also
+    [mosra/corrade#135](https://github.com/mosra/corrade/issues/135).
 -   @ref Utility::Path::list() was leaking the file handle on Windows (see
     [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable

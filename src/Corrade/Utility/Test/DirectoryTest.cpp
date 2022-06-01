@@ -1019,15 +1019,7 @@ void DirectoryTest::libraryLocation() {
     CORRADE_VERIFY(!libraryLocation.empty());
 
     {
-        /* https://sourceware.org/bugzilla/show_bug.cgi?id=20292 probably?
-           doesn't seem like that, but couldn't find anything else in the
-           changelog that would be relevant */
-        #ifdef __GLIBC__
-        #if __GLIBC__*100 + __GLIBC_MINOR__ < 225
-        CORRADE_EXPECT_FAIL("glibc < 2.25 returns executable location from dladdr()");
-        #endif
         CORRADE_VERIFY(libraryLocation != Directory::executableLocation());
-        #endif
 
         /* There should be a TestSuite library next to this one */
         const std::string testSuiteLibraryName =

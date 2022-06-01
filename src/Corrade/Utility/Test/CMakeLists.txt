@@ -262,6 +262,11 @@ corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
         PathTestFilesUtf8/šňůra/dummy
         PathTestFilesUtf8/šňůra/klíče
         PathTestFilesUtf8/hýždě)
+if(CORRADE_TARGET_UNIX)
+    # Without -fPIE libraryLocation() may sometimes return the executable
+    # location and not library location. See its docs for more information.
+    target_compile_options(UtilityPathTest PRIVATE -fPIE)
+endif()
 target_include_directories(UtilityPathTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
@@ -399,5 +404,10 @@ if(CORRADE_BUILD_DEPRECATED)
             PathTestFilesSymlink/file-symlink
             PathTestFilesUtf8/šňůra/dummy
             PathTestFilesUtf8/hýždě)
+    if(CORRADE_TARGET_UNIX)
+        # Without -fPIE libraryLocation() may sometimes return the executable
+        # location and not library location. See its docs for more information.
+        target_compile_options(UtilityDirectoryTest PRIVATE -fPIE)
+    endif()
     target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()

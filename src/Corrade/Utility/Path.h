@@ -299,6 +299,21 @@ resolvable, prints a message to @ref Error and returns @ref Containers::NullOpt.
 
 Returned value is encoded in UTF-8, on Windows it's first converted from a
 UTF-16 representation using @ref Unicode::narrow().
+
+@m_class{m-block m-warning}
+
+@par Calling from an executable on Unix platforms
+    On Unix platforms, when this function is called from the final executable
+    (or a static library linked directly to the final executable), the returned
+    location may be of the executable itself rather than to the actual shared
+    library the pointer comes from. Compile the executable with `-fPIE` (or the
+    static library with `-fPIC`) to ensure the pointer gets resolved properly.
+    See the BUGS section of the [dladdr() man page](https://man.archlinux.org/man/dladdr.3#BUGS)
+    for more information.
+@par
+    This problem doesn't happen when called from a shared library, as shared
+    libraries are commonly compiled with `-fPIC` enabled.
+
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
 */
