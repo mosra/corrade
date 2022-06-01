@@ -114,15 +114,13 @@ namespace Implementation {
 
 class CORRADE_TESTSUITE_EXPORT ComparatorBase {
     public:
-        explicit ComparatorBase(): actualValue{}, expectedValue{} {}
-
-        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, Containers::StringView path);
+        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, Containers::StringView path); // TODO why even this??
 
     protected:
-        void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected, void(*printer)(Utility::Debug&, const void*));
+        void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected, void(*printer)(Utility::Debug&, const void*)) const;
 
-        const void* actualValue;
-        const void* expectedValue;
+        const void* actualValue{};
+        const void* expectedValue{};
 };
 
 }
@@ -276,7 +274,7 @@ template<class T> ComparisonStatusFlags Comparator<T>::operator()(const T& actua
     return ComparisonStatusFlag::Failed;
 }
 
-template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected) {
+template<class T> void Comparator<T>::printMessage(const ComparisonStatusFlags status, Utility::Debug& out, const char* const actual, const char* const expected) {
     Implementation::ComparatorBase::printMessage(status, out, actual, expected,
         [](Utility::Debug& out, const void* value) {
             out << *static_cast<const T*>(value);

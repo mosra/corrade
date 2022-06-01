@@ -60,7 +60,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const ComparisonStatusFlags va
 
 namespace Implementation {
 
-void ComparatorBase::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* const actual, const char* const expected, void(*printer)(Utility::Debug&, const void*)) {
+void ComparatorBase::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* const actual, const char* const expected, void(*printer)(Utility::Debug&, const void*)) const {
     CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
     out << "Values" << actual << "and" << expected << "are not the same, actual is\n       ";
     printer(out, actualValue);
