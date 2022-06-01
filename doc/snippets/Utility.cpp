@@ -381,7 +381,7 @@ Containers::StridedArrayView2D<T> destination = DOXYGEN_ELLIPSIS({});
 /* Y-flip the pixels into a destination */
 Utility::copy(pixels.flipped<0>(), destination);
 
-/* Y.flip the pixels in-place */
+/* Y-flip the pixels in-place */
 Utility::flipInPlace<0>(pixels);
 /* [Algorithms-flipInPlace] */
 }
