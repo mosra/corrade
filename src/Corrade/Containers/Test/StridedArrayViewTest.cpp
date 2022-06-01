@@ -2075,24 +2075,11 @@ void StridedArrayViewTest::convertFromExternalView() {
     CORRADE_COMPARE(ca.size, 10);
 
     {
-        /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang
-           3.8 (Travis ASan build). ¯\_(ツ)_/¯ */
-        #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
-        constexpr
-        #endif
-        ConstStridedArrayView1Di cb = ca;
+        constexpr ConstStridedArrayView1Di cb = ca;
         CORRADE_COMPARE(cb.data(), Array10);
         CORRADE_COMPARE(cb.size(), 10);
     } {
-        /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang
-           3.8 (Travis ASan build). ¯\_(ツ)_/¯. Have to use const to make the
-           type check pass. */
-        #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
-        constexpr
-        #else
-        const
-        #endif
-        auto cb = stridedArrayView(ca);
+        constexpr auto cb = stridedArrayView(ca);
         CORRADE_VERIFY(std::is_same<decltype(cb), const ConstStridedArrayView1Di>::value);
         CORRADE_COMPARE(cb.data(), Array10);
         CORRADE_COMPARE(cb.size(), 10);

@@ -682,7 +682,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     arrayReserve(json._state->strings, escapedStringCount);
 
     /* All good */
-    /* GCC 4.8 and Clang 3.8 need a bit of help here */
+    /* GCC 4.8 needs a bit of help here */
     return Containers::optional(std::move(json));
 }
 

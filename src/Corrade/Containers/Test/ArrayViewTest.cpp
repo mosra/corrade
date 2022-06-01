@@ -665,32 +665,15 @@ void ArrayViewTest::convertExternalView() {
     CORRADE_COMPARE(ca.data, Array13);
     CORRADE_COMPARE(ca.size, 13);
 
-    /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
-       (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
-    constexpr
-    #endif
-    ConstArrayView cb = ca;
+    constexpr ConstArrayView cb = ca;
     CORRADE_COMPARE(cb.data(), Array13);
     CORRADE_COMPARE(cb.size(), 13);
 
-    /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
-       (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
-    constexpr
-    #endif
-    ConstIntView cc = cb;
+    constexpr ConstIntView cc = cb;
     CORRADE_COMPARE(cc.data, Array13);
     CORRADE_COMPARE(cc.size, 13);
 
-    /* Broken on Clang 3.8-svn on Apple. The same works with stock Clang 3.8
-       (Travis ASan build). ¯\_(ツ)_/¯ */
-    #if !defined(CORRADE_TARGET_APPLE_CLANG) || __clang_major__*100 + __clang_minor__ > 703
-    constexpr
-    #else
-    const
-    #endif
-    auto cd = arrayView(cc);
+    constexpr auto cd = arrayView(cc);
     CORRADE_VERIFY(std::is_same<decltype(cd), const Containers::ArrayView<const int>>::value);
     CORRADE_COMPARE(cd.data(), Array13);
     CORRADE_COMPARE(cd.size(), 13);

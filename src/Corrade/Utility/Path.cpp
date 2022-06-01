@@ -822,7 +822,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     if(flags >= ListFlag::SortDescending && !(flags >= ListFlag::SortAscending))
         std::reverse(list.begin(), list.end());
 
-    /* GCC 4.8 and Clang 3.8 need extra help here */
+    /* GCC 4.8 needs extra help here */
     return Containers::optional(std::move(list));
 
     /* Other not implemented */
@@ -962,7 +962,7 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
             arrayRemoveSuffix(out, chunkSize + extra - count);
         } while(count);
 
-        /* GCC 4.8 and Clang 3.8 need extra help here */
+        /* GCC 4.8 needs extra help here */
         return Containers::optional(std::move(out));
     }
 

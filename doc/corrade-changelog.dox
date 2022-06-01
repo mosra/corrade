@@ -271,6 +271,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
+-   The oldest supported Clang version is now 6.0 (available on Ubuntu 18.04),
+    or equivalently Apple Clang 10.0 (Xcode 10). Oldest supported GCC version
+    is still 4.8.
 -   The `-o` option in the @ref acme utility now treats the argument as a file
     if it doesn't exist and a directory only if it exists and is a directory
     (see [mosra/corrade#90](https://github.com/mosra/corrade/issues/90))

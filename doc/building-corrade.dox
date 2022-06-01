@@ -37,8 +37,9 @@ namespace Corrade {
 Minimal set of tools required for building and using Corrade is:
 
 -   C++ compiler with good C++11 support. Compilers which are tested to have
-    everything needed are **GCC** >= 4.8.1, **Clang** >= 3.3 and **MSVC**
-    >= 2015. For Windows you can also use **Clang-CL** or **MinGW-w64**.
+    everything needed are **GCC** >= 4.8.1, **Clang** >= 6 (or equivalently
+    **Apple Clang** >= 10) and **MSVC** >= 2015. For Windows you can also use
+    **Clang-CL** or **MinGW-w64**.
 -   **CMake** >= 3.4
 
 CMake is not a strict requirement, it's also possible to use Corrade with

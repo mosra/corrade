@@ -122,19 +122,7 @@ namespace Implementation {
 /* Vaguely inspired by the Utility::IsIterable type trait */
 template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::ArrayView<typename View::Type> arrayViewTypeFor(T&&);
 template<class T> static Containers::ArrayView<T> arrayViewTypeFor(const Containers::ArrayView<T>&);
-template<std::size_t size, class T
-    /* If T is an array of a non-builtin type, Clang 3.8 thinks it's a
-       non-trivially-copyable type, failing the assert in copy<T>() above. If
-       this overload gets disabled, the copy instead picks the ArrayView<void>
-       overload, where ArrayView<void> constructor doesn't check that T is
-       trivially copyable (even though it should!). Existing code relies on
-       this behavior already, but eventually the ArrayView<void> constructors
-       should get the assert as well. Tested in
-       AlgorithmsTest::copyMultiDimensionalArray(). */
-    #if defined(CORRADE_TARGET_CLANG) && __clang_major__*100 + __clang_minor__ <= 309
-    , class = typename std::enable_if<!std::is_array<T>::value>::type
-    #endif
-> static Containers::ArrayView<T> arrayViewTypeFor(T(&)[size]);
+template<std::size_t size, class T> static Containers::ArrayView<T> arrayViewTypeFor(T(&)[size]);
 template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> arrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
 
 }
