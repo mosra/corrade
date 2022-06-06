@@ -95,6 +95,10 @@ if(WITH_UTILITY) # Cyclic dependency of Containers and Utility
     add_subdirectory(Containers)
 endif()
 
+if(WITH_FILESYSTEM)
+    add_subdirectory(Filesystem)
+endif()
+
 if(WITH_INTERCONNECT)
     add_subdirectory(Interconnect)
 endif()
