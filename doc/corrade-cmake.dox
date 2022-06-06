@@ -339,11 +339,12 @@ DLLs and metadata files are put into `<debug binary install dir>` /
 platforms everything is put into `<debug library install dir>` /
 `<release library install dir>`.
 
-If the plugin interface disables plugin metadata files via
-@ref PluginManager::AbstractPlugin::pluginMetadataSuffix(), the `<metadata file>`
-can be set to @cpp "" @ce, in which case no metadata file is copied anywhere.
-Otherwise the metadata file is copied and renamed to `<plugin name>`, retaining
-its original extension.
+If `<metadata file>` is not an absolute path, it's treated as relative to
+`CMAKE_CURRENT_SOURCE_DIR`. If the plugin interface disables plugin metadata
+files via @ref PluginManager::AbstractPlugin::pluginMetadataSuffix(), the
+`<metadata file>` can be set to @cpp "" @ce, in which case no metadata file is
+copied anywhere. Otherwise the metadata file is copied and renamed to
+`<plugin name>`, retaining its original extension.
 
 @code{.cmake}
 corrade_add_plugin(<plugin name>
@@ -380,11 +381,12 @@ configuration (e.g. with `CMAKE_BUILD_TYPE` set to `Debug`) have `-d` suffix to
 make it possible to have both debug and release plugins installed alongside
 each other.
 
-If the plugin interface disables plugin metadata files via
-@ref PluginManager::AbstractPlugin::pluginMetadataSuffix(), the `<metadata file>`
-can be set to @cpp "" @ce, in which case no metadata file is used. Otherwise
-the metadata file is bundled and renamed to `<plugin name>`, retaining its
-original extension.
+If `<metadata file>` is not an absolute path, it's treated as relative to
+`CMAKE_CURRENT_SOURCE_DIR`. If the plugin interface disables plugin metadata
+files via @ref PluginManager::AbstractPlugin::pluginMetadataSuffix(), the
+`<metadata file>` can be set to @cpp "" @ce, in which case no metadata file is
+used. Otherwise the metadata file is bundled and renamed to `<plugin name>`,
+retaining its original extension.
 
 @code{.cmake}
 corrade_add_static_plugin(<plugin name>

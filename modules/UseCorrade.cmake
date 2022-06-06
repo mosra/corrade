@@ -613,7 +613,7 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     # Force IDEs display also the resource files in project view
     if(metadata_file)
         get_filename_component(metadata_file_suffix ${metadata_file} EXT)
-        add_custom_target(${plugin_name}-metadata SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+        add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
 
         # Copy metadata next to the binary so tests and CMake subprojects can
         # use it as well
@@ -621,8 +621,9 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
             # This would be nice to Ninja, but BYPRODUCTS don't support generator
             # expressions right now (last checked: CMake 3.16)
             #BYPRODUCTS $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${name}-metadata)
+            COMMAND ${CMAKE_COMMAND} -E copy ${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
+            DEPENDS ${metadata_file} ${name}-metadata
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif()
 
     # Install it somewhere, unless that's explicitly not wanted
@@ -672,7 +673,8 @@ function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
     if(metadata_file)
         get_filename_component(metadata_file_suffix ${metadata_file} EXT)
-        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}${metadata_file_suffix}")
+        get_filename_component(metadata_file_absolute ${metadata_file} ABSOLUTE)
+        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${metadata_file_absolute}\"\nalias=${plugin_name}${metadata_file_suffix}")
         corrade_add_resource(${plugin_name} "${resource_file}")
     else()
         file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n")

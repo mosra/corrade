@@ -192,6 +192,14 @@ namespace Corrade {
 -   @ref Containers::StridedArrayView can now be used in STL algorithms such as
     @ref std::lower_bound() if you include @ref Corrade/Containers/StridedArrayViewStl.h
 
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+
+-   The @cmake corrade_add_plugin() @ce and
+    @cmake corrade_add_static_plugin() @ce
+    @ref corrade-cmake-add-plugin "CMake macros" now allow the metadata file
+    path to be absolute as well, which is useful when the file has the contents
+    generated.
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   Added a @ref TestSuite::Tester::testName() getter, used by Magnum Vulkan

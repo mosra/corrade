@@ -60,13 +60,14 @@ corrade_add_test(PluginManagerManagerTest
     AbstractFood.cpp
     LIBRARIES
         CorradePluginManagerTestLib
-        Canary CustomSuffixStatic DisabledMetadataStatic)
+        Canary CustomSuffixStatic DisabledMetadataStatic
+        GeneratedMetadataStatic)
 target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     # So the plugins get properly built when building the test
     add_dependencies(PluginManagerManagerTest
         Bulldog Dog PitBull Snail
-        CustomSuffix Deletable DisabledMetadata
+        CustomSuffix Deletable DisabledMetadata GeneratedMetadataDynamic
         Doggo
         HotDog HotDogWithSnail OldBread RottenTomato
         NoPluginFinalizer NoPluginInitializer NoPluginInstancer
@@ -133,6 +134,7 @@ add_subdirectory(animals)
 add_subdirectory(init-fini)
 add_subdirectory(custom-suffix)
 add_subdirectory(disabled-metadata)
+add_subdirectory(generated-metadata)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     add_subdirectory(doggo)
     add_subdirectory(deletable)

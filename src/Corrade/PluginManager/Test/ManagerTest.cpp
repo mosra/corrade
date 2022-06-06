@@ -46,6 +46,7 @@
 #include "AbstractDeletable.h"
 #include "AbstractDisabledMetadata.h"
 #include "AbstractFood.h"
+#include "AbstractGeneratedMetadata.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
@@ -56,6 +57,7 @@ static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
     CORRADE_PLUGIN_IMPORT(CustomSuffixStatic)
     CORRADE_PLUGIN_IMPORT(DisabledMetadataStatic)
+    CORRADE_PLUGIN_IMPORT(GeneratedMetadataStatic)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test { namespace {
@@ -142,6 +144,7 @@ struct ManagerTest: TestSuite::Tester {
 
     void customSuffix();
     void disabledMetadata();
+    void generatedMetadata();
 
     void debugLoadState();
     void debugLoadStates();
@@ -230,6 +233,7 @@ ManagerTest::ManagerTest() {
 
               &ManagerTest::customSuffix,
               &ManagerTest::disabledMetadata,
+              &ManagerTest::generatedMetadata,
 
               &ManagerTest::debugLoadState,
               &ManagerTest::debugLoadStates});
@@ -1432,6 +1436,24 @@ void ManagerTest::disabledMetadata() {
         CORRADE_VERIFY(plugin);
         CORRADE_COMPARE(plugin->greet(), "Olaa!");
     }
+    #endif
+}
+
+void ManagerTest::generatedMetadata() {
+    /* The purpose here is to test that CMake corrade_add_[static_]plugin()
+       is able to consume a dynamically-generated metadata file (i.e., an
+       absolute path), instead of having a hardcoded assumption that the
+       conf file is always in CMAKE_CURRENT_SOURCE_DIR. And because I have no
+       tests for CMake code itself, it has to be tested via the C++ code. */
+
+    PluginManager::Manager<AbstractGeneratedMetadata> manager;
+
+    CORRADE_COMPARE(manager.load("GeneratedMetadataStatic"), LoadState::Static);
+    CORRADE_COMPARE(manager.metadata("GeneratedMetadataStatic")->configuration().value("generated"), "hello, I'm a CMake string for a static plugin");
+
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_COMPARE(manager.load("GeneratedMetadataDynamic"), LoadState::Loaded);
+    CORRADE_COMPARE(manager.metadata("GeneratedMetadataDynamic")->configuration().value("generated"), "hello, I'm a CMake string for a dynamic plugin");
     #endif
 }
 
