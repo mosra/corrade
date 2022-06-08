@@ -3472,7 +3472,7 @@ void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
         public:
             short& second() {
                 /* Sure, sure, GCC/Clang, but WHAT IF */
-                #ifdef CORRADE_TARGET_GCC
+                #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
                 #pragma GCC diagnostic push
                 #ifdef CORRADE_TARGET_CLANG
                 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
@@ -3488,7 +3488,7 @@ void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
             }
             const short& second() const {
                 /* Sure, sure, GCC/Clang, but WHAT IF */
-                #ifdef CORRADE_TARGET_GCC
+                #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
                 #pragma GCC diagnostic push
                 #ifdef CORRADE_TARGET_CLANG
                 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
