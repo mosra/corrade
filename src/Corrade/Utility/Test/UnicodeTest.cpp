@@ -225,7 +225,7 @@ void UnicodeTest::utf32utf8Error() {
 
 #ifdef CORRADE_TARGET_WINDOWS
 const Containers::StringView TextNarrow = "žluťoučký kůň\0hýždě"_s;
-const Containers::ArrayView<const wchar_t> TextWide = Containers::arrayView(L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b").except(1);
+const Containers::ArrayView<const wchar_t> TextWide = Containers::arrayView(L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b").exceptSuffix(1);
 
 void UnicodeTest::widen() {
     Containers::Array<wchar_t> a = Unicode::widen(TextNarrow);
