@@ -1087,7 +1087,7 @@ struct Foo {
 int main(int argc, char** argv) {
     CORRADE_RESOURCE_INITIALIZE(MyGame_RESOURCES)
 
-    DOXYGEN_ELLIPSIS(static_cast<void>(argc); static_cast<void>(argv);)
+    DOXYGEN_ELLIPSIS(static_cast<void>(argc); static_cast<void>(argv); return 0;)
 }
 /* [Resource-usage-static] */
 };
