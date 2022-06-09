@@ -42,10 +42,15 @@
    error it only emits a warning like
     warning C4003: not enough arguments for function-like macro invocation '_str2'
    which is REALLY GREAT for debugging. In 2018 they promised the preprocessor
-   will get an overhaul and there's an /experimental:preprocessor flag but
-   doing that on a library level is pure insanity so I'm instead disabling
-   this macro on MSVC altogether to avoid it accidental uses and suffering
-   https://devblogs.microsoft.com/cppblog/msvc-preprocessor-progress-towards-conformance/ */
+   will get an overhaul and there's now a /Zc:preprocessor or, on older
+   versions, a /experimental:preprocessor flag, but not even MSVC 2022 has that
+   on by default Enforcing such flag on a library level is pure insanity (same
+   as with /permissive-) so I'm instead disabling this macro on MSVC altogether
+   to avoid accidental uses and suffering.
+   https://devblogs.microsoft.com/cppblog/msvc-preprocessor-progress-towards-conformance/
+   https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview */
+/** @todo when I can be bothered testing this, enable the macro if
+    (defined(CORRADE_TARGET_MSVC) && defined(_MSVC_TRADITIONAL) && !_MSVC_TRADITIONAL) */
 #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define _CORRADE_HELPER_DEFER(m, ...) m(__VA_ARGS__)
 #endif
