@@ -83,11 +83,23 @@ void DebugStlCpp17Test::filesystemPath() {
        using the operator<<() is cheaper since it doesn't require allocating a
        string copy. */
     Debug{&out} << std::filesystem::path("/home/mosra");
-    #ifdef CORRADE_TARGET_MSVC
-    /* Quotes? Yes why not. */
-    CORRADE_COMPARE(out.str(), "\"/home/mosra\"\n");
-    #else
+    /* https://en.cppreference.com/w/cpp/filesystem/path/operator_ltltgtgt as
+       well as https://isocpp.org/files/papers/P0218r1.html (2016) says the
+       operator<< prints the path quoted. I see no practical advantage of doing
+       that (it's like if floats were printed with the `f` suffix always and
+       you couldn't get rid of that), but that's secondary. Worse is that MSVC
+       as well as MinGW follows this, while both libc++ and libstdc++ on both
+       Linux and macOS don't, causing a nasty inconsistency. The reason could
+       be that earlier proposals didn't specify this because std::quoted (from
+       C++14) was not a thing yet, such as this one from 2012:
+       https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3431.html
+
+       Nevertheless. These two comments alone are for me a serious enough
+       reason to never even bother using this library. Not even once. */
+    #if (defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_LIBSTDCXX)) && !defined(CORRADE_TARGET_WINDOWS)
     CORRADE_COMPARE(out.str(), "/home/mosra\n");
+    #else
+    CORRADE_COMPARE(out.str(), "\"/home/mosra\"\n");
     #endif
     #else
     CORRADE_SKIP("No <filesystem> header in this STL implementation.");
