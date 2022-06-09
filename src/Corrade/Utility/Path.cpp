@@ -443,9 +443,10 @@ Containers::Optional<Containers::String> libraryLocation(const void* address) {
     Dl_info info{nullptr, nullptr, nullptr, nullptr};
     if(!dladdr(address, &info)) {
         Error{} << "Utility::Path::libraryLocation(): can't get library location";
-        /* According to manpages, the dlerror is *never* available, so just
-           assert on that instead of branching */
-        CORRADE_INTERNAL_ASSERT(!dlerror());
+        /* According to manpages, the dlerror is *never* available. But
+            CORRADE_INTERNAL_ASSERT(!dlerror());
+           seems to be a bad idea, since ThreadSanitizer can trigger it when
+           address is null. Reproducible in PathTest::libraryLocationNull(). */
         return {};
     }
 
