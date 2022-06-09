@@ -25,6 +25,11 @@
 */
 
 #include <sstream>
+/* __has_include is supported since C++17, but not all C++17 claiming STL
+   implementations might have <filesystem> yet */
+#if __has_include(<filesystem>)
+#include <filesystem>
+#endif
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -32,33 +37,58 @@
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
-struct DebugStlStringViewTest: TestSuite::Tester {
-    explicit DebugStlStringViewTest();
+struct DebugStlCpp17Test: TestSuite::Tester {
+    explicit DebugStlCpp17Test();
 
-    void test();
-    void testEmpty();
+    void stringView();
+    void stringViewEmpty();
+
+    void filesystemPath();
 };
 
-DebugStlStringViewTest::DebugStlStringViewTest() {
-    addTests({&DebugStlStringViewTest::test,
-              &DebugStlStringViewTest::testEmpty});
+DebugStlCpp17Test::DebugStlCpp17Test() {
+    addTests({&DebugStlCpp17Test::stringView,
+              &DebugStlCpp17Test::stringViewEmpty,
+
+              &DebugStlCpp17Test::filesystemPath});
 }
 
 using namespace std::string_view_literals;
 
-void DebugStlStringViewTest::test() {
+void DebugStlCpp17Test::stringView() {
     std::ostringstream out;
     Debug{&out} << "hello\0world!"sv;
     CORRADE_COMPARE(out.str(), (std::string{"hello\0world!\n", 13}));
 }
 
-void DebugStlStringViewTest::testEmpty() {
+void DebugStlCpp17Test::stringViewEmpty() {
     std::ostringstream out;
     /* Empty string view should not cause any issues with data access */
     Debug{&out} << "hello" << std::string_view{} << "!";
     CORRADE_COMPARE(out.str(), "hello  !\n");
 }
 
+void DebugStlCpp17Test::filesystemPath() {
+    #if __has_include(<filesystem>)
+    std::ostringstream out;
+    /* This type is very special because it has a begin() / end() that return
+       std::filesystem::path *again*, so Debug helpfully assumes it's a nested
+       iterable container and then dies on infinite recursion.
+
+       Instead, it has to be treated as string-like, but then there's an
+       ambiguity between an implicit conversion to std::string and a builtin
+       iostream operator<<. For that the operator<<(Debug&, const std::string&)
+       had to get changed to not get selected if a type convertible to a
+       std::string has an iostream operator<< as well -- the assumption is that
+       using the operator<<() is cheaper since it doesn't require allocating a
+       string copy. */
+    Debug{&out} << std::filesystem::path("/home/mosra");
+    CORRADE_COMPARE(out.str(), "/home/mosra\n");
+    #else
+    CORRADE_SKIP("No <filesystem> header in this STL implementation.");
+    #endif
+}
+
 }}}}
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugStlStringViewTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugStlCpp17Test)

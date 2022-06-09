@@ -674,7 +674,7 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /** @todo when we get rid of iostreams, make this inline in DebugStl.h so we
     don't bloat our binaries with STL symbols */
-Debug& operator<<(Debug& debug, const std::string& value) {
+Debug& Implementation::debugPrintStlString(Debug& debug, const std::string& value) {
     return debug.print(value);
 }
 

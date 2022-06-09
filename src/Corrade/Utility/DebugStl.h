@@ -50,17 +50,35 @@ for more information.
 
 namespace Corrade { namespace Utility {
 
+namespace Implementation {
+    CORRADE_HAS_TYPE(HasOstreamOutput, decltype(std::declval<std::ostream&>() << std::declval<T>()));
+
+    CORRADE_UTILITY_EXPORT Debug& debugPrintStlString(Debug& debug, const std::string& value);
+}
+
 /** @relatesalso Debug
 @brief Print a @ref std::string to debug output
+
+For types that are only convertible to a @ref std::string this overload is
+picked only if the type doesn't also provide a @ref std::ostream
+@cpp operator<<() @ce overload. In that case the value is printed directly to
+the stream instead, assuming it's a cheaper operation than conversion to a
+@ref std::string. This is for example a case with @ref std::filesystem::path.
 */
-CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, const std::string& value);
+#ifdef DOXYGEN_GENERATING_OUTPUT
+Debug& operator<<(Debug& debug, const std::string& value);
+#else
+template<class T> typename std::enable_if<std::is_same<typename std::decay<T>::type, std::string>::value || (std::is_convertible<T, std::string>::value && !Implementation::HasOstreamOutput<T>::value), Debug&>::type operator<<(Debug& debug, const T& value) {
+    return Implementation::debugPrintStlString(debug, value);
+}
+#endif
 
 /** @relatesalso Debug
 @brief Print a @ref std::basic_string to debug output
 
 All other types than exactly @ref std::string are printed as containers.
 */
-template<class T> Debug& operator<<(Debug& debug, const std::basic_string<T>& value) {
+template<class T> typename std::enable_if<!std::is_same<T, char>::value, Debug&>::type operator<<(Debug& debug, const std::basic_string<T>& value) {
     return debug << Containers::ArrayView<const T>{value.data(), value.size()};
 }
 
