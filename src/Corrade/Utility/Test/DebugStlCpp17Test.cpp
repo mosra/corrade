@@ -83,7 +83,12 @@ void DebugStlCpp17Test::filesystemPath() {
        using the operator<<() is cheaper since it doesn't require allocating a
        string copy. */
     Debug{&out} << std::filesystem::path("/home/mosra");
+    #ifdef CORRADE_TARGET_MSVC
+    /* Quotes? Yes why not. */
+    CORRADE_COMPARE(out.str(), "\"/home/mosra\"\n");
+    #else
     CORRADE_COMPARE(out.str(), "/home/mosra\n");
+    #endif
     #else
     CORRADE_SKIP("No <filesystem> header in this STL implementation.");
     #endif
