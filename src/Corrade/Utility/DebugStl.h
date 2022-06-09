@@ -31,10 +31,12 @@
 @m_since{2019,10}
 
 Including this header allows you to use STL types such as @ref std::string or
-@ref std::tuple with @ref Corrade::Utility::Debug. A separate
-@ref Corrade/Utility/DebugStlStringView.h header provides compatibility with
-@ref std::string_view from C++17. See @ref Utility-Debug-stl for more
-information.
+@ref std::tuple with @ref Corrade::Utility::Debug, as well as a fallback to
+@ref std::ostream @cpp operator<<() @ce overloads if a type doesn't provide
+@ref Corrade::Utility::operator<<(Debug&, const T&) "operator<<(Utility::Debug&, const T&)"
+directly. A separate @ref Corrade/Utility/DebugStlStringView.h header provides
+compatibility with @ref std::string_view from C++17. See @ref Utility-Debug-stl
+for more information.
 */
 
 #include <iosfwd>
