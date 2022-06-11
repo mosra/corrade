@@ -2207,7 +2207,7 @@ std::size_t JsonToken::childCount() const {
 
 Containers::ArrayView<const JsonToken> JsonToken::children() const {
     return {this + 1, childCount()};
-};
+}
 
 const JsonToken* JsonToken::parent() const {
     /* Traverse backwards until a token that spans over this one is found, or
