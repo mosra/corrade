@@ -816,9 +816,17 @@ void DirectoryTest::moveDestinationNoPermission() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::move(from, to));
+    #ifndef CORRADE_TARGET_WINDOWS
     CORRADE_COMPARE_AS(out.str(),
         formatString("Utility::Path::move(): can't move {} to {}: error 13 (", from, to),
         TestSuite::Compare::StringHasPrefix);
+    #else
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code ("Access is denied.") */
+    CORRADE_COMPARE_AS(out.str(),
+        formatString("Utility::Path::move(): can't move {} to {}: error 5 (", from, to),
+        TestSuite::Compare::StringHasPrefix);
+    #endif
     #endif
 }
 

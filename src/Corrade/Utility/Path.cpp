@@ -418,14 +418,9 @@ bool remove(const Containers::StringView path) {
 }
 
 bool move(Containers::StringView from, Containers::StringView to) {
-    if(
-        #ifndef CORRADE_TARGET_WINDOWS
-        std::rename(Containers::String::nullTerminatedView(from).data(),
-                    Containers::String::nullTerminatedView(to).data())
-        #else
-        _wrename(Unicode::widen(from), Unicode::widen(to))
-        #endif
-    != 0) {
+    #ifndef CORRADE_TARGET_WINDOWS
+    if(std::rename(Containers::String::nullTerminatedView(from).data(),
+                   Containers::String::nullTerminatedView(to).data()) != 0) {
         Error err;
         err << "Utility::Path::move(): can't move" << from << "to" << to << Debug::nospace << ":";
         Utility::Implementation::printErrnoErrorString(err, errno);
@@ -433,6 +428,26 @@ bool move(Containers::StringView from, Containers::StringView to) {
     }
 
     return true;
+
+    /* Windows, except RT */
+    /** @todo how to implement this for RT? */
+    #elif !defined(CORRADE_TARGET_WINDOWS_RT)
+    if(MoveFileExW(Unicode::widen(from), Unicode::widen(to), MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) {
+        Error err;
+        err << "Utility::Path::move(): can't move" << from << "to" << to << Debug::nospace << ":";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return false;
+    }
+
+    return true;
+
+    /* Windows RT... sigh */
+    #else
+    static_cast<void>(from);
+    static_cast<void>(to);
+    Error{} << "Utility::Path::move(): not implemented on this platform";
+    return false;
+    #endif
 }
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
