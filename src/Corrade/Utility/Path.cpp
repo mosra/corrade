@@ -609,11 +609,18 @@ Containers::Optional<Containers::String> homeDirectory() {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo get rid of MAX_PATH */
-    wchar_t h[MAX_PATH + 1];
+    wchar_t* h = nullptr;
+    Containers::ScopeGuard guard{h,
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* MSVC 2015 is unable to cast the parameter for CoTaskMemFree */
+        [](wchar_t* path){ CoTaskMemFree(path); }
+        #else
+        CoTaskMemFree
+        #endif
+    };
     /* There doesn't seem to be any possibility how this could fail, so just
        assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h) == S_OK);
+    CORRADE_INTERNAL_ASSERT(SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, nullptr, &h) == S_OK);
     return fromNativeSeparators(Unicode::narrow(h));
 
     /* Other */
@@ -655,11 +662,18 @@ Containers::Optional<Containers::String> configurationDirectory(const Containers
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo get rid of MAX_PATH */
-    wchar_t path[MAX_PATH];
+    wchar_t* path = nullptr;
+    Containers::ScopeGuard guard{path,
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        /* MSVC 2015 is unable to cast the parameter for CoTaskMemFree */
+        [](wchar_t* path){ CoTaskMemFree(path); }
+        #else
+        CoTaskMemFree
+        #endif
+    };
     /* There doesn't seem to be any possibility how this could fail, so just
        assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path) == S_OK);
+    CORRADE_INTERNAL_ASSERT(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, nullptr, &path) == S_OK);
     if(path[0] == L'\0') {
         Error{} << "Utility::Path::configurationDirectory(): can't retrieve CSIDL_APPDATA";
         return {};
