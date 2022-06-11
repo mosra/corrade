@@ -276,8 +276,9 @@ CORRADE_UTILITY_EXPORT bool remove(Containers::StringView path);
 @brief Move given file or directory
 @m_since_latest
 
-If @p from doesn't exist, can't be read, or @p to can't be written, prints a
-message to @ref Error and returns @cpp false @ce.
+If the destination exists, it's overwritten. If @p from doesn't exist, can't be
+read, or @p to can't be written, prints a message to @ref Error and returns
+@cpp false @ce.
 
 Expects that @p from and @p to are in UTF-8. If either path is already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
@@ -669,9 +670,9 @@ template<class T, class = typename std::enable_if<std::is_same<typename std::dec
 @m_since_latest
 
 Zero-allocation file copy with 128 kB block size. Works only on single files,
-i.e., it can't be used to recursively copy whole directories. Prints a message
-to @ref Error and returns @cpp false @ce if @p from can't be read or @p to
-can't be written.
+i.e., it can't be used to recursively copy whole directories. If the
+destination exists, it's overwritten. Prints a message to @ref Error and
+returns @cpp false @ce if @p from can't be read or @p to can't be written.
 
 Expects that @p from and @p to are in UTF-8. If either path is already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs

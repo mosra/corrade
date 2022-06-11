@@ -342,6 +342,9 @@ namespace Corrade {
     [mosra/corrade#135](https://github.com/mosra/corrade/issues/135).
 -   @ref Utility::Path::list() was leaking the file handle on Windows (see
     [mosra/corrade#99](https://github.com/mosra/corrade/pull/99))
+-   Fixed @ref Utility::Path::move() to overwrite the destination if it exists
+    also on Windows, consistently with other platforms (see
+    [mosra/corrade#143](https://github.com/mosra/corrade/pull/143))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable
     array utils, @ref Containers::Optional, @ref Containers::Pointer and
     @ref Containers::StaticArray where using @cpp T{b} @ce or
