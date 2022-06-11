@@ -103,6 +103,7 @@ cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-in
 cmake_dependent_option(BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
+# Option-independent platform discovery
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
@@ -137,13 +138,6 @@ elseif(WIN32)
     endif()
 endif()
 
-if(BUILD_TESTS)
-    if(CORRADE_TARGET_IOS)
-        set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
-    endif()
-    enable_testing()
-endif()
-
 # Platform-specific options
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS OR CORRADE_TARGET_ANDROID)
     set(CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT 1)
@@ -172,7 +166,14 @@ if(BUILD_STATIC)
     endif()
 endif()
 
-# Initialize macros etc.
+# Initialize variables, macros etc.
+if(BUILD_TESTS)
+    if(CORRADE_TARGET_IOS)
+        set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
+    endif()
+    enable_testing()
+endif()
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
