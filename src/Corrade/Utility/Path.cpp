@@ -598,7 +598,7 @@ Containers::Optional<Containers::String> homeDirectory() {
     Containers::ScopeGuard guard{h,
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* MSVC 2015 is unable to cast the parameter for CoTaskMemFree */
-        [](LPVOID path){ CoTaskMemFree(path); }
+        [](wchar_t* path){ CoTaskMemFree(path); }
         #else
         CoTaskMemFree
         #endif
@@ -651,7 +651,7 @@ Containers::Optional<Containers::String> configurationDirectory(const Containers
     Containers::ScopeGuard guard{path,
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* MSVC 2015 is unable to cast the parameter for CoTaskMemFree */
-        [](LPVOID path){ CoTaskMemFree(path); }
+        [](wchar_t* path){ CoTaskMemFree(path); }
         #else
         CoTaskMemFree
         #endif
