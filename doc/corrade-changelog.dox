@@ -231,6 +231,9 @@ namespace Corrade {
 -   @ref Utility::Arguments can now recognize short options packed together
     (e.g. `-xzOfile.dat` is equivalent to `-x -z -O file.dat` providing `-x`
     and `-z` are boolean options)
+-   Removed unnecessarily excessive @cpp char** @ce overloads in
+    @ref Utility::Arguments in favor of a single one (see
+    [mosra/corrade#](https://github.com/mosra/corrade/pull/142))
 -   New @ref Utility::copy(std::initializer_list<typename ToView::Type>, To&&)
     overload for easy populating of arrays and views
 -   @cpp !Debug{} @ce or @ref Utility-Debug-source-location "source location output in Debug"

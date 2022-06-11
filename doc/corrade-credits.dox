@@ -152,6 +152,8 @@ Is the below list missing your name or something's wrong?
     platforms
 -   **[\@sigman78](https://github.com/sigman78)** --- initial MSVC 2017 port,
     Vcpkg packages
+-   **Stanislaw Halik** ([\@sthalik](https://github.com/sthalik)** ---
+    usability and API cleanliness improvements
 -   **Tracy Ma** ([\@linuxaged](https://github.com/linuxaged)) --- UWP build
     fixes
 -   **[\@xantares](https://github.com/xantares)** --- Windows port improvements
