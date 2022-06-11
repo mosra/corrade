@@ -781,9 +781,14 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /**
          * @brief Command-line arguments
          *
-         * Populated by @ref CORRADE_TEST_MAIN().
+         * Populated by @ref CORRADE_TEST_MAIN(). Note that the argument value
+         * is usually immutable (thus @cpp const char* const * @ce), it's
+         * however exposed as just @cpp char** @ce to make passing to 3rd party
+         * APIs easier.
          */
-        std::pair<int&, char**> arguments() { return {*_argc, _argv}; }
+        std::pair<int&, char**> arguments() {
+            return {*_argc, const_cast<char**>(_argv)};
+        }
 
         /**
          * @brief Add test cases
@@ -1299,12 +1304,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /* Called from CORRADE_TEST_MAIN(). argc is grabbed via a mutable
            reference and argv is grabbed as non-const in order to allow the
            users modifying the argument list (and GLUT requires that) */
-        static void registerArguments(int& argc, char** argv);
-
-        /* Overload needed for testing */
-        static void registerArguments(int& argc, const char** argv) {
-            registerArguments(argc, const_cast<char**>(argv));
-        }
+        static void registerArguments(int& argc, const char* const* argv);
 
         /* Called from all CORRADE_*() macros */
         static Tester& instance();
@@ -1493,7 +1493,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         struct TesterState;
 
         static int* _argc;
-        static char** _argv;
+        static const char* const* _argv;
 
         CORRADE_TESTSUITE_LOCAL void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
         CORRADE_TESTSUITE_LOCAL void printFileLineInfo(Debug& out);

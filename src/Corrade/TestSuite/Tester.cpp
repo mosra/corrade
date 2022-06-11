@@ -201,9 +201,9 @@ struct Tester::TesterState {
 };
 
 int* Tester::_argc = nullptr;
-char** Tester::_argv = nullptr;
+const char* const* Tester::_argv = nullptr;
 
-void Tester::registerArguments(int& argc, char** const argv) {
+void Tester::registerArguments(int& argc, const char* const* const argv) {
     _argc = &argc;
     _argv = argv;
 }
