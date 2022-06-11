@@ -459,7 +459,7 @@ Arguments& Arguments::setParseErrorCallback(ParseErrorCallback callback, void* s
     return *this;
 }
 
-void Arguments::parse(const int argc, const char** const argv) {
+void Arguments::parse(const int argc, const char* const* const argv) {
     const bool status = tryParse(argc, argv);
 
     if(_booleans[find(_prefix + "help")->id]) {
@@ -477,7 +477,7 @@ void Arguments::parse(const int argc, const char** const argv) {
     }
 }
 
-bool Arguments::tryParse(const int argc, const char** const argv) {
+bool Arguments::tryParse(const int argc, const char* const* const argv) {
     /* If argv is nullptr, argc should be 0. This also helps suppressing
        false positives from Clang Analyzer. */
     CORRADE_INTERNAL_ASSERT(!argv == !argc);
