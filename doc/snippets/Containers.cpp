@@ -1151,7 +1151,7 @@ std::fclose(f);
 
 {
 /* [StringView-c-string-allocatedinit] */
-void exec(int argc, const char** argv); /* Takes a C string array */
+void exec(int argc, const char* const* argv); /* Takes a C string array */
 
 Containers::Array<Containers::StringView> args;
 Containers::Array<Containers::String> data;
