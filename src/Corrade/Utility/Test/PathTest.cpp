@@ -116,6 +116,7 @@ struct PathTest: TestSuite::Tester {
     void moveDirectory();
     void moveSourceNonexistent();
     void moveDestinationNoPermission();
+    void moveDestinationExists();
     void moveNonNullTerminated();
     void moveUtf8();
 
@@ -308,6 +309,7 @@ PathTest::PathTest() {
               &PathTest::moveDirectory,
               &PathTest::moveSourceNonexistent,
               &PathTest::moveDestinationNoPermission,
+              &PathTest::moveDestinationExists,
               &PathTest::moveNonNullTerminated,
               &PathTest::moveUtf8,
 
@@ -1182,6 +1184,20 @@ void PathTest::moveDestinationNoPermission() {
         formatString("Utility::Path::move(): can't move {} to {}: error 13 (", from, to),
         TestSuite::Compare::StringHasPrefix);
     #endif
+}
+
+void PathTest::moveDestinationExists() {
+    /* Old file */
+    Containers::String oldFile = Path::join(_writeTestDir, "oldFile.txt");
+    CORRADE_VERIFY(Path::write(oldFile, "a"_s));
+
+    /* New file, should get overwritten */
+    Containers::String newFile = Path::join(_writeTestDir, "newFile.txt");
+    CORRADE_VERIFY(Path::write(newFile, "b"_s));
+
+    CORRADE_VERIFY(Path::move(oldFile, newFile));
+    CORRADE_VERIFY(!Path::exists(oldFile));
+    CORRADE_COMPARE_AS(newFile, "a", TestSuite::Compare::FileToString);
 }
 
 void PathTest::moveNonNullTerminated() {
