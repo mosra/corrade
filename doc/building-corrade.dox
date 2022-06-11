@@ -510,10 +510,12 @@ not:
 
 -   `WITH_INTERCONNECT` --- Build the @ref Interconnect library. Enables also
     building of the Utility library.
+-   `WITH_MAIN` --- build The @ref main "Main" library. Enabled automatically
+    if `WITH_TESTSUITE` is enabled.
 -   `WITH_PLUGINMANAGER` --- Build the @ref PluginManager library. Enables also
     building of the Utility library.
 -   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
-    building of the Utility library.
+    building of the Utility and Main libraries.
 -   `WITH_UTILITY` --- Build the @ref Utility library. Enables also building of
     the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
     `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers

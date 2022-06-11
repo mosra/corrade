@@ -139,6 +139,8 @@ This command will try to find only the base library, not the optional
 components, which are:
 
 -   `Containers` --- @ref Containers library
+-   `Interconnect` --- @ref Interconnect library
+-   `Main` --- @ref main "Main" library
 -   `PluginManager` --- @ref PluginManager library
 -   `TestSuite` --- @ref TestSuite library
 -   `Utility` --- @ref Utility library

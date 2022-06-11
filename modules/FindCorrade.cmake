@@ -16,6 +16,8 @@
 # components, which are:
 #
 #  Containers                   - Containers library
+#  Interconnect                 - Interconnect library
+#  Main                         - Main library
 #  PluginManager                - PluginManager library
 #  TestSuite                    - TestSuite library
 #  Utility                      - Utility library
