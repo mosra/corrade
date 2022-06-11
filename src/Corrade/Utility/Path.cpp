@@ -422,8 +422,8 @@ bool move(Containers::StringView from, Containers::StringView to) {
     if(std::rename(Containers::String::nullTerminatedView(from).data(),
                Containers::String::nullTerminatedView(to).data()) != 0)
     #else
-    if(!MoveFileExW(Unicode::widen(from), Unicode::widen(to),
-                   MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED))
+    if(MoveFileExW(Unicode::widen(from), Unicode::widen(to),
+                   MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0)
     #endif
     {
         Error err;
