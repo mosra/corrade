@@ -80,7 +80,7 @@ add_custom_target(CorradeContainers-headers SOURCES
 
 install(FILES ${CorradeContainers_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Containers)
 
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 

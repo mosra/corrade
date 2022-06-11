@@ -55,9 +55,9 @@ add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_PRIVATE_HEADERS})
 set_target_properties(CorradeTestSuite PROPERTIES
     DEBUG_POSTFIX "-d")
-if(NOT BUILD_STATIC)
+if(NOT CORRADE_BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-elseif(BUILD_STATIC_PIC)
+elseif(CORRADE_BUILD_STATIC_PIC)
     set_target_properties(CorradeTestSuite PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 target_link_libraries(CorradeTestSuite CorradeUtility)
@@ -87,7 +87,7 @@ endif()
 
 add_subdirectory(Compare)
 
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 

@@ -40,8 +40,8 @@ Produces a C++ file with data in a hexadecimal representation to be compiled
 into an executable and used with @ref Utility::Resource. See also
 @ref resource-management for a tutorial.
 
-This utility is built if `WITH_RC` is enabled when building Corrade. To use
-this utility with CMake, see the
+This utility is built if `CORRADE_WITH_RC` is enabled when building Corrade. To
+use this utility with CMake, see the
 @ref corrade-cmake-add-resource "corrade_add_resource()" macro. To use it
 directly, you need to request the `rc` component of the `Corrade` package and
 use the `Corrade::rc` target for example in a custom command:

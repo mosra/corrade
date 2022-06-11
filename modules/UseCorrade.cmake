@@ -78,22 +78,22 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2015. Sorry.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10")
         if(NOT CORRADE_MSVC2015_COMPATIBILITY)
-            message(FATAL_ERROR "To use Corrade with MSVC 2015, build it with MSVC2015_COMPATIBILITY enabled")
+            message(FATAL_ERROR "To use Corrade with MSVC 2015, build it with CORRADE_MSVC2015_COMPATIBILITY enabled")
         endif()
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.20")
         if(NOT CORRADE_MSVC2017_COMPATIBILITY)
-            message(FATAL_ERROR "To use Corrade with MSVC 2017, build it with MSVC2017_COMPATIBILITY enabled")
+            message(FATAL_ERROR "To use Corrade with MSVC 2017, build it with CORRADE_MSVC2017_COMPATIBILITY enabled")
         endif()
     endif()
 
     # Don't allow to use compiler newer than what compatibility mode allows
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10")
         if(CORRADE_MSVC2015_COMPATIBILITY)
-            message(FATAL_ERROR "MSVC >= 2017 cannot be used if Corrade is built with MSVC2015_COMPATIBILITY")
+            message(FATAL_ERROR "MSVC >= 2017 cannot be used if Corrade is built with CORRADE_MSVC2015_COMPATIBILITY")
         endif()
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.20")
         if(CORRADE_MSVC2017_COMPATIBILITY)
-            message(FATAL_ERROR "MSVC >= 2019 cannot be used if Corrade is built with MSVC2017_COMPATIBILITY")
+            message(FATAL_ERROR "MSVC >= 2019 cannot be used if Corrade is built with CORRADE_MSVC2017_COMPATIBILITY")
         endif()
     endif()
 endif()
@@ -340,7 +340,7 @@ endif()
 function(corrade_add_test test_name)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND (NOT TARGET Corrade::TestSuite OR NOT TARGET Corrade::Main))
-        message(FATAL_ERROR "The Corrade::TestSuite target, needed by corrade_add_test(), doesn't exist. Add the TestSuite component to your find_package() or enable WITH_TESTSUITE if you have Corrade as a CMake subproject.")
+        message(FATAL_ERROR "The Corrade::TestSuite target, needed by corrade_add_test(), doesn't exist. Add the TestSuite component to your find_package() or enable CORRADE_WITH_TESTSUITE if you have Corrade as a CMake subproject.")
     endif()
 
     set(_corrade_file_pair_match "^(.+)@([^@]+)$")
@@ -503,7 +503,7 @@ endfunction()
 function(corrade_add_resource name configurationFile)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::rc)
-        message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package() or enable WITH_UTILITY / WITH_RC if you have Corrade as a CMake subproject.")
+        message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package() or enable CORRADE_WITH_UTILITY / CORRADE_WITH_RC if you have Corrade as a CMake subproject.")
     endif()
 
     # Parse dependencies from the file
@@ -548,7 +548,7 @@ endfunction()
 function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs metadata_file)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::PluginManager)
-        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
+        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable CORRADE_WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
     endif()
 
     if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
@@ -655,7 +655,7 @@ endfunction()
 function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::PluginManager)
-        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_static_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
+        message(FATAL_ERROR "The Corrade::PluginManager target, needed by corrade_add_static_plugin(), doesn't exist. Add the PluginManager component to your find_package() or enable CORRADE_WITH_PLUGINMANAGER if you have Corrade as a CMake subproject.")
     endif()
 
     # Populate library_install_dir variable

@@ -83,7 +83,7 @@ CMake 3.13 at least, it's necessary to use the `CACHE ... FORCE` arguments
 For example:
 
 @code{.cmake}
-set(WITH_TESTSUITE OFF CACHE BOOL "" FORCE) # disable what you don't use
+set(CORRADE_WITH_TESTSUITE OFF CACHE BOOL "" FORCE) # disable what you don't use
 add_subdirectory(corrade EXCLUDE_FROM_ALL) # so only things you use are built
 
 find_package(Corrade REQUIRED ...) # see below

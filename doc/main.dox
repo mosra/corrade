@@ -32,8 +32,8 @@ namespace Corrade {
 
 @m_keywords{Main}
 
-This library is built if `WITH_MAIN` is enabled when building Corrade. To use
-this library with CMake, you need to request the `Main` component of the
+This library is built if `CORRADE_WITH_MAIN` is enabled when building Corrade.
+To use this library with CMake, you need to request the `Main` component of the
 `Corrade` package and link *your application executable* to the `Corrade::Main`
 target:
 
@@ -90,11 +90,11 @@ redirection (@cb{.bat} app.exe > stdout.txt @ce and
 @section main-ansi-colors ANSI colors in console output
 
 By default, for compatibility reasons, Corrade is built with the
-@ref corrade-cmake "CMake option" `UTILITY_USE_ANSI_COLORS` disabled, meaning
-colored output is done through direct WINAPI calls only when writing directly
-to the console. Those APIs provide only a limited subset of the ANSI escape
-code feature set and stop working as soon as you redirect the output to a file
-or a pipe.
+@ref corrade-cmake "CMake option" `CORRADE_UTILITY_USE_ANSI_COLORS` disabled,
+meaning colored output is done through direct WINAPI calls only when writing
+directly to the console. Those APIs provide only a limited subset of the ANSI
+escape code feature set and stop working as soon as you redirect the output to
+a file or a pipe.
 
 With the @ref CORRADE_UTILITY_USE_ANSI_COLORS option enabled, the colored
 output is printed the same way as on Unix terminals. Recent versions of Windows

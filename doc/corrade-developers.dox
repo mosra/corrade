@@ -38,10 +38,10 @@ not strictly required to follow them to the point.
 
 @section corrade-developers-library Checklist for adding / removing a library
 
-1.  Add a `WITH_LIBRARYNAME` CMake option to:
+1.  Add a `CORRADE_WITH_LIBRARYNAME` CMake option to:
     -   root `CMakeLists.txt` (if it has some inter-library dependencies,
         update the others / convert them to @cmake cmake_dependent_option() @ce,
-        adding `NOT WITH_LIBRARYNAME` to their condition --- note the
+        adding `NOT CORRADE_WITH_LIBRARYNAME` to their condition --- note the
         conditions are ANDed so they need to be specified in reverse)
     -   the list in `doc/building.dox` (and similar files in other repos)
 2.  Update `FindCorrade.cmake` (or similar in other repos):
@@ -74,17 +74,17 @@ not strictly required to follow them to the point.
     -   verify that target installation is done in proper places (separate
         `RUNTIME` / `LIBRARY` / `ARCHIVE` destinations)
     -   verify that @cmake set_target_properties(CorradeLibraryName PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION}) @ce
-        is done in case `BUILD_STATIC` is *not* set
+        is done in case `CORRADE_BUILD_STATIC` is *not* set
     -   verify that @cmake set_target_properties(CorradeLibraryName PROPERTIES POSITION_INDEPENDENT_CODE ON) @ce
-        is done in case `BUILD_STATIC_PIC` is set
+        is done in case `CORRADE_BUILD_STATIC_PIC` is set
     -   verify that @cmake add_library(Corrade::LibraryName ALIAS CorradeLibraryName) @ce
         (or equivalent) is added to make the library visible for CMake
         subprojects
 6.  Create a new `src/Corrade/LibraryName/Test/` directory:
     -   add a `CMakeLists.txt` with pre-populated license header, add your name
         to it
-    -   conditionally @cmake add_subdirectory() @ce it if `BUILD_TESTS` is
-        enabled
+    -   conditionally @cmake add_subdirectory() @ce it if `CORRADE_BUILD_TESTS`
+        is enabled
 7.  Create a new `src/Corrade/LibraryName/LibraryName.h` header for forward
     declarations (if needed), add a file-level doc block with
     <tt>Forward declarations for the \@ref Corrade::LibraryName namespace</tt>
@@ -96,17 +96,19 @@ not strictly required to follow them to the point.
         target name
     -   if the library is combined from an `OBJECT` library, add its name to
         the above @cpp #ifdef @ce as well (and then explicitly add
-        @cmake target_compile_definitions(ĆorradeLibraryNameObjects PRIVATE "CorradeLibraryNameObjects_EXPORTS") @ce to `CMakeLists.txt` in case `BUILD_STATIC` is not set)
+        @cmake target_compile_definitions(ĆorradeLibraryNameObjects PRIVATE "CorradeLibraryNameObjects_EXPORTS") @ce
+        to `CMakeLists.txt` in case `CORRADE_BUILD_STATIC` is not set)
 9.  Mention the directory and namespace in `doc/namespaces.dox`, basically
     copy-pasting the following from existing documentation:
     -   directory-level doc block referencing the namespace
-    -   namespace-level doc block mentioning the `WITH_LIBRARYNAME` option,
-        dependencies (if any) and a code snippet showing how to use it with
-        CMake
+    -   namespace-level doc block mentioning the `CORRADE_WITH_LIBRARYNAME`
+        option, dependencies (if any) and a code snippet showing how to use it
+        with CMake
 10. Code and test the rest of the library, see @ref corrade-developers-file and
     @ref corrade-developers-symbol for more information
-11. Add the `WITH_LIBRARYNAME` option to all files in `package/` directory,
-    explicitly saying either `ON` or `OFF` based on platform support:
+11. Add the `CORRADE_WITH_LIBRARYNAME` option to all files in `package/`
+    directory, explicitly saying either `ON` or `OFF` based on platform
+    support:
     -   all `package/archlinux/PKGBUILD*` files (and the AUR package(s))
     -   the `package/debian/rules` file (watch out, tabs!)
     -   the `package/gentoo/` `*.ebuild` file
@@ -180,7 +182,7 @@ Similarly to @ref corrade-developers-library except points 2 and 5, with:
         --- for the plugin library it's done automatically inside
         @cmake add_plugin() @ce
     -   verify that @cmake set_target_properties(PluginName PROPERTIES POSITION_INDEPENDENT_CODE ON) @ce
-        is done in case `BUILD_STATIC_PIC` is set
+        is done in case `CORRADE_BUILD_STATIC_PIC` is set
     -   verify that @cmake add_library(Corrade::PluginName ALIAS PluginName) @ce
         (or equivalent) is added to make the library visible for CMake
         subprojects

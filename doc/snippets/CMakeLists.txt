@@ -70,18 +70,18 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     endif()
 endif()
 
-if(WITH_INTERCONNECT)
+if(CORRADE_WITH_INTERCONNECT)
     add_library(snippets-Interconnect STATIC Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
 endif()
 
-if(WITH_PLUGINMANAGER)
+if(CORRADE_WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
 endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
-if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
+if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
 
     # All define the same symbols so they need to be in separate libs

@@ -725,8 +725,8 @@ support dynamic plugin loading due to platform limitations. Defined on
 @brief Target XCTest with TestSuite
 
 Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode
-XCTest. Available only on Apple platforms. Enabled using `TESTSUITE_TARGET_XCTEST`
-CMake option when building Corrade.
+XCTest. Available only on Apple platforms. Enabled using
+`CORRADE_TESTSUITE_TARGET_XCTEST` CMake option when building Corrade.
 @see @ref CORRADE_TARGET_APPLE, @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TESTSUITE_TARGET_XCTEST
@@ -739,8 +739,8 @@ By default colored output using @ref Corrade::Utility::Debug "Utility::Debug"
 on Windows is done using WINAPI that has a limited functionality, because ANSI
 escape sequences are supported only on Windows 10 or when using non-standard
 console emulators. Available only on Windows, all other platforms use ANSI
-sequences implicitly. Enabled using `UTILITY_USE_ANSI_COLORS` CMake option when
-building Corrade.
+sequences implicitly. Enabled using `CORRADE_UTILITY_USE_ANSI_COLORS` CMake
+option when building Corrade.
 
 Note that on Windows 10 you need to additionally enable ANSI color support in
 the console. This is done automatically when you link to the

@@ -43,6 +43,6 @@ add_custom_target(CorradeTestSuiteCompare SOURCES ${CorradeTestSuiteCompare_HEAD
 
 install(FILES ${CorradeTestSuiteCompare_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite/Compare)
 
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(Test)
 endif()

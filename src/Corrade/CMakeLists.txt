@@ -28,7 +28,7 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade")
 
-if(NOT BUILD_STATIC)
+if(NOT CORRADE_BUILD_STATIC)
     set(SHARED_OR_STATIC SHARED)
 else()
     set(SHARED_OR_STATIC STATIC)
@@ -91,31 +91,31 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 
-if(WITH_UTILITY) # Cyclic dependency of Containers and Utility
+if(CORRADE_WITH_UTILITY) # Cyclic dependency of Containers and Utility
     add_subdirectory(Containers)
 endif()
 
-if(WITH_INTERCONNECT)
+if(CORRADE_WITH_INTERCONNECT)
     add_subdirectory(Interconnect)
 endif()
 
-if(WITH_PLUGINMANAGER)
+if(CORRADE_WITH_PLUGINMANAGER)
     add_subdirectory(PluginManager)
 endif()
 
-if(WITH_TESTSUITE)
+if(CORRADE_WITH_TESTSUITE)
     add_subdirectory(TestSuite)
 endif()
 
-if(WITH_UTILITY OR WITH_RC)
+if(CORRADE_WITH_UTILITY OR CORRADE_WITH_RC)
     add_subdirectory(Utility)
 endif()
 
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
-if(WITH_MAIN)
+if(CORRADE_WITH_MAIN)
     if(CORRADE_TARGET_WINDOWS)
         add_library(CorradeMain STATIC CorradeMain.cpp)
         target_include_directories(CorradeMain PUBLIC

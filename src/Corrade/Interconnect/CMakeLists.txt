@@ -50,9 +50,9 @@ add_library(CorradeInterconnect ${SHARED_OR_STATIC}
     ${CorradeInterconnect_HEADERS}
     ${CorradeInterconnect_PRIVATE_HEADERS})
 set_target_properties(CorradeInterconnect PROPERTIES DEBUG_POSTFIX "-d")
-if(NOT BUILD_STATIC)
+if(NOT CORRADE_BUILD_STATIC)
     set_target_properties(CorradeInterconnect PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-elseif(BUILD_STATIC_PIC)
+elseif(CORRADE_BUILD_STATIC_PIC)
     set_target_properties(CorradeInterconnect PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -73,7 +73,7 @@ install(TARGETS CorradeInterconnect
         ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeInterconnect_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Interconnect)
 
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 

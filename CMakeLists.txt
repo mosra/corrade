@@ -49,7 +49,8 @@ endif()
 if(POLICY CMP0071)
     cmake_policy(SET CMP0071 NEW)
 endif()
-# Superprojects can use just set(WITH_BLAH ON) without FORCE CACHE on 3.13+
+# Superprojects can use just set(CORRADE_WITH_BLAH ON) without FORCE CACHE on
+# 3.13+
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
@@ -61,36 +62,67 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(CMakeDependentOption)
 
+# Options that used to be unprefixed. New options shouldn't be added to this
+# list.
+set(_CORRADE_DEPRECATED_UNPREFIXED_OPTIONS
+    WITH_INTERCONNECT
+    WITH_MAIN
+    WITH_PLUGINMANAGER
+    WITH_TESTSUITE
+    WITH_UTILITY
+    WITH_RC
+    MSVC_COMPATIBILITY
+    MSVC2017_COMPATIBILITY
+    MSVC2015_COMPATIBILITY
+    BUILD_DEPRECATED
+    BUILD_MULTITHREADED
+    BUILD_STATIC
+    BUILD_STATIC_PIC
+    BUILD_STATIC_UNIQUE_GLOBALS
+    BUILD_TESTS
+    TESTSUITE_TARGET_XCTEST
+    UTILITY_USE_ANSI_COLORS)
+# If during the first run (i.e., when the variable isn't in cache yet), check
+# if any of the prefixed options are already set. If so, we assume the user is
+# already switched to the prefixed options and won't accept the deprecated
+# unprefixed options for backwards compatibility. This way it's possible for
+# projects to reuse these variables for other purposes without affecting
+# Corrade in any way.
+if(NOT DEFINED _CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS)
+    set(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS ON CACHE INTERNAL "")
+    foreach(option ${_CORRADE_DEPRECATED_UNPREFIXED_OPTIONS})
+        if(DEFINED CORRADE_${option})
+            set(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS OFF CACHE INTERNAL "")
+            break()
+        endif()
+    endforeach()
+endif()
+
 # We want to present the option to the user, but we also want to implicitly
 # enable it during the first run, unless manually overriden. Thus we first
 # remember if it was defined, then define the option() and then below check the
-# remembered state.
-if(NOT DEFINED MSVC_COMPATIBILITY)
+# remembered state. Also checking the deprecated unprefixed name for backwards
+# compatibility.
+if(NOT DEFINED CORRADE_MSVC_COMPATIBILITY AND NOT DEFINED MSVC_COMPATIBILITY)
     set(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED ON)
 endif()
-option(MSVC_COMPATIBILITY "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" OFF)
+option(CORRADE_MSVC_COMPATIBILITY "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" OFF)
 
-option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
-option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
+option(CORRADE_MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
+option(CORRADE_MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 
-option(WITH_INTERCONNECT "Build Interconnect library" ON)
-option(WITH_PLUGINMANAGER "Build PluginManager library" ON)
-option(WITH_TESTSUITE "Build TestSuite library" ON)
-cmake_dependent_option(WITH_UTILITY "Build Utility library" ON "NOT WITH_INTERCONNECT;NOT WITH_PLUGINMANAGER;NOT WITH_TESTSUITE" ON)
-cmake_dependent_option(WITH_MAIN "Build Main library" ON "NOT WITH_TESTSUITE" ON)
-cmake_dependent_option(WITH_RC "Build the corrade-rc utility" ON "NOT WITH_UTILITY" ON)
+option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
+option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
+option(CORRADE_WITH_TESTSUITE "Build TestSuite library" ON)
+cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORRADE_WITH_INTERCONNECT;NOT CORRADE_WITH_PLUGINMANAGER;NOT CORRADE_WITH_TESTSUITE" ON)
+cmake_dependent_option(CORRADE_WITH_MAIN "Build Main library" ON "NOT CORRADE_WITH_TESTSUITE" ON)
+cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
 
-option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
-if(BUILD_DEPRECATED)
-    set(CORRADE_BUILD_DEPRECATED 1)
-endif()
+option(CORRADE_BUILD_DEPRECATED "Include deprecated API in the build" ON)
 
-option(BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaneously in multiple threads" ON)
-if(BUILD_MULTITHREADED)
-    set(CORRADE_BUILD_MULTITHREADED 1)
-endif()
+option(CORRADE_BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaneously in multiple threads" ON)
 
-option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
+option(CORRADE_BUILD_STATIC "Build static libraries (default are shared)" OFF)
 # Disable PIC on Emscripten by default (but still allow it to be enabled
 # explicitly if one so desired). Currently causes linker errors related to
 # __memory_base etc.: https://github.com/emscripten-core/emscripten/issues/8761
@@ -99,15 +131,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
 else()
     set(ON_EXCEPT_EMSCRIPTEN ON)
 endif()
-cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
-cmake_dependent_option(BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
-option(BUILD_TESTS "Build unit tests" OFF)
+cmake_dependent_option(CORRADE_BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
+cmake_dependent_option(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
+option(CORRADE_BUILD_TESTS "Build unit tests" OFF)
 
 # Option-independent platform discovery
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
-    set(BUILD_STATIC ON)
+    set(CORRADE_BUILD_STATIC ON)
 elseif(UNIX)
     # Both APPLE and UNIX are defined on OSX
     if(APPLE)
@@ -125,7 +157,7 @@ elseif(UNIX)
     if(CMAKE_SYSTEM_NAME STREQUAL Android)
         set(CORRADE_TARGET_ANDROID 1)
         # It's too inconvenient to manually load all shared libs using JNI
-        set(BUILD_STATIC ON)
+        set(CORRADE_BUILD_STATIC ON)
     endif()
 
     # Emscripten is Unix too, this selects only the other ones
@@ -143,31 +175,79 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS 
     set(CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT 1)
 endif()
 if(CORRADE_TARGET_APPLE)
-    option(TESTSUITE_TARGET_XCTEST "Build TestSuite tests compatible with Xcode XCTest" OFF)
-    if(TESTSUITE_TARGET_XCTEST)
-        set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
-    endif()
+    option(CORRADE_TESTSUITE_TARGET_XCTEST "Build TestSuite tests compatible with Xcode XCTest" OFF)
 endif()
 if(CORRADE_TARGET_WINDOWS)
     if(CORRADE_TARGET_WINDOWS_RT)
-        set(UTILITY_USE_ANSI_COLORS 1)
+        set(CORRADE_UTILITY_USE_ANSI_COLORS ON)
     else()
-        option(UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
-    endif()
-    if(UTILITY_USE_ANSI_COLORS)
-        set(CORRADE_UTILITY_USE_ANSI_COLORS 1)
+        option(CORRADE_UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
     endif()
 endif()
 
-if(BUILD_STATIC)
-    set(CORRADE_BUILD_STATIC 1)
-    if(BUILD_STATIC_UNIQUE_GLOBALS)
-        set(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS 1)
+# Backwards compatibility for unprefixed CMake options. If the user isn't
+# explicitly using prefixed options in the first run already, accept the
+# unprefixed options, and remember this decision for subsequent runs
+if(NOT DEFINED _CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS)
+    set(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS ON CACHE INTERNAL "")
+endif()
+# If the user wasn't explicitly using prefixed options in the first run and the
+# CORRADE_BUILD_DEPRECATED option is not currently disabled (which can get
+# changed subsequently), accept the unprefixed options and print a warning if
+# they're different from the prefixed ones.
+if(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS AND CORRADE_BUILD_DEPRECATED)
+    # BUILD_STATIC_PIC and BUILD_STATIC_UNIQUE_GLOBALS need extra care, as they
+    # should be implicitly set to ON if BUILD_STATIC is set. Doing this before
+    # propagating the unprefixed options to avoid a false-positive warning
+    # when e.g. CORRADE_BUILD_STATIC_PIC is implicitly ON but BUILD_STATIC_PIC
+    # not yet.
+    if(BUILD_STATIC)
+        if(NOT DEFINED BUILD_STATIC_PIC)
+            set(BUILD_STATIC_PIC ON)
+        endif()
+        if(NOT DEFINED BUILD_STATIC_UNIQUE_GLOBALS)
+            set(BUILD_STATIC_UNIQUE_GLOBALS ON)
+        endif()
+    endif()
+
+    set(_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION )
+    foreach(option ${_CORRADE_DEPRECATED_UNPREFIXED_OPTIONS})
+        if(DEFINED ${option})
+            # CMake has no comparison of boolean values (EQUAL returns false if
+            # comparing ON and 1 or OFF and FALSE, STREQUAL also), so we have
+            # to do it this way. Also warn only on the first encountered
+            # variable so people can fix it, reconfigure and go to the next one
+            # that warns.
+            if((${option} AND NOT CORRADE_${option}) OR
+               (NOT ${option} AND CORRADE_${option}) AND NOT _CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION)
+                set(_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION ${option})
+            endif()
+            set(CORRADE_${option} ${${option}})
+            # If variables specified on the command line don't match any
+            # options, they're kept in cache but set as UNINITIALIZED, meaning
+            # they don't appear in cmake-gui or ccmake, so there's no way to
+            # fix the warning apart from hand-enditing the CMakeCache.txt or
+            # recreating the build dir. Update their cached type to be BOOL to
+            # make them appear.
+            set(${option} ${${option}} CACHE BOOL "Deprecated, use CORRADE_${option} instead")
+        endif()
+    endforeach()
+
+    if(_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION)
+        # CMake 3.5+ has deprecation warnings enabled by default (which makes
+        # sense), 3.4 not. Use a warning there instead.
+        # TODO: drop when 3.4 is not supported anymore
+        if(CMAKE_VERSION VERSION_LESS 3.5)
+            set(DEPRECATION_OR_WARNING WARNING)
+        else()
+            set(DEPRECATION_OR_WARNING DEPRECATION)
+        endif()
+        message(${DEPRECATION_OR_WARNING} "Unprefixed options such as ${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} are deprecated, use CORRADE_${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} instead. Delete the unprefixed variable from CMake cache or set both to the same value to silence this warning.")
     endif()
 endif()
 
 # Initialize variables, macros etc.
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     if(CORRADE_TARGET_IOS)
         set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
     endif()
@@ -213,40 +293,30 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2015. Sorry.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10")
-        if(NOT MSVC2015_COMPATIBILITY)
-            set(MSVC2015_COMPATIBILITY ON)
-            message(WARNING "MSVC 2015 detected, automatically enabling MSVC2015_COMPATIBILITY. Note that some features may not be available with this compiler.")
+        if(NOT CORRADE_MSVC2015_COMPATIBILITY)
+            set(CORRADE_MSVC2015_COMPATIBILITY ON)
+            message(WARNING "MSVC 2015 detected, automatically enabling CORRADE_MSVC2015_COMPATIBILITY. Note that some features may not be available with this compiler.")
         endif()
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.20")
-        if(NOT MSVC2017_COMPATIBILITY)
-            set(MSVC2017_COMPATIBILITY ON)
-            message(WARNING "MSVC 2017 detected, automatically enabling MSVC2017_COMPATIBILITY. Note that some features may not be available with this compiler.")
+        if(NOT CORRADE_MSVC2017_COMPATIBILITY)
+            set(CORRADE_MSVC2017_COMPATIBILITY ON)
+            message(WARNING "MSVC 2017 detected, automatically enabling CORRADE_MSVC2017_COMPATIBILITY. Note that some features may not be available with this compiler.")
         endif()
-    # MSVC_COMPATIBILITY is enforced by MSVC2017_COMPATIBILITY and
-    # MSVC2015_COMPATIBILITY below, but can be disabled for 2019+.
+    # CORRADE_MSVC_COMPATIBILITY is enforced by CORRADE_MSVC2017_COMPATIBILITY
+    # and CORRADE_MSVC2015_COMPATIBILITY below, but can be disabled for 2019+.
     elseif(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED)
-        set(MSVC_COMPATIBILITY ON CACHE BOOL "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" FORCE)
-        message(WARNING "MSVC 2019+ detected, automatically enabling MSVC_COMPATIBILITY which may cause some features to not be available. You can disable this option if you pass /permissive- to the compiler to enable a standards-conforming mode.")
+        set(CORRADE_MSVC_COMPATIBILITY ON CACHE BOOL "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" FORCE)
+        message(WARNING "MSVC 2019+ detected, automatically enabling CORRADE_MSVC_COMPATIBILITY which may cause some features to not be available. You can disable this option if you pass /permissive- to the compiler to enable a standards-conforming mode.")
     endif()
 endif()
 
-if(MSVC_COMPATIBILITY)
-    set(CORRADE_MSVC_COMPATIBILITY 1)
+if(CORRADE_MSVC2017_COMPATIBILITY)
+    set(CORRADE_MSVC_COMPATIBILITY ON)
 endif()
 
-if(MSVC2017_COMPATIBILITY)
-    set(CORRADE_MSVC2017_COMPATIBILITY 1)
-    set(CORRADE_MSVC_COMPATIBILITY 1)
-endif()
-
-if(MSVC2015_COMPATIBILITY)
-    set(CORRADE_MSVC2015_COMPATIBILITY 1)
-    set(CORRADE_MSVC2017_COMPATIBILITY 1)
-    set(CORRADE_MSVC_COMPATIBILITY 1)
-endif()
-
-if(TESTSUITE_TARGET_XCTEST)
-    set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
+if(CORRADE_MSVC2015_COMPATIBILITY)
+    set(CORRADE_MSVC2017_COMPATIBILITY ON)
+    set(CORRADE_MSVC_COMPATIBILITY ON)
 endif()
 
 include(UseCorrade)
@@ -317,6 +387,6 @@ add_subdirectory(modules)
 add_subdirectory(src)
 
 # Build snippets as part of testing
-if(BUILD_TESTS)
+if(CORRADE_BUILD_TESTS)
     add_subdirectory(doc/snippets)
 endif()

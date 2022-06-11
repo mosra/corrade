@@ -56,9 +56,9 @@ namespace Corrade { namespace Utility {
 /**
 @brief Unicode utilities
 
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library with CMake, request the `Utility` component of the `Corrade`
-package and link to the `Corrade::Utility` target.
+This library is built if `CORRADE_WITH_UTILITY` is enabled when building
+Corrade. To use this library with CMake, request the `Utility` component of the
+`Corrade` package and link to the `Corrade::Utility` target.
 
 @code{.cmake}
 find_package(Corrade REQUIRED Utility)

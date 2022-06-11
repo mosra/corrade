@@ -389,6 +389,13 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
+-   All @ref building-corrade-features "CMake build options" are now prefixed
+    with `CORRADE_`. For backwards compatibility, unless
+    @ref CORRADE_BUILD_DEPRECATED is disabled and unless a prefixed option is
+    already set during the initial run, the unprefixed options are still
+    recognized with a warning. In particular, if `BUILD_DEPRECATED` is set but
+    `CORRADE_BUILD_DEPRECATED` not, the unprefixed options are also recognized.
+    See also [mosra/corrade#139](https://github.com/mosra/corrade/issues/139).
 -   @cpp Containers::Array::empty() @ce, @cpp ArrayView::empty() @ce,
     @cpp StaticArray::empty() @ce, @cpp StaticArrayView::empty() @ce and
     @cpp StridedArrayView::empty() @ce is deprecated in favor of
@@ -519,10 +526,10 @@ namespace Corrade {
     compatibility.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` variable, needed for installations
     into older Android NDKs, is obsolete and no longer needed for NDK r19+. It
-    still does what's expected on builds with `BUILD_DEPRECATED` enabled,
-    however you'll get a deprecation notice. Since the variable got saved to
-    CMake cache, to get rid of the message, you may need to either recreate
-    your build directory or explicitly delete it from the cache.
+    still does what's expected on builds with `CORRADE_BUILD_DEPRECATED`
+    enabled, however you'll get a deprecation notice. Since the variable got
+    saved to CMake cache, to get rid of the message, you may need to either
+    recreate your build directory or explicitly delete it from the cache.
 -   The @cpp Corrade/Containers/Tags.h @ce header,
     @cpp Containers::DefaultInit @ce, @cpp Containers::ValueInit @ce,
     @cpp Containers::NoInit @ce, @cpp Containers::NoCreate @ce,

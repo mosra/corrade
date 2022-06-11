@@ -134,7 +134,7 @@ vcpkg install corrade
 Not all features are installed by default; only those that are implicitly
 enabled in @ref building-corrade-features. To opt-in or opt-out of additional
 features, you can use the following syntax; feature names are simply names of
-CMake `WITH_*` options but lowercase, e.g.:
+CMake `CORRADE_WITH_*` options but lowercase, e.g.:
 
 @code{.bat}
 vcpkg install corrade[pluginmanager,testsuite]
@@ -385,7 +385,7 @@ Corrade build is controlled using plenty of configuration variables, which are
 be specified either on command-line with `-Dname=value`, for example:
 
 @code{.sh}
-cmake -DBUILD_TESTS=ON ..
+cmake -DCORRADE_BUILD_TESTS=ON ..
 @endcode
 
 Boolean variables accept `ON`, `OFF`, `True` or `False`. If using QtCreator,
@@ -505,62 +505,63 @@ Installation to given prefix can be done from within QtCreator by adding a new
 @subsection building-corrade-features Enabling or disabling features
 
 By default the library is built with everything included. Using the following
-`WITH_*` CMake options you can specify which parts will be built and which
-not:
+`CORRADE_WITH_*` CMake options you can specify which parts will be built and
+which not:
 
--   `WITH_INTERCONNECT` --- Build the @ref Interconnect library. Enables also
-    building of the Utility library.
--   `WITH_MAIN` --- build The @ref main "Main" library. Enabled automatically
-    if `WITH_TESTSUITE` is enabled.
--   `WITH_PLUGINMANAGER` --- Build the @ref PluginManager library. Enables also
-    building of the Utility library.
--   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
+-   `CORRADE_WITH_INTERCONNECT` --- Build the @ref Interconnect library.
+    Enables also building of the Utility library.
+-   `CORRADE_WITH_MAIN` --- build The @ref main "Main" library. Enabled
+    automatically if `CORRADE_WITH_TESTSUITE` is enabled.
+-   `CORRADE_WITH_PLUGINMANAGER` --- Build the @ref PluginManager library.
+    Enables also building of the Utility library.
+-   `CORRADE_WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
     building of the Utility and Main libraries.
--   `WITH_UTILITY` --- Build the @ref Utility library. Enables also building of
-    the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
-    `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers
-    library is built along with this library.
--   `WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility. Enabled
-    automatically if `WITH_UTILITY` or anything depending on it is enabled.
-    It's possible to build just this executable without anything else, for
-    example when crosscompiling.
+-   `CORRADE_WITH_UTILITY` --- Build the @ref Utility library. Enables also
+    building of the `corrade-rc` executable. Enabled automatically if
+    `CORRADE_WITH_INTERCONNECT`, `CORRADE_WITH_PLUGINMANAGER` or
+    `CORRADE_WITH_TESTSUITE` is enabled. The @ref Containers library is built
+    along with this library.
+-   `CORRADE_WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility.
+    Enabled automatically if `CORRADE_WITH_UTILITY` or anything depending on it is
+    enabled. It's possible to build just this executable without anything else,
+    for example when crosscompiling.
 
 Options controlling the build:
 
--   `BUILD_STATIC` --- Build all libraries as static. Default is shared, except
-    on platforms such as @ref CORRADE_TARGET_ANDROID "Android" or
-    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" that don't support dynamic
+-   `CORRADE_BUILD_STATIC` --- Build all libraries as static. Default is
+    shared, except on platforms such as @ref CORRADE_TARGET_ANDROID "Android"
+    or @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" that don't support dynamic
     linking.
--   `BUILD_STATIC_PIC` --- Build static libraries with position-independent
-    code. Enabled by default when building static libraries, disable if you
-    don't need this feature. On @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
-    this option is always off.
--   `BUILD_STATIC_UNIQUE_GLOBALS` --- Build static libraries in a way that
-    keeps their globals unique even across different shared libraries. Enabled
-    by default for static builds. May introduce additional overhead on some
-    platforms, disable if you will only link static libraries to one final
+-   `CORRADE_BUILD_STATIC_PIC` --- Build static libraries with
+    position-independent code. Enabled by default when building static
+    libraries, disable if you don't need this feature. On
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" this option is always off.
+-   `CORRADE_BUILD_STATIC_UNIQUE_GLOBALS` --- Build static libraries in a way
+    that keeps their globals unique even across different shared libraries.
+    Enabled by default for static builds. May introduce additional overhead on
+    some platforms, disable if you will only link static libraries to one final
     executable and won't use any dynamic plugins.
--   `BUILD_DEPRECATED` --- Include deprecated APIs in the build. Enabled by
-    default to preserve backwards compatibility, disabling it forces you to
-    update your code whenever there's a breaking API change. It's however
-    recommended to have this option disabled when deploying a final application
-    as it can result in smaller binaries.
--   `BUILD_MULTITHREADED` --- Makes it possible to safely use certain Corrade
-    features simultaneously in multiple threads. Enabled by default, disable if
-    you don't need this and don't want to pay potential performance penalties
-    coming from thread-local variables.
+-   `CORRADE_BUILD_DEPRECATED` --- Include deprecated APIs in the build.
+    Enabled by default to preserve backwards compatibility, disabling it forces
+    you to update your code whenever there's a breaking API change. It's
+    however recommended to have this option disabled when deploying a final
+    application as it can result in smaller binaries.
+-   `CORRADE_BUILD_MULTITHREADED` --- Makes it possible to safely use certain
+    Corrade features simultaneously in multiple threads. Enabled by default,
+    disable if you don't need this and don't want to pay potential performance
+    penalties coming from thread-local variables.
 
 Platform-specific options:
 
--   `UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will use ANSI
-    escape codes in @ref Utility::Debug instead of WINAPI functions. Note that
-    you need at least Windows 10 or non-standard console emulator to display
-    them properly. Note that when compiling for
+-   `CORRADE_UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will
+    use ANSI escape codes in @ref Utility::Debug instead of WINAPI functions.
+    Note that you need at least Windows 10 or non-standard console emulator to
+    display them properly. Note that when compiling for
     @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" this option is implicitly
     enabled, because the WINAPI functions are not available for this target.
--   `TESTSUITE_TARGET_XCTEST` --- if building for Xcode on macOS or iOS, this
-    will make the @ref TestSuite tests compatible with the XCTest framework and
-    thus runnable directly from Xcode and also directly on iOS.
+-   `CORRADE_TESTSUITE_TARGET_XCTEST` --- if building for Xcode on macOS or
+    iOS, this will make the @ref TestSuite tests compatible with the XCTest
+    framework and thus runnable directly from Xcode and also directly on iOS.
 
 The features used can be conveniently detected in depending projects both in
 CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
@@ -578,16 +579,17 @@ for more information.
 By default the library expects a standards-conforming compiler. However, for
 portability, compatibility mode for some compilers is provided:
 
--   `MSVC_COMPATIBILITY` --- Compiling with compatibility mode for Microsoft
-    Visual C++ 2019+ *without* the `/permissive-` flag set. Enabled implicitly
-    if MSVC (but not clang-cl) is detected. You can set it to `OFF` but then
-    you're required to specify `/permissive-` for all code using Corrade.
--   `MSVC2017_COMPATIBILITY` --- Compiling with compatibility mode for
+-   `CORRADE_MSVC_COMPATIBILITY` --- Compiling with compatibility mode for
+    Microsoft Visual C++ 2019+ *without* the `/permissive-` flag set. Enabled
+    implicitly if MSVC (but not clang-cl) is detected. You can set it to `OFF`
+    but then you're required to specify `/permissive-` for all code using
+    Corrade.
+-   `CORRADE_MSVC2017_COMPATIBILITY` --- Compiling with compatibility mode for
     Microsoft Visual C++ 2017. Enabled implicitly if MSVC 2017 is detected,
-    implies `MSVC_COMPATIBILITY`.
--   `MSVC2015_COMPATIBILITY` --- Compiling with compatibility mode for
+    implies `CORRADE_MSVC_COMPATIBILITY`.
+-   `CORRADE_MSVC2015_COMPATIBILITY` --- Compiling with compatibility mode for
     Microsoft Visual C++ 2015. Enabled implicitly if MSVC 2015 is detected,
-    implies `MSVC2017_COMPATIBILITY` and `MSVC_COMPATIBILITY`.
+    implies `CORRADE_MSVC2017_COMPATIBILITY` and `CORRADE_MSVC_COMPATIBILITY`.
 
 Corrade will detect the compiler used and refuses to build (or be used) if
 some required compatibility mode is not enabled. On the other hand, if any of
@@ -606,7 +608,7 @@ installed files. The following variables are supported:
     to correct location for given architecture and API level version.
 
 The following variables are deprecated and provided only for backwards
-compatibility if `BUILD_DEPRECATED` isn't disabled.
+compatibility if `CORRADE_BUILD_DEPRECATED` isn't disabled.
 
 -   `CORRADE_INCLUDE_INSTALL_PREFIX` --- Overrides location where
     platform-independent include files, CMake scripts and other files are
@@ -621,9 +623,10 @@ compatibility if `BUILD_DEPRECATED` isn't disabled.
 @subsection building-corrade-tests Building and running tests
 
 If you want to build also the tests (which are not built by default), enable
-`BUILD_TESTS` in CMake. The tests use Corrade's own @ref Corrade::TestSuite "TestSuite"
-framework and can be run either manually (the binaries are located in `Test/`
-subdirectories in the build directory) or using
+`CORRADE_BUILD_TESTS` in CMake. The tests use Corrade's own
+@ref Corrade::TestSuite "TestSuite" framework and can be run either manually
+(the binaries are located in `Test/` subdirectories in the build directory) or
+using
 
 @code{.sh}
 ctest --output-on-failure
@@ -695,7 +698,7 @@ mkdir build-winrt && cd build-winrt
 cmake .. ^
     -DCORRADE_RC_EXECUTABLE="C:/Sys/bin/corrade-rc.exe" ^
     -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" ^
-    -DBUILD_STATIC=ON ^
+    -DCORRADE_BUILD_STATIC=ON ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^
     -DCMAKE_SYSTEM_VERSION=8.1 ^
     -G "Visual Studio 14 2015"
@@ -775,8 +778,8 @@ WebAssembly build. Don't forget to adapt `EMSCRIPTEN_PREFIX` variable in
 `generic/Emscripten*.cmake` to path where Emscripten is installed; you can also
 pass it explicitly on command-line using `-DEMSCRIPTEN_PREFIX`. Default is
 `/usr/lib/emscripten`. Emscripten supports dynamic libraries only to simplify
-porting and they are generally slower, thus `BUILD_STATIC` is implicitly
-enabled.
+porting and they are generally slower, thus `CORRADE_BUILD_STATIC` is
+implicitly enabled.
 
 Then create build directory and run `cmake` and the build command in it. You
 can omit specifying `CORRADE_RC_EXECUTABLE` if
@@ -797,7 +800,7 @@ Then you can install the library using @cb{.sh} cmake --build . --target install
 to make it available to depending projects.
 
 If you have Node.js installed, you can also build and run unit tests using
-`ctest`. See the `BUILD_TESTS` option @ref building-corrade-tests "above".
+`ctest`. See the `CORRADE_BUILD_TESTS` option @ref building-corrade-tests "above".
 
 For ArchLinux there are also prepared package files in `package/archlinux`,
 named `PKGBUILD-emscripten` and `PKGBUILD-emscripten-wasm`, see
@@ -828,12 +831,12 @@ can omit specifying `CORRADE_RC_EXECUTABLE` if
 through `PATH`.
 
 As every application is in its own sandbox, it doesn't make sense to build
-shared libraries (although it is supported). Enable `BUILD_STATIC` to build
-static libraries.
+shared libraries (although it is supported). Enable `CORRADE_BUILD_STATIC` to
+build static libraries.
 
-Please note that `BUILD_MULTITHREADED` is supported only since Xcode 7.3 and
-doesn't work on `i386` iOS Simulator, you need to disable it in order to build
-for older platforms.
+Please note that `CORRADE_BUILD_MULTITHREADED` is supported only since Xcode
+7.3 and doesn't work on `i386` iOS Simulator, you need to disable it in order
+to build for older platforms.
 
 @m_class{m-console-wrap}
 
@@ -845,7 +848,7 @@ cmake .. \
     -DCMAKE_OSX_ARCHITECTURES="arm64;armv7;armv7s" \
     -DCMAKE_INSTALL_PREFIX=~/ios-libs \
     -DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc \
-    -DBUILD_STATIC=ON \
+    -DCORRADE_BUILD_STATIC=ON \
     -G Xcode
 cmake --build .
 @endcode
@@ -877,7 +880,7 @@ version level you wish to use and `CMAKE_ANDROID_ARCH_ABI` to target platform
 ABI. Check the [CMake Android cross-compiling documentation](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-android)
 for further information. You can omit specifying `CORRADE_RC_EXECUTABLE` if
 @ref building-corrade-cross-rc "natively-built corrade-rc" is accessible
-through `PATH`. Note that `BUILD_STATIC` is implicitly enabled, because
+through `PATH`. Note that `CORRADE_BUILD_STATIC` is implicitly enabled, because
 manually loading all depending shared libraries using JNI would be too
 inconvenient.
 

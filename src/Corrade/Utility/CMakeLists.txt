@@ -28,7 +28,7 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/Utility")
 
-if(WITH_UTILITY)
+if(CORRADE_WITH_UTILITY)
     set(CorradeUtility_SRCS
         Debug.cpp
         Configuration.cpp
@@ -139,10 +139,10 @@ if(WITH_UTILITY)
         ${CorradeUtility_HEADERS}
         ${CorradeUtility_PRIVATE_HEADERS})
     target_include_directories(CorradeUtilityObjects PUBLIC $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
-    if(NOT BUILD_STATIC)
+    if(NOT CORRADE_BUILD_STATIC)
         target_compile_definitions(CorradeUtilityObjects PRIVATE "-DCorradeUtilityObjects_EXPORTS")
     endif()
-    if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
+    if(NOT CORRADE_BUILD_STATIC OR CORRADE_BUILD_STATIC_PIC)
         set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
@@ -159,9 +159,9 @@ if(WITH_UTILITY)
     set_property(TARGET CorradeUtility APPEND PROPERTY
         COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
     set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
-    if(NOT BUILD_STATIC)
+    if(NOT CORRADE_BUILD_STATIC)
         set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-    elseif(BUILD_STATIC_PIC)
+    elseif(CORRADE_BUILD_STATIC_PIC)
         set_target_properties(CorradeUtility PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
@@ -180,12 +180,12 @@ if(WITH_UTILITY)
             ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
     install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
-    if(BUILD_TESTS)
+    if(CORRADE_BUILD_TESTS)
         # Library with graceful assert for testing
         add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
         target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
         set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
-        if(BUILD_STATIC_PIC)
+        if(CORRADE_BUILD_STATIC_PIC)
             set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
         endif()
 
@@ -245,7 +245,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     # everything the executable needs directly inside. In case the library is
     # already built as static, there's no need to do any extra work -- just
     # link it.
-    if(NOT BUILD_STATIC OR NOT WITH_UTILITY)
+    if(NOT CORRADE_BUILD_STATIC OR NOT CORRADE_WITH_UTILITY)
         add_executable(corrade-rc rc.cpp ${CorradeUtilityRc_SRCS})
         # Same as Utility, but since we can't depend on it, we can't use its
         # INTERFACE_INCLUDE_DIRECTORIES

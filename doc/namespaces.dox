@@ -55,9 +55,9 @@ Implementations for various containers which don't have direct equivalents in
 STL or are better tailored to specific use cases than general standard
 implementations.
 
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library with CMake, request the `Containers` component of the
-`Corrade` package and link to the `Corrade::Containers` target:
+This library is built if `CORRADE_WITH_UTILITY` is enabled when building
+Corrade. To use this library with CMake, request the `Containers` component of
+the `Corrade` package and link to the `Corrade::Containers` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED Containers)
@@ -114,9 +114,9 @@ Corrade type            | STL equivalent
 
 Literals for easy construction of string views.
 
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library with CMake, request the `Containers` component of the
-`Corrade` package and link to the `Corrade::Containers` target:
+This library is built if `CORRADE_WITH_UTILITY` is enabled when building
+Corrade. To use this library with CMake, request the `Containers` component of
+the `Corrade` package and link to the `Corrade::Containers` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED Containers)
@@ -141,9 +141,9 @@ debug and error output (class @ref Debug), access to configuration files (class
 @ref Configuration) or compiling data files into the executable (class
 @ref Resource, see also @ref resource-management "tutorial").
 
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library with CMake, request the `Utility` component of the `Corrade`
-package and link to the `Corrade::Utility` target:
+This library is built if `CORRADE_WITH_UTILITY` is enabled when building
+Corrade. To use this library with CMake, request the `Utility` component of the
+`Corrade` package and link to the `Corrade::Utility` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED Utility)
@@ -168,9 +168,9 @@ and instancing plugins. There is also an @ref AbstractPlugin class, which is
 the base of all plugins. See @ref plugin-management for a brief introduction to
 how plugins work.
 
-This library is built if `WITH_PLUGINMANAGER` is enabled when building Corrade.
-To use this library with CMake, request the `PluginManager` component of the
-`Corrade` package and link to the `Corrade::PluginManager` target:
+This library is built if `CORRADE_WITH_PLUGINMANAGER` is enabled when building
+Corrade. To use this library with CMake, request the `PluginManager` component
+of the `Corrade` package and link to the `Corrade::PluginManager` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED PluginManager)
@@ -191,9 +191,9 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 This library allows you to interconnect objects. See @ref interconnect for more
 information.
 
-This library is built if `WITH_INTERCONNECT` is enabled when building Corrade.
-To use this library with CMake, request the `Interconnect` component of the
-`Corrade` package and link to the `Corrade::Interconnect` target:
+This library is built if `CORRADE_WITH_INTERCONNECT` is enabled when building
+Corrade. To use this library with CMake, request the `Interconnect` component
+of the `Corrade` package and link to the `Corrade::Interconnect` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED Interconnect)
@@ -213,11 +213,12 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 
 Testing and benchmarking framework. See @ref testsuite for more information.
 
-This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
-use this library with CMake, request the `TestSuite` component of the `Corrade`
-package and link to the `Corrade::TestSuite` target. Most commonly you'll be
-using it through the @ref corrade-cmake-add-test "corrade_add_test()" macro as
-described in the @ref testsuite "tutorial":
+This library is built if `CORRADE_WITH_TESTSUITE` is enabled when building
+Corrade. To use this library with CMake, request the `TestSuite` component of
+the `Corrade` package and link to the `Corrade::TestSuite` target. Most
+commonly you'll be using it through the
+@ref corrade-cmake-add-test "corrade_add_test()" macro as described in the
+@ref testsuite "tutorial":
 
 @code{.cmake}
 find_package(Corrade REQUIRED TestSuite)
@@ -245,9 +246,9 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 See @ref TestSuite-Tester-advanced-comparisons, @ref CORRADE_COMPARE_AS(),
 @ref CORRADE_COMPARE_WITH() and @ref Comparator for more information.
 
-This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
-use this library with CMake, request the `TestSuite` component of the `Corrade`
-package in CMake and link to the `Corrade::TestSuite` target:
+This library is built if `CORRADE_WITH_TESTSUITE` is enabled when building
+Corrade. To use this library with CMake, request the `TestSuite` component of
+the `Corrade` package in CMake and link to the `Corrade::TestSuite` target:
 
 @code{.cmake}
 find_package(Corrade REQUIRED TestSuite)
