@@ -472,7 +472,9 @@ JsonWriter& JsonWriter::write(const long long value) {
 }
 
 JsonWriter& JsonWriter::write(const Containers::StringView value) {
+    #ifndef CORRADE_NO_ASSERT
     State& state = *_state;
+    #endif
     CORRADE_ASSERT(
         state.expecting == Expecting::Value ||
         state.expecting == Expecting::ObjectValue ||
