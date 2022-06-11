@@ -7,10 +7,10 @@ git submodule update --init
 mkdir build && cd build
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps-native \
-    -DWITH_INTERCONNECT=OFF \
-    -DWITH_PLUGINMANAGER=OFF \
-    -DWITH_TESTSUITE=OFF \
-    -DWITH_UTILITY=OFF \
+    -DCORRADE_WITH_INTERCONNECT=OFF \
+    -DCORRADE_WITH_PLUGINMANAGER=OFF \
+    -DCORRADE_WITH_TESTSUITE=OFF \
+    -DCORRADE_WITH_UTILITY=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -G Ninja
 ninja install
@@ -24,9 +24,9 @@ cmake .. \
     -DCMAKE_OSX_ARCHITECTURES="x86_64" \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-    -DBUILD_STATIC=ON \
-    -DBUILD_TESTS=ON \
-    -DTESTSUITE_TARGET_XCTEST=ON \
+    -DCORRADE_BUILD_STATIC=ON \
+    -DCORRADE_BUILD_TESTS=ON \
+    -DCORRADE_TESTSUITE_TARGET_XCTEST=ON \
     -G Xcode
 set -o pipefail && cmake --build . --config Release | xcbeautify
 CORRADE_TEST_COLOR=ON ctest -V -C Release

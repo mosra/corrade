@@ -9,10 +9,10 @@ mkdir build && cd build || exit /b
 cmake .. ^
     -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/deps-native ^
-    -DWITH_INTERCONNECT=OFF ^
-    -DWITH_PLUGINMANAGER=OFF ^
-    -DWITH_TESTSUITE=OFF ^
-    -DWITH_UTILITY=OFF ^
+    -DCORRADE_WITH_INTERCONNECT=OFF ^
+    -DCORRADE_WITH_PLUGINMANAGER=OFF ^
+    -DCORRADE_WITH_TESTSUITE=OFF ^
+    -DCORRADE_WITH_UTILITY=OFF ^
     -G Ninja || exit /b
 cmake --build . || exit /b
 cmake --build . --target install || exit /b
@@ -25,7 +25,7 @@ cmake .. ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^
     -DCMAKE_SYSTEM_VERSION=10.0 ^
     -DCORRADE_RC_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/deps-native/bin/corrade-rc.exe ^
-    -DBUILD_STATIC=ON ^
+    -DCORRADE_BUILD_STATIC=ON ^
     -G "%GENERATOR%" || exit /b
 cmake --build . --config Release || exit /b
 

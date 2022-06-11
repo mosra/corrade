@@ -19,7 +19,7 @@ build() {
     scan-build --use-c++=$(which clang++) cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTS=ON \
+        -DCORRADE_BUILD_TESTS=ON \
         -G Ninja
     scan-build --use-c++=$(which clang++) --view ninja
 }

@@ -8,8 +8,8 @@ cmake .. ^
     -DCMAKE_CXX_FLAGS="--coverage" ^
     -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/deps ^
-    -DUTILITY_USE_ANSI_COLORS=ON ^
-    -DBUILD_TESTS=ON ^
+    -DCORRADE_UTILITY_USE_ANSI_COLORS=ON ^
+    -DCORRADE_BUILD_TESTS=ON ^
     -G Ninja || exit /b
 cmake --build . || exit /b
 
