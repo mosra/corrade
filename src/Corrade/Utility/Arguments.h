@@ -853,17 +853,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * program with `1`.
          * @see @ref tryParse(), @ref usage(), @ref help()
          */
-        void parse(int argc, const char** argv);
-
-        /** @overload */
-        void parse(int argc, char** argv) {
-            parse(argc, const_cast<const char**>(argv));
-        }
-
-        /** @overload */
-        void parse(int argc, std::nullptr_t argv) {
-            parse(argc, static_cast<const char**>(argv));
-        }
+        void parse(int argc, const char* const* argv);
 
         /**
          * @brief Try parsing the arguments
@@ -873,17 +863,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * additional arguments are parsed, only `--help` option is set and
          * @cpp true @ce is returned.
          */
-        bool tryParse(int argc, const char** argv);
-
-        /** @overload */
-        bool tryParse(int argc, char** argv) {
-            return tryParse(argc, const_cast<const char**>(argv));
-        }
-
-        /** @overload */
-        bool tryParse(int argc, std::nullptr_t argv) {
-            return tryParse(argc, static_cast<const char**>(argv));
-        }
+        bool tryParse(int argc, const char* const* argv);
 
         /**
          * @brief Usage string
