@@ -202,10 +202,10 @@ if(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS AND CORRADE_BUILD_DEPRECATED)
     # when e.g. CORRADE_BUILD_STATIC_PIC is implicitly ON but BUILD_STATIC_PIC
     # not yet.
     if(BUILD_STATIC)
-        if(NOT DEFINED BUILD_STATIC_PIC)
+        if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT DEFINED BUILD_STATIC_PIC)
             set(BUILD_STATIC_PIC ON)
         endif()
-        if(NOT DEFINED BUILD_STATIC_UNIQUE_GLOBALS)
+        if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT DEFINED BUILD_STATIC_UNIQUE_GLOBALS)
             set(BUILD_STATIC_UNIQUE_GLOBALS ON)
         endif()
     endif()
@@ -229,7 +229,7 @@ if(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS AND CORRADE_BUILD_DEPRECATED)
             # fix the warning apart from hand-enditing the CMakeCache.txt or
             # recreating the build dir. Update their cached type to be BOOL to
             # make them appear.
-            set(${option} ${${option}} CACHE BOOL "Deprecated, use CORRADE_${option} instead")
+            set(${option} ${${option}} CACHE BOOL "Deprecated, use CORRADE_${option} instead" FORCE)
         endif()
     endforeach()
 
