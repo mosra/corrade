@@ -327,6 +327,10 @@ namespace Corrade {
 -   Updated Emscripten toolchains to not pass `-s WASM` to the compiler, as
     only the linker needs it and recent versions complain loudly (see
     [mosra/toolchains#16](https://github.com/mosra/toolchains/pull/16))
+-   @ref Corrade/Utility/Memory.h now has @cpp #include <malloc.h> @ce on
+    Windows as well instead of declaring aligned memory allocation functions on
+    its own, as it's not worth the seriously-looking compiler warnings (see
+    [mosra/corrade#145](https://github.com/mosra/corrade/issues/145))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

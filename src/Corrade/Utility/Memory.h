@@ -39,16 +39,12 @@
 #include "Corrade/Containers/initializeHelpers.h"
 #include "Corrade/Utility/visibility.h"
 
-#ifdef CORRADE_TARGET_UNIX
 #ifdef CORRADE_TARGET_APPLE
 #include <stdlib.h>
-#else
+#elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
+/* On Windows it's <malloc.h> as well, and it's relatively tiny without pulling
+   in any of the <windows.h> horror, so it's fine */
 #include <malloc.h>
-#endif
-#elif defined(CORRADE_TARGET_WINDOWS)
-/* <malloc.h> as well, but I don't want to include all the nasty shit */
-extern "C" void* __cdecl _aligned_malloc(size_t, size_t);
-extern "C" void __cdecl _aligned_free(void*);
 #endif
 
 namespace Corrade { namespace Utility {
