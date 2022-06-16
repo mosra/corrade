@@ -757,9 +757,14 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @snippet Containers.cpp StridedArrayView-slice-member-function
          *
          * Expects the function to return a reference to the class data members
-         * (i.e., the returned offset being less than @cpp sizeof(T) @ce). To
-         * avoid ambiguity, a @cpp const @ce overload is always picked on a
-         * @cpp const @ce view and a non-const overload on a mutable view.
+         * (i.e., the returned offset being less than @cpp sizeof(T) @ce).
+         *
+         * @note To prevent ambiguous overload errors, a @cpp const @ce
+         *      overload is always picked on a @cpp const @ce view and a
+         *      non-const overload on a mutable view. This implies that it's
+         *      not possible to slice to a @cpp const @ce function on a mutable
+         *      view --- instead convert the view to a @cpp const @ce type
+         *      first and then perform the slice.
          *
          * @attention Note that in order to get the offset, the member function
          *      is internally executed on a zeroed-out piece of memory. Thus
