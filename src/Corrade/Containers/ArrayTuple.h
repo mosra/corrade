@@ -273,6 +273,8 @@ namespace Implementation {
        template parameters inside lambdas */
     template<class T> inline void callDeleter(char* data, std::size_t) {
         reinterpret_cast<T*>(data)->~T();
+        /* "warning C4100: 'data': unreferenced formal parameter" otherwise */
+        static_cast<void>(data);
     }
     template<class D> inline void wrapStatefulDeleter(char* state, std::size_t size) {
         D deleter = *reinterpret_cast<D*>(state);
