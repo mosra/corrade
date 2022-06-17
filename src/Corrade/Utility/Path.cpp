@@ -611,9 +611,15 @@ Containers::Optional<Containers::String> homeDirectory() {
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /** @todo get rid of MAX_PATH */
     wchar_t h[MAX_PATH + 1];
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h) == S_OK);
+    /* This could fail for example with E_INVALIDARG for system accounts
+       without a home folder */
+    if(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h) != S_OK) {
+        Error err;
+        err << "Utility::Path::homeDirectory(): can't retrieve CSIDL_PERSONAL:";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
+        return {};
+    }
+
     return fromNativeSeparators(Unicode::narrow(h));
 
     /* Other */
@@ -657,11 +663,12 @@ Containers::Optional<Containers::String> configurationDirectory(const Containers
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /** @todo get rid of MAX_PATH */
     wchar_t path[MAX_PATH];
-    /* There doesn't seem to be any possibility how this could fail, so just
-       assert */
-    CORRADE_INTERNAL_ASSERT(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path) == S_OK);
-    if(path[0] == L'\0') {
-        Error{} << "Utility::Path::configurationDirectory(): can't retrieve CSIDL_APPDATA";
+    /* This could fail for example with E_INVALIDARG for system accounts
+       without a home folder */
+    if(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path) != S_OK) {
+        Error err;
+        err << "Utility::Path::configurationDirectory(): can't retrieve CSIDL_APPDATA:";
+        Utility::Implementation::printWindowsErrorString(err, GetLastError());
         return {};
     }
     return join(fromNativeSeparators(Unicode::narrow(path)), applicationName);

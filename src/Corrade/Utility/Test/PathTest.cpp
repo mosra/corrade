@@ -1546,8 +1546,24 @@ void PathTest::homeDirectory() {
 }
 
 void PathTest::homeDirectoryInvalid() {
-    /* Could be tested by temporarily removing $HOME, but ... ahem */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* The query fails for system accounts, and system accounts apparently have
+       no access to environment, so checking if %HOMEPATH% is missing:
+       https://serverfault.com/questions/292040/win-service-running-under-localservice-account-cannot-access-environment-variabl */
+    if(std::getenv("HOMEPATH"))
+        CORRADE_SKIP("%HOMEPATH% exists, can't test.");
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::homeDirectory());
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::homeDirectory(): can't retrieve CSIDL_PERSONAL: error 666 (",
+        TestSuite::Compare::StringHasPrefix);
+
+    #else
+    /* On Unix could be tested by temporarily removing $HOME, but ... ahem */
     CORRADE_SKIP("Not sure how to test this.");
+    #endif
 }
 
 void PathTest::homeDirectoryUtf8() {
@@ -1617,9 +1633,25 @@ void PathTest::configurationDirectory() {
 }
 
 void PathTest::configurationDirectoryInvalid() {
-    /* Could be tested by temporarily removing $XDG_CONFIG_HOME and $HOME, but
-       ... ahem */
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* The query fails for system accounts, and system accounts apparently have
+       no access to environment, so checking if %HOMEPATH% is missing:
+       https://serverfault.com/questions/292040/win-service-running-under-localservice-account-cannot-access-environment-variabl */
+    if(std::getenv("APPDATA"))
+        CORRADE_SKIP("%APPDATA% exists, can't test.");
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::configurationDirectory("Corrade"));
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::configurationDirectory(): can't retrieve CSIDL_APPDATA: error 666 (",
+        TestSuite::Compare::StringHasPrefix);
+
+    #else
+    /* On Unix could be tested by temporarily removing $XDG_CONFIG_HOME and
+       $HOME, but ... ahem */
     CORRADE_SKIP("Not sure how to test this.");
+    #endif
 }
 
 void PathTest::configurationDirectoryUtf8() {
