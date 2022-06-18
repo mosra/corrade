@@ -392,7 +392,7 @@ class Array {
          * constructor and then initializes each element with placement new
          * using forwarded @p args.
          */
-        template<class... Args> explicit Array(Corrade::DirectInitT, std::size_t size, Args&&... args);
+        template<class ...Args> explicit Array(Corrade::DirectInitT, std::size_t size, Args&&... args);
 
         /**
          * @brief Construct a list-initialized array

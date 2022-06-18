@@ -684,13 +684,13 @@ the new elements at the end are constructed using placement-new with provided
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
 */
-template<class T, class... Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
+template<class T, class ...Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
 
 /**
 @overload
 @m_since{2020,06}
 */
-template<class T, class Allocator, class... Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
+template<class T, class Allocator, class ...Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -703,7 +703,7 @@ template<class T, class Allocator, class... Args> void arrayResize(Array<T>& arr
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args) {
+template<template<class> class Allocator, class T, class ...Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args) {
     arrayResize<T, Allocator<T>>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
 }
 #endif
@@ -800,7 +800,7 @@ on a @ref std::vector.
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
 */
-template<class T, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
+template<class T, class ...Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
 
 /* This crap tool can't distinguish between these and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -810,7 +810,7 @@ template<class T, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlac
 @overload
 @m_since{2020,06}
 */
-template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
+template<class T, class Allocator, class ...Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
 
 /**
 @overload
@@ -819,7 +819,7 @@ template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T, class... Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
+template<template<class> class Allocator, class T, class ...Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
     return arrayAppend<T, Allocator<T>>(array, Corrade::InPlaceInit, Utility::forward<Args>(args)...);
 }
 #endif
@@ -1307,7 +1307,7 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::Va
     Implementation::arrayConstruct(Corrade::ValueInit, array + prevSize, array.end());
 }
 
-template<class T, class Allocator, class... Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
+template<class T, class Allocator, class ...Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
     const std::size_t prevSize = array.size();
     arrayResize<T, Allocator>(array, Corrade::NoInit, size);
 
@@ -1317,7 +1317,7 @@ template<class T, class Allocator, class... Args> void arrayResize(Array<T>& arr
         Implementation::construct(*it, Utility::forward<Args>(args)...);
 }
 
-template<class T, class... Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
+template<class T, class ...Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
     arrayResize<T, ArrayAllocator<T>, Args...>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
 }
 
@@ -1403,7 +1403,7 @@ template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& arr
     return {it, valueCount};
 }
 
-template<class T, class... Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
+template<class T, class ...Args> inline T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
     return arrayAppend<T, ArrayAllocator<T>>(array, Corrade::InPlaceInit, Utility::forward<Args>(args)...);
 }
 
@@ -1411,7 +1411,7 @@ template<class T, class... Args> inline T& arrayAppend(Array<T>& array, Corrade:
    just one with the docs melted together. More useless than showing nothing
    at all, so hiding this one from it until it improves. */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T, class Allocator, class... Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
+template<class T, class Allocator, class ...Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
     /* No helper function as there's no way we could memcpy such a thing. */
     /* On GCC 4.8 this includes another workaround, see the 4.8-specific
