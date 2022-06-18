@@ -133,7 +133,7 @@ template<class T> struct ArrayNewAllocator {
     }
 
     /**
-     * @brief Grow the array
+     * @brief Grow an array
      *
      * If current occupied size (including the space needed to store capacity)
      * is less than 64 bytes, the capacity always doubled, with the allocation
@@ -261,7 +261,7 @@ template<class T> struct ArrayMallocAllocator {
     }
 
     /**
-     * @brief Grow the array
+     * @brief Grow an array
      *
      * Behaves the same as @ref ArrayNewAllocator::grow().
      */
@@ -346,7 +346,7 @@ template<class T> struct ArrayAllocator {
     static void deallocate(T* data);
 
     /**
-     * @brief Grow the array
+     * @brief Grow an array
      *
      * Assumes that @p array is either @cpp nullptr @ce or was returned earlier
      * by @ref allocate() or @ref reallocate(). Implementations are expected to
@@ -443,7 +443,7 @@ template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
 }
 
 /**
-@brief Whether the array is growable
+@brief Whether an array is growable
 @m_since{2020,06}
 
 Returns @cpp true @ce if the array is growable and using given @p Allocator,
@@ -660,7 +660,8 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
-uninitialized state instead.
+uninitialized state instead. I.e., placement-new is meant to be used on *all*
+newly added elements with a non-trivially-copyable @p T.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible.
@@ -885,7 +886,7 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 #endif
 
 /**
-@brief Append a list of items to an array
+@brief Copy-append a list of items to an array
 @return View on the newly appended items
 @m_since{2020,06}
 
@@ -941,13 +942,15 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayApp
 #endif
 
 /**
-@brief Append given count of uninitialized values to the array
+@brief Append given count of uninitialized values to an array
 @return View on the newly appended items
 @m_since{2020,06}
 
-A lower-level variant of @ref arrayAppend(Array<T>& array, ArrayView<const T>)
-where the new values are meant to be initialized in-place after, instead of
-being copied from a pre-existing location.
+A lower-level variant of @ref arrayAppend(Array<T>&, ArrayView<const T>) where
+the new values are meant to be initialized in-place after, instead of being
+copied from a pre-existing location. The new values are always uninitialized
+--- ii.e., placement-new is meant to be used on *all* inserted elements with
+a non-trivially-copyable @p T.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible.
@@ -976,11 +979,11 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppe
 #endif
 
 /**
-@brief Remove a suffix from the array
+@brief Remove a suffix from an array
 @m_since{2020,06}
 
 Expects that @p count is not larger than @ref Array::size(). If the array is
-not growable, all its elements except the suffix are first reallocated to a
+not growable, all its elements except the removed suffix are reallocated to a
 growable version. Otherwise, a destructor is called on removed elements and the
 @ref Array::size() is decreased by @p count.
 
@@ -1381,7 +1384,8 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
         return arrayGuts.data + arrayGuts.size;
 
     /* For arrays with an unknown deleter we'll always copy-allocate to a new
-       place */
+       place. Not using reallocate() as we don't know where the original memory
+       comes from. */
     const std::size_t desiredCapacity = arrayGuts.size + count;
     std::size_t capacity;
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
