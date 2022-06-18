@@ -923,7 +923,9 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppe
 @overload
 @m_since{2020,06}
 */
-template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values);
+template<class T, class Allocator = ArrayAllocator<T>> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+    return arrayAppend<T, Allocator>(array, arrayView(values));
+}
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -1441,10 +1443,6 @@ template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const 
     new(it) T{value};
     #endif
     return *it;
-}
-
-template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const std::initializer_list<T> values) {
-    return arrayAppend<T, Allocator>(array, {values.begin(), values.size()});
 }
 
 template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const ArrayView<const T> values) {
