@@ -349,6 +349,10 @@ namespace Corrade {
 -   Fixed @ref Utility::Path::move() to overwrite the destination if it exists
     also on Windows, consistently with other platforms (see
     [mosra/corrade#143](https://github.com/mosra/corrade/pull/143))
+-   Fixed @ref Utility::Path::homeDirectory() and
+    @relativeref{Utility::Path,configurationDirectory()} to not use an old
+    Windows API that tends to prefer OneDrive over local user directories
+    (see [mosra/corrade#144](https://github.com/mosra/corrade/pull/144))
 -   Added GCC 4.8-specific workarounds to @ref Containers::Array, growable
     array utils, @ref Containers::Optional, @ref Containers::Pointer and
     @ref Containers::StaticArray where using @cpp T{b} @ce or

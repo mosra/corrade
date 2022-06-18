@@ -5,6 +5,7 @@
                 2017, 2018, 2019, 2020, 2021, 2022
               Vladimír Vondruš <mosra@centrum.cz>
     Copyright © 2019, 2020 Jonathan Hale <squareys@googlemail.com>
+    Copyright © 2022 William JCM <w.jcm59@gmail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
