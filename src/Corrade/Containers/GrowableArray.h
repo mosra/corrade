@@ -739,7 +739,7 @@ template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(A
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, std::size_t size, const typename std::common_type<T>::type& value) {
+template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, std::size_t size, const typename std::common_type<T>::type& value) {
     arrayResize<T, Allocator<T>>(array, size, value);
 }
 #endif
