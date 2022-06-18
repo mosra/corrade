@@ -74,6 +74,10 @@
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
 #ifdef CORRADE_TARGET_WINDOWS
 #ifdef __MINGW32__
+/* For SHGetKnownFolderPath() on MinGW: https://stackoverflow.com/a/59033437 */
+#ifndef NTDDI_VERSION
+#define NTDDI_VERSION 0x06000000
+#endif
 #include <wtypes.h>
 #include <windef.h>
 #include <wincrypt.h>
