@@ -84,8 +84,9 @@ template<class T> struct AllocatorTraits {
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C++
 @cpp new[] @ce / @cpp delete[] @ce constructs, reserving an extra space
-* *before* to store array capacity. Expects that @p T is nothrow
-move-constructible.
+* *before* to store array capacity.
+
+All reallocation operations expect that @p T is nothrow move-constructible.
 @see @ref Containers-Array-growable
 */
 template<class T> struct ArrayNewAllocator {
@@ -184,9 +185,11 @@ template<class T> struct ArrayNewAllocator {
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C
 @ref std::malloc() / @ref std::free() constructs in order to be able to use
-@ref std::realloc() for fast reallocations. Expects that @p T is trivially
-copyable. Similarly to @ref ArrayNewAllocator it's reserving an extra space
-* *before* to store array capacity.
+@ref std::realloc() for fast reallocations. Similarly to @ref ArrayNewAllocator
+it's reserving an extra space *before* to store array capacity.
+
+All reallocation operations expect that @p T is trivially copyable. If it's
+not, use @ref ArrayNewAllocator instead.
 
 Compared to @ref ArrayNewAllocator, this allocator stores array capacity in
 bytes and, together with the fact that @ref std::free() doesn't care about the
@@ -300,11 +303,15 @@ template<class T> struct ArrayMallocAllocator {
 @m_since{2020,06}
 
 Is either @ref ArrayMallocAllocator for trivially copyable @p T, or
-@ref ArrayNewAllocator otherwise. See @ref Containers-Array-growable for an
-introduction to growable arrays. You can provide your own allocator by
-implementing a class that with @ref Type, @ref allocate(), @ref reallocate(),
-@ref deallocate(), @ref grow(), @ref capacity(), @ref base() and @ref deleter()
-following the documented semantics.
+@ref ArrayNewAllocator otherwise, in which case reallocation operations expect
+@p T to be nothrow move-constructible.
+
+See @ref Containers-Array-growable for an introduction to growable arrays.
+
+You can provide your own allocator by implementing a class that with @ref Type,
+@ref allocate(), @ref reallocate(), @ref deallocate(), @ref grow(),
+@ref capacity(), @ref base() and @ref deleter() following the documented
+semantics.
 */
 template<class T> struct ArrayAllocator {
     typedef T Type; /**< Pointer type */
@@ -467,8 +474,8 @@ template<template<class T> class Allocator, class T> inline bool arrayIsGrowable
 @brief Array capacity
 @m_since{2020,06}
 
-For a growable array returns its capacity, for a non-growable array returns
-@ref Array::size().
+For a growable array using given @p Allocator returns its capacity, otherwise
+returns @ref Array::size().
 
 This function is equivalent to calling @relativeref{std::vector,capacity()} on
 a @ref std::vector.
@@ -505,7 +512,9 @@ without being reallocated to a growable version.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the original
 container, @f$ \mathcal{O}(1) @f$ if the capacity is already large enough or
-if the reallocation can be done in-place.
+if the reallocation can be done in-place. This function imposes no additional
+constraints on @p T on top of what the @p Allocator (or the default
+@ref ArrayAllocator) itself needs.
 
 This function is equivalent to calling @relativeref{std::vector,reserve()} on
 a @ref std::vector.
@@ -545,7 +554,8 @@ size, it's kept as such, without being reallocated to a growable version.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the new container,
 @f$ \mathcal{O}(1) @f$ if current container size is already exactly of given
-size.
+size. On top of what the @p Allocator (or the default @ref ArrayAllocator)
+itself needs, @p T is required to be default-constructible.
 @see @ref Array::size(), @ref arrayCapacity(), @ref arrayIsGrowable(),
     @ref arrayRemoveSuffix(), @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
@@ -580,6 +590,9 @@ Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but value-initialized
 (i.e., trivial types zero-initialized and default constructor called
 otherwise).
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be default-constructible.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
@@ -646,6 +659,9 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
 uninitialized state instead.
+
+This function imposes no additional constraints on @p T on top of what the
+@p Allocator (or the default @ref ArrayAllocator) itself needs.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
@@ -678,6 +694,9 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 Similar to @ref arrayResize(Array<T>&, ValueInitT, std::size_t) except that
 the new elements at the end are constructed using placement-new with provided
 @p args.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be constructible from provided @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
@@ -749,11 +768,13 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @return Reference to the newly appended item
 @m_since{2020,06}
 
-If the array is not growable or the capacity is not large enough, the array capacity is grown first. Then, @p value is copy-constructed at the end of the
+If the array is not growable or the capacity is not large enough, the array
+capacity is grown first. Then, @p value is copy-constructed at the end of the
 array and @ref Array::size() increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
-ratio is exponential.
+ratio is exponential. On top of what the @p Allocator (or the default
+@ref ArrayAllocator) itself needs, @p T is required to be copy-constructible.
 
 This function is equivalent to calling @relativeref{std::vector,push_back()} on
 a @ref std::vector.
@@ -791,6 +812,9 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 Similar to @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&)
 except that the new element is constructed using placement-new with provided
 @p args.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be constructible from provided @p args.
 
 This function is equivalent to calling @relativeref{std::vector,emplace_back()}
 on a @ref std::vector.
@@ -862,6 +886,9 @@ template<template<class> class Allocator, class T> inline T& arrayAppend(Array<T
 
 Like @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
 but inserting multiple values at once.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be copy-constructible.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -915,6 +942,9 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayApp
 A lower-level variant of @ref arrayAppend(Array<T>& array, ArrayView<const T>)
 where the new values are meant to be initialized in-place after, instead of
 being copied from a pre-existing location.
+
+This function imposes no additional constraints on @p T on top of what the
+@p Allocator (or the default @ref ArrayAllocator) itself needs.
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
@@ -948,6 +978,10 @@ not growable, all its elements except the suffix are first reallocated to a
 growable version. Otherwise, a destructor is called on removed elements and the
 @ref Array::size() is decreased by @p count.
 
+Amortized complexity is @f$ \mathcal{O}(n) @f$ where @f$ n @f$ is the number of
+items removed. This function imposes no additional constraints on @p T on top
+of what the @p Allocator (or the default @ref ArrayAllocator) itself needs.
+
 With @p count set to @cpp 1 @ce, this function is equivalent to calling
 @relativeref{std::vector,pop_back()} on a @ref std::vector.
 @m_keywords{pop_back()}
@@ -977,11 +1011,14 @@ template<template<class> class Allocator, class T> inline void arrayRemoveSuffix
 
 Allocates a @ref NoInit array that's exactly large enough to fit
 @ref Array::size() elements, move-constructs the elements there and frees the
-old memory using @ref Array::deleter(). If the array is not growable, it's
-assumed to be already as small as possible, and nothing is done.
+old memory using @ref Array::deleter(). If the array is not growable using
+given @p Allocator, it's assumed to be already as small as possible, and
+nothing is done.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
-@f$ \mathcal{O}(1) @f$ if the array is already non-growable.
+@f$ \mathcal{O}(1) @f$ if the array is already non-growable. No constraints
+on @p T from @p Allocator (or the default @ref ArrayAllocator) apply here but
+@p T is required to be move-constructible.
 
 This function is equivalent to calling @relativeref{std::vector,shrink_to_fit()}
 on a @ref std::vector.
@@ -997,13 +1034,18 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>
 
 Allocates a @ref DefaultInit array that's exactly large enough to fit
 @ref Array::size() elements, move-assigns the elements there and frees the old
-memory using @ref Array::deleter(). If the array is not growable, it's assumed
-to be already as small as possible, and nothing is done.
+memory using @ref Array::deleter(). If the array is not growable using
+given @p Allocator, it's assumed to be already as small as possible, and
+nothing is done.
 
-Compared to @ref arrayShrink(Array<T>&, NoInitT) this overload works only with
-types that are default-constructible, and the resulting array instance always
-has a default (@cpp nullptr @ce) deleter. This is useful when it's not possible
-to use custom deleters, such as in plugin implementations.
+Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
+@f$ \mathcal{O}(1) @f$ if the array is already non-growable. No constraints on
+@p T from @p Allocator (or the default @ref ArrayAllocator) apply here but @p T
+is required to be default-constructible and move-assignable.
+
+Compared to @ref arrayShrink(Array<T>&, NoInitT), the resulting array instance
+always has a default (@cpp nullptr @ce) deleter. This is useful when it's not
+possible to use custom deleters, such as in plugin implementations.
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, Corrade::DefaultInitT);
