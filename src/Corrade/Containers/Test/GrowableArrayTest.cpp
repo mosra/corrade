@@ -1972,16 +1972,11 @@ void GrowableArrayTest::removeSuffixInvalid() {
     #endif
 
     Array<int> a{4};
-    Array<int> b;
-    arrayResize(b, 4);
 
     std::ostringstream out;
     Error redirectOutput{&out};
-
     arrayRemoveSuffix(a, 5);
-    arrayRemoveSuffix(b, 5);
     CORRADE_COMPARE(out.str(),
-        "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n"
         "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n");
 }
 
