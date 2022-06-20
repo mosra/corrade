@@ -127,7 +127,9 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     template<class T> void removeSuffixZero();
     template<class T> void removeSuffixNonGrowable();
+    template<class T> void removeSuffixAllNonGrowable();
     template<class T> void removeSuffixGrowable();
+    template<class T> void removeSuffixAllGrowable();
     void removeSuffixInvalid();
 
     template<class T> void shrinkNonGrowableEmptyNoInit();
@@ -336,8 +338,12 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::removeSuffixZero<Movable>,
               &GrowableArrayTest::removeSuffixNonGrowable<int>,
               &GrowableArrayTest::removeSuffixNonGrowable<Movable>,
+              &GrowableArrayTest::removeSuffixAllNonGrowable<int>,
+              &GrowableArrayTest::removeSuffixAllNonGrowable<Movable>,
               &GrowableArrayTest::removeSuffixGrowable<int>,
               &GrowableArrayTest::removeSuffixGrowable<Movable>,
+              &GrowableArrayTest::removeSuffixAllGrowable<int>,
+              &GrowableArrayTest::removeSuffixAllGrowable<Movable>,
               &GrowableArrayTest::removeSuffixInvalid,
 
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<int>,
@@ -1846,6 +1852,43 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
     }
 }
 
+template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{2};
+        T* prev = a.data();
+        a[0] = 2;
+        a[1] = 7;
+
+        /* Gets converted to growable as otherwise we can't ensure the
+           destructors won't be called on removed elements */
+        arrayRemoveSuffix(a, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 0);
+        CORRADE_VERIFY(a.data() != prev);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The two items are constructed in-place, then a new empty growable
+           array is constructed, originals destructed */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
 template<class T> void GrowableArrayTest::removeSuffixGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -1876,26 +1919,50 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
             CORRADE_COMPARE(Movable::assigned, 0);
             CORRADE_COMPARE(Movable::destructed, 2);
         }
-
-        /* Remove the rest */
-        arrayRemoveSuffix(a, 2);
-        CORRADE_VERIFY(arrayIsGrowable(a));
-        CORRADE_COMPARE(a.size(), 0);
-        CORRADE_COMPARE(arrayCapacity(a), 10);
-        if(std::is_same<T, Movable>::value) {
-            CORRADE_COMPARE(Movable::constructed, 4);
-            CORRADE_COMPARE(Movable::moved, 0);
-            CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 4);
-        }
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
+    /* And finally also the two remaining destructed */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::assigned, 0);
         CORRADE_COMPARE(Movable::destructed, 4);
+    }
+}
+
+template<class T> void GrowableArrayTest::removeSuffixAllGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 10);
+        T* prev = a.data();
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        arrayRemoveSuffix(a, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 10);
+        CORRADE_VERIFY(a.data() == prev);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The two items are constructed in-place. Then, all are destructed. */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
     }
 }
 
