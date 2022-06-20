@@ -86,7 +86,7 @@ void GrowableArraySanitizerFailTest::testVector() {
 
     #ifndef _CORRADE_CONTAINERS_SANITIZER_ENABLED
     CORRADE_SKIP("ASan not enabled");
-    #endif
+    #else
     vector.data()[80] = 3;
 
     #ifdef CORRADE_TARGET_LIBSTDCXX
@@ -96,6 +96,7 @@ void GrowableArraySanitizerFailTest::testVector() {
     /* No mention of this at https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/,
        need to test to be sure it's not there. */
     CORRADE_VERIFY(!"This shouldn't be reached");
+    #endif
 }
 
 void GrowableArraySanitizerFailTest::testString() {
@@ -108,7 +109,7 @@ void GrowableArraySanitizerFailTest::testString() {
 
     #ifndef _CORRADE_CONTAINERS_SANITIZER_ENABLED
     CORRADE_SKIP("ASan not enabled");
-    #endif
+    #else
     (&string[0])[80] = 3;
     /* https://gcc.gnu.org/ml/gcc-patches/2017-07/msg00458.html, nothing in the
        WIP GCC 10 changelog yet either, libc++ has it "under review" (but can't
@@ -120,6 +121,7 @@ void GrowableArraySanitizerFailTest::testString() {
     /* No mention of this at https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/,
        need to test to be sure it's not there. */
     CORRADE_VERIFY(!"This shouldn't be reached");
+    #endif
 }
 
 void GrowableArraySanitizerFailTest::test() {
@@ -131,9 +133,14 @@ void GrowableArraySanitizerFailTest::test() {
 
     #ifndef _CORRADE_CONTAINERS_SANITIZER_ENABLED
     CORRADE_SKIP("ASan not enabled");
-    #endif
-    /* Even though the memory *is* there, this should cause ASan to complain */
+    #else
+    /* Even though the memory *is* there, this should cause ASan to complain.
+       Testing only a single kind of operation here to verify the annotations
+       actually cause the expected abort and ASan message. Validity of the
+       annotations after each operation is verified in GrowableArrayTest
+       itself. */
     array[80] = 5;
+    #endif
 }
 
 }}}}
