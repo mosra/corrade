@@ -94,19 +94,36 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<class T, class Init> void resizeFromGrowableToLess();
 
     template<class T> void appendFromEmpty();
+    template<class T> void insertFromEmpty();
     template<class T> void appendFromNonGrowable();
+    template<class T> void insertFromNonGrowable();
     template<class T> void appendFromGrowable();
+    template<class T> void insertFromGrowable();
     template<class T> void appendFromGrowableNoRealloc();
+    template<class T> void insertFromGrowableNoRealloc();
+    template<class T> void insertFromGrowableNoReallocNoInit();
 
     /* InPlace tested in appendFrom*() already */
     void appendCopy();
+    void insertCopy();
     void appendMove();
+    void insertMove();
     void appendList();
+    void insertList();
     void appendListEmpty();
+    void insertListEmpty();
     void appendCountNoInit();
+    void insertCountNoInit();
     void appendCountNoInitEmpty();
+    void insertCountNoInitEmpty();
+
+    void insertShiftOperationOrder();
+    void insertShiftOperationOrderNoOp();
+    void insertShiftOperationOrderNoOverlap();
+    void insertInvalid();
 
     void appendGrowRatio();
+    /* Insert uses the same growth ratio underneath, no need to test again */
 
     template<class T> void removeSuffixZero();
     template<class T> void removeSuffixNonGrowable();
@@ -140,7 +157,7 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     template<template<class> class Allocator, std::size_t alignment> void allocationAlignment();
 
-    void appendConflictingType();
+    void appendInsertConflictingType();
 
     /* Here go the benchmarks */
 
@@ -278,19 +295,40 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::appendFromEmpty<int>,
               &GrowableArrayTest::appendFromEmpty<Movable>,
+              &GrowableArrayTest::insertFromEmpty<int>,
+              &GrowableArrayTest::insertFromEmpty<Movable>,
               &GrowableArrayTest::appendFromNonGrowable<int>,
               &GrowableArrayTest::appendFromNonGrowable<Movable>,
+              &GrowableArrayTest::insertFromNonGrowable<int>,
+              &GrowableArrayTest::insertFromNonGrowable<Movable>,
               &GrowableArrayTest::appendFromGrowable<int>,
               &GrowableArrayTest::appendFromGrowable<Movable>,
+              &GrowableArrayTest::insertFromGrowable<int>,
+              &GrowableArrayTest::insertFromGrowable<Movable>,
               &GrowableArrayTest::appendFromGrowableNoRealloc<int>,
               &GrowableArrayTest::appendFromGrowableNoRealloc<Movable>,
+              &GrowableArrayTest::insertFromGrowableNoRealloc<int>,
+              &GrowableArrayTest::insertFromGrowableNoRealloc<Movable>,
+              &GrowableArrayTest::insertFromGrowableNoReallocNoInit<int>,
+              &GrowableArrayTest::insertFromGrowableNoReallocNoInit<Movable>,
 
               &GrowableArrayTest::appendCopy,
+              &GrowableArrayTest::insertCopy,
               &GrowableArrayTest::appendMove,
+              &GrowableArrayTest::insertMove,
               &GrowableArrayTest::appendList,
+              &GrowableArrayTest::insertList,
               &GrowableArrayTest::appendListEmpty,
+              &GrowableArrayTest::insertListEmpty,
               &GrowableArrayTest::appendCountNoInit,
+              &GrowableArrayTest::insertCountNoInit,
               &GrowableArrayTest::appendCountNoInitEmpty,
+              &GrowableArrayTest::insertCountNoInitEmpty,
+
+              &GrowableArrayTest::insertShiftOperationOrder,
+              &GrowableArrayTest::insertShiftOperationOrderNoOp,
+              &GrowableArrayTest::insertShiftOperationOrderNoOverlap,
+              &GrowableArrayTest::insertInvalid,
 
               &GrowableArrayTest::appendGrowRatio,
 
@@ -347,7 +385,7 @@ GrowableArrayTest::GrowableArrayTest() {
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 8>,
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 16>}, 100);
 
-    addTests({&GrowableArrayTest::appendConflictingType});
+    addTests({&GrowableArrayTest::appendInsertConflictingType});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1009,6 +1047,37 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
     }
 }
 
+template<class T> void GrowableArrayTest::insertFromEmpty() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        T& inserted = arrayInsert(a, 0, T{37});
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 1);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
+        CORRADE_COMPARE(int(a[0]), 37);
+        CORRADE_COMPARE(&inserted, &a[0]);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+    }
+
+    /* The 37 is constructed as a temporary and then move-constructed into the
+       new place */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 1);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
 template<class T> void GrowableArrayTest::appendFromNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -1054,6 +1123,48 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
     }
 }
 
+template<class T> void GrowableArrayTest::insertFromNonGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{3};
+        T* prev = a;
+        a[0] = 28;
+        a[1] = 42;
+        a[2] = 56;
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 3);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 0);
+        }
+
+        T& inserted = arrayInsert(a, 1, T{37});
+        CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 4);
+        CORRADE_COMPARE(arrayCapacity(a), 4);
+        CORRADE_COMPARE(int(a[0]), 28);
+        CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(int(a[2]), 42);
+        CORRADE_COMPARE(int(a[3]), 56);
+        CORRADE_COMPARE(&inserted, &a[1]);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+    }
+
+    /* The first three items are default-constructed in-place. Then, 37 is
+       constructed as a temporary. Then as insert reallocates, 28, 42 and 56 is
+       move-constructed into new memory (fifth to seventh construction, first
+       to third move), leaving a gap in between. Then 37 is move-constructed
+       (eighth construction, fourth move) into the new place. */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 8);
+        CORRADE_COMPARE(Movable::moved, 4);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 8);
+    }
+}
+
 template<class T> void GrowableArrayTest::appendFromGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -1094,6 +1205,56 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
     }
 }
 
+template<class T> void GrowableArrayTest::insertFromGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayResize(a, 3);
+        T* prev = a;
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        a[0] = 28;
+        a[1] = 42;
+        a[2] = 56;
+        T& inserted = arrayInsert(a, 1, T{37});
+        /* std::realloc() for ints might extend it in-place */
+        if(std::is_same<T, Movable>::value)
+            CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 4);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 8);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 7);
+        #endif
+        CORRADE_COMPARE(int(a[0]), 28);
+        CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(int(a[2]), 42);
+        CORRADE_COMPARE(int(a[3]), 56);
+        CORRADE_COMPARE(&inserted, &a[1]);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+    }
+
+    /* The first three items are default-constructed in-place. Then, 37 is
+       constructed as a temporary. Then, as insert reallocates, 28, 42 and 56
+       is move-constructed into new memory (fifth to seventh construction,
+       first to third move), 56 move-constructed (eighth construction, fourth
+       move) to a new place, 42 move-assigned (fifth move, first assignment) to
+       where 56 was before, and the moved-out gap after 42 is destructed. Then,
+       37 is move-constructed into the new place (9th construction, 6th move). */
+    /** @todo fix to do the "widening" move directly during reallocation and
+        not in a subsequent step; change destruction + move-construction to
+        a move-assignment */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 9);
+        CORRADE_COMPARE(Movable::moved, 6);
+        CORRADE_COMPARE(Movable::assigned, 1);
+        CORRADE_COMPARE(Movable::destructed, 9);
+    }
+}
+
 template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -1126,6 +1287,90 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
     }
 }
 
+template<class T> void GrowableArrayTest::insertFromGrowableNoRealloc() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 4);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+        T* prev = a;
+        arrayResize(a, 3);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+        a[0] = 28;
+        a[1] = 42;
+        a[2] = 56;
+        T& inserted = arrayInsert(a, 1, T{37});
+        CORRADE_VERIFY(a == prev);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 4);
+        CORRADE_COMPARE(arrayCapacity(a), 4);
+        CORRADE_COMPARE(int(a[0]), 28);
+        CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(int(a[2]), 42);
+        CORRADE_COMPARE(int(a[3]), 56);
+        CORRADE_COMPARE(&inserted, &a[1]);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+    }
+
+    /* The first three items are constructed in-place. Then, 37 is constructed
+       as a temporary. Then, 56 is move-constructed (fifth construction, first
+       move) to a new place, 42 is move-assigned (second move, first
+       assignment) to where 56 was before, and the moved-out gap after 42 is
+       destructed. Then, 37 is move-constructed to where 42 was before (6th construction, third move). */
+    /** @todo fix destruction + move-construction to a move-assignment */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 6);
+        CORRADE_COMPARE(Movable::moved, 3);
+        CORRADE_COMPARE(Movable::assigned, 1);
+        CORRADE_COMPARE(Movable::destructed, 6);
+    }
+}
+
+template<class T> void GrowableArrayTest::insertFromGrowableNoReallocNoInit() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 4);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+        T* prev = a;
+        arrayResize(a, 3);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+        a[0] = 28;
+        a[1] = 42;
+        a[2] = 56;
+        T& inserted = arrayInsert(a, 1, Corrade::NoInit, 1).front();
+        new(&inserted) T{37};
+        CORRADE_VERIFY(a == prev);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 4);
+        CORRADE_COMPARE(arrayCapacity(a), 4);
+        CORRADE_COMPARE(int(a[0]), 28);
+        CORRADE_COMPARE(int(a[1]), 37);
+        CORRADE_COMPARE(int(a[2]), 42);
+        CORRADE_COMPARE(int(a[3]), 56);
+        CORRADE_COMPARE(&inserted, &a[1]);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+    }
+
+    /* The first three items are constructed in-place. Then, 56 is
+       move-constructed (fourth construction, first move) to a new place, 42 is
+       move-assigned (second move, first assignment) to where 56 was before,
+       and the moved-out gap after 42 is destructed. Then, 37 is constructed
+       in-place (fifth construction).
+
+       Compared to insertFromGrowableNoRealloc(), the destruction of the gap
+       after 42 has to happen so users can always perform a placement-new
+       without having to worry about what was there before. */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 5);
+        CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 1);
+        CORRADE_COMPARE(Movable::destructed, 5);
+    }
+}
+
 void GrowableArrayTest::appendCopy() {
     Array<int> a;
     int& appended = arrayAppend(a, 2786541);
@@ -1140,6 +1385,23 @@ void GrowableArrayTest::appendCopy() {
     #endif
     CORRADE_COMPARE(a[0], 2786541);
     CORRADE_COMPARE(&appended, &a.back());
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::insertCopy() {
+    Array<int> a;
+    int& inserted = arrayInsert(a, 0, 2786541);
+    CORRADE_COMPARE(a.size(), 1);
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(arrayCapacity(a), 2);
+    /** @todo expose Implementation::DefaultAllocationAlignment instead */
+    #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_COMPARE(arrayCapacity(a), 1);
+    #else
+    CORRADE_COMPARE(arrayCapacity(a), 3);
+    #endif
+    CORRADE_COMPARE(a[0], 2786541);
+    CORRADE_COMPARE(&inserted, &a.back());
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
@@ -1167,6 +1429,30 @@ void GrowableArrayTest::appendMove() {
     CORRADE_COMPARE(Movable::destructed, 2);
 }
 
+void GrowableArrayTest::insertMove() {
+    {
+        Array<Movable> a;
+        Movable& inserted = arrayInsert(a, 0, Movable{25141});
+        CORRADE_COMPARE(a.size(), 1);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
+        CORRADE_COMPARE(a[0].a, 25141);
+        CORRADE_COMPARE(&inserted, &a.back());
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::moved, 1);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 2);
+}
+
 void GrowableArrayTest::appendList() {
     Array<int> a;
     Containers::ArrayView<int> appended = arrayAppend(a, {17, -22, 65, 2786541});
@@ -1178,6 +1464,20 @@ void GrowableArrayTest::appendList() {
     CORRADE_COMPARE(a[3], 2786541);
     CORRADE_COMPARE(appended.data(), a.data());
     CORRADE_COMPARE(appended.size(), 4);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::insertList() {
+    Array<int> a;
+    Containers::ArrayView<int> inserted = arrayInsert(a, 0, {17, -22, 65, 2786541});
+    CORRADE_COMPARE(a.size(), 4);
+    CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
+    CORRADE_COMPARE(a[0], 17);
+    CORRADE_COMPARE(a[1], -22);
+    CORRADE_COMPARE(a[2], 65);
+    CORRADE_COMPARE(a[3], 2786541);
+    CORRADE_COMPARE(inserted.data(), a.data());
+    CORRADE_COMPARE(inserted.size(), 4);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
@@ -1193,6 +1493,18 @@ void GrowableArrayTest::appendListEmpty() {
     CORRADE_COMPARE(appended.size(), 0);
 }
 
+void GrowableArrayTest::insertListEmpty() {
+    Array<int> a{3};
+    int* prev = a.data();
+    Containers::ArrayView<int> inserted = arrayInsert(a, 1, {});
+
+    /* Should be a no-op, not reallocating the (non-growable) array */
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(a.data(), prev);
+    CORRADE_COMPARE(inserted.data(), &a[1]);
+    CORRADE_COMPARE(inserted.size(), 0);
+}
+
 void GrowableArrayTest::appendCountNoInit() {
     Array<int> a;
     Containers::ArrayView<int> appended = arrayAppend(a, Corrade::NoInit, 4);
@@ -1200,6 +1512,16 @@ void GrowableArrayTest::appendCountNoInit() {
     CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
     CORRADE_COMPARE(appended.data(), a.data());
     CORRADE_COMPARE(appended.size(), 4);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::insertCountNoInit() {
+    Array<int> a;
+    Containers::ArrayView<int> inserted = arrayInsert(a, 0, Corrade::NoInit, 4);
+    CORRADE_COMPARE(a.size(), 4);
+    CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
+    CORRADE_COMPARE(inserted.data(), a.data());
+    CORRADE_COMPARE(inserted.size(), 4);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 }
 
@@ -1213,6 +1535,162 @@ void GrowableArrayTest::appendCountNoInitEmpty() {
     CORRADE_COMPARE(a.data(), prev);
     CORRADE_COMPARE(appended.data(), a.end());
     CORRADE_COMPARE(appended.size(), 0);
+}
+
+void GrowableArrayTest::insertCountNoInitEmpty() {
+    Array<int> a{3};
+    int* prev = a.data();
+    Containers::ArrayView<int> inserted = arrayInsert(a, 1, Corrade::NoInit, 0);
+
+    /* Should be a no-op, not reallocating the (non-growable) array */
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(a.data(), prev);
+    CORRADE_COMPARE(inserted.data(), &a[1]);
+    CORRADE_COMPARE(inserted.size(), 0);
+}
+
+struct VerboseMovable {
+    /*implicit*/ VerboseMovable(int a = 0) noexcept: a{short(a)} {
+        Utility::Debug{} << "Constructing" << a;
+    }
+    VerboseMovable(const VerboseMovable&) = delete;
+    VerboseMovable(VerboseMovable&& other) noexcept: a(other.a) {
+        Utility::Debug{} << (other.movedOut ? "Move-constructing (moved-out)" : "Move-constructing") << a << "with a" << (this - &other) << Utility::Debug::nospace << "-element offset";
+        other.movedOut = true;
+    }
+    ~VerboseMovable() {
+        Utility::Debug{} << (movedOut ? "Destructing (moved-out)" : "Destructing") << a;
+    }
+    VerboseMovable& operator=(const VerboseMovable&) = delete;
+    VerboseMovable& operator=(VerboseMovable&& other) noexcept {
+        a = other.a;
+        Utility::Debug{} << (other.movedOut ? "Move-assigning (moved-out)" : "Move-assigning") << a << "with a" << (this - &other) << Utility::Debug::nospace << "-element offset";
+        movedOut = other.movedOut;
+        other.movedOut = true;
+        return *this;
+    }
+
+    short a;
+    bool movedOut = false;
+};
+
+void GrowableArrayTest::insertShiftOperationOrder() {
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayReserve(a, 7);
+        arrayResize(a, Corrade::NoInit, 5);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+        new(&a[3]) VerboseMovable{4};
+        new(&a[4]) VerboseMovable{5};
+
+        arrayInsert(a, 1, Corrade::NoInit, 2);
+        new(&a[1]) VerboseMovable{6};
+        new(&a[2]) VerboseMovable{7};
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Constructing 4\n"
+        "Constructing 5\n"
+        "Move-constructing 5 with a 2-element offset\n"
+        "Move-constructing 4 with a 2-element offset\n"
+        "Move-assigning 3 with a 2-element offset\n"
+        "Move-assigning 2 with a 2-element offset\n"
+        "Destructing (moved-out) 3\n"
+        "Destructing (moved-out) 2\n"
+        "Constructing 6\n"
+        "Constructing 7\n"
+        "Destructing 1\n"
+        "Destructing 6\n"
+        "Destructing 7\n"
+        "Destructing 2\n"
+        "Destructing 3\n"
+        "Destructing 4\n"
+        "Destructing 5\n");
+}
+
+void GrowableArrayTest::insertShiftOperationOrderNoOp() {
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayResize(a, Corrade::NoInit, 3);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+
+        /* This does nothing, so no loop should get entered */
+        arrayInsert(a, 1, Corrade::NoInit, 0);
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Destructing 1\n"
+        "Destructing 2\n"
+        "Destructing 3\n");
+}
+
+void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
+    /* Compared to insertShiftOperationOrder(), this isn't doing any move
+       assignments */
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayReserve(a, 8);
+        arrayResize(a, Corrade::NoInit, 3);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+
+        arrayInsert(a, 1, Corrade::NoInit, 5);
+        new(&a[1]) VerboseMovable{4};
+        new(&a[2]) VerboseMovable{5};
+        new(&a[3]) VerboseMovable{6};
+        new(&a[4]) VerboseMovable{7};
+        new(&a[5]) VerboseMovable{8};
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Move-constructing 3 with a 5-element offset\n"
+        "Move-constructing 2 with a 5-element offset\n"
+        "Destructing (moved-out) 3\n"
+        "Destructing (moved-out) 2\n"
+        "Constructing 4\n"
+        "Constructing 5\n"
+        "Constructing 6\n"
+        "Constructing 7\n"
+        "Constructing 8\n"
+        "Destructing 1\n"
+        "Destructing 4\n"
+        "Destructing 5\n"
+        "Destructing 6\n"
+        "Destructing 7\n"
+        "Destructing 8\n"
+        "Destructing 2\n"
+        "Destructing 3\n");
+}
+
+void GrowableArrayTest::insertInvalid() {
+    #ifdef CORRADE_NO_ASSERT
+    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
+    #endif
+
+    Array<int> a{5};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayInsert(a, 6, 7);
+    CORRADE_COMPARE(out.str(), "Containers::arrayInsert(): can't insert at index 6 into an array of size 5\n");
 }
 
 void GrowableArrayTest::appendGrowRatio() {
@@ -1778,11 +2256,24 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(value, 6);
     } {
+        int& value = arrayInsert<ArrayNewAllocator>(a, 0, six);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+        CORRADE_COMPARE(value, 6);
+    } {
         int& value = arrayAppend<ArrayNewAllocator>(a, Corrade::InPlaceInit, 7);
         CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(value, 7);
     } {
+        int& value = arrayInsert<ArrayNewAllocator>(a, 0, Corrade::InPlaceInit, 7);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+        CORRADE_COMPARE(value, 7);
+    } {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+        CORRADE_COMPARE(view.size(), 3);
+        CORRADE_COMPARE(view[2], 10);
+    } {
+        Containers::ArrayView<int> view = arrayInsert<ArrayNewAllocator>(a, 0, {8, 9, 10});
         CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[2], 10);
@@ -1793,14 +2284,27 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         CORRADE_COMPARE(view.size(), 3);
         CORRADE_COMPARE(view[1], 12);
     } {
+        const int values[]{11, 12, 13};
+        Containers::ArrayView<int> view = arrayInsert<ArrayNewAllocator>(a, 0, arrayView(values));
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+        CORRADE_COMPARE(view.size(), 3);
+        CORRADE_COMPARE(view[1], 12);
+    } {
         Containers::ArrayView<int> view = arrayAppend<ArrayNewAllocator>(a, Corrade::NoInit, 2);
         CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 2);
         view[0] = 14;
         view[1] = 15;
-        CORRADE_COMPARE(a[13], 14);
+        CORRADE_COMPARE(a[21], 14);
+    } {
+        Containers::ArrayView<int> view = arrayInsert<ArrayNewAllocator>(a, 0, Corrade::NoInit, 2);
+        CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+        CORRADE_COMPARE(view.size(), 2);
+        view[0] = 14;
+        view[1] = 15;
+        CORRADE_COMPARE(a[23], 14);
     }
-    CORRADE_COMPARE(a.size(), 15);
+    CORRADE_COMPARE(a.size(), 25);
 
     arrayRemoveSuffix<ArrayNewAllocator>(a);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
@@ -1808,7 +2312,7 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayShrink<ArrayNewAllocator>(a);
     CORRADE_VERIFY(!arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_VERIFY(!a.deleter());
-    CORRADE_COMPARE(a.size(), 14);
+    CORRADE_COMPARE(a.size(), 24);
 
     /** @todo use a different allocator here once it exists -- this one would
         be picked up implicitly as well so it doesn't really test anything */
@@ -1819,9 +2323,15 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayAppend<ArrayNewAllocator>(b, Movable{1});
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
 
+    arrayInsert<ArrayNewAllocator>(b, 0, Movable{1});
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
+
     arrayAppend<ArrayNewAllocator>(b, Corrade::InPlaceInit, 2);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
-    CORRADE_COMPARE(b.size(), 7);
+
+    arrayInsert<ArrayNewAllocator>(b, 0, Corrade::InPlaceInit, 2);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
+    CORRADE_COMPARE(b.size(), 9);
 }
 
 void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
@@ -1842,7 +2352,8 @@ void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
     Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b;
     arrayResize(b, Corrade::DirectInit, 1);
     arrayAppend(b, Corrade::InPlaceInit);
-    CORRADE_COMPARE(b.size(), 2);
+    arrayInsert(b, 0, Corrade::InPlaceInit);
+    CORRADE_COMPARE(b.size(), 3);
 }
 
 void GrowableArrayTest::copyConstructPlainStruct() {
@@ -1858,6 +2369,7 @@ void GrowableArrayTest::copyConstructPlainStruct() {
        argument and fails miserably. */
     ExtremelyTrivial value;
     arrayAppend(a, value);
+    arrayInsert(a, 0, value);
 
     /* This copy-constructs the new values */
     arrayResize(a, Corrade::DirectInit, 10, ExtremelyTrivial{4, 'b'});
@@ -1868,8 +2380,9 @@ void GrowableArrayTest::copyConstructPlainStruct() {
         {6, 'd'}
     };
     arrayAppend(a, arrayView(data));
+    arrayInsert(a, 0, arrayView(data));
 
-    CORRADE_COMPARE(a.size(), 12);
+    CORRADE_COMPARE(a.size(), 14);
 }
 
 void GrowableArrayTest::moveConstructPlainStruct() {
@@ -1897,7 +2410,12 @@ void GrowableArrayTest::moveConstructPlainStruct() {
        we're just reusing that to mix in the 4.8-specific variant also */
     arrayAppend(a, MoveOnlyStruct{5, 'c', nullptr});
 
-    CORRADE_COMPARE(a.size(), 16);
+    /* Here a move constructor gets called on the last element to shift it
+       forward and then a move constructor gets called to place the new
+       element */
+    arrayInsert(a, 16, MoveOnlyStruct{6, 'd', nullptr});
+
+    CORRADE_COMPARE(a.size(), 17);
 }
 
 template<template<class> class> struct AllocatorName;
@@ -1939,7 +2457,7 @@ template<template<class> class Allocator, std::size_t alignment> void GrowableAr
     }
 }
 
-void GrowableArrayTest::appendConflictingType() {
+void GrowableArrayTest::appendInsertConflictingType() {
     Array<unsigned> a;
 
     /* If the second argument is just const T& or T&&, these would fail to
@@ -1951,8 +2469,12 @@ void GrowableArrayTest::appendConflictingType() {
     arrayAppend(a, 5);
     arrayAppend<ArrayAllocator>(a, value);
     arrayAppend<ArrayAllocator>(a, 5);
+    arrayInsert(a, 0, value);
+    arrayInsert(a, 0, 5);
+    arrayInsert<ArrayAllocator>(a, 0, value);
+    arrayInsert<ArrayAllocator>(a, 0, 5);
     CORRADE_COMPARE_AS(a,
-        Containers::arrayView<unsigned>({5, 5, 5, 5}),
+        Containers::arrayView<unsigned>({5, 5, 5, 5, 5, 5, 5, 5}),
         TestSuite::Compare::Container);
 }
 

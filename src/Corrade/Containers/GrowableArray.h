@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
+ * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayInsert(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
  * @m_since{2020,06}
  *
  * See @ref Containers-Array-growable for more information.
@@ -38,6 +38,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/initializeHelpers.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/TypeTraits.h"
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
@@ -789,6 +790,7 @@ a @ref std::vector.
     @ref arrayAppend(Array<T>&, ArrayView<const T>),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value);
@@ -828,6 +830,7 @@ on a @ref std::vector.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, ArrayView<const T>),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
     @ref Containers-Array-growable
 */
 template<class T, class ...Args> T& arrayAppend(Array<T>& array, Corrade::InPlaceInitT, Args&&... args);
@@ -863,6 +866,7 @@ Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, ArrayView<const T>),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, typename std::common_type<T>::type&& value) {
@@ -899,6 +903,7 @@ copy-constructible.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, ArrayView<const T>),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, ArrayView<const T> values);
@@ -959,6 +964,7 @@ needs, @p T is required to be nothrow move-constructible.
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
 */
@@ -977,6 +983,230 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppend(Array<T>& array, Corrade::NoInitT, std::size_t count) {
     return arrayAppend<T, Allocator<T>>(array, Corrade::NoInit, count);
+}
+#endif
+
+/**
+@brief Copy-insert an item into an array
+@return Reference to the newly inserted item
+@m_since_latest
+
+Expects that @p index is not larger than @ref Array::size(). If the array is
+not growable or the capacity is not large enough, the array capacity is grown
+first. Then, items starting at @p index are moved one item forward, @p value is
+copied to @p index and @ref Array::size() is increased by 1.
+
+Amortized complexity is @f$ \mathcal{O}(n) @f$. On top of what the @p Allocator
+(or the default @ref ArrayAllocator) itself needs, @p T is required to be
+nothrow move-constructible, nothrow move-assignable and copy-constructible.
+
+This function is equivalent to calling @relativeref{std::vector,insert()} on
+a @ref std::vector.
+@m_keywords{insert()}
+@see @ref arrayCapacity(), @ref arrayIsGrowable(),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, ArrayView<const T>),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> T& arrayInsert(Array<T>& array, std::size_t index, const typename std::common_type<T>::type& value);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> T& arrayInsert(Array<T>& array, std::size_t index, const typename std::common_type<T>::type& value) {
+    return arrayInsert<T, Allocator<T>>(array, index, value);
+}
+#endif
+
+/**
+@brief In-place insert an item into an array
+@return Reference to the newly inserted item
+@m_since_latest
+
+Similar to @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&)
+except that the new element is constructed using placement-new with provided
+@p args.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be nothrow move-constructible, nothrow
+move-assignable and constructible from provided @p args.
+
+This function is equivalent to calling @relativeref{std::vector,emplace()}
+on a @ref std::vector.
+@m_keywords{emplace()}
+@see @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, ArrayView<const T>),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref Containers-Array-growable
+*/
+template<class T, class ...Args> T& arrayInsert(Array<T>& array, std::size_t index, Corrade::InPlaceInitT, Args&&... args);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+*/
+template<class T, class Allocator, class ...Args> T& arrayInsert(Array<T>& array, std::size_t index, Corrade::InPlaceInitT, Args&&... args);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class ...Args> T& arrayInsert(Array<T>& array, std::size_t index, Corrade::InPlaceInitT, Args&&... args) {
+    return arrayInsert<T, Allocator<T>>(array, index, Utility::forward<Args>(args)...);
+}
+#endif
+
+/**
+@brief Move-insert an item into an array
+@return Reference to the newly appended item
+@m_since_latest
+
+Calls @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args)
+with @p value.
+@see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayInsert(Array<T>&, std::size_t, ArrayView<const T>),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayInsert(Array<T>& array, std::size_t index, typename std::common_type<T>::type&& value) {
+    return arrayInsert<T, Allocator>(array, index, Corrade::InPlaceInit, Utility::move(value));
+}
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline T& arrayInsert(Array<T>& array, std::size_t index, typename std::common_type<T>::type&& value) {
+    return arrayInsert<T, Allocator<T>>(array, index, Corrade::InPlaceInit, Utility::move(value));
+}
+#endif
+
+/**
+@brief Copy-insert a list of items into an array
+@return View on the newly appended items
+@m_since_latest
+
+Like @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+but inserting multiple values at once.
+
+Amortized complexity is @f$ \mathcal{O}(m + n) @f$, where @f$ m @f$ is the
+number of items being inserted and @f$ n @f$ is the existing array size. On top
+of what the @p Allocator (or the default @ref ArrayAllocator) itself needs,
+@p T is required to be nothrow move-constructible, nothrow move-assignable and
+copy-constructible.
+@see @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, ArrayView<const T>),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, ArrayView<const T> values);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, ArrayView<const T> values) {
+    return arrayInsert<T, Allocator<T>>(array, index, values);
+}
+#endif
+
+/**
+@overload
+@m_since_latest
+*/
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<T> values) {
+    return arrayInsert<T, Allocator>(array, index, arrayView(values));
+}
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<T> values) {
+    return arrayInsert<T, Allocator<T>>(array, index, values);
+}
+#endif
+
+/**
+@brief Insert given count of uninitialized values into an array
+@return View on the newly appended items
+@m_since_latest
+
+A lower-level variant of @ref arrayInsert(Array<T>&, std::size_t, ArrayView<const T>)
+where the new values are meant to be initialized in-place after, instead of
+being copied from a pre-existing location. Independently of whether the array
+was reallocated to fit the new items or the items were just shifted around
+because the capacity was large enough, the new values are always uninitialized
+--- i.e., placement-new is meant to be used on *all* inserted elements with a
+non-trivially-copyable @p T.
+
+Amortized complexity is @f$ \mathcal{O}(n) @f$, where @f$ n @f$ is the existing
+array size. On top of what the @p Allocator (or the default @ref ArrayAllocator)
+itself needs, @p T is required to be nothrow move-constructible and nothrow
+move-assignable.
+@see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::NoInitT, std::size_t count);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::NoInitT, std::size_t count) {
+    return arrayInsert<T, Allocator<T>>(array, index, Corrade::NoInit, count);
 }
 #endif
 
@@ -1474,6 +1704,191 @@ template<class T, class Allocator, class ...Args> T& arrayAppend(Array<T>& array
 
 template<class T, class Allocator> ArrayView<T> arrayAppend(Array<T>& array, Corrade::NoInitT, const std::size_t count) {
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, count);
+    return {it, count};
+}
+
+namespace Implementation {
+
+template<class T> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    /* Compared to the non-trivially-copyable variant below, just delegate to
+       memmove() and assume it can figure out how to copy from back to front
+       more efficiently that we ever could.
+
+       Same as with memcpy(), apparently memmove() can't be called with null
+       pointers, even if size is zero. I call that bullying. */
+    if(count) std::memmove(dst, src, count*sizeof(T));
+}
+
+template<class T> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<!
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
+        "nothrow move-constructible and move-assignable type is required");
+
+    /* Count of non-overlapping items, which will be move-constructed on one
+       side and destructed on the other. The rest will be move-assigned. */
+    const std::size_t nonOverlappingCount = src + count < dst ? count : dst - src;
+
+    /* Move-construct the non-overlapping elements. Doesn't matter if going
+       forward or backward as we're not overwriting anything, but go backward
+       for consistency with the move-assignment loop below. */
+    for(T *end = src + count - nonOverlappingCount, *constructSrc = src + count, *constructDst = dst + count; constructSrc > end; --constructSrc, --constructDst) {
+        /* Can't use {}, see the GCC 4.8-specific overload for details */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
+        Implementation::construct(*(constructDst - 1), Utility::move(*(constructSrc - 1)));
+        #else
+        new(constructDst - 1) T{Utility::move(*(constructSrc - 1))};
+        #endif
+    }
+
+    /* Move-assign overlapping elements, going backwards to avoid overwriting
+       values that are yet to be moved. This loop is never entered if
+       nonOverlappingCount >= count. */
+    for(T *assignSrc = src + count - nonOverlappingCount, *assignDst = dst + count - nonOverlappingCount; assignSrc > src; --assignSrc, --assignDst)
+        *(assignDst - 1) = Utility::move(*(assignSrc - 1));
+
+    /* Destruct non-overlapping elements in the newly-formed gap so the calling
+       code can assume uninitialized memory both in all cases. Here it again
+       doesn't matter if going forward or backward, but go backward for
+       consistency. */
+    /** @todo prefer a move assignment instead -- needs arrayGrowAtBy() to
+        return some sort of a flag that tells the caller whether the new items
+        have to be constructed or moved -- and then, if moved, the NoInit
+        variant would be calling a destructor on its own, to make sure the
+        caller can always placement-new the items without risking any resource
+        leaks */
+    for(T *destructSrc = src + nonOverlappingCount; destructSrc != src; --destructSrc)
+        (destructSrc - 1)->~T();
+}
+
+template<class T, class Allocator> T* arrayGrowAtBy(Array<T>& array, const std::size_t index, const std::size_t count) {
+    /* Direct access & caching to speed up debug builds */
+    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
+    CORRADE_ASSERT(index <= arrayGuts.size, "Containers::arrayInsert(): can't insert at index" << index << "into an array of size" << arrayGuts.size, arrayGuts.data);
+
+    /* No values to add, early exit */
+    if(!count)
+        return arrayGuts.data + index;
+
+    /* For arrays with an unknown deleter we'll always move-allocate to a new
+       place, the parts before and after index separately. Not using
+       reallocate() as we don't know where the original memory comes from. */
+    const std::size_t desiredCapacity = arrayGuts.size + count;
+    std::size_t capacity;
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    T* oldMid = nullptr;
+    #endif
+    bool needsShiftForward = false;
+    if(arrayGuts.deleter != Allocator::deleter) {
+        capacity = Allocator::grow(nullptr, desiredCapacity);
+        T* const newArray = Allocator::allocate(capacity);
+        arrayMoveConstruct<T>(arrayGuts.data, newArray, index);
+        arrayMoveConstruct<T>(arrayGuts.data + index, newArray + index + count, arrayGuts.size - index);
+        array = Array<T>{newArray, arrayGuts.size, Allocator::deleter};
+
+    /* Otherwise, if there's no space anymore, reallocate. which might be able
+       to grow in-place. However we still need to shift the part after index
+       forward. */
+    } else {
+        capacity = Allocator::capacity(arrayGuts.data);
+        if(arrayGuts.size + count > capacity) {
+            capacity = Allocator::grow(arrayGuts.data, desiredCapacity);
+            Allocator::reallocate(arrayGuts.data, arrayGuts.size, capacity);
+        } else {
+            #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+            oldMid = arrayGuts.data + arrayGuts.size;
+            #endif
+        }
+
+        /** @todo do this as part of a reallocation instead of a second pass
+            to speed up -- Allocator::reallocate() could keep the original
+            memory intact instead of deleting it, move just the first `index`
+            data, then return the new pointer (instead of modifying the
+            original) and leave the rest to be moved by us. The case of
+            reallocating in-place still needs to be taken care of tho (return
+            a null pointer, in which case arrayShiftForward() still gets
+            called?) */
+        needsShiftForward = true;
+    }
+
+    /* Increase array size and return the position at index */
+    T* const it = arrayGuts.data + index;
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    __sanitizer_annotate_contiguous_container(
+        Allocator::base(arrayGuts.data),
+        arrayGuts.data + capacity,
+        /* For a new allocation, ASan assumes the previous middle pointer is at
+           the end of the array. If we grew an existing allocation, the
+           previous middle is set what __sanitier_acc() received as a middle
+           value before */
+        /** @todo with std::realloc possibly happening in reallocate(), is that
+            really a new allocation? what should I do there? */
+        oldMid ? oldMid : arrayGuts.data + capacity,
+        arrayGuts.data + arrayGuts.size + count);
+    #endif
+
+    /* Perform a shift of elements after index. Needs to be done after the ASan
+       annotation is updated, otherwise it'll trigger a failure due to outdated
+       bounds information. */
+    if(needsShiftForward)
+        arrayShiftForward(arrayGuts.data + index, arrayGuts.data + index + count, arrayGuts.size - index);
+
+    arrayGuts.size += count;
+    return it;
+}
+
+}
+
+template<class T, class Allocator> inline T& arrayInsert(Array<T>& array, std::size_t index, const typename std::common_type<T>::type& value) {
+    T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, 1);
+    /* Can't use {}, see the GCC 4.8-specific overload for details */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
+    Implementation::construct(*it, value);
+    #else
+    new(it) T{value};
+    #endif
+    return *it;
+}
+
+template<class T, class Allocator> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, const ArrayView<const T> values) {
+    /* Direct access & caching to speed up debug builds */
+    const std::size_t valueCount = values.size();
+
+    T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, valueCount);
+    Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
+    return {it, valueCount};
+}
+
+template<class T, class ...Args> inline T& arrayInsert(Array<T>& array, std::size_t index, Corrade::InPlaceInitT, Args&&... args) {
+    return arrayInsert<T, ArrayAllocator<T>>(array, index, Corrade::InPlaceInit, Utility::forward<Args>(args)...);
+}
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T, class Allocator, class ...Args> T& arrayInsert(Array<T>& array, std::size_t index, Corrade::InPlaceInitT, Args&&... args) {
+    T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, 1);
+    /* No helper function as there's no way we could memcpy such a thing. */
+    /* On GCC 4.8 this includes another workaround, see the 4.8-specific
+       overload docs for details */
+    Implementation::construct(*it, Utility::forward<Args>(args)...);
+    return *it;
+}
+#endif
+
+template<class T, class Allocator> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::NoInitT, const std::size_t count) {
+    T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, count);
     return {it, count};
 }
 
