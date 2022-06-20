@@ -1863,7 +1863,8 @@ void GrowableArrayTest::copyConstructPlainStruct() {
     /* This needs special handling on GCC 4.8, where T{b} (copy-construction)
        attempts to convert ExtremelyTrivial to int to initialize the first
        argument and fails miserably. */
-    arrayAppend(a, ExtremelyTrivial{3, 'a'});
+    ExtremelyTrivial value;
+    arrayAppend(a, value);
 
     /* This copy-constructs the new values */
     arrayResize(a, Corrade::DirectInit, 10, ExtremelyTrivial{4, 'b'});
