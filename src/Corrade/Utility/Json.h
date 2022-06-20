@@ -2280,7 +2280,8 @@ inline const JsonToken* JsonToken::firstChild() const {
 
 inline std::nullptr_t JsonToken::asNull() const {
     CORRADE_ASSERT(type() == Type::Null && isParsed(),
-        "Utility::JsonToken::asNull(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
+        /* {} causes a -Wzero-as-null-pointer-constant warning on GCC 4.8 */
+        "Utility::JsonToken::asNull(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), nullptr);
     return nullptr;
 }
 
