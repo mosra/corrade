@@ -512,9 +512,9 @@ without being reallocated to a growable version.
 
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the original
 container, @f$ \mathcal{O}(1) @f$ if the capacity is already large enough or
-if the reallocation can be done in-place. This function imposes no additional
-constraints on @p T on top of what the @p Allocator (or the default
-@ref ArrayAllocator) itself needs.
+if the reallocation can be done in-place. On top of what the @p Allocator (or
+the default @ref ArrayAllocator) itself needs, @p T is required to be nothrow
+move-constructible and move-assignable.
 
 This function is equivalent to calling @relativeref{std::vector,reserve()} on
 a @ref std::vector.
@@ -555,7 +555,8 @@ size, it's kept as such, without being reallocated to a growable version.
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the new container,
 @f$ \mathcal{O}(1) @f$ if current container size is already exactly of given
 size. On top of what the @p Allocator (or the default @ref ArrayAllocator)
-itself needs, @p T is required to be default-constructible.
+itself needs, @p T is required to be nothrow move-constructible and
+default-constructible.
 @see @ref Array::size(), @ref arrayCapacity(), @ref arrayIsGrowable(),
     @ref arrayRemoveSuffix(), @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
@@ -592,7 +593,8 @@ the new elements at the end are not default-initialized, but value-initialized
 otherwise).
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
-needs, @p T is required to be default-constructible.
+needs, @p T is required to be nothrow move-constructible and
+default-constructible.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
@@ -660,8 +662,8 @@ Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
 the new elements at the end are not default-initialized, but left in an
 uninitialized state instead.
 
-This function imposes no additional constraints on @p T on top of what the
-@p Allocator (or the default @ref ArrayAllocator) itself needs.
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be nothrow move-constructible.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
@@ -696,7 +698,8 @@ the new elements at the end are constructed using placement-new with provided
 @p args.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
-needs, @p T is required to be constructible from provided @p args.
+needs, @p T is required to be nothrow move-constructible and constructible from
+provided @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
@@ -774,7 +777,8 @@ array and @ref Array::size() increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential. On top of what the @p Allocator (or the default
-@ref ArrayAllocator) itself needs, @p T is required to be copy-constructible.
+@ref ArrayAllocator) itself needs, @p T is required to be nothrow
+move-constructible and copy-constructible.
 
 This function is equivalent to calling @relativeref{std::vector,push_back()} on
 a @ref std::vector.
@@ -814,7 +818,8 @@ except that the new element is constructed using placement-new with provided
 @p args.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
-needs, @p T is required to be constructible from provided @p args.
+needs, @p T is required to be nothrow move-constructible and constructible from
+provided @p args.
 
 This function is equivalent to calling @relativeref{std::vector,emplace_back()}
 on a @ref std::vector.
@@ -888,7 +893,8 @@ Like @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
 but inserting multiple values at once.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
-needs, @p T is required to be copy-constructible.
+needs, @p T is required to be nothrow move-constructible and
+copy-constructible.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -943,8 +949,8 @@ A lower-level variant of @ref arrayAppend(Array<T>& array, ArrayView<const T>)
 where the new values are meant to be initialized in-place after, instead of
 being copied from a pre-existing location.
 
-This function imposes no additional constraints on @p T on top of what the
-@p Allocator (or the default @ref ArrayAllocator) itself needs.
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be nothrow move-constructible.
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
@@ -979,8 +985,9 @@ growable version. Otherwise, a destructor is called on removed elements and the
 @ref Array::size() is decreased by @p count.
 
 Amortized complexity is @f$ \mathcal{O}(n) @f$ where @f$ n @f$ is the number of
-items removed. This function imposes no additional constraints on @p T on top
-of what the @p Allocator (or the default @ref ArrayAllocator) itself needs.
+items removed. On top of what the @p Allocator (or the default
+@ref ArrayAllocator) itself needs, @p T is required to be nothrow
+move-constructible.
 
 With @p count set to @cpp 1 @ce, this function is equivalent to calling
 @relativeref{std::vector,pop_back()} on a @ref std::vector.
@@ -1018,7 +1025,7 @@ nothing is done.
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @f$ \mathcal{O}(1) @f$ if the array is already non-growable. No constraints
 on @p T from @p Allocator (or the default @ref ArrayAllocator) apply here but
-@p T is required to be move-constructible.
+@p T is required to be nothrow move-constructible.
 
 This function is equivalent to calling @relativeref{std::vector,shrink_to_fit()}
 on a @ref std::vector.
@@ -1041,7 +1048,7 @@ nothing is done.
 Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @f$ \mathcal{O}(1) @f$ if the array is already non-growable. No constraints on
 @p T from @p Allocator (or the default @ref ArrayAllocator) apply here but @p T
-is required to be default-constructible and move-assignable.
+is required to be default-constructible and nothrow move-assignable.
 
 Compared to @ref arrayShrink(Array<T>&, NoInitT), the resulting array instance
 always has a default (@cpp nullptr @ce) deleter. This is useful when it's not
@@ -1101,7 +1108,7 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
     #endif
 >::type* = nullptr) {
     static_assert(std::is_nothrow_move_constructible<T>::value,
-        "noexcept move-constructible type is required");
+        "nothrow move-constructible type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
@@ -1131,7 +1138,7 @@ template<class T> inline void arrayMoveAssign(T* src, T* dst, const std::size_t 
     #endif
 >::type* = nullptr) {
     static_assert(std::is_nothrow_move_assignable<T>::value,
-        "noexcept move-assignable type is required");
+        "nothrow move-assignable type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
         *dst = Utility::move(*src);
 }
@@ -1200,7 +1207,7 @@ template<class T> inline std::size_t arrayGrowth(const std::size_t currentCapaci
 template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::size_t prevSize, const std::size_t newCapacity) {
     T* newArray = allocate(newCapacity);
     static_assert(std::is_nothrow_move_constructible<T>::value,
-        "noexcept move-constructible type is required");
+        "nothrow move-constructible type is required");
     for(T *src = array, *end = src + prevSize, *dst = newArray; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
