@@ -1906,7 +1906,7 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
        reallocate() as we don't know where the original memory comes from. */
     if(arrayGuts.deleter != Allocator::deleter) {
         T* const newArray = Allocator::allocate(arrayGuts.size - count);
-        Implementation::arrayMoveConstruct<T>(array, newArray, arrayGuts.size - count);
+        Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size - count);
         array = Array<T>{newArray, arrayGuts.size - count, Allocator::deleter};
 
         #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
@@ -1921,8 +1921,7 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
     /* Otherwise call the destructor on the excessive elements and update the
        size */
     } else {
-        T* const end = arrayGuts.data + arrayGuts.size;
-        Implementation::arrayDestruct<T>(end - count, end);
+        Implementation::arrayDestruct<T>(arrayGuts.data + arrayGuts.size - count, arrayGuts.data + arrayGuts.size);
         #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
         __sanitizer_annotate_contiguous_container(
             Allocator::base(arrayGuts.data),
