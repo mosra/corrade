@@ -1069,56 +1069,31 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         a[0] = 28;
-        T& appended0 = arrayAppend(a, T{37});
+        T& appended = arrayAppend(a, T{37});
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
             CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
-        CORRADE_COMPARE(&appended0, &a.back());
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
         else
             CORRADE_COMPARE(arrayCapacity(a), 3);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
-
-        T& appended1 = arrayAppend(a, T{26});
-        CORRADE_COMPARE(a.size(), 3);
-        /* More thoroughly tested in appendFromGrowableGrowRatio() below */
-        if(sizeof(std::size_t) == 8)
-            CORRADE_COMPARE(arrayCapacity(a), 6);
-        else
-            CORRADE_COMPARE(arrayCapacity(a), 3);
-
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
-        CORRADE_COMPARE(int(a[2]), 26);
-        CORRADE_COMPARE(&appended1, &a.back());
+        CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
     /* The first item is default-constructed in-place. Then, 37 is constructed
        as a temporary. Then as append reallocates, 28 is move-constructed into
        new memory (third construction, first move). Then 37 is move-constructed
-       into the new place (fourth construction, second move). Then, 26 is
-       constructed as a temporary. Append reallocates again (sixth and seventh
-       construction, third and fourth move), then 26 is move-constructed into
-       the new place (eighth construction, fifth move).
-
-       On 32bit no second reallocation happens, so there's two moves and
-       constructions less. */
+       into the new place (fourth construction, second move). */
     if(std::is_same<T, Movable>::value) {
-        if(sizeof(std::size_t) == 8) {
-            CORRADE_COMPARE(Movable::constructed, 8);
-            CORRADE_COMPARE(Movable::moved, 5);
-            CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 8);
-        } else {
-            CORRADE_COMPARE(Movable::constructed, 6);
-            CORRADE_COMPARE(Movable::moved, 3);
-            CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 6);
-        }
+        CORRADE_COMPARE(Movable::constructed, 4);
+        CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 4);
     }
 }
 
