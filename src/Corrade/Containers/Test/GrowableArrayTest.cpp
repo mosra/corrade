@@ -1817,6 +1817,8 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_VERIFY(!a.deleter());
     CORRADE_COMPARE(a.size(), 14);
 
+    /** @todo use a different allocator here once it exists -- this one would
+        be picked up implicitly as well so it doesn't really test anything */
     Array<Movable> b;
     arrayResize<ArrayNewAllocator>(b, Corrade::DirectInit, 5, Movable{6});
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(b));
