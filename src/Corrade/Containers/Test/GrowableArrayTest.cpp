@@ -1859,8 +1859,6 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         arrayAppend(a, Corrade::InPlaceInit, 35786);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* Gets converted to growable as otherwise we can't ensure the
-           destructors won't be called on removed elements */
         arrayRemoveSuffix(a, 2);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
