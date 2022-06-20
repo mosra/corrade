@@ -1001,7 +1001,8 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
-    /* The item is move-constructed into the new place */
+    /* The 37 is constructed as a temporary and then move-constructed into the
+       new place */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 2);
         CORRADE_COMPARE(Movable::moved, 1);
@@ -1044,9 +1045,11 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
-    /* The first item is constructed in-place, then move-constructed into
-       growable memory. Then second is constructed (third construction) and
-       then moved (fourth construction, second move) into the new place. */
+    /* The first item is default-constructed in-place. Then, 37 is constructed
+       as a temporary. Then, as append reallocates, 28 is move-constructed
+       (third construction, first move) to new memory. Then 37 is
+       move-constructed (fourth construction, second move) into the new
+       place. */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 4);
         CORRADE_COMPARE(Movable::moved, 2);
@@ -1094,11 +1097,16 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
-    /* First item is default-constructed, then move-constructed into growable
-       memory as the first reallocation happens. Then an item is constructed &
-       moved into the new place (fourth construction), after that a second
-       realloc happens (two more move constructions), then third item added
-       (two more constructions). */
+    /* The first item is default-constructed in-place. Then, 37 is constructed
+       as a temporary. Then as append reallocates, 28 is move-constructed into
+       new memory (third construction, first move). Then 37 is move-constructed
+       into the new place (fourth construction, second move). Then, 26 is
+       constructed as a temporary. Append reallocates again (sixth and seventh
+       construction, third and fourth move), then 26 is move-constructed into
+       the new place (eighth construction, fifth move).
+
+       On 32bit no second reallocation happens, so there's two moves and
+       constructions less. */
     if(std::is_same<T, Movable>::value) {
         if(sizeof(std::size_t) == 8) {
             CORRADE_COMPARE(Movable::constructed, 8);
@@ -1136,8 +1144,8 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
     }
 
-    /* The first item is constructed in-place, then move-constructed into
-       larger memory, then second is move-constructed into the new place */
+    /* The first item is constructed in-place. Then, 37 is constructed as a
+       temporary and then move-constructed into the new place. */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 1);
@@ -1341,7 +1349,8 @@ template<class T> void GrowableArrayTest::removeSuffixZero() {
         /* Not growable, no ASan annotation check */
     }
 
-    /* Nothing should be done by the shrink */
+    /* The three items are constructed in-place, nothing else should be done by
+       the removal */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 3);
         CORRADE_COMPARE(Movable::moved, 0);
@@ -1372,7 +1381,8 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
         CORRADE_COMPARE(int(a[1]), 7);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* Two move-constructed to the new array */
+        /* The four items are constructed in-place, then the remaining two of
+           them move-constructed to a new array, originals destructed */
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 6);
             CORRADE_COMPARE(Movable::moved, 2);
@@ -1381,6 +1391,7 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
         }
     }
 
+    /* And finally also the two remaining destructed */
     if(std::is_same<T, Movable>::value) {
         CORRADE_COMPARE(Movable::constructed, 6);
         CORRADE_COMPARE(Movable::moved, 2);
@@ -1413,7 +1424,8 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         CORRADE_COMPARE(int(a[1]), 7);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* Nothing moved, just two elements cut away */
+        /* The four items are constructed in-place. Then, just two elements of
+           those are destructed. */
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 4);
             CORRADE_COMPARE(Movable::moved, 0);
