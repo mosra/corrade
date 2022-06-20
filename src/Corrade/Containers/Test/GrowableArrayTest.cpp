@@ -986,16 +986,14 @@ template<class T> void GrowableArrayTest::appendFromEmpty() {
         T& appended = arrayAppend(a, T{37});
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 1);
-        if(sizeof(std::size_t) == 8)
-            CORRADE_COMPARE(arrayCapacity(a), 2);
-        else {
-            /** @todo expose Implementation::DefaultAllocationAlignment instead */
-            #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
-            CORRADE_COMPARE(arrayCapacity(a), 1);
-            #else
-            CORRADE_COMPARE(arrayCapacity(a), 3);
-            #endif
-        }
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
         CORRADE_COMPARE(int(a[0]), 37);
         CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -1029,16 +1027,14 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
-        if(sizeof(std::size_t) == 8)
-            CORRADE_COMPARE(arrayCapacity(a), 2);
-        else {
-            /** @todo expose Implementation::DefaultAllocationAlignment instead */
-            #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
-            CORRADE_COMPARE(arrayCapacity(a), 2);
-            #else
-            CORRADE_COMPARE(arrayCapacity(a), 3);
-            #endif
-        }
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
         CORRADE_COMPARE(&appended, &a.back());
@@ -1075,10 +1071,11 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
             CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
-        if(sizeof(std::size_t) == 8)
-            CORRADE_COMPARE(arrayCapacity(a), 2);
-        else
-            CORRADE_COMPARE(arrayCapacity(a), 3);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
         CORRADE_COMPARE(int(a[0]), 28);
         CORRADE_COMPARE(int(a[1]), 37);
         CORRADE_COMPARE(&appended, &a.back());
@@ -1133,16 +1130,14 @@ void GrowableArrayTest::appendCopy() {
     Array<int> a;
     int& appended = arrayAppend(a, 2786541);
     CORRADE_COMPARE(a.size(), 1);
-    if(sizeof(std::size_t) == 8)
-        CORRADE_COMPARE(arrayCapacity(a), 2);
-    else {
-        /** @todo expose Implementation::DefaultAllocationAlignment instead */
-        #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
-        CORRADE_COMPARE(arrayCapacity(a), 1);
-        #else
-        CORRADE_COMPARE(arrayCapacity(a), 3);
-        #endif
-    }
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(arrayCapacity(a), 2);
+    /** @todo expose Implementation::DefaultAllocationAlignment instead */
+    #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_COMPARE(arrayCapacity(a), 1);
+    #else
+    CORRADE_COMPARE(arrayCapacity(a), 3);
+    #endif
     CORRADE_COMPARE(a[0], 2786541);
     CORRADE_COMPARE(&appended, &a.back());
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
@@ -1153,16 +1148,14 @@ void GrowableArrayTest::appendMove() {
         Array<Movable> a;
         Movable& appended = arrayAppend(a, Movable{25141});
         CORRADE_COMPARE(a.size(), 1);
-        if(sizeof(std::size_t) == 8)
-            CORRADE_COMPARE(arrayCapacity(a), 2);
-        else {
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
             /** @todo expose Implementation::DefaultAllocationAlignment instead */
-            #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
-            CORRADE_COMPARE(arrayCapacity(a), 1);
-            #else
-            CORRADE_COMPARE(arrayCapacity(a), 3);
-            #endif
-        }
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
         CORRADE_COMPARE(a[0].a, 25141);
         CORRADE_COMPARE(&appended, &a.back());
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
@@ -1227,80 +1220,80 @@ void GrowableArrayTest::appendGrowRatio() {
 
     /* On 32-bit, the growing is a bit different due to a different size of
        std::size_t */
-    if(sizeof(std::size_t) == 8) {
-        /* Double the size (minus sizeof(T)) until 64 bytes */
-        arrayAppend(a, 1);
-        CORRADE_COMPARE(arrayCapacity(a), 2);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, 2);
-        CORRADE_COMPARE(arrayCapacity(a), 2);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    #ifndef CORRADE_TARGET_32BIT
+    /* Double the size (minus sizeof(T)) until 64 bytes */
+    arrayAppend(a, 1);
+    CORRADE_COMPARE(arrayCapacity(a), 2);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 2);
+    CORRADE_COMPARE(arrayCapacity(a), 2);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 3);
-        CORRADE_COMPARE(arrayCapacity(a), 6);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {4, 5, 6});
-        CORRADE_COMPARE(arrayCapacity(a), 6);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 3);
+    CORRADE_COMPARE(arrayCapacity(a), 6);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {4, 5, 6});
+    CORRADE_COMPARE(arrayCapacity(a), 6);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 7);
-        CORRADE_COMPARE(arrayCapacity(a), 14);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {8, 9, 10, 11, 12, 13, 14});
-        CORRADE_COMPARE(arrayCapacity(a), 14); /* 14*4 + 8 == 64 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 7);
+    CORRADE_COMPARE(arrayCapacity(a), 14);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {8, 9, 10, 11, 12, 13, 14});
+    CORRADE_COMPARE(arrayCapacity(a), 14); /* 14*4 + 8 == 64 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        /* Add 50% minus sizeof(T) after */
-        arrayAppend(a, 15);
-        CORRADE_COMPARE(arrayCapacity(a), 22); /* 64*1.5 = 96 = 22*4 + 8 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {16, 17, 18, 19, 20, 21, 22});
-        CORRADE_COMPARE(arrayCapacity(a), 22);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    /* Add 50% minus sizeof(T) after */
+    arrayAppend(a, 15);
+    CORRADE_COMPARE(arrayCapacity(a), 22); /* 64*1.5 = 96 = 22*4 + 8 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {16, 17, 18, 19, 20, 21, 22});
+    CORRADE_COMPARE(arrayCapacity(a), 22);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 23);
-        CORRADE_COMPARE(arrayCapacity(a), 34); /* 96*1.5 = 144 = 34*4 + 8 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-    } else {
-        /* Double the size (minus sizeof(T)) until 64 bytes */
-        arrayAppend(a, 1);
-        /** @todo expose Implementation::DefaultAllocationAlignment instead */
-        #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
-        CORRADE_COMPARE(arrayCapacity(a), 1);
-        #else
-        CORRADE_COMPARE(arrayCapacity(a), 3);
-        #endif
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {2, 3});
-        CORRADE_COMPARE(arrayCapacity(a), 3);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 23);
+    CORRADE_COMPARE(arrayCapacity(a), 34); /* 96*1.5 = 144 = 34*4 + 8 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    #else
+    /* Double the size (minus sizeof(T)) until 64 bytes */
+    arrayAppend(a, 1);
+    /** @todo expose Implementation::DefaultAllocationAlignment instead */
+    #if !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_COMPARE(arrayCapacity(a), 1);
+    #else
+    CORRADE_COMPARE(arrayCapacity(a), 3);
+    #endif
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {2, 3});
+    CORRADE_COMPARE(arrayCapacity(a), 3);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 4);
-        CORRADE_COMPARE(arrayCapacity(a), 7);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {5, 6, 7});
-        CORRADE_COMPARE(arrayCapacity(a), 7);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 4);
+    CORRADE_COMPARE(arrayCapacity(a), 7);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {5, 6, 7});
+    CORRADE_COMPARE(arrayCapacity(a), 7);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 8);
-        CORRADE_COMPARE(arrayCapacity(a), 15);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {9, 10, 11, 12, 13, 14, 15});
-        CORRADE_COMPARE(arrayCapacity(a), 15); /* 15*4 + 4 == 64 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, 8);
+    CORRADE_COMPARE(arrayCapacity(a), 15);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {9, 10, 11, 12, 13, 14, 15});
+    CORRADE_COMPARE(arrayCapacity(a), 15); /* 15*4 + 4 == 64 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        /* Add 50% minus sizeof(T) after */
-        arrayAppend(a, 16);
-        CORRADE_COMPARE(arrayCapacity(a), 23); /* 64*1.5 = 96 = 23*4 + 4 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-        arrayAppend(a, {17, 18, 19, 20, 21, 22, 23});
-        CORRADE_COMPARE(arrayCapacity(a), 23);
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    /* Add 50% minus sizeof(T) after */
+    arrayAppend(a, 16);
+    CORRADE_COMPARE(arrayCapacity(a), 23); /* 64*1.5 = 96 = 23*4 + 4 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    arrayAppend(a, {17, 18, 19, 20, 21, 22, 23});
+    CORRADE_COMPARE(arrayCapacity(a), 23);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
 
-        arrayAppend(a, 24);
-        CORRADE_COMPARE(arrayCapacity(a), 35); /* 96*1.5 = 144 = 35*4 + 4 */
-        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
-    }
+    arrayAppend(a, 24);
+    CORRADE_COMPARE(arrayCapacity(a), 35); /* 96*1.5 = 144 = 35*4 + 4 */
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    #endif
 }
 
 template<class T> void GrowableArrayTest::removeSuffixZero() {
