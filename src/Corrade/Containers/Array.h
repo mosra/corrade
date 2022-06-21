@@ -176,10 +176,11 @@ custom allocators, type constructibility and such.
 As long as the type stored in the array is nothrow-move-constructible, any
 @ref Array instance can be converted to a growing container by calling the
 family of @ref arrayAppend(), @ref arrayInsert(), @ref arrayReserve(),
-@ref arrayResize() ... functions. A growable array behaves the same as a
-regular array to its consumers --- its @ref size() returns the count of *real*
-elements, while available capacity can be queried through @ref arrayCapacity().
-Example of populating an array with an undetermined amount of elements:
+@ref arrayResize(), @ref arrayRemove() ... functions. A growable array behaves
+the same as a regular array to its consumers --- its @ref size() returns the
+count of *real* elements, while available capacity can be queried through
+@ref arrayCapacity(). Example of populating an array with an undetermined
+amount of elements:
 
 @snippet Containers.cpp Array-growable
 

@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayInsert(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
+ * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayInsert(), @ref Corrade::Containers::arrayRemove(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
  * @m_since{2020,06}
  *
  * See @ref Containers-Array-growable for more information.
@@ -1211,6 +1211,44 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayInse
 #endif
 
 /**
+@brief Remove an element from an array
+@m_since_latest
+
+Expects that @cpp index + count @ce is not larger than @ref Array::size(). If
+the array is not growable, all elements except the removed ones are reallocated
+to a growable version. Otherwise, items starting at @cpp index + count @ce are
+moved @cpp count @ce items backward and the @ref Array::size() is decreased by
+@p count.
+
+Amortized complexity is @f$ \mathcal{O}(m + n) @f$ where @f$ m @f$ is the
+number of items being removed and @f$ n @f$ is the array size after removal. On
+top of what the @p Allocator (or the default @ref ArrayAllocator) itself needs,
+@p T is required to be nothrow move-constructible and nothrow move-assignable.
+
+This function is equivalent to calling @relativeref{std::vector,erase()} on a
+@ref std::vector.
+@m_keywords{erase()}
+@see @ref arrayIsGrowable(), @ref arrayRemoveSuffix()
+*/
+template<class T, class Allocator = ArrayAllocator<T>> void arrayRemove(Array<T>& array, std::size_t index, std::size_t count = 1);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayRemove(Array<T>& array, std::size_t index, std::size_t count = 1) {
+    arrayRemove<T, Allocator<T>>(array, index, count);
+}
+#endif
+
+/**
 @brief Remove a suffix from an array
 @m_since{2020,06}
 
@@ -1227,7 +1265,7 @@ move-constructible.
 With @p count set to @cpp 1 @ce, this function is equivalent to calling
 @relativeref{std::vector,pop_back()} on a @ref std::vector.
 @m_keywords{pop_back()}
-@see @ref arrayIsGrowable(), @ref arrayResize()
+@see @ref arrayIsGrowable(), @ref arrayRemove(), @ref arrayResize()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1);
 
@@ -1890,6 +1928,87 @@ template<class T, class Allocator, class ...Args> T& arrayInsert(Array<T>& array
 template<class T, class Allocator> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::NoInitT, const std::size_t count) {
     T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, count);
     return {it, count};
+}
+
+namespace Implementation {
+
+template<class T> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    /* Compared to the non-trivially-copyable variant below, just delegate to
+       memmove() and assume it can figure out how to copy from front to back
+       more efficiently that we ever could.
+
+       Same as with memcpy(), apparently memmove() can't be called with null
+       pointers, even if size is zero. I call that bullying. */
+    if(count) std::memmove(dst, src, count*sizeof(T));
+}
+
+template<class T> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<!
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    std::is_trivially_copyable<T>::value
+    #else
+    IsTriviallyCopyableOnOldGcc<T>::value
+    #endif
+>::type* = nullptr) {
+    static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
+        "nothrow move-constructible and move-assignable type is required");
+
+    /* Move-assign later elements to earlier */
+    for(T *end = src + count, *assignSrc = src, *assignDst = dst; assignSrc != end; ++assignSrc, ++assignDst)
+        *assignDst = Utility::move(*assignSrc);
+
+    /* Destruct remaining moved-out elements */
+    for(T *end = src + count, *destructSrc = dst + count; destructSrc != end; ++destructSrc)
+        destructSrc->~T();
+}
+
+}
+
+template<class T, class Allocator> void arrayRemove(Array<T>& array, const std::size_t index, const std::size_t count) {
+    /* Direct access to speed up debug builds */
+    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
+    CORRADE_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemove(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
+
+    /* Nothing to remove, yay! */
+    if(!count) return;
+
+    /* If we don't have our own deleter, we need to reallocate in order to
+       store the capacity. Move the parts before and after the index separately,
+       which will also cause the removed elements to be properly destructed, so
+       nothing else needs to be done. Not using reallocate() as we don't know
+       where the original memory comes from. */
+    if(arrayGuts.deleter != Allocator::deleter) {
+        T* const newArray = Allocator::allocate(arrayGuts.size - count);
+        Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, index);
+        Implementation::arrayMoveConstruct<T>(arrayGuts.data + index + count, newArray + index, arrayGuts.size - index - count);
+        array = Array<T>{newArray, arrayGuts.size - count, Allocator::deleter};
+
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        /* This should basically be a no-op, right? */
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size);
+        #endif
+
+    /* Otherwise shift the elements after index backward */
+    } else {
+        Implementation::arrayShiftBackward(arrayGuts.data + index + count, arrayGuts.data + index, arrayGuts.size - index - count);
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + Allocator::capacity(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size - count);
+        #endif
+        arrayGuts.size -= count;
+    }
 }
 
 template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const std::size_t count) {
