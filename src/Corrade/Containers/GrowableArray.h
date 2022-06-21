@@ -1219,7 +1219,7 @@ not growable, all its elements except the removed suffix are reallocated to a
 growable version. Otherwise, a destructor is called on removed elements and the
 @ref Array::size() is decreased by @p count.
 
-Amortized complexity is @f$ \mathcal{O}(n) @f$ where @f$ n @f$ is the number of
+Amortized complexity is @f$ \mathcal{O}(m) @f$ where @f$ m @f$ is the number of
 items removed. On top of what the @p Allocator (or the default
 @ref ArrayAllocator) itself needs, @p T is required to be nothrow
 move-constructible.
