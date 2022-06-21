@@ -126,19 +126,27 @@ struct GrowableArrayTest: TestSuite::Tester {
     /* Insert uses the same growth ratio underneath, no need to test again */
 
     template<class T> void removeZero();
+    template<class T> void removeUnorderedZero();
     template<class T> void removeSuffixZero();
     template<class T> void removeNonGrowable();
+    template<class T> void removeUnorderedNonGrowable();
     template<class T> void removeSuffixNonGrowable();
     template<class T> void removeAllNonGrowable();
+    template<class T> void removeUnorderedAllNonGrowable();
     template<class T> void removeSuffixAllNonGrowable();
     template<class T> void removeGrowable();
+    template<class T> void removeUnorderedGrowable();
     template<class T> void removeSuffixGrowable();
     template<class T> void removeAllGrowable();
+    template<class T> void removeUnorderedAllGrowable();
     template<class T> void removeSuffixAllGrowable();
 
     void removeShiftOperationOrder();
     void removeShiftOperationOrderNoOp();
     void removeShiftOperationOrderNoOverlap();
+    void removeUnorderedShiftOperationOrder();
+    void removeUnorderedShiftOperationOrderNoOp();
+    void removeUnorderedShiftOperationOrderNoOverlap();
     void removeInvalid();
 
     template<class T> void shrinkNonGrowableEmptyNoInit();
@@ -345,28 +353,41 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::removeZero<int>,
               &GrowableArrayTest::removeZero<Movable>,
+              &GrowableArrayTest::removeUnorderedZero<int>,
+              &GrowableArrayTest::removeUnorderedZero<Movable>,
               &GrowableArrayTest::removeSuffixZero<int>,
               &GrowableArrayTest::removeSuffixZero<Movable>,
               &GrowableArrayTest::removeNonGrowable<int>,
               &GrowableArrayTest::removeNonGrowable<Movable>,
+              &GrowableArrayTest::removeUnorderedNonGrowable<int>,
+              &GrowableArrayTest::removeUnorderedNonGrowable<Movable>,
               &GrowableArrayTest::removeSuffixNonGrowable<int>,
               &GrowableArrayTest::removeSuffixNonGrowable<Movable>,
               &GrowableArrayTest::removeAllNonGrowable<int>,
               &GrowableArrayTest::removeAllNonGrowable<Movable>,
+              &GrowableArrayTest::removeUnorderedAllNonGrowable<int>,
+              &GrowableArrayTest::removeUnorderedAllNonGrowable<Movable>,
               &GrowableArrayTest::removeSuffixAllNonGrowable<int>,
               &GrowableArrayTest::removeSuffixAllNonGrowable<Movable>,
               &GrowableArrayTest::removeGrowable<int>,
               &GrowableArrayTest::removeGrowable<Movable>,
+              &GrowableArrayTest::removeUnorderedGrowable<int>,
+              &GrowableArrayTest::removeUnorderedGrowable<Movable>,
               &GrowableArrayTest::removeSuffixGrowable<int>,
               &GrowableArrayTest::removeSuffixGrowable<Movable>,
               &GrowableArrayTest::removeAllGrowable<int>,
               &GrowableArrayTest::removeAllGrowable<Movable>,
+              &GrowableArrayTest::removeUnorderedAllGrowable<int>,
+              &GrowableArrayTest::removeUnorderedAllGrowable<Movable>,
               &GrowableArrayTest::removeSuffixAllGrowable<int>,
               &GrowableArrayTest::removeSuffixAllGrowable<Movable>,
 
               &GrowableArrayTest::removeShiftOperationOrder,
               &GrowableArrayTest::removeShiftOperationOrderNoOp,
               &GrowableArrayTest::removeShiftOperationOrderNoOverlap,
+              &GrowableArrayTest::removeUnorderedShiftOperationOrder,
+              &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp,
+              &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap,
               &GrowableArrayTest::removeInvalid,
 
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<int>,
@@ -1834,6 +1855,37 @@ template<class T> void GrowableArrayTest::removeZero() {
     }
 }
 
+template<class T> void GrowableArrayTest::removeUnorderedZero() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{3};
+        T* prev = a.data();
+        a[0] = 2;
+        a[1] = 7;
+        a[2] = -1;
+
+        /* Should do no nuthin' */
+        arrayRemoveUnordered(a, 3, 0);
+        CORRADE_VERIFY(!arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 3);
+        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(int(a[0]), 2);
+        CORRADE_COMPARE(int(a[1]), 7);
+        CORRADE_COMPARE(int(a[2]), -1);
+        /* Not growable, no ASan annotation check */
+    }
+
+    /* The three items are constructed in-place, nothing else hould be done by
+       the removal */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 3);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 3);
+    }
+}
+
 template<class T> void GrowableArrayTest::removeSuffixZero() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -1879,6 +1931,49 @@ template<class T> void GrowableArrayTest::removeNonGrowable() {
         /* Gets converted to growable as otherwise we can't ensure the
            destructors won't be called on removed elements */
         arrayRemove(a, 1, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 2);
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        CORRADE_VERIFY(a.data() != prev);
+        CORRADE_COMPARE(int(a[0]), 2);
+        CORRADE_COMPARE(int(a[1]), 5786);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The four items are constructed in-place, then the remaining two of
+           them move-constructed to a new array, originals destructed */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 6);
+            CORRADE_COMPARE(Movable::moved, 2);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 4);
+        }
+    }
+
+    /* And finally also the two remaining destructed */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 6);
+        CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 6);
+    }
+}
+
+template<class T> void GrowableArrayTest::removeUnorderedNonGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{4};
+        T* prev = a.data();
+        a[0] = 2;
+        a[1] = 7;
+        a[2] = -1;
+        a[3] = 5786;
+
+        /* Gets converted to growable as otherwise we can't ensure the
+           destructors won't be called on removed elements. The observable
+           behavior is the same as with arrayRemove(), as the copy has to be
+           done anyway and so there's no reason to differ. */
+        arrayRemoveUnordered(a, 1, 2);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1984,6 +2079,45 @@ template<class T> void GrowableArrayTest::removeAllNonGrowable() {
     }
 }
 
+template<class T> void GrowableArrayTest::removeUnorderedAllNonGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{2};
+        T* prev = a.data();
+        a[0] = 2;
+        a[1] = 7;
+
+        /* Gets converted to growable as otherwise we can't ensure the
+           destructors won't be called on removed elements. The observable
+           behavior is again the same as with arrayRemove(), as the copy has to
+           be done anyway and so there's no reason to differ. */
+        arrayRemoveUnordered(a, 0, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 0);
+        CORRADE_VERIFY(a.data() != prev);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The two items are constructed in-place, then a new empty growable
+           array is constructed, originals destructed */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
 template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -2063,6 +2197,52 @@ template<class T> void GrowableArrayTest::removeGrowable() {
     }
 }
 
+template<class T> void GrowableArrayTest::removeUnorderedGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 10);
+        T* prev = a.data();
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        arrayAppend(a, Corrade::InPlaceInit, -1);
+        arrayAppend(a, Corrade::InPlaceInit, 15);
+        arrayAppend(a, Corrade::InPlaceInit, 4);
+        arrayAppend(a, Corrade::InPlaceInit, 5786);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        arrayRemoveUnordered(a, 1, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 4);
+        CORRADE_COMPARE(arrayCapacity(a), 10);
+        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(int(a[0]), 2);
+        CORRADE_COMPARE(int(a[1]), 4);
+        CORRADE_COMPARE(int(a[2]), 5786);
+        CORRADE_COMPARE(int(a[3]), 15);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The six items are constructed in-place. Then, 4 is moved over 7
+           and 5786 over -1 (two assignments, two moves) and the places left
+           after them get destructed. */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 6);
+            CORRADE_COMPARE(Movable::moved, 2);
+            CORRADE_COMPARE(Movable::assigned, 2);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* And finally also the four remaining destructed */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 6);
+        CORRADE_COMPARE(Movable::moved, 2);
+        CORRADE_COMPARE(Movable::assigned, 2);
+        CORRADE_COMPARE(Movable::destructed, 6);
+    }
+}
+
 template<class T> void GrowableArrayTest::removeSuffixGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -2116,6 +2296,42 @@ template<class T> void GrowableArrayTest::removeAllGrowable() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         arrayRemove(a, 0, 2);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 10);
+        CORRADE_VERIFY(a.data() == prev);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The two items are constructed in-place. Then, all are destructed. */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
+template<class T> void GrowableArrayTest::removeUnorderedAllGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 10);
+        T* prev = a.data();
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        arrayRemoveUnordered(a, 0, 2);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 10);
@@ -2266,6 +2482,97 @@ void GrowableArrayTest::removeShiftOperationOrderNoOverlap() {
         "Destructing 6\n");
 }
 
+void GrowableArrayTest::removeUnorderedShiftOperationOrder() {
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayResize(a, Corrade::NoInit, 6);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+        new(&a[3]) VerboseMovable{4};
+        new(&a[4]) VerboseMovable{5};
+        new(&a[5]) VerboseMovable{6};
+
+        arrayRemoveUnordered(a, 1, 2);
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Constructing 4\n"
+        "Constructing 5\n"
+        "Constructing 6\n"
+        "Move-assigning 5 with a -3-element offset\n"
+        "Move-assigning 6 with a -3-element offset\n"
+        "Destructing (moved-out) 5\n"
+        "Destructing (moved-out) 6\n"
+        "Destructing 1\n"
+        "Destructing 5\n"
+        "Destructing 6\n"
+        "Destructing 4\n");
+}
+
+void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp() {
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayResize(a, Corrade::NoInit, 3);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+
+        /* This does nothing, so no loop should get entered */
+        arrayRemoveUnordered(a, 1, 0);
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Destructing 1\n"
+        "Destructing 2\n"
+        "Destructing 3\n");
+}
+
+void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
+    /* Compared to removeUnorderedShiftOperationOrder(), this doesn't have
+       `count` items after the removed ones, so one is destructed without being
+       moved anywhere. The observed behavior is the same as with
+       removeShiftOperationOrderNoOverlap(). */
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    {
+        Array<VerboseMovable> a;
+        arrayResize(a, Corrade::NoInit, 6);
+        new(&a[0]) VerboseMovable{1};
+        new(&a[1]) VerboseMovable{2};
+        new(&a[2]) VerboseMovable{3};
+        new(&a[3]) VerboseMovable{4};
+        new(&a[4]) VerboseMovable{5};
+        new(&a[5]) VerboseMovable{6};
+
+        arrayRemoveUnordered(a, 1, 3);
+    }
+    CORRADE_COMPARE(out.str(),
+        "Constructing 1\n"
+        "Constructing 2\n"
+        "Constructing 3\n"
+        "Constructing 4\n"
+        "Constructing 5\n"
+        "Constructing 6\n"
+        "Move-assigning 5 with a -3-element offset\n"
+        "Move-assigning 6 with a -3-element offset\n"
+        "Destructing 4\n"
+        "Destructing (moved-out) 5\n"
+        "Destructing (moved-out) 6\n"
+        "Destructing 1\n"
+        "Destructing 5\n"
+        "Destructing 6\n");
+}
+
 void GrowableArrayTest::removeInvalid() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
@@ -2277,10 +2584,14 @@ void GrowableArrayTest::removeInvalid() {
     Error redirectOutput{&out};
     arrayRemove(a, 4, 1);
     arrayRemove(a, 2, 3);
+    arrayRemoveUnordered(a, 4, 1);
+    arrayRemoveUnordered(a, 2, 3);
     arrayRemoveSuffix(a, 5);
     CORRADE_COMPARE(out.str(),
         "Containers::arrayRemove(): can't remove 1 elements at index 4 from an array of size 4\n"
         "Containers::arrayRemove(): can't remove 3 elements at index 2 from an array of size 4\n"
+        "Containers::arrayRemoveUnordered(): can't remove 1 elements at index 4 from an array of size 4\n"
+        "Containers::arrayRemoveUnordered(): can't remove 3 elements at index 2 from an array of size 4\n"
         "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n");
 }
 
@@ -2671,13 +2982,14 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_COMPARE(a.size(), 25);
 
     arrayRemove<ArrayNewAllocator>(a, 15);
+    arrayRemoveUnordered<ArrayNewAllocator>(a, 15);
     arrayRemoveSuffix<ArrayNewAllocator>(a);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     /* After this it will finally lose the growable status */
     arrayShrink<ArrayNewAllocator>(a);
     CORRADE_VERIFY(!arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_VERIFY(!a.deleter());
-    CORRADE_COMPARE(a.size(), 23);
+    CORRADE_COMPARE(a.size(), 22);
 
     /** @todo use a different allocator here once it exists -- this one would
         be picked up implicitly as well so it doesn't really test anything */

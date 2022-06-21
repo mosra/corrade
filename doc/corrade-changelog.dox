@@ -84,9 +84,9 @@ namespace Corrade {
 -   New @ref Containers::ArrayView2, @ref Containers::ArrayView3 and
     @ref Containers::ArrayView4 convenience aliases for
     @ref Containers::StaticArrayView
--   Added a family of @ref Containers::arrayInsert() and
-    @ref Containers::arrayRemove() functions for arbitrary insertion into and
-    deletion from growable arrays
+-   Added a family of @ref Containers::arrayInsert(),
+    @ref Containers::arrayRemove() and @ref Containers::arrayRemoveUnordered()
+    functions for arbitrary insertion into and deletion from growable arrays
 
 @subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
 
