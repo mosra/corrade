@@ -1820,7 +1820,7 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
         a[0] = 2;
         a[1] = 7;
         a[2] = -1;
-        a[3] = 35786;
+        a[3] = 5786;
 
         /* Gets converted to growable as otherwise we can't ensure the
            destructors won't be called on removed elements */
@@ -1899,7 +1899,7 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         arrayAppend(a, Corrade::InPlaceInit, 2);
         arrayAppend(a, Corrade::InPlaceInit, 7);
         arrayAppend(a, Corrade::InPlaceInit, -1);
-        arrayAppend(a, Corrade::InPlaceInit, 35786);
+        arrayAppend(a, Corrade::InPlaceInit, 5786);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         arrayRemoveSuffix(a, 2);
