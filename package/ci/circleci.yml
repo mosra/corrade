@@ -362,14 +362,14 @@ workflows:
   build:
     jobs:
     - linux
-    - linux-arm64
+    #- linux-arm64
     - linux-static
     - linux-nondeprecated
     - linux-sanitizers
     - linux-threadsanitizer
-    - macos
-    - macos-static
+    #- macos
+    #- macos-static
     - emscripten
     - android-x86
-    - ios
+    #- ios
     - acme
