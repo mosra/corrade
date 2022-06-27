@@ -439,7 +439,7 @@ class Array {
             a function pointer, to avoid accidental malloc()/delete[]
             mismatches (String already has the deleter explicit, e.g.) */
         /* GCC <=4.8 breaks on _deleter{} */
-        explicit Array(T* data, std::size_t size, D deleter = {}): _data{data}, _size{size}, _deleter(deleter) {}
+        explicit Array(T* data, std::size_t size, D deleter = {}) noexcept: _data{data}, _size{size}, _deleter(deleter) {}
 
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
