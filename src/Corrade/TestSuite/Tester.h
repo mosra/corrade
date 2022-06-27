@@ -1844,8 +1844,9 @@ caveats. See @ref CORRADE_VERIFY() for details.
 @param ...      Message which will be printed as an indication of a skipped
     test
 
-Skips all following checks in given test case. Useful for e.g. indicating that
-given feature can't be tested on given platform:
+Skips all following checks in given test case, printing a
+@cb{.ansi} [1;39mSKIP @ce in the output. Useful for e.g. indicating that given
+feature can't be tested on given platform:
 
 @snippet TestSuite.cpp CORRADE_SKIP
 
