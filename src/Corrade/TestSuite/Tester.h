@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
+ * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
  */
 
 #include <initializer_list>
@@ -1857,12 +1857,60 @@ This macro is meant to be called in a test case in a
 @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF()
+@see @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(),
+    @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF()
 */
 #define CORRADE_SKIP(...)                                                   \
     Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(skipDebug, __LINE__) << __VA_ARGS__;          \
     })})
+
+/** @hideinitializer
+@brief Skip a test case if Corrade asserts are disabled
+@m_since_latest
+
+If @ref CORRADE_NO_ASSERT is defined, expands to a @ref CORRADE_SKIP() call.
+Otherwise expands to @cpp do {} while(false) @ce. To be used in test cases that
+verify @ref CORRADE_ASSERT() and other assertion macros and which would
+misbehave or crash if asserts are compiled out. Use
+@ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT() for testing @ref CORRADE_DEBUG_ASSERT()
+and other debug assertion macros.
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
+*/
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_SKIP_IF_NO_ASSERT() CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions")
+#else
+#define CORRADE_SKIP_IF_NO_ASSERT() do {} while(false)
+#endif
+
+/** @hideinitializer
+@brief Skip a test case if Corrade debug asserts are disabled
+@m_since_latest
+
+If @ref CORRADE_NO_ASSERT is defined or @ref CORRADE_IS_DEBUG_BUILD is not
+defined and @cpp NDEBUG @ce is defined, expands to a @ref CORRADE_SKIP() call.
+Otherwise expands to @cpp do {} while(false) @ce. To be used in test cases that
+verify @ref CORRADE_DEBUG_ASSERT() and other assertion macros and which would
+misbehave or crash if asserts are compiled out. Use
+@ref CORRADE_SKIP_IF_NO_ASSERT() for testing @ref CORRADE_ASSERT() and other
+assertion macros.
+
+This macro is meant to be called in a test case in a
+@ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass. It's possible to
+also call it in a helper function or lambda called from inside a test case with
+some caveats. See @ref CORRADE_VERIFY() for details.
+*/
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_SKIP_IF_NO_DEBUG_ASSERT() CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test debug assertions")
+#elif !defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)
+#define CORRADE_SKIP_IF_NO_DEBUG_ASSERT() CORRADE_SKIP("CORRADE_IS_DEBUG_BUILD not defined and NDEBUG defined, can't test debug assertions")
+#else
+#define CORRADE_SKIP_IF_NO_DEBUG_ASSERT() do {} while(false)
+#endif
 
 /** @hideinitializer
 @brief Annotate an iteration in a test case

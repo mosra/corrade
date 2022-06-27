@@ -38,6 +38,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
+#include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/StlMath.h"
@@ -815,6 +816,9 @@ struct TesterTest: Tester {
     void compareNonCopyable();
     void expectFailIfExplicitBool();
     void failIfExplicitBool();
+
+    void skipIfNoAssert();
+    void skipIfNoDebugAssert();
 };
 
 class EmptyTest: public Tester {};
@@ -892,7 +896,10 @@ TesterTest::TesterTest() {
               &TesterTest::compareWithDereference,
               &TesterTest::compareNonCopyable,
               &TesterTest::expectFailIfExplicitBool,
-              &TesterTest::failIfExplicitBool});
+              &TesterTest::failIfExplicitBool,
+
+              &TesterTest::skipIfNoAssert,
+              &TesterTest::skipIfNoDebugAssert});
 }
 
 template<class T> void TesterTest::configurationSetSkippedArgumentPrefixes() {
@@ -2324,6 +2331,49 @@ void TesterTest::failIfExplicitBool() {
         CORRADE_EXPECT_FAIL("");
         CORRADE_FAIL_IF(ExplicitTrue{}, "");
     }
+}
+
+void TesterTest::skipIfNoAssert() {
+    int a = 3;
+
+    /* Checks that the value is incremented at the end of a scope. If asserts
+       are disabled, it doesn't check anything (and the value is not
+       incremented). If asserts are enabled but CORRADE_SKIP_IF_NO_ASSERT()
+       exits the function, this assertion will fail. */
+    Containers::ScopeGuard assertAtExit{&a, [](int* a) {
+        CORRADE_INTERNAL_ASSERT(*a == 4);
+    }};
+
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    /* Gets incremented only if asserts are not disabled */
+    CORRADE_INTERNAL_ASSERT(++a);
+
+    /* If asserts are disabled but CORRADE_SKIP_IF_NO_ASSERT() didn't exit
+       the function, this comparison will fail */
+    CORRADE_COMPARE(a, 4);
+}
+
+void TesterTest::skipIfNoDebugAssert() {
+    int a = 3;
+
+    /* Checks that the value is incremented at the end of a scope. If debug
+       asserts are disabled, it doesn't check anything (and the value is not
+       incremented). If debug asserts are enabled but
+       CORRADE_SKIP_IF_NO_DEBUG_ASSERT() exits the function, this assertion
+       will fail. */
+    Containers::ScopeGuard assertAtExit{&a, [](int* a) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(*a == 4);
+    }};
+
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    /* Gets incremented only if asserts are not disabled */
+    CORRADE_INTERNAL_DEBUG_ASSERT(++a);
+
+    /* If debug asserts are disabled but CORRADE_SKIP_IF_NO_DEBUG_ASSERT()
+       didn't exit the function, this comparison will fail */
+    CORRADE_COMPARE(a, 4);
 }
 
 }}}}

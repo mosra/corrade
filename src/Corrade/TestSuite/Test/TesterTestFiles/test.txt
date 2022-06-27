@@ -1,61 +1,61 @@
 Starting TesterTest::Test with 63 test cases...
      ? [01] <unknown>()
     OK [02] trueExpression()
-  FAIL [03] falseExpression() at here.cpp:317
+  FAIL [03] falseExpression() at here.cpp:318
         Expression 5 != 5 failed.
     OK [04] equal()
-  FAIL [05] nonEqual() at here.cpp:327
+  FAIL [05] nonEqual() at here.cpp:328
         Values a and b are not the same, actual is
         5
         but expected
         3
- XFAIL [06] expectFail() at here.cpp:334
-        The world is not mad yet. 2 + 2 and 5 failed the comparison.
  XFAIL [06] expectFail() at here.cpp:335
+        The world is not mad yet. 2 + 2 and 5 failed the comparison.
+ XFAIL [06] expectFail() at here.cpp:336
         The world is not mad yet. Expression false == true failed.
      ? [07] expectFailNoChecks()
      ? [08] expectFailIfNoChecks()
- XPASS [09] unexpectedPassExpression() at here.cpp:364
+ XPASS [09] unexpectedPassExpression() at here.cpp:365
         Expression true == true was expected to fail.
- XPASS [10] unexpectedPassEqual() at here.cpp:369
+ XPASS [10] unexpectedPassEqual() at here.cpp:370
         2 + 2 and 4 were expected to fail the comparison.
     OK [11] compareAs()
-  FAIL [12] compareAsFail() at here.cpp:377
+  FAIL [12] compareAsFail() at here.cpp:378
         Length of actual "meh" doesn't match length of expected "hello" with epsilon 0
     OK [13] compareWith()
-  FAIL [14] compareWithFail() at here.cpp:385
+  FAIL [14] compareWithFail() at here.cpp:386
         Length of actual "You rather GTFO" doesn't match length of expected "hello" with epsilon 9
-  FAIL [15] compareImplicitConversionFail() at here.cpp:390
+  FAIL [15] compareImplicitConversionFail() at here.cpp:391
         Values "holla" and hello are not the same, actual is
         holla
         but expected
         hello
-  WARN [16] compareWarning() at here.cpp:401
+  WARN [16] compareWarning() at here.cpp:402
         This is a warning when comparing "a.txt" and "b.txt"
-  INFO [17] compareMessage() at here.cpp:397
+  INFO [17] compareMessage() at here.cpp:398
         This is a message when comparing "a.txt" and "b.txt"
     OK [18] compareSaveDiagnostic()
-  INFO [19] info() at here.cpp:413
+  INFO [19] info() at here.cpp:414
         The value is 7
-  WARN [20] warn() at here.cpp:420
+  WARN [20] warn() at here.cpp:421
         The value 7 is higher than 5
-  INFO [21] infoWarnNoChecks() at here.cpp:428
+  INFO [21] infoWarnNoChecks() at here.cpp:429
         This test talks
-  WARN [21] infoWarnNoChecks() at here.cpp:429
+  WARN [21] infoWarnNoChecks() at here.cpp:430
         Instead of testing!!!
      ? [21] infoWarnNoChecks()
-  FAIL [22] fail() at here.cpp:434
+  FAIL [22] fail() at here.cpp:435
         The value 7 is higher than 5
     OK [23] failNot()
- XFAIL [24] failExpected() at here.cpp:447
+ XFAIL [24] failExpected() at here.cpp:448
         Our values are high. Condition failed.
- XPASS [25] failUnexpectedlyNot() at here.cpp:454
+ XPASS [25] failUnexpectedlyNot() at here.cpp:455
         Failure was expected to happen.
   SKIP [26] skip()
         This testcase is skipped.
-  FAIL [27] iteration() at here.cpp:468 (iteration JOHN is the name, 1)
+  FAIL [27] iteration() at here.cpp:469 (iteration JOHN is the name, 1)
         Expression !std::isupper(name[i]) failed.
-  FAIL [28] iterationScope() at here.cpp:487
+  FAIL [28] iterationScope() at here.cpp:488
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected
@@ -78,7 +78,7 @@ Starting TesterTest::Test with 63 test cases...
        [39] tearing down...
      ? [39] <unknown>()
        [40] setting up...
-  FAIL [40] setupTeardownFail() at here.cpp:556
+  FAIL [40] setupTeardownFail() at here.cpp:557
         Expression false failed.
        [40] tearing down...
        [41] setting up...
@@ -87,7 +87,7 @@ Starting TesterTest::Test with 63 test cases...
        [41] tearing down...
     OK [42] instancedTest(zero)
     OK [43] instancedTest(1)
-  FAIL [44] instancedTest(two) at here.cpp:579
+  FAIL [44] instancedTest(two) at here.cpp:580
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
@@ -101,7 +101,7 @@ Starting TesterTest::Test with 63 test cases...
 4
     OK [47] repeatedTest()@5
      ? [48] <unknown>()@50
-  FAIL [49] repeatedTestFail()@18 at here.cpp:590
+  FAIL [49] repeatedTestFail()@18 at here.cpp:591
         Expression _i++ < 17 failed.
   SKIP [50] repeatedTestSkip()@29
         Too late.
@@ -116,7 +116,7 @@ Starting TesterTest::Test with 63 test cases...
        [52] tearing down...
      ? [52] <unknown>()@2
        [53] setting up...
-  FAIL [53] repeatedTestSetupTeardownFail()@1 at here.cpp:604
+  FAIL [53] repeatedTestSetupTeardownFail()@1 at here.cpp:605
         Expression false failed.
        [53] tearing down...
        [54] setting up...
@@ -142,22 +142,22 @@ Benchmark end: 500
  BENCH [59] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
   SKIP [60] benchmarkSkip()@1
         Can't verify the measurements anyway.
- XFAIL [61] macrosInALambda() at here.cpp:678 (iteration 37)
+ XFAIL [61] macrosInALambda() at here.cpp:679 (iteration 37)
         Expected here to test CORRADE_EXPECT_FAIL(). Expression false failed.
-  INFO [61] macrosInALambda() at here.cpp:680
+  INFO [61] macrosInALambda() at here.cpp:681
         Expected here to test CORRADE_INFO().
-  WARN [61] macrosInALambda() at here.cpp:681
+  WARN [61] macrosInALambda() at here.cpp:682
         Expected here to test CORRADE_WARN().
- XFAIL [61] macrosInALambda() at here.cpp:685
+ XFAIL [61] macrosInALambda() at here.cpp:686
         Expected here to test CORRADE_FAIL_IF(). Condition failed.
   SKIP [61] macrosInALambda()
         Expected here to test CORRADE_SKIP().
  BENCH [62] 348.36          kB benchmarkMacrosInALambda()@1x1
-  INFO [63] macrosInASingleExpressionBlock() at here.cpp:727
+  INFO [63] macrosInASingleExpressionBlock() at here.cpp:728
         Expected here to test CORRADE_INFO().
-  WARN [63] macrosInASingleExpressionBlock() at here.cpp:729
+  WARN [63] macrosInASingleExpressionBlock() at here.cpp:730
         Expected here to test CORRADE_WARN().
- XFAIL [63] macrosInASingleExpressionBlock() at here.cpp:734
+ XFAIL [63] macrosInASingleExpressionBlock() at here.cpp:735
         Expected here to test CORRADE_FAIL_IF(). Condition failed.
   SKIP [63] macrosInASingleExpressionBlock()
         Expected here to test CORRADE_SKIP().

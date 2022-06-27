@@ -106,6 +106,9 @@ namespace Corrade {
 -   New @ref CORRADE_INFO(), @ref CORRADE_WARN() and @ref CORRADE_FAIL_IF()
     macros for printing formatted information to the output and explicitly
     failing a test
+-   New @ref CORRADE_SKIP_IF_NO_ASSERT() and
+    @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT() helper macros for easier assertion
+    testing
 -   New @ref TestSuite::Compare::NotEqual comparator to provide an alternative
     to @cpp CORRADE_VERIFY(a != b) @ce with a better failure diagnostic
 -   New @ref TestSuite::Compare::StringHasPrefix,
