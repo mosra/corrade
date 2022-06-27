@@ -123,6 +123,7 @@ struct ManagerTest: TestSuite::Tester {
     void hierarchy();
     void destructionHierarchy();
     void crossManagerDependencies();
+    void crossManagerDependenciesInstantiateFromDifferent();
     void crossManagerDependenciesWrongDestructionOrder();
     void unresolvedDependencies();
 
@@ -212,6 +213,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::hierarchy,
               &ManagerTest::destructionHierarchy,
               &ManagerTest::crossManagerDependencies,
+              &ManagerTest::crossManagerDependenciesInstantiateFromDifferent,
               &ManagerTest::crossManagerDependenciesWrongDestructionOrder,
               &ManagerTest::unresolvedDependencies,
 
@@ -992,13 +994,13 @@ void ManagerTest::destructionHierarchy() {
 }
 
 void ManagerTest::crossManagerDependencies() {
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
     foodManager.registerExternalManager(manager);
 
-    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
-    #else
     /* Load HotDog */
     CORRADE_COMPARE(foodManager.load("HotDog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -1023,13 +1025,17 @@ void ManagerTest::crossManagerDependencies() {
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
         std::vector<std::string>{});
     #endif
+}
 
-    /* Verify that the plugin can be instanced only through its own manager */
+void ManagerTest::crossManagerDependenciesInstantiateFromDifferent() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    PluginManager::Manager<AbstractAnimal> manager;
+    PluginManager::Manager<AbstractFood> foodManager;
+    foodManager.registerExternalManager(manager);
+
+    /* The plugin can be instanced only through its own manager */
     CORRADE_VERIFY(manager.instantiate("Canary"));
-
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't fully test assertions");
-    #endif
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1041,9 +1047,7 @@ void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
     #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
     #endif
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't fully test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<PluginManager::Manager<AbstractAnimal>> manager{InPlaceInit};
     PluginManager::Manager<AbstractFood> foodManager;
