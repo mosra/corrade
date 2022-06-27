@@ -493,12 +493,12 @@ StringView String::prefix(const std::size_t count) const {
     return StringView{*this}.prefix(count);
 }
 
-MutableStringView String::exceptPrefix(const std::size_t begin) {
-    return MutableStringView{*this}.exceptPrefix(begin);
+MutableStringView String::exceptPrefix(const std::size_t count) {
+    return MutableStringView{*this}.exceptPrefix(count);
 }
 
-StringView String::exceptPrefix(const std::size_t begin) const {
-    return StringView{*this}.exceptPrefix(begin);
+StringView String::exceptPrefix(const std::size_t count) const {
+    return StringView{*this}.exceptPrefix(count);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED

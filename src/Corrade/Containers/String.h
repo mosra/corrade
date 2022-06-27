@@ -744,8 +744,8 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::exceptPrefix(). The result has
          * always @ref StringViewFlag::NullTerminated set.
          */
-        MutableStringView exceptPrefix(std::size_t begin);
-        StringView exceptPrefix(std::size_t begin) const; /**< @overload */
+        MutableStringView exceptPrefix(std::size_t count);
+        StringView exceptPrefix(std::size_t count) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @copybrief exceptPrefix()
