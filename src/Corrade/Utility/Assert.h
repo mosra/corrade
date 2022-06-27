@@ -116,9 +116,9 @@ application aborts. If @ref CORRADE_GRACEFUL_ASSERT is defined *and*
 @ref Corrade::Utility::Error output is redirected (i.e., in tests verifying the
 assert behavior), the message is printed and the function returns with
 @p returnValue instead of aborting. If @ref CORRADE_STANDARD_ASSERT is defined,
-this macro compiles to @cpp assert(condition) @ce, ignoring @p message. If
+this macro expands to @cpp assert(condition) @ce, ignoring @p message. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
-@cpp NDEBUG @ce are defined), this macro compiles to @cpp do {} while(0) @ce.
+@cpp NDEBUG @ce are defined), this macro expands to @cpp do {} while(false) @ce.
 Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT
@@ -162,7 +162,7 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
+#define CORRADE_ASSERT(condition, message, returnValue) do {} while(false)
 #elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
@@ -205,7 +205,7 @@ function gets executed as usual instead of aborting. If
 @ref CORRADE_STANDARD_ASSERT is defined, @p message is ignored and the standard
 @cpp assert() @ce is called if @p condition fails. If @ref CORRADE_NO_ASSERT is
 defined (or if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are
-defined), this macro compiles to @cpp static_cast<void>(0) @ce.
+defined), this macro expands to @cpp static_cast<void>(0) @ce.
 
 As with @ref CORRADE_ASSERT(), you can use stream output operators for
 formatting just like when printing to @ref Corrade::Utility::Debug output.
@@ -301,7 +301,7 @@ error output and the application aborts. If @ref CORRADE_GRACEFUL_ASSERT is
 defined *and* @ref Corrade::Utility::Error output is redirected (i.e., in tests
 verifying the assert behavior), the message is printed and the function returns
 with @p returnValue instead of aborting. If @ref CORRADE_STANDARD_ASSERT is
-defined, this macro compiles to @cpp assert(!"unreachable code") @ce. If
+defined, this macro expands to @cpp assert(!"unreachable code") @ce. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
 @cpp NDEBUG @ce are defined), this macro hints to the compiler that given code
 is not reachable, possibly helping the optimizer (using a compiler builtin on
@@ -355,9 +355,9 @@ prints what failed and where instead of a user-friendly message.
 
 By default, if assertion fails, failed condition, file and line is printed to
 error output and the application aborts. If @ref CORRADE_STANDARD_ASSERT is
-defined, this macro compiles to @cpp assert(condition) @ce. If
+defined, this macro expands to @cpp assert(condition) @ce. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
-@cpp NDEBUG @ce are defined), this macro compiles to @cpp do {} while(0) @ce.
+@cpp NDEBUG @ce are defined), this macro expands to @cpp do {} while(false) @ce.
 Example usage:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT
@@ -393,7 +393,7 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_INTERNAL_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
+#define CORRADE_INTERNAL_ASSERT(condition) do {} while(false)
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT(condition) assert(condition)
 #else
@@ -422,7 +422,7 @@ and line is printed to error output and the application aborts. If
 @ref CORRADE_STANDARD_ASSERT is defined, the standard @cpp assert() @ce is
 called if @p condition fails. If @ref CORRADE_NO_ASSERT is defined (or if both
 @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this macro
-compiles to @cpp static_cast<void>(0) @ce.
+expands to @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_CONSTEXPR_ASSERT @ce before including the
@@ -527,7 +527,7 @@ result type has to be at least movable. If @ref CORRADE_STANDARD_ASSERT is
 defined, this macro uses @cpp assert(value) @ce inside, unfortunately it's not
 possible for the standard assert macro to show the expression. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
-@cpp NDEBUG @ce are defined), this macro compiles to nothing, leaving just the
+@cpp NDEBUG @ce are defined), this macro expands to nothing, leaving just the
 parenthesized expression out of it.
 
 You can override this implementation by placing your own
@@ -561,7 +561,7 @@ message.
 
 By default, if code marked with this macro is reached, message with file and
 line is printed to error output and the application aborts. If
-@ref CORRADE_STANDARD_ASSERT is defined, this macro compiles to
+@ref CORRADE_STANDARD_ASSERT is defined, this macro expands to
 @cpp assert(!"unreachable code") @ce. If @ref CORRADE_NO_ASSERT is defined (or
 if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this
 macro hints to the compiler that given code is not reachable, possibly helping

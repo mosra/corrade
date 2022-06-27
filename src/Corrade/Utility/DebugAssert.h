@@ -53,7 +53,7 @@ namespace Corrade { namespace Utility {
 
 Expands to @ref CORRADE_ASSERT() if @ref CORRADE_NO_ASSERT is not defined and
 either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is *not*
-defined. Otherwise compiles to @cpp do {} while(0) @ce.
+defined. Otherwise expands to @cpp do {} while(false) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_DEBUG_ASSERT @ce before including the
@@ -64,7 +64,7 @@ You can override this implementation by placing your own
 #define CORRADE_DEBUG_ASSERT(condition, message, returnValue)               \
     CORRADE_ASSERT(condition, message, returnValue)
 #else
-#define CORRADE_DEBUG_ASSERT(condition, message, returnValue) do {} while(0)
+#define CORRADE_DEBUG_ASSERT(condition, message, returnValue) do {} while(false)
 #endif
 #endif
 
@@ -74,7 +74,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_CONSTEXPR_ASSERT() if @ref CORRADE_NO_ASSERT is not
 defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise compiles to @cpp static_cast<void>(0) @ce.
+* *not* defined. Otherwise expands to @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_CONSTEXPR_DEBUG_ASSERT @ce before including the
@@ -95,7 +95,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_ASSERT_OUTPUT() if @ref CORRADE_NO_ASSERT is not
 defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise compiles to @cpp static_cast<void>(call) @ce.
+* *not* defined. Otherwise expands to @cpp static_cast<void>(call) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_DEBUG_ASSERT_OUTPUT @ce before including the
@@ -117,7 +117,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_ASSERT_UNREACHABLE() if @ref CORRADE_NO_ASSERT is not
 defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise compiles to a compiler builtin on GCC, Clang and
+* *not* defined. Otherwise expands to a compiler builtin on GCC, Clang and
 MSVC; calls @ref std::abort() otherwise. A @cpp return @ce statement can thus
 be safely omitted in a code path following this macro even in a release build
 without causing any compiler warnings or errors.
@@ -147,7 +147,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_ASSERT() if @ref CORRADE_NO_ASSERT is not
 defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise compiles to @cpp do {} while(0) @ce.
+* *not* defined. Otherwise expands to @cpp do {} while(false) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_DEBUG_ASSERT @ce before including the
@@ -158,7 +158,7 @@ You can override this implementation by placing your own
 #define CORRADE_INTERNAL_DEBUG_ASSERT(condition)                            \
     CORRADE_INTERNAL_ASSERT(condition)
 #else
-#define CORRADE_INTERNAL_DEBUG_ASSERT(condition) do {} while(0)
+#define CORRADE_INTERNAL_DEBUG_ASSERT(condition) do {} while(false)
 #endif
 #endif
 
@@ -168,7 +168,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT() if @ref CORRADE_NO_ASSERT
 is not defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or
-@cpp NDEBUG @ce is *not* defined. Otherwise compiles to
+@cpp NDEBUG @ce is *not* defined. Otherwise expands to
 @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
@@ -190,7 +190,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_OUTPUT() if @ref CORRADE_NO_ASSERT is
 not defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or
-@cpp NDEBUG @ce is *not* defined. Otherwise compiles to
+@cpp NDEBUG @ce is *not* defined. Otherwise expands to
 @cpp static_cast<void>(call) @ce.
 
 You can override this implementation by placing your own
@@ -212,7 +212,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() if
 @ref CORRADE_NO_ASSERT is not defined and either @ref CORRADE_IS_DEBUG_BUILD is
-defined or @cpp NDEBUG @ce is *not* defined. Otherwise compiles to nothing,
+defined or @cpp NDEBUG @ce is *not* defined. Otherwise expands to nothing,
 leaving just the parenthesized expression out of it.
 
 You can override this implementation by placing your own
@@ -235,7 +235,7 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() if
 @ref CORRADE_NO_ASSERT is not defined and either @ref CORRADE_IS_DEBUG_BUILD is
-defined or @cpp NDEBUG @ce is *not* defined. Otherwise compiles to a compiler
+defined or @cpp NDEBUG @ce is *not* defined. Otherwise expands to a compiler
 builtin on GCC, Clang and MSVC; calls @ref std::abort() otherwise. A
 @cpp return @ce statement can thus be safely omitted in a code path following
 this macro even in a release build without causing any compiler warnings or
