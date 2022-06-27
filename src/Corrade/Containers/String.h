@@ -151,7 +151,7 @@ initialization constructors are provided, similarly to the @ref Array class:
 
 @subsection Containers-String-usage-wrapping Wrapping externally allocated strings
 
-Similarly to an @ref Array, by default the class makes all allocations using
+Similarly to @ref Array, by default the class makes all allocations using
 @cpp operator new[] @ce and deallocates using @cpp operator delete[] @ce. It's
 however also possible to wrap an externally allocated string using
 @ref String(char*, std::size_t, Deleter) together with specifying which
@@ -585,7 +585,7 @@ class CORRADE_UTILITY_EXPORT String {
         /*implicit*/ operator Array<char>() &&;
 
         /**
-         * @brief Convert the view to external representation
+         * @brief Convert the string to external representation
          *
          * @see @ref Containers-String-stl
          */

@@ -41,7 +41,7 @@
 namespace Corrade { namespace Containers {
 
 /**
-@brief Static array
+@brief Compile-time-sized array
 @tparam size_   Array size
 @tparam T       Element type
 

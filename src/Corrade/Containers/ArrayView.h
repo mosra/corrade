@@ -946,7 +946,7 @@ namespace Implementation {
 }
 
 /**
-@brief Compile-time-size array view
+@brief Compile-time-sized array view
 
 Like @ref ArrayView, but with compile-time size information. Similar to a
 fixed-size @ref std::span from C++2a. Implicitly convertible to an

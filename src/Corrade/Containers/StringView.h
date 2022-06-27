@@ -261,6 +261,7 @@ set in a @ref StringView converted from it.
 
 @experimental
 */
+/* All member functions are const because the view doesn't own the data */
 template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
     public:
         /**
