@@ -788,9 +788,7 @@ void JsonWriterTest::rawJsonInObjectKey() {
        because why have the distinction in write() vs writeKey() but not in
        writeJson()? */
 
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject();
@@ -857,9 +855,7 @@ void JsonWriterTest::toFileFailed() {
 }
 
 void JsonWriterTest::tooBigIndent() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -868,9 +864,7 @@ void JsonWriterTest::tooBigIndent() {
 }
 
 void JsonWriterTest::currentArraySizeNoValue() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -881,9 +875,7 @@ void JsonWriterTest::currentArraySizeNoValue() {
 }
 
 void JsonWriterTest::currentArraySizeObject() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginArray()
@@ -897,9 +889,7 @@ void JsonWriterTest::currentArraySizeObject() {
 }
 
 void JsonWriterTest::objectEndButNoObject() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -910,9 +900,7 @@ void JsonWriterTest::objectEndButNoObject() {
 }
 
 void JsonWriterTest::arrayEndButNoArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -923,9 +911,7 @@ void JsonWriterTest::arrayEndButNoArray() {
 }
 
 void JsonWriterTest::arrayEndButObjectEndExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject();
@@ -937,9 +923,7 @@ void JsonWriterTest::arrayEndButObjectEndExpected() {
 }
 
 void JsonWriterTest::objectEndButArrayEndExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginArray();
@@ -951,9 +935,7 @@ void JsonWriterTest::objectEndButArrayEndExpected() {
 }
 
 void JsonWriterTest::valueButObjectKeyExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject();
@@ -970,9 +952,7 @@ void JsonWriterTest::valueButObjectKeyExpected() {
 }
 
 void JsonWriterTest::objectKeyButValueExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject()
@@ -985,9 +965,7 @@ void JsonWriterTest::objectKeyButValueExpected() {
 }
 
 void JsonWriterTest::objectKeyButDocumentEndExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.write("hi");
@@ -999,9 +977,7 @@ void JsonWriterTest::objectKeyButDocumentEndExpected() {
 }
 
 void JsonWriterTest::valueButDocumentEndExpected() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.write("hi");
@@ -1018,9 +994,7 @@ void JsonWriterTest::valueButDocumentEndExpected() {
 }
 
 void JsonWriterTest::toStringOrFileNoValue() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -1034,9 +1008,7 @@ void JsonWriterTest::toStringOrFileNoValue() {
 }
 
 void JsonWriterTest::toStringOrFileIncompleteObject() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject();
@@ -1051,9 +1023,7 @@ void JsonWriterTest::toStringOrFileIncompleteObject() {
 }
 
 void JsonWriterTest::toStringOrFileIncompleteObjectValue() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginObject()
@@ -1069,9 +1039,7 @@ void JsonWriterTest::toStringOrFileIncompleteObjectValue() {
 }
 
 void JsonWriterTest::toStringOrFileIncompleteArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
     json.beginArray();
@@ -1089,9 +1057,7 @@ void JsonWriterTest::invalidFloat() {
     auto&& data = InvalidFloatDoubleData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -1109,9 +1075,7 @@ void JsonWriterTest::invalidDouble() {
     auto&& data = InvalidFloatDoubleData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -1126,9 +1090,7 @@ void JsonWriterTest::invalidDouble() {
 }
 
 void JsonWriterTest::invalidUnsignedLong() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 
@@ -1145,9 +1107,7 @@ void JsonWriterTest::invalidLong() {
     auto&& data = InvalidLongData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     JsonWriter json;
 

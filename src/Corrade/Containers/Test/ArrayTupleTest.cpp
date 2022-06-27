@@ -948,9 +948,7 @@ void ArrayTupleTest::convertArray() {
 }
 
 void ArrayTupleTest::convertArrayInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     ArrayView<NonCopyable> noncopyable;
     ArrayTuple nonTrivialData{

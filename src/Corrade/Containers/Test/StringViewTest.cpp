@@ -531,9 +531,7 @@ void StringViewTest::constructLiteralEmpty() {
 }
 
 void StringViewTest::constructTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -548,9 +546,7 @@ void StringViewTest::constructTooLarge() {
 }
 
 void StringViewTest::constructNullptrNullTerminated() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -832,9 +828,7 @@ void StringViewTest::accessMutable() {
 }
 
 void StringViewTest::accessInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -852,9 +846,7 @@ void StringViewTest::accessInvalid() {
 }
 
 void StringViewTest::sliceInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     /* Basically the same as in ArrayViewTest::sliceInvalid() */
 
@@ -1334,9 +1326,7 @@ void StringViewTest::exceptPrefixFlags() {
 }
 
 void StringViewTest::exceptPrefixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectOutput{&out};
@@ -1386,9 +1376,7 @@ void StringViewTest::exceptSuffixFlags() {
 }
 
 void StringViewTest::exceptSuffixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectOutput{&out};

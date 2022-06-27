@@ -231,9 +231,7 @@ void ResourceTest::emptyGroup() {
 }
 
 void ResourceTest::nonexistentGroup() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -304,9 +302,7 @@ void ResourceTest::getEmptyFileString() {
 }
 
 void ResourceTest::getNonexistentFile() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -339,9 +335,7 @@ void ResourceTest::overrideGroup() {
 }
 
 void ResourceTest::overrideGroupNonexistent() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -359,9 +353,7 @@ void ResourceTest::overrideGroupDifferent() {
 }
 
 void ResourceTest::overrideGroupFileFallback() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
     Resource rs{"test"};
@@ -400,9 +392,7 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
 }
 
 void ResourceTest::overrideGroupFileNonexistent() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
     Resource rs{"test"};

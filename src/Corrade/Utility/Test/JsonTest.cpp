@@ -2932,9 +2932,7 @@ void JsonTest::parseArrayError() {
 }
 
 void JsonTest::parseTokenNotOwned() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}");
     CORRADE_VERIFY(json);
@@ -3074,9 +3072,7 @@ void JsonTest::iterateObjectTokens() {
 }
 
 void JsonTest::iterateObjectNotObject() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3088,9 +3084,7 @@ void JsonTest::iterateObjectNotObject() {
 }
 
 void JsonTest::iterateObjectNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}");
     CORRADE_VERIFY(json);
@@ -3102,9 +3096,7 @@ void JsonTest::iterateObjectNotParsed() {
 }
 
 void JsonTest::iterateObjectKeyNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{\"key\": false}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3154,9 +3146,7 @@ void JsonTest::iterateArrayTokens() {
 }
 
 void JsonTest::iterateArrayNotArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3168,9 +3158,7 @@ void JsonTest::iterateArrayNotArray() {
 }
 
 void JsonTest::iterateArrayNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
@@ -3200,9 +3188,7 @@ void JsonTest::findObjectKey() {
 }
 
 void JsonTest::findObjectKeyNotFound() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"({
         "hello": 3,
@@ -3218,9 +3204,7 @@ void JsonTest::findObjectKeyNotFound() {
 }
 
 void JsonTest::findObjectKeyNotObject() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3236,9 +3220,7 @@ void JsonTest::findObjectKeyNotObject() {
 }
 
 void JsonTest::findObjectKeyNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}");
     CORRADE_VERIFY(json);
@@ -3254,9 +3236,7 @@ void JsonTest::findObjectKeyNotParsed() {
 }
 
 void JsonTest::findObjectKeyKeyNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"({
         "hello": 3,
@@ -3297,9 +3277,7 @@ void JsonTest::findArrayIndex() {
 }
 
 void JsonTest::findArrayIndexNotFound() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         "hello",
@@ -3315,9 +3293,7 @@ void JsonTest::findArrayIndexNotFound() {
 }
 
 void JsonTest::findArrayIndexNotArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3333,9 +3309,7 @@ void JsonTest::findArrayIndexNotArray() {
 }
 
 void JsonTest::findArrayIndexNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
@@ -3364,9 +3338,7 @@ void JsonTest::asBoolArray() {
 }
 
 void JsonTest::asBoolArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         true, false, 0
@@ -3381,9 +3353,7 @@ void JsonTest::asBoolArrayNotAllSame() {
 }
 
 void JsonTest::asBoolArrayNotAllParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         true, false, true
@@ -3401,9 +3371,7 @@ void JsonTest::asBoolArrayNotAllParsed() {
 }
 
 void JsonTest::asBoolArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         true, false, true
@@ -3432,9 +3400,7 @@ void JsonTest::asDoubleArray() {
 }
 
 void JsonTest::asDoubleArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 1
@@ -3451,9 +3417,7 @@ void JsonTest::asDoubleArrayNotAllSame() {
 }
 
 void JsonTest::asDoubleArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 0.25
@@ -3483,9 +3447,7 @@ void JsonTest::asFloatArray() {
 }
 
 void JsonTest::asFloatArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 1
@@ -3502,9 +3464,7 @@ void JsonTest::asFloatArrayNotAllSame() {
 }
 
 void JsonTest::asFloatArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.5, -17.25, 0.25
@@ -3534,9 +3494,7 @@ void JsonTest::asUnsignedIntArray() {
 }
 
 void JsonTest::asUnsignedIntArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
@@ -3553,9 +3511,7 @@ void JsonTest::asUnsignedIntArrayNotAllSame() {
 }
 
 void JsonTest::asUnsignedIntArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
@@ -3585,9 +3541,7 @@ void JsonTest::asIntArray() {
 }
 
 void JsonTest::asIntArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 0.25
@@ -3604,9 +3558,7 @@ void JsonTest::asIntArrayNotAllSame() {
 }
 
 void JsonTest::asIntArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
@@ -3636,9 +3588,7 @@ void JsonTest::asUnsignedLongArray() {
 }
 
 void JsonTest::asUnsignedLongArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
@@ -3655,9 +3605,7 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
 }
 
 void JsonTest::asUnsignedLongArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
@@ -3687,9 +3635,7 @@ void JsonTest::asLongArray() {
 }
 
 void JsonTest::asLongArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 0.25
@@ -3706,9 +3652,7 @@ void JsonTest::asLongArrayNotAllSame() {
 }
 
 void JsonTest::asLongArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, -17, 25
@@ -3738,9 +3682,7 @@ void JsonTest::asSizeArray() {
 }
 
 void JsonTest::asSizeArrayNotAllSame() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 0.25
@@ -3762,9 +3704,7 @@ void JsonTest::asSizeArrayNotAllSame() {
 }
 
 void JsonTest::asSizeArrayUnexpectedSize() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35, 17, 25
@@ -3785,9 +3725,7 @@ void JsonTest::asSizeArrayUnexpectedSize() {
 }
 
 void JsonTest::asTypeArrayNotArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3820,9 +3758,7 @@ void JsonTest::asTypeArrayNotArray() {
 }
 
 void JsonTest::asTypeArrayNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
@@ -3986,9 +3922,7 @@ void JsonTest::fromFileParseError() {
 }
 
 void JsonTest::asTypeWrongType() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("[{}]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -4024,9 +3958,7 @@ void JsonTest::asTypeWrongType() {
 }
 
 void JsonTest::asTypeNotParsed() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         nOOO, fALSE, -yey, "\uhh", {}
@@ -4064,9 +3996,7 @@ void JsonTest::asTypeNotParsed() {
 }
 
 void JsonTest::asTypeWrongParsedType() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
         35.7, -35.7, 25, -17

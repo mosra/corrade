@@ -859,9 +859,7 @@ void ArrayViewTest::accessConstVoid() {
 }
 
 void ArrayViewTest::accessInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -888,9 +886,7 @@ void ArrayViewTest::rangeBasedFor() {
 }
 
 void ArrayViewTest::sliceInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     /* Do it this way to avoid (reasonable) warnings about out-of-bounds array
        access with `a - 1` */
@@ -1183,9 +1179,7 @@ void ArrayViewTest::cast() {
 }
 
 void ArrayViewTest::castInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     char data[10]{};
     Containers::ArrayView<char> a = data;

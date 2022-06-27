@@ -255,6 +255,8 @@ void AssertTest::constexprTest() {
 }
 
 void AssertTest::evaluateOnce() {
+    /* Not using CORRADE_SKIP_IF_NO_ASSERT() to provide better diagnostic
+       messages */
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertion evaluation");
     #endif
@@ -299,6 +301,8 @@ void AssertTest::evaluateOnce() {
 }
 
 void AssertTest::expressionExplicitBoolMoveOnly() {
+    /* Not using CORRADE_SKIP_IF_NO_ASSERT() to provide better diagnostic
+       messages */
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertion evaluation");
     #endif

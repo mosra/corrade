@@ -427,9 +427,7 @@ void PointerTest::access() {
 }
 
 void PointerTest::accessInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     struct Innocent {
         void foo() const {}

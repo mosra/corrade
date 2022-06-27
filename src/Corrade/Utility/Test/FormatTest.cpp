@@ -285,9 +285,7 @@ void FormatTest::character() {
 }
 
 void FormatTest::characterLong() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -334,9 +332,7 @@ void FormatTest::hexadecimalUppercase() {
 }
 
 void FormatTest::integerFloat() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -605,9 +601,7 @@ void FormatTest::floatFixedUppercase() {
 }
 
 void FormatTest::floatBase() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -805,9 +799,7 @@ void FormatTest::emptyFormat() {
 }
 
 void FormatTest::tooSmallBuffer() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -824,9 +816,7 @@ void FormatTest::tooSmallBuffer() {
 }
 
 void FormatTest::mismatchedDelimiter() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -853,9 +843,7 @@ void FormatTest::mismatchedDelimiter() {
 }
 
 void FormatTest::unknownPlaceholderContent() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -874,9 +862,7 @@ void FormatTest::unknownPlaceholderContent() {
 }
 
 void FormatTest::invalidPrecision() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -893,9 +879,7 @@ void FormatTest::invalidPrecision() {
 }
 
 void FormatTest::typeForString() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -910,9 +894,7 @@ void FormatTest::typeForString() {
 }
 
 void FormatTest::invalidType() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};

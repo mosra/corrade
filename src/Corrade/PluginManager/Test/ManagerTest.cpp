@@ -324,9 +324,7 @@ void ManagerTest::pluginDirectoryUtf8() {
 #endif
 
 void ManagerTest::pluginInterfaceNotGlobal() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     struct SomePlugin: AbstractPlugin {
         static Containers::StringView pluginInterface() {
@@ -342,9 +340,7 @@ void ManagerTest::pluginInterfaceNotGlobal() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::pluginSuffixNotGlobal() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     struct SomePlugin: AbstractPlugin {
         static Containers::StringView pluginSuffix() { return ".boom"; }
@@ -358,9 +354,7 @@ void ManagerTest::pluginSuffixNotGlobal() {
 #endif
 
 void ManagerTest::pluginMetadataSuffixNotGlobal() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     struct SomePlugin: AbstractPlugin {
         static Containers::StringView pluginMetadataSuffix() {
@@ -388,9 +382,7 @@ void ManagerTest::pluginSearchPathsNotUsed() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::pluginSearchPathsNotProvided() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     struct SomePlugin: AbstractPlugin {};
 
@@ -1269,9 +1261,7 @@ void ManagerTest::setPreferredPluginsWhileActive() {
 }
 
 void ManagerTest::setPreferredPluginsUnknownAlias() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     PluginManager::Manager<AbstractAnimal> manager;
 
@@ -1282,9 +1272,7 @@ void ManagerTest::setPreferredPluginsUnknownAlias() {
 }
 
 void ManagerTest::setPreferredPluginsDoesNotProvide() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     PluginManager::Manager<AbstractAnimal> manager;
 

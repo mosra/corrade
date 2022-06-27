@@ -685,9 +685,7 @@ void StringTest::stripPrefix() {
 }
 
 void StringTest::stripPrefixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectOutput{&out};
@@ -703,9 +701,7 @@ void StringTest::stripSuffix() {
 }
 
 void StringTest::stripSuffixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectOutput{&out};
@@ -772,9 +768,7 @@ void StringTest::replaceAllNotFound() {
 }
 
 void StringTest::replaceAllEmptySearch() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectOutput{&out};

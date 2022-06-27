@@ -479,9 +479,7 @@ void AlgorithmsTest::copyInitializerListStridedZeroSize() {
 }
 
 void AlgorithmsTest::copyNonMatchingSizes() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1083,9 +1081,7 @@ void AlgorithmsTest::flipInPlaceZeroSize() {
 }
 
 void AlgorithmsTest::flipInPlaceNonContigous() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     int a[2*3*7];
     Containers::StridedArrayView3D<int> b{a, {1, 3, 7}, {2*3*7*4, 7*4, 4}};

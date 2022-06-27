@@ -525,9 +525,7 @@ Arguments:
 }
 
 void ArgumentsTest::setHelpNotFound() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
 
@@ -538,9 +536,7 @@ void ArgumentsTest::setHelpNotFound() {
 }
 
 void ArgumentsTest::setHelpKeyForBoolean() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
 
@@ -551,9 +547,7 @@ void ArgumentsTest::setHelpKeyForBoolean() {
 }
 
 void ArgumentsTest::duplicateKey() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     args.addArgument("foo");
@@ -578,9 +572,7 @@ void ArgumentsTest::duplicateKey() {
 }
 
 void ArgumentsTest::duplicateShortKey() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     args.addNamedArgument('b', "bar");
@@ -599,9 +591,7 @@ void ArgumentsTest::duplicateShortKey() {
 }
 
 void ArgumentsTest::emptyKey() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
 
@@ -625,9 +615,7 @@ void ArgumentsTest::emptyKey() {
 }
 
 void ArgumentsTest::disallowedCharacter() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     /* It's fine here (even though confusing) -- the user won't be typing this
@@ -650,9 +638,7 @@ void ArgumentsTest::disallowedCharacter() {
 }
 
 void ArgumentsTest::disallowedCharacterShort() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -670,9 +656,7 @@ void ArgumentsTest::disallowedCharacterShort() {
 }
 
 void ArgumentsTest::disallowedIgnoreUnknown() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -681,9 +665,7 @@ void ArgumentsTest::disallowedIgnoreUnknown() {
 }
 
 void ArgumentsTest::arrayArgumentTwice() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -694,9 +676,7 @@ void ArgumentsTest::arrayArgumentTwice() {
 }
 
 void ArgumentsTest::finalOptionalArgumentTwice() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -707,9 +687,7 @@ void ArgumentsTest::finalOptionalArgumentTwice() {
 }
 
 void ArgumentsTest::finalOptionalArgumentWithArray() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -720,9 +698,7 @@ void ArgumentsTest::finalOptionalArgumentWithArray() {
 }
 
 void ArgumentsTest::argumentAfterFinalOptionalArgument() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -733,9 +709,7 @@ void ArgumentsTest::argumentAfterFinalOptionalArgument() {
 }
 
 void ArgumentsTest::arrayArgumentAfterFinalOptionalArgument() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1459,9 +1433,7 @@ Arguments:
 }
 
 void ArgumentsTest::prefixedDisallowedCalls() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1485,9 +1457,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefix() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1500,9 +1470,7 @@ void ArgumentsTest::prefixedDisallowedWithPrefix() {
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1578,9 +1546,7 @@ void ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName() {
 }
 
 void ArgumentsTest::notParsedYet() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     args.addOption("value")
@@ -1602,9 +1568,7 @@ void ArgumentsTest::notParsedYet() {
 }
 
 void ArgumentsTest::notParsedYetOnlyHelp() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     const char* argv[] = { "", "--help" };
 
@@ -1632,9 +1596,7 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
 }
 
 void ArgumentsTest::valueNotFound() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     args.addOption("foobar") /* only so asserts have some reference to return */
@@ -1654,9 +1616,7 @@ void ArgumentsTest::valueNotFound() {
 }
 
 void ArgumentsTest::valueMismatchedUse() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Arguments args;
     args.addOption("value")
@@ -1686,9 +1646,7 @@ void ArgumentsTest::valueMismatchedUse() {
 }
 
 void ArgumentsTest::arrayValueOutOfBounds() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     const char* argv[] = { "", "-X", "first", "--opt", "second", "-X", "last" };
 

@@ -409,9 +409,7 @@ void StringTest::constructTakeOwnershipImplicitSize() {
 }
 
 void StringTest::constructTakeOwnershipNull() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     const char* data = nullptr;
 
@@ -425,9 +423,7 @@ void StringTest::constructTakeOwnershipNull() {
 }
 
 void StringTest::constructTakeOwnershipNotNullTerminated() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     const char data[] { 'a', '3' };
 
@@ -440,9 +436,7 @@ void StringTest::constructTakeOwnershipNotNullTerminated() {
 }
 
 void StringTest::constructTakeOwnershipTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     const char* data = "abc";
 
@@ -577,9 +571,7 @@ void StringTest::constructPointerSizeNullZeroAllocatedInit() {
 }
 
 void StringTest::constructPointerSizeNullNonZero() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -591,9 +583,7 @@ void StringTest::constructPointerSizeNullNonZero() {
 }
 
 void StringTest::constructPointerSizeTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -637,9 +627,7 @@ void StringTest::constructValueInitSmall() {
 }
 
 void StringTest::constructValueInitTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -680,9 +668,7 @@ void StringTest::constructDirectInitSmall() {
 }
 
 void StringTest::constructDirectInitTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -721,9 +707,7 @@ void StringTest::constructNoInitSmall() {
 }
 
 void StringTest::constructNoInitTooLarge() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1655,9 +1639,7 @@ void StringTest::accessSmall() {
 }
 
 void StringTest::accessInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -1941,9 +1923,7 @@ template<class T> void StringTest::exceptPrefix() {
 }
 
 void StringTest::exceptPrefixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     String a{"overcomplicated"};
     const String ca{"overcomplicated"};
@@ -1993,9 +1973,7 @@ template<class T> void StringTest::exceptSuffix() {
 }
 
 void StringTest::exceptSuffixInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     String a{"overcomplicated"};
     const String ca{"overcomplicated"};
@@ -2364,9 +2342,7 @@ void StringTest::release() {
 }
 
 void StringTest::releaseDeleterSmall() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     String a;
     CORRADE_VERIFY(a.isSmall());

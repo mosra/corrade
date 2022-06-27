@@ -70,6 +70,8 @@ AssertGracefulTest::AssertGracefulTest() {
 }
 
 void AssertGracefulTest::test() {
+    /* Not using CORRADE_SKIP_IF_NO_ASSERT() to provide better diagnostic
+       messages */
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
     #endif
@@ -120,6 +122,8 @@ constexpr int divide(int a, int b) {
 }
 
 void AssertGracefulTest::constexprTest() {
+    /* Not using CORRADE_SKIP_IF_NO_ASSERT() to provide better diagnostic
+       messages */
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
     #endif

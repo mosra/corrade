@@ -1731,9 +1731,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
 }
 
 void GrowableArrayTest::insertInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Array<int> a{5};
 
@@ -2574,9 +2572,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
 }
 
 void GrowableArrayTest::removeInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Array<int> a{4};
 
@@ -2863,9 +2859,7 @@ void GrowableArrayTest::castEmpty() {
 }
 
 void GrowableArrayTest::castNonTrivial() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Array<char> a;
     arrayResize<char, ArrayNewAllocator<char>>(a, 10);
@@ -2878,9 +2872,7 @@ void GrowableArrayTest::castNonTrivial() {
 }
 
 void GrowableArrayTest::castNonGrowable() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test assertions");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Array<char> a{10};
 
@@ -2892,9 +2884,7 @@ void GrowableArrayTest::castNonGrowable() {
 }
 
 void GrowableArrayTest::castInvalid() {
-    #ifdef CORRADE_NO_ASSERT
-    CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test.");
-    #endif
+    CORRADE_SKIP_IF_NO_ASSERT();
 
     Array<char> a;
     arrayResize(a, 10);
