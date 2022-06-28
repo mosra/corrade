@@ -102,8 +102,8 @@ Corrade type            | STL equivalent
 @ref StridedArrayView   | @m_class{m-doc-external} [std::mdspan](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p0009r10.html) @m_class{m-label m-flat m-danger} **C++23**
 * *no equivalent*       | @ref std::deque, \n @ref std::stack, \n @ref std::queue
 @ref String             | @ref std::string, \n @ref std::u8string
-@ref StringView         | @ref std::string_view, \n @ref std::u8string_view @m_class{m-label m-flat m-primary} **C++17**
-@ref MutableStringView  | *no equivalent*
+@ref BasicStringView "StringView" | @ref std::string_view, \n @ref std::u8string_view @m_class{m-label m-flat m-primary} **C++17**
+@ref BasicStringView "MutableStringView" | *no equivalent*
 @m_class{m-label m-flat m-danger} **not planned** | @ref std::wstring, \n @ref std::u16string, \n @ref std::u32string, \n @ref std::wstring_view, \n @ref std::u16string_view, \n @ref std::u32string_view
 @ref Triple             | @ref std::tuple "std::tuple<F, S, T>"
 * *no equivalent*       | @ref std::any, \n @ref std::variant
