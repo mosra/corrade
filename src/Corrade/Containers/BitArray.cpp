@@ -72,7 +72,13 @@ BitArray::BitArray(Corrade::DirectInitT, const std::size_t size, const bool valu
     }
 }
 
-BitArray::BitArray(void* data, const std::size_t offset, const std::size_t size, const Deleter deleter) noexcept: _data{static_cast<char*>(data)}, _sizeOffset{size << 3 | offset}, _deleter{deleter} {
+BitArray::BitArray(void* data, const std::size_t offset, const std::size_t size, const Deleter deleter) noexcept:
+    /* Interestingly enough, on GCC 4.8, using _value{} will spam with
+        warning: parameter 'data' set but not used [-Wunused-but-set-parameter]
+        even though everything works as intended. Using () instead. */
+    _data(static_cast<char*>(data)),
+    _sizeOffset{size << 3 | offset}, _deleter{deleter}
+{
     CORRADE_ASSERT(offset < 8,
         "Containers::BitArray: offset expected to be smaller than 8 bits, got" << offset, );
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
