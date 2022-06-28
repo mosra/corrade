@@ -76,8 +76,8 @@ struct ArrayTest: TestSuite::Tester {
     void construct();
     void constructDefaultInit();
     void constructValueInit();
-    void constructNoInitNonTrivial();
     void constructNoInitTrivial();
+    void constructNoInitNonTrivial();
     void constructDirectInit();
     void constructInPlaceInit();
     void constructFromExisting();
@@ -139,8 +139,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::construct,
               &ArrayTest::constructDefaultInit,
               &ArrayTest::constructValueInit,
-              &ArrayTest::constructNoInitNonTrivial,
               &ArrayTest::constructNoInitTrivial,
+              &ArrayTest::constructNoInitNonTrivial,
               &ArrayTest::constructDirectInit,
               &ArrayTest::constructInPlaceInit,
               &ArrayTest::constructFromExisting,
