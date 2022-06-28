@@ -52,7 +52,7 @@ Owning container for an array of bits. Eight times more memory-efficient than
 A non-owning version of this container is a @ref BitArrayView and a
 @ref MutableBitArrayView, implemented using a generic @ref BasicBitArrayView.
 
-As with @ref Array itself, the container is non-movable with a size specified
+As with @ref Array itself, the container is non-copyable with a size specified
 upfront. At the moment, there's no growing functionality.
 
 @section Containers-BitArray-usage Usage
