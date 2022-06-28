@@ -294,7 +294,7 @@ Corrade type                    | ↭ | STL type
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 
-@see @ref ArrayTuple
+@see @ref ArrayTuple, @ref BitArray
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>

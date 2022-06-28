@@ -64,7 +64,8 @@ values, the storage is artificially limited to 8192 values, which fits into
 1 kB. With a 16-bit @p T and larger, you're expected to set the @p size
 template parameter to a reasonable upper bound, not larger than @cpp 128 @ce.
 On construction, the enum value is checked against this limit to ensure no
-bits are ignored by accident.
+bits are ignored by accident. For an unbounded runtime-sized array of bits use
+@ref BitArray instead.
 
 Below is a side-by-side comparison of an equivalent enum set implementation in
 @ref EnumSet and @ref BigEnumSet --- the only difference is enum values being
@@ -86,7 +87,7 @@ macro is the same:
 
 @endparblock
 
-@see @ref bigEnumSetDebugOutput()
+@see @ref bigEnumSetDebugOutput(), @ref BitArray
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, std::size_t size = (1 << (sizeof(T)*8 - 6))>

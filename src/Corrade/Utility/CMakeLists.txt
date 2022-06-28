@@ -52,6 +52,7 @@ if(CORRADE_WITH_UTILITY)
         Unicode.cpp
 
         ../Containers/ArrayTuple.cpp
+        ../Containers/BitArray.cpp
         ../Containers/String.cpp
         ../Containers/StringView.cpp)
 

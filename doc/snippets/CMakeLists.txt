@@ -46,6 +46,18 @@ target_link_libraries(snippets PRIVATE CorradeUtility)
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.9") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
+        add_library(snippets-cpp14 STATIC
+            Containers-cpp14.cpp)
+        target_link_libraries(snippets-cpp14 PRIVATE CorradeUtility)
+        set_target_properties(snippets-cpp14 PROPERTIES
+            CORRADE_CXX_STANDARD 14)
+    endif()
+
+    # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR

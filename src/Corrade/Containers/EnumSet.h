@@ -73,7 +73,8 @@ definitions. This macro works with templated classes as well.
     The @ref EnumSet is limited by the maximum size of a builtin type, which is
     64 bits. 128-bit types are available on some platforms, but are not
     standard and thus not portable. If you need to store a larger set and
-    you're fine with some limitations, check out @ref BigEnumSet.
+    you're fine with some limitations, check out @ref BigEnumSet. If you need
+    an unbounded runtime-sized set of bits, use @ref BitArray instead.
 
 @see @ref enumCastUnderlyingType(), @ref enumSetDebugOutput()
 */

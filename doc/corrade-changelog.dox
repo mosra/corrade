@@ -64,6 +64,8 @@ namespace Corrade {
     [mosra/corrade#117](https://github.com/mosra/corrade/pull/117).
 -   New @ref Containers::BigEnumSet class for storing enum sets with more than
     64 values
+-   New @ref Containers::BitArray and @ref Containers::BitArrayView classes for
+    owning and non-owning containers of bits
 -   New @ref Containers::Pair and @ref Containers::Triple classes that fix
     various issues and pitfalls of @ref std::pair and provide a lightweight
     alternative to a three-element @ref std::tuple

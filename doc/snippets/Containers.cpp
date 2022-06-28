@@ -34,6 +34,8 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayTuple.h"
 #include "Corrade/Containers/BigEnumSet.hpp"
+#include "Corrade/Containers/BitArray.h"
+#include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
@@ -615,6 +617,52 @@ static_cast<void>(b);
 int data[15];
 auto a = Containers::arrayCast<char>(data); // a.size() == 60
 /* [arrayCast-StaticArrayView-array] */
+static_cast<void>(a);
+}
+
+{
+std::size_t vertexCount{};
+unsigned indexBuffer[5]{};
+/* [BitArray-usage] */
+Containers::BitArray used{ValueInit, vertexCount};
+
+for(unsigned index: indexBuffer) used.set(index);
+/* [BitArray-usage] */
+}
+
+{
+/* [BitArray-usage-initialization] */
+/* 200 zero bits */
+Containers::BitArray a{ValueInit, 200};
+
+/* 200 one bits */
+Containers::BitArray b{DirectInit, 200, true};
+
+/* 100 uninitialized bits */
+Containers::BitArray c{NoInit, 100};
+/* [BitArray-usage-initialization] */
+}
+
+/* [BitArray-usage-wrapping] */
+{
+    void* data = std::malloc(250);
+
+    // Will call std::free() on destruction
+    Containers::BitArray array{data, 0, 250*8,
+        [](char* data, std::size_t) { std::free(data); }};
+}
+/* [BitArray-usage-wrapping] */
+
+{
+/* [BitArrayView-usage] */
+/* Create a view on a BitArray */
+Containers::BitArray array = DOXYGEN_ELLIPSIS({});
+Containers::BitArrayView a = array;
+
+/* Mutable view on bits 7 to 34 of a 64-bit number */
+std::uint64_t data = DOXYGEN_ELLIPSIS({});
+Containers::MutableBitArrayView b{&data, 7, 27};
+/* [BitArrayView-usage] */
 static_cast<void>(a);
 }
 

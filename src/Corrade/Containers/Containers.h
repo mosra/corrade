@@ -54,6 +54,11 @@ template<class T> using Array4 = StaticArray<4, T>;
 
 template<class T, std::size_t size = 1 << (sizeof(T)*8 - 6)> class BigEnumSet;
 
+class BitArray;
+template<class> class BasicBitArrayView;
+typedef BasicBitArrayView<const char> BitArrayView;
+typedef BasicBitArrayView<char> MutableBitArrayView;
+
 template<unsigned, class> class StridedDimensions;
 template<unsigned, class> class StridedArrayView;
 template<unsigned, class> class StridedIterator;
