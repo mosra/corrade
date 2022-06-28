@@ -154,8 +154,8 @@ struct StringTest: TestSuite::Tester {
     void accessSmall();
     void accessInvalid();
 
-    void slice();
-    void slicePointer();
+    template<class T> void slice();
+    template<class T> void slicePointer();
 
     void split();
     void splitOnAny();
@@ -289,8 +289,10 @@ StringTest::StringTest() {
               &StringTest::accessSmall,
               &StringTest::accessInvalid,
 
-              &StringTest::slice,
-              &StringTest::slicePointer,
+              &StringTest::slice<const String>,
+              &StringTest::slice<String>,
+              &StringTest::slicePointer<const String>,
+              &StringTest::slicePointer<String>,
 
               &StringTest::split,
               &StringTest::splitOnAny,
@@ -1739,44 +1741,33 @@ void StringTest::accessInvalid() {
         "Containers::String::back(): string is empty\n");
 }
 
-void StringTest::slice() {
+template<class T> void StringTest::slice() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    String a = "hello";
+    T a = "hello";
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
     CORRADE_COMPARE(a.prefix(3), "hel"_s);
     CORRADE_COMPARE(a.prefix(2).flags(), StringViewFlags{});
     CORRADE_COMPARE(a.exceptPrefix(2), "llo"_s);
     CORRADE_COMPARE(a.exceptPrefix(2).flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(a.exceptSuffix(2), "hel"_s);
-
-    const String ca = "hello";
-    CORRADE_COMPARE(ca.slice(1, 4), "ell"_s);
-    CORRADE_COMPARE(ca.prefix(3), "hel"_s);
-    CORRADE_COMPARE(ca.prefix(2).flags(), StringViewFlags{});
-    CORRADE_COMPARE(ca.exceptPrefix(2), "llo"_s);
-    CORRADE_COMPARE(ca.exceptPrefix(2).flags(), StringViewFlag::NullTerminated);
-    CORRADE_COMPARE(ca.exceptSuffix(2), "hel"_s);
 }
 
-void StringTest::slicePointer() {
+template<class T> void StringTest::slicePointer() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    String a = "hello";
+    T a = "hello";
     CORRADE_COMPARE(a.slice(a.data() + 1, a.data() + 4), "ell"_s);
     CORRADE_COMPARE(a.prefix(a.data() + 3), "hel"_s);
     CORRADE_COMPARE(a.prefix(a.data() + 2).flags(), StringViewFlags{});
     CORRADE_COMPARE(a.suffix(a.data() + 2), "llo"_s);
     CORRADE_COMPARE(a.suffix(a.data() + 2).flags(), StringViewFlag::NullTerminated);
-
-    const String ca = "hello";
-    CORRADE_COMPARE(ca.slice(ca.data() + 1, ca.data() + 4), "ell"_s);
-    CORRADE_COMPARE(ca.prefix(ca.data() + 3), "hel"_s);
-    CORRADE_COMPARE(ca.prefix(ca.data() + 2).flags(), StringViewFlags{});
-    CORRADE_COMPARE(ca.suffix(ca.data() + 2), "llo"_s);
-    CORRADE_COMPARE(ca.suffix(ca.data() + 2).flags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::split() {
