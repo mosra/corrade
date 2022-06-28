@@ -95,12 +95,15 @@ struct StringTest: TestSuite::Tester {
 
     void constructValueInit();
     void constructValueInitSmall();
+    void constructValueInitZeroSize();
     void constructValueInitTooLarge();
     void constructDirectInit();
     void constructDirectInitSmall();
+    void constructDirectInitZeroSize();
     void constructDirectInitTooLarge();
     void constructNoInit();
     void constructNoInitSmall();
+    void constructNoInitZeroSize();
     void constructNoInitTooLarge();
 
     void constructNullTerminatedGlobalView();
@@ -226,12 +229,15 @@ StringTest::StringTest() {
 
               &StringTest::constructValueInit,
               &StringTest::constructValueInitSmall,
+              &StringTest::constructValueInitZeroSize,
               &StringTest::constructValueInitTooLarge,
               &StringTest::constructDirectInit,
               &StringTest::constructDirectInitSmall,
+              &StringTest::constructDirectInitZeroSize,
               &StringTest::constructDirectInitTooLarge,
               &StringTest::constructNoInit,
               &StringTest::constructNoInitSmall,
+              &StringTest::constructNoInitZeroSize,
               &StringTest::constructNoInitTooLarge,
 
               &StringTest::constructNullTerminatedGlobalView,
@@ -626,6 +632,19 @@ void StringTest::constructValueInitSmall() {
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
 }
 
+void StringTest::constructValueInitZeroSize() {
+    String a{Corrade::ValueInit, 0};
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(a.data()[0], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
 void StringTest::constructValueInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -667,6 +686,19 @@ void StringTest::constructDirectInitSmall() {
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
 }
 
+void StringTest::constructDirectInitZeroSize() {
+    String a{Corrade::DirectInit, 0, 'X'};
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(a.data()[0], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
 void StringTest::constructDirectInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -700,6 +732,19 @@ void StringTest::constructNoInitSmall() {
     CORRADE_COMPARE(a.size(), 10);
     /* Contents can be just anything */
     CORRADE_COMPARE(a.data()[a.size()], '\0');
+
+    /* Verify the data is really stored inside */
+    CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));
+    CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
+}
+
+void StringTest::constructNoInitZeroSize() {
+    String a{Corrade::ValueInit, 0};
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(a.data()[0], '\0');
 
     /* Verify the data is really stored inside */
     CORRADE_VERIFY(a.data() >= reinterpret_cast<char*>(&a));

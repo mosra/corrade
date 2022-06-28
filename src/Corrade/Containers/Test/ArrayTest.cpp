@@ -74,14 +74,20 @@ struct ArrayTest: TestSuite::Tester {
     void constructEmpty();
     void constructNullptr();
     void construct();
-    void constructDefaultInit();
-    void constructValueInit();
-    void constructNoInitTrivial();
-    void constructNoInitNonTrivial();
-    void constructDirectInit();
-    void constructInPlaceInit();
-    void constructFromExisting();
     void constructZeroSize();
+    void constructDefaultInit();
+    void constructDefaultInitZeroSize();
+    void constructValueInit();
+    void constructValueInitZeroSize();
+    void constructNoInitTrivial();
+    void constructNoInitTrivialZeroSize();
+    void constructNoInitNonTrivial();
+    void constructNoInitNonTrivialZeroSize();
+    void constructDirectInit();
+    void constructDirectInitZeroSize();
+    void constructInPlaceInit();
+    void constructInPlaceInitZeroSize();
+    void constructFromExisting();
     void constructMove();
     void constructDirectReferences();
 
@@ -137,14 +143,20 @@ ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
               &ArrayTest::constructNullptr,
               &ArrayTest::construct,
-              &ArrayTest::constructDefaultInit,
-              &ArrayTest::constructValueInit,
-              &ArrayTest::constructNoInitTrivial,
-              &ArrayTest::constructNoInitNonTrivial,
-              &ArrayTest::constructDirectInit,
-              &ArrayTest::constructInPlaceInit,
-              &ArrayTest::constructFromExisting,
               &ArrayTest::constructZeroSize,
+              &ArrayTest::constructDefaultInit,
+              &ArrayTest::constructDefaultInitZeroSize,
+              &ArrayTest::constructValueInit,
+              &ArrayTest::constructValueInitZeroSize,
+              &ArrayTest::constructNoInitTrivial,
+              &ArrayTest::constructNoInitTrivialZeroSize,
+              &ArrayTest::constructNoInitNonTrivial,
+              &ArrayTest::constructNoInitNonTrivialZeroSize,
+              &ArrayTest::constructDirectInit,
+              &ArrayTest::constructDirectInitZeroSize,
+              &ArrayTest::constructInPlaceInit,
+              &ArrayTest::constructInPlaceInitZeroSize,
+              &ArrayTest::constructFromExisting,
               &ArrayTest::constructMove,
               &ArrayTest::constructDirectReferences,
 
@@ -227,6 +239,12 @@ void ArrayTest::construct() {
     CORRADE_VERIFY(!std::is_convertible<std::size_t, Array>::value);
 }
 
+void ArrayTest::constructZeroSize() {
+    Array a{0};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
+}
+
 void ArrayTest::constructFromExisting() {
     int* a = new int[25];
     Array b{a, 25};
@@ -242,6 +260,12 @@ void ArrayTest::constructDefaultInit() {
     /* Values are random memory */
 }
 
+void ArrayTest::constructDefaultInitZeroSize() {
+    Array a{Corrade::DefaultInit, 0};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
+}
+
 void ArrayTest::constructValueInit() {
     const Array a{Corrade::ValueInit, 5};
     CORRADE_VERIFY(a);
@@ -255,11 +279,23 @@ void ArrayTest::constructValueInit() {
     CORRADE_COMPARE(a[4], 0);
 }
 
+void ArrayTest::constructValueInitZeroSize() {
+    Array a{Corrade::ValueInit, 0};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
+}
+
 void ArrayTest::constructNoInitTrivial() {
     const Array a{Corrade::NoInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
     CORRADE_VERIFY(!a.deleter());
+}
+
+void ArrayTest::constructNoInitTrivialZeroSize() {
+    Array a{Corrade::NoInit, 0};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
 }
 
 struct Foo {
@@ -280,12 +316,24 @@ void ArrayTest::constructNoInitNonTrivial() {
     CORRADE_COMPARE(Foo::constructorCallCount, 7);
 }
 
+void ArrayTest::constructNoInitNonTrivialZeroSize() {
+    Containers::Array<Foo> a{Corrade::NoInit, 0};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
+}
+
 void ArrayTest::constructDirectInit() {
     const Array a{Corrade::DirectInit, 2, -37};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 2);
     CORRADE_COMPARE(a[0], -37);
     CORRADE_COMPARE(a[1], -37);
+}
+
+void ArrayTest::constructDirectInitZeroSize() {
+    Array a{Corrade::DirectInit, 0, -37};
+    CORRADE_VERIFY(!a.data());
+    CORRADE_COMPARE(a.size(), 0);
 }
 
 void ArrayTest::constructInPlaceInit() {
@@ -312,10 +360,9 @@ void ArrayTest::constructInPlaceInit() {
     CORRADE_VERIFY(!b2);
 }
 
-void ArrayTest::constructZeroSize() {
-    const Array a(0);
-
-    CORRADE_VERIFY(a == nullptr);
+void ArrayTest::constructInPlaceInitZeroSize() {
+    Array a{Corrade::InPlaceInit, {}};
+    CORRADE_VERIFY(!a.data());
     CORRADE_COMPARE(a.size(), 0);
 }
 
