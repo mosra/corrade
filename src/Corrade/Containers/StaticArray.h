@@ -158,7 +158,10 @@ template<std::size_t size_, class T> class StaticArray {
          * behavior for trivial types it's better to explicitly use either the
          * @ref StaticArray(ValueInitT) or the @ref StaticArray(NoInitT)
          * variant instead.
-         * @see @ref DefaultInit, @ref std::is_trivial
+         * @see @relativeref{Corrade,DefaultInit},
+         *      @ref StaticArray(DirectInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref std::is_trivial
          */
         explicit StaticArray(Corrade::DefaultInitT): StaticArray{Corrade::DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
 
@@ -166,9 +169,14 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct a value-initialized array
          *
          * Creates array of given size, the contents are value-initialized
-         * (i.e., builtin types are zero-initialized, default constructor
+         * (i.e., trivial types are zero-initialized, default constructor
          * called otherwise). This is the same as @ref StaticArray().
-         * @see @ref ValueInit, @ref StaticArray(DefaultInitT)
+         * @see @relativeref{Corrade,ValueInit},
+         *      @ref StaticArray(DefaultInitT),
+         *      @ref StaticArray(NoInitT),
+         *      @ref StaticArray(DirectInitT, Args&&... args),
+         *      @ref StaticArray(InPlaceInitT, Args&&... args),
+         *      @ref std::is_trivial
          */
         explicit StaticArray(Corrade::ValueInitT): _data{} {}
 
@@ -189,7 +197,9 @@ template<std::size_t size_, class T> class StaticArray {
          *
          * @snippet Containers.cpp StaticArray-NoInit
          *
-         * @see @ref NoInit, @ref StaticArray(DirectInitT, Args&&... args),
+         * @see @relativeref{Corrade,NoInit},
+         *      @ref StaticArray(ValueInitT),
+         *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */

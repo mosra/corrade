@@ -249,15 +249,6 @@ String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
     }
 }
 
-String::String(Corrade::DirectInitT, const std::size_t size, const char c): String{Corrade::NoInit, size} {
-    #ifdef CORRADE_GRACEFUL_ASSERT
-    /* If the NoInit constructor asserted, don't attempt to memset */
-    if(size >= Implementation::SmallStringSize && !_large.data) return;
-    #endif
-
-    std::memset(size < Implementation::SmallStringSize ? _small.data : _large.data, c, size);
-}
-
 String::String(Corrade::NoInitT, const std::size_t size)
     #ifdef CORRADE_GRACEFUL_ASSERT
     /* Zero-init the contents so the destructor doesn't crash if we assert here */
@@ -268,6 +259,15 @@ String::String(Corrade::NoInitT, const std::size_t size)
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
 
     construct(Corrade::NoInit, size);
+}
+
+String::String(Corrade::DirectInitT, const std::size_t size, const char c): String{Corrade::NoInit, size} {
+    #ifdef CORRADE_GRACEFUL_ASSERT
+    /* If the NoInit constructor asserted, don't attempt to memset */
+    if(size >= Implementation::SmallStringSize && !_large.data) return;
+    #endif
+
+    std::memset(size < Implementation::SmallStringSize ? _small.data : _large.data, c, size);
 }
 
 String::~String() { destruct(); }

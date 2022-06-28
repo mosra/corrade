@@ -152,6 +152,9 @@ initialization constructors are provided, similarly to the @ref Array class:
     for the null terminator. Equivalent to @cpp new char[size + 1] @ce followed
     by @cpp string[size] = '\0' @ce.
 
+Unlike an @ref Array, there's no @ref DefaultInitT constructor, as the same
+behavior is already provided by @ref String(NoInitT, std::size_t).
+
 @subsection Containers-String-usage-wrapping Wrapping externally allocated strings
 
 Similarly to @ref Array, by default the class makes all allocations using
@@ -488,24 +491,14 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
-         * @brief Create a zero-initialized string of given size
+         * @brief Create a zero-initialized string
          * @param size      Size excluding the null terminator
          *
-         * A @ref DefaultInitT overload isn't provided to prevent accidents ---
-         * its behavior would be the same to @ref String(NoInitT, std::size_t).
-         * @see @ref String(DirectInitT, std::size_t, char)
+         * @see @relativeref{Corrade,ValueInit},
+         *      @ref String(NoInitT, std::size_t),
+         *      @ref String(DirectInitT, std::size_t, char)
          */
         explicit String(Corrade::ValueInitT, std::size_t size);
-
-        /**
-         * @brief Create a string initialized to a particular character
-         * @param size      Size excluding the null terminator
-         * @param c         Character value
-         *
-         * @see @ref String(ValueInitT, std::size_t),
-         *      @ref String(NoInitT, std::size_t)
-         */
-        explicit String(Corrade::DirectInitT, std::size_t size, char c);
 
         /**
          * @brief Create an uninitialized string
@@ -514,8 +507,22 @@ class CORRADE_UTILITY_EXPORT String {
          * While the string contents are left untouched, the null terminator
          * *does* get initialized to @cpp '\0' @ce. Useful if you're going to
          * overwrite the contents anyway.
+         * @see @relativeref{Corrade,NoInit},
+         *      @ref String(ValueInitT, std::size_t),
+         *      @ref String(DirectInitT, std::size_t, char)
          */
         explicit String(Corrade::NoInitT, std::size_t size);
+
+        /**
+         * @brief Create a string initialized to a particular character
+         * @param size      Size excluding the null terminator
+         * @param c         Character value
+         *
+         * @see @relativeref{Corrade,DirectInit},
+         *      @ref String(ValueInitT, std::size_t),
+         *      @ref String(NoInitT, std::size_t)
+         */
+        explicit String(Corrade::DirectInitT, std::size_t size, char c);
 
         /** @todo combined AllocatedInit + Value/Direct/NoInit constructors */
 

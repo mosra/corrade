@@ -339,24 +339,32 @@ class Array {
         /**
          * @brief Construct a default-initialized array
          *
-         * Creates array of given size, the contents are default-initialized
+         * Creates an array of given size, the contents are default-initialized
          * (i.e. trivial types are not initialized, default constructor called
          * otherwise). If the size is zero, no allocation is done. Because of
          * the differing behavior for trivial types it's better to explicitly
          * use either the @ref Array(ValueInitT, std::size_t) or the
          * @ref Array(NoInitT, std::size_t) variant instead.
-         * @see @ref DefaultInit, @ref std::is_trivial
+         * @see @relativeref{Corrade,DefaultInit},
+         *      @ref Array(DirectInitT, std::size_t, Args&&... args),
+         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
+         *      @ref array(std::initializer_list<T>), @ref std::is_trivial
          */
         explicit Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
          * @brief Construct a value-initialized array
          *
-         * Creates array of given size, the contents are value-initialized
-         * (i.e. builtin types are zero-initialized, default constructor called
+         * Creates an array of given size, the contents are value-initialized
+         * (i.e. trivial types are zero-initialized, default constructor called
          * otherwise). This is the same as @ref Array(std::size_t). If the size
          * is zero, no allocation is done.
-         * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
+         * @see @relativeref{Corrade,ValueInit},
+         *      @ref Array(DefaultInitT, std::size_t),
+         *      @ref Array(NoInitT, std::size_t),
+         *      @ref Array(DirectInitT, std::size_t, Args&&... args),
+         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
+         *      @ref array(std::initializer_list<T>), @ref std::is_trivial
          */
         explicit Array(Corrade::ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
 
@@ -381,7 +389,9 @@ class Array {
          *
          * @snippet Containers.cpp Array-NoInit
          *
-         * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args&&... args),
+         * @see @relativeref{Corrade,NoInit},
+         *      @ref Array(ValueInitT, std::size_t),
+         *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
          *      @ref array(std::initializer_list<T>), @ref deleter(),
          *      @ref std::is_trivial
@@ -394,6 +404,11 @@ class Array {
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then initializes each element with placement new
          * using forwarded @p args.
+         * @see @relativeref{Corrade,DirectInit},
+         *      @ref Array(DefaultInitT, std::size_t),
+         *      @ref Array(ValueInitT, std::size_t),
+         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
+         *      @ref array(std::initializer_list<T>)
          */
         template<class ...Args> explicit Array(Corrade::DirectInitT, std::size_t size, Args&&... args);
 
@@ -409,6 +424,10 @@ class Array {
          * usability issues as with @ref std::vector --- see the
          * @ref Containers-Array-initializer-list "class documentation" for
          * more information.
+         * @see @relativeref{Corrade,DirectInit},
+         *      @ref Array(DefaultInitT, std::size_t),
+         *      @ref Array(ValueInitT, std::size_t),
+         *      @ref Array(DirectInitT, std::size_t, Args&&... args)
          */
         /*implicit*/ Array(Corrade::InPlaceInitT, std::initializer_list<T> list);
 
