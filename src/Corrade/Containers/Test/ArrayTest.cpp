@@ -112,6 +112,7 @@ struct ArrayTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
+
     void release();
 
     void defaultDeleter();

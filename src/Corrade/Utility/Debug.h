@@ -834,7 +834,7 @@ template<class T> Debug& operator<<(Debug& debug, const T& value);
 /** @relatesalso Debug
 @brief Operator for printing iterable types to debug output
 
-Prints the value as @cb{.shell-session} {a, b, c} @ce. If the type contains
+Prints the value as @cb{.shell-session} {a, b, …} @ce. If the type contains
 a nested iterable type, the values are separated by newlines. Specifying
 @ref Debug::Flag::Packed or using @ref Debug::packed will print the values
 tightly-packed without commas and spaces in between.
