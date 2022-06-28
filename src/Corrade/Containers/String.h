@@ -96,10 +96,13 @@ equivalent, the implicit conversion has some runtime impact due to
 
 @snippet Containers.cpp String-usage-literal-null
 
-@ref String instances are implicitly convertible from and to
-(mutable) @ref BasicStringView "StringView", all instances (including an empty
-string) are guaranteed to be null-terminated, which means a conversion to
-@ref BasicStringView "StringView" will always have
+The @ref String class provides access, slicing and lookup APIs similar to
+@ref BasicStringView "StringView", see @ref Containers-BasicStringView-usage "its usage docs"
+for details. All @ref String slicing APIs return a (mutable)
+@ref BasicStringView "StringView", additionally @ref String instances are
+implicitly convertible from and to (mutable) @ref BasicStringView "StringView".
+All instances (including an empty string) are guaranteed to be null-terminated,
+which means a conversion to @ref BasicStringView "StringView" will always have
 @ref StringViewFlag::NullTerminated set.
 
 As with @ref BasicStringView "StringView", the class is implicitly convertible

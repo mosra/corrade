@@ -80,7 +80,8 @@ see @ref StridedArrayView. An owning version of this container is an @ref Array.
 
 The class is implicitly convertible from compile-time-sized C arrays and
 @ref Array / @ref StaticArray instances of the same underlying type; it's also
-possible to implicitly create a @cpp const @ce view on a mutable array.
+possible to implicitly create a @cpp const @ce view on a mutable array. Besides
+that, a view can be created manually from a pointer and size:
 
 @snippet Containers.cpp ArrayView-usage
 

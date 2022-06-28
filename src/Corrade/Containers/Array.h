@@ -89,14 +89,14 @@ opt-in, see @ref Containers-Array-growable below for more information.
 
 @section Containers-Array-usage Usage
 
+@snippet Containers.cpp Array-usage
+
 The @ref Array class provides an access and slicing API similar to
 @ref ArrayView, see @ref Containers-ArrayView-usage "its usage docs" for
 details. All @ref Array slicing APIs return an @ref ArrayView, additionally
 @ref Array instances are also implicitly convertible to it. The only difference
 is due to the owning aspect --- mutable access to the data is provided only via
 non @cpp const @ce overloads.
-
-@snippet Containers.cpp Array-usage
 
 @subsection Containers-Array-usage-initialization Array initialization
 
