@@ -75,6 +75,7 @@ struct StringTest: TestSuite::Tester {
 
     void constructDefault();
     void constructTakeOwnership();
+    void constructTakeOwnershipConst();
     void constructTakeOwnershipImplicitSize();
     void constructTakeOwnershipNull();
     void constructTakeOwnershipNotNullTerminated();
@@ -209,6 +210,7 @@ StringTest::StringTest() {
 
               &StringTest::constructDefault,
               &StringTest::constructTakeOwnership,
+              &StringTest::constructTakeOwnershipConst,
               &StringTest::constructTakeOwnershipImplicitSize,
               &StringTest::constructTakeOwnershipNull,
               &StringTest::constructTakeOwnershipNotNullTerminated,
@@ -376,6 +378,9 @@ void StringTest::constructDefault() {
 }
 
 void StringTest::constructTakeOwnership() {
+    /* Arguments passed to deleter and cases when deleter is called tested more
+       thoroughly in customDeleter*() */
+
     char data[] = "hello\0world!";
 
     {
@@ -394,7 +399,31 @@ void StringTest::constructTakeOwnership() {
     CORRADE_COMPARE((StringView{data, 12}), "iello\0world?"_s);
 }
 
+void StringTest::constructTakeOwnershipConst() {
+    /* Taking over a const pointer should be possible, as it's a common use
+       case to avoid copying a static string literal (or, further wrapped by
+       String::nullTerminatedGlobalView()). Not mutating the data is then user
+       responsibility. */
+
+    const char* data = "hello\0world!";
+
+    {
+        String a{data, 12, [](char*, std::size_t) {}};
+        CORRADE_VERIFY(a);
+        CORRADE_VERIFY(!a.isSmall());
+        CORRADE_VERIFY(!a.isEmpty());
+        CORRADE_COMPARE(a.size(), 12);
+        CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
+        CORRADE_VERIFY(a.deleter());
+    }
+
+    CORRADE_COMPARE((StringView{data, 12}), "hello\0world!"_s);
+}
+
 void StringTest::constructTakeOwnershipImplicitSize() {
+    /* Arguments passed to deleter and cases when deleter is called tested more
+       thoroughly in customDeleter*() */
+
     /* Everything after \0 gets ignored */
     char data[] = "hello\0world!";
 
@@ -952,6 +981,10 @@ void StringTest::convertStringView() {
     CORRADE_COMPARE(aView2.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView2.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView2.data()), a.data());
+
+    /* It shouldn't be possible to create a mutable view from a const String */
+    CORRADE_VERIFY(std::is_convertible<const String, StringView>::value);
+    CORRADE_VERIFY(!std::is_convertible<const String, MutableStringView>::value);
 }
 
 void StringTest::convertStringViewSmall() {
@@ -1048,6 +1081,12 @@ void StringTest::convertArrayView() {
     ArrayView<const void> aVoidView = a;
     CORRADE_COMPARE(aVoidView.size(), a.size());
     CORRADE_COMPARE(aVoidView.data(), a.data());
+
+    /* It shouldn't be possible to create a mutable view from a const String */
+    CORRADE_VERIFY(std::is_convertible<const String, ArrayView<const char>>::value);
+    CORRADE_VERIFY(std::is_convertible<const String, ArrayView<const void>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const String, ArrayView<char>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const String, ArrayView<void>>::value);
 }
 
 void StringTest::convertArrayViewSmall() {
