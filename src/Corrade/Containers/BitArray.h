@@ -405,7 +405,7 @@ inline void BitArray::set(std::size_t i) {
 inline void BitArray::reset(std::size_t i) {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArray::reset(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
-    _data[(((_sizeOffset & 0x07) & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
+    _data[((_sizeOffset & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
 }
 
 inline void BitArray::set(std::size_t i, bool value) {
