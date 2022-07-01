@@ -28,8 +28,8 @@ cmake .. \
     -DCORRADE_BUILD_TESTS=ON \
     -DCORRADE_TESTSUITE_TARGET_XCTEST=ON \
     -G Xcode
-set -o pipefail && cmake --build . --config Release | xcbeautify
+set -o pipefail && cmake --build . --config Release -j$XCODE_JOBS | xcbeautify
 CORRADE_TEST_COLOR=ON ctest -V -C Release
 
 # Test install, after running the tests as for them it shouldn't be needed
-set -o pipefail && cmake --build . --config Release --target install | xcbeautify
+set -o pipefail && cmake --build . --config Release --target install -j$XCODE_JOBS | xcbeautify
