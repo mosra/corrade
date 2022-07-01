@@ -409,6 +409,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * To be used for loading dependencies from different plugin
          * interfaces. Once registered, the @p manager is expected to stay in
          * scope for the whole lifetime of this instance.
+         * @see @ref Manager::externalManager()
          */
         void registerExternalManager(AbstractManager& manager);
 
@@ -445,6 +446,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         Containers::Pointer<AbstractPlugin> instantiateInternal(Containers::StringView plugin);
         Containers::Pointer<AbstractPlugin> loadAndInstantiateInternal(Containers::StringView plugin);
+        AbstractManager* externalManagerInternal(Containers::StringView pluginInterface);
 
     private:
         struct State;

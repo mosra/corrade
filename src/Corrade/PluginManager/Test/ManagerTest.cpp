@@ -123,6 +123,7 @@ struct ManagerTest: TestSuite::Tester {
     void hierarchy();
     void destructionHierarchy();
     void crossManagerDependencies();
+    void crossManagerDependenciesRetrieveExternalManagerNoInterface();
     void crossManagerDependenciesInstantiateFromDifferent();
     void crossManagerDependenciesWrongDestructionOrder();
     void unresolvedDependencies();
@@ -213,6 +214,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::hierarchy,
               &ManagerTest::destructionHierarchy,
               &ManagerTest::crossManagerDependencies,
+              &ManagerTest::crossManagerDependenciesRetrieveExternalManagerNoInterface,
               &ManagerTest::crossManagerDependenciesInstantiateFromDifferent,
               &ManagerTest::crossManagerDependenciesWrongDestructionOrder,
               &ManagerTest::unresolvedDependencies,
@@ -986,13 +988,19 @@ void ManagerTest::destructionHierarchy() {
 }
 
 void ManagerTest::crossManagerDependencies() {
-    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
-    #else
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
     foodManager.registerExternalManager(manager);
 
+    /* The external manager should be retrievable again, matched by its
+       interface string. Other type (and even its own interface) will return
+       nullptr. */
+    CORRADE_COMPARE(foodManager.externalManager<AbstractAnimal>(), &manager);
+    CORRADE_COMPARE(foodManager.externalManager<AbstractFood>(), nullptr);
+
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_SKIP("Cross-manager dependencies can be tested only with dynamic plugins");
+    #else
     /* Load HotDog */
     CORRADE_COMPARE(foodManager.load("HotDog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -1019,6 +1027,19 @@ void ManagerTest::crossManagerDependencies() {
     #endif
 }
 
+void ManagerTest::crossManagerDependenciesRetrieveExternalManagerNoInterface() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    struct NoInterface: AbstractPlugin {};
+
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    manager.externalManager<NoInterface>();
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::externalManager(): can only retrieve managers with a non-empty plugin interface\n");
+}
+
 void ManagerTest::crossManagerDependenciesInstantiateFromDifferent() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -1036,9 +1057,6 @@ void ManagerTest::crossManagerDependenciesInstantiateFromDifferent() {
 }
 
 void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
-    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
-    #endif
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<PluginManager::Manager<AbstractAnimal>> manager{InPlaceInit};

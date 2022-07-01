@@ -144,11 +144,9 @@ struct AbstractManager::State {
     std::map<Containers::String, Containers::Pointer<Plugin>> plugins;
     std::map<Containers::String, Plugin&> aliases;
 
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     std::set<AbstractManager*> externalManagers;
     #ifndef CORRADE_NO_ASSERT
     std::set<AbstractManager*> externalManagerUsedBy;
-    #endif
     #endif
 };
 
@@ -338,7 +336,6 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
 }
 
 AbstractManager::~AbstractManager() {
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     #ifndef CORRADE_NO_ASSERT
     /* Check that this instance is not used for external dependencies anywhere */
     if(!_state->externalManagerUsedBy.empty()) {
@@ -356,7 +353,6 @@ AbstractManager::~AbstractManager() {
        used in any way. */
     for(AbstractManager* manager: _state->externalManagers)
         CORRADE_INTERNAL_ASSERT_OUTPUT(manager->_state->externalManagerUsedBy.erase(this) == 1);
-    #endif
     #endif
 
     /* Unload all plugins */
@@ -392,11 +388,13 @@ LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
 
     return after;
 }
+#endif
 
 Containers::StringView AbstractManager::pluginInterface() const {
     return _state->pluginInterface;
 }
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 Containers::StringView AbstractManager::pluginDirectory() const {
     return _state->pluginDirectory;
 }
@@ -976,13 +974,9 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 #endif
 
 void AbstractManager::registerExternalManager(AbstractManager& manager) {
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     _state->externalManagers.insert(&manager);
     #ifndef CORRADE_NO_ASSERT
     manager._state->externalManagerUsedBy.insert(this);
-    #endif
-    #else
-    static_cast<void>(manager);
     #endif
 }
 
@@ -1080,6 +1074,14 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
     auto found = _state->aliases.find(plugin);
     CORRADE_INTERNAL_ASSERT(found != _state->aliases.end());
     return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, plugin)));
+}
+
+AbstractManager* AbstractManager::externalManagerInternal(const Containers::StringView pluginInterface) {
+    CORRADE_ASSERT(pluginInterface,
+        "PluginManager::Manager::externalManager(): can only retrieve managers with a non-empty plugin interface", {});
+    for(AbstractManager* manager: _state->externalManagers)
+        if(manager->pluginInterface() == pluginInterface) return manager;
+    return nullptr;
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT

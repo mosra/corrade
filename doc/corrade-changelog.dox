@@ -98,6 +98,8 @@ namespace Corrade {
     @ref Containers::String, @ref Containers::ArrayView and
     @ref Containers::Array is used instead, resulting in much less temporary
     allocations and better compile times.
+-   New @ref PluginManager::Manager::externalManager() API to allow plugins to
+    list, access and instantiate plugins of other types
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 

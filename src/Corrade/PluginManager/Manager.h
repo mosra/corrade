@@ -210,6 +210,20 @@ template<class T> class Manager: public AbstractManager {
          * name is then loaded using @ref instantiate() as usual.
          */
         Containers::Pointer<T> loadAndInstantiate(Containers::StringView plugin);
+
+        /**
+         * @brief Retrieve an external plugin manager
+         * @m_since_latest
+         *
+         * If a plugin manager of type @p U was passed to
+         * @ref registerExternalManager() earlier, returns a pointer to it,
+         * otherwise returns @cpp nullptr @ce. The manager type is matched
+         * using @ref pluginInterface(), thus it's expected that the plugin
+         * defines it to a non-empty and unique value.
+         */
+        template<class U> Manager<U>* externalManager() {
+            return static_cast<Manager<U>*>(externalManagerInternal(U::pluginInterface()));
+        }
 };
 
 }}
