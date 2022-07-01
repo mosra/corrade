@@ -7,13 +7,10 @@ executors:
   ubuntu-18_04:
     docker:
     - image: ubuntu:bionic-20220427
-  xcode-11_5:
+  # Anything below 11.7 is deprecated as of June 6th 2022
+  xcode-11_7:
     macos:
-      # xcbeautify (for the iOS build) requires Xcode 11.4. Since 2922-05-23,
-      # 11.4.1 images wait endlessly for "VM assignment", using 11.5 instead.
-      # I would test on 10.3 also, but those also started waiting endlessly
-      # since 2022-06-09, so it's just 11.5 now.
-      xcode: 11.5
+      xcode: 11.7.0
   emscripten:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
@@ -290,7 +287,7 @@ jobs:
         script: unix-desktop.sh
 
   macos:
-    executor: xcode-11_5
+    executor: xcode-11_7
     environment:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
@@ -301,7 +298,7 @@ jobs:
     - lcov
 
   macos-static:
-    executor: xcode-11_5
+    executor: xcode-11_7
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
@@ -333,7 +330,7 @@ jobs:
         script: android-x86.sh
 
   ios:
-    executor: xcode-11_5
+    executor: xcode-11_7
     steps:
     - install-base-macos:
         extra: xcbeautify
