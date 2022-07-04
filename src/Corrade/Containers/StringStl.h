@@ -32,10 +32,10 @@
 
 Including this header allows you to convert a
 @ref Corrade::Containers::String / @ref Corrade::Containers::StringView from
-and to @ref std::string. A separate
-@ref Corrade/Containers/StringStlView.h header provides compatibility with
-@ref std::string_view from C++17. See
-@ref Containers-String-stl "String STL compatibility" and
+and to @ref std::string. A separate @ref Corrade/Containers/StringStlView.h
+header provides compatibility with @ref std::string_view from C++17,
+@ref Corrade/Containers/StringStlHash.h then provides a @ref std::hash
+specialization. See @ref Containers-String-stl "String STL compatibility" and
 @ref Containers-BasicStringView-stl "StringView STL compatibility" for more
 information.
 */

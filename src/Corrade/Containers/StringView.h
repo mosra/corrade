@@ -259,6 +259,13 @@ no possibility to create a @ref MutableStringView out of it. Because
 neither @ref StringViewFlag::NullTerminated nor @ref StringViewFlag::Global is
 set in a @ref StringView converted from it.
 
+Finally, the @ref Corrade/Containers/StringStlHash.h header provides a
+@ref std::hash specialization for @ref StringView / @ref MutableStringView,
+making it usable in @ref std::unordered_map and @ref std::unordered_set. It's
+* *also* separate, due to dependency on @cpp #include <functional> @ce which is
+among the heaviest STL headers in existence, and which is only really needed
+when you deal with unordered containers.
+
 @experimental
 */
 /* All member functions are const because the view doesn't own the data */

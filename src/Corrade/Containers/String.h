@@ -241,6 +241,13 @@ mitigate the conversion impact, it's recommended to convert
 @ref std::string_view instances to @ref BasicStringView "StringView" instead
 where possible.
 
+Finally, the @ref Corrade/Containers/StringStlHash.h header provides a
+@ref std::hash specialization for @ref String, making it usable in
+@ref std::unordered_map and @ref std::unordered_set. It's *also* separate, due
+to dependency on @cpp #include <functional> @ce which is among the heaviest STL
+headers in existence, and which is only really needed when you deal with
+unordered containers.
+
 @experimental
 */
 class CORRADE_UTILITY_EXPORT String {

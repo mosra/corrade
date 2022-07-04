@@ -24,8 +24,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <unordered_map>
+
 #include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/StringStlHash.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -46,6 +50,8 @@ struct StringStlTest: TestSuite::Tester {
     void convertViewFromStlStringEmpty();
     void convertMutableViewFromStlString();
     void convertMutableViewFromStlStringEmpty();
+
+    template<class T> void hash();
 };
 
 StringStlTest::StringStlTest() {
@@ -61,7 +67,11 @@ StringStlTest::StringStlTest() {
               &StringStlTest::convertViewFromStlString,
               &StringStlTest::convertViewFromStlStringEmpty,
               &StringStlTest::convertMutableViewFromStlString,
-              &StringStlTest::convertMutableViewFromStlStringEmpty});
+              &StringStlTest::convertMutableViewFromStlStringEmpty,
+
+              &StringStlTest::hash<StringView>,
+              &StringStlTest::hash<MutableStringView>,
+              &StringStlTest::hash<String>});
 }
 
 using namespace Literals;
@@ -145,6 +155,41 @@ void StringStlTest::convertMutableViewFromStlStringEmpty() {
     MutableStringView b = a;
     CORRADE_COMPARE(b, ""_s);
     CORRADE_COMPARE(b.data(), static_cast<const void*>(a.data()));
+}
+
+template<class> struct NameTraits;
+template<> struct NameTraits<StringView> {
+    static const char* name() { return "StringView"; }
+};
+template<> struct NameTraits<MutableStringView> {
+    static const char* name() { return "MutableStringView"; }
+};
+template<> struct NameTraits<String> {
+    static const char* name() { return "String"; }
+};
+
+template<class T> void StringStlTest::hash() {
+    setTestCaseTemplateName(NameTraits<T>::name());
+
+    char hello[] = "hello";
+    char olleh[] = "olleh";
+
+    std::unordered_map<T, int> map;
+    map.emplace(hello, 3);
+    map.emplace(olleh, 7);
+    CORRADE_COMPARE(map[hello], 3);
+    CORRADE_COMPARE(map[olleh], 7);
+
+    /* Verify the hash function is non-trivial */
+    CORRADE_COMPARE_AS(std::hash<T>{}(hello), std::hash<T>{}({}),
+        TestSuite::Compare::NotEqual);
+    CORRADE_COMPARE_AS(std::hash<T>{}(olleh), std::hash<T>{}({}),
+        TestSuite::Compare::NotEqual);
+    CORRADE_COMPARE_AS(std::hash<T>{}(hello), std::hash<T>{}(olleh),
+        TestSuite::Compare::NotEqual);
+
+    /* And also non-random and not depending on the data pointer */
+    CORRADE_COMPARE(std::hash<T>{}(hello), std::hash<Containers::StringView>{}("hello!"_s.exceptSuffix(1)));
 }
 
 }}}}
