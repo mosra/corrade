@@ -28,10 +28,6 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/PluginManager/Test")
 
-# CMake before 3.8 has broken $<TARGET_FILE*> expressions for iOS (see
-# https://gitlab.kitware.com/cmake/cmake/merge_requests/404) and since Corrade
-# doesn't support dynamic plugins on iOS, this sorta works around that. Should
-# be revisited when updating Travis to newer Xcode (xcode7.3 has CMake 3.6).
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     # On windows, all DLLs are in bin/, but elsewhere in lib/. See the root
     # CMakeLists.txt for more info about where this is set to.
