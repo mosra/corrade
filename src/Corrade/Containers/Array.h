@@ -902,12 +902,12 @@ template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D
 }
 
 template<class T, class D> const T& Array<T, D>::front() const {
-    CORRADE_ASSERT(_size, "Containers::Array::front(): array is empty", _data[0]);
+    CORRADE_DEBUG_ASSERT(_size, "Containers::Array::front(): array is empty", _data[0]);
     return _data[0];
 }
 
 template<class T, class D> const T& Array<T, D>::back() const {
-    CORRADE_ASSERT(_size, "Containers::Array::back(): array is empty", _data[_size - 1]);
+    CORRADE_DEBUG_ASSERT(_size, "Containers::Array::back(): array is empty", _data[_size - 1]);
     return _data[_size - 1];
 }
 

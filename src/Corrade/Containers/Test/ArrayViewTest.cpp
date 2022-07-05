@@ -868,7 +868,7 @@ void ArrayViewTest::accessConstVoid() {
 }
 
 void ArrayViewTest::accessInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -895,7 +895,7 @@ void ArrayViewTest::rangeBasedFor() {
 }
 
 void ArrayViewTest::sliceInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     /* Do it this way to avoid (reasonable) warnings about out-of-bounds array
        access with `a - 1` */

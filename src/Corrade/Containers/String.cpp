@@ -136,6 +136,9 @@ String::String(const char* const data, const std::size_t size)
     : _large{}
     #endif
 {
+    /* Compared to StringView construction which happens a lot this shouldn't,
+       and the chance of strings > 1 GB on 32-bit is rare but possible and thus
+       worth checking even in release */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
     CORRADE_ASSERT(data || !size,
@@ -160,6 +163,9 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
     : _large{}
     #endif
 {
+    /* Compared to StringView construction which happens a lot this shouldn't,
+       and the chance of strings > 1 GB on 32-bit is rare but possible and thus
+       worth checking even in release */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
     CORRADE_ASSERT(data || !size,
@@ -213,6 +219,10 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     : _large{}
     #endif
 {
+    /* Compared to StringView construction which happens a lot this shouldn't,
+       the chance of strings > 1 GB on 32-bit is rare but possible and thus
+       worth checking even in release; but most importantly checking for null
+       termination outweighs potential speed issues */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
     CORRADE_ASSERT(data && !data[size],
@@ -236,6 +246,9 @@ String::String(void(*deleter)(char*, std::size_t), std::nullptr_t, char* const d
 } {}
 
 String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
+    /* Compared to StringView construction which happens a lot this shouldn't,
+       and the chance of strings > 1 GB on 32-bit is rare but possible and thus
+       worth checking even in release */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
 
@@ -255,6 +268,9 @@ String::String(Corrade::NoInitT, const std::size_t size)
     : _large{}
     #endif
 {
+    /* Compared to StringView construction which happens a lot this shouldn't,
+       and the chance of strings > 1 GB on 32-bit is rare but possible and thus
+       worth checking even in release */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
 
@@ -382,6 +398,7 @@ bool String::isEmpty() const {
 }
 
 auto String::deleter() const -> Deleter {
+    /* Unlikely to be called very often, so a non-debug assert is fine */
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::deleter(): cannot call on a SSO instance", {});
     return _large.deleter;
@@ -426,7 +443,7 @@ const char* String::cend() const {
     directly without delegating to size()/begin()/end()? i don't think so */
 
 char& String::front() {
-    CORRADE_ASSERT(size(), "Containers::String::front(): string is empty", *begin());
+    CORRADE_DEBUG_ASSERT(size(), "Containers::String::front(): string is empty", *begin());
     return *begin();
 }
 
@@ -435,7 +452,7 @@ char String::front() const {
 }
 
 char& String::back() {
-    CORRADE_ASSERT(size(), "Containers::String::back(): string is empty", *(end() - 1));
+    CORRADE_DEBUG_ASSERT(size(), "Containers::String::back(): string is empty", *(end() - 1));
     return *(end() - 1);
 }
 
@@ -814,6 +831,7 @@ bool String::containsAny(const StringView substring) const {
 }
 
 char* String::release() {
+    /* Unlikely to be called very often, so a non-debug assert is fine */
     CORRADE_ASSERT(!(_small.size & 0x80),
         "Containers::String::release(): cannot call on a SSO instance", {});
     char* data = _large.data;

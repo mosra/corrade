@@ -37,7 +37,7 @@
 
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/EnumSet.h"
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
@@ -300,9 +300,12 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
         constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{
-            (CORRADE_CONSTEXPR_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
+            /* This ends up being called from BasicStringView(T*, Flags), so
+               basically on every implicit conversion from a C string, thus
+               the release build perf aspect wins over safety */
+            (CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
-            CORRADE_CONSTEXPR_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
+            CORRADE_CONSTEXPR_DEBUG_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
                 "Containers::StringView: can't use StringViewFlag::NullTerminated with null data"),
             size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}
 
@@ -1187,15 +1190,15 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
 }
 
 template<class T> constexpr T& BasicStringView<T>::front() const {
-    return CORRADE_CONSTEXPR_ASSERT(size(), "Containers::StringView::front(): view is empty"), _data[0];
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(size(), "Containers::StringView::front(): view is empty"), _data[0];
 }
 
 template<class T> constexpr T& BasicStringView<T>::back() const {
-    return CORRADE_CONSTEXPR_ASSERT(size(), "Containers::StringView::back(): view is empty"), _data[size() - 1];
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(size(), "Containers::StringView::back(): view is empty"), _data[size() - 1];
 }
 
 template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* const begin, T* const end) const {
-    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask),
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin <= end && end <= _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask),
             "Containers::StringView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data
             << Utility::Debug::nospace << ":"
@@ -1214,7 +1217,7 @@ template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* cons
 }
 
 template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(const std::size_t begin, const std::size_t end) const {
-    return CORRADE_CONSTEXPR_ASSERT(begin <= end && end <= (_sizePlusFlags & ~Implementation::StringViewSizeMask),
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin <= end && end <= (_sizePlusFlags & ~Implementation::StringViewSizeMask),
             "Containers::StringView::slice(): slice ["
             << Utility::Debug::nospace << begin
             << Utility::Debug::nospace << ":"

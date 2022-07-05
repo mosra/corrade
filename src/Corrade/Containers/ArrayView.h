@@ -34,8 +34,9 @@
 #include <type_traits>
 
 #include "Corrade/Containers/Containers.h"
-#include "Corrade/Utility/Move.h"
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugAssert.h"
+#include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers {
 
@@ -890,6 +891,8 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     const std::size_t size = view.size()*sizeof(T)/sizeof(U);
+    /* Unlike slice() etc, this is usually not called in tight loops and should
+       be as checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(size*sizeof(U) == view.size()*sizeof(T),
         "Containers::arrayCast(): can't reinterpret" << view.size() << sizeof(T) << Utility::Debug::nospace << "-byte items into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
     return {reinterpret_cast<U*>(view.begin()), size};
@@ -906,6 +909,8 @@ and the total byte size doesn't change.
 template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     const std::size_t size = view.size()/sizeof(U);
+    /* Unlike slice() etc, this is usually not called in tight loops and should
+       be as checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(size*sizeof(U) == view.size(),
         "Containers::arrayCast(): can't reinterpret" << view.size() << "bytes into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
     return {reinterpret_cast<U*>(view.data()), size};
@@ -1380,15 +1385,15 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
 }
 
 template<class T> constexpr T& ArrayView<T>::front() const {
-    return CORRADE_CONSTEXPR_ASSERT(_size, "Containers::ArrayView::front(): view is empty"), _data[0];
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_size, "Containers::ArrayView::front(): view is empty"), _data[0];
 }
 
 template<class T> constexpr T& ArrayView<T>::back() const {
-    return CORRADE_CONSTEXPR_ASSERT(_size, "Containers::ArrayView::back(): view is empty"), _data[_size - 1];
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_size, "Containers::ArrayView::back(): view is empty"), _data[_size - 1];
 }
 
 template<class T> constexpr ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
-    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data
             << Utility::Debug::nospace << ":"
@@ -1399,7 +1404,7 @@ template<class T> constexpr ArrayView<T> ArrayView<T>::slice(T* begin, T* end) c
 }
 
 template<class T> constexpr ArrayView<T> ArrayView<T>::slice(std::size_t begin, std::size_t end) const {
-    return CORRADE_CONSTEXPR_ASSERT(begin <= end && end <= _size,
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin <= end && end <= _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin
             << Utility::Debug::nospace << ":"
@@ -1420,7 +1425,7 @@ template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::bac
 }
 
 template<class T> template<std::size_t count> constexpr StaticArrayView<count, T> ArrayView<T>::slice(T* begin) const {
-    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin + count <= _data + _size,
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin + count <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data
             << Utility::Debug::nospace << ":"
@@ -1431,7 +1436,7 @@ template<class T> template<std::size_t count> constexpr StaticArrayView<count, T
 }
 
 template<class T> template<std::size_t count> constexpr StaticArrayView<count, T> ArrayView<T>::slice(std::size_t begin) const {
-    return CORRADE_CONSTEXPR_ASSERT(begin + count <= _size,
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin + count <= _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin
             << Utility::Debug::nospace << ":"
@@ -1443,7 +1448,7 @@ template<class T> template<std::size_t count> constexpr StaticArrayView<count, T
 
 template<class T> template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> ArrayView<T>::slice() const {
     static_assert(begin_ < end_, "fixed-size slice needs to have a positive size");
-    return CORRADE_CONSTEXPR_ASSERT(end_ <= _size,
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(end_ <= _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin_
             << Utility::Debug::nospace << ":"

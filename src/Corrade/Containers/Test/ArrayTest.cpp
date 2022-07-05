@@ -623,7 +623,7 @@ void ArrayTest::accessConst() {
 }
 
 void ArrayTest::accessInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};

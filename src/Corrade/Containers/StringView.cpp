@@ -35,6 +35,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
 
@@ -390,12 +391,18 @@ template<class T> bool BasicStringView<T>::hasSuffix(const char suffix) const {
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::exceptPrefix(const StringView prefix) const {
+    /* Stripping a hardcoded prefix is unlikely to be called in a tight loop --
+       and the main purpose of this API is this check -- so it shouldn't be a
+       debug assert */
     CORRADE_ASSERT(hasPrefix(prefix),
         "Containers::StringView::exceptPrefix(): string doesn't begin with" << prefix, {});
     return exceptPrefix(prefix.size());
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const StringView suffix) const {
+    /* Stripping a hardcoded suffix is unlikely to be called in a tight loop --
+       and the main purpose of this API is this check -- so it shouldn't be a
+       debug assert */
     CORRADE_ASSERT(hasSuffix(suffix),
         "Containers::StringView::exceptSuffix(): string doesn't end with" << suffix, {});
     return exceptSuffix(suffix.size());
