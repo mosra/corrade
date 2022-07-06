@@ -405,7 +405,7 @@ template<class T> class ArrayView {
          * Expects there is at least one element.
          * @see @ref begin()
          */
-        T& front() const;
+        constexpr T& front() const;
 
         /**
          * @brief Last element
@@ -413,7 +413,7 @@ template<class T> class ArrayView {
          * Expects there is at least one element.
          * @see @ref end()
          */
-        T& back() const;
+        constexpr T& back() const;
 
         /**
          * @brief View slice
@@ -1125,7 +1125,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Expects there is at least one element.
          * @see @ref begin()
          */
-        T& front() const;
+        constexpr T& front() const;
 
         /**
          * @brief Last element
@@ -1133,7 +1133,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Expects there is at least one element.
          * @see @ref end()
          */
-        T& back() const;
+        constexpr T& back() const;
 
         /** @copydoc ArrayView::slice(T*, T*) const */
         constexpr ArrayView<T> slice(T* begin, T* end) const {
@@ -1379,14 +1379,12 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
     return arrayCast<U>(StaticArrayView<size, T>{data});
 }
 
-template<class T> T& ArrayView<T>::front() const {
-    CORRADE_ASSERT(_size, "Containers::ArrayView::front(): view is empty", _data[0]);
-    return _data[0];
+template<class T> constexpr T& ArrayView<T>::front() const {
+    return CORRADE_CONSTEXPR_ASSERT(_size, "Containers::ArrayView::front(): view is empty"), _data[0];
 }
 
-template<class T> T& ArrayView<T>::back() const {
-    CORRADE_ASSERT(_size, "Containers::ArrayView::back(): view is empty", _data[_size - 1]);
-    return _data[_size - 1];
+template<class T> constexpr T& ArrayView<T>::back() const {
+    return CORRADE_CONSTEXPR_ASSERT(_size, "Containers::ArrayView::back(): view is empty"), _data[_size - 1];
 }
 
 template<class T> constexpr ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
@@ -1411,12 +1409,12 @@ template<class T> constexpr ArrayView<T> ArrayView<T>::slice(std::size_t begin, 
         ArrayView<T>{_data + begin, end - begin};
 }
 
-template<std::size_t size_, class T> T& StaticArrayView<size_, T>::front() const {
+template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::front() const {
     static_assert(size_, "view is empty");
     return _data[0];
 }
 
-template<std::size_t size_, class T> T& StaticArrayView<size_, T>::back() const {
+template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::back() const {
     static_assert(size_, "view is empty");
     return _data[size_ - 1];
 }

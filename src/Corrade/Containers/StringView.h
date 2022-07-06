@@ -468,7 +468,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * Expects there is at least one byte.
          * @see @ref begin()
          */
-        T& front() const;
+        constexpr T& front() const;
 
         /**
          * @brief Last byte
@@ -476,7 +476,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * Expects there is at least one byte.
          * @see @ref end()
          */
-        T& back() const;
+        constexpr T& back() const;
 
         /** @brief Element access */
         constexpr T& operator[](std::size_t i) const { return _data[i]; }
@@ -1184,6 +1184,14 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
     return StringView{data, size, StringViewFlag(std::size_t(StringViewFlag::Global)|std::size_t(StringViewFlag::NullTerminated))};
 }
 
+}
+
+template<class T> constexpr T& BasicStringView<T>::front() const {
+    return CORRADE_CONSTEXPR_ASSERT(size(), "Containers::StringView::front(): view is empty"), _data[0];
+}
+
+template<class T> constexpr T& BasicStringView<T>::back() const {
+    return CORRADE_CONSTEXPR_ASSERT(size(), "Containers::StringView::back(): view is empty"), _data[size() - 1];
 }
 
 template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(T* const begin, T* const end) const {

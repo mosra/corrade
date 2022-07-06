@@ -411,6 +411,12 @@ void StaticArrayViewTest::access() {
     constexpr std::size_t size = cb.size();
     CORRADE_COMPARE(size, 7);
 
+    constexpr const int& front = cb.front();
+    CORRADE_COMPARE(front, 0);
+
+    constexpr const int& back = cb.back();
+    CORRADE_COMPARE(back, 6);
+
     constexpr const int* begin = cb.begin();
     constexpr const int* cbegin = cb.cbegin();
     CORRADE_COMPARE(begin, OneToSeven);

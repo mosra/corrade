@@ -172,6 +172,10 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
+-   @ref Containers::ArrayView::front(), @ref Containers::ArrayView::back(),
+    @ref Containers::StaticArrayView::front() and
+    @ref Containers::StaticArrayView::back() is now @cpp constexpr @ce like all
+    other access APIs
 -   Added @ref Containers::arrayShrink(Array<T>&, DefaultInitT) overload for
     cases where it's not desired to have an @ref Containers::Array with a
     `NoInit` deleter

@@ -817,6 +817,12 @@ void StringViewTest::access() {
     /* constexpr data(), size(), isEmpty(), operator bool, flags() tested in
        constructConstexpr() already */
 
+    constexpr const char& front = cview.front();
+    CORRADE_COMPARE(front, 'h');
+
+    constexpr const char& back = cview.back();
+    CORRADE_COMPARE(back, '!');
+
     constexpr const char* begin = cview.begin();
     constexpr const char* cbegin = cview.cbegin();
     CORRADE_COMPARE(*begin, 'h');
