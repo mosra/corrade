@@ -30,7 +30,6 @@
  * @brief Forward declarations for the @ref Corrade::Utility namespace
  */
 
-#include <cstdint> /** @todo do we really need this? */
 #include <cstddef>
 
 #include "Corrade/configure.h"
@@ -45,7 +44,7 @@ template<std::size_t> class HashDigest;
 
 class Configuration;
 class ConfigurationGroup;
-enum class ConfigurationValueFlag: std::uint8_t;
+enum class ConfigurationValueFlag: unsigned char;
 typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
 template<class> struct ConfigurationValue;
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -77,7 +76,7 @@ class Translator;
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 /* Tweakable doesn't need forward declaration */
 template<class> struct TweakableParser;
-enum class TweakableState: std::uint8_t;
+enum class TweakableState: unsigned char;
 #endif
 
 }}

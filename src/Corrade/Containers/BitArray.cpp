@@ -145,8 +145,8 @@ Utility::Debug& operator<<(Utility::Debug& debug, const BitArray& value) {
 Utility::Debug& operator<<(Utility::Debug& debug, BitArrayView value) {
     debug << "{" << Utility::Debug::nospace;
 
-    const auto* data = reinterpret_cast<const std::uint8_t*>(value.data());
-    std::uint8_t mask = 1 << value.offset();
+    const auto* data = reinterpret_cast<const unsigned char*>(value.data());
+    unsigned char mask = 1 << value.offset();
     for(std::size_t i = 0, iMax = value.size(); i != iMax; ++i) {
         if(!mask) {
             ++data;

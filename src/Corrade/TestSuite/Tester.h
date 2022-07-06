@@ -30,6 +30,7 @@
  * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
  */
 
+#include <cstdint>
 #include <initializer_list>
 
 #include "Corrade/Containers/Pointer.h"

@@ -30,8 +30,6 @@
  * @brief Class @ref Corrade::Utility::ConfigurationValue, enum @ref Corrade::Utility::ConfigurationValueFlag, enum set @ref Corrade::Utility::ConfigurationValueFlags
  */
 
-#include <cstdint>
-
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
@@ -43,7 +41,7 @@ namespace Corrade { namespace Utility {
 
 @see @ref ConfigurationValueFlags
 */
-enum class ConfigurationValueFlag: std::uint8_t {
+enum class ConfigurationValueFlag: unsigned char {
     Oct = 1 << 0,           /**< Numeric value as octal */
     Hex = 1 << 1,           /**< Numeric value as hexadecimal */
     Scientific = 1 << 2,    /**< Floating point values in scientific notation */

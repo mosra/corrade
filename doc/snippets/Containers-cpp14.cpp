@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstdint>
+
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Utility/Debug.h"
 

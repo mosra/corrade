@@ -41,7 +41,7 @@ namespace Corrade { namespace TestSuite {
 
 @see @ref ComparisonStatusFlags, @ref Comparator
 */
-enum class ComparisonStatusFlag: std::uint8_t {
+enum class ComparisonStatusFlag: unsigned char {
     /**
      * The comparison failed. Absence of this flag indicates success.
      * If this is returned from @ref Comparator::operator()(), the @ref Tester

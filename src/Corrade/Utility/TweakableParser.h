@@ -96,7 +96,7 @@ template<class T> struct TweakableParser;
 @see @ref Tweakable::update()
 @experimental
 */
-enum class TweakableState: std::uint8_t {
+enum class TweakableState: unsigned char {
     /**
      * No source file has any changes that affect tweakable values. Nothing to
      * do.
