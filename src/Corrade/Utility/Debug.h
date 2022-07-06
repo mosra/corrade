@@ -882,21 +882,6 @@ template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<It
     return debug;
 }
 
-namespace Implementation {
-    /** @todo C++14: use std::make_index_sequence and std::integer_sequence */
-    template<std::size_t ...> struct Sequence {};
-
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    /* E.g. GenerateSequence<3>::Type is Sequence<0, 1, 2> */
-    template<std::size_t N, std::size_t ...sequence> struct GenerateSequence:
-        GenerateSequence<N-1, N-1, sequence...> {};
-
-    template<std::size_t ...sequence> struct GenerateSequence<0, sequence...> {
-        typedef Sequence<sequence...> Type;
-    };
-    #endif
-}
-
 /** @relatesalso Debug
 @brief Print a @ref std::pair to debug output
 

@@ -46,6 +46,7 @@ for more information.
 #include <tuple>
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/sequenceHelpers.h"
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Utility {
@@ -84,8 +85,8 @@ template<class T> typename std::enable_if<!std::is_same<T, char>::value, Debug&>
 
 namespace Implementation {
     /* Used by operator<<(Debug&, std::tuple<>...) */
-    template<class T> inline void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
-    template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
+    template<class T> inline void tupleDebugOutput(Debug&, const T&, Containers::Implementation::Sequence<>) {}
+    template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Containers::Implementation::Sequence<i, sequence...>) {
         debug << std::get<i>(tuple);
         #ifdef CORRADE_TARGET_MSVC
         #pragma warning(push)
@@ -96,7 +97,7 @@ namespace Implementation {
         #ifdef CORRADE_TARGET_MSVC
         #pragma warning(pop)
         #endif
-        tupleDebugOutput(debug, tuple, Sequence<sequence...>{});
+        tupleDebugOutput(debug, tuple, Containers::Implementation::Sequence<sequence...>{});
     }
 }
 
@@ -115,7 +116,7 @@ template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...
     debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
 
     debug << "(" << Debug::nospace;
-    Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
+    Implementation::tupleDebugOutput(debug, value, typename Containers::Implementation::GenerateSequence<sizeof...(Args)>::Type{});
     debug << Debug::nospace << ")";
 
     /* Reset the original flags back */
