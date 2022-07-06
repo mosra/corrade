@@ -1007,7 +1007,7 @@ void OptionalTest::accessRvalueLifetimeExtension() {
 }
 
 void OptionalTest::accessInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     struct Innocent {
         void foo() const {}

@@ -34,7 +34,7 @@
 #include <type_traits>
 
 #include "Corrade/Tags.h"
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
@@ -243,13 +243,13 @@ template<class T> class Pointer {
          *      @ref release()
          */
         T* operator->() {
-            CORRADE_ASSERT(_pointer, "Containers::Pointer: the pointer is null", nullptr);
+            CORRADE_DEBUG_ASSERT(_pointer, "Containers::Pointer: the pointer is null", nullptr);
             return _pointer;
         }
 
         /** @overload */
         const T* operator->() const {
-            CORRADE_ASSERT(_pointer, "Containers::Pointer: the pointer is null", nullptr);
+            CORRADE_DEBUG_ASSERT(_pointer, "Containers::Pointer: the pointer is null", nullptr);
             return _pointer;
         }
 
@@ -261,13 +261,13 @@ template<class T> class Pointer {
          *      @ref release()
          */
         T& operator*() {
-            CORRADE_ASSERT(_pointer, "Containers::Pointer: the pointer is null", *_pointer);
+            CORRADE_DEBUG_ASSERT(_pointer, "Containers::Pointer: the pointer is null", *_pointer);
             return *_pointer;
         }
 
         /** @overload */
         const T& operator*() const {
-            CORRADE_ASSERT(_pointer, "Containers::Pointer: the pointer is null", *_pointer);
+            CORRADE_DEBUG_ASSERT(_pointer, "Containers::Pointer: the pointer is null", *_pointer);
             return *_pointer;
         }
 

@@ -35,6 +35,7 @@
 
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {

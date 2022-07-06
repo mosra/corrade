@@ -36,7 +36,7 @@
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugAssert.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
@@ -316,13 +316,13 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator*()
          */
         T* operator->() {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
+            CORRADE_DEBUG_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
             return &_value;
         }
 
         /** @overload */
         const T* operator->() const {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
+            CORRADE_DEBUG_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
             return &_value;
         }
 
@@ -333,7 +333,7 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->()
          */
         T& operator*() & {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
+            CORRADE_DEBUG_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
             return _value;
         }
 
@@ -342,13 +342,13 @@ template<class T> class Optional {
            common code. See the accessRvalueLifetimeExtension() test for
            details. */
         T operator*() && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
+            CORRADE_DEBUG_ASSERT(_set, "Containers::Optional: the optional is empty", Utility::move(_value));
             return Utility::move(_value);
         }
 
         /** @overload */
         const T& operator*() const & {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
+            CORRADE_DEBUG_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
             return _value;
         }
 
