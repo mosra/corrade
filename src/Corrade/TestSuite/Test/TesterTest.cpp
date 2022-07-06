@@ -2361,8 +2361,9 @@ void TesterTest::skipIfNoDebugAssert() {
        asserts are disabled, it doesn't check anything (and the value is not
        incremented). If debug asserts are enabled but
        CORRADE_SKIP_IF_NO_DEBUG_ASSERT() exits the function, this assertion
-       will fail. */
-    Containers::ScopeGuard assertAtExit{&a, [](int* a) {
+       will fail. The CORRADE_UNUSED is to avoid a warning about the argument
+       being unused in a release build. */
+    Containers::ScopeGuard assertAtExit{&a, [](CORRADE_UNUSED int* a) {
         CORRADE_INTERNAL_DEBUG_ASSERT(*a == 4);
     }};
 

@@ -590,7 +590,9 @@ static_assert(Size*Size*Size == Size2*Size2, "otherwise the times won't match");
 
 void AlgorithmsTest::copyBenchmarkFlatStdCopy() {
     int src[Size*Size*Size];
-    int dst[Size*Size*Size];
+    /* GCC in release build warns that dst is potentially uninitialized
+       otherwise */
+    int dst[Size*Size*Size]{};
 
     int base = 0;
     CORRADE_BENCHMARK(10) {

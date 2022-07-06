@@ -797,7 +797,9 @@ auto b = Containers::pointer<std::string>('a', 'b');
 /* [ScopeGuard-usage] */
 
 {
-Containers::StringView filename;
+/* If default-constructed, GCC in release build warns that open() gets a null
+   argument */
+Containers::StringView filename = "";
 /* [ScopeGuard-deferred] */
 Containers::ScopeGuard e{NoCreate};
 
