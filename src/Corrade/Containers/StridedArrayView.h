@@ -1679,7 +1679,7 @@ extra careful in that case. Example usage:
 template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    #ifndef CORRADE_NO_DEBUG
+    #ifndef CORRADE_NO_ASSERT
     for(unsigned i = 0; i != dimensions; ++i) {
         CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
             "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
@@ -1701,7 +1701,7 @@ extra careful in that case.
 */
 template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    #ifndef CORRADE_NO_DEBUG
+    #ifndef CORRADE_NO_ASSERT
     for(unsigned i = 0; i != dimensions; ++i) {
         CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
             "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
@@ -1731,7 +1731,7 @@ template<int dimensions> struct ArrayCastFlattenOrInflate {
 };
 template<> struct ArrayCastFlattenOrInflate<-1> {
     template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions - 1, U> cast(const StridedArrayView<dimensions, T>& view) {
-        #ifndef CORRADE_NO_DEBUG
+        #ifndef CORRADE_NO_ASSERT
         /* The last dimension is flattened, so not testing its stride */
         for(unsigned i = 0; i != dimensions - 1; ++i) {
             CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
@@ -1750,7 +1750,7 @@ template<> struct ArrayCastFlattenOrInflate<-1> {
 };
 template<> struct ArrayCastFlattenOrInflate<0> {
     template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
-        #ifndef CORRADE_NO_DEBUG
+        #ifndef CORRADE_NO_ASSERT
         /* The last dimension is flattened, so not testing its stride */
         for(unsigned i = 0; i != dimensions - 1; ++i) {
             CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
@@ -1858,7 +1858,7 @@ checks can be done for zero strides, so be extra careful in that case.
 template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view, std::size_t lastDimensionSize) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     static_assert(newDimensions == dimensions + 1, "can inflate only into one more dimension");
-    #ifndef CORRADE_NO_DEBUG
+    #ifndef CORRADE_NO_ASSERT
     /* Not testing the last dimension, because that one has to satisfy the
        (stricter) next condition as well */
     for(unsigned i = 0; i != dimensions - 1; ++i) {
