@@ -37,7 +37,7 @@
 
 #include "Corrade/Containers/EnumSet.h" /* reusing the macros */
 #include "Corrade/Containers/sequenceHelpers.h"
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugAssert.h"
 
 namespace Corrade { namespace Containers {
 
@@ -111,7 +111,7 @@ class BigEnumSet {
 
         /** @brief Create a set from one value */
         constexpr /*implicit*/ BigEnumSet(T value) noexcept: BigEnumSet<T, size>{
-            (CORRADE_CONSTEXPR_ASSERT(static_cast<typename std::underlying_type<T>::type>(value) < size*64,
+            (CORRADE_CONSTEXPR_DEBUG_ASSERT(static_cast<typename std::underlying_type<T>::type>(value) < size*64,
                 "Containers::BigEnumSet: value" << static_cast<typename std::underlying_type<T>::type>(value) << "too large for a" << size*64 << Utility::Debug::nospace << "-bit storage"
             ), nullptr),
             value, typename Implementation::GenerateSequence<Size>::Type{}} {}

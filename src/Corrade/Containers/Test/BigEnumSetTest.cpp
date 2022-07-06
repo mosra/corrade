@@ -191,7 +191,7 @@ void BigEnumSetTest::construct() {
 }
 
 void BigEnumSetTest::constructOutOfRange() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     /* These are fine, shouldn't warn */
     Features{Feature(255)};
