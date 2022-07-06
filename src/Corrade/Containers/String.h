@@ -32,7 +32,6 @@
  */
 
 #include <cstddef>
-#include <cstdint>
 #include <type_traits>
 
 #include "Corrade/Containers/Containers.h"
@@ -1250,11 +1249,11 @@ class CORRADE_UTILITY_EXPORT String {
            preferrable solution after all. */
         struct Small {
             #ifdef CORRADE_TARGET_BIG_ENDIAN
-            std::uint8_t size;
+            unsigned char size;
             char data[Implementation::SmallStringSize];
             #else
             char data[Implementation::SmallStringSize];
-            std::uint8_t size;
+            unsigned char size;
             #endif
         };
         struct Large {
