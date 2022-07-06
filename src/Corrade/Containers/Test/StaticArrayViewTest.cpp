@@ -420,6 +420,9 @@ void StaticArrayViewTest::access() {
     constexpr const int* cend = cb.cend();
     CORRADE_COMPARE(end, OneToSeven + 7);
     CORRADE_COMPARE(cend, OneToSeven + 7);
+
+    constexpr int four = cb[4];
+    CORRADE_COMPARE(four, 4);
 }
 
 void StaticArrayViewTest::accessConst() {
