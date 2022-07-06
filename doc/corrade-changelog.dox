@@ -172,6 +172,12 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
+-   Assertions in often-called element access and slicing APIs were converted
+    to @ref CORRADE_DEBUG_ASSERT() and friends, meaning they get compiled out
+    on release builds for better performance. Complex array casting and slicing
+    functionality that's prone to user errors still keeps @ref CORRADE_ASSERT()
+    as these functions are not meant to be called in tight loops and the value
+    of safety guarantees outweighs negative performance effects.
 -   @ref Containers::ArrayView::front(), @ref Containers::ArrayView::back(),
     @ref Containers::StaticArrayView::front() and
     @ref Containers::StaticArrayView::back() is now @cpp constexpr @ce like all
