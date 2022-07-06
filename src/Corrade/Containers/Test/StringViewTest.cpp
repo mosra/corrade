@@ -811,6 +811,24 @@ void StringViewTest::access() {
     CORRADE_COMPARE(*(view.cend() - 1), '!');
     CORRADE_COMPARE(view.back(), '!');
     CORRADE_COMPARE(view[6], 'w');
+
+    constexpr StringView cview = "hello\0world!"_s;
+
+    /* constexpr data(), size(), isEmpty(), operator bool, flags() tested in
+       constructConstexpr() already */
+
+    constexpr const char* begin = cview.begin();
+    constexpr const char* cbegin = cview.cbegin();
+    CORRADE_COMPARE(*begin, 'h');
+    CORRADE_COMPARE(*cbegin, 'h');
+
+    constexpr const char* end = cview.end();
+    constexpr const char* cend = cview.cend();
+    CORRADE_COMPARE(*(end - 1), '!');
+    CORRADE_COMPARE(*(cend - 1), '!');
+
+    constexpr char o = cview[4];
+    CORRADE_COMPARE(o, 'o');
 }
 
 void StringViewTest::accessMutable() {
