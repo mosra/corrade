@@ -670,7 +670,7 @@ void StridedArrayViewTest::dimensionsAccess() {
 }
 
 void StridedArrayViewTest::dimensionsAccessInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     Size3D a{3, 12, 76};
     const Size3D ca{3, 12, 76};
@@ -2452,7 +2452,7 @@ void StridedArrayViewTest::accessNegativeStride() {
 }
 
 void StridedArrayViewTest::accessInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -2587,7 +2587,7 @@ void StridedArrayViewTest::access3DZeroStride() {
 }
 
 void StridedArrayViewTest::access3DInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::stringstream out;
     Error redirectError{&out};
@@ -2840,7 +2840,7 @@ void StridedArrayViewTest::slice() {
 }
 
 void StridedArrayViewTest::sliceInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView1Di a = data;
@@ -2894,7 +2894,7 @@ void StridedArrayViewTest::slice3D() {
 }
 
 void StridedArrayViewTest::slice3DInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     Plane data[2]{
         {{{{{2, 23125}, {16, 1}, {7853268, -2}}},
@@ -2955,7 +2955,7 @@ void StridedArrayViewTest::slice3DFirstDimension() {
 }
 
 void StridedArrayViewTest::slice3DFirstDimensionInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView3Di a = {data, {5, 1, 1}};

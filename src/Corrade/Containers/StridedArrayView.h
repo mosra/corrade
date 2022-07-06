@@ -201,13 +201,13 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
         /** @brief Element access */
         constexpr T operator[](std::size_t i) const {
-            return CORRADE_CONSTEXPR_ASSERT(i < dimensions,
+            return CORRADE_CONSTEXPR_DEBUG_ASSERT(i < dimensions,
                 "Containers::StridedDimensions::operator[](): dimension" << i << "out of range for" << dimensions << "dimensions"), _data[i];
         }
 
         /** @brief Element access */
         T& operator[](std::size_t i) {
-            CORRADE_ASSERT(i < dimensions,
+            CORRADE_DEBUG_ASSERT(i < dimensions,
                 "Containers::StridedDimensions::operator[](): dimension" << i << "out of range for" << dimensions << "dimensions", _data[0]);
             return _data[i];
         }
@@ -433,6 +433,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @see @ref stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType>, T*, std::size_t, std::ptrdiff_t)
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Size& size, const Stride& stride) noexcept: _data{(
+            /* A strided array view is usually not created from scratch in
+               tight loops (except for slicing) and should be as checked as
+               possible, so it's not a debug assert */
             /** @todo can't compare void pointers to check if member is in data,
                     it's not constexpr :( */
             /* If any size is zero, data can be zero-sized too. If the largest
@@ -1092,6 +1095,9 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * conditions, so be extra careful when specifying these.
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, void* member, const Size& size, const Stride& stride) noexcept: _data{(
+            /* A strided array view is usually not created from scratch in
+               tight loops (except for slicing) and should be as checked as
+               possible, so it's not a debug assert */
             /** @todo can't compare void pointers to check if member is in data,
                     it's not constexpr :( */
             /* If any size is zero, data can be zero-sized too. If the largest
@@ -1330,6 +1336,9 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * conditions, so be extra careful when specifying these.
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const void* member, const Size& size, const Stride& stride) noexcept: _data{(
+            /* A strided array view is usually not created from scratch in
+               tight loops (except for slicing) and should be as checked as
+               possible, so it's not a debug assert */
             /** @todo can't compare void pointers to check if member is in data,
                     it's not constexpr :( */
             /* If any size is zero, data can be zero-sized too. If the largest
@@ -1681,6 +1690,8 @@ template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> 
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     #ifndef CORRADE_NO_ASSERT
     for(unsigned i = 0; i != dimensions; ++i) {
+        /* Unlike slice() etc, this is usually not called in tight loops and
+           should be as checked as possible, so it's not a debug assert */
         CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
             "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
     }
@@ -1703,6 +1714,8 @@ template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     #ifndef CORRADE_NO_ASSERT
     for(unsigned i = 0; i != dimensions; ++i) {
+        /* Unlike slice() etc, this is usually not called in tight loops and
+           should be as checked as possible, so it's not a debug assert */
         CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
             "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
     }
@@ -1731,6 +1744,8 @@ template<int dimensions> struct ArrayCastFlattenOrInflate {
 };
 template<> struct ArrayCastFlattenOrInflate<-1> {
     template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions - 1, U> cast(const StridedArrayView<dimensions, T>& view) {
+        /* Unlike slice() etc, this is usually not called in tight loops and
+           should be as checked as possible, so it's not a debug assert */
         #ifndef CORRADE_NO_ASSERT
         /* The last dimension is flattened, so not testing its stride */
         for(unsigned i = 0; i != dimensions - 1; ++i) {
@@ -1750,6 +1765,8 @@ template<> struct ArrayCastFlattenOrInflate<-1> {
 };
 template<> struct ArrayCastFlattenOrInflate<0> {
     template<class U, unsigned dimensions, class T> static StridedArrayView<dimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
+        /* Unlike slice() etc, this is usually not called in tight loops and
+           should be as checked as possible, so it's not a debug assert */
         #ifndef CORRADE_NO_ASSERT
         /* The last dimension is flattened, so not testing its stride */
         for(unsigned i = 0; i != dimensions - 1; ++i) {
@@ -1858,6 +1875,8 @@ checks can be done for zero strides, so be extra careful in that case.
 template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view, std::size_t lastDimensionSize) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     static_assert(newDimensions == dimensions + 1, "can inflate only into one more dimension");
+    /* Unlike slice() etc, this is usually not called in tight loops and should
+       be as checked as possible, so it's not a debug assert */
     #ifndef CORRADE_NO_ASSERT
     /* Not testing the last dimension, because that one has to satisfy the
        (stricter) next condition as well */
@@ -2030,6 +2049,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
 }
 
 template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions, T>::asContiguous() const {
+    /* Unlike slice() etc, this is usually not called in tight loops and should
+       be as checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(isContiguous(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
     std::size_t size = 1;
     for(std::size_t i = 0; i != dimensions; ++i) size *= _size._data[i];
@@ -2038,6 +2059,8 @@ template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions,
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimension + 1, T> StridedArrayView<dimensions, T>::asContiguous() const {
     static_assert(dimension < dimensions, "dimension out of bounds");
+    /* Unlike slice() etc, this is usually not called in tight loops and should
+       be as checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(isContiguous<dimension>(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
 
     StridedDimensions<dimension + 1, std::size_t> size;
@@ -2072,22 +2095,22 @@ namespace Implementation {
 }
 
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::operator[](const std::size_t i) const -> ElementType {
-    CORRADE_ASSERT(i < _size._data[0], "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size._data[0] << "elements", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i)));
+    CORRADE_DEBUG_ASSERT(i < _size._data[0], "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size._data[0] << "elements", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i);
 }
 
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::front() const -> ElementType {
-    CORRADE_ASSERT(_size._data[0], "Containers::StridedArrayView::front(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0)));
+    CORRADE_DEBUG_ASSERT(_size._data[0], "Containers::StridedArrayView::front(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0);
 }
 
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::back() const -> ElementType {
-    CORRADE_ASSERT(_size._data[0], "Containers::StridedArrayView::back(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1)));
+    CORRADE_DEBUG_ASSERT(_size._data[0], "Containers::StridedArrayView::back(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1);
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::slice(std::size_t begin, std::size_t end) const {
-    CORRADE_ASSERT(begin <= end && end <= _size._data[0],
+    CORRADE_DEBUG_ASSERT(begin <= end && end <= _size._data[0],
         "Containers::StridedArrayView::slice(): slice [" << Utility::Debug::nospace
         << begin << Utility::Debug::nospace << ":"
         << Utility::Debug::nospace << end << Utility::Debug::nospace
@@ -2106,6 +2129,9 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
 
     /* Adjust data pointer based on offsets of all source dimensions */
     for(std::size_t i = 0; i != dimensions; ++i) {
+        /* Unlike plain slice(begin, end), complex dimension-changing slicing
+           is usually not called in tight loops and should be as checked as
+           possible, so it's not a debug assert */
         CORRADE_ASSERT(begin._data[i] <= end._data[i] && end._data[i] <= _size._data[i],
             "Containers::StridedArrayView::slice(): slice [" << Utility::Debug::nospace
             << begin << Utility::Debug::nospace << ":"
@@ -2150,6 +2176,9 @@ template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFun
        be fine. */
     alignas(T) typename std::conditional<std::is_const<T>::value, const char, char>::type storage[sizeof(T)]{};
     const std::size_t offset = reinterpret_cast<const char*>(&(reinterpret_cast<T*>(storage)->*memberFunction)()) - storage;
+    /* Unlike plain slice(begin, end), complex member slicing is usually not
+       called in tight loops and should be as checked as possible, so it's not
+       a debug assert */
     CORRADE_ASSERT(offset < sizeof(T),
         "Containers::StridedArrayView::slice(): member function slice returned offset" << std::ptrdiff_t(offset) << "for a" << sizeof(T) << Utility::Debug::nospace << "-byte type", {});
     return offset;
@@ -2210,6 +2239,9 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
     Size size = _size;
     Stride stride = _stride;
     for(std::size_t dimension = 0; dimension != dimensions; ++dimension) {
+        /* Unlike plain slice(begin, end), complex slicing is usually not
+           called in tight loops and should be as checked as possible, so it's
+           not a debug assert */
         CORRADE_ASSERT(step[dimension], "Containers::StridedArrayView::every(): step in dimension" << dimension << "is zero", {});
 
         /* If step is negative, adjust also data pointer */
@@ -2250,6 +2282,9 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::broadcasted(std::size_t size) const {
     static_assert(dimension < dimensions, "dimension out of range");
+    /* Unlike plain slice(begin, end), complex slicing is usually not called in
+       tight loops and should be as checked as possible, so it's not a debug
+       assert */
     CORRADE_ASSERT(_size._data[dimension] == 1,
         "Containers::StridedArrayView::broadcasted(): can't broadcast dimension" << dimension << "with" << _size._data[dimension] << "elements", {});
 
