@@ -97,9 +97,9 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     return parts;
 }
 
-namespace {
+namespace Implementation {
 
-inline const char* find(const char* data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
+const char* stringFindString(const char* data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
     /* If the substring is not larger than the string we search in */
     if(substringSize <= size) {
         /* If these are both empty (substringSize <= size, so it's also 0),
@@ -121,7 +121,7 @@ inline const char* find(const char* data, const std::size_t size, const char* co
     return {};
 }
 
-inline const char* findLast(const char* const data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
+const char* stringFindLastString(const char* const data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
     /* If the substring is not larger than the string we search in */
     if(substringSize <= size) {
         /* If these are both empty (substringSize <= size, so it's also 0),
@@ -143,14 +143,14 @@ inline const char* findLast(const char* const data, const std::size_t size, cons
     return {};
 }
 
-inline const char* find(const char* data, const std::size_t size, const char character) {
+const char* stringFindCharacter(const char* data, const std::size_t size, const char character) {
     /* Making a utility function because yet again I'm not sure if null
        pointers are allowed and cppreference says nothing about that, so in
        case this needs to be patched it's better to have it in a single place */
     return static_cast<const char*>(std::memchr(data, character, size));
 }
 
-inline const char* findLast(const char* const data, const std::size_t size, const char character) {
+const char* stringFindLastCharacter(const char* const data, const std::size_t size, const char character) {
     /* Linux has a memrchr() function but other OSes not. So let's just do it
        myself, that way I also don't need to worry about null pointers being
        allowed or not ... haha, well, except that if data is nullptr,
@@ -181,7 +181,7 @@ inline const char* findLast(const char* const data, const std::size_t size, cons
    std::find_first_of() because I doubt STL implementations explicitly optimize
    for that case. Yes, std::string::find_first_of() probably would have that,
    but I'd first need to allocate to make use of that and FUCK NO. */
-inline const char* findAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
+const char* stringFindAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
         if(std::memchr(characters, *i, characterCount)) return i;
     return {};
@@ -190,19 +190,19 @@ inline const char* findAny(const char* const data, const std::size_t size, const
 /* Variants of the above. Not sure if those even have any vaguely corresponding
    C lib API. Probably not. */
 
-inline const char* findLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
+const char* stringFindLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data + size; i != data; --i)
         if(std::memchr(characters, *(i - 1), characterCount)) return i - 1;
     return {};
 }
 
-inline const char* findNotAny(const char* const data, const std::size_t size, const char* const characters, std::size_t characterCount) {
+const char* stringFindNotAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
         if(!std::memchr(characters, *i, characterCount)) return i;
     return {};
 }
 
-inline const char* findLastNotAny(const char* const data, const size_t size, const char* const characters, std::size_t characterCount) {
+const char* stringFindLastNotAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data + size; i != data; --i)
         if(!std::memchr(characters, *(i - 1), characterCount)) return i - 1;
     return {};
@@ -218,7 +218,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithou
     T* const end = _data + size();
 
     while(oldpos < end) {
-        if(T* const pos = const_cast<T*>(Containers::findAny(oldpos, end - oldpos, characters, characterCount))) {
+        if(T* const pos = const_cast<T*>(Implementation::stringFindAny(oldpos, end - oldpos, characters, characterCount))) {
             if(pos != oldpos)
                 arrayAppend(parts, slice(oldpos, pos));
             oldpos = pos + 1;
@@ -408,10 +408,6 @@ template<class T> BasicStringView<T> BasicStringView<T>::exceptSuffix(const Stri
     return exceptSuffix(suffix.size());
 }
 
-template<class T> BasicStringView<T> BasicStringView<T>::trimmed(const StringView characters) const {
-    return trimmedPrefix(characters).trimmedSuffix(characters);
-}
-
 template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return trimmed(Whitespace);
@@ -419,12 +415,6 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
     using namespace Containers::Literals;
     return trimmed(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
-    const std::size_t size = this->size();
-    T* const found = const_cast<T*>(findNotAny(_data, size, characters._data, characters.size()));
-    return suffix(found ? found : _data + size);
 }
 
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
@@ -436,11 +426,6 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
     #endif
 }
 
-template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
-    T* const found = const_cast<T*>(findLastNotAny(_data, size(), characters._data, characters.size()));
-    return prefix(found ? found + 1 : _data);
-}
-
 template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return trimmedSuffix(Whitespace);
@@ -448,82 +433,6 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
     using namespace Containers::Literals;
     return trimmedSuffix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findOr(const StringView substring, T* const fail) const {
-    /* Cache the getters to speed up debug builds */
-    const std::size_t substringSize = substring.size();
-    if(const char* const found = Containers::find(_data, size(), substring._data, substringSize))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findOr(const char character, T* const fail) const {
-    if(const char* const found = Containers::find(_data, size(), character))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findLastOr(const StringView substring, T* const fail) const {
-    /* Cache the getters to speed up debug builds */
-    const std::size_t substringSize = substring.size();
-    if(const char* const found = Containers::findLast(_data, size(), substring._data, substringSize))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findLastOr(const char character, T* const fail) const {
-    if(const char* const found = Containers::findLast(_data, size(), character))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> bool BasicStringView<T>::contains(const StringView substring) const {
-    return Containers::find(_data, size(), substring._data, substring.size());
-}
-
-template<class T> bool BasicStringView<T>::contains(const char character) const {
-    return Containers::find(_data, size(), character);
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findAnyOr(const StringView characters, T* const fail) const {
-    if(const char* const found = Containers::findAny(_data, size(), characters._data, characters.size()))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> BasicStringView<T> BasicStringView<T>::findLastAnyOr(const StringView characters, T* const fail) const {
-    if(const char* const found = Containers::findLastAny(_data, size(), characters._data, characters.size()))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
-
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
-}
-
-template<class T> bool BasicStringView<T>::containsAny(const StringView characters) const {
-    return Containers::findAny(_data, size(), characters._data, characters.size());
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

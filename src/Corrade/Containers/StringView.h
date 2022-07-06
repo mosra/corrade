@@ -269,7 +269,15 @@ when you deal with unordered containers.
 @experimental
 */
 /* All member functions are const because the view doesn't own the data */
-template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
+template<class T> class
+#ifndef CORRADE_TARGET_MSVC
+/* If it's here, MSVC complains that the out-of-class inline functions have a
+   definition while being dllimport'd. If I remove it, GCC then complains that
+   the export in StringView.cpp is ignored as the type is already defined,
+   proceeding with a linker error. */
+CORRADE_UTILITY_EXPORT
+#endif
+BasicStringView {
     public:
         /**
          * @brief Default constructor
@@ -796,7 +804,9 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          * @see @ref trimmed() const, @ref trimmedPrefix(StringView) const,
          *      @ref trimmedSuffix(StringView) const
          */
-        BasicStringView<T> trimmed(StringView characters) const;
+        BasicStringView<T> trimmed(StringView characters) const {
+            return trimmedPrefix(characters).trimmedSuffix(characters);
+        }
 
         /**
          * @brief View with whitespace trimmed from prefix and suffix
@@ -1252,6 +1262,108 @@ template<class T> constexpr BasicStringView<T> BasicStringView<T>::slice(const s
             /* Using an internal assert-less constructor, the public
                constructor asserts would be redundant */
             nullptr};
+}
+
+namespace Implementation {
+
+/* Making naming unique in order to prepare for these being function pointers
+   (that can't be overloaded) */
+CORRADE_UTILITY_EXPORT const char* stringFindString(const char* data, std::size_t size, const char* substring, std::size_t substringSize);
+CORRADE_UTILITY_EXPORT const char* stringFindLastString(const char* data, std::size_t size, const char* substring, std::size_t substringSize);
+CORRADE_UTILITY_EXPORT const char* stringFindCharacter(const char* data, std::size_t size, char character);
+CORRADE_UTILITY_EXPORT const char* stringFindLastCharacter(const char* data, std::size_t size, char character);
+CORRADE_UTILITY_EXPORT const char* stringFindAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+CORRADE_UTILITY_EXPORT const char* stringFindLastAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+CORRADE_UTILITY_EXPORT const char* stringFindNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+CORRADE_UTILITY_EXPORT const char* stringFindLastNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::trimmedPrefix(const StringView characters) const {
+    const std::size_t size = this->size();
+    T* const found = const_cast<T*>(Implementation::stringFindNotAny(_data, size, characters._data, characters.size()));
+    return suffix(found ? found : _data + size);
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::trimmedSuffix(const StringView characters) const {
+    T* const found = const_cast<T*>(Implementation::stringFindLastNotAny(_data, size(), characters._data, characters.size()));
+    return prefix(found ? found + 1 : _data);
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findOr(const StringView substring, T* const fail) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t substringSize = substring.size();
+    if(const char* const found = Implementation::stringFindString(_data, size(), substring._data, substringSize))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findOr(const char character, T* const fail) const {
+    if(const char* const found = Implementation::stringFindCharacter(_data, size(), character))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastOr(const StringView substring, T* const fail) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t substringSize = substring.size();
+    if(const char* const found = Implementation::stringFindLastString(_data, size(), substring._data, substringSize))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastOr(const char character, T* const fail) const {
+    if(const char* const found = Implementation::stringFindLastCharacter(_data, size(), character))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline bool BasicStringView<T>::contains(const StringView substring) const {
+    return Implementation::stringFindString(_data, size(), substring._data, substring.size());
+}
+
+template<class T> inline bool BasicStringView<T>::contains(const char character) const {
+    return Implementation::stringFindCharacter(_data, size(), character);
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findAnyOr(const StringView characters, T* const fail) const {
+    if(const char* const found = Implementation::stringFindAny(_data, size(), characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAnyOr(const StringView characters, T* const fail) const {
+    if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant. Since it's a zero-sized view, it doesn't
+       really make sense to try to preserve any flags. */
+    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+}
+
+template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {
+    return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
 }
 
 }}
