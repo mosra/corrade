@@ -1731,7 +1731,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
 }
 
 void GrowableArrayTest::insertInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     Array<int> a{5};
 
@@ -2572,7 +2572,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
 }
 
 void GrowableArrayTest::removeInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     Array<int> a{4};
 

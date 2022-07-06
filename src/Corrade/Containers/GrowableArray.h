@@ -430,6 +430,8 @@ template<class U, template<class> class Allocator, class T> Array<U> arrayAlloca
         Implementation::IsTriviallyCopyableOnOldGcc<T>::value && Implementation::IsTriviallyCopyableOnOldGcc<U>::value
         #endif
         , "only trivially copyable types can use the allocator cast");
+    /* Unlike arrayInsert() etc, this is not called that often and should be as
+       checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(array.data() == nullptr ||
         (array.deleter() == Allocator<T>::deleter && std::is_base_of<ArrayMallocAllocator<T>, Allocator<T>>::value),
         "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative", {});
@@ -1850,7 +1852,7 @@ template<class T> inline void arrayShiftForward(T* const src, T* const dst, cons
 template<class T, class Allocator> T* arrayGrowAtBy(Array<T>& array, const std::size_t index, const std::size_t count) {
     /* Direct access & caching to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
-    CORRADE_ASSERT(index <= arrayGuts.size, "Containers::arrayInsert(): can't insert at index" << index << "into an array of size" << arrayGuts.size, arrayGuts.data);
+    CORRADE_DEBUG_ASSERT(index <= arrayGuts.size, "Containers::arrayInsert(): can't insert at index" << index << "into an array of size" << arrayGuts.size, arrayGuts.data);
 
     /* No values to add, early exit */
     if(!count)
@@ -2010,7 +2012,7 @@ template<class T> inline void arrayShiftBackward(T* const src, T* const dst, con
 template<class T, class Allocator> void arrayRemove(Array<T>& array, const std::size_t index, const std::size_t count) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
-    CORRADE_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemove(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
+    CORRADE_DEBUG_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemove(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
     if(!count) return;
@@ -2052,7 +2054,7 @@ template<class T, class Allocator> void arrayRemove(Array<T>& array, const std::
 template<class T, class Allocator> void arrayRemoveUnordered(Array<T>& array, const std::size_t index, const std::size_t count) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
-    CORRADE_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemoveUnordered(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
+    CORRADE_DEBUG_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemoveUnordered(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
     if(!count) return;
@@ -2096,7 +2098,7 @@ template<class T, class Allocator> void arrayRemoveUnordered(Array<T>& array, co
 template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const std::size_t count) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
-    CORRADE_ASSERT(count <= arrayGuts.size, "Containers::arrayRemoveSuffix(): can't remove" << count << "elements from an array of size" << arrayGuts.size, );
+    CORRADE_DEBUG_ASSERT(count <= arrayGuts.size, "Containers::arrayRemoveSuffix(): can't remove" << count << "elements from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
     if(!count) return;
