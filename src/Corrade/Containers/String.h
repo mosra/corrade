@@ -56,10 +56,10 @@ Used to distinguish @ref String construction that bypasses small string
 optimization.
 @see @ref AllocatedInit, @ref Containers-String-usage-sso
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct AllocatedInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    struct Init {};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
     constexpr explicit AllocatedInitT(Init) {}
     #endif
 };

@@ -48,10 +48,10 @@ meaning of "default" may vary, see documentation of a particular API using this
 tag for a detailed behavior description.
 @see @ref DefaultInit
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct DefaultInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    struct Init {};
     constexpr explicit DefaultInitT(Init) {}
     #endif
 };
@@ -64,10 +64,10 @@ Used to distinguish construction with value initialization (builtin types are
 zeroed out, others are default-constructed).
 @see @ref ValueInit
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct ValueInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    struct Init {};
     constexpr explicit ValueInitT(Init) {}
     #endif
 };
@@ -80,10 +80,10 @@ Used to distinguish construction with no initialization at all, which leaves
 the data with whatever random values the memory had before.
 @see @ref NoInit, @ref NoCreateT
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct NoInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    struct Init {};
     constexpr explicit NoInitT(Init) {}
     #endif
 };
@@ -97,10 +97,10 @@ to @ref NoInitT this doesn't keep random values, but makes the instance empty
 (usually equivalent to a moved-out state).
 @see @ref NoCreate
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct NoCreateT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    struct Init {};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
     constexpr explicit NoCreateT(Init) {}
     #endif
 };
@@ -112,10 +112,10 @@ struct NoCreateT {
 Used to distinguish construction with direct initialization.
 @see @ref DirectInit
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct DirectInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    struct Init {};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
     constexpr explicit DirectInitT(Init) {}
     #endif
 };
@@ -127,10 +127,10 @@ struct DirectInitT {
 Used to distinguish construction with in-place initialization.
 @see @ref DirectInit
 */
-/* Explicit constructor to avoid ambiguous calls when using {} */
 struct InPlaceInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    struct Init{};
+    struct Init {};
+    /* Explicit constructor to avoid ambiguous calls when using {} */
     constexpr explicit InPlaceInitT(Init) {}
     #endif
 };

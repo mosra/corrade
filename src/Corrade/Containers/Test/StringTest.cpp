@@ -362,10 +362,13 @@ using namespace Literals;
 
 /** @todo move these to TagsTest once the tags gets used outside of String */
 void StringTest::allocatedInitTagNoDefaultConstructor() {
+    /* Isn't default constructible to prevent ambiguity when calling
+       foo({}) if both foo(TagT) and foo(whatever) is available */
     CORRADE_VERIFY(!std::is_default_constructible<AllocatedInitT>::value);
 }
 
 void StringTest::allocatedInitTagInlineDefinition() {
+    /* Just a sanity check that the types match */
     CORRADE_VERIFY(std::is_same<decltype(AllocatedInit), const AllocatedInitT>::value);
 }
 
