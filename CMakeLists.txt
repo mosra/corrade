@@ -98,18 +98,20 @@ if(NOT DEFINED _CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS)
     endforeach()
 endif()
 
-# We want to present the option to the user, but we also want to implicitly
-# enable it during the first run, unless manually overriden. Thus we first
-# remember if it was defined, then define the option() and then below check the
-# remembered state. Also checking the deprecated unprefixed name for backwards
-# compatibility.
-if(NOT DEFINED CORRADE_MSVC_COMPATIBILITY AND NOT DEFINED MSVC_COMPATIBILITY)
-    set(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED ON)
-endif()
-option(CORRADE_MSVC_COMPATIBILITY "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" OFF)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # We want to present the option to the user, but we also want to implicitly
+    # enable it during the first run, unless manually overriden. Thus we first
+    # remember if it was defined, then define the option() and then below check
+    # the remembered state. Also checking the deprecated unprefixed name for
+    # backwards compatibility.
+    if(NOT DEFINED CORRADE_MSVC_COMPATIBILITY AND NOT DEFINED MSVC_COMPATIBILITY)
+        set(_CORRADE_MSVC_COMPATIBILITY_NOT_DEFINED ON)
+    endif()
+    option(CORRADE_MSVC_COMPATIBILITY "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" OFF)
 
-option(CORRADE_MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
-option(CORRADE_MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
+    option(CORRADE_MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
+    option(CORRADE_MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
+endif()
 
 option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
 option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
@@ -308,15 +310,15 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set(CORRADE_MSVC_COMPATIBILITY ON CACHE BOOL "Enable compatibility mode for MSVC 2019+ without /permissive- set (might disable some features)" FORCE)
         message(WARNING "MSVC 2019+ detected, automatically enabling CORRADE_MSVC_COMPATIBILITY which may cause some features to not be available. You can disable this option if you pass /permissive- to the compiler to enable a standards-conforming mode.")
     endif()
-endif()
 
-if(CORRADE_MSVC2017_COMPATIBILITY)
-    set(CORRADE_MSVC_COMPATIBILITY ON)
-endif()
+    if(CORRADE_MSVC2017_COMPATIBILITY)
+        set(CORRADE_MSVC_COMPATIBILITY ON)
+    endif()
 
-if(CORRADE_MSVC2015_COMPATIBILITY)
-    set(CORRADE_MSVC2017_COMPATIBILITY ON)
-    set(CORRADE_MSVC_COMPATIBILITY ON)
+    if(CORRADE_MSVC2015_COMPATIBILITY)
+        set(CORRADE_MSVC2017_COMPATIBILITY ON)
+        set(CORRADE_MSVC_COMPATIBILITY ON)
+    endif()
 endif()
 
 include(UseCorrade)
