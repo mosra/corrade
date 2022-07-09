@@ -181,7 +181,7 @@
 #define CORRADE_BIG_ENDIAN
 #endif
 
-/* Compile-time SIMD detection */
+/* Compile-time CPU feature detection */
 #ifdef CORRADE_TARGET_X86
 
 /* SSE on GCC: https://stackoverflow.com/a/28939692 */

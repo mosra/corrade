@@ -534,7 +534,7 @@ direct option and it's only implied by `/arch:AVX`). Superset of
 @m_since_latest
 
 Defined on @ref CORRADE_TARGET_X86 "x86" if
-[Supplemental Streaming SIMD Extensions 3](https://en.wikipedia.org/wiki/SSE3)
+[Supplemental Streaming SIMD Extensions 3](https://en.wikipedia.org/wiki/SSSE3)
 are enabled at compile time (on GCC/Clang it's `-mssse3` and higher, MSVC
 doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
 @ref CORRADE_TARGET_SSE3, implied by @ref CORRADE_TARGET_SSE41.
