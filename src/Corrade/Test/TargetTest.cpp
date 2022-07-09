@@ -372,12 +372,12 @@ void TargetTest::simd() {
     CORRADE_VERIFY(!"CORRADE_TARGET_NEON* defined but CORRADE_TARGET_ARM not");
     #endif
 
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    #ifdef CORRADE_TARGET_WASM
     #ifdef CORRADE_TARGET_SIMD128
     Debug{&out} << "CORRADE_TARGET_SIMD128";
     #endif
     #elif defined(CORRADE_TARGET_SIMD128)
-    CORRADE_VERIFY(!"CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_EMSCRIPTEN not");
+    CORRADE_VERIFY(!"CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_WASM not");
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
