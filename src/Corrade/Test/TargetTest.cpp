@@ -354,17 +354,17 @@ void TargetTest::simd() {
     Debug{&out} << "CORRADE_TARGET_NEON";
     #endif
 
-    #ifdef CORRADE_TARGET_NEON_FP16
-    Debug{&out} << "CORRADE_TARGET_NEON_FP16";
+    #ifdef CORRADE_TARGET_NEON_FMA
+    Debug{&out} << "CORRADE_TARGET_NEON_FMA";
     #ifndef CORRADE_TARGET_NEON
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FP16 defined but CORRADE_TARGET_NEON not");
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FMA defined but CORRADE_TARGET_NEON not");
     #endif
     #endif
 
-    #ifdef CORRADE_TARGET_NEON_FMA
-    Debug{&out} << "CORRADE_TARGET_NEON_FMA";
-    #ifndef CORRADE_TARGET_NEON_FP16
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FMA defined but CORRADE_TARGET_NEON_FP16 not");
+    #ifdef CORRADE_TARGET_NEON_FP16
+    Debug{&out} << "CORRADE_TARGET_NEON_FP16";
+    #ifndef CORRADE_TARGET_NEON_FMA
+    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FP16 defined but CORRADE_TARGET_NEON_FMA not");
     #endif
     #endif
 

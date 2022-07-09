@@ -256,18 +256,21 @@
 #elif defined(CORRADE_TARGET_ARM)
 #ifdef __ARM_NEON
 #define CORRADE_TARGET_NEON
-/* Conservatively mark half-floats as supported only if the IEEE variant is
-   supported and not the ARM-specific variant that trades one extra exponent
-   value for a lack of inf and NaN support (ARM C Language Extensions 1.1,
-   §6.5.2: https://developer.arm.com/documentation/ihi0053/b/) */
-#if __ARM_FP16_FORMAT_IEEE && (__ARM_NEON_FP & 0x02)
-#define CORRADE_TARGET_NEON_FP16
-#endif
 /* NEON FMA is available only if __ARM_FEATURE_FMA is defined and some bits of
    __ARM_NEON_FP as well (ARM C Language Extensions 1.1, §6.5.5:
-   https://developer.arm.com/documentation/ihi0053/b/) */
-#if defined(__ARM_FEATURE_FMA) && __ARM_NEON_FP
+   https://developer.arm.com/documentation/ihi0053/b/). On AAArch64 NEON is
+   implicitly supported and __ARM_NEON_FP might not be defined (Android Clang
+   defines it but GCC 9 on Ubuntu ARM64 not), so check for __aarch64__ as
+   well. */
+#if defined(__ARM_FEATURE_FMA) && (__ARM_NEON_FP || defined(__aarch64__))
 #define CORRADE_TARGET_NEON_FMA
+#endif
+/* There's no linkable documentation for anything and the PDF is stupid. But,
+   given the FP16 instructions implemented in GCC and Clang are guarded by this
+   macro, it should be alright:
+   https://gcc.gnu.org/legacy-ml/gcc-patches/2016-06/msg00460.html */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#define CORRADE_TARGET_NEON_FP16
 #endif
 #endif
 

@@ -274,7 +274,8 @@ unclear on platforms with multi-architecture binaries. If neither
 nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
 old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
 library doesn't know about yet.
-@see @ref CORRADE_TARGET_NEON
+@see @ref CORRADE_TARGET_NEON, @ref CORRADE_TARGET_NEON_FMA,
+    @ref CORRADE_TARGET_NEON_FP16
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM
@@ -657,7 +658,7 @@ GCC/Clang, `/arch:AVX512` on MSVC). Superset of @ref CORRADE_TARGET_AVX2.
 Defined on @ref CORRADE_TARGET_ARM "ARM" if
 [ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
 instructions are enabled at compile time (`-mfpu=neon` on GCC/Clang, implicitly
-supported on AArch64). Implied by @ref CORRADE_TARGET_NEON_FP16.
+supported on ARM64). Implied by @ref CORRADE_TARGET_NEON_FMA.
 
 Apart from NEON, there's several other mutually incompatible ARM instruction
 sets. Detection for these will be added when the platforms become more
@@ -674,30 +675,28 @@ widespread:
 #undef CORRADE_TARGET_NEON
 
 /**
-@brief NEON target with half-floats
-@m_since_latest
-
-Defined on @ref CORRADE_TARGET_ARM "ARM" if NEON IEEE
-[half-precision floating-point](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
-support is enabled at compile time (`-mfpu=neon-fp16` or higher on GCC/Clang).
-Not defined if only the ARM alternative half-float representation is available,
-which trades one extra exponent value for a lack of infinity and NaN support.
-Superset of @ref CORRADE_TARGET_NEON, implied by @ref CORRADE_TARGET_NEON_FMA.
-*/
-#define CORRADE_TARGET_NEON_FP16
-#undef CORRADE_TARGET_NEON_FP16
-
-/**
 @brief NEON target with FMA
 @m_since_latest
 
 Defined on @ref CORRADE_TARGET_ARM "ARM" if NEON FMA instructions are enabled
-at compile time (`-mfpu=neon-vfpv4` on GCC/Clang). Not defined if FMA is only
-available for scalar code and not for NEON. Superset of
+at compile time (`-mfpu=neon-vfpv4` on GCC/Clang on 32-bit ARM, implicitly
+supported on ARM64). Not defined if FMA is only available for scalar code and
+not for NEON. Superset of @ref CORRADE_TARGET_NEON, implied by
 @ref CORRADE_TARGET_NEON_FP16.
 */
 #define CORRADE_TARGET_NEON_FMA
 #undef CORRADE_TARGET_NEON_FMA
+
+/**
+@brief NEON target with FP16 vector arithmetic
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_ARM "ARM" if ARMv8.2-a NEON FP16 vector
+arithmetic support is enabled at compile time (`-march=armv8.2-a+fp16` on
+GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
+*/
+#define CORRADE_TARGET_NEON_FP16
+#undef CORRADE_TARGET_NEON_FP16
 
 /**
 @brief SIMD128 target

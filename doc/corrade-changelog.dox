@@ -48,10 +48,11 @@ namespace Corrade {
     @ref CORRADE_TARGET_AVX, @ref CORRADE_TARGET_AVX_F16C,
     @ref CORRADE_TARGET_AVX_FMA, @ref CORRADE_TARGET_AVX2,
     @ref CORRADE_TARGET_AVX512F, @ref CORRADE_TARGET_NEON,
-    @ref CORRADE_TARGET_NEON_FP16, @ref CORRADE_TARGET_NEON_FMA and
+    @ref CORRADE_TARGET_NEON_FMA, @ref CORRADE_TARGET_NEON_FP16 and
     @ref CORRADE_TARGET_SIMD128 preprocessor variables added to the already
-    existing @ref CORRADE_TARGET_SSE2 for detecting enabled instruction sets on
-    x86, ARM and WebAssembly
+    existing
+    @ref CORRADE_TARGET_SSE2 for detecting enabled instruction sets on x86, ARM
+    and WebAssembly
 -   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
     detection of 32-bit builds
 
