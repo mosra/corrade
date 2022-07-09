@@ -38,6 +38,7 @@ set_directory_properties(PROPERTIES
     CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_library(snippets STATIC
+    Corrade.cpp
     Containers.cpp
     Containers-stl.cpp
     Utility.cpp)
@@ -63,6 +64,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
         add_library(snippets-cpp17 STATIC
+            Corrade-cpp17.cpp
             Containers-stl17.cpp)
         target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp17 PROPERTIES

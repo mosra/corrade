@@ -38,6 +38,8 @@ if(CORRADE_WITH_UTILITY)
         Sha1.cpp
         System.cpp
 
+        ../Cpu.cpp
+
         Implementation/ErrorString.cpp)
 
     set(CorradeUtility_GracefulAssert_SRCS

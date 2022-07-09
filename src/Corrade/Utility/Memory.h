@@ -105,6 +105,8 @@ loop or a call to @ref std::memset().
     constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar --- see the function docs for an
     example.
+
+@see @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> inline Containers::Array<T> allocateAligned(std::size_t size);
 
@@ -121,7 +123,7 @@ differing behavior for trivial types it's better to explicitly use either the
 Implemented via @ref allocateAligned(NoInitT, std::size_t) with a
 loop calling the constructors on the returned allocation in case of non-trivial
 types.
-@see @ref allocateAligned(ValueInitT, std::size_t)
+@see @ref allocateAligned(ValueInitT, std::size_t), @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(DefaultInitT, std::size_t size);
 
@@ -133,7 +135,7 @@ Same as @ref allocateAligned(std::size_t), just more explicit. Implemented via
 @ref allocateAligned(NoInitT, std::size_t) with either a
 @ref std::memset() or a loop calling the constructors on the returned
 allocation.
-@see @ref allocateAligned(DefaultInitT, std::size_t)
+@see @ref allocateAligned(DefaultInitT, std::size_t), @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(ValueInitT, std::size_t size);
 
@@ -153,7 +155,7 @@ uninitialized memory:
 @snippet Utility.cpp allocateAligned-NoInit
 
 @see @ref allocateAligned(DefaultInitT, std::size_t),
-    @ref allocateAligned(ValueInitT, std::size_t)
+    @ref allocateAligned(ValueInitT, std::size_t), @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(NoInitT, std::size_t size);
 

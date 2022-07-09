@@ -33,6 +33,8 @@ corrade_add_test(MainTest MainTest.cpp
 # Prefixed with project name to avoid conflicts with TagsTest in Magnum
 corrade_add_test(CorradeTagsTest TagsTest.cpp)
 
+corrade_add_test(CpuTest CpuTest.cpp)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 corrade_add_test(TargetTest TargetTest.cpp)

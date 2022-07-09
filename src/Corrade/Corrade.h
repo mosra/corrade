@@ -256,7 +256,8 @@ library doesn't know about yet.
     @ref CORRADE_TARGET_SSSE3, @ref CORRADE_TARGET_SSE41,
     @ref CORRADE_TARGET_SSE42, @ref CORRADE_TARGET_AVX,
     @ref CORRADE_TARGET_AVX_F16C, @ref CORRADE_TARGET_AVX_FMA,
-    @ref CORRADE_TARGET_AVX2, @ref CORRADE_TARGET_AVX512F
+    @ref CORRADE_TARGET_AVX2, @ref CORRADE_TARGET_AVX512F,
+    @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -275,7 +276,7 @@ nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
 old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
 library doesn't know about yet.
 @see @ref CORRADE_TARGET_NEON, @ref CORRADE_TARGET_NEON_FMA,
-    @ref CORRADE_TARGET_NEON_FP16
+    @ref CORRADE_TARGET_NEON_FP16, @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM
@@ -313,7 +314,7 @@ unclear on platforms with multi-architecture binaries. If neither
 nor @ref CORRADE_TARGET_WASM is defined, the platform might be either a very
 old pre-WebAssembly @ref CORRADE_TARGET_EMSCRIPTEN or any other that the
 library doesn't know about yet.
-@see @ref CORRADE_TARGET_SIMD128
+@see @ref CORRADE_TARGET_SIMD128, @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_WASM
 #undef CORRADE_TARGET_WASM
@@ -513,6 +514,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Streaming SIMD Extensions 2](https://en.wikipedia.org/wiki/SSE2) are enabled
 at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or higher on
 MSVC). All x86-64 targets support SSE2. Implied by @ref CORRADE_TARGET_SSE3.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse2}
 */
 #define CORRADE_TARGET_SSE2
 #undef CORRADE_TARGET_SSE2
@@ -526,6 +528,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 at compile time (on GCC/Clang it's `-msse3` and higher, MSVC doesn't have a
 direct option and it's only implied by `/arch:AVX`). Superset of
 @ref CORRADE_TARGET_SSE2, implied by @ref CORRADE_TARGET_SSSE3.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse3}
 */
 #define CORRADE_TARGET_SSE3
 #undef CORRADE_TARGET_SSE3
@@ -544,6 +547,7 @@ Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wik
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
 detect those.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Ssse3}
 */
 #define CORRADE_TARGET_SSSE3
 #undef CORRADE_TARGET_SSSE3
@@ -562,6 +566,7 @@ Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wik
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
 detect those.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse41}
 */
 #define CORRADE_TARGET_SSE41
 #undef CORRADE_TARGET_SSE41
@@ -575,6 +580,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (on GCC/Clang it's `-msse4.2` and higher, MSVC
 doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
 @ref CORRADE_TARGET_SSE41, implied by @ref CORRADE_TARGET_AVX.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse42}
 */
 #define CORRADE_TARGET_SSE42
 #undef CORRADE_TARGET_SSE42
@@ -588,6 +594,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 is enabled at compile time. On GCC/Clang it's `-mpopcnt` and is also implied by
 `-msse4.2` and higher, MSVC doesn't have a direct option but it's assumed to
 be implied by `/arch:AVX`.
+@see @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_POPCNT
 #undef CORRADE_TARGET_POPCNT
@@ -602,6 +609,7 @@ is enabled at compile time (on GCC/Clang it's `-mlznct`, MSVC doesn't have a
 direct option but it's assumed to be implied by `/arch:AVX`). However note that
 this instruction has encoding compatible with an earlier `BSR` instruction
 which has a slightly different behavior.
+@see @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_LZCNT
 #undef CORRADE_TARGET_LZCNT
@@ -615,6 +623,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (`-mavx` and higher on GCC/Clang, `/arch:AVX` on
 MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
 @ref CORRADE_TARGET_AVX2.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx}
 */
 #define CORRADE_TARGET_AVX
 #undef CORRADE_TARGET_AVX
@@ -627,6 +636,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [F16C instruction set](https://en.wikipedia.org/wiki/F16C) is enabled at
 compile time. On GCC/Clang it's `-mf16c`, MSVC doesn't have a direct option but
 it's assumed to be implied by `/arch:AVX2`.
+@see @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_AVX_F16C
 #undef CORRADE_TARGET_AVX_F16C
@@ -643,6 +653,7 @@ option but it's assumes to be implied by `/arch:AVX2`.
 The FMA4 instruction set, which used to be supported only in certain range of
 AMD processors and isn't anymore, is not detected, and AMD switched to FMA3
 since.
+@see @relativeref{Corrade,Cpu}
 */
 #define CORRADE_TARGET_AVX_FMA
 #undef CORRADE_TARGET_AVX_FMA
@@ -656,6 +667,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
 MSVC). Superset of @ref CORRADE_TARGET_AVX, implied by
 @ref CORRADE_TARGET_AVX512F.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx2}
 */
 #define CORRADE_TARGET_AVX2
 #undef CORRADE_TARGET_AVX2
@@ -667,6 +679,7 @@ MSVC). Superset of @ref CORRADE_TARGET_AVX, implied by
 Defined on @ref CORRADE_TARGET_X86 "x86" if [AVX-512](https://en.wikipedia.org/wiki/AVX-512)
 Foundation instructions are enabled at compile time (`-mavx512f` and higher on
 GCC/Clang, `/arch:AVX512` on MSVC). Superset of @ref CORRADE_TARGET_AVX2.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx512f}
 */
 #define CORRADE_TARGET_AVX512F
 #undef CORRADE_TARGET_AVX512F
@@ -690,6 +703,8 @@ widespread:
 -   SVE2, which is a next-generation vector instruction set designed to be a
     successor to both NEON and SVE, scheduled to appear in production in around
     2022
+
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Neon}
 */
 #define CORRADE_TARGET_NEON
 #undef CORRADE_TARGET_NEON
@@ -703,6 +718,7 @@ at compile time (`-mfpu=neon-vfpv4` on GCC/Clang on 32-bit ARM, implicitly
 supported on ARM64). Not defined if FMA is only available for scalar code and
 not for NEON. Superset of @ref CORRADE_TARGET_NEON, implied by
 @ref CORRADE_TARGET_NEON_FP16.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFma}
 */
 #define CORRADE_TARGET_NEON_FMA
 #undef CORRADE_TARGET_NEON_FMA
@@ -714,6 +730,7 @@ not for NEON. Superset of @ref CORRADE_TARGET_NEON, implied by
 Defined on @ref CORRADE_TARGET_ARM "ARM" if ARMv8.2-a NEON FP16 vector
 arithmetic support is enabled at compile time (`-march=armv8.2-a+fp16` on
 GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFp16}
 */
 #define CORRADE_TARGET_NEON_FP16
 #undef CORRADE_TARGET_NEON_FP16
@@ -725,6 +742,7 @@ GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
 Defined on @ref CORRADE_TARGET_WASM "WebAssembly" if
 [128-bit SIMD](https://github.com/webassembly/simd) instructions are enabled at
 compile time (`-msimd128` passed to Clang).
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Simd128}
 */
 #define CORRADE_TARGET_SIMD128
 #undef CORRADE_TARGET_SIMD128
