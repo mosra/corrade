@@ -46,6 +46,12 @@
 #if defined(CORRADE_ENABLE_AVX) || defined(CORRADE_ENABLE_AVX_F16C) || defined(CORRADE_ENABLE_AVX_FMA) || defined(CORRADE_ENABLE_AVX2) || defined(CORRADE_ENABLE_AVX512F)
 #include "Corrade/Utility/IntrinsicsAvx.h"
 #endif
+#ifdef CORRADE_ENABLE_NEON
+#include <arm_neon.h>
+#endif
+#ifdef CORRADE_ENABLE_SIMD128
+#include <wasm_simd128.h>
+#endif
 
 namespace Corrade { namespace Test { namespace {
 
@@ -126,6 +132,12 @@ CpuTest::CpuTest() {
               &CpuTest::enableMacros<Cpu::AvxT>,
               &CpuTest::enableMacros<Cpu::Avx2T>,
               &CpuTest::enableMacros<Cpu::Avx512fT>,
+              #elif defined(CORRADE_TARGET_ARM)
+              &CpuTest::enableMacros<Cpu::NeonT>,
+              &CpuTest::enableMacros<Cpu::NeonFmaT>,
+              &CpuTest::enableMacros<Cpu::NeonFp16T>,
+              #elif defined(CORRADE_TARGET_WASM)
+              &CpuTest::enableMacros<Cpu::Simd128T>,
               #endif
 
               &CpuTest::debug,
@@ -640,6 +652,83 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX512F int callInstructionFor<Cp
 
     CORRADE_COMPARE(ceil, 6);
     return ceil;
+}
+#endif
+#ifdef CORRADE_ENABLE_NEON
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON int callInstructionFor<Cpu::NeonT>() {
+    int32x4_t a{-10, 20, -30, 40};
+
+    /* All instructions NEON */
+    union {
+        int32x4_t v;
+        int s[8];
+    } b;
+    b.v = vabsq_s32(a);
+
+    CORRADE_COMPARE(b.s[0], 10);
+    CORRADE_COMPARE(b.s[1], 20);
+    CORRADE_COMPARE(b.s[2], 30);
+    CORRADE_COMPARE(b.s[3], 40);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_NEON_FMA
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FMA int callInstructionFor<Cpu::NeonFmaT>() {
+    /* Values from Magnum::Math::Test::FunctionsTest::fma() */
+    float32x4_t a{0.0f,  2.0f,  1.5f,  0.5f};
+    float32x4_t b{0.0f,  3.0f,  2.0f, -1.0f};
+    float32x4_t c{0.0f, 0.75f, 0.25f,  0.1f};
+
+    /* FMA */
+    union {
+        float32x4_t v;
+        float s[4];
+    } d;
+    d.v = vfmaq_f32(c, b, a);
+
+    CORRADE_COMPARE(d.s[0], 0.0f);
+    CORRADE_COMPARE(d.s[1], 6.75f);
+    CORRADE_COMPARE(d.s[2], 3.25f);
+    CORRADE_COMPARE(d.s[3], -0.4f);
+    return d.s[2];
+}
+#endif
+#ifdef CORRADE_ENABLE_NEON_FP16
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FP16 int callInstructionFor<Cpu::NeonFp16T>() {
+    float32x4_t a{5.47f, 2.23f, 7.62f, 0.5f};
+    float16x4_t b = vcvt_f16_f32(a);
+
+    /* FP16 */
+    float16x4_t c = vrndp_f16(b);
+
+    union {
+        float32x4_t v;
+        float s[4];
+    } d;
+    d.v = vcvt_f32_f16(c);
+    CORRADE_COMPARE(d.s[0], 6.0f);
+    CORRADE_COMPARE(d.s[1], 3.0f);
+    CORRADE_COMPARE(d.s[2], 8.0f);
+    CORRADE_COMPARE(d.s[3], 1.0f);
+    return d.s[3];
+}
+#endif
+#ifdef CORRADE_ENABLE_SIMD128
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SIMD128 int callInstructionFor<Cpu::Simd128T>() {
+    v128_t a = wasm_i32x4_make(-10, 20, -30, 40);
+
+    /* All instructions SIMD128 */
+    union {
+        v128_t v;
+        int s[8];
+    } b;
+    b.v = wasm_i32x4_abs(a);
+
+    CORRADE_COMPARE(b.s[0], 10);
+    CORRADE_COMPARE(b.s[1], 20);
+    CORRADE_COMPARE(b.s[2], 30);
+    CORRADE_COMPARE(b.s[3], 40);
+    return b.s[0];
 }
 #endif
 

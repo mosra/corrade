@@ -712,7 +712,8 @@ widespread:
     successor to both NEON and SVE, scheduled to appear in production in around
     2022
 
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Neon}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Neon},
+    @ref CORRADE_ENABLE_NEON
 */
 #define CORRADE_TARGET_NEON
 #undef CORRADE_TARGET_NEON
@@ -726,7 +727,8 @@ at compile time (`-mfpu=neon-vfpv4` on GCC/Clang on 32-bit ARM, implicitly
 supported on ARM64). Not defined if FMA is only available for scalar code and
 not for NEON. Superset of @ref CORRADE_TARGET_NEON, implied by
 @ref CORRADE_TARGET_NEON_FP16.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFma}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFma},
+    @ref CORRADE_ENABLE_NEON_FMA
 */
 #define CORRADE_TARGET_NEON_FMA
 #undef CORRADE_TARGET_NEON_FMA
@@ -738,7 +740,8 @@ not for NEON. Superset of @ref CORRADE_TARGET_NEON, implied by
 Defined on @ref CORRADE_TARGET_ARM "ARM" if ARMv8.2-a NEON FP16 vector
 arithmetic support is enabled at compile time (`-march=armv8.2-a+fp16` on
 GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFp16}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::NeonFp16},
+    @ref CORRADE_ENABLE_NEON_FP16
 */
 #define CORRADE_TARGET_NEON_FP16
 #undef CORRADE_TARGET_NEON_FP16
@@ -750,7 +753,8 @@ GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
 Defined on @ref CORRADE_TARGET_WASM "WebAssembly" if
 [128-bit SIMD](https://github.com/webassembly/simd) instructions are enabled at
 compile time (`-msimd128` passed to Clang).
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Simd128}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Simd128},
+    @ref CORRADE_ENABLE_SIMD128
 */
 #define CORRADE_TARGET_SIMD128
 #undef CORRADE_TARGET_SIMD128

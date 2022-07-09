@@ -591,7 +591,7 @@ constexpr Avx512fT Avx512f{Implementation::Init};
 [ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon)).
 Available only on @ref CORRADE_TARGET_ARM "ARM". Superset of @ref Scalar,
 implied by @ref NeonFp16.
-@see @ref CORRADE_TARGET_NEON
+@see @ref CORRADE_TARGET_NEON, @ref CORRADE_ENABLE_NEON
 */
 constexpr NeonT Neon{Implementation::Init};
 
@@ -601,7 +601,7 @@ constexpr NeonT Neon{Implementation::Init};
 [ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
 with FMA instructions. Available only on @ref CORRADE_TARGET_ARM "ARM".
 Superset of @ref Neon, implied by @ref NeonFp16.
-@see @ref CORRADE_TARGET_NEON_FMA
+@see @ref CORRADE_TARGET_NEON_FMA, @ref CORRADE_ENABLE_NEON_FMA
 */
 constexpr NeonFmaT NeonFma{Implementation::Init};
 
@@ -611,7 +611,7 @@ constexpr NeonFmaT NeonFma{Implementation::Init};
 [ARM NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
 with ARMv8.2-a FP16 vector arithmetic. Available only on
 @ref CORRADE_TARGET_ARM "ARM". Superset of @ref NeonFma.
-@see @ref CORRADE_TARGET_NEON_FP16
+@see @ref CORRADE_TARGET_NEON_FP16, @ref CORRADE_ENABLE_NEON_FP16
 */
 constexpr NeonFp16T NeonFp16{Implementation::Init};
 #endif
@@ -622,7 +622,7 @@ constexpr NeonFp16T NeonFp16{Implementation::Init};
 
 [128-bit WebAssembly SIMD](https://github.com/webassembly/simd). Available only
 on @ref CORRADE_TARGET_WASM "WebAssembly". Superset of @ref Scalar.
-@see @ref CORRADE_TARGET_SIMD128
+@see @ref CORRADE_TARGET_SIMD128, @ref CORRADE_ENABLE_SIMD128
 */
 constexpr Simd128T Simd128{Implementation::Init};
 #endif
@@ -1364,6 +1364,133 @@ more information and usage example.
    already requires the right /arch: settings" is correct. */
 #elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1911 && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_AVX512F
+#endif
+#endif
+
+#if defined(CORRADE_TARGET_ARM) || defined(DOXYGEN_GENERATING_OUTPUT)
+/**
+@brief Enable NEON for given function
+@m_since_latest
+
+On 32-bit @ref CORRADE_TARGET_ARM "ARM" GCC expands to
+@cpp __attribute__((__target__("fpu=neon"))) @ce, allowing use of
+[NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
+instructions inside a function annotated with this macro without having to
+specify `-mfpu=neon` for the whole compilation unit. On ARM MSVC expands to
+nothing, as the compiler doesn't restrict use of intrinsics in any way. In
+contrast to GCC, this macro is not defined on Clang, as it makes the NEON
+intrinsics available only if enabled on compiler command line. Not defined on
+other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_NEON is present (meaning NEON is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers. This is also the case for ARM64, where NEON support is implicit
+(and where `-mfpu=neon` is unrecognized).
+
+Implied by @ref CORRADE_ENABLE_NEON_FMA. See @ref Cpu-usage-target-attributes
+for more information and usage example.
+@see @relativeref{Corrade,Cpu::Neon}
+*/
+#if defined(CORRADE_TARGET_NEON) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON
+/* https://github.com/android/ndk/issues/1066 is the only reported (and
+   ignored) issue I found, feels strange that people would just not use ifunc
+   or target attributes on Android at all and instead put everything in
+   separate files. Needs further investigation. Too bad most ARM platforms
+   ditched GCC, where this works properly. */
+#elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
+#define CORRADE_ENABLE_NEON __attribute__((__target__("fpu=neon")))
+#elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON
+#endif
+
+/**
+@brief Enable NEON FMA for given function
+@m_since_latest
+
+On 32-bit @ref CORRADE_TARGET_ARM "ARM" GCC expands to
+@cpp __attribute__((__target__("fpu=neon-vfpv4"))) @ce, allowing use of
+[NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon)) FMA
+instructions inside a function annotated with this macro without having to
+specify `-mfpu=neon-vfpv4` for the whole compilation unit. On ARM MSVC expands
+to nothing, as the compiler doesn't restrict use of intrinsics in any way. In
+contrast to GCC, this macro is not defined on Clang, as it makes the NEON FMA
+intrinsics available only if enabled on compiler command line. Not defined on
+other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_NEON_FMA is present (meaning NEON FMA
+is enabled for the whole compilation unit), this macro is defined as empty on
+all compilers. This is also the case for ARM64, where NEON support is implicit
+(and where `-mfpu=neon-vfpv4` is unrecognized).
+
+Superset of @ref CORRADE_ENABLE_NEON, implied by @ref CORRADE_ENABLE_NEON_FP16.
+See @ref Cpu-usage-target-attributes for more information and usage example.
+@see @relativeref{Corrade,Cpu::NeonFma}
+*/
+#if defined(CORRADE_TARGET_NEON_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON_FMA
+/* See CORRADE_ENABLE_NEON above for details about Clang */
+#elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
+#define CORRADE_ENABLE_NEON_FMA __attribute__((__target__("fpu=neon-vfpv4")))
+#elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON_FMA
+#endif
+
+/**
+@brief Enable NEON FP16 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_ARM "ARM" GCC expands to
+@cpp __attribute__((__target__("arch=armv8.2-a+fp16"))) @ce, allowing use of
+ARMv8.2-a [NEON](https://en.wikipedia.org/wiki/ARM_architecture#Advanced_SIMD_(Neon))
+FP16 vector arithmetic inside a function annotated with this macro without
+having to specify `-march=armv8.2-a+fp16` for the whole compilation unit. On
+ARM MSVC expands to nothing, as the compiler doesn't restrict use of intrinsics
+in any way. In contrast to GCC, this macro is not defined on Clang, as it makes
+the NEON FP16 intrinsics available only if enabled on compiler command line.
+Not defined on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_NEON_FP16 is present (meaning NEON
+FP16 is enabled for the whole compilation unit), this macro is defined as empty
+on all compilers.
+
+Superset of @ref CORRADE_ENABLE_NEON_FMA. See @ref Cpu-usage-target-attributes
+for more information and usage example.
+@see @relativeref{Corrade,Cpu::NeonFp16}
+*/
+#if defined(CORRADE_TARGET_NEON_FP16) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON_FP16
+/* See CORRADE_ENABLE_NEON above for details about Clang */
+#elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
+#define CORRADE_ENABLE_NEON_FP16 __attribute__((__target__("arch=armv8.2-a+fp16")))
+#elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_NEON_FP16
+#endif
+#endif
+
+#if defined(CORRADE_TARGET_WASM) || defined(DOXYGEN_GENERATING_OUTPUT)
+/**
+@brief Enable SIMD128 for given function
+@m_since_latest
+
+Given that it's currently not possible to selectively use
+[128-bit SIMD](https://github.com/webassembly/simd) in a WebAssembly module
+without causing a compilation error on runtimes that don't support it, this
+macro is only defined if @ref CORRADE_TARGET_SIMD128 is present (meaning
+SIMD128 is explicitly enabled for the whole compilation unit), and is always
+empty, as @cpp __attribute__((__target__("simd128"))) @ce would be redundant
+if `-msimd128` is passed on the command line.
+
+The situation may change once the
+[feature detection proposal](https://github.com/WebAssembly/feature-detection/blob/main/proposals/feature-detection/Overview.md)
+is implemented, but likely only for instruction sets building on top of this
+one.
+
+See @ref Cpu-usage-target-attributes for more information and usage example.
+@see @relativeref{Corrade,Cpu::Simd128}
+*/
+#if defined(CORRADE_TARGET_SIMD128) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SIMD128
 #endif
 #endif
 
