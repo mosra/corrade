@@ -38,6 +38,7 @@ struct CpuTest: TestSuite::Tester {
 
     void tagNoDefaultConstructor();
     void tagInlineDefinition();
+    void tagConstructTemplate();
 
     void typeTraits();
 
@@ -49,6 +50,7 @@ struct CpuTest: TestSuite::Tester {
 
     void featuresConstructScalar();
     void featuresConstruct();
+    void featuresConstructTemplate();
     void featuresOperatorOr();
     void featuresOperatorAnd();
     void featuresOperatorXor();
@@ -77,11 +79,13 @@ const struct {
 CpuTest::CpuTest() {
     addTests({&CpuTest::tagNoDefaultConstructor,
               &CpuTest::tagInlineDefinition,
+              &CpuTest::tagConstructTemplate,
 
               &CpuTest::typeTraits,
 
               &CpuTest::featuresConstructScalar,
               &CpuTest::featuresConstruct,
+              &CpuTest::featuresConstructTemplate,
               &CpuTest::featuresOperatorOr,
               &CpuTest::featuresOperatorAnd,
               &CpuTest::featuresOperatorXor,
@@ -146,6 +150,27 @@ void CpuTest::tagInlineDefinition() {
     #endif
 }
 
+void CpuTest::tagConstructTemplate() {
+    #ifdef CORRADE_TARGET_X86
+    auto tag = Cpu::tag<Cpu::Sse3T>();
+    constexpr auto cTag = Cpu::tag<Cpu::Sse3T>();
+    CORRADE_VERIFY(std::is_same<decltype(tag), Cpu::Sse3T>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTag), const Cpu::Sse3T>::value);
+    #elif defined(CORRADE_TARGET_ARM)
+    auto tag = Cpu::tag<Cpu::NeonT>();
+    constexpr auto cTag = Cpu::tag<Cpu::NeonT>();
+    CORRADE_VERIFY(std::is_same<decltype(tag), Cpu::NeonT>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTag), const Cpu::NeonT>::value);
+    #elif defined(CORRADE_TARGET_WASM)
+    auto tag = Cpu::tag<Cpu::Simd128T>();
+    constexpr auto cTag = Cpu::tag<Cpu::Simd128T>();
+    CORRADE_VERIFY(std::is_same<decltype(tag), Cpu::Simd128T>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTag), const Cpu::Simd128T>::value);
+    #else
+    CORRADE_SKIP("No Cpu tags available on this platform");
+    #endif
+}
+
 void CpuTest::typeTraits() {
     CORRADE_VERIFY(!Cpu::TypeTraits<Cpu::ScalarT>::Index);
     #ifdef CORRADE_TARGET_X86
@@ -195,6 +220,27 @@ void CpuTest::featuresConstruct() {
     CORRADE_COMPARE(std::uint32_t(features), 1);
     CORRADE_COMPARE(std::uint32_t(cFeatures), 1);
     CORRADE_VERIFY(std::is_nothrow_constructible<Cpu::Features, Cpu::Simd128T>::value);
+    #else
+    CORRADE_SKIP("No Cpu tags available on this platform");
+    #endif
+}
+
+void CpuTest::featuresConstructTemplate() {
+    #ifdef CORRADE_TARGET_X86
+    auto features = Cpu::features<Cpu::Sse3T>();
+    constexpr auto cFeatures = Cpu::features<Cpu::Sse3T>();
+    CORRADE_COMPARE(std::uint32_t(features), 2);
+    CORRADE_COMPARE(std::uint32_t(cFeatures), 2);
+    #elif defined(CORRADE_TARGET_ARM)
+    auto features = Cpu::features<Cpu::NeonT>();
+    constexpr auto cFeatures = Cpu::features<Cpu::NeonT>();
+    CORRADE_COMPARE(std::uint32_t(features), 1);
+    CORRADE_COMPARE(std::uint32_t(cFeatures), 1);
+    #elif defined(CORRADE_TARGET_WASM)
+    auto features = Cpu::features<Cpu::Simd128T>();
+    constexpr auto cFeatures = Cpu::features<Cpu::Simd128T>();
+    CORRADE_COMPARE(std::uint32_t(features), 1);
+    CORRADE_COMPARE(std::uint32_t(cFeatures), 1);
     #else
     CORRADE_SKIP("No Cpu tags available on this platform");
     #endif

@@ -40,6 +40,8 @@ void transform(Cpu::Avx2T, Containers::ArrayView<float> data);
 /* [Cpu-usage-declare] */
 #endif
 
+inline void foo(Cpu::ScalarT) {}
+
 int main() {
 #ifdef CORRADE_TARGET_X86
 {
@@ -62,6 +64,21 @@ else if(features & Cpu::Sse41)
 else
     transform(Cpu::Scalar, data);
 /* [Cpu-usage-runtime-manual-dispatch] */
+}
+
+{
+/* [Cpu-tag-from-type] */
+foo(Cpu::Avx2);
+foo(Cpu::tag<Cpu::Avx2T>());
+/* [Cpu-tag-from-type] */
+}
+{
+/* [Cpu-features-from-type] */
+Cpu::Features a = Cpu::Avx2;
+Cpu::Features b = Cpu::features<Cpu::Avx2T>();
+/* [Cpu-features-from-type] */
+static_cast<void>(a);
+static_cast<void>(b);
 }
 #endif
 

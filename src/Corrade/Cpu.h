@@ -161,6 +161,7 @@ Useful for detecting tag properties at compile time without the need for
 repeated code such as method overloading, cascaded ifs or template
 specializations for all tag types. All tag types in the @ref Cpu namespace
 have this class implemented.
+@see @ref tag(), @ref features()
 */
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class> struct TypeTraits;
@@ -195,6 +196,7 @@ namespace Implementation {
 @brief Scalar tag type
 
 See the @ref Cpu namespace and the @ref Scalar tag for more information.
+@see @ref tag(), @ref features()
 */
 struct ScalarT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -217,6 +219,7 @@ template<> struct TypeTraits<ScalarT> {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Sse2 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Sse2T: ScalarT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -230,6 +233,7 @@ struct Sse2T: ScalarT {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Sse3 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Sse3T: Sse2T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -243,6 +247,7 @@ struct Sse3T: Sse2T {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Ssse3 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Ssse3T: Sse3T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -256,6 +261,7 @@ struct Ssse3T: Sse3T {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Sse41T tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Sse41T: Ssse3T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -269,6 +275,7 @@ struct Sse41T: Ssse3T {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Sse42T tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Sse42T: Sse41T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -282,6 +289,7 @@ struct Sse42T: Sse41T {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Avx tag for more information.
+@see @ref tag(), @ref features()
 */
 struct AvxT: Sse42T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -295,6 +303,7 @@ struct AvxT: Sse42T {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Avx2 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Avx2T: AvxT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -308,6 +317,7 @@ struct Avx2T: AvxT {
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
 and the @ref Avx512f tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Avx512fT: Avx2T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -358,6 +368,7 @@ template<> struct TypeTraits<Avx512fT> {
 
 Available only on @ref CORRADE_TARGET_ARM "ARM". See the @ref Cpu namespace
 and the @ref Neon tag for more information.
+@see @ref tag(), @ref features()
 */
 struct NeonT: ScalarT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -371,6 +382,7 @@ struct NeonT: ScalarT {
 
 Available only on @ref CORRADE_TARGET_ARM "ARM". See the @ref Cpu namespace
 and the @ref NeonFma tag for more information.
+@see @ref tag(), @ref features()
 */
 struct NeonFmaT: NeonT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -384,6 +396,7 @@ struct NeonFmaT: NeonT {
 
 Available only on @ref CORRADE_TARGET_ARM "ARM". See the @ref Cpu namespace
 and the @ref NeonFp16 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct NeonFp16T: NeonFmaT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -414,6 +427,7 @@ template<> struct TypeTraits<NeonFp16T> {
 
 Available only on @ref CORRADE_TARGET_WASM "WebAssembly". See the @ref Cpu
 namespace and the @ref Simd128 tag for more information.
+@see @ref tag(), @ref features()
 */
 struct Simd128T: ScalarT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -655,6 +669,18 @@ capable of detecting the available CPU feature set at runtime.
 constexpr DefaultBaseT DefaultBase{Implementation::Init};
 
 /**
+@brief Tag for a tag type
+
+Returns a tag corresponding to tag type @p T. The following two expressions are
+equivalent:
+
+@snippet Corrade.cpp Cpu-tag-from-type
+
+@see @ref features()
+*/
+template<class T> constexpr T tag() { return T{Implementation::Init}; }
+
+/**
 @brief Feature set
 
 Provides storage and comparison as well as runtime detection of CPU instruction
@@ -673,7 +699,11 @@ class Features {
          */
         constexpr explicit Features() noexcept: _data{} {}
 
-        /** @brief Construct from a tag */
+        /**
+         * @brief Construct from a tag
+         *
+         * @see @ref features()
+         */
         template<class T, class = decltype(TypeTraits<T>::Index)> constexpr /*implicit*/ Features(T) noexcept: _data{TypeTraits<T>::Index} {}
 
         /** @brief Equality comparison */
@@ -759,6 +789,7 @@ class Features {
         constexpr explicit operator unsigned int() const { return _data; }
 
     private:
+        template<class> friend constexpr Features features();
         friend constexpr Features compiledFeatures();
         #if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
         /* MSVC demands the export macro to be here as well */
@@ -769,6 +800,21 @@ class Features {
 
         unsigned int _data;
 };
+
+/**
+@brief Feature set for a tag type
+
+Returns @ref Features with a tag corresponding to tag type @p T, avoiding a
+need to form the tag value in order to pass it to @ref Features::Features(T).
+The following two expressions are equivalent:
+
+@snippet Corrade.cpp Cpu-features-from-type
+
+@see @ref tag()
+*/
+template<class T> constexpr Features features() {
+    return Features{TypeTraits<T>::Index};
+}
 
 /** @relates Features
 @brief Equality comparison of a tag and a feature set
