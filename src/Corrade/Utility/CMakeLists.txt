@@ -75,6 +75,19 @@ if(CORRADE_WITH_UTILITY)
         Format.h
         FormatStl.h
         FormatStlStringView.h
+
+        # Because various platforms can have multi-architecture binaries
+        # (macOS, iOS), the CORRADE_TARGET_X86 variable isn't exposed to CMake.
+        # And because all desktop and mobile platfoms have an x86 variant
+        # including iOS and Android, and Emscripten has x86 intrinsics
+        # compatibility (!!), we install the x86-specific intrinsics wrappers
+        # always.
+        IntrinsicsSse2.h
+        IntrinsicsSse3.h
+        IntrinsicsSsse3.h
+        IntrinsicsSse4.h
+        IntrinsicsAvx.h
+
         Json.h
         JsonWriter.h
         Macros.h

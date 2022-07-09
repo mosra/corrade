@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Namespace @ref Corrade::Cpu
+ * @brief Namespace @ref Corrade::Cpu and related macros
  * @m_since_latest
  */
 
@@ -151,6 +151,46 @@ returned @ref Cpu::Features against particular tags to decide which variant to
 use:
 
 @snippet Corrade.cpp Cpu-usage-runtime-manual-dispatch
+
+@subsection Cpu-usage-target-attributes Enabling instruction sets for particular functions
+
+On GCC and Clang, a machine target has to be enabled in order to use a
+particular CPU instruction set or its intrinsics. While it's possible to do
+that for the whole compilation unit by passing for example `-mavx2` to the
+compiler, it would force you to create dedicated files for every architecture
+variant you want to support. Instead, it's possible to equip particular
+functions with *target attributes* defined by @ref CORRADE_ENABLE_SSE2 and
+related macros, which then makes a particular instruction set enabled for given
+function.
+
+In contrast, MSVC doesn't restrict intrinsics usage in any way, so you can
+freely call e.g. AVX2 intrinsics even if the whole file is compiled with just
+SSE2 enabled. The @ref CORRADE_ENABLE_SSE2 and related macros are thus defined
+to be empty on this compiler.
+
+@m_class{m-note m-warning}
+
+@par
+    On the other hand, on MSVC, using just the baseline target on the file
+    level means the compiler will not be able to use any advanced instructions
+    apart from what you call explicitly via intrinsics. You can try extracting
+    all AVX+ variants into a dedicated file with `/arch:AVX` enabled and see
+    if it makes any performance difference.
+
+For developer convenience, the @ref CORRADE_ENABLE_SSE2 etc. macros are defined
+only on matching architectures, and generally only if the compiler itself has
+given feature set implemented and usable. Which means you can easily use them
+to @cpp #ifdef @ce your variants to be compiled only where it makes sense, or
+even guard intrinsics includes with them to avoid including potentially heavy
+headers you won't use anyway. In comparison, using the @ref CORRADE_TARGET_SSE2
+etc. macros would only make the variant available if the whole compilation unit
+has a corresponding `-m` or `/arch:` option passed to the compiler.
+
+Definitions of the above functions would then look like below with the target
+attributes enabled. The scalar variant has no target-specific annotation and
+will be present as a fallback in all cases.
+
+@snippet Corrade.cpp Cpu-usage-target-attributes
 */
 namespace Cpu {
 
@@ -462,7 +502,7 @@ constexpr ScalarT Scalar{Implementation::Init};
 only on @ref CORRADE_TARGET_X86 "x86", supported by all 64-bit x86 processors
 and is present on majority of contemporary 32-bit x86 processors as well.
 Superset of @ref Scalar, implied by @ref Sse3.
-@see @ref CORRADE_TARGET_SSE2
+@see @ref CORRADE_TARGET_SSE2, @ref CORRADE_ENABLE_SSE2
 */
 constexpr Sse2T Sse2{Implementation::Init};
 
@@ -472,7 +512,7 @@ constexpr Sse2T Sse2{Implementation::Init};
 [Streaming SIMD Extensions 3](https://en.wikipedia.org/wiki/SSE3). Available
 only on @ref CORRADE_TARGET_X86 "x86". Superset of @ref Sse2, implied by
 @ref Ssse3.
-@see @ref CORRADE_TARGET_SSE3
+@see @ref CORRADE_TARGET_SSE3, @ref CORRADE_ENABLE_SSE3
 */
 constexpr Sse3T Sse3{Implementation::Init};
 
@@ -486,7 +526,7 @@ by @ref Sse41.
 Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wiki/SSE4#SSE4a)
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref Sse41 to handle those.
-@see @ref CORRADE_TARGET_SSSE3
+@see @ref CORRADE_TARGET_SSSE3, @ref CORRADE_ENABLE_SSSE3
 */
 constexpr Ssse3T Ssse3{Implementation::Init};
 
@@ -500,7 +540,7 @@ implied by @ref Sse42.
 Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wiki/SSE4#SSE4a)
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref Sse41 to handle those.
-@see @ref CORRADE_TARGET_SSE41
+@see @ref CORRADE_TARGET_SSE41, @ref CORRADE_ENABLE_SSE41
 */
 constexpr Sse41T Sse41{Implementation::Init};
 
@@ -510,7 +550,7 @@ constexpr Sse41T Sse41{Implementation::Init};
 [Streaming SIMD Extensions 4.2](https://en.wikipedia.org/wiki/SSE4#SSE4.2).
 Available only on @ref CORRADE_TARGET_X86 "x86". Superset of @ref Sse41,
 implied by @ref Avx.
-@see @ref CORRADE_TARGET_SSE42
+@see @ref CORRADE_TARGET_SSE42, @ref CORRADE_ENABLE_SSE42
 */
 constexpr Sse42T Sse42{Implementation::Init};
 
@@ -520,7 +560,7 @@ constexpr Sse42T Sse42{Implementation::Init};
 [Advanced Vector Extensions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions).
 Available only on @ref CORRADE_TARGET_X86 "x86". Superset of @ref Sse42,
 implied by @ref Avx2.
-@see @ref CORRADE_TARGET_AVX
+@see @ref CORRADE_TARGET_AVX, @ref CORRADE_ENABLE_AVX
 */
 constexpr AvxT Avx{Implementation::Init};
 
@@ -530,7 +570,7 @@ constexpr AvxT Avx{Implementation::Init};
 [Advanced Vector Extensions 2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2).
 Available only on @ref CORRADE_TARGET_X86 "x86". Superset of @ref Avx,
 implied by @ref Avx512f.
-@see @ref CORRADE_TARGET_AVX2
+@see @ref CORRADE_TARGET_AVX2, @ref CORRADE_ENABLE_AVX2
 */
 constexpr Avx2T Avx2{Implementation::Init};
 
@@ -539,7 +579,7 @@ constexpr Avx2T Avx2{Implementation::Init};
 
 [AVX-512](https://en.wikipedia.org/wiki/AVX-512) Foundation. Available only on
 @ref CORRADE_TARGET_X86 "x86". Superset of @ref Avx2.
-@see @ref CORRADE_TARGET_AVX512F
+@see @ref CORRADE_TARGET_AVX512F, @ref CORRADE_ENABLE_AVX512F
 */
 constexpr Avx512fT Avx512f{Implementation::Init};
 #endif
@@ -993,6 +1033,315 @@ default-constructed) @ref Features.
 CORRADE_UTILITY_EXPORT Features runtimeFeatures();
 #else
 constexpr Features runtimeFeatures() { return compiledFeatures(); }
+#endif
+
+#if defined(CORRADE_TARGET_X86) || defined(DOXYGEN_GENERATING_OUTPUT)
+/**
+@brief Enable SSE2 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("sse2"))) @ce, allowing use of
+[SSE2](https://en.wikipedia.org/wiki/SSE2) and earlier SSE instructions inside
+a function annotated with this macro without having to specify `-msse2` for the
+whole compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
+restrict use of intrinsics in any way. Not defined on other compilers or
+architectures.
+
+As a special case, if @ref CORRADE_TARGET_SSE2 is present (meaning SSE2 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Implied by @ref CORRADE_ENABLE_SSE3. See @ref Cpu-usage-target-attributes for
+more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsSse2.h instead of
+    @cpp #include <emmintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Sse2}
+*/
+#if defined(CORRADE_TARGET_SSE2) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SSE2
+#elif defined(CORRADE_TARGET_GCC)
+#define CORRADE_ENABLE_SSE2 __attribute__((__target__("sse2")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_SSE2
+#endif
+
+/**
+@brief Enable SSE3 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("sse3"))) @ce, allowing use of
+[SSE3](https://en.wikipedia.org/wiki/SSE3) and earlier SSE intrinsics inside a
+function annotated with this macro without having to specify `-msse3` for the
+whole compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
+restrict use of intrinsics in any way. Not defined on other compilers or
+architectures.
+
+As a special case, if @ref CORRADE_TARGET_SSE3 is present (meaning SSE3 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_SSE2, implied by @ref CORRADE_ENABLE_SSSE3. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsSse3.h instead of
+    @cpp #include <pmmintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Sse3}
+*/
+#if defined(CORRADE_TARGET_SSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SSE3
+#elif defined(CORRADE_TARGET_GCC)
+/* The -msse3 option implies -msse2 on both GCC and Clang, so no need to
+   specify those as well (verified with `echo | gcc -dM -E - -msse3`) */
+#define CORRADE_ENABLE_SSE3 __attribute__((__target__("sse3")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_SSE3
+#endif
+
+/**
+@brief Enable SSSE3 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("ssse3"))) @ce, allowing use of
+[SSSE3](https://en.wikipedia.org/wiki/SSSE3) and earlier SSE instructions
+inside a function annotated with this macro without having to specify `-mssse3`
+for the whole compilation unit. On x86 MSVC expands to nothing, as the compiler
+doesn't restrict use of intrinsics in any way. Not defined on other compilers
+or architectures.
+
+As a special case, if @ref CORRADE_TARGET_SSSE3 is present (meaning SSSE3 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_SSE3, implied by @ref CORRADE_ENABLE_SSE41. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsSsse3.h instead of
+    @cpp #include <tmmintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Ssse3}
+*/
+#if defined(CORRADE_TARGET_SSSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SSSE3
+#elif defined(CORRADE_TARGET_GCC)
+/* The -mssse3 option implies -msse2 -msse3 on both GCC and Clang, so no need
+   to specify those as well (verified with `echo | gcc -dM -E - -mssse3`) */
+#define CORRADE_ENABLE_SSSE3 __attribute__((__target__("ssse3")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_SSSE3
+#endif
+
+/**
+@brief Enable SSE4.1 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("sse4.1"))) @ce, allowing use of
+[SSE4.1](https://en.wikipedia.org/wiki/SSE4#SSE4.1) and earlier SSE
+instructions inside a function annotated with this macro without having to
+specify `-msse4.1` for the whole compilation unit. On x86 MSVC expands to
+nothing, as the compiler doesn't restrict use of intrinsics in any way. Not
+defined on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_SSE41 is present (meaning SSE4.1 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_SSSE3, implied by @ref CORRADE_ENABLE_SSE42.
+See @ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-danger}
+
+@par
+    Unless @ref CORRADE_TARGET_SSE41 is present, this macro is not defined on
+    GCC 4.8, as SSE4.1 intrinsics only work if `-msse4.2` is specified as well
+    due to both SSE4.1 and 4.2 intrinsics living in the same header. You can
+    only use @ref CORRADE_ENABLE_SSE42 in this case.
+
+@see @relativeref{Corrade,Cpu::Sse41}
+*/
+#if defined(CORRADE_TARGET_SSE41) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SSE41
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG))
+/* The -msse4.1 option implies -msse2 -msse3 -mssse3 on both GCC and Clang, so
+   no need to specify those as well (verified with
+   `echo | gcc -dM -E - -msse4.1`) */
+#define CORRADE_ENABLE_SSE41 __attribute__((__target__("sse4.1")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_SSE41
+#endif
+
+/**
+@brief Enable SSE4.2 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("sse4.2"))) @ce, allowing use of
+[SSE4.2](https://en.wikipedia.org/wiki/SSE4#SSE4.2) and earlier SSE
+instructions inside a function annotated with this macro without having to
+specify `-msse4.2` for the whole compilation unit. On x86 MSVC expands to
+nothing, as the compiler doesn't restrict use of intrinsics in any way. Not
+defined on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_SSE42 is defined (meaning SSE4.2 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsSse4.h instead of
+    @cpp #include <smmintrin.h> @ce and @cpp #include <nmmintrin.h> @ce to be
+    able to access the intrinsics on this compiler.
+
+@see @relativeref{Corrade,Cpu::Sse42}
+*/
+#if defined(CORRADE_TARGET_SSE42) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_SSE42
+#elif defined(CORRADE_TARGET_GCC)
+/* The -msse4.2 option implies -msse2 -msse3 -mssse3 -msse4.1 on both GCC and
+   Clang, so no need to specify those as well (verified with
+   `echo | gcc -dM -E - -msse4.2`) */
+#define CORRADE_ENABLE_SSE42 __attribute__((__target__("sse4.2")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_SSE42
+#endif
+
+/**
+@brief Enable AVX for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("avx"))) @ce, allowing use of
+[AVX](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions) and all earlier
+SSE instructions inside a function annotated with this macro without having to
+specify `-mavx` for the whole compilation unit. On x86 MSVC expands to nothing,
+as the compiler doesn't restrict use of intrinsics in any way. Not defined on
+other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_AVX is present (meaning AVX is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Avx}
+*/
+#if defined(CORRADE_TARGET_AVX) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_AVX
+#elif defined(CORRADE_TARGET_GCC)
+/* The -mavx option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 on both GCC
+   and Clang, so no need to specify those as well (verified with
+   `echo | gcc -dM -E - -mavx`) */
+#define CORRADE_ENABLE_AVX __attribute__((__target__("avx")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_AVX
+#endif
+
+/**
+@brief Enable AVX2 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("avx2"))) @ce, allowing use of
+[AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2),
+FMA, F16C, AVX and all earlier SSE instructions inside a function annotated
+with this macro without having to specify `-mavx2` for the whole compilation
+unit. On x86 MSVC expands to nothing, as the compiler doesn't restrict use of
+intrinsics in any way. Not defined on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_AVX2 is present (meaning AVX2 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Superset of @ref CORRADE_ENABLE_AVX, implied by @ref CORRADE_ENABLE_AVX512F.
+See @ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Avx2}
+*/
+#if defined(CORRADE_TARGET_AVX2) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_AVX2
+#elif defined(CORRADE_TARGET_GCC)
+/* The -mavx2 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
+   both GCC and Clang, so no need to specify those as well (verified with
+   `echo | gcc -dM -E - -mavx2`) */
+#define CORRADE_ENABLE_AVX2 __attribute__((__target__("avx2")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_AVX2
+#endif
+
+/**
+@brief Enable AVX-512 Foundation for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC 4.9+ and Clang expands to
+@cpp __attribute__((__target__("avx512f"))) @ce, allowing use of
+[AVX-512](https://en.wikipedia.org/wiki/AVX-512) Foundation and all earlier AVX
+and SSE instructions inside a function annotated with this macro without having
+to specify `-mavx512f` for the whole compilation unit. On x86 MSVC 2017 15.3+
+expands to nothing, as the compiler doesn't restrict use of intrinsics in any
+way. Not defined on other compilers, earlier compiler versions without AVX-512
+support or other architectures.
+
+As a special case, if @ref CORRADE_TARGET_AVX512F is present (meaning AVX-512
+Foundation is enabled for the whole compilation unit), this macro is defined as
+empty on all compilers.
+
+Superset of @ref CORRADE_ENABLE_AVX2. See @ref Cpu-usage-target-attributes for
+more information and usage example.
+@see @relativeref{Corrade,Cpu::Avx512f}
+*/
+#if defined(CORRADE_TARGET_AVX512F) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_AVX512F
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG))
+/* The -mavx512 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx
+   -mavx2 on both GCC and Clang, so no need to specify those as well (verified
+   with `echo | gcc -dM -E - -mavx512f`) */
+#define CORRADE_ENABLE_AVX512F __attribute__((__target__("avx512f")))
+#elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1911
+#define CORRADE_ENABLE_AVX512F
+#endif
 #endif
 
 }

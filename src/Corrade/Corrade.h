@@ -514,7 +514,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Streaming SIMD Extensions 2](https://en.wikipedia.org/wiki/SSE2) are enabled
 at compile time (`-msse2` or higher on GCC/Clang, `/arch:SSE2` or higher on
 MSVC). All x86-64 targets support SSE2. Implied by @ref CORRADE_TARGET_SSE3.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse2}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse2},
+    @ref CORRADE_ENABLE_SSE2
 */
 #define CORRADE_TARGET_SSE2
 #undef CORRADE_TARGET_SSE2
@@ -528,7 +529,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 at compile time (on GCC/Clang it's `-msse3` and higher, MSVC doesn't have a
 direct option and it's only implied by `/arch:AVX`). Superset of
 @ref CORRADE_TARGET_SSE2, implied by @ref CORRADE_TARGET_SSSE3.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse3}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse3},
+    @ref CORRADE_ENABLE_SSE3
 */
 #define CORRADE_TARGET_SSE3
 #undef CORRADE_TARGET_SSE3
@@ -547,7 +549,8 @@ Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wik
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
 detect those.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Ssse3}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Ssse3},
+    @ref CORRADE_ENABLE_SSSE3
 */
 #define CORRADE_TARGET_SSSE3
 #undef CORRADE_TARGET_SSSE3
@@ -566,7 +569,8 @@ Note that certain older AMD processors have [SSE4a](https://en.wikipedia.org/wik
 but neither SSSE3 nor SSE4.1. Both can be however treated as a subset of SSE4.1
 to a large extent, and it's recommended to use @ref CORRADE_TARGET_SSE41 to
 detect those.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse41}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse41},
+    @ref CORRADE_ENABLE_SSE41
 */
 #define CORRADE_TARGET_SSE41
 #undef CORRADE_TARGET_SSE41
@@ -580,7 +584,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (on GCC/Clang it's `-msse4.2` and higher, MSVC
 doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
 @ref CORRADE_TARGET_SSE41, implied by @ref CORRADE_TARGET_AVX.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse42}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Sse42},
+    @ref CORRADE_ENABLE_SSE42
 */
 #define CORRADE_TARGET_SSE42
 #undef CORRADE_TARGET_SSE42
@@ -623,7 +628,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (`-mavx` and higher on GCC/Clang, `/arch:AVX` on
 MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
 @ref CORRADE_TARGET_AVX2.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx},
+    @ref CORRADE_ENABLE_AVX
 */
 #define CORRADE_TARGET_AVX
 #undef CORRADE_TARGET_AVX
@@ -667,7 +673,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
 MSVC). Superset of @ref CORRADE_TARGET_AVX, implied by
 @ref CORRADE_TARGET_AVX512F.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx2}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx2},
+    @ref CORRADE_ENABLE_AVX2
 */
 #define CORRADE_TARGET_AVX2
 #undef CORRADE_TARGET_AVX2
@@ -679,7 +686,8 @@ MSVC). Superset of @ref CORRADE_TARGET_AVX, implied by
 Defined on @ref CORRADE_TARGET_X86 "x86" if [AVX-512](https://en.wikipedia.org/wiki/AVX-512)
 Foundation instructions are enabled at compile time (`-mavx512f` and higher on
 GCC/Clang, `/arch:AVX512` on MSVC). Superset of @ref CORRADE_TARGET_AVX2.
-@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx512f}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Avx512f},
+    @ref CORRADE_ENABLE_AVX512F
 */
 #define CORRADE_TARGET_AVX512F
 #undef CORRADE_TARGET_AVX512F

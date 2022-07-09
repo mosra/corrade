@@ -38,6 +38,22 @@ void transform(Cpu::ScalarT, Containers::ArrayView<float> data);
 void transform(Cpu::Sse42T, Containers::ArrayView<float> data);
 void transform(Cpu::Avx2T, Containers::ArrayView<float> data);
 /* [Cpu-usage-declare] */
+
+/* [Cpu-usage-target-attributes] */
+void transform(Cpu::ScalarT, Containers::ArrayView<float> data) {
+    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+}
+#ifdef CORRADE_ENABLE_SSE42
+CORRADE_ENABLE_SSE42 void transform(Cpu::Sse42T, Containers::ArrayView<float> data) {
+    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX2
+CORRADE_ENABLE_AVX2 void transform(Cpu::Avx2T, Containers::ArrayView<float> data) {
+    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+}
+#endif
+/* [Cpu-usage-target-attributes] */
 #endif
 
 inline void foo(Cpu::ScalarT) {}

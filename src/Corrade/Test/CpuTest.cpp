@@ -31,6 +31,22 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
+#ifdef CORRADE_ENABLE_SSE2
+#include "Corrade/Utility/IntrinsicsSse2.h"
+#endif
+#ifdef CORRADE_ENABLE_SSE3
+#include "Corrade/Utility/IntrinsicsSse3.h"
+#endif
+#ifdef CORRADE_ENABLE_SSSE3
+#include "Corrade/Utility/IntrinsicsSsse3.h"
+#endif
+#if defined(CORRADE_ENABLE_SSE41) || defined(CORRADE_ENABLE_SSE42)
+#include "Corrade/Utility/IntrinsicsSse4.h"
+#endif
+#if defined(CORRADE_ENABLE_AVX) || defined(CORRADE_ENABLE_AVX_F16C) || defined(CORRADE_ENABLE_AVX_FMA) || defined(CORRADE_ENABLE_AVX2) || defined(CORRADE_ENABLE_AVX512F)
+#include "Corrade/Utility/IntrinsicsAvx.h"
+#endif
+
 namespace Corrade { namespace Test { namespace {
 
 struct CpuTest: TestSuite::Tester {
@@ -63,6 +79,7 @@ struct CpuTest: TestSuite::Tester {
     void detect();
 
     void tagDispatch();
+    template<class T> void enableMacros();
 
     void debug();
     void debugPacked();
@@ -100,6 +117,16 @@ CpuTest::CpuTest() {
         Containers::arraySize(DetectData));
 
     addTests({&CpuTest::tagDispatch,
+              #ifdef CORRADE_TARGET_X86
+              &CpuTest::enableMacros<Cpu::Sse2T>,
+              &CpuTest::enableMacros<Cpu::Sse3T>,
+              &CpuTest::enableMacros<Cpu::Ssse3T>,
+              &CpuTest::enableMacros<Cpu::Sse41T>,
+              &CpuTest::enableMacros<Cpu::Sse42T>,
+              &CpuTest::enableMacros<Cpu::AvxT>,
+              &CpuTest::enableMacros<Cpu::Avx2T>,
+              &CpuTest::enableMacros<Cpu::Avx512fT>,
+              #endif
 
               &CpuTest::debug,
               &CpuTest::debugPacked});
@@ -470,6 +497,160 @@ void CpuTest::tagDispatch() {
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
+}
+
+/* Not using an argument here since we *don't* want the overload delegating
+   in this case -- it would hide errors when a certain instruction set doesn't
+   have a corresponding overload, as it'd fall back to a parent one. I'm also
+   defining a catch-all implementation with CORRADE_SKIP() instead of having an
+   #ifdef CORRADE_ENABLE_* around every variant in addTests(), because this way
+   it's clearly visible in the test output if any CORRADE_ENABLE_* macro isn't
+   defined for whatever reason. */
+template<class T> int callInstructionFor() {
+    CORRADE_SKIP("No CORRADE_ENABLE_* macro for" << Cpu::features<T>() << "on this compiler");
+}
+/* The goal here is to use instructions that would make the compilation fail
+   on GCC and default flags (i.e., no -march=native etc.) if the
+   CORRADE_ENABLE_* macro is removed. While this is quite a lot of code, it's a
+   good overview of how all the instructions look like... and it also uncovers
+   a MASSIVE amount of platform-specific warts and compiler bugs that the API
+   should take care of.
+
+   All these are also marked with CORRADE_NEVER_INLINE to make it easier to see
+   into what code they get actually compiled. Except for the catch-all variant,
+   which isn't interesting for disassembly. */
+#ifdef CORRADE_ENABLE_SSE2
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE2 int callInstructionFor<Cpu::Sse2T>() {
+    __m128i a = _mm_set_epi32(0x80808080, 0, 0x80808080, 0);
+
+    /* All instructions SSE2 */
+
+    int mask = _mm_movemask_epi8(a);
+    CORRADE_COMPARE(mask, 0xf0f0); /* 0b1111000011110000 */
+    return mask;
+}
+#endif
+#ifdef CORRADE_ENABLE_SSE3
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE3 int callInstructionFor<Cpu::Sse3T>() {
+    const std::uint32_t a[]{0, 10, 20, 30, 40};
+
+    /* SSE3 */
+    union {
+        __m128i v;
+        int s[4];
+    } b;
+    b.v = _mm_lddqu_si128(reinterpret_cast<const __m128i*>(a + 1));
+
+    CORRADE_COMPARE(b.s[0], 10);
+    CORRADE_COMPARE(b.s[1], 20);
+    CORRADE_COMPARE(b.s[2], 30);
+    CORRADE_COMPARE(b.s[3], 40);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_SSSE3
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSSE3 int callInstructionFor<Cpu::Ssse3T>() {
+    __m128i a = _mm_set_epi32(-10, 20, -30, 40);
+
+    /* SSSE3 */
+    union {
+        __m128i v;
+        int s[4];
+    } b;
+    b.v = _mm_abs_epi32(a);
+
+    CORRADE_COMPARE(b.s[3], 10);
+    CORRADE_COMPARE(b.s[2], 20);
+    CORRADE_COMPARE(b.s[1], 30);
+    CORRADE_COMPARE(b.s[0], 40);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_SSE41
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE41 int callInstructionFor<Cpu::Sse41T>() {
+    __m128 a = _mm_set_ps(5.47f, 2.23f, 7.62f, 0.5f);
+
+    /* SSE4.1 */
+    union {
+        __m128 v;
+        float s[4];
+    } b;
+    b.v = _mm_ceil_ps(a);
+
+    CORRADE_COMPARE(b.s[3], 6.0f);
+    CORRADE_COMPARE(b.s[2], 3.0f);
+    CORRADE_COMPARE(b.s[1], 8.0f);
+    CORRADE_COMPARE(b.s[0], 1.0f);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_SSE42
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE42 int callInstructionFor<Cpu::Sse42T>() {
+    __m128i a = _mm_set_epi64x(50, 60);
+    __m128i b = _mm_set_epi64x(60, 50);
+
+    /* SSE4.2 */
+    union {
+        __m128i v;
+        std::int64_t s[2];
+    } c;
+    c.v = _mm_cmpgt_epi64(a, b);
+
+    CORRADE_COMPARE(c.s[0], -1);
+    CORRADE_COMPARE(c.s[1], 0);
+    return c.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX int callInstructionFor<Cpu::AvxT>() {
+    __m256d a = _mm256_set_pd(5.47, 2.23, 7.62, 0.5);
+
+    /* All instructions AVX */
+
+    union {
+        __m256d v;
+        double s[4];
+    } b;
+    b.v = _mm256_ceil_pd(a);
+
+    CORRADE_COMPARE(b.s[3], 6.0);
+    CORRADE_COMPARE(b.s[2], 3.0);
+    CORRADE_COMPARE(b.s[1], 8.0);
+    CORRADE_COMPARE(b.s[0], 1.0);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX2
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX2 int callInstructionFor<Cpu::Avx2T>() {
+    __m256i a = _mm256_set_epi64x(0x8080808080808080ull, 0, 0x8080808080808080ull, 0);
+
+    /* Like callInstructionFor<Cpu::Sse2T>(), but expanded to AVX2 */
+    int mask = _mm256_movemask_epi8(a);
+
+    CORRADE_COMPARE(mask, 0xff00ff00);/* 0b11111111000000001111111100000000 */
+    return mask;
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX512F
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX512F int callInstructionFor<Cpu::Avx512fT>() {
+    __m128 a = _mm_set1_ps(5.47f);
+
+    /* AVX512 */
+    int ceil = _mm_cvt_roundss_si32(a, _MM_FROUND_TO_POS_INF|_MM_FROUND_NO_EXC);
+
+    CORRADE_COMPARE(ceil, 6);
+    return ceil;
+}
+#endif
+
+template<class T> void CpuTest::enableMacros() {
+    setTestCaseTemplateName(Cpu::TypeTraits<T>::name());
+
+    if(!(Cpu::runtimeFeatures() & Cpu::features<T>()))
+        CORRADE_SKIP("CPU feature not supported");
+
+    CORRADE_VERIFY(true); /* to capture correct function name */
+    CORRADE_VERIFY(callInstructionFor<T>());
 }
 
 void CpuTest::debug() {
