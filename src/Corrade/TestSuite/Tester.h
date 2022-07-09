@@ -1722,7 +1722,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
    done for consistency with CORRADE_EXPECT_FAIL_IF(), see the notice there
    for more info. */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(expectFailDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(expectFailDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(expectFailDebug, __LINE__) << message;        \
     })}
 
@@ -1761,7 +1761,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
    `int>{}, "..."`. Same is done in CORRADE_COMPARE(), for example, but not
    in CORRADE_SKIP() or CORRADE_ITERATION() as those have just one argument. */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
-    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)((Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(expectFailIfDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)((Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(expectFailIfDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(expectFailIfDebug, __LINE__) << message;      \
     }), condition)
 
@@ -1786,7 +1786,7 @@ caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP()
 */
 #define CORRADE_INFO(...)                                                   \
-    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
     })}, __LINE__, false)
 
@@ -1810,7 +1810,7 @@ caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP()
 */
 #define CORRADE_WARN(...)                                                   \
-    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
     })}, __LINE__, true)
 
@@ -1836,7 +1836,7 @@ caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_SKIP()
 */
 #define CORRADE_FAIL_IF(condition, message)                                 \
-    Corrade::TestSuite::Tester::instance().failIf(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__), [&](Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::instance().failIf(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << message;              \
     })}, condition)
 
@@ -1862,7 +1862,7 @@ some caveats. See @ref CORRADE_VERIFY() for details.
     @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF()
 */
 #define CORRADE_SKIP(...)                                                   \
-    Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(skipDebug, __LINE__) << __VA_ARGS__;          \
     })})
 
@@ -1933,7 +1933,7 @@ also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #define CORRADE_ITERATION(...)                                              \
-    Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Debug&& _CORRADE_HELPER_PASTE(iterationPrinterDebug, __LINE__)) { \
+    Corrade::TestSuite::Tester::IterationPrinter _CORRADE_HELPER_PASTE(iterationPrinter, __LINE__){(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(iterationPrinterDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(iterationPrinterDebug, __LINE__) << __VA_ARGS__; \
     })}
 
