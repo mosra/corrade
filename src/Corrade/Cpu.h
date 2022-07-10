@@ -720,6 +720,14 @@ equivalent:
 */
 template<class T> constexpr T tag() { return T{Implementation::Init}; }
 
+#if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+class Features;
+
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT Features runtimeFeatures(unsigned long caps);
+}
+#endif
+
 /**
 @brief Feature set
 
@@ -834,6 +842,9 @@ class Features {
         #if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
         /* MSVC demands the export macro to be here as well */
         friend CORRADE_UTILITY_EXPORT Features runtimeFeatures();
+        #endif
+        #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+        friend Features Implementation::runtimeFeatures(unsigned long);
         #endif
 
         constexpr explicit Features(unsigned int data) noexcept: _data{data} {}
@@ -1012,9 +1023,11 @@ not present, no following flags are checked either. On compilers other than
 GCC, Clang and MSVC the function is @cpp constexpr @ce and delegates into
 @ref compiledFeatures().
 
-On @ref CORRADE_TARGET_ARM "ARM", no runtime detection is implemented at the
-moment. The function is @cpp constexpr @ce and delegates into
-@ref compiledFeatures().
+On @ref CORRADE_TARGET_ARM "ARM" and Linux or Android API level 18+ uses
+@m_class{m-doc-external} [getauxval()](https://man.archlinux.org/man/getauxval.3)
+to check for the @ref Neon, @ref NeonFma and @ref NeonFp16. @ref Neon and
+@ref NeonFma are implicitly supported on ARM64. On other platforms the function
+is @cpp constexpr @ce and delegates into @ref compiledFeatures().
 
 On @ref CORRADE_TARGET_WASM "WebAssembly" an attempt to use SIMD instructions
 without runtime support results in a WebAssembly compilation error and thus
@@ -1029,7 +1042,7 @@ default-constructed) @ref Features.
 
 @see @ref DefaultBase
 */
-#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || defined(DOXYGEN_GENERATING_OUTPUT)
+#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(DOXYGEN_GENERATING_OUTPUT)
 CORRADE_UTILITY_EXPORT Features runtimeFeatures();
 #else
 constexpr Features runtimeFeatures() { return compiledFeatures(); }

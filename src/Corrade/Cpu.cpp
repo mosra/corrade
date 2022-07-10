@@ -53,6 +53,11 @@
 #include <immintrin.h>
 #endif
 #endif
+
+/* ARM on Linux and Android with API level 18+ */
+#elif defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+#include <asm/hwcap.h>
+#include <sys/auxv.h>
 #endif
 
 namespace Corrade { namespace Cpu {
@@ -79,7 +84,50 @@ static_assert(sizeof(Cpu::NeonFp16) == 1, "");
 static_assert(sizeof(Cpu::Simd128) == 1, "");
 #endif
 
-#if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
+#if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+namespace Implementation {
+
+/* As getauxval() can't be called from within an ifunc resolver because there
+   it's too early for an external call, the value of AT_HWCAP is instead passed
+   to it from outside, on glibc 2.13+ and on Android API 30+:
+    https://github.com/bminor/glibc/commit/7520ff8c744a704ca39741c165a2360d63a4f47a
+    https://android.googlesource.com/platform/bionic/+/e949195f6489653ee3771535951ed06973246c3e/libc/include/sys/ifunc.h
+   Which means we need a variant of runtimeFeatures() that is able to operate
+   with a value fed from outside, which is then used inside such resolvers.
+   For simplicity this variant is available always and the public
+   Cpu::runtimeFeatures() just delegates to it. */
+Features runtimeFeatures(const unsigned long caps) {
+    unsigned int out = 0;
+    #ifdef CORRADE_TARGET_32BIT
+    if(caps & HWCAP_NEON) out |= TypeTraits<NeonT>::Index;
+    /* Since FMA is enabled by passing -mfpu=neon-vfpv4, I assume this is the
+       flag that corresponds to it. */
+    if(caps & HWCAP_VFPv4) out |= TypeTraits<NeonFmaT>::Index;
+    #else
+    /* On ARM64 NEON and NEON FMA is implicit. For extra security make use of
+       the CORRADE_TARGET_ defines (which should be always there). */
+    out |=
+        #ifdef CORRADE_TARGET_NEON
+        TypeTraits<NeonT>::Index|
+        #endif
+        #ifdef CORRADE_TARGET_NEON_FMA
+        TypeTraits<NeonFmaT>::Index|
+        #endif
+        0;
+    /* The HWCAP flags are extremely cryptic. The only vague confirmation is in
+       a *commit message* to the kernel hwcaps file, FFS. The HWCAP_FPHP seems
+       to correspond to scalar FP16, so the other should be the vector one?
+       https://github.com/torvalds/linux/blame/master/arch/arm64/include/uapi/asm/hwcap.h
+       This one also isn't present on 32-bit, so I assume it's ARM64-only? */
+    if(caps & HWCAP_ASIMDHP) out |= TypeTraits<NeonFp16T>::Index;
+    #endif
+    return Features{out};
+}
+
+}
+#endif
+
+#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18))
 #if defined(CORRADE_TARGET_X86) && defined(CORRADE_TARGET_GCC)
 /* GCC 10 complains otherwise, however 4.8 doesn't. Doing it via a function
    attribute instead of passing -mxsave as detecting target architecture in
@@ -87,8 +135,6 @@ static_assert(sizeof(Cpu::Simd128) == 1, "");
 __attribute__((__target__("xsave")))
 #endif
 Features runtimeFeatures() {
-    unsigned int out = 0;
-
     /* Use cpuid on x86 and GCC/Clang/MSVC */
     #if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
     union {
@@ -109,6 +155,7 @@ Features runtimeFeatures() {
     CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid(1, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
     #endif
 
+    unsigned int out = 0;
     if(cpuid.e.dx & (1 << 26)) out |= TypeTraits<Sse2T>::Index;
     if(cpuid.e.cx & (1 <<  0)) out |= TypeTraits<Sse3T>::Index;
     if(cpuid.e.cx & (1 <<  9)) out |= TypeTraits<Ssse3T>::Index;
@@ -170,13 +217,21 @@ Features runtimeFeatures() {
     if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
     if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
 
+    return Features{out};
+
+    /* Use getauxval() on ARM on Linux and Android */
+    #elif defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+    /* People say getauxval() is "extremely slow":
+        https://lemire.me/blog/2020/07/17/the-cost-of-runtime-dispatch/#comment-538459
+       Like, can anything be worse than reading and parsing the text from
+       /proc/cpuinfo? */
+    return Implementation::runtimeFeatures(getauxval(AT_HWCAP));
+
     /* No other implementation at the moment. The function should not be even
        defined here in that case -- it's inlined in the header instead. */
     #else
     #error
     #endif
-
-    return Features{out};
 }
 #endif
 
