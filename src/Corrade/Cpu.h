@@ -1040,8 +1040,8 @@ constexpr Features runtimeFeatures() { return compiledFeatures(); }
 @brief Enable SSE2 for given function
 @m_since_latest
 
-On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
-@cpp __attribute__((__target__("sse2"))) @ce, allowing use of
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang and @ref CORRADE_TARGET_CLANG_CL "clang-cl"
+expands to @cpp __attribute__((__target__("sse2"))) @ce, allowing use of
 [SSE2](https://en.wikipedia.org/wiki/SSE2) and earlier SSE instructions inside
 a function annotated with this macro without having to specify `-msse2` for the
 whole compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
@@ -1067,7 +1067,7 @@ more information and usage example.
 */
 #if defined(CORRADE_TARGET_SSE2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE2
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_SSE2 __attribute__((__target__("sse2")))
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSE2
@@ -1104,7 +1104,7 @@ Superset of @ref CORRADE_ENABLE_SSE2, implied by @ref CORRADE_ENABLE_SSSE3. See
 */
 #if defined(CORRADE_TARGET_SSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE3
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -msse3 option implies -msse2 on both GCC and Clang, so no need to
    specify those as well (verified with `echo | gcc -dM -E - -msse3`) */
 #define CORRADE_ENABLE_SSE3 __attribute__((__target__("sse3")))
@@ -1116,8 +1116,8 @@ Superset of @ref CORRADE_ENABLE_SSE2, implied by @ref CORRADE_ENABLE_SSSE3. See
 @brief Enable SSSE3 for given function
 @m_since_latest
 
-On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
-@cpp __attribute__((__target__("ssse3"))) @ce, allowing use of
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang and @ref CORRADE_TARGET_CLANG_CL "clang-cl"
+expands to @cpp __attribute__((__target__("ssse3"))) @ce, allowing use of
 [SSSE3](https://en.wikipedia.org/wiki/SSSE3) and earlier SSE instructions
 inside a function annotated with this macro without having to specify `-mssse3`
 for the whole compilation unit. On x86 MSVC expands to nothing, as the compiler
@@ -1143,7 +1143,7 @@ Superset of @ref CORRADE_ENABLE_SSE3, implied by @ref CORRADE_ENABLE_SSE41. See
 */
 #if defined(CORRADE_TARGET_SSSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSSE3
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -mssse3 option implies -msse2 -msse3 on both GCC and Clang, so no need
    to specify those as well (verified with `echo | gcc -dM -E - -mssse3`) */
 #define CORRADE_ENABLE_SSSE3 __attribute__((__target__("ssse3")))
@@ -1155,8 +1155,8 @@ Superset of @ref CORRADE_ENABLE_SSE3, implied by @ref CORRADE_ENABLE_SSE41. See
 @brief Enable SSE4.1 for given function
 @m_since_latest
 
-On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
-@cpp __attribute__((__target__("sse4.1"))) @ce, allowing use of
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang and @ref CORRADE_TARGET_CLANG_CL "clang-cl"
+expands to @cpp __attribute__((__target__("sse4.1"))) @ce, allowing use of
 [SSE4.1](https://en.wikipedia.org/wiki/SSE4#SSE4.1) and earlier SSE
 instructions inside a function annotated with this macro without having to
 specify `-msse4.1` for the whole compilation unit. On x86 MSVC expands to
@@ -1182,7 +1182,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_SSE41) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE41
-#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG))
+#elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 409) || defined(CORRADE_TARGET_CLANG) /* also matches clang-cl */
 /* The -msse4.1 option implies -msse2 -msse3 -mssse3 on both GCC and Clang, so
    no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.1`) */
@@ -1195,8 +1195,8 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 @brief Enable SSE4.2 for given function
 @m_since_latest
 
-On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
-@cpp __attribute__((__target__("sse4.2"))) @ce, allowing use of
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang and @ref CORRADE_TARGET_CLANG_CL "clang-cl"
+expands to @cpp __attribute__((__target__("sse4.2"))) @ce, allowing use of
 [SSE4.2](https://en.wikipedia.org/wiki/SSE4#SSE4.2) and earlier SSE
 instructions inside a function annotated with this macro without having to
 specify `-msse4.2` for the whole compilation unit. On x86 MSVC expands to
@@ -1222,7 +1222,7 @@ Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
 */
 #if defined(CORRADE_TARGET_SSE42) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE42
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -msse4.2 option implies -msse2 -msse3 -mssse3 -msse4.1 on both GCC and
    Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.2`) */
@@ -1240,8 +1240,10 @@ On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
 [AVX](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions) and all earlier
 SSE instructions inside a function annotated with this macro without having to
 specify `-mavx` for the whole compilation unit. On x86 MSVC expands to nothing,
-as the compiler doesn't restrict use of intrinsics in any way. Not defined on
-other compilers or architectures.
+as the compiler doesn't restrict use of intrinsics in any way. Unlike the SSE
+variants this macro is not defined on @ref CORRADE_TARGET_CLANG_CL "clang-cl",
+as there AVX and newer intrinsics are provided only if enabled on compiler
+command line. Not defined on other compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_AVX is present (meaning AVX is
 enabled for the whole compilation unit), this macro is defined as empty on all
@@ -1262,12 +1264,17 @@ Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
 */
 #if defined(CORRADE_TARGET_AVX) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mavx option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 on both GCC
    and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx`) */
 #define CORRADE_ENABLE_AVX __attribute__((__target__("avx")))
-#elif defined(CORRADE_TARGET_MSVC)
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __AVX__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_AVX
 #endif
 
@@ -1281,7 +1288,10 @@ On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
 FMA, F16C, AVX and all earlier SSE instructions inside a function annotated
 with this macro without having to specify `-mavx2` for the whole compilation
 unit. On x86 MSVC expands to nothing, as the compiler doesn't restrict use of
-intrinsics in any way. Not defined on other compilers or architectures.
+intrinsics in any way. Unlike the SSE variants this macro is not defined on
+@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer intrinsics are
+provided only if enabled on compiler command line. Not defined on other
+compilers  or architectures.
 
 As a special case, if @ref CORRADE_TARGET_AVX2 is present (meaning AVX2 is
 enabled for the whole compilation unit), this macro is defined as empty on all
@@ -1302,12 +1312,17 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX2
-#elif defined(CORRADE_TARGET_GCC)
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mavx2 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx2`) */
 #define CORRADE_ENABLE_AVX2 __attribute__((__target__("avx2")))
-#elif defined(CORRADE_TARGET_MSVC)
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __AVX2__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_AVX2
 #endif
 
@@ -1321,8 +1336,11 @@ On @ref CORRADE_TARGET_X86 "x86" GCC 4.9+ and Clang expands to
 and SSE instructions inside a function annotated with this macro without having
 to specify `-mavx512f` for the whole compilation unit. On x86 MSVC 2017 15.3+
 expands to nothing, as the compiler doesn't restrict use of intrinsics in any
-way. Not defined on other compilers, earlier compiler versions without AVX-512
-support or other architectures.
+way. Unlike the SSE variants this macro is not defined on
+@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer intrinsics are
+provided only if enabled on compiler command line. Not defined on other
+compilers, earlier compiler versions without AVX-512 support or other
+architectures.
 
 As a special case, if @ref CORRADE_TARGET_AVX512F is present (meaning AVX-512
 Foundation is enabled for the whole compilation unit), this macro is defined as
@@ -1334,12 +1352,17 @@ more information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX512F) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX512F
-#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG))
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mavx512 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx
    -mavx2 on both GCC and Clang, so no need to specify those as well (verified
    with `echo | gcc -dM -E - -mavx512f`) */
 #define CORRADE_ENABLE_AVX512F __attribute__((__target__("avx512f")))
-#elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1911
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __AVX512F__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1911 && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_AVX512F
 #endif
 #endif
