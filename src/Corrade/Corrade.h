@@ -580,6 +580,33 @@ doesn't have a direct option and it's only implied by `/arch:AVX`). Superset of
 #undef CORRADE_TARGET_SSE42
 
 /**
+@brief Target with POPCNT instructions
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[POPCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+is enabled at compile time. On GCC/Clang it's `-mpopcnt` and is also implied by
+`-msse4.2` and higher, MSVC doesn't have a direct option but it's assumed to
+be implied by `/arch:AVX`.
+*/
+#define CORRADE_TARGET_POPCNT
+#undef CORRADE_TARGET_POPCNT
+
+/**
+@brief Target with LZCNT instructions
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[LZCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+is enabled at compile time (on GCC/Clang it's `-mlznct`, MSVC doesn't have a
+direct option but it's assumed to be implied by `/arch:AVX`). However note that
+this instruction has encoding compatible with an earlier `BSR` instruction
+which has a slightly different behavior.
+*/
+#define CORRADE_TARGET_LZCNT
+#undef CORRADE_TARGET_LZCNT
+
+/**
 @brief AVX target
 @m_since_latest
 

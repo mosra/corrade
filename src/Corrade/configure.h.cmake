@@ -233,6 +233,35 @@
 #endif
 #endif
 
+/* POPCNT and LZCNT on GCC, queried wth `gcc -mpopcnt -dM -E - | grep POPCNT`,
+   and equivalent for LZCNT. */
+#ifdef CORRADE_TARGET_GCC
+#ifdef __POPCNT__
+#define CORRADE_TARGET_POPCNT
+#endif
+#ifdef __LZCNT__
+#define CORRADE_TARGET_LZCNT
+#endif
+
+/* There doesn't seem to be any equivalent on MSVC,
+   https://github.com/kimwalisch/libpopcnt assumes POPCNT is on x86 MSVC
+   always, and LZCNT has encoding compatible with BSR so if not available it'll
+   not crash but produce wrong results, sometimes. Enabling them always feels a
+   bit too much, so restricting that only to AVX+, since one is in SSE4
+   intrinsic headers and the other in AVX headers. */
+#elif defined(CORRADE_TARGET_MSVC) && defined(__AVX__)
+#define CORRADE_TARGET_POPCNT
+/* As with other AVX+ intrinsics on clang-cl, these are only included if the
+   corresponding macro is defined as well, so check for __LZCNT__ there.
+   Otherwise this would mean the CORRADE_ENABLE_LZCNT macro is defined always,
+   which would incorrectly imply presence of these intrinsics. Chance is that
+   __LZCNT__ is possibly implied with /arch:AVX2 or some such, but I don't know
+   for sure, so this is more robust. */
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__LZCNT__)
+#define CORRADE_TARGET_LZCNT
+#endif
+#endif
+
 /* On GCC, F16C and FMA have its own define, on MSVC FMA is implied by
    /arch:AVX2  (https://docs.microsoft.com/en-us/cpp/build/reference/arch-x86),
    no mention of F16C but https://walbourn.github.io/directxmath-f16c-and-fma/
