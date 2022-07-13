@@ -42,5 +42,15 @@ if constexpr(Cpu::DefaultBase >= Cpu::Avx2) {
     // scalar code
 }
 /* [Cpu-usage-compile-time] */
+
+/* [Cpu-usage-extra-compile-time] */
+Utility::Debug{} << "Base and extra instruction sets:" << Cpu::Default;
+
+if constexpr(Cpu::Default >= (Cpu::Avx2|Cpu::AvxFma)) {
+    // AVX2+FMA code
+} else {
+    // scalar code
+}
+/* [Cpu-usage-extra-compile-time] */
 }
 #endif

@@ -598,8 +598,10 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [POPCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
 is enabled at compile time. On GCC/Clang it's `-mpopcnt` and is also implied by
 `-msse4.2` and higher, MSVC doesn't have a direct option but it's assumed to
-be implied by `/arch:AVX`.
-@see @relativeref{Corrade,Cpu}
+be implied by `/arch:AVX`. To avoid failures at runtime, prefer to detect its
+presence with @ref Cpu::runtimeFeatures().
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Popcnt},
+    @ref CORRADE_ENABLE_POPCNT
 */
 #define CORRADE_TARGET_POPCNT
 #undef CORRADE_TARGET_POPCNT
@@ -613,8 +615,11 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 is enabled at compile time (on GCC/Clang it's `-mlznct`, MSVC doesn't have a
 direct option but it's assumed to be implied by `/arch:AVX`). However note that
 this instruction has encoding compatible with an earlier `BSR` instruction
-which has a slightly different behavior.
-@see @relativeref{Corrade,Cpu}
+which has a slightly different behavior. To avoid wrong results if it isn't
+available, prefer to detect its presence with @ref Cpu::runtimeFeatures()
+instead.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Lzcnt},
+    @ref CORRADE_ENABLE_LZCNT
 */
 #define CORRADE_TARGET_LZCNT
 #undef CORRADE_TARGET_LZCNT
@@ -641,8 +646,10 @@ MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
 Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [F16C instruction set](https://en.wikipedia.org/wiki/F16C) is enabled at
 compile time. On GCC/Clang it's `-mf16c`, MSVC doesn't have a direct option but
-it's assumed to be implied by `/arch:AVX2`.
-@see @relativeref{Corrade,Cpu}
+it's assumed to be implied by `/arch:AVX2`. To avoid failures at runtime,
+prefer to detect its presence with @ref Cpu::runtimeFeatures().
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::AvxF16c},
+    @ref CORRADE_ENABLE_AVX_F16C
 */
 #define CORRADE_TARGET_AVX_F16C
 #undef CORRADE_TARGET_AVX_F16C
@@ -654,12 +661,14 @@ it's assumed to be implied by `/arch:AVX2`.
 Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set) is
 enabled at compile time. On GCC/Clang it's `-mfma`, MSVC doesn't have a direct
-option but it's assumes to be implied by `/arch:AVX2`.
+option but it's assumes to be implied by `/arch:AVX2`. To avoid failures at
+runtime, prefer to detect its presence with @ref Cpu::runtimeFeatures().
 
 The FMA4 instruction set, which used to be supported only in certain range of
 AMD processors and isn't anymore, is not detected, and AMD switched to FMA3
 since.
-@see @relativeref{Corrade,Cpu}
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::AvxFma},
+    @ref CORRADE_ENABLE_AVX_FMA
 */
 #define CORRADE_TARGET_AVX_FMA
 #undef CORRADE_TARGET_AVX_FMA

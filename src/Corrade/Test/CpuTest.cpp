@@ -84,7 +84,18 @@ struct CpuTest: TestSuite::Tester {
     void detectDefault();
     void detect();
 
+    void bitIndex();
+    void bitCount();
+    void priority();
+
     void tagDispatch();
+    void tagDispatchExtraExact();
+    void tagDispatchExtraUnusedExtra();
+    void tagDispatchExtraFallbackExtra();
+    void tagDispatchExtraFallbackBase();
+    void tagDispatchExtraFallbackBoth();
+    void tagDispatchExtraPriority();
+
     template<class T> void enableMacros();
 
     void debug();
@@ -122,14 +133,29 @@ CpuTest::CpuTest() {
     addInstancedTests({&CpuTest::detect},
         Containers::arraySize(DetectData));
 
-    addTests({&CpuTest::tagDispatch,
+    addTests({&CpuTest::bitIndex,
+              &CpuTest::bitCount,
+              &CpuTest::priority,
+
+              &CpuTest::tagDispatch,
+              &CpuTest::tagDispatchExtraExact,
+              &CpuTest::tagDispatchExtraUnusedExtra,
+              &CpuTest::tagDispatchExtraFallbackBase,
+              &CpuTest::tagDispatchExtraFallbackExtra,
+              &CpuTest::tagDispatchExtraFallbackBoth,
+              &CpuTest::tagDispatchExtraPriority,
+
               #ifdef CORRADE_TARGET_X86
               &CpuTest::enableMacros<Cpu::Sse2T>,
               &CpuTest::enableMacros<Cpu::Sse3T>,
               &CpuTest::enableMacros<Cpu::Ssse3T>,
               &CpuTest::enableMacros<Cpu::Sse41T>,
               &CpuTest::enableMacros<Cpu::Sse42T>,
+              &CpuTest::enableMacros<Cpu::PopcntT>,
+              &CpuTest::enableMacros<Cpu::LzcntT>,
               &CpuTest::enableMacros<Cpu::AvxT>,
+              &CpuTest::enableMacros<Cpu::AvxF16cT>,
+              &CpuTest::enableMacros<Cpu::AvxFmaT>,
               &CpuTest::enableMacros<Cpu::Avx2T>,
               &CpuTest::enableMacros<Cpu::Avx512fT>,
               #elif defined(CORRADE_TARGET_ARM)
@@ -157,6 +183,8 @@ void CpuTest::tagNoDefaultConstructor() {
     CORRADE_VERIFY(!std::is_default_constructible<Cpu::Sse41T>::value);
     CORRADE_VERIFY(!std::is_default_constructible<Cpu::Sse42T>::value);
     CORRADE_VERIFY(!std::is_default_constructible<Cpu::AvxT>::value);
+    CORRADE_VERIFY(!std::is_default_constructible<Cpu::AvxF16cT>::value);
+    CORRADE_VERIFY(!std::is_default_constructible<Cpu::AvxFmaT>::value);
     CORRADE_VERIFY(!std::is_default_constructible<Cpu::Avx2T>::value);
     CORRADE_VERIFY(!std::is_default_constructible<Cpu::Avx512fT>::value);
     #elif defined(CORRADE_TARGET_ARM)
@@ -178,6 +206,8 @@ void CpuTest::tagInlineDefinition() {
     CORRADE_VERIFY(std::is_same<decltype(Cpu::Sse41), const Cpu::Sse41T>::value);
     CORRADE_VERIFY(std::is_same<decltype(Cpu::Sse42), const Cpu::Sse42T>::value);
     CORRADE_VERIFY(std::is_same<decltype(Cpu::Avx), const Cpu::AvxT>::value);
+    CORRADE_VERIFY(std::is_same<decltype(Cpu::AvxF16c), const Cpu::AvxF16cT>::value);
+    CORRADE_VERIFY(std::is_same<decltype(Cpu::AvxFma), const Cpu::AvxFmaT>::value);
     CORRADE_VERIFY(std::is_same<decltype(Cpu::Avx2), const Cpu::Avx2T>::value);
     CORRADE_VERIFY(std::is_same<decltype(Cpu::Avx512f), const Cpu::Avx512fT>::value);
     #elif defined(CORRADE_TARGET_ARM)
@@ -287,6 +317,10 @@ void CpuTest::featuresConstructTemplate() {
 
 void CpuTest::featuresOperatorOr() {
     #ifdef CORRADE_TARGET_X86
+    /* This is actually using the compile-time operation, producing Tags<bits>,
+       which is tested explicitly below, but that should be completely
+       transparent to the user and work as if it produced Features directly
+       instead of going through Tags first */
     Cpu::Features features = Cpu::Sse3|Cpu::Sse2;
     CORRADE_COMPARE(std::uint32_t(features), 3);
 
@@ -302,6 +336,17 @@ void CpuTest::featuresOperatorOr() {
     CORRADE_COMPARE(std::uint32_t(cFeatures), 3);
     CORRADE_COMPARE(std::uint32_t(cFeatures1), 7);
     CORRADE_COMPARE(std::uint32_t(cFeatures2), 7);
+
+    /* Test also the compile-time operation, different values should be
+       different types but same values should be same types */
+    constexpr auto cTags = Cpu::Sse3|Cpu::Sse2;
+    constexpr auto cTags1 = cTags|Cpu::Ssse3;
+    constexpr auto cTags2 = Cpu::Ssse3|cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags), 3);
+    CORRADE_COMPARE(std::uint32_t(cTags1), 7);
+    CORRADE_COMPARE(std::uint32_t(cTags2), 7);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -309,6 +354,10 @@ void CpuTest::featuresOperatorOr() {
 
 void CpuTest::featuresOperatorAnd() {
     #ifdef CORRADE_TARGET_X86
+    /* This is actually using the compile-time operation, producing Tags<bits>,
+       which is tested explicitly below, but that should be completely
+       transparent to the user and work as if it produced Features directly
+       instead of going through Tags first */
     CORRADE_COMPARE(std::uint32_t(Cpu::Sse3 & Cpu::Sse2), 0);
 
     Cpu::Features features = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
@@ -328,6 +377,16 @@ void CpuTest::featuresOperatorAnd() {
     constexpr Cpu::Features cFeatures2 = Cpu::Sse41 & cFeatures;
     CORRADE_COMPARE(std::uint32_t(cFeatures1), 8);
     CORRADE_COMPARE(std::uint32_t(cFeatures2), 8);
+
+    /* Test also the compile-time operation, different values should be
+       different types but same values should be same types */
+    constexpr auto cTags = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
+    constexpr auto cTags1 = cTags & Cpu::Sse41;
+    constexpr auto cTags2 = Cpu::Sse41 & cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags1), 8);
+    CORRADE_COMPARE(std::uint32_t(cTags2), 8);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -335,6 +394,10 @@ void CpuTest::featuresOperatorAnd() {
 
 void CpuTest::featuresOperatorXor() {
     #ifdef CORRADE_TARGET_X86
+    /* This is actually using the compile-time operation, producing Tags<bits>,
+       which is tested explicitly below, but that should be completely
+       transparent to the user and work as if it produced Features directly
+       instead of going through Tags first */
     CORRADE_COMPARE(std::uint32_t(Cpu::Sse3 ^ Cpu::Sse3), 0);
     CORRADE_COMPARE(std::uint32_t(Cpu::Sse3 ^ Cpu::Sse2), 3);
 
@@ -355,6 +418,16 @@ void CpuTest::featuresOperatorXor() {
     constexpr Cpu::Features cFeatures2 = Cpu::Sse2 ^ cFeatures;
     CORRADE_COMPARE(std::uint32_t(cFeatures1), 10);
     CORRADE_COMPARE(std::uint32_t(cFeatures2), 10);
+
+    /* Test also the compile-time operation, different values should be
+       different types but same values should be same types */
+    constexpr auto cTags = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
+    constexpr auto cTags1 = cTags ^ Cpu::Sse2;
+    constexpr auto cTags2 = Cpu::Sse2 ^ cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags1), 10);
+    CORRADE_COMPARE(std::uint32_t(cTags2), 10);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
+    CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -365,6 +438,11 @@ void CpuTest::featuresOperatorBoolScalar() {
 
     constexpr bool cFeatures = !!Cpu::Features{Cpu::Scalar};
     CORRADE_VERIFY(!cFeatures);
+
+    /* Have to use an implementation detail to create the Tags type here. Which
+       is fine, people shouldn't need to do this directly. */
+    constexpr bool cTags = !!Cpu::Implementation::tags(Cpu::Scalar);
+    CORRADE_VERIFY(!cTags);
 }
 
 void CpuTest::featuresOperatorBool() {
@@ -378,6 +456,14 @@ void CpuTest::featuresOperatorBool() {
     constexpr bool cFeatures2 = !!(cFeatures & Cpu::Sse3);
     CORRADE_VERIFY(!cFeatures1);
     CORRADE_VERIFY(cFeatures2);
+
+    /* Test also the compile-time operation */
+    constexpr auto cTags = Cpu::Sse3|Cpu::Sse2;
+    constexpr bool cTags1 = !!(cTags & Cpu::Sse41);
+    constexpr bool cTags2 = !!(cTags & Cpu::Sse3);
+    CORRADE_VERIFY(!cTags1);
+    CORRADE_VERIFY(cTags2);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags), Cpu::Features>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -385,6 +471,10 @@ void CpuTest::featuresOperatorBool() {
 
 void CpuTest::featuresOperatorInverse() {
     #ifdef CORRADE_TARGET_X86
+    /* This is actually using the compile-time operation, producing Tags<bits>,
+       which is tested explicitly below, but that should be completely
+       transparent to the user and work as if it produced Features directly
+       instead of going through Tags first */
     CORRADE_COMPARE(std::uint32_t(~Cpu::Scalar), 0xffffffffu);
     CORRADE_COMPARE(std::uint32_t(~(Cpu::Sse41|Cpu::Sse3)), 4294967285u);
     CORRADE_COMPARE(std::uint32_t(~Cpu::Sse41), 4294967287u);
@@ -393,6 +483,15 @@ void CpuTest::featuresOperatorInverse() {
     constexpr Cpu::Features cFeatures2 = ~(Cpu::Sse41|Cpu::Sse3);
     CORRADE_COMPARE(std::uint32_t(cFeatures1), 0xffffffffu);
     CORRADE_COMPARE(std::uint32_t(cFeatures2), 4294967285u);
+
+    /* Test also the compile-time operation, different values should be
+       different types but same values should be same types */
+    constexpr auto cTags1 = ~Cpu::Scalar;
+    constexpr auto cTags2 = ~(Cpu::Sse41|Cpu::Sse3);
+    CORRADE_COMPARE(std::uint32_t(cTags1), 0xffffffffu);
+    CORRADE_COMPARE(std::uint32_t(cTags2), 4294967285u);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags1), Cpu::Features>::value);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags1), decltype(cTags2)>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -427,6 +526,17 @@ void CpuTest::featuresCompare() {
     CORRADE_VERIFY(!cFeaturesNonEqual);
     CORRADE_VERIFY(cFeaturesLessEqual);
     CORRADE_VERIFY(cFeaturesGreaterEqual);
+
+    constexpr auto cTags = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
+    constexpr bool cTagsEqual = cTags == cTags;
+    constexpr bool cTagsNonEqual = cTags != cTags;
+    constexpr bool cTagsLessEqual = cTags <= cTags;
+    constexpr bool cTagsGreaterEqual = cTags >= cTags;
+    CORRADE_VERIFY(cTagsEqual);
+    CORRADE_VERIFY(!cTagsNonEqual);
+    CORRADE_VERIFY(cTagsLessEqual);
+    CORRADE_VERIFY(cTagsGreaterEqual);
+    CORRADE_VERIFY(!std::is_same<decltype(cTags), Cpu::Features>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -475,6 +585,57 @@ void CpuTest::detect() {
     #endif
 }
 
+void CpuTest::bitIndex() {
+    CORRADE_COMPARE(Cpu::Implementation::BitIndex<0>::Value, 0);
+    CORRADE_COMPARE(Cpu::Implementation::BitIndex<1>::Value, 1);
+    CORRADE_COMPARE(Cpu::Implementation::BitIndex<(1 << 7)>::Value, 8);
+    CORRADE_COMPARE(Cpu::Implementation::BitIndex<(1 << 15)>::Value, 16);
+}
+
+void CpuTest::bitCount() {
+    CORRADE_COMPARE(Cpu::Implementation::BitCount<0>::Value, 0);
+    CORRADE_COMPARE(Cpu::Implementation::BitCount<(1 << 7)>::Value, 1);
+    CORRADE_COMPARE(Cpu::Implementation::BitCount<12345>::Value, 6);
+    CORRADE_COMPARE(Cpu::Implementation::BitCount<65432>::Value, 11);
+    CORRADE_COMPARE(Cpu::Implementation::BitCount<0xffffu>::Value, 16);
+}
+
+template<unsigned int i> unsigned int priorityValue(Cpu::Implementation::Priority<i>) {
+    return i;
+}
+
+void CpuTest::priority() {
+    #ifdef CORRADE_TARGET_X86
+    /* Extra tag alone is always 1 */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::AvxFma)), 1);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Popcnt)), 1);
+
+    /* More extra tags together is their count */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::AvxFma|Cpu::AvxF16c|Cpu::Lzcnt)), 3);
+
+    /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
+       zero, times the count of extra tags plus one */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Scalar)), 0);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Sse2)), 1*5);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2)), 7*5);
+
+    /* Base tag + extra tags is a sum of the two */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), 7*5 + 2);
+    #elif defined(CORRADE_TARGET_ARM)
+    /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
+       zero, times one as there are no extra tags */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Scalar)), 0);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Neon)), 1);
+    #elif defined(CORRADE_TARGET_WASM)
+    /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
+       zero, times one as there are no extra tags */
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Scalar)), 0);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Simd128)), 1);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
 #if defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM)
 const char* dispatch(Cpu::ScalarT) { return "scalar"; }
 #ifdef CORRADE_TARGET_X86
@@ -506,6 +667,138 @@ void CpuTest::tagDispatch() {
     /* Exact match */
     CORRADE_COMPARE(dispatch(Cpu::Neon), "NEON"_s);
     CORRADE_COMPARE(dispatch(Cpu::Scalar), "scalar"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraExact(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)) { return "AVX2+FMA+F16C"; }
+const char* dispatchExtraExact(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Popcnt)) { return "SSE4.2+POPCNT"; }
+const char* dispatchExtraExact(CORRADE_CPU_DECLARE(Cpu::Ssse3)) { return "SSSE3"; }
+const char* dispatchExtraExact(CORRADE_CPU_DECLARE(Cpu::Popcnt|Cpu::Lzcnt)) { return "POPCNT+LZCNT"; }
+#endif
+
+void CpuTest::tagDispatchExtraExact() {
+    #ifdef CORRADE_TARGET_X86
+    /* For each there's an exact matching overload */
+    CORRADE_COMPARE(dispatchExtraExact(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), "AVX2+FMA+F16C"_s);
+    CORRADE_COMPARE(dispatchExtraExact(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt)), "SSE4.2+POPCNT"_s);
+    CORRADE_COMPARE(dispatchExtraExact(CORRADE_CPU_SELECT(Cpu::Ssse3)), "SSSE3"_s);
+    /* The base tag doesn't even need to be there */
+    CORRADE_COMPARE(dispatchExtraExact(CORRADE_CPU_SELECT(Cpu::Popcnt|Cpu::Lzcnt)), "POPCNT+LZCNT"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraUnusedExtra(CORRADE_CPU_DECLARE(Cpu::Avx2)) { return "AVX2"; }
+const char* dispatchExtraUnusedExtra(CORRADE_CPU_DECLARE(Cpu::Sse42)) { return "SSE4.2"; }
+const char* dispatchExtraUnusedExtra(CORRADE_CPU_DECLARE(Cpu::Ssse3)) { return "SSSE3"; }
+const char* dispatchExtraUnusedExtra(CORRADE_CPU_DECLARE(Cpu::Scalar)) { return "scalar"; }
+#endif
+
+void CpuTest::tagDispatchExtraUnusedExtra() {
+    #ifdef CORRADE_TARGET_X86
+    /* The extra tags get ignored, only the base one will be used */
+    CORRADE_COMPARE(dispatchExtraUnusedExtra(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), "AVX2"_s);
+    CORRADE_COMPARE(dispatchExtraUnusedExtra(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt)), "SSE4.2"_s);
+    CORRADE_COMPARE(dispatchExtraUnusedExtra(CORRADE_CPU_SELECT(Cpu::Ssse3)), "SSSE3"_s);
+    /* The base tag doesn't even need to be there */
+    CORRADE_COMPARE(dispatchExtraUnusedExtra(CORRADE_CPU_SELECT(Cpu::Popcnt|Cpu::Lzcnt)), "scalar"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraFallbackExtra(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Popcnt|Cpu::Lzcnt)) { return "AVX2+POPCNT+LZCNT"; }
+const char* dispatchExtraFallbackExtra(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Lzcnt)) { return "SSE4.2+LZCNT"; }
+const char* dispatchExtraFallbackExtra(CORRADE_CPU_DECLARE(Cpu::Sse42)) { return "SSE4.2"; }
+#endif
+
+void CpuTest::tagDispatchExtraFallbackExtra() {
+    #ifdef CORRADE_TARGET_X86
+    /* The base tag stays the same, but the extra ones get dropped */
+    CORRADE_COMPARE(dispatchExtraFallbackExtra(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::Popcnt|Cpu::Lzcnt|Cpu::AvxFma|Cpu::AvxF16c)), "AVX2+POPCNT+LZCNT"_s);
+    CORRADE_COMPARE(dispatchExtraFallbackExtra(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt|Cpu::Lzcnt)), "SSE4.2+LZCNT"_s);
+    CORRADE_COMPARE(dispatchExtraFallbackExtra(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt)), "SSE4.2"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraFallbackBase(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Popcnt|Cpu::Lzcnt)) { return "AVX2+POPCNT+LZCNT"; }
+const char* dispatchExtraFallbackBase(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Lzcnt)) { return "SSE42+LZCNT"; }
+const char* dispatchExtraFallbackBase(CORRADE_CPU_DECLARE(Cpu::Ssse3)) { return "SSSE3"; }
+const char* dispatchExtraFallbackBase(CORRADE_CPU_DECLARE(Cpu::Popcnt|Cpu::Lzcnt)) { return "POPCNT+LZCNT"; }
+#endif
+
+void CpuTest::tagDispatchExtraFallbackBase() {
+    #ifdef CORRADE_TARGET_X86
+    /* The extra tags stay the same, but the base one gets lowered */
+    CORRADE_COMPARE(dispatchExtraFallbackBase(CORRADE_CPU_SELECT(Cpu::Avx512f|Cpu::Popcnt|Cpu::Lzcnt)), "AVX2+POPCNT+LZCNT"_s);
+    CORRADE_COMPARE(dispatchExtraFallbackBase(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::Lzcnt)), "SSE42+LZCNT"_s);
+    CORRADE_COMPARE(dispatchExtraFallbackBase(CORRADE_CPU_SELECT(Cpu::Sse42)), "SSSE3"_s);
+    CORRADE_COMPARE(dispatchExtraFallbackBase(CORRADE_CPU_SELECT(Cpu::Sse3|Cpu::Popcnt|Cpu::Lzcnt)), "POPCNT+LZCNT"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraFallbackBoth(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::AvxFma)) { return "AVX2+FMA"; }
+const char* dispatchExtraFallbackBoth(CORRADE_CPU_DECLARE(Cpu::Avx|Cpu::AvxF16c)) { return "AVX+F16C"; }
+const char* dispatchExtraFallbackBoth(CORRADE_CPU_DECLARE(Cpu::Avx)) { return "AVX"; }
+const char* dispatchExtraFallbackBoth(CORRADE_CPU_DECLARE(Cpu::AvxF16c|Cpu::AvxFma)) { return "F16C+FMA"; }
+#endif
+
+void CpuTest::tagDispatchExtraFallbackBoth() {
+    #ifdef CORRADE_TARGET_X86
+    /* Top-class HW, just pick AVX2 as it's the closest */
+    CORRADE_COMPARE(dispatchExtraFallbackBoth(CORRADE_CPU_SELECT(Cpu::Avx512f|Cpu::AvxFma|Cpu::AvxF16c)), "AVX2+FMA"_s);
+
+    /* We have one extra less than required for the AVX2 variant, fall back to
+       AVX with F16C */
+    CORRADE_COMPARE(dispatchExtraFallbackBoth(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::AvxF16c)), "AVX+F16C"_s);
+
+    /* We have AVX2, but neither of the extra bits, just some irrelevant ones,
+       take plain AVX */
+    CORRADE_COMPARE(dispatchExtraFallbackBoth(CORRADE_CPU_SELECT(Cpu::Avx2|Cpu::Lzcnt|Cpu::Popcnt)), "AVX"_s);
+
+    /* We have only SSE3 but both extra bits, fall back to the scalar version
+       that has them. Yes, it's silly, but the scalar fallback needs to be
+       verified. */
+    CORRADE_COMPARE(dispatchExtraFallbackBoth(CORRADE_CPU_SELECT(Cpu::Sse3|Cpu::AvxF16c|Cpu::AvxFma)), "F16C+FMA"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+const char* dispatchExtraPriority(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Popcnt|Cpu::Lzcnt)) {
+    return "SSE4.2+POPCNT+LZCNT";
+}
+const char* dispatchExtraPriority(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Popcnt)) {
+    return "SSE4.2+POPCNT";
+}
+const char* dispatchExtraPriority(CORRADE_CPU_DECLARE(Cpu::Sse42|Cpu::Lzcnt)) {
+    return "SSE4.2+LZCNT";
+}
+#endif
+
+void CpuTest::tagDispatchExtraPriority() {
+    #ifdef CORRADE_TARGET_X86
+    /* The candidate which has the most tags gets picked. OTOH, if it wouldn't
+       be there, this call would be ambiguous. */
+    CORRADE_COMPARE(dispatchExtraPriority(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt|Cpu::Lzcnt)), "SSE4.2+POPCNT+LZCNT"_s);
+
+    /* Both single-extra-tag candidates have the same calculated priority, the
+       one for which we actually have the feature gets picked */
+    CORRADE_COMPARE(dispatchExtraPriority(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt)), "SSE4.2+POPCNT"_s);
+    CORRADE_COMPARE(dispatchExtraPriority(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Lzcnt)), "SSE4.2+LZCNT"_s);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -613,6 +906,31 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE42 int callInstructionFor<Cpu:
     return c.s[0];
 }
 #endif
+#ifdef CORRADE_ENABLE_POPCNT
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_POPCNT int callInstructionFor<Cpu::PopcntT>() {
+    /* Just pocnt alone; using volatile to prevent this from being folded into
+       a constant */
+    volatile unsigned int a = 0x0005c1a6;
+    unsigned int count = _mm_popcnt_u32(a);
+    CORRADE_COMPARE(count, 9);
+    return count;
+}
+#endif
+#ifdef CORRADE_ENABLE_LZCNT
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_LZCNT int callInstructionFor<Cpu::LzcntT>() {
+    /* Just lzcnt alone; using volatile to prevent this from being folded into
+       a constant */
+    volatile int a = 0x0005c1a6;
+    unsigned int count = _lzcnt_u32(a);
+
+    /* Also verify that it does the right thing for 0. If misdetected and the
+       BSR fallback gets used, this would return something random here. */
+    CORRADE_COMPARE(_lzcnt_u32(0), 32);
+
+    CORRADE_COMPARE(count, 13);
+    return count;
+}
+#endif
 #ifdef CORRADE_ENABLE_AVX
 template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX int callInstructionFor<Cpu::AvxT>() {
     __m256d a = _mm256_set_pd(5.47, 2.23, 7.62, 0.5);
@@ -630,6 +948,46 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX int callInstructionFor<Cpu::A
     CORRADE_COMPARE(b.s[1], 8.0);
     CORRADE_COMPARE(b.s[0], 1.0);
     return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX_F16C
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_F16C int callInstructionFor<Cpu::AvxF16cT>() {
+    /* Values from Magnum::Math::Test::HalfTest::pack() */
+    __m128 a = _mm_set_ps(0.0f, 123.75f, -0.000351512f, 3.0f);
+
+    /* F16C */
+    union {
+        __m128i v;
+        std::uint16_t s[8];
+    } b;
+    b.v = _mm_cvtps_ph(a, 0);
+
+    CORRADE_COMPARE(b.s[3], 0x0000);
+    CORRADE_COMPARE(b.s[2], 0x57bc);
+    CORRADE_COMPARE(b.s[1], 0x8dc2);
+    CORRADE_COMPARE(b.s[0], 0x4200);
+    return b.s[0];
+}
+#endif
+#ifdef CORRADE_ENABLE_AVX_FMA
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_FMA int callInstructionFor<Cpu::AvxFmaT>() {
+    /* Values from Magnum::Math::Test::FunctionsTest::fma() */
+    __m128 a = _mm_set_ps(0.0f,  2.0f,  1.5f,  0.5f);
+    __m128 b = _mm_set_ps(0.0f,  3.0f,  2.0f, -1.0f);
+    __m128 c = _mm_set_ps(0.0f, 0.75f, 0.25f,  0.1f);
+
+    /* FMA */
+    union {
+        __m128 v;
+        float s[4];
+    } d;
+    d.v = _mm_fmadd_ps(a, b, c);
+
+    CORRADE_COMPARE(d.s[3], 0.0f);
+    CORRADE_COMPARE(d.s[2], 6.75f);
+    CORRADE_COMPARE(d.s[1], 3.25f);
+    CORRADE_COMPARE(d.s[0], -0.4f);
+    return d.s[2];
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX2

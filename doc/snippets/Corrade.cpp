@@ -39,18 +39,43 @@ void transform(Cpu::Sse42T, Containers::ArrayView<float> data);
 void transform(Cpu::Avx2T, Containers::ArrayView<float> data);
 /* [Cpu-usage-declare] */
 
-/* [Cpu-usage-target-attributes] */
-void transform(Cpu::ScalarT, Containers::ArrayView<float> data) {
-    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+/* [Cpu-usage-extra-declare] */
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse2), DOXYGEN_ELLIPSIS(int));
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt), DOXYGEN_ELLIPSIS(int));
+/* [Cpu-usage-extra-declare] */
+int lookup(CORRADE_CPU_DECLARE(Cpu::Scalar), DOXYGEN_ELLIPSIS(int));
+/* Might needed if Default doesn't include SSE2 on 32-bit */
+
+namespace Foo {
+/* [Cpu-usage-extra-ambiguity] */
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt), DOXYGEN_ELLIPSIS(int));
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Lzcnt), DOXYGEN_ELLIPSIS(int));
+/* [Cpu-usage-extra-ambiguity] */
+
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt), int);
+/* [Cpu-usage-extra-ambiguity-resolve] */
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt), DOXYGEN_ELLIPSIS(int)) {
+    // Or the other variant, or a custom third implementation ...
+    return lookup(CORRADE_CPU_SELECT(Cpu::Sse41|Cpu::Lzcnt), DOXYGEN_ELLIPSIS(0));
 }
-#ifdef CORRADE_ENABLE_SSE42
-CORRADE_ENABLE_SSE42 void transform(Cpu::Sse42T, Containers::ArrayView<float> data) {
-    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+/* [Cpu-usage-extra-ambiguity-resolve] */
+}
+
+/* [Cpu-usage-target-attributes] */
+int lookup(CORRADE_CPU_DECLARE(Cpu::Scalar), DOXYGEN_ELLIPSIS(int)) {
+    DOXYGEN_ELLIPSIS(return 0;)
+}
+#ifdef CORRADE_ENABLE_SSE2
+CORRADE_ENABLE_SSE2 int lookup(CORRADE_CPU_DECLARE(Cpu::Sse2), DOXYGEN_ELLIPSIS(int)) {
+    DOXYGEN_ELLIPSIS(return 0;)
 }
 #endif
-#ifdef CORRADE_ENABLE_AVX2
-CORRADE_ENABLE_AVX2 void transform(Cpu::Avx2T, Containers::ArrayView<float> data) {
-    DOXYGEN_ELLIPSIS(static_cast<void>(data);)
+#if defined(CORRADE_ENABLE_SSE41) && \
+    defined(CORRADE_ENABLE_POPCNT) && \
+    defined(CORRADE_ENABLE_LZCNT)
+CORRADE_ENABLE_SSE41 CORRADE_ENABLE_POPCNT CORRADE_ENABLE_LZCNT
+int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt), DOXYGEN_ELLIPSIS(int)) {
+    DOXYGEN_ELLIPSIS(return 0;)
 }
 #endif
 /* [Cpu-usage-target-attributes] */
@@ -80,6 +105,13 @@ else if(features & Cpu::Sse41)
 else
     transform(Cpu::Scalar, data);
 /* [Cpu-usage-runtime-manual-dispatch] */
+}
+
+{
+/* [Cpu-usage-extra-compile-time-call] */
+int found = lookup(CORRADE_CPU_SELECT(Cpu::Default), DOXYGEN_ELLIPSIS(0));
+/* [Cpu-usage-extra-compile-time-call] */
+static_cast<void>(found);
 }
 
 {

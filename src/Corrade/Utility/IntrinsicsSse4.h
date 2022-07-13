@@ -25,14 +25,14 @@
 */
 
 /** @file
-@brief Intrinsics for x86 SSE4.1 and SSE4.2 instructions
+@brief Intrinsics for x86 SSE4.1, SSE4.2 and POPCNT instructions
 @m_since_latest
 
 Equivalent to @cpp #include <smmintrin.h> @ce and
 @cpp #include <nmmintrin.h> @ce on most compilers except for GCC 4.8, where it
 contains an additional workaround to make the instructions available with just
 the @ref CORRADE_ENABLE_SSE41 and @ref CORRADE_ENABLE_SSE42 function attributes
-instead of having to specify `-msse4.1` and `-msse4.2` for the whole
+instead of having to specify `-msse4.1`, `-msse4.2` or `-mpopcnt` for the whole
 compilation unit.
 
 Because GCC puts both the SSE4.1 and the SSE4.2 instructions into the same
@@ -74,5 +74,20 @@ together, unlike with other SSE variants.
 #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
 #pragma pop_macro("__SSE4_1__")
 #pragma pop_macro("__SSE4_2__")
+#pragma GCC pop_options
+#endif
+
+/* Unlike with SSE4.1 / SSE4.2 there's no weird interaction with the popcnt
+   intrinsics, so it could be even in the above block. But for extra safety and
+   consistency with AVX it's separate. */
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
+#pragma GCC push_options
+#pragma GCC target("popcnt")
+#pragma push_macro("__POPCNT__")
+#ifndef __POPCNT__
+#define __POPCNT__
+#endif
+#include <popcntintrin.h>
+#pragma pop_macro("__POPCNT__")
 #pragma GCC pop_options
 #endif

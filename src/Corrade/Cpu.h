@@ -125,7 +125,7 @@ time:
 
 @m_class{m-block m-warning}
 
-@par SSE3, SSSE3 and SSE4.1/SSE4.2 on MSVC
+@par SSE3, SSSE3, SSE4.1/SSE4.2, POPCNT, LZCNT, AVX F16C and AVX FMA on MSVC
     A special case worth mentioning are SSE3 and newer instructions on Windows.
     MSVC only provides a very coarse `/arch:SSE2`, `/arch:AVX` and `/arch:AVX2`
     for either @ref Sse2, @ref Avx or @ref Avx2, but nothing in between. That
@@ -152,7 +152,70 @@ use:
 
 @snippet Corrade.cpp Cpu-usage-runtime-manual-dispatch
 
-@subsection Cpu-usage-target-attributes Enabling instruction sets for particular functions
+@section Cpu-usage-extra Usage with extra instruction sets
+
+Besides the base instruction set, which on x86 is @ref Sse2 through
+@ref Avx512f, with each tag being a superset of the previous one, there are
+* *extra* instruction sets such as @ref Popcnt or @ref AvxFma. Basic
+compile-time detection for these is still straightforward, only now using
+@ref Default instead of @link DefaultBase @endlink:
+
+@snippet Corrade-cpp17.cpp Cpu-usage-extra-compile-time
+
+The process of defining and dispatching to function variants that include extra
+instruction sets gets moderately more complex, however. As shown on the diagram
+below, those are instruction sets that neither fit into the hierarchy nor are
+unambiguously included in a later instruction set. For example, some CPUs are
+known to have @ref Avx and just @ref AvxFma, some @ref Avx and just
+@ref AvxF16c and there are even CPUs with @ref Avx2 but no @ref AvxFma.
+
+@dotfile cpu.dot
+
+While there's no possibility of having a total ordering between all possible
+combinations for dispatching, the following approach is chosen:
+
+1.  The base instruction set has the main priority. For example, if both an
+    @ref Avx2 and a @ref Sse2 variant are viable candidates, the @ref Avx2
+    variant gets picked, even if the @ref Sse2 variant uses extra
+    instruction sets that the @ref Avx2 doesn't.
+2.  After that, the variant with the most extra instruction sets is chosen. For
+    example, an @ref Avx + @ref AvxFma variant is chosen over plain @ref Avx.
+
+On the declaration side, the desired base instruction set gets ORed with as
+many extra instruction sets as needed, and then wrapped in a
+@ref CORRADE_CPU_DECLARE() macro. For example, a lookup algorithm may have a
+@ref Sse41 implementation which however also relies on @ref Popcnt and
+@ref Lzcnt, and a fallback @ref Sse2 implementation that uses neither:
+
+@snippet Corrade.cpp Cpu-usage-extra-declare
+
+And a concrete overload gets picked at compile-time by passing a desired
+combination of CPU tags as well --- or @ref Default for the set of features
+enabled at compile time --- this time wrapped in a @ref CORRADE_CPU_SELECT():
+
+@snippet Corrade.cpp Cpu-usage-extra-compile-time-call
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Resolving overload ambiguity
+    Because the best overload is picked based on the count of extra instruction
+    sets used, it may happen that two different variants get assigned the same
+    priority, causing an ambiguity. For example, the two variants below would
+    be abiguous for a CPU with @ref Sse41 and both @ref Popcnt and @ref Lzcnt
+    present:
+@par
+    @snippet Corrade.cpp Cpu-usage-extra-ambiguity
+@par
+    It's not desirable for this library to arbitrarily decide which instruction
+    set should be preferred --- only the implementation itself can know that.
+    Thus, to resolve such potential conflict, provide an overload with both
+    extra tags and delegate from there:
+@par
+    @snippet Corrade.cpp Cpu-usage-extra-ambiguity-resolve
+
+@section Cpu-usage-target-attributes Enabling instruction sets for particular functions
 
 On GCC and Clang, a machine target has to be enabled in order to use a
 particular CPU instruction set or its intrinsics. While it's possible to do
@@ -186,9 +249,10 @@ headers you won't use anyway. In comparison, using the @ref CORRADE_TARGET_SSE2
 etc. macros would only make the variant available if the whole compilation unit
 has a corresponding `-m` or `/arch:` option passed to the compiler.
 
-Definitions of the above functions would then look like below with the target
-attributes enabled. The scalar variant has no target-specific annotation and
-will be present as a fallback in all cases.
+Definitions of the `lookup()` function variants from above would then look like
+below with the target attributes added. The extra instruction sets get
+explicitly enabled as well, in contrast a scalar variant would have no
+target-specific annotations at all.
 
 @snippet Corrade.cpp Cpu-usage-target-attributes
 */
@@ -230,6 +294,8 @@ namespace Implementation {
        using {} */
     struct InitT {};
     constexpr InitT Init{};
+
+    enum: unsigned int { ExtraTagBitOffset = 16 };
 }
 
 /**
@@ -325,6 +391,34 @@ struct Sse42T: Sse41T {
 };
 
 /**
+@brief POPCNT tag type
+
+Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
+and the @ref Popcnt tag for more information.
+@see @ref tag(), @ref features()
+*/
+struct PopcntT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    constexpr explicit PopcntT(Implementation::InitT) {}
+    #endif
+};
+
+/**
+@brief LZCNT tag type
+
+Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
+and the @ref Lzcnt tag for more information.
+@see @ref tag(), @ref features()
+*/
+struct LzcntT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    constexpr explicit LzcntT(Implementation::InitT) {}
+    #endif
+};
+
+/**
 @brief AVX tag type
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
@@ -335,6 +429,34 @@ struct AvxT: Sse42T {
     #ifndef DOXYGEN_GENERATING_OUTPUT
     /* Explicit constructor to avoid ambiguous calls when using {} */
     constexpr explicit AvxT(Implementation::InitT): Sse42T{Implementation::Init} {}
+    #endif
+};
+
+/**
+@brief AVX F16C tag type
+
+Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
+and the @ref AvxF16c tag for more information.
+@see @ref tag(), @ref features()
+*/
+struct AvxF16cT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    constexpr explicit AvxF16cT(Implementation::InitT) {}
+    #endif
+};
+
+/**
+@brief AVX FMA tag type
+
+Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
+and the @ref AvxFma tag for more information.
+@see @ref tag(), @ref features()
+*/
+struct AvxFmaT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    constexpr explicit AvxFmaT(Implementation::InitT) {}
     #endif
 };
 
@@ -367,6 +489,7 @@ struct Avx512fT: Avx2T {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+/* Features earlier in the hierarchy should have lower bits set */
 template<> struct TypeTraits<Sse2T> {
     enum: unsigned int { Index = 1 << 0 };
     static const char* name() { return "Sse2"; }
@@ -398,6 +521,24 @@ template<> struct TypeTraits<Avx2T> {
 template<> struct TypeTraits<Avx512fT> {
     enum: unsigned int { Index = 1 << 7 };
     static const char* name() { return "Avx512f"; }
+};
+
+/* The total bit range should not be larger than ExtraTagCount */
+template<> struct TypeTraits<PopcntT> {
+    enum: unsigned int { Index = 1 << (0 + Implementation::ExtraTagBitOffset) };
+    static const char* name() { return "Popcnt"; }
+};
+template<> struct TypeTraits<LzcntT> {
+    enum: unsigned int { Index = 1 << (1 + Implementation::ExtraTagBitOffset) };
+    static const char* name() { return "Lzcnt"; }
+};
+template<> struct TypeTraits<AvxF16cT> {
+    enum: unsigned int { Index = 1 << (2 + Implementation::ExtraTagBitOffset) };
+    static const char* name() { return "AvxF16c"; }
+};
+template<> struct TypeTraits<AvxFmaT> {
+    enum: unsigned int { Index = 1 << (3 + Implementation::ExtraTagBitOffset) };
+    static const char* name() { return "AvxFma"; }
 };
 #endif
 #endif
@@ -555,6 +696,33 @@ implied by @ref Avx.
 constexpr Sse42T Sse42{Implementation::Init};
 
 /**
+@brief POPCNT tag
+
+[POPCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+instructions. Available only on @ref CORRADE_TARGET_X86 "x86". This instruction
+set is treated as an *extra*, i.e. is neither a superset of nor implied by any
+other instruction set. See @ref Cpu-usage-extra for more information.
+@see @ref Lzcnt, @ref CORRADE_TARGET_POPCNT, @ref CORRADE_ENABLE_POPCNT
+*/
+constexpr PopcntT Popcnt{Implementation::Init};
+
+/**
+@brief LZCNT tag
+
+[LZCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+instructions. Available only on @ref CORRADE_TARGET_X86 "x86". This instruction
+set is treated as an *extra*, i.e. is neither a superset of nor implied by any
+other instruction set. See @ref Cpu-usage-extra for more information.
+
+Note that this instruction has encoding compatible with an earlier `BSR`
+instruction which has a slightly different behavior. To avoid wrong results if
+it isn't available, prefer to always detect its presence with
+@ref runtimeFeatures() instead of a compile-time check.
+@see @ref Popcnt, @ref CORRADE_TARGET_LZCNT, @ref CORRADE_ENABLE_LZCNT
+*/
+constexpr LzcntT Lzcnt{Implementation::Init};
+
+/**
 @brief AVX tag
 
 [Advanced Vector Extensions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions).
@@ -563,6 +731,28 @@ implied by @ref Avx2.
 @see @ref CORRADE_TARGET_AVX, @ref CORRADE_ENABLE_AVX
 */
 constexpr AvxT Avx{Implementation::Init};
+
+/**
+@brief AVX F16C tag
+
+[F16C](https://en.wikipedia.org/wiki/F16C) instructions. Available only on
+@ref CORRADE_TARGET_X86 "x86". This instruction set is treated as an *extra*,
+i.e. is neither a superset of nor implied by any other instruction set. See
+@ref Cpu-usage-extra for more information.
+@see @ref CORRADE_TARGET_AVX_F16C, @ref CORRADE_ENABLE_AVX_F16C
+*/
+constexpr AvxF16cT AvxF16c{Implementation::Init};
+
+/**
+@brief AVX FMA tag
+
+[FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set).
+Available only on @ref CORRADE_TARGET_X86 "x86". This instruction set is
+treated as an *extra*, i.e. is neither a superset of nor implied by any other
+instruction set. See @ref Cpu-usage-extra for more information.
+@see @ref CORRADE_TARGET_AVX_FMA, @ref CORRADE_ENABLE_AVX_FMA
+*/
+constexpr AvxFmaT AvxFma{Implementation::Init};
 
 /**
 @brief AVX2 tag
@@ -627,6 +817,139 @@ on @ref CORRADE_TARGET_WASM "WebAssembly". Superset of @ref Scalar.
 constexpr Simd128T Simd128{Implementation::Init};
 #endif
 
+namespace Implementation {
+
+template<unsigned i> struct Priority: Priority<i - 1> {};
+template<> struct Priority<0> {};
+
+/* Count of "extra" tags that are not in the hierarchy. Should not be larger
+   than strictly necessary as it deepens inheritance hierarchy when picking
+   best overload candidate. */
+enum: unsigned int {
+    BaseTagMask = (1 << ExtraTagBitOffset) - 1,
+    ExtraTagMask = 0xffffffffu & ~BaseTagMask,
+    #ifdef CORRADE_TARGET_X86
+    ExtraTagCount = 4,
+    #else
+    ExtraTagCount = 0,
+    #endif
+};
+
+/* Holds a compile-time combination of tags. Kept private, since it isn't
+   really directly needed in user code and it would only lead to confusion. */
+template<unsigned int value> struct Tags {
+    enum: unsigned int { Value = value };
+
+    /* Empty initialization. Should not be needed by public code. */
+    constexpr explicit Tags(InitT) {}
+
+    /* Conversion from other tag combination, allowed only if the other is
+       not a subset */
+    template<unsigned int otherValue> constexpr Tags(Tags<otherValue>, typename std::enable_if<
+        /* There should be at most one base tag set in both, if there's none
+           then it's Cpu::Scalar */
+        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
+        !((otherValue & BaseTagMask) & ((otherValue & BaseTagMask) - 1)) &&
+        /* The other base tag should be the same or derived (i.e, having same
+           or larger value) */
+        (otherValue & BaseTagMask) >= (value & BaseTagMask) &&
+        /* The other extra bits should be a superset of this */
+        ((otherValue & value) & ExtraTagMask) == (value & ExtraTagMask)
+    >::type* = {}) {}
+
+    /* Conversion from a single tag, allowed only if we're a single bit and
+       the other is not a subset */
+    template<class T> constexpr Tags(T, typename std::enable_if<
+        /* There should be at most one base tag set in this one, the other
+           satisfies that implicitly as it's constrained by TypeTraits */
+        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
+        /* The other base tag should be the same or derived (i.e, having same
+           or larger value) */
+        (TypeTraits<T>::Index & BaseTagMask) >= (value & BaseTagMask) &&
+        /* The other extra bits should be a superset of this. Since a single
+           tag can be only one bit, this condition gets satisfied only either
+           if we're Cpu::Scalar or if we have no extra bits. */
+        ((TypeTraits<T>::Index & value) & ExtraTagMask) == (value & ExtraTagMask)
+    >::type* = {}) {}
+
+    /* A subset of operators on Features, excluding the assignment ones --
+       since they modify the type, they make no sense here */
+    template<class U> constexpr Tags<value | TypeTraits<U>::Index> operator|(U) const {
+        return Tags<value | TypeTraits<U>::Index>{Init};
+    }
+    template<class U> constexpr Tags<value & TypeTraits<U>::Index> operator&(U) const {
+        return Tags<value & TypeTraits<U>::Index>{Init};
+    }
+    template<class U> constexpr Tags<value ^ TypeTraits<U>::Index> operator^(U) const {
+        return Tags<value ^ TypeTraits<U>::Index>{Init};
+    }
+    constexpr Tags<~value> operator~() const {
+        return Tags<~value>{Init};
+    }
+    constexpr explicit operator bool() const { return value; }
+    constexpr operator unsigned int() const { return value; }
+};
+
+template<class T> constexpr Tags<TypeTraits<T>::Index> tags(T) {
+    return Tags<TypeTraits<T>::Index>{Init};
+}
+template<unsigned int value> constexpr Tags<value> tags(Tags<value> tags) {
+    return tags;
+}
+
+/* Base-2 log, "plus one" (returns 0 for A == 0). For a base tag, which is
+   always just one bit, returns position of that bit. Used for calculating
+   distance between two tags in order to calculate overload priority. But since
+   there's also the Scalar tag, which is 0, it's plus one. */
+template<unsigned short A> struct BitIndex {
+    enum: unsigned short { Value = 1 + BitIndex<(A >> 1)>::Value };
+};
+template<> struct BitIndex<0> {
+    enum: unsigned short { Value = 0 };
+};
+
+/* Popcount, but constexpr. No, not related to Cpu::Popcnt, in any way. Used
+   for calculating a difference between two extra tag sets in order to
+   calculate overload priority. */
+template<unsigned short A> struct BitCount {
+    /* https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation;
+       lol I can do that without having to recurse */
+    enum: unsigned short {
+        Bits1 = 0x5555, /* 0b0101010101010101 */
+        Bits2 = 0x3333, /* 0b0011001100110011 */
+        Bits4 = 0x0f0f, /* 0b0000111100001111 */
+        Bits8 = 0x00ff, /* 0b0000000011111111 */
+
+        B0 = (A >> 0) & Bits1,
+        B1 = (A >> 1) & Bits1,
+        C = B0 + B1,
+        D0 = (C >> 0) & Bits2,
+        D2 = (C >> 2) & Bits2,
+        E = D0 + D2,
+        F0 = (E >> 0) & Bits4,
+        F4 = (E >> 4) & Bits4,
+        G = F0 + F4,
+        H0 = (G >> 0) & Bits8,
+        H8 = (G >> 8) & Bits8,
+        Value = H0 + H8
+    };
+};
+
+/* Calculates an absolute priority index for given tag, which is either a
+   base-2 log "plus one" of its index if it's a base tag, or is 1 if it's an
+   extra tag */
+template<class T> Priority<TypeTraits<T>::Index & ExtraTagMask ? 1 : BitIndex<TypeTraits<T>::Index & BaseTagMask>::Value*(ExtraTagCount + 1)> constexpr priority(T) {
+    return {};
+}
+template<unsigned int value> Priority<BitIndex<value & BaseTagMask>::Value*(ExtraTagCount + 1) + BitCount<((value & ExtraTagMask) >> ExtraTagBitOffset)>::Value> constexpr priority(Tags<value>) {
+    static_assert(!((value & BaseTagMask) & ((value & BaseTagMask) - 1)), "more than one base tag used");
+    /* GCC 4.8 loudly complains about enum comparison if I don't cast, sigh */
+    static_assert(((value & ExtraTagMask) >> ExtraTagBitOffset) < (1 << static_cast<unsigned int>(ExtraTagCount)), "extra tag out of expected bounds");
+    return {};
+}
+
+}
+
 /**
 @brief Default base tag type
 
@@ -675,6 +998,35 @@ typedef
     DefaultBaseT;
 
 /**
+@brief Default extra tag type
+
+See the @ref DefaultExtra tag for more information.
+*/
+typedef Implementation::Tags<
+    #ifdef CORRADE_TARGET_X86
+    #ifdef CORRADE_TARGET_POPCNT
+    TypeTraits<PopcntT>::Index|
+    #endif
+    #ifdef CORRADE_TARGET_LZCNT
+    TypeTraits<LzcntT>::Index|
+    #endif
+    #ifdef CORRADE_TARGET_AVX_FMA
+    TypeTraits<AvxFmaT>::Index|
+    #endif
+    #ifdef CORRADE_TARGET_AVX_F16C
+    TypeTraits<AvxF16cT>::Index|
+    #endif
+    #endif
+    0> DefaultExtraT;
+
+/**
+@brief Default tag type
+
+See the @ref Default tag for more information.
+*/
+typedef Implementation::Tags<TypeTraits<DefaultBaseT>::Index|DefaultExtraT::Value> DefaultT;
+
+/**
 @brief Default base tag
 
 Highest base instruction set available on given architecture with current
@@ -702,11 +1054,45 @@ On @ref CORRADE_TARGET_WASM it's one of these:
 -   @ref Simd128 if @ref CORRADE_TARGET_SIMD128 is defined
 -   @ref Scalar otherwise
 
-See also @ref compiledFeatures(), which returns a *combination* of these tags
-instead of just the highest available, and @ref runtimeFeatures() which is
+In addition to the above, @ref DefaultExtra contains a combination of extra
+instruction sets available together with the base instruction set, and
+@ref Default is a combination of both. See also @ref compiledFeatures() which
+returns a *combination* of base tags instead of just the highest available,
+together with the extra instruction sets, and @ref runtimeFeatures() which is
 capable of detecting the available CPU feature set at runtime.
 */
 constexpr DefaultBaseT DefaultBase{Implementation::Init};
+
+/**
+@brief Default extra tags
+
+Instruction sets available in addition to @ref DefaultBase on
+given architecture with current compiler flags. On @ref CORRADE_TARGET_X86 it's
+a combination of these:
+
+-   @ref Popcnt if @ref CORRADE_TARGET_POPCNT is defined
+-   @ref Lzcnt if @ref CORRADE_TARGET_LZCNT is defined
+-   @ref AvxFma if @ref CORRADE_TARGET_AVX_FMA is defined
+-   @ref AvxF16c if @ref CORRADE_TARGET_AVX_F16C is defined
+
+No extra instruction sets are currently defined for @ref CORRADE_TARGET_ARM or
+@ref CORRADE_TARGET_WASM.
+
+In addition to the above, @ref Default is a combination of both
+@ref DefaultBase and the extra instruction sets. See also
+@ref compiledFeatures() which returns these together with a combination of all
+base instruction sets available, and @ref runtimeFeatures() which is capable of
+detecting the available CPU feature set at runtime.
+*/
+constexpr DefaultExtraT DefaultExtra{Implementation::Init};
+
+/**
+@brief Default tags
+
+A combination of @ref DefaultBase and @ref DefaultExtra, see their
+documentation for more information.
+*/
+constexpr DefaultT Default{Implementation::Init};
 
 /**
 @brief Tag for a tag type
@@ -752,7 +1138,17 @@ class Features {
          *
          * @see @ref features()
          */
-        template<class T, class = decltype(TypeTraits<T>::Index)> constexpr /*implicit*/ Features(T) noexcept: _data{TypeTraits<T>::Index} {}
+        template<class T, class = decltype(TypeTraits<T>::Index)> constexpr /*implicit*/ Features(T) noexcept: _data{TypeTraits<T>::Index} {
+            /* GCC 4.8 loudly complains about enum comparison if I don't cast, sigh */
+            static_assert(((TypeTraits<T>::Index & Implementation::ExtraTagMask) >> Implementation::ExtraTagBitOffset) < (1 << static_cast<unsigned int>(Implementation::ExtraTagCount)),
+                "extra tag out of expected bounds");
+        }
+
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        /* The compile-time Tags<> is an implementation detail, don't show that
+           in the docs */
+        template<unsigned int value> constexpr /*implicit*/ Features(Implementation::Tags<value>) noexcept: _data{value} {}
+        #endif
 
         /** @brief Equality comparison */
         constexpr bool operator==(Features other) const {
@@ -912,6 +1308,18 @@ template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features ope
     return b | a;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Compared to the above, this produces a type that encodes the value instead
+   of Features. Has to be in the same namespace as the tags, but since Tags<>
+   is an implementation detail, this is hidden from plain sight as well. */
+template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index | TypeTraits<U>::Index> operator|(T, U) {
+    return Implementation::Tags<TypeTraits<T>::Index | TypeTraits<U>::Index>{Implementation::Init};
+}
+template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index | value> operator|(T, Implementation::Tags<value>) {
+    return Implementation::Tags<TypeTraits<T>::Index | value>{Implementation::Init};
+}
+#endif
+
 /** @relates Features
 @brief Intersection of two feature sets
 
@@ -920,6 +1328,18 @@ Same as @ref Features::operator&().
 template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features operator&(T a, Features b) {
     return b & a;
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Compared to the above, this produces a type that encodes the value instead
+   of Features. Has to be in the same namespace as the tags, but since Tags<>
+   is an implementation detail, this is hidden from plain sight as well. */
+template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index & TypeTraits<U>::Index> operator&(T, U) {
+    return Implementation::Tags<TypeTraits<T>::Index & TypeTraits<U>::Index>{Implementation::Init};
+}
+template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index & value> operator&(T, Implementation::Tags<value>) {
+    return Implementation::Tags<TypeTraits<T>::Index & value>{Implementation::Init};
+}
+#endif
 
 /** @relates Features
 @brief XOR of two feature sets
@@ -930,14 +1350,32 @@ template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features ope
     return b ^ a;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Compared to the above, this produces a type that encodes the value instead
+   of Features. Has to be in the same namespace as the tags, but since Tags<>
+   is an implementation detail, this is hidden from plain sight as well. */
+template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index ^ TypeTraits<U>::Index> operator^(T, U) {
+    return Implementation::Tags<TypeTraits<T>::Index ^ TypeTraits<U>::Index>{Implementation::Init};
+}
+template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index ^ value> operator^(T, Implementation::Tags<value>) {
+    return Implementation::Tags<TypeTraits<T>::Index ^ value>{Implementation::Init};
+}
+#endif
+
 /** @relates Features
 @brief Feature set complement
 
 Same as @ref Features::operator~().
 */
-template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features operator~(T a) {
-    return ~Features(a);
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T> constexpr Features operator~(T a);
+#else
+/* To avoid confusion, to the doc use it's shown that the operator produces a
+   Features, but in fact it's a type with a compile-time-encoded value */
+template<class T> constexpr Implementation::Tags<~TypeTraits<T>::Index> operator~(T) {
+    return Implementation::Tags<~TypeTraits<T>::Index>{Implementation::Init};
 }
+#endif
 
 /** @debugoperator{Features} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, Features value);
@@ -949,12 +1387,19 @@ template<class T, class = decltype(TypeTraits<T>::Index)> inline Utility::Debug&
     return operator<<(debug, Features{value});
 }
 
+namespace Implementation {
+    template<unsigned int value_> inline Utility::Debug& operator<<(Utility::Debug& debug, Tags<value_> value) {
+        return operator<<(debug, Features{value});
+    }
+}
+
 /**
 @brief CPU instruction sets enabled at compile time
 
 On @ref CORRADE_TARGET_X86 "x86" returns a combination of @ref Sse2, @ref Sse3,
-@ref Ssse3, @ref Sse41, @ref Sse42, @ref Avx, @ref Avx2 and @ref Avx512f based
-on what all @ref CORRADE_TARGET_SSE2 etc. preprocessor variables are defined.
+@ref Ssse3, @ref Sse41, @ref Sse42, @ref Popcnt, @ref Lzcnt, @ref Avx,
+@ref AvxF16c, @ref AvxFma, @ref Avx2 and @ref Avx512f based on what all
+@ref CORRADE_TARGET_SSE2 etc. preprocessor variables are defined.
 
 On @ref CORRADE_TARGET_ARM "ARM", returns a combination of @ref Neon,
 @ref NeonFma and @ref NeonFp16 based on what all @ref CORRADE_TARGET_NEON etc.
@@ -966,7 +1411,7 @@ whether the @ref CORRADE_TARGET_SIMD128 preprocessor variable is defined.
 On other platforms or if no known CPU instruction set is enabled, the returned
 value is equal to @ref Scalar, which in turn is equivalent to empty (or
 default-constructed) @ref Features.
-@see @ref DefaultBase
+@see @ref DefaultBase, @ref DefaultExtra, @ref Default
 */
 constexpr Features compiledFeatures() {
     return Features{
@@ -986,8 +1431,20 @@ constexpr Features compiledFeatures() {
         #ifdef CORRADE_TARGET_SSE42
         TypeTraits<Sse42T>::Index|
         #endif
+        #ifdef CORRADE_TARGET_POPCNT
+        TypeTraits<PopcntT>::Index|
+        #endif
+        #ifdef CORRADE_TARGET_LZCNT
+        TypeTraits<LzcntT>::Index|
+        #endif
         #ifdef CORRADE_TARGET_AVX
         TypeTraits<AvxT>::Index|
+        #endif
+        #ifdef CORRADE_TARGET_AVX_FMA
+        TypeTraits<AvxFmaT>::Index|
+        #endif
+        #ifdef CORRADE_TARGET_AVX_F16C
+        TypeTraits<AvxF16cT>::Index|
         #endif
         #ifdef CORRADE_TARGET_AVX2
         TypeTraits<Avx2T>::Index|
@@ -1017,11 +1474,11 @@ constexpr Features compiledFeatures() {
 
 On @ref CORRADE_TARGET_X86 "x86" and GCC, Clang or MSVC uses the
 [CPUID](https://en.wikipedia.org/wiki/CPUID) builtin to check for the
-@ref Sse2, @ref Sse3, @ref Ssse3, @ref Sse41, @ref Sse42, @ref Avx, @ref Avx2
-and @ref Avx512f runtime features. @ref Avx needs OS support as well, if it's
-not present, no following flags are checked either. On compilers other than
-GCC, Clang and MSVC the function is @cpp constexpr @ce and delegates into
-@ref compiledFeatures().
+@ref Sse2, @ref Sse3, @ref Ssse3, @ref Sse41, @ref Sse42, @ref Popcnt,
+@ref Lzcnt, @ref Avx, @ref AvxF16c, @ref AvxFma, @ref Avx2 and @ref Avx512f
+runtime features. @ref Avx needs OS support as well, if it's not present, no
+following flags are checked either. On compilers other than GCC, Clang and MSVC
+the function is @cpp constexpr @ce and delegates into @ref compiledFeatures().
 
 On @ref CORRADE_TARGET_ARM "ARM" and Linux or Android API level 18+ uses
 @m_class{m-doc-external} [getauxval()](https://man.archlinux.org/man/getauxval.3)
@@ -1039,14 +1496,44 @@ into @ref compiledFeatures().
 On other platforms or if no known CPU instruction set is detected, the returned
 value is equal to @ref Scalar, which in turn is equivalent to empty (or
 default-constructed) @ref Features.
-
-@see @ref DefaultBase
+@see @ref DefaultBase, @ref DefaultExtra, @ref Default
 */
 #if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(DOXYGEN_GENERATING_OUTPUT)
 CORRADE_UTILITY_EXPORT Features runtimeFeatures();
 #else
 constexpr Features runtimeFeatures() { return compiledFeatures(); }
 #endif
+
+/**
+@brief Declare a CPU tag for a compile-time dispatch
+@m_since_latest
+
+Meant to be used to declare a function overload that uses given combination of
+CPU instruction sets. The @ref CORRADE_CPU_SELECT() macro is a counterpart used
+to select among overloads declared with this macro. See @ref Cpu-usage-extra
+for more information and usage example.
+
+Internally, this macro expands to two function parameter declarations separated
+by a comma, one that ensures only an overload matching the desired instruction
+sets get picked, and one that assigns an absolute priority to this overload.
+*/
+#define CORRADE_CPU_DECLARE(tag) decltype(Corrade::Cpu::Implementation::tags(tag)), decltype(Corrade::Cpu::Implementation::priority(tag))
+
+/**
+@brief Select a CPU tag for a compile-time dispatch
+@m_since_latest
+
+Meant to be used to select among function overloads declared with
+@ref CORRADE_CPU_DECLARE() that best matches given combination of CPU
+instruction sets. See @ref Cpu-usage-extra for more information and usage
+example.
+
+Internally, this macro expands to two function parameter values separated by a
+comma, one that contains the desired instruction sets to filter the overloads
+against and another that converts the sets to an absolute priority to pick the
+best viable overload.
+*/
+#define CORRADE_CPU_SELECT(tag) tag, Corrade::Cpu::Implementation::priority(tag)
 
 #if defined(CORRADE_TARGET_X86) || defined(DOXYGEN_GENERATING_OUTPUT)
 /**
@@ -1245,6 +1732,96 @@ Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
 #endif
 
 /**
+@brief Enable POPCNT for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang and @ref CORRADE_TARGET_CLANG_CL "clang-cl"
+expands to @cpp __attribute__((__target__("popcnt"))) @ce, allowing use of the
+[POPCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+instructions inside a function annotated with this macro without having to
+specify `-mpopcnt` for the whole compilation unit. On x86 MSVC expands to
+nothing, as the compiler doesn't restrict use of intrinsics in any way. Not
+defined on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_POPCNT is defined (meaning POCNT is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro, so you
+may need to specify it together with others. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsSse4.h instead of
+    @cpp #include <nmmintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Popcnt}
+*/
+#if defined(CORRADE_TARGET_POPCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_POPCNT
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE_POPCNT __attribute__((__target__("popcnt")))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_ENABLE_POPCNT
+#endif
+
+/**
+@brief Enable LZCNT for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("lzcnt"))) @ce, allowing use of the
+[LZCNT](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation))
+instructions inside a function annotated with this macro without having to
+specify `-mlzcnt` for the whole compilation unit. On x86 MSVC expands to
+nothing, as the compiler doesn't restrict use of intrinsics in any way. Unlike
+the SSE variants and POPCNT this macro is not defined on
+@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, AVX and newer
+intrinsics are provided only if enabled on compiler command line. Not defined
+on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_LZCNT is defined (meaning LZCNT is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro, so you
+may need to specify it together with others. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Lzcnt}
+*/
+#if defined(CORRADE_TARGET_LZCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_LZCNT
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+/* GCC 4.8 needs also -mabm. This option is not needed since 4.9 and is also
+   unrecognized on Clang. */
+#if defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 409
+#define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt")))
+#else
+#define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt,abm")))
+#endif
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __LZCNT__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE_LZCNT
+#endif
+
+/**
 @brief Enable AVX for given function
 @m_since_latest
 
@@ -1289,6 +1866,102 @@ Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
    already requires the right /arch: settings" is correct. */
 #elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_AVX
+#endif
+
+/**
+@brief Enable AVX F16C for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("f16c"))) @ce, allowing use of
+[F16C](https://en.wikipedia.org/wiki/F16C) instructions inside a function
+annotated with this macro without having to specify `-mf16c` for the whole
+compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
+restrict use of intrinsics in any way. Unlike the SSE variants this macro is
+not defined on @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer
+intrinsics are provided only if enabled on compiler command line. Not defined
+on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_AVX_F16C is present (meaning AVX F16C
+is enabled for the whole compilation unit), this macro is defined as empty on
+all compilers.
+
+Superset of @ref CORRADE_ENABLE_AVX on both GCC and Clang. However not
+portably implied by any other `CORRADE_ENABLE_*` macro so you may need to
+specify it together with others. See @ref Cpu-usage-target-attributes for more
+information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::AvxF16c}
+*/
+#if defined(CORRADE_TARGET_AVX_F16C) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_AVX_F16C
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+/* The -mf16c option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
+   both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
+#define CORRADE_ENABLE_AVX_F16C __attribute__((__target__("f16c")))
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __F16C__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE_AVX_F16C
+#endif
+
+/**
+@brief Enable AVX FMA for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC and Clang expands to
+@cpp __attribute__((__target__("fma"))) @ce, allowing use of
+[FMA](https://en.wikipedia.org/wiki/FMA_instruction_set) instructions inside a
+function annotated with this macro without having to specify `-mfma` for the
+whole compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
+restrict use of intrinsics in any way. Unlike the SSE variants this macro is
+not defined on @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer
+intrinsics are provided only if enabled on compiler command line. Not defined
+on other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_AVX_FMA is present (meaning AVX with
+FMA is enabled for the whole compilation unit), this macro is defined as empty
+on all compilers.
+
+Superset of @ref CORRADE_ENABLE_AVX on both GCC and Clang. However not
+portably implied by any other `CORRADE_ENABLE_*` macro so you may need to
+specify it together with others. See @ref Cpu-usage-target-attributes for more
+information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::AvxFma}
+*/
+#if defined(CORRADE_TARGET_AVX_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_AVX_FMA
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+/* The -mfma option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
+   both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
+#define CORRADE_ENABLE_AVX_FMA __attribute__((__target__("fma")))
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __FMA__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE_AVX_FMA
 #endif
 
 /**

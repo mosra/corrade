@@ -74,6 +74,8 @@ static_assert(sizeof(Cpu::Ssse3) == 1, "");
 static_assert(sizeof(Cpu::Sse41) == 1, "");
 static_assert(sizeof(Cpu::Sse42) == 1, "");
 static_assert(sizeof(Cpu::Avx) == 1, "");
+static_assert(sizeof(Cpu::AvxF16c) == 1, "");
+static_assert(sizeof(Cpu::AvxFma) == 1, "");
 static_assert(sizeof(Cpu::Avx2) == 1, "");
 static_assert(sizeof(Cpu::Avx512f) == 1, "");
 #elif defined(CORRADE_TARGET_ARM)
@@ -162,6 +164,13 @@ Features runtimeFeatures() {
     if(cpuid.e.cx & (1 << 19)) out |= TypeTraits<Sse41T>::Index;
     if(cpuid.e.cx & (1 << 20)) out |= TypeTraits<Sse42T>::Index;
 
+    /* https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits,
+       bit 5 says "ABM (lzcnt and popcnt)", but
+       https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation)
+       says that while LZCNT is advertised in the ABM CPUID bit, POPCNT is a
+       separate CPUID flag. Get POPCNT first, ABM later. */
+    if(cpuid.e.cx & (1 << 23)) out |= TypeTraits<PopcntT>::Index;
+
     /* AVX needs OS support checked, as the OS needs to be capable of saving
        and restoring the expanded registers when switching contexts:
        https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Operating_system_support */
@@ -186,36 +195,49 @@ Features runtimeFeatures() {
     }
 
     /* If AVX is not supported, we don't check any following flags either */
-    if(!(out & TypeTraits<AvxT>::Index)) return Features{out};
+    if(out & TypeTraits<AvxT>::Index) {
+        if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
+        if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
 
-    /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
+        /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
+        #ifdef CORRADE_TARGET_MSVC
+        __cpuidex(cpuid.data, 7, 0);
+        /* __get_cpuid_count() is only since GCC 7.1 and Clang 5.0:
+            https://github.com/gcc-mirror/gcc/commit/2488ebe5ef1788616c2fbc61e05af09f0749ebbe
+            https://github.com/llvm/llvm-project/commit/f6e8408a116405d0cc25b506e8c5b60ab4ab7bcd
+           Furthermore, Clang 5.0 is 9.3 on Apple, 9.2 has only Clang 4:
+            https://en.wikipedia.org/wiki/Xcode#Toolchain_versions */
+        #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 701) || (defined(CORRADE_TARGET_CLANG) && ((!defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 5) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__*100 + __clang_minor__ >= 903)))
+        CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid_count(7, 0, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
+        /* Looking at the above commits, on older GCC, __get_cpuid(7) seems to
+           do what __get_cpuid_count(7, 0) does on new GCC, however that's only
+           since 6.3:
+            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77756
+           Older Clang doesn't do any of that, and thus to avoid a
+           combinatorial explosion of test scenarios, we'll just directly use
+           the __cpuid assembly on both, which seems to be there since forever.
+           __get_cpuid[_count]() only does a bunch of bounds checking on top of
+           that anyway and if we didn't blow up on the assert above I HOPE we
+           should be fine to check for extended features level zero. For higher
+           levels (to check very recent AVX512 features) probably not but I
+           assume those would need very recent compilers anyway so when that
+           happens we can just pretend those don't exist on GCC 7.0 and
+           older. */
+        #else
+        __cpuid_count(7, 0, cpuid.e.ax, cpuid.e.bx, cpuid.e.cx, cpuid.e.dx);
+        #endif
+        if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
+        if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
+    }
+
+    /* And now the LZCNT bit, finally
+       https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits */
     #ifdef CORRADE_TARGET_MSVC
-    __cpuidex(cpuid.data, 7, 0);
-    /* __get_cpuid_count() is only since GCC 7.1 and Clang 5.0:
-        https://github.com/gcc-mirror/gcc/commit/2488ebe5ef1788616c2fbc61e05af09f0749ebbe
-        https://github.com/llvm/llvm-project/commit/f6e8408a116405d0cc25b506e8c5b60ab4ab7bcd
-       Furthermore, Clang 5.0 is 9.3 on Apple, 9.2 has only Clang 4:
-        https://en.wikipedia.org/wiki/Xcode#Toolchain_versions */
-    #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 701) || (defined(CORRADE_TARGET_CLANG) && ((!defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 5) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__*100 + __clang_minor__ >= 903)))
-    CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid_count(7, 0, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
-    /* Looking at the above commits, on older GCC, __get_cpuid(7) seems to do
-       what __get_cpuid_count(7, 0) does on new GCC, however that's only since
-       6.3:
-        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77756
-       Older Clang doesn't do any of that, and thus to avoid a combinatorial
-       explosion of test scenarios, we'll just directly use the __cpuid
-       assembly on both, which seems to be there since forever.
-       __get_cpuid[_count]() only does a bunch of bounds checking on top of
-       that anyway and if we didn't blow up on the assert above I HOPE we
-       should be fine to check for extended features level zero. For higher
-       levels (to check very recent AVX512 features) probably not but I assume
-       those would need very recent compilers anyway so when that happens we
-       can just pretend those don't exist on GCC 7.0 and older. */
-    #else
-    __cpuid_count(7, 0, cpuid.e.ax, cpuid.e.bx, cpuid.e.cx, cpuid.e.dx);
+    __cpuid(cpuid.data, 0x80000001);
+    #elif defined(CORRADE_TARGET_GCC)
+    CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid(0x80000001, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
     #endif
-    if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
-    if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
+    if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
 
     return Features{out};
 
@@ -258,6 +280,12 @@ Utility::Debug& operator<<(Utility::Debug& debug, const Features value) {
     _c(Avx)
     _c(Avx2)
     _c(Avx512f)
+    /* Print the extras at the end so the base instruction set is always first
+       even in case of Cpu::Default, where it's just one */
+    _c(Popcnt)
+    _c(Lzcnt)
+    _c(AvxF16c)
+    _c(AvxFma)
     #elif defined(CORRADE_TARGET_ARM)
     _c(Neon)
     _c(NeonFma)
