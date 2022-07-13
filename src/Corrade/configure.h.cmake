@@ -185,6 +185,7 @@
 #ifdef CORRADE_TARGET_X86
 
 /* SSE on GCC: https://stackoverflow.com/a/28939692 */
+/** @todo check also for Clang, maybe clang-cl defines these too? */
 #ifdef CORRADE_TARGET_GCC
 #ifdef __SSE2__
 #define CORRADE_TARGET_SSE2
@@ -232,9 +233,13 @@
 #endif
 #endif
 
-/* On GCC, F16C and FMA have its own define, on MSVC it's implied by /arch:AVX2
-   (source: https://docs.microsoft.com/en-us/cpp/build/reference/arch-x86 ...
-   or at least the FMA instructions, no word about F16C). */
+/* On GCC, F16C and FMA have its own define, on MSVC FMA is implied by
+   /arch:AVX2  (https://docs.microsoft.com/en-us/cpp/build/reference/arch-x86),
+   no mention of F16C but https://walbourn.github.io/directxmath-f16c-and-fma/
+   says it's like that so I'll believe that. However, comments below
+   https://stackoverflow.com/a/50829580 say there is a Via processor with AVX2
+   but no FMA, so then the __AVX2__ check isn't really bulletproof. Use runtime
+   detection where possible, please. */
 #ifdef CORRADE_TARGET_GCC
 #ifdef __F16C__
 #define CORRADE_TARGET_AVX_F16C
@@ -243,8 +248,18 @@
 #define CORRADE_TARGET_AVX_FMA
 #endif
 #elif defined(CORRADE_TARGET_MSVC) && defined(__AVX2__)
+/* As with other AVX+ intrinsics on clang-cl, these are only included if the
+   corresponding macro is defined as well, so check for __F16C__ and __FMA__
+   there. Otherwise this would mean the CORRADE_ENABLE_AVX_{16C,FMA} macros are
+   defined always, which would incorrectly imply presence of these intrinsics.
+   Chance is that __F16C__ / __FMA__ is possibly implied with /arch:AVX2, but I
+   don't know  for sure, so this is more robust. */
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__F16C__)
 #define CORRADE_TARGET_AVX_F16C
+#endif
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__FMA__)
 #define CORRADE_TARGET_AVX_FMA
+#endif
 #endif
 
 /* https://stackoverflow.com/a/37056771, confirmed on Android NDK Clang that

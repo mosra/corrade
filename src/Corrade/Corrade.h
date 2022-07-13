@@ -587,7 +587,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Advanced Vector Extensions](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions)
 are enabled at compile time (`-mavx` and higher on GCC/Clang, `/arch:AVX` on
 MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
-@ref CORRADE_TARGET_AVX_F16C.
+@ref CORRADE_TARGET_AVX2.
 */
 #define CORRADE_TARGET_AVX
 #undef CORRADE_TARGET_AVX
@@ -598,13 +598,8 @@ MSVC). Superset of @ref CORRADE_TARGET_SSE42, implied by
 
 Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [F16C instruction set](https://en.wikipedia.org/wiki/F16C) is enabled at
-compile time (`-mf16c` on GCC/Clang, MSVC doesn't have a direct option and it's
-only implied by `/arch:AVX2`). Superset of @ref CORRADE_TARGET_AVX, implied by
-@ref CORRADE_TARGET_AVX_FMA.
-
-Although there's no documented relation between AVX, F16C, FMA and AVX2,
-looking the history of released Intel and AMD CPUs it can be seen that all CPUs
-having F16C support plain AVX as well, and all CPUs supporting FMA have F16C.
+compile time. On GCC/Clang it's `-mf16c`, MSVC doesn't have a direct option but
+it's assumed to be implied by `/arch:AVX2`.
 */
 #define CORRADE_TARGET_AVX_F16C
 #undef CORRADE_TARGET_AVX_F16C
@@ -614,15 +609,13 @@ having F16C support plain AVX as well, and all CPUs supporting FMA have F16C.
 @m_since_latest
 
 Defined on @ref CORRADE_TARGET_X86 "x86" if the
-[FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set) is enabled at compile time (`-mfma` on GCC/Clang, MSVC doesn't have a direct
-option and it's only implied by `/arch:AVX2`). Superset of
-@ref CORRADE_TARGET_AVX_F16C, implied by @ref CORRADE_TARGET_AVX2.
+[FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set) is
+enabled at compile time. On GCC/Clang it's `-mfma`, MSVC doesn't have a direct
+option but it's assumes to be implied by `/arch:AVX2`.
 
 The FMA4 instruction set, which used to be supported only in certain range of
 AMD processors and isn't anymore, is not detected, and AMD switched to FMA3
-since. Although there's no documented relation between AVX, F16C, FMA and AVX2,
-looking the history of released Intel and AMD CPUs it can be seen that all CPUs
-having FMA support F16C as well, and all CPUs supporting AVX2 have FMA.
+since.
 */
 #define CORRADE_TARGET_AVX_FMA
 #undef CORRADE_TARGET_AVX_FMA
@@ -634,7 +627,7 @@ having FMA support F16C as well, and all CPUs supporting AVX2 have FMA.
 Defined on @ref CORRADE_TARGET_X86 "x86" if
 [Advanced Vector Extensions 2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2)
 are enabled at compile time (`-mavx2` and higher on GCC/Clang, `/arch:AVX2` on
-MSVC). Superset of @ref CORRADE_TARGET_AVX_FMA, implied by
+MSVC). Superset of @ref CORRADE_TARGET_AVX, implied by
 @ref CORRADE_TARGET_AVX512F.
 */
 #define CORRADE_TARGET_AVX2
