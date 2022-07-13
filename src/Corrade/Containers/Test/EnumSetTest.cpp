@@ -192,8 +192,8 @@ void EnumSetTest::operatorXor() {
     CORRADE_COMPARE(int(Feature::Cheap ^ Feature::Fast), 3);
 
     Features features = Feature::Popular|Feature::Fast|Feature::Cheap;
-    CORRADE_COMPARE(int(features ^ Feature::Tested), 15);
-    CORRADE_COMPARE(int(Feature::Tested ^ features), 15);
+    CORRADE_COMPARE(int(features ^ Feature::Fast), 10);
+    CORRADE_COMPARE(int(Feature::Fast ^ features), 10);
 
     CORRADE_COMPARE(int(features ^ Feature::Popular), 3);
 
@@ -204,10 +204,10 @@ void EnumSetTest::operatorXor() {
     CORRADE_COMPARE(int(features), 6);
 
     constexpr Features cFeatures = Feature::Popular|Feature::Fast|Feature::Cheap;
-    constexpr Features cFeatures1 = cFeatures ^ Feature::Tested;
-    constexpr Features cFeatures2 = Feature::Tested ^ cFeatures;
-    CORRADE_COMPARE(int(cFeatures1), 15);
-    CORRADE_COMPARE(int(cFeatures2), 15);
+    constexpr Features cFeatures1 = cFeatures ^ Feature::Fast;
+    constexpr Features cFeatures2 = Feature::Fast ^ cFeatures;
+    CORRADE_COMPARE(int(cFeatures1), 10);
+    CORRADE_COMPARE(int(cFeatures2), 10);
 }
 
 void EnumSetTest::operatorBool() {

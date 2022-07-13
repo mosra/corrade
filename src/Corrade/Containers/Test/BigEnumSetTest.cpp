@@ -343,15 +343,15 @@ void BigEnumSetTest::operatorXor() {
     CORRADE_COMPARE(cheapAndFast.data()[3], 0);
 
     Features features = Feature::Popular|Feature::Fast|Feature::Cheap;
-    Features featuresXorTestedA = features ^ Feature::Tested;
-    CORRADE_COMPARE(featuresXorTestedA.data()[0], FastBit ^ CheapBit);
-    CORRADE_COMPARE(featuresXorTestedA.data()[1], TestedBit);
+    Features featuresXorTestedA = features ^ Feature::Fast;
+    CORRADE_COMPARE(featuresXorTestedA.data()[0], CheapBit);
+    CORRADE_COMPARE(featuresXorTestedA.data()[1], 0);
     CORRADE_COMPARE(featuresXorTestedA.data()[2], 0);
     CORRADE_COMPARE(featuresXorTestedA.data()[3], PopularBit);
 
-    Features featuresXorTestedB = Feature::Tested ^ features;
-    CORRADE_COMPARE(featuresXorTestedB.data()[0], FastBit ^ CheapBit);
-    CORRADE_COMPARE(featuresXorTestedB.data()[1], TestedBit);
+    Features featuresXorTestedB = Feature::Fast ^ features;
+    CORRADE_COMPARE(featuresXorTestedB.data()[0], CheapBit);
+    CORRADE_COMPARE(featuresXorTestedB.data()[1], 0);
     CORRADE_COMPARE(featuresXorTestedB.data()[2], 0);
     CORRADE_COMPARE(featuresXorTestedB.data()[3], PopularBit);
 
