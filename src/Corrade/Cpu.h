@@ -1754,7 +1754,7 @@ may need to specify it together with others. See
 @m_class{m-note m-info}
 
 @par
-    If you target GCC 4.8, you may also want to use
+    If you target GCC 4.8 or Clang < 7, you may also want to use
     @ref Corrade/Utility/IntrinsicsSse4.h instead of
     @cpp #include <nmmintrin.h> @ce to be able to access the intrinsics on this
     compiler.

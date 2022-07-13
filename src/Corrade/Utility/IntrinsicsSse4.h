@@ -29,11 +29,14 @@
 @m_since_latest
 
 Equivalent to @cpp #include <smmintrin.h> @ce and
-@cpp #include <nmmintrin.h> @ce on most compilers except for GCC 4.8, where it
-contains an additional workaround to make the instructions available with just
-the @ref CORRADE_ENABLE_SSE41 and @ref CORRADE_ENABLE_SSE42 function attributes
-instead of having to specify `-msse4.1`, `-msse4.2` or `-mpopcnt` for the whole
-compilation unit.
+@cpp #include <nmmintrin.h> @ce on most compilers except for:
+
+-   GCC 4.8, where it contains an additional workaround to make the
+    instructions available with just the @ref CORRADE_ENABLE_SSE41 and
+    @ref CORRADE_ENABLE_SSE42 function attributes instead of having to specify
+    `-msse4.1`, `-msse4.2` or `-mpopcnt` for the whole compilation unit.
+-   Clang < 7, where `__POPCNT__` has to be explicitly defined in order to
+    access the POPCNT instruction
 
 Because GCC puts both the SSE4.1 and the SSE4.2 instructions into the same
 header and just guards each with a different macro, they have to be included
@@ -69,12 +72,23 @@ together, unlike with other SSE variants.
 #define __SSE4_2__
 #endif
 #endif
+/* https://github.com/llvm/llvm-project/commit/092d42557b6c70d32b0b9362e4a8db9566369ddc
+   says this was an accidental omission, so this should do no harm */
+#if defined(CORRADE_TARGET_CLANG) && __clang_major__ < 7
+#pragma push_macro("__POPCNT__")
+#ifndef __POPCNT__
+#define __POPCNT__
+#endif
+#endif
 #include <smmintrin.h>
 #include <nmmintrin.h>
 #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
 #pragma pop_macro("__SSE4_1__")
 #pragma pop_macro("__SSE4_2__")
 #pragma GCC pop_options
+#endif
+#if defined(CORRADE_TARGET_CLANG) && __clang_major__ < 7
+#pragma pop_macro("__POPCNT__")
 #endif
 
 /* Unlike with SSE4.1 / SSE4.2 there's no weird interaction with the popcnt
