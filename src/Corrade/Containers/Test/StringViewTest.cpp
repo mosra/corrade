@@ -975,10 +975,9 @@ void StringViewTest::slicePointer() {
     CORRADE_COMPARE(a.prefix(data + 3), "hel"_s);
     CORRADE_COMPARE(a.suffix(data + 2), "llo"_s);
 
-    /* Not constexpr on MSVC 2015; not constexpr on GCC 4.8 (probably because
-       of arithmetic on the C string literal). Interestingly enough, `cb`
-       compiles fine locally but not on Travis CI (both have 4.8.5). */
-    #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER <= 1900) && !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5)
+    /* Not constexpr on MSVC 2015; not constexpr on GCC 4.8, 4.9 or 5 (probably
+       because of arithmetic on the C string literal) */
+    #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER <= 1900) && !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 6)
     constexpr const char* cdata = "hello";
     constexpr StringView ca{cdata, 5};
     constexpr StringView cb = ca.slice(cdata + 1, cdata + 4);
