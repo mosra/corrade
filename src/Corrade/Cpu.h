@@ -937,11 +937,14 @@ template<unsigned short A> struct BitCount {
 
 /* Calculates an absolute priority index for given tag, which is either a
    base-2 log "plus one" of its index if it's a base tag, or is 1 if it's an
-   extra tag */
-template<class T> Priority<TypeTraits<T>::Index & ExtraTagMask ? 1 : BitIndex<TypeTraits<T>::Index & BaseTagMask>::Value*(ExtraTagCount + 1)> constexpr priority(T) {
+   extra tag.
+
+   MSVC 2015 and 2017 need the extra () inside Priority<>, otherwise they
+   demand that a typename is used for TypeTraits<T>::Index. Heh. */
+template<class T> Priority<(TypeTraits<T>::Index & ExtraTagMask ? 1 : BitIndex<TypeTraits<T>::Index & BaseTagMask>::Value*(ExtraTagCount + 1))> constexpr priority(T) {
     return {};
 }
-template<unsigned int value> Priority<BitIndex<value & BaseTagMask>::Value*(ExtraTagCount + 1) + BitCount<((value & ExtraTagMask) >> ExtraTagBitOffset)>::Value> constexpr priority(Tags<value>) {
+template<unsigned int value> Priority<(BitIndex<value & BaseTagMask>::Value*(ExtraTagCount + 1) + BitCount<((value & ExtraTagMask) >> ExtraTagBitOffset)>::Value)> constexpr priority(Tags<value>) {
     static_assert(!((value & BaseTagMask) & ((value & BaseTagMask) - 1)), "more than one base tag used");
     /* GCC 4.8 loudly complains about enum comparison if I don't cast, sigh */
     static_assert(((value & ExtraTagMask) >> ExtraTagBitOffset) < (1 << static_cast<unsigned int>(ExtraTagCount)), "extra tag out of expected bounds");
