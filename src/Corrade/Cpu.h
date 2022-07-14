@@ -1251,7 +1251,7 @@ class Features {
     private:
         template<class> friend constexpr Features features();
         friend constexpr Features compiledFeatures();
-        #if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
+        #if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(CORRADE_TARGET_APPLE))
         /* MSVC demands the export macro to be here as well */
         friend CORRADE_UTILITY_EXPORT Features runtimeFeatures();
         #endif
@@ -1497,7 +1497,7 @@ following flags are checked either. On compilers other than GCC, Clang and MSVC
 the function is @cpp constexpr @ce and delegates into @ref compiledFeatures().
 
 On @ref CORRADE_TARGET_ARM "ARM" and Linux or Android API level 18+ uses
-@m_class{m-doc-external} [getauxval()](https://man.archlinux.org/man/getauxval.3)
+@m_class{m-doc-external} [getauxval()](https://man.archlinux.org/man/getauxval.3), or on ARM macOS and iOS uses @m_class{m-doc-external} [sysctlbyname()](https://developer.apple.com/documentation/kernel/1387446-sysctlbyname)
 to check for the @ref Neon, @ref NeonFma and @ref NeonFp16. @ref Neon and
 @ref NeonFma are implicitly supported on ARM64. On other platforms the function
 is @cpp constexpr @ce and delegates into @ref compiledFeatures().
@@ -1514,7 +1514,7 @@ value is equal to @ref Scalar, which in turn is equivalent to empty (or
 default-constructed) @ref Features.
 @see @ref DefaultBase, @ref DefaultExtra, @ref Default
 */
-#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(DOXYGEN_GENERATING_OUTPUT)
+#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && ((defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(CORRADE_TARGET_APPLE))) || defined(DOXYGEN_GENERATING_OUTPUT)
 CORRADE_UTILITY_EXPORT Features runtimeFeatures();
 #else
 constexpr Features runtimeFeatures() { return compiledFeatures(); }
