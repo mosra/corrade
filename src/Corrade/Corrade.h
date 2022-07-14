@@ -720,6 +720,8 @@ widespread:
 -   SVE2, which is a next-generation vector instruction set designed to be a
     successor to both NEON and SVE, scheduled to appear in production in around
     2022
+-   AMX, which is Apple's proprietary and patented instruction set available
+    only on their own hardware
 
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Neon},
     @ref CORRADE_ENABLE_NEON
