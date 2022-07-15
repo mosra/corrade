@@ -819,8 +819,12 @@ constexpr Simd128T Simd128{Implementation::Init};
 
 namespace Implementation {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* "warning: Detected potential recursive class relation between..." I DON'T
+   CARE, DOXYGEN, IT'S NOT YOUR JOB TO PARSE THE CODE IN THIS NAMESPACE */
 template<unsigned i> struct Priority: Priority<i - 1> {};
 template<> struct Priority<0> {};
+#endif
 
 /* Count of "extra" tags that are not in the hierarchy. Should not be larger
    than strictly necessary as it deepens inheritance hierarchy when picking
