@@ -525,19 +525,18 @@ function(corrade_add_resource name configurationFile)
 
     # Output file name
     set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
-    set(outDepends "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.depends")
 
-    # Use configure_file() to trick CMake to re-run and update the dependency
-    # list when the resource list file changes (otherwise it parses the file
-    # only during the explicit configure step and never again, thus additions/
-    # deletions are not recognized automatically)
-    configure_file(${configurationFile} ${outDepends} COPYONLY)
+    # Tell CMake to re-run and update the dependency list when the resource
+    # list file changes (otherwise it parses the file only during the explicit
+    # configure step and never again, thus additions/deletions are not
+    # recognized automatically)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${configurationFile})
 
     # Run command
     add_custom_command(
         OUTPUT "${out}"
         COMMAND Corrade::rc ${name} "${configurationFile}" "${out}"
-        DEPENDS Corrade::rc ${outDepends} ${dependencies} ${name}-dependencies
+        DEPENDS Corrade::rc ${configurationFile} ${dependencies} ${name}-dependencies
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
