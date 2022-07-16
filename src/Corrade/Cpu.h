@@ -835,6 +835,40 @@ enum: unsigned int {
     #endif
 };
 
+/* On sane compilers (and on MSVC with /permissive-), these two could be
+   directly in the Tag constructor enable_if expressions. But MSVC chokes hard
+   on those ("C2988: unrecognizable template declaration/definition", haha), so
+   they have to be extracted outside. I could also #ifdef around the workaround
+   and extract it only for MSVC, but I don't think the code duplication would
+   be worth it. */
+template<unsigned int value, unsigned int otherValue> struct IsTagConversionAllowed {
+    enum: bool { Value =
+        /* There should be at most one base tag set in both, if there's none
+           then it's Cpu::Scalar */
+        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
+        !((otherValue & BaseTagMask) & ((otherValue & BaseTagMask) - 1)) &&
+        /* The other base tag should be the same or derived (i.e, having same
+           or larger value) */
+        (otherValue & BaseTagMask) >= (value & BaseTagMask) &&
+        /* The other extra bits should be a superset of this */
+        ((otherValue & value) & ExtraTagMask) == (value & ExtraTagMask)
+    };
+};
+template<unsigned int value, unsigned int otherIndex> struct IsSingleTagConversionAllowed {
+    enum: bool { Value =
+        /* There should be at most one base tag set in this one, the other
+           satisfies that implicitly as it's constrained by TypeTraits */
+        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
+        /* The other base tag should be the same or derived (i.e, having same
+           or larger value) */
+        (otherIndex & BaseTagMask) >= (value & BaseTagMask) &&
+        /* The other extra bits should be a superset of this. Since a single
+           tag can be only one bit, this condition gets satisfied only either
+           if we're Cpu::Scalar or if we have no extra bits. */
+        ((otherIndex & value) & ExtraTagMask) == (value & ExtraTagMask)
+    };
+};
+
 /* Holds a compile-time combination of tags. Kept private, since it isn't
    really directly needed in user code and it would only lead to confusion. */
 template<unsigned int value> struct Tags {
@@ -845,32 +879,11 @@ template<unsigned int value> struct Tags {
 
     /* Conversion from other tag combination, allowed only if the other is
        not a subset */
-    template<unsigned int otherValue> constexpr Tags(Tags<otherValue>, typename std::enable_if<
-        /* There should be at most one base tag set in both, if there's none
-           then it's Cpu::Scalar */
-        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
-        !((otherValue & BaseTagMask) & ((otherValue & BaseTagMask) - 1)) &&
-        /* The other base tag should be the same or derived (i.e, having same
-           or larger value) */
-        (otherValue & BaseTagMask) >= (value & BaseTagMask) &&
-        /* The other extra bits should be a superset of this */
-        ((otherValue & value) & ExtraTagMask) == (value & ExtraTagMask)
-    >::type* = {}) {}
+    template<unsigned int otherValue> constexpr Tags(Tags<otherValue>, typename std::enable_if<IsTagConversionAllowed<value, otherValue>::Value>::type* = {}) {}
 
     /* Conversion from a single tag, allowed only if we're a single bit and
        the other is not a subset */
-    template<class T> constexpr Tags(T, typename std::enable_if<
-        /* There should be at most one base tag set in this one, the other
-           satisfies that implicitly as it's constrained by TypeTraits */
-        !((value & BaseTagMask) & ((value & BaseTagMask) - 1)) &&
-        /* The other base tag should be the same or derived (i.e, having same
-           or larger value) */
-        (TypeTraits<T>::Index & BaseTagMask) >= (value & BaseTagMask) &&
-        /* The other extra bits should be a superset of this. Since a single
-           tag can be only one bit, this condition gets satisfied only either
-           if we're Cpu::Scalar or if we have no extra bits. */
-        ((TypeTraits<T>::Index & value) & ExtraTagMask) == (value & ExtraTagMask)
-    >::type* = {}) {}
+    template<class T> constexpr Tags(T, typename std::enable_if<IsSingleTagConversionAllowed<Value, TypeTraits<T>::Index>::Value>::type* = {}) {}
 
     /* A subset of operators on Features, excluding the assignment ones --
        since they modify the type, they make no sense here */
