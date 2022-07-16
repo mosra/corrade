@@ -347,6 +347,13 @@ void CpuTest::featuresOperatorOr() {
     CORRADE_COMPARE(std::uint32_t(cTags2), 7);
     CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
     CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
+
+    /* And also with Tags<> on both sides, check that it doesn't decay to an
+       int or other horrible thing */
+    constexpr auto cTags3 = Cpu::Ssse3|Cpu::Sse41;
+    constexpr auto cTags4 = cTags3|cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags4), 15);
+    CORRADE_VERIFY(std::is_same<decltype(cTags4), const Cpu::Implementation::Tags<15>>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -387,6 +394,13 @@ void CpuTest::featuresOperatorAnd() {
     CORRADE_COMPARE(std::uint32_t(cTags2), 8);
     CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
     CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
+
+    /* And also with Tags<> on both sides, check that it doesn't decay to an
+       int or other horrible thing */
+    constexpr auto cTags3 = Cpu::Ssse3|Cpu::Sse41;
+    constexpr auto cTags4 = cTags3 & cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags4), 8);
+    CORRADE_VERIFY(std::is_same<decltype(cTags4), const Cpu::Implementation::Tags<8>>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
@@ -428,6 +442,13 @@ void CpuTest::featuresOperatorXor() {
     CORRADE_COMPARE(std::uint32_t(cTags2), 10);
     CORRADE_VERIFY(!std::is_same<decltype(cTags), decltype(cTags1)>::value);
     CORRADE_VERIFY(std::is_same<decltype(cTags1), decltype(cTags2)>::value);
+
+    /* And also with Tags<> on both sides, check that it doesn't decay to an
+       int or other horrible thing */
+    constexpr auto cTags3 = Cpu::Ssse3|Cpu::Sse41;
+    constexpr auto cTags4 = cTags3 ^ cTags;
+    CORRADE_COMPARE(std::uint32_t(cTags4), 7);
+    CORRADE_VERIFY(std::is_same<decltype(cTags4), const Cpu::Implementation::Tags<7>>::value);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif

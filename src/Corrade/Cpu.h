@@ -891,11 +891,20 @@ template<unsigned int value> struct Tags {
 
     /* A subset of operators on Features, excluding the assignment ones --
        since they modify the type, they make no sense here */
+    template<unsigned int otherValue> constexpr Tags<value | otherValue> operator|(Tags<otherValue>) const {
+        return Tags<value | otherValue>{Init};
+    }
     template<class U> constexpr Tags<value | TypeTraits<U>::Index> operator|(U) const {
         return Tags<value | TypeTraits<U>::Index>{Init};
     }
+    template<unsigned int otherValue> constexpr Tags<value & otherValue> operator&(Tags<otherValue>) const {
+        return Tags<value & otherValue>{Init};
+    }
     template<class U> constexpr Tags<value & TypeTraits<U>::Index> operator&(U) const {
         return Tags<value & TypeTraits<U>::Index>{Init};
+    }
+    template<unsigned int otherValue> constexpr Tags<value ^ otherValue> operator^(Tags<otherValue>) const {
+        return Tags<value ^ otherValue>{Init};
     }
     template<class U> constexpr Tags<value ^ TypeTraits<U>::Index> operator^(U) const {
         return Tags<value ^ TypeTraits<U>::Index>{Init};
