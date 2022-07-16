@@ -79,6 +79,50 @@ int lookup(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt), DOXYGEN_ELLIP
 }
 #endif
 /* [Cpu-usage-target-attributes] */
+
+namespace Bar {
+using TransformT = void(*)(Containers::ArrayView<float>);
+TransformT transformImplementation(Cpu::ScalarT);
+TransformT transformImplementation(Cpu::Sse42T);
+TransformT transformImplementation(Cpu::Avx2T);
+TransformT transformImplementation(Cpu::Features);
+/* [Cpu-usage-automatic-runtime-dispatch-declare] */
+using TransformT = void(*)(Containers::ArrayView<float>);
+
+TransformT transformImplementation(Cpu::ScalarT) {
+    return [](Containers::ArrayView<float> data) { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
+}
+TransformT transformImplementation(Cpu::Sse42T) {
+    return [](Containers::ArrayView<float> data) { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
+}
+TransformT transformImplementation(Cpu::Avx2T) {
+    return [](Containers::ArrayView<float> data) { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
+}
+
+CORRADE_CPU_DISPATCHER_BASE(TransformT, transformImplementation)
+/* [Cpu-usage-automatic-runtime-dispatch-declare] */
+
+using LookupT = int(*)(int);
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar));
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2));
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt));
+LookupT lookupImplementation(Cpu::Features);
+/* [Cpu-usage-automatic-runtime-dispatch-extra-declare] */
+using LookupT = int(*)(DOXYGEN_ELLIPSIS(int));
+
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+    DOXYGEN_ELLIPSIS(return {};)
+}
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2)) {
+    DOXYGEN_ELLIPSIS(return {};)
+}
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt)) {
+    DOXYGEN_ELLIPSIS(return {};)
+}
+
+CORRADE_CPU_DISPATCHER(LookupT, lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
+/* [Cpu-usage-automatic-runtime-dispatch-extra-declare] */
+}
 #endif
 
 inline void foo(Cpu::ScalarT) {}
@@ -112,6 +156,18 @@ else
 int found = lookup(CORRADE_CPU_SELECT(Cpu::Default), DOXYGEN_ELLIPSIS(0));
 /* [Cpu-usage-extra-compile-time-call] */
 static_cast<void>(found);
+}
+
+{
+using namespace Bar;
+Containers::ArrayView<float> data;
+/* [Cpu-usage-automatic-runtime-dispatch-call] */
+/* Dispatch once and cache the function pointer */
+TransformT transform = transformImplementation(Cpu::runtimeFeatures());
+
+/* Call many times */
+transform(data);
+/* [Cpu-usage-automatic-runtime-dispatch-call] */
 }
 
 {

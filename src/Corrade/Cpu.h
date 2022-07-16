@@ -31,6 +31,7 @@
  * @m_since_latest
  */
 
+#include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -152,6 +153,11 @@ use:
 
 @snippet Corrade.cpp Cpu-usage-runtime-manual-dispatch
 
+While such approach gives you the most control, manually managing the dispatch
+branches is error prone and the argument passthrough may also add nontrivial
+overhead. See below for an
+@ref Cpu-usage-automatic-runtime-dispatch "efficient automatic runtime dispatch".
+
 @section Cpu-usage-extra Usage with extra instruction sets
 
 Besides the base instruction set, which on x86 is @ref Sse2 through
@@ -255,6 +261,44 @@ explicitly enabled as well, in contrast a scalar variant would have no
 target-specific annotations at all.
 
 @snippet Corrade.cpp Cpu-usage-target-attributes
+
+@section Cpu-usage-automatic-runtime-dispatch Automatic runtime dispatch
+
+Similarly to how the best-matching function variant can be picked at compile
+time, there's a possibility to do the same at runtime without maintaining a
+custom dispatch code for each case
+@ref Cpu-usage-dispatch-runtime "as was shown above". To avoid having to
+dispatch on every call and to remove the argument passthrough overhead, all
+variants need to have the same function signature, separate from the CPU tags.
+That's achievable by putting them into lambdas with a common signature, and
+returning that lambda from a wrapper function that contains the CPU tag. After
+that, a runtime dispatcher function that is created with the
+@ref CORRADE_CPU_DISPATCHER_BASE() macro. The @cpp transform() @ce variants
+from above would then look like this instead:
+
+@snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-declare
+
+The macro creates an overload of the same name, but taking @ref Features
+instead, and internally dispatches to one of the overloads using the same rules
+as in the compile-time dispatch. Which means you can now call it with e.g.
+@ref runtimeFeatures(), get a function pointer back and then call it with the
+actual arguments:
+
+@snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-call
+
+@subsection Cpu-usage-automatic-runtime-dispatch-extra Automatic runtime dispach with extra instruction sets
+
+If the variants are tagged with extra instruction sets instead of just the
+base instruction set like in the @cpp lookup() @ce case
+@ref Cpu-usage-extra "shown above", you'll use the @ref CORRADE_CPU_DISPATCHER()
+macro instead. There, to avoid a combinatorial explosion of cases to check,
+you're expected to list the actual extra tags the overloads use. Which is
+usually just one or two out of the whole set:
+
+@snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-extra-declare
+
+On the call side, there's no difference. The created dispatcher function takes
+@ref Features as well.
 */
 namespace Cpu {
 
@@ -1563,6 +1607,177 @@ against and another that converts the sets to an absolute priority to pick the
 best viable overload.
 */
 #define CORRADE_CPU_SELECT(tag) tag, Corrade::Cpu::Implementation::priority(tag)
+
+/**
+@brief Create a function for a runtime dispatch on a base CPU instruction set
+@m_since_latest
+
+Given a set of function overloads named @p function that accept a CPU tag as a
+parameter and return a function pointer of @p type, creates a function with
+signature @cpp type function(Cpu::Features) @ce which will select among the
+overloads using a runtime-specified @relativeref{Corrade,Cpu::Features}, using
+the same rules as the compile-time overload selection. For this macro to work,
+at the very least there has to be an overload with a
+@relativeref{Corrade,Cpu::ScalarT} argument. See
+@ref Cpu-usage-automatic-runtime-dispatch for more information and an example.
+
+This function works with just a single base CPU instruction tag such as
+@relativeref{Corrade,Cpu::Avx2} or @relativeref{Corrade,Cpu::Neon}, but not the
+extra instruction sets like @relativeref{Corrade,Cpu::Lzcnt} or
+@relativeref{Corrade,Cpu::AvxFma}. For a dispatch that takes extra instruction
+sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
+*/
+/* Ideally this would reuse _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(),
+   unfortunately due to MSVC not being able to defer macro calls unless
+   "the new preprocessor" is enabled it wouldn't be possible to get rid of the
+   CORRADE_CPU_SELECT() macro from there. */
+#ifdef CORRADE_TARGET_X86
+#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
+    type function(Corrade::Cpu::Features features) {                        \
+        if(features & Corrade::Cpu::Avx512f)                                \
+            return function(Corrade::Cpu::Avx512f);                         \
+        if(features & Corrade::Cpu::Avx2)                                   \
+            return function(Corrade::Cpu::Avx2);                            \
+        if(features & Corrade::Cpu::Avx)                                    \
+            return function(Corrade::Cpu::Avx);                             \
+        if(features & Corrade::Cpu::Sse42)                                  \
+            return function(Corrade::Cpu::Sse42);                           \
+        if(features & Corrade::Cpu::Sse41)                                  \
+            return function(Corrade::Cpu::Sse41);                           \
+        if(features & Corrade::Cpu::Ssse3)                                  \
+            return function(Corrade::Cpu::Ssse3);                           \
+        if(features & Corrade::Cpu::Sse3)                                   \
+            return function(Corrade::Cpu::Sse3);                            \
+        if(features & Corrade::Cpu::Sse2)                                   \
+            return function(Corrade::Cpu::Sse2);                            \
+        return function(Corrade::Cpu::Scalar);                              \
+    }
+#elif defined(CORRADE_TARGET_ARM)
+#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
+    type function(Corrade::Cpu::Features features) {                        \
+        if(features & Corrade::Cpu::NeonFp16)                               \
+            return function(Corrade::Cpu::NeonFp16);                        \
+        if(features & Corrade::Cpu::NeonFma)                                \
+            return function(Corrade::Cpu::NeonFma);                         \
+        if(features & Corrade::Cpu::Neon)                                   \
+            return function(Corrade::Cpu::Neon);                            \
+        return function(Corrade::Cpu::Scalar);                              \
+    }
+#elif defined(CORRADE_TARGET_WASM)
+#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
+    type function(Corrade::Cpu::Features features) {                        \
+        if(features & Corrade::Cpu::Simd128)                                \
+            return function(Corrade::Cpu::Simd128);                         \
+        return function(Corrade::Cpu::Scalar);                              \
+    }
+#else
+#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
+    type function(Corrade::Cpu::Features features) {                        \
+        return function(Corrade::Cpu::Scalar);                              \
+    }
+#endif
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+#ifdef CORRADE_TARGET_X86
+#define _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, extra)             \
+    if(features >= (Corrade::Cpu::Avx512f extra))                           \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Avx512f extra));   \
+    if(features >= (Corrade::Cpu::Avx2 extra))                              \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Avx2 extra));      \
+    if(features >= (Corrade::Cpu::Avx extra))                               \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Avx extra));       \
+    if(features >= (Corrade::Cpu::Sse42 extra))                             \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Sse42 extra));     \
+    if(features >= (Corrade::Cpu::Sse41 extra))                             \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Sse41 extra));     \
+    if(features >= (Corrade::Cpu::Ssse3 extra))                             \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Ssse3 extra));     \
+    if(features >= (Corrade::Cpu::Sse3 extra))                              \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Sse3 extra));      \
+    if(features >= (Corrade::Cpu::Sse2 extra))                              \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Sse2 extra));      \
+    return function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar extra));
+#elif defined(CORRADE_TARGET_ARM)
+#define _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, extra)             \
+    if(features >= (Corrade::Cpu::NeonFp16 extra))                          \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::NeonFp16 extra));  \
+    if(features >= (Corrade::Cpu::NeonFma extra))                           \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::NeonFma extra));   \
+    if(features >= (Corrade::Cpu::Neon extra))                              \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Neon extra));      \
+    return function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar extra));
+#elif defined(CORRADE_TARGET_WASM)
+#define _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, extra)             \
+    if(features >= (Corrade::Cpu::Simd128 extra))                           \
+        return function(CORRADE_CPU_SELECT(Corrade::Cpu::Simd128 extra));   \
+    return function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar extra));
+#else
+#define _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, extra)             \
+    return function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar extra));
+#endif
+
+/* CORRADE_CPU_DISPATCHER() specialization for 0 extra instruction sets.
+   Basically equivalent to CORRADE_CPU_DISPATCHER_BASE() except for the extra
+   CORRADE_CPU_SELECT() macro. */
+#define _CORRADE_CPU_DISPATCHER0(type, function)                            \
+    type function(Corrade::Cpu::Features features) {                        \
+        _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, )                  \
+    }
+
+/* CORRADE_CPU_DISPATCHER() specialization for 1+ extra instruction sets. On
+   Clang this still generates quite a reasonable code for 2 extra sets compared
+   to CORRADE_CPU_DISPATCHER_BASE(), on GCC it's ~25% longer but also still
+   reasonable. I attempted adding an "unrolled" _CORRADE_CPU_DISPATCHER2() but
+   it made everything significantly worse on both compilers, more than doubling
+   the amount of generated code. */
+#define _CORRADE_CPU_DISPATCHERn(type, function, ...)                       \
+    template<unsigned int value> CORRADE_ALWAYS_INLINE type function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value>) { \
+        _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, |Corrade::Cpu::Implementation::Tags<value>{Corrade::Cpu::Implementation::Init}) \
+    }                                                                       \
+    template<unsigned int value, class First, class ...Next> CORRADE_ALWAYS_INLINE type function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value> extra, First first, Next... next) { \
+        static_assert(!(static_cast<unsigned int>(Corrade::Cpu::Implementation::tags(First{Corrade::Cpu::Implementation::Init})) & Corrade::Cpu::Implementation::BaseTagMask), \
+            "only extra instruction set tags should be explicitly listed"); \
+        if(features & first)                                                \
+            return function ## Internal(features, extra|first, next...);    \
+        else                                                                \
+            return function ## Internal(features, extra, next...);          \
+    }                                                                       \
+    type function(Corrade::Cpu::Features features) {                        \
+        return function ## Internal(features, Corrade::Cpu::Implementation::Tags<0>{Corrade::Cpu::Implementation::Init}, __VA_ARGS__); \
+    }
+
+/* Called from CORRADE_CPU_DISPATCHER() to pick either _CORRADE_CPU_DISPATCHER0
+   if there are no extra arguments after function or _CORRADE_CPU_DISPATCHERn
+   if there is 1 to 7 extra args (assuming there isn't a need to have more than
+   7). Source: https://stackoverflow.com/a/11763277 */
+#define _CORRADE_CPU_DISPATCHER_PICK(_0, _1, _2, _3, _4, _5, _6, _7, macroName, ...) macroName
+#endif
+
+/**
+@brief Create a function for a runtime dispatch on a base CPU instruction set and select extra instruction sets
+@m_since_latest
+
+Given a set of function overloads named @p function that accept a CPU tag
+combination wrapped in @ref CORRADE_CPU_DECLARE() as a parameter and return a
+function pointer of @p type, creates a function with signature
+@cpp type function(Cpu::Features) @ce which will select among the overloads
+using a runtime-specified @relativeref{Corrade,Cpu::Features}, using the same
+rules as the compile-time overload selection. The extra instruction sets
+considered in the overload selection are specified as additional parameters to
+the macro, specifying none is valid as well. For this macro to work, at the
+very least there has to be an overload with a
+@ref Corrade::Cpu::Scalar "CORRADE_CPU_DECLARE(Cpu::Scalar)" argument. See
+@ref Cpu-usage-automatic-runtime-dispatch for more information and an example.
+
+For a dispatch using just the base instruction set use
+@ref CORRADE_CPU_DISPATCHER_BASE() instead.
+*/
+#ifdef DOXYGEN_GENERATING_OUTPUT
+#define CORRADE_CPU_DISPATCHER(type, function, ...)
+#else
+#define CORRADE_CPU_DISPATCHER(type, ...)                               \
+    _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__)
+#endif
 
 #if defined(CORRADE_TARGET_X86) || defined(DOXYGEN_GENERATING_OUTPUT)
 /**

@@ -96,6 +96,11 @@ struct CpuTest: TestSuite::Tester {
     void tagDispatchExtraFallbackBoth();
     void tagDispatchExtraPriority();
 
+    void tagDispatchRuntime();
+    void tagDispatchRuntimeExtra();
+    void tagDispatchRuntimeExtraCombination();
+    void tagDispatchRuntimeExtraZeroExtra();
+
     template<class T> void enableMacros();
 
     void debug();
@@ -144,6 +149,11 @@ CpuTest::CpuTest() {
               &CpuTest::tagDispatchExtraFallbackExtra,
               &CpuTest::tagDispatchExtraFallbackBoth,
               &CpuTest::tagDispatchExtraPriority,
+
+              &CpuTest::tagDispatchRuntime,
+              &CpuTest::tagDispatchRuntimeExtra,
+              &CpuTest::tagDispatchRuntimeExtraCombination,
+              &CpuTest::tagDispatchRuntimeExtraZeroExtra,
 
               #ifdef CORRADE_TARGET_X86
               &CpuTest::enableMacros<Cpu::Sse2T>,
@@ -820,6 +830,213 @@ void CpuTest::tagDispatchExtraPriority() {
        one for which we actually have the feature gets picked */
     CORRADE_COMPARE(dispatchExtraPriority(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Popcnt)), "SSE4.2+POPCNT"_s);
     CORRADE_COMPARE(dispatchExtraPriority(CORRADE_CPU_SELECT(Cpu::Sse42|Cpu::Lzcnt)), "SSE4.2+LZCNT"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+/* The lambda wrappers are marked with CORRADE_ALWAYS_INLINE to make them go
+   away with optimizations */
+#if defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM) || defined(CORRADE_TARGET_WASM)
+typedef const char*(*DispatchRuntimeT)();
+
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::ScalarT) {
+    return []() -> const char* { return "scalar"; };
+}
+#ifdef CORRADE_TARGET_X86
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::Sse3T) {
+    return []() -> const char* { return "SSE3"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::Avx2T) {
+    return []() -> const char* { return "AVX2"; };
+}
+#elif defined(CORRADE_TARGET_ARM)
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::NeonT) {
+    return []() -> const char* { return "NEON"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::NeonFmaT) {
+    return []() -> const char* { return "NEON FMA"; };
+}
+#elif defined(CORRADE_TARGET_WASM)
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::Simd128T) {
+    return []() -> const char* { return "SIMD128"; };
+}
+#else
+#error
+#endif
+
+CORRADE_CPU_DISPATCHER_BASE(DispatchRuntimeT, dispatchRuntime)
+#endif
+
+void CpuTest::tagDispatchRuntime() {
+    /* Explicitly casting to Cpu::Features here to ensure it's indeed going
+       through the runtime switch and not directly. Otherwise it's the same as
+       tagDispatch(). */
+
+    #ifdef CORRADE_TARGET_X86
+    /* If no match, gets the next highest available */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Avx512f})(), "AVX2"_s);
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Sse42})(), "SSE3"_s);
+
+    /* Exact match */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Sse3})(), "SSE3"_s);
+
+    /* Anything below gets ... the scalar */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Sse2})(), "scalar"_s);
+    #elif defined(CORRADE_TARGET_ARM)
+    /* If no match, gets the next highest available */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::NeonFp16})(), "NEON FMA"_s);
+
+    /* Exact match */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Neon})(), "NEON"_s);
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
+    #elif defined(CORRADE_TARGET_WASM)
+    /* Exact match. No other opportunity to test anything, but better than have
+       the macro completely untested. */
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Simd128})(), "SIMD128"_s);
+    CORRADE_COMPARE(dispatchRuntime(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+    return []() -> const char* { return "scalar"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(Cpu::AvxF16c|Cpu::AvxFma)) {
+    return []() -> const char* { return "F16C+FMA"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(Cpu::Avx)) {
+    return []() -> const char* { return "AVX"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(Cpu::Avx|Cpu::AvxF16c)) {
+    return []() -> const char* { return "AVX+F16C"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::AvxFma)) {
+    return []() -> const char* { return "AVX2+FMA"; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtra, Cpu::AvxF16c, Cpu::AvxFma)
+#endif
+
+void CpuTest::tagDispatchRuntimeExtra() {
+    /* Explicitly casting to Cpu::Features here to ensure it's indeed going
+       through the runtime switch and not directly. Otherwise it's mostly the
+       same as tagDispatchExtraFallbackBoth(). */
+
+    #ifdef CORRADE_TARGET_X86
+    /* Top-class HW, just pick AVX2 as it's the closest */
+    CORRADE_COMPARE(dispatchRuntimeExtra(Cpu::Features{Cpu::Avx512f|Cpu::AvxFma|Cpu::AvxF16c})(), "AVX2+FMA"_s);
+
+    /* We have one extra less than required for the AVX2 variant, fall back to
+       AVX with F16C */
+    CORRADE_COMPARE(dispatchRuntimeExtra(Cpu::Features{Cpu::Avx2|Cpu::AvxF16c})(), "AVX+F16C"_s);
+
+    /* We have AVX2, but neither of the extra bits, just some irrelevant ones,
+       take plain AVX */
+    CORRADE_COMPARE(dispatchRuntimeExtra(Cpu::Features{Cpu::Avx2|Cpu::Lzcnt|Cpu::Popcnt})(), "AVX"_s);
+
+    /* We have only SSE3 but both extra bits, fall back to the scalar version
+       that has them. Yes, it's silly, but the scalar fallback needs to be
+       verified. */
+    CORRADE_COMPARE(dispatchRuntimeExtra(Cpu::Features{Cpu::Sse3|Cpu::AvxF16c|Cpu::AvxFma})(), "F16C+FMA"_s);
+
+    /* Finally, this will fall back to the scalar version. */
+    CORRADE_COMPARE(dispatchRuntimeExtra(Cpu::Features{Cpu::Sse3})(), "scalar"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#ifdef CORRADE_TARGET_X86
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraCombination(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+    return []() -> const char* { return "scalar"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraCombination(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzcnt)) {
+    return []() -> const char* { return "SSE4.1+POPCNT+LZCNT"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraCombination(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Popcnt|Cpu::Lzcnt)) {
+    return []() -> const char* { return "AVX2+POPCNT+LZCNT"; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraCombination, Cpu::Popcnt|Cpu::Lzcnt)
+#endif
+
+void CpuTest::tagDispatchRuntimeExtraCombination() {
+    /* This verifies that the CORRADE_CPU_DISPATCHER() can accept also
+       tag combinations, in case the variants only ever use them together */
+
+    #ifdef CORRADE_TARGET_X86
+    /* Verify the tag combinations don't get skipped if we have them all or
+       more */
+    CORRADE_COMPARE(dispatchRuntimeExtraCombination(Cpu::Features{Cpu::Avx512f|Cpu::Popcnt|Cpu::Lzcnt|Cpu::AvxFma})(), "AVX2+POPCNT+LZCNT"_s);
+    CORRADE_COMPARE(dispatchRuntimeExtraCombination(Cpu::Features{Cpu::Avx|Cpu::Popcnt|Cpu::Lzcnt})(), "SSE4.1+POPCNT+LZCNT"_s);
+
+    /* But also that they don't get picked if we don't have them all */
+    CORRADE_COMPARE(dispatchRuntimeExtraCombination(Cpu::Features{Cpu::Avx512f|Cpu::Popcnt|Cpu::AvxFma})(), "scalar"_s);
+    #else
+    CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+#if defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM) || defined(CORRADE_TARGET_WASM)
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+    return []() -> const char* { return "scalar"; };
+}
+
+#ifdef CORRADE_TARGET_X86
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Sse2)) {
+    return []() -> const char* { return "SSE2"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Avx)) {
+    return []() -> const char* { return "AVX"; };
+}
+CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+#elif defined(CORRADE_TARGET_ARM)
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Neon)) {
+    return []() -> const char* { return "NEON"; };
+}
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::NeonFma)) {
+    return []() -> const char* { return "NEON FMA"; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+#elif defined(CORRADE_TARGET_WASM)
+CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
+    return []() -> const char* { return "SIMD128"; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+#else
+#error
+#endif
+#endif
+
+void CpuTest::tagDispatchRuntimeExtraZeroExtra() {
+    /* Explicitly casting to Cpu::Features here to ensure it's indeed going
+       through the runtime switch and not directly. Otherwise it's mostly the
+       same as tagDispatchRuntime(). */
+
+    #ifdef CORRADE_TARGET_X86
+    /* If no match, gets the next highest available */
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Avx512f})(), "AVX"_s);
+
+    /* Exact match */
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Sse2})(), "SSE2"_s);
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
+    #elif defined(CORRADE_TARGET_ARM)
+    /* If no match, gets the next highest available */
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::NeonFp16})(), "NEON FMA"_s);
+
+    /* Exact match */
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Neon})(), "NEON"_s);
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
+    #elif defined(CORRADE_TARGET_WASM)
+    /* Exact match. No other opportunity to test anything, but better than have
+       the macro completely untested. */
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Simd128})(), "SIMD128"_s);
+    CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
