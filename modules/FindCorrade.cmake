@@ -327,10 +327,11 @@ set(_corradeFlags
     TARGET_WINDOWS_RT
     TARGET_EMSCRIPTEN
     TARGET_ANDROID
-    # TARGET_X86 etc and TARGET_LIBCXX are not exposed to CMake as the meaning
-    # is unclear on platforms with multi-arch binaries or when mixing different
-    # STL implementations. TARGET_GCC etc are figured out via UseCorrade.cmake,
-    # as the compiler can be different when compiling the lib & when using it.
+    # TARGET_X86 etc, TARGET_32BIT, TARGET_BIG_ENDIAN and TARGET_LIBCXX etc.
+    # are not exposed to CMake as the meaning is unclear on platforms with
+    # multi-arch binaries or when mixing different STL implementations.
+    # TARGET_GCC etc are figured out via UseCorrade.cmake, as the compiler can
+    # be different when compiling the lib & when using it.
     PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     TESTSUITE_TARGET_XCTEST
     UTILITY_USE_ANSI_COLORS)

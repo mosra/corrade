@@ -239,8 +239,11 @@ also available as preprocessor variables if you include
     used for colored output with @ref Utility::Debug on Windows
 
 Besides all the defines above, the @ref Corrade/Corrade.h additionally defines
-@ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM,
-@ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_LIBCXX,
+@ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_X86 and related x86-specific
+variables, @ref CORRADE_TARGET_ARM and related ARM-specific variables,
+@ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_WASM and related
+WebAssembly-specific variables, @ref CORRADE_TARGET_32BIT,
+@ref CORRADE_TARGET_BIG_ENDIAN, @ref CORRADE_TARGET_LIBCXX,
 @ref CORRADE_TARGET_LIBSTDCXX and @ref CORRADE_TARGET_DINKUMWARE based on
 target architecture, standard and STL used. They are not exposed in CMake
 because the meaning is unclear with projects that mix more different C++
