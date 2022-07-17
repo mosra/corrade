@@ -165,6 +165,7 @@ struct StringTest: TestSuite::Tester {
 
     void add();
     void addNullViews();
+    void addArrayViews();
 
     void join();
     void joinNullViews();
@@ -302,6 +303,7 @@ StringTest::StringTest() {
 
               &StringTest::add,
               &StringTest::addNullViews,
+              &StringTest::addArrayViews,
 
               &StringTest::join,
               &StringTest::joinNullViews,
@@ -1902,6 +1904,12 @@ void StringTest::add() {
     CORRADE_COMPARE("hello"_s + ""_s, "hello");
     CORRADE_COMPARE(""_s + "hello"_s, "hello");
     CORRADE_COMPARE("hello"_s + "world"_s, "helloworld");
+
+    /* Single char */
+    CORRADE_COMPARE(""_s + '!', "!");
+    CORRADE_COMPARE('?' + ""_s, "?");
+    CORRADE_COMPARE("hello"_s + '!', "hello!");
+    CORRADE_COMPARE('?' + "hello"_s, "?hello");
 }
 
 void StringTest::addNullViews() {
@@ -1911,6 +1919,15 @@ void StringTest::addNullViews() {
     CORRADE_COMPARE(StringView{} + StringView{}, "");
     CORRADE_COMPARE("hello"_s + nullptr, "hello");
     CORRADE_COMPARE(nullptr + "hello"_s, "hello");
+
+    /* Single char */
+    CORRADE_COMPARE(StringView{} + '!', "!");
+    CORRADE_COMPARE('!' + StringView{}, "!");
+}
+
+void StringTest::addArrayViews() {
+    // TODO ambiguous
+    Containers::ArrayView<const char>{} + 3;
 }
 
 void StringTest::join() {

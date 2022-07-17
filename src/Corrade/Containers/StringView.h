@@ -1093,6 +1093,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         friend CORRADE_UTILITY_EXPORT bool operator>=(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT bool operator>(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
+        friend CORRADE_UTILITY_EXPORT String operator+(char, StringView);
+        friend CORRADE_UTILITY_EXPORT String operator+(StringView, char);
 
         /* Used by the char* constructor, delinlined because it calls into
            std::strlen() */
@@ -1168,6 +1170,18 @@ needless temporary allocations.
     allocating new, when growable strings are a thing
 */
 CORRADE_UTILITY_EXPORT String operator+(StringView a, StringView b);
+
+/**
+ * @overload
+ * @m_since_latest
+ */
+CORRADE_UTILITY_EXPORT String operator+(char a, StringView b);
+
+/**
+ * @overload
+ * @m_since_latest
+ */
+CORRADE_UTILITY_EXPORT String operator+(StringView a, char b);
 
 /* operator<<(Debug&, StringView) implemented directly in Debug */
 
