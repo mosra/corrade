@@ -313,8 +313,10 @@ Features runtimeFeatures() {
 }
 #endif
 
-Utility::Debug& operator<<(Utility::Debug& debug, const Features value) {
-    const Containers::StringView prefix = "|Cpu::"_s.exceptSuffix(debug.immediateFlags() & Utility::Debug::Flag::Packed ? 5 : 0);
+Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
+    const bool packed = debug.immediateFlags() >= Utility::Debug::Flag::Packed;
+
+    const Containers::StringView prefix = "|Cpu::"_s.exceptSuffix(packed ? 5 : 0);
 
     /* First one without the | */
     debug << prefix.exceptPrefix(1) << Utility::Debug::nospace;
@@ -326,6 +328,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const Features value) {
             if(!written) written = true;                                    \
             else debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace; \
             debug << TypeTraits<tag ## T>::name();                          \
+            value &= ~tag;                                                  \
         }
     #ifdef CORRADE_TARGET_X86
     _c(Sse2)
@@ -350,6 +353,11 @@ Utility::Debug& operator<<(Utility::Debug& debug, const Features value) {
     _c(Simd128)
     #endif
     #undef _c
+
+    if(value) {
+        if(written) debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace;
+        debug << (packed ? "" : "Features(") << Utility::Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned int>(value)) << Utility::Debug::nospace << (packed ? "" : ")");
+    }
 
     return debug;
 }

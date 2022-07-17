@@ -1487,31 +1487,39 @@ template<class T> void CpuTest::enableMacros() {
 }
 
 void CpuTest::debug() {
+    /* If more flags get added, this might need to become even more zeros */
+    const unsigned int dead = 0xde00ad00;
+
     /* Features{} are equivalent to Scalar */
     #ifdef CORRADE_TARGET_X86
     std::ostringstream out;
-    Debug{&out} << Cpu::Scalar << (Cpu::Avx2|Cpu::Ssse3|Cpu::Sse41) << Cpu::Features{};
-    CORRADE_COMPARE(out.str(), "Cpu::Scalar Cpu::Ssse3|Cpu::Sse41|Cpu::Avx2 Cpu::Scalar\n");
+    Debug{&out} << Cpu::Scalar << (Cpu::Avx2|Cpu::Ssse3|Cpu::Sse41) << Cpu::Features{} << (reinterpret_cast<const Cpu::Features&>(dead)|Cpu::Avx512f) << reinterpret_cast<const Cpu::Features&>(dead);
+    CORRADE_COMPARE(out.str(), "Cpu::Scalar Cpu::Ssse3|Cpu::Sse41|Cpu::Avx2 Cpu::Scalar Cpu::Avx512f|Cpu::Features(0xde00ad00) Cpu::Features(0xde00ad00)\n");
     #elif defined(CORRADE_TARGET_ARM)
     std::ostringstream out;
-    Debug{&out} << Cpu::Scalar << (Cpu::NeonFp16|Cpu::NeonFma|Cpu::Neon) << Cpu::Features{};
-    CORRADE_COMPARE(out.str(), "Cpu::Scalar Cpu::Neon|Cpu::NeonFma|Cpu::NeonFp16 Cpu::Scalar\n");
+    Debug{&out} << Cpu::Scalar << (Cpu::NeonFp16|Cpu::NeonFma|Cpu::Neon) << Cpu::Features{} << (reinterpret_cast<const Cpu::Features&>(dead)|Cpu::NeonFma) << reinterpret_cast<const Cpu::Features&>(dead);
+    CORRADE_COMPARE(out.str(), "Cpu::Scalar Cpu::Neon|Cpu::NeonFma|Cpu::NeonFp16 Cpu::Scalar Cpu::NeonFma|Cpu::Features(0xde00ad00) Cpu::Features(0xde00ad00)\n");
     #else
+    static_cast<void>(dead);
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
 }
 
 void CpuTest::debugPacked() {
+    /* If more flags get added, this might need to become even more zeros */
+    const unsigned int dead = 0xde00ad00;
+
     /* Features{} are equivalent to Scalar */
     #ifdef CORRADE_TARGET_X86
     std::ostringstream out;
-    Debug{&out} << Debug::packed << Cpu::Scalar << Debug::packed << (Cpu::Avx2|Cpu::Ssse3|Cpu::Sse41) << Debug::packed << Cpu::Features{} << Cpu::Avx;
-    CORRADE_COMPARE(out.str(), "Scalar Ssse3|Sse41|Avx2 Scalar Cpu::Avx\n");
+    Debug{&out} << Debug::packed << Cpu::Scalar << Debug::packed << (Cpu::Avx2|Cpu::Ssse3|Cpu::Sse41) << Debug::packed << Cpu::Features{} << Debug::packed << (reinterpret_cast<const Cpu::Features&>(dead)|Cpu::Avx512f) << Debug::packed << reinterpret_cast<const Cpu::Features&>(dead) << Cpu::Avx;
+    CORRADE_COMPARE(out.str(), "Scalar Ssse3|Sse41|Avx2 Scalar Avx512f|0xde00ad00 0xde00ad00 Cpu::Avx\n");
     #elif defined(CORRADE_TARGET_ARM)
     std::ostringstream out;
-    Debug{&out} << Debug::packed << Cpu::Scalar << Debug::packed << (Cpu::NeonFp16|Cpu::NeonFma|Cpu::Neon) << Debug::packed << Cpu::Features{} << Cpu::NeonFma;
-    CORRADE_COMPARE(out.str(), "Scalar Neon|NeonFma|NeonFp16 Scalar Cpu::NeonFma\n");
+    Debug{&out} << Debug::packed << Cpu::Scalar << Debug::packed << (Cpu::NeonFp16|Cpu::NeonFma|Cpu::Neon) << Debug::packed << Cpu::Features{} << Debug::packed << (reinterpret_cast<const Cpu::Features&>(dead)|Cpu::NeonFma) << Debug::packed << reinterpret_cast<const Cpu::Features&>(dead) << Cpu::NeonFma;
+    CORRADE_COMPARE(out.str(), "Scalar Neon|NeonFma|NeonFp16 Scalar NeonFma|0xde00ad00 0xde00ad00 Cpu::NeonFma\n");
     #else
+    static_cast<void>(dead);
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
     #endif
 }
