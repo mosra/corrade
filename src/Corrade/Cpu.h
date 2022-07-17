@@ -1774,9 +1774,16 @@ For a dispatch using just the base instruction set use
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 #define CORRADE_CPU_DISPATCHER(type, function, ...)
-#else
+#elif !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_CPU_DISPATCHER(type, ...)                               \
     _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__)
+#else
+/* Workaround for MSVC not being able to expand __VA_ARGS__ correctly. Would
+   work with /Zc:preprocessor or /experimental:preprocessor, but I'm not
+   enabling that globally yet. Source: https://stackoverflow.com/a/5134656 */
+#define _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS(x) x
+#define CORRADE_CPU_DISPATCHER(type, ...)                               \
+    _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__))
 #endif
 
 #if defined(CORRADE_TARGET_X86) || defined(DOXYGEN_GENERATING_OUTPUT)
