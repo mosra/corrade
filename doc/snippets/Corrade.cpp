@@ -122,6 +122,26 @@ LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzc
 
 CORRADE_CPU_DISPATCHER(LookupT, lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
 /* [Cpu-usage-automatic-runtime-dispatch-extra-declare] */
+
+#ifdef CORRADE_CPU_USE_IFUNC
+/* [Cpu-usage-automatic-cached-dispatch-ifunc] */
+CORRADE_CPU_DISPATCHED_IFUNC(LookupT, lookupImplementation, int lookup(DOXYGEN_ELLIPSIS(int)))
+/* [Cpu-usage-automatic-cached-dispatch-ifunc] */
+#else
+/* [Cpu-usage-automatic-cached-dispatch-pointer] */
+CORRADE_CPU_DISPATCHED_POINTER(LookupT, lookupImplementation, lookup)
+/* [Cpu-usage-automatic-cached-dispatch-pointer] */
+#endif
+
+namespace BarInsideABar {
+int lookup(DOXYGEN_ELLIPSIS(int));
+/* [Cpu-usage-automatic-cached-dispatch-compile-time] */
+int lookup(DOXYGEN_ELLIPSIS(int)) {
+    return lookupImplementation(CORRADE_CPU_SELECT(Cpu::Default))(DOXYGEN_ELLIPSIS(0));
+}
+/* [Cpu-usage-automatic-cached-dispatch-compile-time] */
+}
+
 }
 #endif
 
@@ -168,6 +188,23 @@ TransformT transform = transformImplementation(Cpu::runtimeFeatures());
 /* Call many times */
 transform(data);
 /* [Cpu-usage-automatic-runtime-dispatch-call] */
+}
+
+{
+using namespace Bar;
+#ifndef CORRADE_CPU_USE_IFUNC
+#define LOOKUP_USES_FUNCTION_POINTER
+#endif
+/* [Cpu-usage-automatic-cached-dispatch-call] */
+#ifdef LOOKUP_USES_FUNCTION_POINTER
+int (*lookup)(DOXYGEN_ELLIPSIS(int));
+#else
+int lookup(DOXYGEN_ELLIPSIS(int));
+#endif
+
+int found = lookup(DOXYGEN_ELLIPSIS(0));
+/* [Cpu-usage-automatic-cached-dispatch-call] */
+static_cast<void>(found);
 }
 
 {

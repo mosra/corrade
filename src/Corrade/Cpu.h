@@ -299,6 +299,58 @@ usually just one or two out of the whole set:
 
 On the call side, there's no difference. The created dispatcher function takes
 @ref Features as well.
+
+@section Cpu-usage-automatic-cached-dispatch Automatic cached dispatch
+
+Ultimately, the dispatch can be performed implicitly, exposing only the final
+function or a function pointer, with no additional steps needed from the user
+side. There's three possible scenarios with varying performance tradeoffs.
+Continuing from the @cpp lookupImplementation() @ce example above:
+
+<ul>
+<li>
+On Linux and Android with API 30+ it's possible to use the
+[GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC) mechanism, where the
+dynamic linker performs a dispatch during the early startup. This is the
+fastest variant of runtime dispatch, as it results in an equivalent of a
+regular dynamic library function call. Assuming a dispatcher was created using
+either @ref CORRADE_CPU_DISPATCHER() or @ref CORRADE_CPU_DISPATCHER_BASE(),
+it's implemented using the @ref CORRADE_CPU_DISPATCHED_IFUNC() macro:
+
+@snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-ifunc
+</li>
+<li>
+On platforms where IFUNC isn't available, a function pointer can be used
+for runtime dispatch instead. It's one additional indirection, which may have a
+visible effect if the dispatched-to code is relatively tiny and is called from
+within a tight loop. Assuming a dispatcher was created using
+either @ref CORRADE_CPU_DISPATCHER() or @ref CORRADE_CPU_DISPATCHER_BASE(),
+it's implemented using the @ref CORRADE_CPU_DISPATCHED_POINTER() macro:
+
+@snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-pointer
+</li>
+<li>
+For the least amount of overhead, the compile-time dispatch can be used, with
+arguments passed through by hand. Similarly to IFUNC, this will also result in
+a regular function, but without the indirect overhead. Furthermore, since it's
+a direct call to the lambda inside, compiler optimizations will fully inline
+its contents, removing any remaining overhead and allowing LTO and other
+inter-procedural optimizations that wouldn't be possible with the indirect
+calls. This option is best suited for scenarios where it's possible to build
+and optimize code for a single target platform. In this case it calls directly
+to the original variants, so no macro is needed and
+@ref CORRADE_CPU_DISPATCHER() / @ref CORRADE_CPU_DISPATCHER_BASE() is not
+needed either:
+
+@snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-compile-time
+</li>
+</ul>
+
+With all three cases, you end up with either a function or a function pointer.
+Finally, when exposed in a header as appropriate, both variants can be then
+called the same way:
+
+@snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-call
 */
 namespace Cpu {
 
@@ -1784,6 +1836,100 @@ For a dispatch using just the base instruction set use
 #define _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS(x) x
 #define CORRADE_CPU_DISPATCHER(type, ...)                               \
     _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__))
+#endif
+
+/**
+@brief Create a runtime-dispatched function pointer
+@m_since_latest
+
+Assuming a @p dispatcher of @p type was defined with either
+@ref CORRADE_CPU_DISPATCHER() or @ref CORRADE_CPU_DISPATCHER_BASE(), defines a
+function pointer variable of @p type and @p name. In a global constructor the
+variable is assigned a function pointer returned by @p dispatcher for
+@relativeref{Corrade,Cpu::runtimeFeatures()}.
+
+The pointer can be changed afterwards, such as for testing purposes, See also
+@ref CORRADE_CPU_DISPATCHED_IFUNC() which avoids the overhead of function
+pointer indirection.
+
+See @ref Cpu-usage-automatic-cached-dispatch for more information, usage
+example and overhead comparison.
+*/
+#define CORRADE_CPU_DISPATCHED_POINTER(type, dispatcher, name)              \
+    type name = dispatcher(Corrade::Cpu::runtimeFeatures());
+
+/**
+@brief Create a runtime-dispatched function via GNU IFUNC
+@m_since_latest
+
+Available only if @ref CORRADE_CPU_USE_IFUNC is enabled. Assuming a
+@p dispatcher of @p type was defined with either @ref CORRADE_CPU_DISPATCHER()
+or @ref CORRADE_CPU_DISPATCHER_BASE(), defines a function with a signature
+specified via the third variadic argument. The signature has to match @p type.
+The function uses the [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC)
+mechanism, which causes the function call to be resolved to a function pointer
+returned by @p dispatcher for @relativeref{Corrade,Cpu::runtimeFeatures()}. The
+dispatch is performed by the dynamic linker during early startup and cannot be
+changed afterwards.
+
+If @ref CORRADE_CPU_USE_IFUNC isn't available, is explicitly disabled or if
+you need to be able to subsequently change the dispatched-to function (such as
+for testing purposes), use @ref CORRADE_CPU_DISPATCHED_POINTER() instead.
+
+See @ref Cpu-usage-automatic-cached-dispatch for more information, usage
+example and overhead comparison.
+*/
+#if defined(CORRADE_CPU_USE_IFUNC) || defined(DOXYGEN_GENERATING_OUTPUT)
+/* On ARM we get CPU features through getauxval() but it can't be called from
+   an ifunc resolver because it's too early at that point. Instead, AT_HWCAPS
+   is passed to it from outside, so there we call an internal variant with the
+   caps parameter -- see its documentation in Cpu.cpp for more info. On x86
+   calling into CPUID from within an ifunc resolver is no problem.
+
+   Although not specifically documented anywhere, the dispatcher has to have
+   C++ mangling disabled in order to be found by __attribute__((ifunc)), on
+   both GCC and Clang. That however means it's exported even if inside an
+   anonymous namespace, which is undesirable. To fix that, it's marked as
+   static... */
+#ifdef CORRADE_TARGET_CLANG
+/* ... unfortunately the static makes Clang not find the name again, so there
+   we can't use it. But, to drown even deeper, not using the static causes the
+   -Wmissing-prototypes macro to get fired (which is enabled globally because
+   it has obvious benefits), so to avoid noise it has to be disabled here. */
+#ifndef CORRADE_TARGET_ARM
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    _Pragma("GCC diagnostic push")                                          \
+    _Pragma("GCC diagnostic ignored \"-Wmissing-prototypes\"")              \
+    extern "C" type dispatcher() {                                          \
+        return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
+    }                                                                       \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher)));                        \
+    _Pragma("GCC diagnostic pop")
+#else
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    _Pragma("GCC diagnostic push")                                          \
+    _Pragma("GCC diagnostic ignored \"-Wmissing-prototypes\"")              \
+    extern "C" type dispatcher(unsigned long caps) {                        \
+        return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
+    }                                                                       \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher)));                        \
+    _Pragma("GCC diagnostic pop")
+#endif
+#else
+#ifndef CORRADE_TARGET_ARM
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    extern "C" { static type dispatcher() {                                 \
+        return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
+    }}                                                                      \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher)));
+#else
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    extern "C" { static type dispatcher(unsigned long caps) {               \
+        return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
+    }}                                                                      \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher)));
+#endif
+#endif
 #endif
 
 #if defined(CORRADE_TARGET_X86) || defined(DOXYGEN_GENERATING_OUTPUT)

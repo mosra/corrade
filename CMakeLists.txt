@@ -187,6 +187,30 @@ if(CORRADE_TARGET_WINDOWS)
     endif()
 endif()
 
+# Check if we can use IFUNC for CPU dispatch. Linux with glibc and Android with
+# API 18+ has it, but e.g. Alpine Linux with musl doesn't, and on Android with
+# API < 30 we don't get AT_HWCAP passed into the resolver and can't call
+# getauxval() ourselves because it's too early at that point, which makes it
+# pretty useless. Plus it also needs a certain binutils version and a capable
+# compiler, so it's easiest to just verify the whole thing.
+if(CORRADE_TARGET_UNIX)
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles("\
+int fooImplementation() { return 42; }
+#if defined(__ANDROID_API__) && __ANDROID_API__ < 30
+#error need Android API 30+ to have AT_HWCAP passed into the resolver
+#endif
+extern \"C\" int(*fooDispatcher())() {
+    return fooImplementation;
+}
+int foo() __attribute__((ifunc(\"fooDispatcher\")));
+int main() { return foo() - 42; }\
+        " _CORRADE_CPU_CAN_USE_IFUNC)
+else()
+    set(_CORRADE_CPU_CAN_USE_IFUNC OFF)
+endif()
+cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime CPU dispatch" ON "_CORRADE_CPU_CAN_USE_IFUNC" OFF)
+
 # Backwards compatibility for unprefixed CMake options. If the user isn't
 # explicitly using prefixed options in the first run already, accept the
 # unprefixed options, and remember this decision for subsequent runs

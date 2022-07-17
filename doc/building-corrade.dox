@@ -553,6 +553,13 @@ Options controlling the build:
 
 Platform-specific options:
 
+-   `CORRADE_CPU_USE_IFUNC` --- Allow
+    [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC) to be used for
+    runtime dispatch in the @ref Cpu library. Available only on platforms that
+    support it, which is currently only Linux with glibc and Android with API
+    30+, and there enabled by default. See
+    @ref Cpu-usage-automatic-cached-dispatch for details and information about
+    performance tradeoffs.
 -   `CORRADE_UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will
     use ANSI escape codes in @ref Utility::Debug instead of WINAPI functions.
     Note that you need at least Windows 10 or non-standard console emulator to

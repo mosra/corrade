@@ -100,6 +100,8 @@
 #  CORRADE_TARGET_MSVC          - Defined if compiling with MSVC or Clang with
 #   a MSVC frontend
 #  CORRADE_TARGET_MINGW         - Defined if compiling under MinGW
+#  CORRADE_CPU_USE_IFUNC        - Defined if GNU IFUNC is allowed to be used
+#   for runtime dispatch in the Cpu library
 #  CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT - Defined if PluginManager
 #   doesn't support dynamic plugin loading due to platform limitations
 #  CORRADE_TESTSUITE_TARGET_XCTEST - Defined if TestSuite is targeting Xcode
@@ -332,6 +334,7 @@ set(_corradeFlags
     # multi-arch binaries or when mixing different STL implementations.
     # TARGET_GCC etc are figured out via UseCorrade.cmake, as the compiler can
     # be different when compiling the lib & when using it.
+    CPU_USE_IFUNC
     PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     TESTSUITE_TARGET_XCTEST
     UTILITY_USE_ANSI_COLORS)

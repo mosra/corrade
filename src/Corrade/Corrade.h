@@ -771,6 +771,20 @@ compile time (`-msimd128` passed to Clang).
 #undef CORRADE_TARGET_SIMD128
 
 /**
+@brief GNU IFUNC is allowed to be used for runtime dispatch in the Cpu library
+@m_since_latest
+
+Defined if the @relativeref{Corrade,Cpu} library can perform runtime dispatch
+using [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC), exposing the
+@ref CORRADE_CPU_DISPATCHED_IFUNC() macro. Supported only on Linux with glibc
+and on Android with API 30+. See @ref Cpu-usage-automatic-cached-dispatch for
+details and information about performance tradeoffs.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_CPU_USE_IFUNC
+#undef CORRADE_CPU_USE_IFUNC
+
+/**
 @brief PluginManager doesn't have dynamic plugin support on this platform
 
 Defined if the @ref Corrade::PluginManager "PluginManager" library doesn't

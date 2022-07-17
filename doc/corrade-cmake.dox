@@ -230,6 +230,9 @@ also available as preprocessor variables if you include
 -   `CORRADE_TARGET_MSVC` --- Defined if compiling with MSVC or Clang with a
     MSVC frontend
 -   `CORRADE_TARGET_MINGW` --- Defined if compiling under MinGW
+-   `CORRADE_CPU_USE_IFUNC` - Defined if
+    [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC) is allowed to be
+    used for runtime dispatch in the @ref Cpu library
 -   `CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT` --- Defined if
     @ref PluginManager doesn't support dynamic plugin loading due to platform
     limitations

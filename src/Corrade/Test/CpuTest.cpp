@@ -101,6 +101,10 @@ struct CpuTest: TestSuite::Tester {
     void tagDispatchRuntimeExtraCombination();
     void tagDispatchRuntimeExtraZeroExtra();
 
+    void tagDispatchedCompileTime();
+    void tagDispatchedPointer();
+    void tagDispatchedIfunc();
+
     template<class T> void enableMacros();
 
     void debug();
@@ -154,6 +158,10 @@ CpuTest::CpuTest() {
               &CpuTest::tagDispatchRuntimeExtra,
               &CpuTest::tagDispatchRuntimeExtraCombination,
               &CpuTest::tagDispatchRuntimeExtraZeroExtra,
+
+              &CpuTest::tagDispatchedCompileTime,
+              &CpuTest::tagDispatchedPointer,
+              &CpuTest::tagDispatchedIfunc,
 
               #ifdef CORRADE_TARGET_X86
               &CpuTest::enableMacros<Cpu::Sse2T>,
@@ -1039,6 +1047,146 @@ void CpuTest::tagDispatchRuntimeExtraZeroExtra() {
     CORRADE_COMPARE(dispatchRuntimeExtraZeroExtra(Cpu::Features{Cpu::Scalar})(), "scalar"_s);
     #else
     CORRADE_SKIP("Not enough Cpu tags available on this platform, can't test");
+    #endif
+}
+
+using DispatchedT = Cpu::Features(*)();
+
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+    return []() -> Cpu::Features { return Cpu::Scalar; };
+}
+#ifdef CORRADE_TARGET_X86
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2)) {
+    return []() -> Cpu::Features { return Cpu::Sse2; };
+}
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Avx)) {
+    return []() -> Cpu::Features { return Cpu::Avx; };
+}
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Avx|Cpu::AvxFma)) {
+    return []() -> Cpu::Features { return Cpu::Avx|Cpu::AvxFma; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation, Cpu::AvxFma)
+#elif defined(CORRADE_TARGET_ARM)
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::NeonFp16)) {
+    return []() -> Cpu::Features { return Cpu::NeonFp16; };
+}
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Neon)) {
+    return []() -> Cpu::Features { return Cpu::Neon; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation)
+#elif defined(CORRADE_TARGET_WASM)
+CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
+    return []() -> Cpu::Features { return Cpu::Simd128; };
+}
+
+CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation)
+#endif
+
+/* CORRADE_NEVER_INLINE to make it possible to look at the disassembly. The
+   lambda body should be fully inlined here. */
+CORRADE_NEVER_INLINE Cpu::Features dispatchedCompileTime() {
+    /* While calling without CORRADE_CPU_SELECT() would work too, it'd go
+       through the runtime dispatch. And then the call would *not* get inlined,
+       no matter how many force inlines I put onto the lambdas. */
+    return dispatchedImplementation(CORRADE_CPU_SELECT(Cpu::Default))();
+}
+
+void CpuTest::tagDispatchedCompileTime() {
+    Cpu::Features dispatchedFeatures = dispatchedCompileTime();
+    CORRADE_INFO("Dispatched to:" << dispatchedFeatures);
+
+    Cpu::Features features = Cpu::compiledFeatures();
+    #ifdef CORRADE_TARGET_X86
+    if(features >= (Cpu::Avx|Cpu::AvxFma))
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx|Cpu::AvxFma);
+    else if(features >= Cpu::Avx)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx);
+    else if(features >= Cpu::Sse2)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Sse2);
+    else
+    #elif defined(CORRADE_TARGET_ARM)
+    if(features >= Cpu::NeonFp16)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::NeonFp16);
+    else if(features >= Cpu::Neon)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Neon);
+    else
+    #elif defined(CORRADE_TARGET_WASM)
+    if(features >= Cpu::Simd128)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Simd128);
+    else
+    #endif
+    {
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Scalar);
+    }
+}
+
+CORRADE_CPU_DISPATCHED_POINTER(DispatchedT, dispatchedImplementation, dispatchedPointer)
+
+void CpuTest::tagDispatchedPointer() {
+    Cpu::Features dispatchedFeatures = dispatchedPointer();
+    CORRADE_INFO("Dispatched to:" << dispatchedFeatures);
+
+    Cpu::Features features = Cpu::runtimeFeatures();
+    #ifdef CORRADE_TARGET_X86
+    if(features >= (Cpu::Avx|Cpu::AvxFma))
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx|Cpu::AvxFma);
+    else if(features >= Cpu::Avx)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx);
+    else if(features >= Cpu::Sse2)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Sse2);
+    else
+    #elif defined(CORRADE_TARGET_ARM)
+    if(features >= Cpu::NeonFp16)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::NeonFp16);
+    else if(features >= Cpu::Neon)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Neon);
+    else
+    #elif defined(CORRADE_TARGET_WASM)
+    if(features >= Cpu::Simd128)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Simd128);
+    else
+    #endif
+    {
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Scalar);
+    }
+}
+
+#ifdef CORRADE_CPU_USE_IFUNC
+CORRADE_CPU_DISPATCHED_IFUNC(DispatchedT, dispatchedImplementation, Cpu::Features dispatchedIfunc())
+#endif
+
+void CpuTest::tagDispatchedIfunc() {
+    #ifndef CORRADE_CPU_USE_IFUNC
+    CORRADE_SKIP("CORRADE_CPU_USE_IFUNC not available");
+    #else
+    Cpu::Features dispatchedFeatures = dispatchedIfunc();
+    CORRADE_INFO("Dispatched to:" << dispatchedFeatures);
+
+    Cpu::Features features = Cpu::runtimeFeatures();
+    #ifdef CORRADE_TARGET_X86
+    if(features >= (Cpu::Avx|Cpu::AvxFma))
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx|Cpu::AvxFma);
+    else if(features >= Cpu::Avx)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Avx);
+    else if(features >= Cpu::Sse2)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Sse2);
+    else
+    #elif defined(CORRADE_TARGET_ARM)
+    if(features >= Cpu::NeonFp16)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::NeonFp16);
+    else if(features >= Cpu::Neon)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Neon);
+    else
+    #elif defined(CORRADE_TARGET_WASM)
+    if(features >= Cpu::Simd128)
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Simd128);
+    else
+    #endif
+    {
+        CORRADE_COMPARE(dispatchedFeatures, Cpu::Scalar);
+    }
     #endif
 }
 
