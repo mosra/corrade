@@ -221,6 +221,28 @@ int main() { return foo() - 42; }\
             endif()
             set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
         endif()
+
+        # If sanitizers are enabled, call into the dispatch function crashes.
+        # Upstream bugreport https://github.com/google/sanitizers/issues/342
+        # suggests using __attribute__((no_sanitize_address)), but that doesn't
+        # work / can't be used because it would mean marking basically
+        # everything including the actual implementation that's being
+        # dispatched to.
+        #
+        # Sanitizers can be also enabled any other way such as with
+        # CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER or with per-target properties
+        # which isn't easy to detect, so as a secondary measure there's a kill
+        # switch in Corrade/configure.h that will fail with an error if a
+        # sanitizer is detected and CORRADE_CPU_USE_IFUNC is enabled.
+        #
+        # While Clang and GCC use -fsanitize=whatever, MSVC allows also
+        # /fsanitize=, so catch both.
+        if(CMAKE_CXX_FLAGS MATCHES "[-/]fsanitize=")
+            if(NOT DEFINED CORRADE_CPU_USE_IFUNC)
+                message(WARNING "Disabling CORRADE_CPU_USE_IFUNC by default as it crashes when used together with sanitizers. See https://github.com/google/sanitizers/issues/342 for more information.")
+            endif()
+            set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
+        endif()
     else()
         set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
     endif()

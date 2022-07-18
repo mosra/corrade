@@ -361,4 +361,23 @@ static_assert(sizeof(1 ? "" : "") == 1,
     "enabled or ensure /permissive- is set for all files that include Corrade " "headers.");
 #endif
 
+/* Kill switch for when presence of a sanitizer is detected and
+   CORRADE_CPU_USE_IFUNC is enabled. Unfortunately in our case the
+   __attribute__((no_sanitize_address)) workaround as described on
+   https://github.com/google/sanitizers/issues/342 doesn't work / can't be used
+   because it would mean marking basically everything including the actual
+   implementation that's being dispatched to. */
+#ifdef CORRADE_CPU_USE_IFUNC
+#ifdef __has_feature
+#if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer) || __has_feature(memory_sanitizer) || __has_feature(undefined_behavior_sanitizer)
+#define _CORRADE_SANITIZER_IFUNC_DETECTED
+#endif
+#elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
+#define _CORRADE_SANITIZER_IFUNC_DETECTED
+#endif
+#ifdef _CORRADE_SANITIZER_IFUNC_DETECTED
+#error Corrade was built with CORRADE_CPU_USE_IFUNC, which is incompatible with sanitizers. Rebuild without this option or disable sanitizers.
+#endif
+#endif
+
 #endif // kate: hl c++
