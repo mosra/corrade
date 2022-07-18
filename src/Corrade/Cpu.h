@@ -1915,7 +1915,29 @@ example and overhead comparison.
     __VA_ARGS__ __attribute__((ifunc(#dispatcher)));                        \
     _Pragma("GCC diagnostic pop")
 #endif
+#elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ < 409
+/* Furthermore, due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58105
+   the resolver function won't work on GCC 4.8 unless it's marked with
+   CORRADE_NEVER_INLINE. That, however, causes GCC 4.8 to spit out a bogus
+   warning that the dispatcher function is redeclared as noinline -- it thinks
+   it's the same function as the always-inline lambda wrappers which have the
+   same name. Despite the warning it works, but to avoid useless noise the
+   ifunc dispatcher is named differently. */
+#ifndef CORRADE_TARGET_ARM
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    extern "C" { CORRADE_NEVER_INLINE static type dispatcher ## Ifunc() {   \
+        return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
+    }}                                                                      \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher "Ifunc")));
 #else
+#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+    extern "C" { CORRADE_NEVER_INLINE static type dispatcher ## Ifunc(unsigned long caps) { \
+        return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
+    }}                                                                      \
+    __VA_ARGS__ __attribute__((ifunc(#dispatcher "Ifunc")));
+#endif
+#else
+/* Only GCC 4.9+ has the implementation in the most minimal form. */
 #ifndef CORRADE_TARGET_ARM
 #define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
     extern "C" { static type dispatcher() {                                 \
