@@ -557,7 +557,8 @@ Platform-specific options:
     [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC) to be used for
     runtime dispatch in the @ref Cpu library. Available only on platforms that
     support it, which is currently only Linux with glibc and Android with API
-    30+, and there enabled by default. See
+    30+, and there enabled by default unless a problematic case is detected
+    that may cause it to misbehave. See
     @ref Cpu-usage-automatic-cached-dispatch for details and information about
     performance tradeoffs.
 -   `CORRADE_UTILITY_USE_ANSI_COLORS` --- if building for Windows, this will

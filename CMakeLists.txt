@@ -206,10 +206,29 @@ extern \"C\" int(*fooDispatcher())() {
 int foo() __attribute__((ifunc(\"fooDispatcher\")));
 int main() { return foo() - 42; }\
         " _CORRADE_CPU_CAN_USE_IFUNC)
+    # In cases where ifunc is known to be broken, disable it by default --
+    # users can still force it to be enabled, but the initial state should not
+    # cause crashes or other strange behavior.
+    if(_CORRADE_CPU_CAN_USE_IFUNC)
+        set(_CORRADE_CPU_USE_IFUNC_DEFAULT ON)
+        # On GCC 4.8, if --coverage or -fprofile-arcs is enabled, the ifunc
+        # dispatchers cause a segfault. On Ubuntu 20.04 at least. Not the case
+        # with GCC 5 there, not the case with GCC 4.8 on Arch. Can't find any
+        # upstream bug report or commit that would be related to this.
+        if(CMAKE_CXX_COMPILER_ID AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9" AND CMAKE_CXX_FLAGS MATCHES "(--coverage|-fprofile-arcs)")
+            if(NOT DEFINED CORRADE_CPU_USE_IFUNC)
+                message(WARNING "Disabling CORRADE_CPU_USE_IFUNC by default as it may crash when used together with --coverage on GCC 4.8.")
+            endif()
+            set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
+        endif()
+    else()
+        set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
+    endif()
 else()
     set(_CORRADE_CPU_CAN_USE_IFUNC OFF)
+    set(_CORRADE_CPU_USE_IFUNC_DEFAULT OFF)
 endif()
-cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime CPU dispatch" ON "_CORRADE_CPU_CAN_USE_IFUNC" OFF)
+cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime CPU dispatch" ${_CORRADE_CPU_USE_IFUNC_DEFAULT} "_CORRADE_CPU_CAN_USE_IFUNC" OFF)
 
 # Backwards compatibility for unprefixed CMake options. If the user isn't
 # explicitly using prefixed options in the first run already, accept the
