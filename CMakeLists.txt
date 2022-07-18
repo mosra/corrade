@@ -252,6 +252,11 @@ else()
 endif()
 cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime CPU dispatch" ${_CORRADE_CPU_USE_IFUNC_DEFAULT} "_CORRADE_CPU_CAN_USE_IFUNC" OFF)
 
+# Runtime CPU dispatch. Because going through a function pointer may have
+# negative perf consequences, enable it by default only on platforms that have
+# IFUNC, and thus can avoid the function pointer indirection.
+option(CORRADE_BUILD_CPU_RUNTIME_DISPATCH "Build with runtime dispatch for CPU-dependent functionality" ${_CORRADE_CPU_CAN_USE_IFUNC})
+
 # Backwards compatibility for unprefixed CMake options. If the user isn't
 # explicitly using prefixed options in the first run already, accept the
 # unprefixed options, and remember this decision for subsequent runs

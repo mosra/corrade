@@ -550,6 +550,17 @@ Options controlling the build:
     Corrade features simultaneously in multiple threads. Enabled by default,
     disable if you don't need this and don't want to pay potential performance
     penalties coming from thread-local variables.
+-   `CORRADE_BUILD_CPU_RUNTIME_DISPATCH` --- Build with performance-critical
+    code paths optimized for multiple architectures (such as SSE or AVX on
+    x86), with the best matching variant selected at runtime based on detected
+    CPU features. If not enabled, the library is built with just a single
+    variant that's picked at compile time depending on target architecture
+    flags being passed to the compiler. Enabled by default on platforms that
+    support [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC), which is
+    currently only Linux with glibc and Android with API 30+. See also the
+    `CORRADE_CPU_USE_IFUNC` option below and
+    @ref Cpu-usage-automatic-cached-dispatch for details and information about
+    performance tradeoffs.
 
 Platform-specific options:
 

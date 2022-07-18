@@ -211,6 +211,9 @@ also available as preprocessor variables if you include
 -   `CORRADE_BUILD_MULTITHREADED` --- Defined if compiled in a way that makes
     it possible to safely use certain Corrade features simultaneously in
     multiple threads.
+-   `CORRADE_BUILD_CPU_RUNTIME_DISPATCH` --- Defined if built with code paths
+    optimized for multiple architectres with the best matching variant selected
+    at runtime based on detected CPU features
 -   `CORRADE_TARGET_UNIX` --- Defined if compiled for some Unix flavor (Linux,
     BSD, macOS, iOS, Android, ...)
 -   `CORRADE_TARGET_APPLE` --- Defined if compiled for Apple platforms

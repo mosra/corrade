@@ -364,6 +364,13 @@ namespace Corrade {
     Windows as well instead of declaring aligned memory allocation functions on
     its own, as it's not worth the seriously-looking compiler warnings (see
     [mosra/corrade#145](https://github.com/mosra/corrade/issues/145))
+-   Platforms that support @ref CORRADE_CPU_USE_IFUNC will now build certain
+    code paths optimized for multiple architectures, with the best variant
+    selected at runtime using the @ref Cpu library based on available CPU
+    features. This behavior can be disabled with the
+    @ref CORRADE_BUILD_CPU_RUNTIME_DISPATCH CMake option. Platforms without
+    IFUNC support implement runtime dispatch using function pointers instead of
+    indirect functions and have this currently disabled by default.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

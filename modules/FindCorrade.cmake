@@ -80,6 +80,9 @@
 #  CORRADE_BUILD_MULTITHREADED  - Defined if compiled in a way that makes it
 #   possible to safely use certain Corrade features simultaneously in multiple
 #   threads
+#  CORRADE_BUILD_CPU_RUNTIME_DISPATCH - Defined if built with code paths
+#   optimized for multiple architectres with the best matching variant selected
+#   at runtime based on detected CPU features
 #  CORRADE_TARGET_UNIX          - Defined if compiled for some Unix flavor
 #   (Linux, BSD, macOS)
 #  CORRADE_TARGET_APPLE         - Defined if compiled for Apple platforms
@@ -321,6 +324,7 @@ set(_corradeFlags
     BUILD_STATIC
     BUILD_STATIC_UNIQUE_GLOBALS
     BUILD_MULTITHREADED
+    BUILD_CPU_RUNTIME_DISPATCH
     TARGET_UNIX
     TARGET_APPLE
     TARGET_IOS
