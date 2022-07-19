@@ -235,14 +235,17 @@
 #endif
 #endif
 
-/* POPCNT and LZCNT on GCC, queried wth `gcc -mpopcnt -dM -E - | grep POPCNT`,
-   and equivalent for LZCNT. */
+/* POPCNT, LZCNT and BMI1 on GCC, queried wth
+   `gcc -mpopcnt -dM -E - | grep POPCNT`, and equivalent for others. */
 #ifdef CORRADE_TARGET_GCC
 #ifdef __POPCNT__
 #define CORRADE_TARGET_POPCNT
 #endif
 #ifdef __LZCNT__
 #define CORRADE_TARGET_LZCNT
+#endif
+#ifdef __BMI__
+#define CORRADE_TARGET_BMI1
 #endif
 
 /* There doesn't seem to be any equivalent on MSVC,
@@ -254,13 +257,16 @@
 #elif defined(CORRADE_TARGET_MSVC) && defined(__AVX__)
 #define CORRADE_TARGET_POPCNT
 /* As with other AVX+ intrinsics on clang-cl, these are only included if the
-   corresponding macro is defined as well, so check for __LZCNT__ there.
-   Otherwise this would mean the CORRADE_ENABLE_LZCNT macro is defined always,
-   which would incorrectly imply presence of these intrinsics. Chance is that
-   __LZCNT__ is possibly implied with /arch:AVX2 or some such, but I don't know
-   for sure, so this is more robust. */
+   corresponding macro is defined as well, so check for __LZCNT__ / __BMI__
+   there. Otherwise this would mean the CORRADE_ENABLE_{LZCNT,BMI1} macro is
+   defined always, which would incorrectly imply presence of these intrinsics.
+   Chance is that __LZCNT__ / __BMI__ is possibly implied with /arch:AVX or
+   some such, but I don't know for sure, so this is more robust. */
 #if !defined(CORRADE_TARGET_CLANG_CL) || defined(__LZCNT__)
 #define CORRADE_TARGET_LZCNT
+#endif
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__BMI__)
+#define CORRADE_TARGET_BMI1
 #endif
 #endif
 

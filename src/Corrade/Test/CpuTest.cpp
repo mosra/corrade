@@ -171,6 +171,7 @@ CpuTest::CpuTest() {
               &CpuTest::enableMacros<Cpu::Sse42T>,
               &CpuTest::enableMacros<Cpu::PopcntT>,
               &CpuTest::enableMacros<Cpu::LzcntT>,
+              &CpuTest::enableMacros<Cpu::Bmi1T>,
               &CpuTest::enableMacros<Cpu::AvxT>,
               &CpuTest::enableMacros<Cpu::AvxF16cT>,
               &CpuTest::enableMacros<Cpu::AvxFmaT>,
@@ -655,11 +656,11 @@ void CpuTest::priority() {
     /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
        zero, times the count of extra tags plus one */
     CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Scalar)), 0);
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Sse2)), 1*5);
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2)), 7*5);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Sse2)), 1*6);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2)), 7*6);
 
     /* Base tag + extra tags is a sum of the two */
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), 7*5 + 2);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), 7*6 + 2);
     #elif defined(CORRADE_TARGET_ARM)
     /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
        zero, times one as there are no extra tags */
@@ -1312,6 +1313,23 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_LZCNT int callInstructionFor<Cpu:
     /* Also verify that it does the right thing for 0. If misdetected and the
        BSR fallback gets used, this would return something random here. */
     CORRADE_COMPARE(_lzcnt_u32(0), 32);
+
+    CORRADE_COMPARE(count, 13);
+    return count;
+}
+#endif
+#ifdef CORRADE_ENABLE_BMI1
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_BMI1 int callInstructionFor<Cpu::Bmi1T>() {
+    /* Just lzcnt alone; using volatile to prevent this from being folded into
+       a constant */
+    volatile int a = 0x6583a000; /* 0x0005c1a6 but bit-reversed */
+    /* GCC and Clang have __tzcnt_u32() as well, but MSVC has only a single
+       underscore. */
+    unsigned int count = _tzcnt_u32(a);
+
+    /* Also verify that it does the right thing for 0. If misdetected and the
+       BSR fallback gets used, this would return something random here. */
+    CORRADE_COMPARE(_tzcnt_u32(0), 32);
 
     CORRADE_COMPARE(count, 13);
     return count;

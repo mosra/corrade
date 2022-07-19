@@ -245,6 +245,7 @@ Features runtimeFeatures() {
         #else
         __cpuid_count(7, 0, cpuid.e.ax, cpuid.e.bx, cpuid.e.cx, cpuid.e.dx);
         #endif
+        if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
         if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
         if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
     }
@@ -343,6 +344,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
        even in case of Cpu::Default, where it's just one */
     _c(Popcnt)
     _c(Lzcnt)
+    _c(Bmi1)
     _c(AvxF16c)
     _c(AvxFma)
     #elif defined(CORRADE_TARGET_ARM)

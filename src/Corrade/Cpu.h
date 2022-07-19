@@ -127,7 +127,7 @@ time:
 
 @m_class{m-block m-warning}
 
-@par SSE3, SSSE3, SSE4.1/SSE4.2, POPCNT, LZCNT, AVX F16C and AVX FMA on MSVC
+@par SSE3, SSSE3, SSE4.1/SSE4.2, POPCNT, LZCNT, BMI1, AVX F16C and AVX FMA on MSVC
     A special case worth mentioning are SSE3 and newer instructions on Windows.
     MSVC only provides a very coarse `/arch:SSE2`, `/arch:AVX` and `/arch:AVX2`
     for either @ref Sse2, @ref Avx or @ref Avx2, but nothing in between. That
@@ -520,6 +520,20 @@ struct LzcntT {
 };
 
 /**
+@brief BMI1 tag type
+
+Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
+and the @ref Bmi1 tag for more information.
+@see @ref tag(), @ref features()
+*/
+struct Bmi1T {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* Explicit constructor to avoid ambiguous calls when using {} */
+    constexpr explicit Bmi1T(Implementation::InitT) {}
+    #endif
+};
+
+/**
 @brief AVX tag type
 
 Available only on @ref CORRADE_TARGET_X86 "x86". See the @ref Cpu namespace
@@ -633,12 +647,16 @@ template<> struct TypeTraits<LzcntT> {
     enum: unsigned int { Index = 1 << (1 + Implementation::ExtraTagBitOffset) };
     static const char* name() { return "Lzcnt"; }
 };
-template<> struct TypeTraits<AvxF16cT> {
+template<> struct TypeTraits<Bmi1T> {
     enum: unsigned int { Index = 1 << (2 + Implementation::ExtraTagBitOffset) };
+    static const char* name() { return "Bmi1"; }
+};
+template<> struct TypeTraits<AvxF16cT> {
+    enum: unsigned int { Index = 1 << (3 + Implementation::ExtraTagBitOffset) };
     static const char* name() { return "AvxF16c"; }
 };
 template<> struct TypeTraits<AvxFmaT> {
-    enum: unsigned int { Index = 1 << (3 + Implementation::ExtraTagBitOffset) };
+    enum: unsigned int { Index = 1 << (4 + Implementation::ExtraTagBitOffset) };
     static const char* name() { return "AvxFma"; }
 };
 #endif
@@ -803,7 +821,8 @@ constexpr Sse42T Sse42{Implementation::Init};
 instructions. Available only on @ref CORRADE_TARGET_X86 "x86". This instruction
 set is treated as an *extra*, i.e. is neither a superset of nor implied by any
 other instruction set. See @ref Cpu-usage-extra for more information.
-@see @ref Lzcnt, @ref CORRADE_TARGET_POPCNT, @ref CORRADE_ENABLE_POPCNT
+@see @ref Lzcnt, @ref Bmi1, @ref CORRADE_TARGET_POPCNT,
+    @ref CORRADE_ENABLE_POPCNT
 */
 constexpr PopcntT Popcnt{Implementation::Init};
 
@@ -819,9 +838,28 @@ Note that this instruction has encoding compatible with an earlier `BSR`
 instruction which has a slightly different behavior. To avoid wrong results if
 it isn't available, prefer to always detect its presence with
 @ref runtimeFeatures() instead of a compile-time check.
-@see @ref Popcnt, @ref CORRADE_TARGET_LZCNT, @ref CORRADE_ENABLE_LZCNT
+@see @ref Popcnt, @ref Bmi1, @ref CORRADE_TARGET_LZCNT,
+    @ref CORRADE_ENABLE_LZCNT
 */
 constexpr LzcntT Lzcnt{Implementation::Init};
+
+/**
+@brief BMI1 tag
+
+[BMI1](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI1_(Bit_Manipulation_Instruction_Set_1))
+instructions, including `TZCNT`. Available only on
+@ref CORRADE_TARGET_X86 "x86". This instruction set is treated as an *extra*,
+i.e. is neither a superset of nor implied by any other instruction set. See
+@ref Cpu-usage-extra for more information.
+
+Note that the `TZCNT` instruction has encoding compatible with an earlier `BSF`
+instruction which has a slightly different behavior. To avoid wrong results if
+it isn't available, prefer to always detect its presence with
+@ref runtimeFeatures() instead of a compile-time check.
+@see @ref Popcnt, @ref Lzcnt, @ref CORRADE_TARGET_BMI1,
+    @ref CORRADE_ENABLE_BMI1
+*/
+constexpr Bmi1T Bmi1{Implementation::Init};
 
 /**
 @brief AVX tag
@@ -934,7 +972,7 @@ enum: unsigned int {
     BaseTagMask = (1 << ExtraTagBitOffset) - 1,
     ExtraTagMask = 0xffffffffu & ~BaseTagMask,
     #ifdef CORRADE_TARGET_X86
-    ExtraTagCount = 4,
+    ExtraTagCount = 5,
     #else
     ExtraTagCount = 0,
     #endif
@@ -1140,6 +1178,9 @@ typedef Implementation::Tags<
     #ifdef CORRADE_TARGET_LZCNT
     TypeTraits<LzcntT>::Index|
     #endif
+    #ifdef CORRADE_TARGET_BMI1
+    TypeTraits<Bmi1T>::Index|
+    #endif
     #ifdef CORRADE_TARGET_AVX_FMA
     TypeTraits<AvxFmaT>::Index|
     #endif
@@ -1202,6 +1243,7 @@ a combination of these:
 
 -   @ref Popcnt if @ref CORRADE_TARGET_POPCNT is defined
 -   @ref Lzcnt if @ref CORRADE_TARGET_LZCNT is defined
+-   @ref Bmi1 if @ref CORRADE_TARGET_BMI1 is defined
 -   @ref AvxFma if @ref CORRADE_TARGET_AVX_FMA is defined
 -   @ref AvxF16c if @ref CORRADE_TARGET_AVX_F16C is defined
 
@@ -1525,9 +1567,9 @@ namespace Implementation {
 @brief CPU instruction sets enabled at compile time
 
 On @ref CORRADE_TARGET_X86 "x86" returns a combination of @ref Sse2, @ref Sse3,
-@ref Ssse3, @ref Sse41, @ref Sse42, @ref Popcnt, @ref Lzcnt, @ref Avx,
-@ref AvxF16c, @ref AvxFma, @ref Avx2 and @ref Avx512f based on what all
-@ref CORRADE_TARGET_SSE2 etc. preprocessor variables are defined.
+@ref Ssse3, @ref Sse41, @ref Sse42, @ref Popcnt, @ref Lzcnt, @ref Bmi1,
+@ref Avx, @ref AvxF16c, @ref AvxFma, @ref Avx2 and @ref Avx512f based on what
+all @ref CORRADE_TARGET_SSE2 etc. preprocessor variables are defined.
 
 On @ref CORRADE_TARGET_ARM "ARM", returns a combination of @ref Neon,
 @ref NeonFma and @ref NeonFp16 based on what all @ref CORRADE_TARGET_NEON etc.
@@ -1564,6 +1606,9 @@ constexpr Features compiledFeatures() {
         #endif
         #ifdef CORRADE_TARGET_LZCNT
         TypeTraits<LzcntT>::Index|
+        #endif
+        #ifdef CORRADE_TARGET_BMI1
+        TypeTraits<Bmi1T>::Index|
         #endif
         #ifdef CORRADE_TARGET_AVX
         TypeTraits<AvxT>::Index|
@@ -1603,10 +1648,11 @@ constexpr Features compiledFeatures() {
 On @ref CORRADE_TARGET_X86 "x86" and GCC, Clang or MSVC uses the
 [CPUID](https://en.wikipedia.org/wiki/CPUID) builtin to check for the
 @ref Sse2, @ref Sse3, @ref Ssse3, @ref Sse41, @ref Sse42, @ref Popcnt,
-@ref Lzcnt, @ref Avx, @ref AvxF16c, @ref AvxFma, @ref Avx2 and @ref Avx512f
-runtime features. @ref Avx needs OS support as well, if it's not present, no
-following flags are checked either. On compilers other than GCC, Clang and MSVC
-the function is @cpp constexpr @ce and delegates into @ref compiledFeatures().
+@ref Lzcnt, @ref Bmi1, @ref Avx, @ref AvxF16c, @ref AvxFma, @ref Avx2 and
+@ref Avx512f runtime features. @ref Avx needs OS support as well, if it's not
+present, no following flags including @ref Bmi1 are checked either. On
+compilers other than GCC, Clang and MSVC the function is @cpp constexpr @ce and
+delegates into @ref compiledFeatures().
 
 On @ref CORRADE_TARGET_ARM "ARM" and Linux or Android API level 18+ uses
 @m_class{m-doc-external} [getauxval()](https://man.archlinux.org/man/getauxval.3), or on ARM macOS and iOS uses @m_class{m-doc-external} [sysctlbyname()](https://developer.apple.com/documentation/kernel/1387446-sysctlbyname)
@@ -2202,7 +2248,7 @@ instructions inside a function annotated with this macro without having to
 specify `-mlzcnt` for the whole compilation unit. On x86 MSVC expands to
 nothing, as the compiler doesn't restrict use of intrinsics in any way. Unlike
 the SSE variants and POPCNT this macro is not defined on
-@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, AVX and newer
+@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, BMI1, AVX and newer
 intrinsics are provided only if enabled on compiler command line. Not defined
 on other compilers or architectures.
 
@@ -2241,6 +2287,52 @@ may need to specify it together with others. See
    already requires the right /arch: settings" is correct. */
 #elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_LZCNT
+#endif
+
+/**
+@brief Enable BMI1 for given function
+@m_since_latest
+
+On @ref CORRADE_TARGET_X86 "x86" GCC, Clang expands to
+@cpp __attribute__((__target__("bmi"))) @ce, allowing use of the
+[BMI1](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI1_(Bit_Manipulation_Instruction_Set_1))
+instructions inside a function annotated with this macro without having to
+specify `-mbmi` for the whole compilation unit. On x86 MSVC expands to nothing,
+as the compiler doesn't restrict use of intrinsics in any way. Unlike the SSE
+variants and POPCNT this macro is not defined on
+@ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, BMI1, AVX and newer
+intrinsics are provided only if enabled on compiler command line.  Not defined on
+other compilers or architectures.
+
+As a special case, if @ref CORRADE_TARGET_BMI1 is defined (meaning BMI1 is
+enabled for the whole compilation unit), this macro is defined as empty on all
+compilers.
+
+Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro, so you
+may need to specify it together with others. See
+@ref Cpu-usage-target-attributes for more information and usage example.
+
+@m_class{m-note m-info}
+
+@par
+    If you target GCC 4.8, you may also want to use
+    @ref Corrade/Utility/IntrinsicsAvx.h instead of
+    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
+    compiler.
+
+@see @relativeref{Corrade,Cpu::Bmi1}
+*/
+#if defined(CORRADE_TARGET_BMI1) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_ENABLE_BMI1
+#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+#define CORRADE_ENABLE_BMI1 __attribute__((__target__("bmi")))
+/* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
+   still present in Jul 2022, meaning we can only use these if __BMI__ is
+   defined. Funnily enough the older headers don't have this on their own, only
+   <immintrin.h>. Also I don't think "Actually using intrinsics on Windows
+   already requires the right /arch: settings" is correct. */
+#elif defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE_BMI1
 #endif
 
 /**

@@ -25,15 +25,15 @@
 */
 
 /** @file
-@brief Intrinsics for x86 LZCNT, AVX, AVX F16C, AVX FMA and AVX2 instructions
+@brief Intrinsics for x86 LZCNT, BMI1, AVX, AVX F16C, AVX FMA and AVX2 instructions
 @m_since_latest
 
 Equivalent to @cpp #include <immintrin.h> @ce on most compilers except for GCC
 4.8, where it contains an additional workaround to make the instructions
 available with just the @ref CORRADE_ENABLE_AVX, @ref CORRADE_ENABLE_AVX_F16C,
 @ref CORRADE_ENABLE_AVX_FMA or @ref CORRADE_ENABLE_AVX2 function attributes
-instead of having to specify `-mlzcnt`, `-mavx`, `-mf16c`, `-mfma` or `-mavx2`
-for the whole compilation unit.
+instead of having to specify `-mlzcnt`, `-mbmi`, `-mavx`, `-mf16c`, `-mfma` or
+`-mavx2` for the whole compilation unit.
 
 As AVX-512 is supported only since GCC 4.9, which doesn't need this workaround,
 it's not handled here.
@@ -58,7 +58,7 @@ it's not handled here.
    instructions are included below by defining target("avx2") and directly
    pulling in <avx2intrin.h>, and only doing that on GCC 4.8, as all other
    compilers have everything already included from the top-level <immintrin.h>.
-   Same then goes for F16C, FMA and LZCNT, which all also have such weird
+   Same then goes for F16C, FMA, LZCNT and BMI1, which all also have such weird
    interactions when pulled in together.
 
    I wonder what impact this has on optimization, but I don't care that much as
@@ -130,5 +130,17 @@ it's not handled here.
 #include <lzcntintrin.h>
 #pragma pop_macro("__ABM__")
 #pragma pop_macro("__LZCNT__")
+#pragma GCC pop_options
+#endif
+
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
+#pragma GCC push_options
+#pragma GCC target("bmi")
+#pragma push_macro("__BMI__")
+#ifndef __BMI__
+#define __BMI__
+#endif
+#include <bmiintrin.h>
+#pragma pop_macro("__BMI__")
 #pragma GCC pop_options
 #endif

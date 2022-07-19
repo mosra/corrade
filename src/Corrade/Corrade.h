@@ -644,6 +644,24 @@ instead.
 #undef CORRADE_TARGET_LZCNT
 
 /**
+@brief Target with BMI1 instructions
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[BMI1](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI1_(Bit_Manipulation_Instruction_Set_1))
+including the `TZCNT` instruction is enabled at compile time (on GCC/Clang it's
+`-mbmi`, MSVC doesn't have a direct option but it's assumed to be implied by
+`/arch:AVX`). However note that the `TZCNT` instruction has encoding compatible
+with an earlier `BSF` instruction which has a slightly different behavior. To
+avoid wrong results if it isn't available, prefer to detect its presence with
+@ref Cpu::runtimeFeatures() instead.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Bmi1},
+    @ref CORRADE_ENABLE_BMI1
+*/
+#define CORRADE_TARGET_BMI1
+#undef CORRADE_TARGET_BMI1
+
+/**
 @brief AVX target
 @m_since_latest
 
