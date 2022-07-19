@@ -1122,7 +1122,7 @@ void CpuTest::tagDispatchedCompileTime() {
     }
 }
 
-CORRADE_CPU_DISPATCHED_POINTER(DispatchedT, dispatchedImplementation, dispatchedPointer)
+CORRADE_CPU_DISPATCHED_POINTER(dispatchedImplementation, Cpu::Features (*dispatchedPointer)())
 
 void CpuTest::tagDispatchedPointer() {
     Cpu::Features dispatchedFeatures = dispatchedPointer();

@@ -1841,10 +1841,10 @@ For a dispatch using just the base instruction set use
 @brief Create a runtime-dispatched function pointer
 @m_since_latest
 
-Assuming a @p dispatcher of @p type was defined with either
-@ref CORRADE_CPU_DISPATCHER() or @ref CORRADE_CPU_DISPATCHER_BASE(), defines a
-function pointer variable of @p type and @p name. In a global constructor the
-variable is assigned a function pointer returned by @p dispatcher for
+Assuming a @p dispatcher was defined with either @ref CORRADE_CPU_DISPATCHER()
+or @ref CORRADE_CPU_DISPATCHER_BASE(), defines a function pointer variable with
+a signature specified in the second variadic argument. In a global constructor
+the variable is assigned a function pointer returned by @p dispatcher for
 @relativeref{Corrade,Cpu::runtimeFeatures()}.
 
 The pointer can be changed afterwards, such as for testing purposes, See also
@@ -1854,8 +1854,8 @@ pointer indirection.
 See @ref Cpu-usage-automatic-cached-dispatch for more information, usage
 example and overhead comparison.
 */
-#define CORRADE_CPU_DISPATCHED_POINTER(type, dispatcher, name)              \
-    type name = dispatcher(Corrade::Cpu::runtimeFeatures());
+#define CORRADE_CPU_DISPATCHED_POINTER(dispatcher, ...)              \
+    __VA_ARGS__ = dispatcher(Corrade::Cpu::runtimeFeatures());
 
 /**
 @brief Create a runtime-dispatched function via GNU IFUNC

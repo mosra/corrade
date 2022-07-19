@@ -129,7 +129,7 @@ CORRADE_CPU_DISPATCHED_IFUNC(LookupT, lookupImplementation, int lookup(DOXYGEN_E
 /* [Cpu-usage-automatic-cached-dispatch-ifunc] */
 #else
 /* [Cpu-usage-automatic-cached-dispatch-pointer] */
-CORRADE_CPU_DISPATCHED_POINTER(LookupT, lookupImplementation, lookup)
+CORRADE_CPU_DISPATCHED_POINTER(lookupImplementation, int(*lookup)(DOXYGEN_ELLIPSIS(int)))
 /* [Cpu-usage-automatic-cached-dispatch-pointer] */
 #endif
 
