@@ -437,6 +437,129 @@ only in inverse.
 In order to remove a port, be sure to touch all places mentioned above, only in
 inverse.
 
+@section corrade-developers-cpu-tag Checklist for adding / removing a CPU instruction set
+
+1.  Add a new `CORRADE_TARGET_FOO` preprocessor variable to `Corrade.h`:
+    -   With relevant documentation pointing ideally to a Wikipedia page
+        describing the instruction set
+    -   Mentioning the GCC/Clang `-m` option that enables it and the MSVC
+        equivalent, if any, or the closest `/arch:` option that implies it
+    -   Linking to related other `CORRADE_TARGET_*` variables, or saying it's
+        a superset of / implied by another
+    -   Mentioning possible caveats (like with `LZCNT` having a dangerous `BSR`
+        fallback)
+2.  Add detection into `configure.h.cmake`
+    -   On GCC / Clang it's usually a preprocessor variable in a form of
+        `__FOO__`, verify with `echo | gcc -dM -E -mfoo | grep FOO`
+    -   If it's a superset of / implied by another, verify that the other
+        preprocessor variables are set / imply this option as expected
+    -   Cross-check with Clang and if it has a different behavior drop the
+        implication
+    -   On MSVC just assume it's enabled by the option that implies it, as
+        there it's harder to verify
+    -   Special-case clang-cl under the MSVC branch, reusing the `__FOO__`
+        check for it
+3.  Add a new `FooT` tag type into `Cpu.h`
+    -   Roughly at the place where it historically appeared among other
+        extensions (e.g. @ref Cpu::PopcntT is after `Sse42T` and before `AvxT`
+        but new AVX-512 extensions would go at the end)
+    -   If a superset of / implied by another, wire it into the class
+        hierarchy (like e.g. @ref Cpu::AvxT), otherwise keep it standalone
+        (like e.g. @ref Cpu::PopcntT)
+    -   Make the minimal documentation only link to the tag instance
+4.  Add a @cpp TypeTraits<FooT> @ce entry. Its value is important for proper
+    overload resolution:
+    -   If it's in a hierarchy, renumber the other indices so it's larger than
+        everything before it and smaller than everything after. Worst case, if
+        the hierarchy becomes larger than 16 items, the `ExtraTagBitOffset` may
+        need to get increased.
+    -   If it's not, `ExtraTagCount` may need to get updated to account for the
+        new extra tag. You'll get static assertions if the tag value is too
+        small.
+5.  Add a new `Foo` tag:
+    -   Position matching the order in which the tag types were defined
+    -   Documentation similar to the `CORRADE_TARGET_FOO` docs, including the
+        Wikipedia link and potential caveats
+    -   Mentioning it's either a superset of / implied by another (like e.g.
+        @ref Cpu::Avx) or an "extra" (like e.g. @ref Cpu::Popcnt)
+    -   Linking to relevant other tags and corresponding `CORRADE_TARGET_FOO`
+        and `CORRADE_ENABLE_FOO` variables
+    -   List it in the right place in the @ref Utility::Debug output operator
+        in `Cpu.cpp` --- "extra" tags go after the base ones
+    -   If it seems like a reasonable addition, expand the `doc/cpu.dot` graph
+        with the new tag
+6.  Wire it into compile-time detection:
+    -   Inside the @ref Cpu::DefaultBaseT / @ref Cpu::DefaultExtraT typedef and
+        in the @ref Cpu::compiledFeatures() function, at a place that
+        corresponds to where it was defined among the tags
+    -   Mentioned in @ref Cpu::DefaultBase / @ref Cpu::DefaultExtra and
+        @ref Cpu::compiledFeatures() docs, again in proper order
+    -   If it doesn't have a direct mapping to a MSVC `/arch:` option, consider
+        also listing it among others in the yllow warning block in @ref Cpu
+        namespace docs
+7.  Wire it into runtime detection:
+    -   For x86 find the right [CPUID](https://en.wikipedia.org/wiki/CPUID)
+        bit, order the branch among checks for surrounding bits
+    -   For ARM on Linux and Android check for a corresponding
+        [HWCAP](https://github.com/torvalds/linux/blame/master/arch/arm64/include/uapi/asm/hwcap.h)
+        bit, in some cases it may need to read the `AT_HWCAP2` entry as well
+        which has support further limited -- see docs in the code for more
+        information.
+    -   For ARM on macOS / iOS check the corresponding
+        [sysctlbyname()](https://developer.apple.com/documentation/kernel/1387446-sysctlbyname/determining_instruction_set_characteristics)
+        value
+    -   For WebAssembly there's no runtime detection yet. Check if anything
+        happened with the [feature detection proposal](https://github.com/WebAssembly/feature-detection/blob/main/proposals/feature-detection/Overview.md).
+    -   List it in @ref Cpu::runtimeFeatures() docs, if it's depending on AVX
+        like e.g. @ref Cpu::Bmi1 on x86 and the dependency isn't obvious,
+        mention that as well
+8.  Add a new `CORRADE_ENABLE_FOO` macro:
+    -   With a corresponding @cpp __attribute__((__target__("foo"))) @ce,
+        mention the matching `-m` option in the docs
+    -   If the instruction set works on clang-cl without having to define
+        anything, then add the attribute also for clang-cl (like e.g.
+        @ref CORRADE_ENABLE_SSE42), if it doesn't then explicitly exclude
+        clang-cl such as with @ref CORRADE_ENABLE_LZCNT or
+        @ref CORRADE_ENABLE_AVX512F. Reflect that in the documentation ---
+        either saying that it expands to the target attribute also on clang-cl,
+        or that it isn't defined there ever.
+    -   Verify and mention the special case with `CORRADE_TARGET_FOO`
+    -   If it's a superset of / implied by any other `-m` option (as discovered
+        when implementing the `CORRADE_TARGET_FOO` detection), mention that in
+        the docs -- but only if it's consistent for GCC and Clang.
+9.  Add a test for the `CORRADE_ENABLE_FOO` macro:
+    -   New `callInstructionFor()` variant for given tag type
+    -   Annotated with the macro and also with an @cpp #ifdef @ce for the macro
+        around
+    -   Ideally using just that instruction alone (such as is the case with
+        `POPCNT`), if not then try to use an instruction set that's implied by
+        it so it doesn't need a second `CORRADE_ENABLE_*`. Clearly mark which
+        expression uses the tested instruction set. It should verify something
+        nontrivial (so not just a load/store) and return a non-zero value.
+    -   Be sure to build & run on weird / broken compilers such as GCC 4.8 or
+        clang-cl. In case of GCC 4.8 the `Utility/Intrinsics*.h` headers may
+        need to get expanded to correctly pull in the intrinsics without
+        requiring `-mfoo` globally, see their code for more info.
+10. Run `CpuTest` to verify everything:
+    -   Compile-time detection (test with a `-march=native` build or
+        equivalent)
+    -   Runtime detection, ideally on multiple platforms (AMD/Intel for x86,
+        phone + Apple M1 + CircleCI for ARM...)
+    -   `CORRADE_ENABLE_*` macro (that a corresponding @cpp enableMacros() @ce
+        test case is run and gives a reasonable result, use CircleCI for
+        AVX-512 and new ARM extensions if not available locally)
+    -   If the instruction set isn't detected as supported on a target, verify
+        that calling it crashes (temporarily comment out the `CORRADE_SKIP()`
+        in `enableMacros()`)
+11. List the new `CORRADE_TARGET_FOO`, `CORRADE_ENABLE_FOO` variables and the
+    `Cpu::Foo` tag in `doc/changelog.dox`
+12. Check the output of `CpuTest` CI jobs for sanity:
+    -   Especially differences between Linux, Windows and macOS
+    -   Between x86, ARM and WebAssembly
+    -   Docker CircleCI x86 and ARM jobs tend to have very recent hardware,
+        OTOH macOS jobs have outdated Intel CPUs without AVX2, the output
+        should correspond to that
+
 @section corrade-developers-copyright-year Checklist for updating copyright year
 
 1.  Verify there are no uncommitted changes in any repos, as that would

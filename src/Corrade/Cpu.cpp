@@ -102,6 +102,9 @@ namespace Implementation {
    with a value fed from outside, which is then used inside such resolvers.
    For simplicity this variant is available always and the public
    Cpu::runtimeFeatures() just delegates to it. */
+/** @todo If AT_HWCAP2 or other bits are needed, it's passed to ifunc resolvers
+    only since glibc 2.30 (and Android API 30+, which is the same as before):
+    https://github.com/bminor/glibc/commit/2b8a3c86e7606cf1b0a997dad8af2d45ae8989c3 */
 Features runtimeFeatures(const unsigned long caps) {
     unsigned int out = 0;
     #ifdef CORRADE_TARGET_32BIT
