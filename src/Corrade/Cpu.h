@@ -1668,12 +1668,12 @@ best viable overload.
 @m_since_latest
 
 Given a set of function overloads named @p function that accept a CPU tag as a
-parameter and return a function pointer of @p type, creates a function with
-signature @cpp type function(Cpu::Features) @ce which will select among the
-overloads using a runtime-specified @relativeref{Corrade,Cpu::Features}, using
-the same rules as the compile-time overload selection. For this macro to work,
-at the very least there has to be an overload with a
-@relativeref{Corrade,Cpu::ScalarT} argument. See
+parameter, all returning a function pointer of the same type, creates a
+function with signature @cpp function(Cpu::Features) @ce which will select
+among the overloads using a runtime-specified
+@relativeref{Corrade,Cpu::Features}, using the same rules as the compile-time
+overload selection. For this macro to work, at the very least there has to be
+an overload with a @relativeref{Corrade,Cpu::ScalarT} argument. See
 @ref Cpu-usage-automatic-runtime-dispatch for more information and an example.
 
 This function works with just a single base CPU instruction tag such as
@@ -1687,8 +1687,8 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
    "the new preprocessor" is enabled it wouldn't be possible to get rid of the
    CORRADE_CPU_SELECT() macro from there. */
 #ifdef CORRADE_TARGET_X86
-#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
-    type function(Corrade::Cpu::Features features) {                        \
+#define CORRADE_CPU_DISPATCHER_BASE(function)                               \
+    decltype(function(Corrade::Cpu::Scalar)) function(Corrade::Cpu::Features features) { \
         if(features & Corrade::Cpu::Avx512f)                                \
             return function(Corrade::Cpu::Avx512f);                         \
         if(features & Corrade::Cpu::Avx2)                                   \
@@ -1708,8 +1708,8 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
         return function(Corrade::Cpu::Scalar);                              \
     }
 #elif defined(CORRADE_TARGET_ARM)
-#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
-    type function(Corrade::Cpu::Features features) {                        \
+#define CORRADE_CPU_DISPATCHER_BASE(function)                               \
+    decltype(function(Corrade::Cpu::Scalar)) function(Corrade::Cpu::Features features) { \
         if(features & Corrade::Cpu::NeonFp16)                               \
             return function(Corrade::Cpu::NeonFp16);                        \
         if(features & Corrade::Cpu::NeonFma)                                \
@@ -1719,15 +1719,15 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
         return function(Corrade::Cpu::Scalar);                              \
     }
 #elif defined(CORRADE_TARGET_WASM)
-#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
-    type function(Corrade::Cpu::Features features) {                        \
+#define CORRADE_CPU_DISPATCHER_BASE(function)                               \
+    decltype(function(Corrade::Cpu::Scalar)) function(Corrade::Cpu::Features features) { \
         if(features & Corrade::Cpu::Simd128)                                \
             return function(Corrade::Cpu::Simd128);                         \
         return function(Corrade::Cpu::Scalar);                              \
     }
 #else
-#define CORRADE_CPU_DISPATCHER_BASE(type, function)                         \
-    type function(Corrade::Cpu::Features features) {                        \
+#define CORRADE_CPU_DISPATCHER_BASE(function)                               \
+    decltype(function(Corrade::Cpu::Scalar)) function(Corrade::Cpu::Features features) { \
         return function(Corrade::Cpu::Scalar);                              \
     }
 #endif
@@ -1774,8 +1774,8 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
 /* CORRADE_CPU_DISPATCHER() specialization for 0 extra instruction sets.
    Basically equivalent to CORRADE_CPU_DISPATCHER_BASE() except for the extra
    CORRADE_CPU_SELECT() macro. */
-#define _CORRADE_CPU_DISPATCHER0(type, function)                            \
-    type function(Corrade::Cpu::Features features) {                        \
+#define _CORRADE_CPU_DISPATCHER0(function)                                  \
+    decltype(function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar))) function(Corrade::Cpu::Features features) { \
         _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, )                  \
     }
 
@@ -1785,11 +1785,11 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
    reasonable. I attempted adding an "unrolled" _CORRADE_CPU_DISPATCHER2() but
    it made everything significantly worse on both compilers, more than doubling
    the amount of generated code. */
-#define _CORRADE_CPU_DISPATCHERn(type, function, ...)                       \
-    template<unsigned int value> CORRADE_ALWAYS_INLINE type function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value>) { \
+#define _CORRADE_CPU_DISPATCHERn(function, ...)                             \
+    template<unsigned int value> CORRADE_ALWAYS_INLINE decltype(function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar))) function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value>) { \
         _CORRADE_CPU_DISPATCHER_IMPLEMENTATION(function, |Corrade::Cpu::Implementation::Tags<value>{Corrade::Cpu::Implementation::Init}) \
     }                                                                       \
-    template<unsigned int value, class First, class ...Next> CORRADE_ALWAYS_INLINE type function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value> extra, First first, Next... next) { \
+    template<unsigned int value, class First, class ...Next> CORRADE_ALWAYS_INLINE decltype(function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar))) function ## Internal(Corrade::Cpu::Features features, Corrade::Cpu::Implementation::Tags<value> extra, First first, Next... next) { \
         static_assert(!(static_cast<unsigned int>(Corrade::Cpu::Implementation::tags(First{Corrade::Cpu::Implementation::Init})) & Corrade::Cpu::Implementation::BaseTagMask), \
             "only extra instruction set tags should be explicitly listed"); \
         if(features & first)                                                \
@@ -1797,7 +1797,7 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
         else                                                                \
             return function ## Internal(features, extra, next...);          \
     }                                                                       \
-    type function(Corrade::Cpu::Features features) {                        \
+    decltype(function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar))) function(Corrade::Cpu::Features features) { \
         return function ## Internal(features, Corrade::Cpu::Implementation::Tags<0>{Corrade::Cpu::Implementation::Init}, __VA_ARGS__); \
     }
 
@@ -1813,14 +1813,14 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
 @m_since_latest
 
 Given a set of function overloads named @p function that accept a CPU tag
-combination wrapped in @ref CORRADE_CPU_DECLARE() as a parameter and return a
-function pointer of @p type, creates a function with signature
-@cpp type function(Cpu::Features) @ce which will select among the overloads
-using a runtime-specified @relativeref{Corrade,Cpu::Features}, using the same
-rules as the compile-time overload selection. The extra instruction sets
-considered in the overload selection are specified as additional parameters to
-the macro, specifying none is valid as well. For this macro to work, at the
-very least there has to be an overload with a
+combination wrapped in @ref CORRADE_CPU_DECLARE() as a parameter, all returning
+a function pointer of the same type, creates a function with signature
+@cpp function(Cpu::Features) @ce which will select among the overloads using a
+runtime-specified @relativeref{Corrade,Cpu::Features}, using the same rules as
+the compile-time overload selection. The extra instruction sets considered in
+the overload selection are specified as additional parameters to the macro,
+specifying none is valid as well. For this macro to work, at the very least
+there has to be an overload with a
 @ref Corrade::Cpu::Scalar "CORRADE_CPU_DECLARE(Cpu::Scalar)" argument. See
 @ref Cpu-usage-automatic-runtime-dispatch for more information and an example.
 
@@ -1828,17 +1828,17 @@ For a dispatch using just the base instruction set use
 @ref CORRADE_CPU_DISPATCHER_BASE() instead.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_CPU_DISPATCHER(type, function, ...)
+#define CORRADE_CPU_DISPATCHER(function, ...)
 #elif !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
-#define CORRADE_CPU_DISPATCHER(type, ...)                               \
-    _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__)
+#define CORRADE_CPU_DISPATCHER(...)                               \
+    _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__)
 #else
 /* Workaround for MSVC not being able to expand __VA_ARGS__ correctly. Would
    work with /Zc:preprocessor or /experimental:preprocessor, but I'm not
    enabling that globally yet. Source: https://stackoverflow.com/a/5134656 */
 #define _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS(x) x
-#define CORRADE_CPU_DISPATCHER(type, ...)                               \
-    _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(type, __VA_ARGS__))
+#define CORRADE_CPU_DISPATCHER(...)                               \
+    _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__))
 #endif
 
 /**

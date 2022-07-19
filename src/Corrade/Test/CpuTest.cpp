@@ -873,7 +873,7 @@ CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntime(Cpu::Simd128T) {
 #error
 #endif
 
-CORRADE_CPU_DISPATCHER_BASE(DispatchRuntimeT, dispatchRuntime)
+CORRADE_CPU_DISPATCHER_BASE(dispatchRuntime)
 #endif
 
 void CpuTest::tagDispatchRuntime() {
@@ -925,7 +925,7 @@ CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtra(CORRADE_CPU_DECLARE(
     return []() -> const char* { return "AVX2+FMA"; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtra, Cpu::AvxF16c, Cpu::AvxFma)
+CORRADE_CPU_DISPATCHER(dispatchRuntimeExtra, Cpu::AvxF16c, Cpu::AvxFma)
 #endif
 
 void CpuTest::tagDispatchRuntimeExtra() {
@@ -968,7 +968,7 @@ CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraCombination(CORRADE_C
     return []() -> const char* { return "AVX2+POPCNT+LZCNT"; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraCombination, Cpu::Popcnt|Cpu::Lzcnt)
+CORRADE_CPU_DISPATCHER(dispatchRuntimeExtraCombination, Cpu::Popcnt|Cpu::Lzcnt)
 #endif
 
 void CpuTest::tagDispatchRuntimeExtraCombination() {
@@ -1000,7 +1000,7 @@ CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU
 CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Avx)) {
     return []() -> const char* { return "AVX"; };
 }
-CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+CORRADE_CPU_DISPATCHER(dispatchRuntimeExtraZeroExtra)
 #elif defined(CORRADE_TARGET_ARM)
 CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Neon)) {
     return []() -> const char* { return "NEON"; };
@@ -1009,13 +1009,13 @@ CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU
     return []() -> const char* { return "NEON FMA"; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+CORRADE_CPU_DISPATCHER(dispatchRuntimeExtraZeroExtra)
 #elif defined(CORRADE_TARGET_WASM)
 CORRADE_ALWAYS_INLINE DispatchRuntimeT dispatchRuntimeExtraZeroExtra(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
     return []() -> const char* { return "SIMD128"; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchRuntimeT, dispatchRuntimeExtraZeroExtra)
+CORRADE_CPU_DISPATCHER(dispatchRuntimeExtraZeroExtra)
 #else
 #error
 #endif
@@ -1066,7 +1066,7 @@ CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(C
     return []() -> Cpu::Features { return Cpu::Avx|Cpu::AvxFma; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation, Cpu::AvxFma)
+CORRADE_CPU_DISPATCHER(dispatchedImplementation, Cpu::AvxFma)
 #elif defined(CORRADE_TARGET_ARM)
 CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::NeonFp16)) {
     return []() -> Cpu::Features { return Cpu::NeonFp16; };
@@ -1075,13 +1075,13 @@ CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(C
     return []() -> Cpu::Features { return Cpu::Neon; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation)
+CORRADE_CPU_DISPATCHER(dispatchedImplementation)
 #elif defined(CORRADE_TARGET_WASM)
 CORRADE_ALWAYS_INLINE DispatchedT dispatchedImplementation(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
     return []() -> Cpu::Features { return Cpu::Simd128; };
 }
 
-CORRADE_CPU_DISPATCHER(DispatchedT, dispatchedImplementation)
+CORRADE_CPU_DISPATCHER(dispatchedImplementation)
 #endif
 
 /* CORRADE_NEVER_INLINE to make it possible to look at the disassembly. The

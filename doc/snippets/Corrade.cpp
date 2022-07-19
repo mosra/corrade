@@ -99,7 +99,7 @@ TransformT transformImplementation(Cpu::Avx2T) {
     return [](Containers::ArrayView<float> data) { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
 }
 
-CORRADE_CPU_DISPATCHER_BASE(TransformT, transformImplementation)
+CORRADE_CPU_DISPATCHER_BASE(transformImplementation)
 /* [Cpu-usage-automatic-runtime-dispatch-declare] */
 
 using LookupT = int(*)(int);
@@ -120,7 +120,7 @@ LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzc
     DOXYGEN_ELLIPSIS(return {};)
 }
 
-CORRADE_CPU_DISPATCHER(LookupT, lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
+CORRADE_CPU_DISPATCHER(lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
 /* [Cpu-usage-automatic-runtime-dispatch-extra-declare] */
 
 #ifdef CORRADE_CPU_USE_IFUNC
