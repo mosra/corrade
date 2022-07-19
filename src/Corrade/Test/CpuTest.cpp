@@ -1154,7 +1154,7 @@ void CpuTest::tagDispatchedPointer() {
 }
 
 #ifdef CORRADE_CPU_USE_IFUNC
-CORRADE_CPU_DISPATCHED_IFUNC(DispatchedT, dispatchedImplementation, Cpu::Features dispatchedIfunc())
+CORRADE_CPU_DISPATCHED_IFUNC(dispatchedImplementation, Cpu::Features dispatchedIfunc())
 #endif
 
 void CpuTest::tagDispatchedIfunc() {

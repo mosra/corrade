@@ -125,7 +125,7 @@ CORRADE_CPU_DISPATCHER(LookupT, lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
 
 #ifdef CORRADE_CPU_USE_IFUNC
 /* [Cpu-usage-automatic-cached-dispatch-ifunc] */
-CORRADE_CPU_DISPATCHED_IFUNC(LookupT, lookupImplementation, int lookup(DOXYGEN_ELLIPSIS(int)))
+CORRADE_CPU_DISPATCHED_IFUNC(lookupImplementation, int lookup(DOXYGEN_ELLIPSIS(int)))
 /* [Cpu-usage-automatic-cached-dispatch-ifunc] */
 #else
 /* [Cpu-usage-automatic-cached-dispatch-pointer] */

@@ -348,8 +348,12 @@ needed either:
 </ul>
 
 With all three cases, you end up with either a function or a function pointer.
-Finally, when exposed in a header as appropriate, both variants can be then
-called the same way:
+The macro signatures are deliberately similar to each other and to the direct
+function declaration to make it possible to unify them under a single wrapper
+macro in case a practical use case needs to handle more than one variant.
+
+Finally, when exposed in a header as appropriate, both the function and the
+function pointer variant can be then called the same way:
 
 @snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-call
 */
@@ -1862,8 +1866,8 @@ example and overhead comparison.
 @m_since_latest
 
 Available only if @ref CORRADE_CPU_USE_IFUNC is enabled. Assuming a
-@p dispatcher of @p type was defined with either @ref CORRADE_CPU_DISPATCHER()
-or @ref CORRADE_CPU_DISPATCHER_BASE(), defines a function with a signature
+@p dispatcher was defined with either @ref CORRADE_CPU_DISPATCHER() or
+@ref CORRADE_CPU_DISPATCHER_BASE(), defines a function with a signature
 specified via the third variadic argument. The signature has to match @p type.
 The function uses the [GNU IFUNC](https://sourceware.org/glibc/wiki/GNU_IFUNC)
 mechanism, which causes the function call to be resolved to a function pointer
@@ -1896,19 +1900,19 @@ example and overhead comparison.
    -Wmissing-prototypes macro to get fired (which is enabled globally because
    it has obvious benefits), so to avoid noise it has to be disabled here. */
 #ifndef CORRADE_TARGET_ARM
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
     _Pragma("GCC diagnostic push")                                          \
     _Pragma("GCC diagnostic ignored \"-Wmissing-prototypes\"")              \
-    extern "C" type dispatcher() {                                          \
+    extern "C" decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher() { \
         return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
     }                                                                       \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher)));                        \
     _Pragma("GCC diagnostic pop")
 #else
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
     _Pragma("GCC diagnostic push")                                          \
     _Pragma("GCC diagnostic ignored \"-Wmissing-prototypes\"")              \
-    extern "C" type dispatcher(unsigned long caps) {                        \
+    extern "C" decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher(unsigned long caps) { \
         return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
     }                                                                       \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher)));                        \
@@ -1923,14 +1927,14 @@ example and overhead comparison.
    same name. Despite the warning it works, but to avoid useless noise the
    ifunc dispatcher is named differently. */
 #ifndef CORRADE_TARGET_ARM
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
-    extern "C" { CORRADE_NEVER_INLINE static type dispatcher ## Ifunc() {   \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
+    extern "C" { CORRADE_NEVER_INLINE static decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher ## Ifunc() {   \
         return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
     }}                                                                      \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher "Ifunc")));
 #else
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
-    extern "C" { CORRADE_NEVER_INLINE static type dispatcher ## Ifunc(unsigned long caps) { \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
+    extern "C" { CORRADE_NEVER_INLINE static decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher ## Ifunc(unsigned long caps) { \
         return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
     }}                                                                      \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher "Ifunc")));
@@ -1938,14 +1942,14 @@ example and overhead comparison.
 #else
 /* Only GCC 4.9+ has the implementation in the most minimal form. */
 #ifndef CORRADE_TARGET_ARM
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
-    extern "C" { static type dispatcher() {                                 \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
+    extern "C" { static decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher() { \
         return dispatcher(Corrade::Cpu::runtimeFeatures());                 \
     }}                                                                      \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher)));
 #else
-#define CORRADE_CPU_DISPATCHED_IFUNC(type, dispatcher, ...)                 \
-    extern "C" { static type dispatcher(unsigned long caps) {               \
+#define CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, ...)                       \
+    extern "C" { static decltype(dispatcher(std::declval<Corrade::Cpu::Features>())) dispatcher(unsigned long caps) { \
         return dispatcher(Corrade::Cpu::Implementation::runtimeFeatures(caps)); \
     }}                                                                      \
     __VA_ARGS__ __attribute__((ifunc(#dispatcher)));
