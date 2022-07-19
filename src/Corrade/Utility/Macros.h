@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_PASSTHROUGH(), @ref CORRADE_NOOP(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -615,12 +615,21 @@ as applying to the immediately following line, which is why the extra
 #define CORRADE_LINE_STRING _CORRADE_LINE_STRING_IMPLEMENTATION(__LINE__)
 
 /** @hideinitializer
+@brief Passthrough
+@m_since_latest
+
+Expands to all arguments passed to it. Inverse of @ref CORRADE_NOOP().
+*/
+#define CORRADE_PASSTHROUGH(...) __VA_ARGS__
+
+/** @hideinitializer
 @brief No-op
 @m_since{2019,10}
 
-Eats all arguments passed to it. Useful on compilers that don't support
-defining function macros on command line --- for example,
-@cpp -DA_MACRO=CORRADE_NOOP @ce is the same as doing @cpp -D'A_MACRO(arg)=' @ce.
+Eats all arguments passed to it. Inverse of @ref CORRADE_PASSTHROUGH(). Useful
+on compilers that don't support defining function macros on command line ---
+for example, @cpp -DA_MACRO=CORRADE_NOOP @ce is the same as doing
+@cpp -D'A_MACRO(arg)=' @ce.
 */
 #define CORRADE_NOOP(...)
 
