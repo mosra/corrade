@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Basic definitions
+ * @brief Basic definitions and forward declarations for the @ref Corrade namespace
  */
 
 #include "Corrade/configure.h"
@@ -842,6 +842,12 @@ the console. This is done automatically when you link to the
 */
 #define CORRADE_UTILITY_USE_ANSI_COLORS
 #undef CORRADE_UTILITY_USE_ANSI_COLORS
+#endif
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+namespace Cpu {
+    class Features;
+}
 #endif
 
 }

@@ -31,6 +31,7 @@
  * @m_since_latest
  */
 
+#include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
@@ -1232,8 +1233,6 @@ equivalent:
 template<class T> constexpr T tag() { return T{Implementation::Init}; }
 
 #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
-class Features;
-
 namespace Implementation {
     CORRADE_UTILITY_EXPORT Features runtimeFeatures(unsigned long caps);
 }
