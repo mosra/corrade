@@ -45,9 +45,9 @@ if(CORRADE_TARGET_EMSCRIPTEN)
     set_property(TARGET ContainersGrowableArrayTest APPEND_STRING PROPERTY LINK_FLAGS " -s ALLOW_MEMORY_GROWTH=1")
 endif()
 corrade_add_test(ContainersGrowableArraySa___FailTest GrowableArraySanitizerFailTest.cpp)
-# Not matching with the -f, as MSVC might use either /f or -f. Source:
-# https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/
-if(CMAKE_CXX_FLAGS MATCHES "fsanitize=address")
+# While Clang and GCC use -fsanitize=whatever, MSVC allows also /fsanitize=,
+# so catch both.
+if(CMAKE_CXX_FLAGS MATCHES "[-/]fsanitize=address")
     set_tests_properties(ContainersGrowableArraySa___FailTest PROPERTIES
         PASS_REGULAR_EXPRESSION "AddressSanitizer: container-overflow")
 endif()
