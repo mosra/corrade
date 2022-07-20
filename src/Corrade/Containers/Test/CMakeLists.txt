@@ -28,6 +28,15 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/Containers/Test")
 
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(CONTAINERS_TEST_DIR ".")
+else()
+    set(CONTAINERS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+
 corrade_add_test(ContainersAnyReferenceTest AnyReferenceTest.cpp)
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
@@ -72,6 +81,12 @@ corrade_add_test(ContainersStridedArrayViewStlTest StridedArrayViewStlTest.cpp)
 corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(ContainersStringStlTest StringStlTest.cpp)
 corrade_add_test(ContainersStringViewTest StringViewTest.cpp LIBRARIES CorradeUtilityTestLib)
+
+corrade_add_test(ContainersStringViewBenchmark StringViewBenchmark.cpp
+    LIBRARIES CorradeUtilityTestLib
+    FILES StringTestFiles/lorem-ipsum.txt)
+target_include_directories(ContainersStringViewBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 corrade_add_test(ContainersTripleTest TripleTest.cpp)
 corrade_add_test(ContainersTripleStlTest TripleStlTest.cpp)
 
