@@ -169,16 +169,18 @@ struct StringViewTest: TestSuite::Tester {
     void trimmedNullView();
 
     /* Tests also contains() */
-    void find();
-    void findMultipleOccurences();
-    void findWholeString();
+    void findString();
+    void findStringMultipleOccurences();
+    void findStringWhole();
+    void findCharacter();
     void findEmpty();
     void findFlags();
     void findOr();
 
-    void findLast();
-    void findLastMultipleOccurences();
-    void findLastWholeString();
+    void findLastString();
+    void findLastStringMultipleOccurences();
+    void findLastStringWhole();
+    void findLastCharacter();
     void findLastEmpty();
     void findLastFlags();
     void findLastOr();
@@ -275,16 +277,18 @@ StringViewTest::StringViewTest() {
               &StringViewTest::trimmedFlags,
               &StringViewTest::trimmedNullView,
 
-              &StringViewTest::find,
-              &StringViewTest::findMultipleOccurences,
-              &StringViewTest::findWholeString,
+              &StringViewTest::findString,
+              &StringViewTest::findStringMultipleOccurences,
+              &StringViewTest::findStringWhole,
+              &StringViewTest::findCharacter,
               &StringViewTest::findEmpty,
               &StringViewTest::findFlags,
               &StringViewTest::findOr,
 
-              &StringViewTest::findLast,
-              &StringViewTest::findLastMultipleOccurences,
-              &StringViewTest::findLastWholeString,
+              &StringViewTest::findLastString,
+              &StringViewTest::findLastStringMultipleOccurences,
+              &StringViewTest::findLastStringWhole,
+              &StringViewTest::findLastCharacter,
               &StringViewTest::findLastEmpty,
               &StringViewTest::findLastFlags,
               &StringViewTest::findLastOr,
@@ -1484,7 +1488,7 @@ void StringViewTest::trimmedNullView() {
     CORRADE_VERIFY(!StringView{nullptr}.trimmed().data());
 }
 
-void StringViewTest::find() {
+void StringViewTest::findString() {
     StringView a = "hello cursed\0world!"_s;
 
     /* Right at the start */
@@ -1542,9 +1546,56 @@ void StringViewTest::find() {
         StringView found = a.find("world!\0"_s);
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findStringMultipleOccurences() {
+    StringView a = "so, hello hell hello! hello"_s;
+
+    /* Multiple occurrences */
+    {
+        CORRADE_VERIFY(a.contains("hello"));
+
+        StringView found = a.find("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
+
+    /* First occurrence almost but not quite complete */
+    } {
+        CORRADE_VERIFY(a.contains("hello!"));
+
+        StringView found = a.find("hello!");
+        CORRADE_COMPARE(found, "hello!");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
+    }
+}
+
+void StringViewTest::findStringWhole() {
+    StringView a = "hell"_s;
+
+    /* Finding a substring that's the whole string should succeed */
+    {
+        CORRADE_VERIFY(a.contains("hell"));
+
+        StringView found = a.find("hell");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* But a larger string should fail */
+    } {
+        CORRADE_VERIFY(!a.contains("hello"));
+
+        StringView found = a.find("hello");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findCharacter() {
+    StringView a = "hello cursed\0world!"_s;
 
     /* Single character at the start */
-    } {
+    {
         CORRADE_VERIFY(a.contains('h'));
 
         StringView found = a.find('h');
@@ -1583,67 +1634,14 @@ void StringViewTest::find() {
         StringView found = a.exceptPrefix(15).find('\0');
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
-    }
-}
-
-void StringViewTest::findMultipleOccurences() {
-    StringView a = "so, hello hell hello! hello"_s;
 
     /* Multiple occurrences */
-    {
-        CORRADE_VERIFY(a.contains("hello"));
-
-        StringView found = a.find("hello");
-        CORRADE_COMPARE(found, "hello");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
-
-    /* First occurrence almost but not quite complete */
-    } {
-        CORRADE_VERIFY(a.contains("hello!"));
-
-        StringView found = a.find("hello!");
-        CORRADE_COMPARE(found, "hello!");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
-
-    /* Multiple character occurrences */
     } {
         CORRADE_VERIFY(a.contains('o'));
 
         StringView found = a.find('o');
         CORRADE_COMPARE(found, "o");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 1);
-    }
-}
-
-void StringViewTest::findWholeString() {
-    StringView a = "hell"_s;
-
-    /* Finding a substring that's the whole string should succeed */
-    {
-        CORRADE_VERIFY(a.contains("hell"));
-
-        StringView found = a.find("hell");
-        CORRADE_COMPARE(found, "hell");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
-
-    /* But a larger string should fail */
-    } {
-        CORRADE_VERIFY(!a.contains("hello"));
-
-        StringView found = a.find("hello");
-        CORRADE_VERIFY(!found.data());
-        CORRADE_VERIFY(found.isEmpty());
-    }
-
-    StringView b = "h"_s;
-
-    /* Finding a single character that's the whole string should succeed too */
-    {
-        CORRADE_VERIFY(b.contains('h'));
-
-        StringView found = b.find('h');
-        CORRADE_COMPARE(found, "h");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data());
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
     }
 }
 
@@ -1802,9 +1800,9 @@ void StringViewTest::findOr() {
     }
 }
 
-void StringViewTest::findLast() {
-    /* Mostly similar to find(), except that it doesn't check contains() (which
-       is internally the same algorithm as find()) */
+void StringViewTest::findLastString() {
+    /* Mostly similar to findString(), except that it doesn't check contains()
+       (which is internally the same algorithm as find()) */
 
     StringView a = "hello cursed\0world!"_s;
 
@@ -1849,9 +1847,57 @@ void StringViewTest::findLast() {
         StringView found = a.findLast("world!\0"_s);
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findLastStringMultipleOccurences() {
+    /* Mostly similar to findStringMultipleOccurences(), except that it doesn't
+       check contains() (which is internally the same algorithm as find()) */
+
+    StringView a = "so, hello hell hello! hello hell"_s;
+
+    /* Multiple occurrences */
+    {
+        StringView found = a.findLast("hello");
+        CORRADE_COMPARE(found, "hello");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 22);
+
+    /* Last occurrence almost but not quite complete */
+    } {
+        StringView found = a.findLast("hello!");
+        CORRADE_COMPARE(found, "hello!");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
+    }
+}
+
+void StringViewTest::findLastStringWhole() {
+    /* Mostly similar to findStringWhole(), except that it doesn't check
+       contains() (which is internally the same algorithm as find()) */
+
+    StringView a = "hell"_s;
+
+    /* Finding a substring that's the whole string should succeed */
+    {
+        StringView found = a.findLast("hell");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* But a larger string should fail */
+    } {
+        StringView found = a.findLast("hello");
+        CORRADE_VERIFY(!found.data());
+        CORRADE_VERIFY(found.isEmpty());
+    }
+}
+
+void StringViewTest::findLastCharacter() {
+    /* Mostly similar to findCharacter(), except that it doesn't check
+       contains() (which is internally the same algorithm as find()) */
+
+    StringView a = "hello cursed\0world!"_s;
 
     /* Single character at the end */
-    } {
+    {
         StringView found = a.findLast('!');
         CORRADE_COMPARE(found, "!");
         CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 18);
@@ -1880,61 +1926,12 @@ void StringViewTest::findLast() {
         StringView found = a.exceptPrefix(15).findLast('\0');
         CORRADE_VERIFY(!found.data());
         CORRADE_VERIFY(found.isEmpty());
-    }
-}
-
-void StringViewTest::findLastMultipleOccurences() {
-    /* Mostly similar to findMultipleOccurences(), except that it doesn't check
-       contains() (which is internally the same algorithm as find()) */
-
-    StringView a = "so, hello hell hello! hello hell"_s;
-
-    /* Multiple occurrences */
-    {
-        StringView found = a.findLast("hello");
-        CORRADE_COMPARE(found, "hello");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 22);
-
-    /* Last occurrence almost but not quite complete */
-    } {
-        StringView found = a.findLast("hello!");
-        CORRADE_COMPARE(found, "hello!");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 15);
 
     /* Multiple character occurrences */
     } {
         StringView found = a.findLast('o');
         CORRADE_COMPARE(found, "o");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 26);
-    }
-}
-
-void StringViewTest::findLastWholeString() {
-    /* Mostly similar to findWholeString(), except that it doesn't check
-       contains() (which is internally the same algorithm as find()) */
-
-    StringView a = "hell"_s;
-
-    /* Finding a substring that's the whole string should succeed */
-    {
-        StringView found = a.findLast("hell");
-        CORRADE_COMPARE(found, "hell");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
-
-    /* But a larger string should fail */
-    } {
-        StringView found = a.findLast("hello");
-        CORRADE_VERIFY(!found.data());
-        CORRADE_VERIFY(found.isEmpty());
-    }
-
-    StringView b = "h"_s;
-
-    /* Finding a single character that's the whole string should succeed too */
-    {
-        StringView found = b.findLast('h');
-        CORRADE_COMPARE(found, "h");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), b.data());
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 14);
     }
 }
 
