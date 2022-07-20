@@ -287,6 +287,19 @@ actual arguments:
 
 @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-call
 
+<b></b>
+
+@m_class{m-block m-info }
+
+@par Instruction enabling macros
+    An important difference with the @ref CORRADE_ENABLE_SSE2 "CORRADE_ENABLE_*"
+    macros is that they now have to go directly next to the lambda as GCC
+    [currently doesn't propagate the attributes](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80439)
+    from the wrapper function to the nested lambda. The above AVX variant would
+    look like this with relevant macros added:
+@par
+    @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-target-attributes
+
 @subsection Cpu-usage-automatic-runtime-dispatch-extra Automatic runtime dispach with extra instruction sets
 
 If the variants are tagged with extra instruction sets instead of just the

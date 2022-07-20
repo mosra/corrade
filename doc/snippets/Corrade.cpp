@@ -102,6 +102,17 @@ TransformT transformImplementation(Cpu::Avx2T) {
 CORRADE_CPU_DISPATCHER_BASE(transformImplementation)
 /* [Cpu-usage-automatic-runtime-dispatch-declare] */
 
+namespace Baz {
+TransformT transformImplementation(Cpu::Avx2T);
+/* [Cpu-usage-automatic-runtime-dispatch-target-attributes] */
+#ifdef CORRADE_ENABLE_AVX2
+TransformT transformImplementation(Cpu::Avx2T) {
+    return [](Containers::ArrayView<float> data) CORRADE_ENABLE_AVX2 { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
+}
+#endif
+/* [Cpu-usage-automatic-runtime-dispatch-target-attributes] */
+}
+
 using LookupT = int(*)(int);
 LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar));
 LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2));
