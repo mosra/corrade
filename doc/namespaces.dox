@@ -85,7 +85,7 @@ Corrade type            | STL equivalent
 @ref Array with custom deleters | @ref std::unique_ptr "std::unique_ptr<T[]>" (no size info)
 @ref Array with @ref Utility::allocateAligned() "overaligned memory" | @ref std::valarray
 @ref ArrayView          | @ref std::span @m_class{m-label m-flat m-warning} **C++20**
-@ref BasicBitArrayView "BitArrayView", \n @ref BasicBitArrayView "MutableArrayView" | *no equivalent*
+@ref BasicBitArrayView "BitArrayView", \n @ref BasicBitArrayView "MutableBitArrayView" | *no equivalent*
 @ref EnumSet, \n @ref BigEnumSet | @ref std::bitset (no strong typing)
 @ref LinkedList         | *no equivalent*
 @m_class{m-label m-flat m-danger} **not planned** | @ref std::list, \n @ref std::forward_list
