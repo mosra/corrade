@@ -252,21 +252,29 @@
    https://github.com/kimwalisch/libpopcnt assumes POPCNT is on x86 MSVC
    always, and LZCNT has encoding compatible with BSR so if not available it'll
    not crash but produce wrong results, sometimes. Enabling them always feels a
-   bit too much, so restricting that only to AVX+, since one is in SSE4
-   intrinsic headers and the other in AVX headers. */
-#elif defined(CORRADE_TARGET_MSVC) && defined(__AVX__)
+   bit too much, so instead going with what clang-cl uses. There /arch:AVX
+   matches -march=sandybridge:
+    https://github.com/llvm/llvm-project/blob/6542cb55a3eb115b1c3592514590a19987ffc498/clang/lib/Driver/ToolChains/Arch/X86.cpp#L46-L58
+   and `echo | clang -march=sandybridge -dM -E -` lists only POPCNT, while
+   /arch:AVX2 matches -march=haswell, which lists also LZCNT, BMI and BMI2. */
+#elif defined(CORRADE_TARGET_MSVC)
+/* For extra robustness on clang-cl check the macros explicitly -- as with
+   other AVX+ intrinsics, these are only included if the corresponding macro is
+   defined as well. Failing to do so would mean the
+   CORRADE_ENABLE_AVX_{POPCNT,LZCNT,BMI1} macros are defined always,
+   incorrectly implying presence of these intrinsics. */
+#ifdef __AVX__
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__POPCNT__)
 #define CORRADE_TARGET_POPCNT
-/* As with other AVX+ intrinsics on clang-cl, these are only included if the
-   corresponding macro is defined as well, so check for __LZCNT__ / __BMI__
-   there. Otherwise this would mean the CORRADE_ENABLE_{LZCNT,BMI1} macro is
-   defined always, which would incorrectly imply presence of these intrinsics.
-   Chance is that __LZCNT__ / __BMI__ is possibly implied with /arch:AVX or
-   some such, but I don't know for sure, so this is more robust. */
+#endif
+#endif
+#ifdef __AVX2__
 #if !defined(CORRADE_TARGET_CLANG_CL) || defined(__LZCNT__)
 #define CORRADE_TARGET_LZCNT
 #endif
 #if !defined(CORRADE_TARGET_CLANG_CL) || defined(__BMI__)
 #define CORRADE_TARGET_BMI1
+#endif
 #endif
 #endif
 
@@ -285,12 +293,13 @@
 #define CORRADE_TARGET_AVX_FMA
 #endif
 #elif defined(CORRADE_TARGET_MSVC) && defined(__AVX2__)
-/* As with other AVX+ intrinsics on clang-cl, these are only included if the
-   corresponding macro is defined as well, so check for __F16C__ and __FMA__
-   there. Otherwise this would mean the CORRADE_ENABLE_AVX_{16C,FMA} macros are
-   defined always, which would incorrectly imply presence of these intrinsics.
-   Chance is that __F16C__ / __FMA__ is possibly implied with /arch:AVX2, but I
-   don't know  for sure, so this is more robust. */
+/* On clang-cl /arch:AVX2 matches -march=haswell:
+    https://github.com/llvm/llvm-project/blob/6542cb55a3eb115b1c3592514590a19987ffc498/clang/lib/Driver/ToolChains/Arch/X86.cpp#L46-L58
+   And `echo | clang -march=haswell -dM -E -` lists both F16C and FMA. However,
+   for robustness, check the macros explicitly -- as with other AVX+ intrinsics
+   on clang-cl, these are only included if the corresponding macro is defined
+   as well. Failing to do so would mean the CORRADE_ENABLE_AVX_{16C,FMA} macros
+   are defined always, incorrectly implying presence of these intrinsics. */
 #if !defined(CORRADE_TARGET_CLANG_CL) || defined(__F16C__)
 #define CORRADE_TARGET_AVX_F16C
 #endif
