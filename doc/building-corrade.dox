@@ -641,11 +641,21 @@ compatibility if `CORRADE_BUILD_DEPRECATED` isn't disabled.
 
 @subsection building-corrade-tests Building and running tests
 
-If you want to build also the tests (which are not built by default), enable
-`CORRADE_BUILD_TESTS` in CMake. The tests use Corrade's own
-@ref Corrade::TestSuite "TestSuite" framework and can be run either manually
-(the binaries are located in `Test/` subdirectories in the build directory) or
-using
+Building of tests is controlled by the following options:
+
+-   `CORRADE_BUILD_TESTS` --- Builds unit tests. Disabled by default.
+-   `CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH` --- Force unit tests to be
+    built with function-pointer-based dispatch for CPU-dependent functionality,
+    independently of the `CORRADE_BUILD_CPU_RUNTIME_DISPATCH` and
+    `CORRADE_CPU_USE_IFUNC` options. This makes it possible for the tests to
+    verify all variants instead of just one, and is enabled by default. The
+    overhead from function pointers may however be significant on certain
+    platforms, skewing benchmark results. Disable it to make the tests use the
+    same dispatch method as the rest of the library.
+
+The tests use Corrade's own @relativeref{Corrade,TestSuite} framework and can
+be run either manually (the binaries are located in `Test/` subdirectories in
+the build directory) or using
 
 @code{.sh}
 ctest --output-on-failure

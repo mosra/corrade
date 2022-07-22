@@ -256,6 +256,11 @@ cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime 
 # negative perf consequences, enable it by default only on platforms that have
 # IFUNC, and thus can avoid the function pointer indirection.
 option(CORRADE_BUILD_CPU_RUNTIME_DISPATCH "Build with runtime dispatch for CPU-dependent functionality" ${_CORRADE_CPU_CAN_USE_IFUNC})
+# Enabled by default and independent of CORRADE_BUILD_CPU_RUNTIME_DISPATCH as
+# correctness is important. It can however negatively affect performance
+# compared to IFUNC or compile-time dispatch, so make it possible to disable
+# this for benchmarks.
+cmake_dependent_option(CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH "Force pointer-based dispatch for unit tests to verify all variants of CPU-dependent functionality" ON "CORRADE_BUILD_TESTS" OFF)
 
 # Backwards compatibility for unprefixed CMake options. If the user isn't
 # explicitly using prefixed options in the first run already, accept the
