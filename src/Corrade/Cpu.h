@@ -36,6 +36,17 @@
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
+/* Because can't use inline assembly when targeting 64bit on MSVC, and because
+   <intrin.h> and <immintrin.h> is just too damn heavy to be included in a
+   header. Declarations copied verbatim. Clang-cl doesn't like this (undefined
+   reference to __cpuidex), so using the GCC/Clang codepath on it instead. */
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && defined(CORRADE_TARGET_X86)
+extern "C" {
+    void __cpuidex(int[4], int, int);
+    unsigned __int64 __cdecl _xgetbv(unsigned int);
+}
+#endif
+
 namespace Corrade {
 
 /**
@@ -1423,8 +1434,12 @@ class Features {
         template<class> friend constexpr Features features();
         friend constexpr Features compiledFeatures();
         #if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && defined(CORRADE_TARGET_APPLE))
-        /* MSVC demands the export macro to be here as well */
-        friend CORRADE_UTILITY_EXPORT Features runtimeFeatures();
+        friend
+        #ifdef CORRADE_TARGET_ARM
+        /* MSVC demands the export macro to be here as well. Inlined on x86. */
+        CORRADE_UTILITY_EXPORT
+        #endif
+        Features runtimeFeatures();
         #endif
         #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
         friend Features Implementation::runtimeFeatures(unsigned long);
@@ -1690,7 +1705,10 @@ default-constructed) @ref Features.
 @see @ref DefaultBase, @ref DefaultExtra, @ref Default
 */
 #if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && ((defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(CORRADE_TARGET_APPLE))) || defined(DOXYGEN_GENERATING_OUTPUT)
-CORRADE_UTILITY_EXPORT Features runtimeFeatures();
+#ifdef CORRADE_TARGET_ARM
+CORRADE_UTILITY_EXPORT /* Inlined on x86 at the very end of the header */
+#endif
+Features runtimeFeatures();
 #else
 constexpr Features runtimeFeatures() { return compiledFeatures(); }
 #endif
@@ -2976,6 +2994,121 @@ preprocessor behavior would make this extremely tricky to implement.
 #define CORRADE_ENABLE(...) _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_ENABLE8, _CORRADE_ENABLE7, _CORRADE_ENABLE6, _CORRADE_ENABLE5, _CORRADE_ENABLE4, _CORRADE_ENABLE3, _CORRADE_ENABLE2, _CORRADE_ENABLE1, )(__VA_ARGS__)
 #else
 #define CORRADE_ENABLE(...)
+#endif
+
+/* x86 CPUID implementation on GCC/Clang/MSVC. Has to be inlined in the header
+   because otherwise in the IFUNC scenario it may result in a cross-SO call
+   that's unsupported on Clang and older GCC, causing a crash in the dynamic
+   loader during early startup because it calls into a place that's not there
+   yet.
+
+   Because casually including <immintrin.h> leads to 37+ kLOC (!!!), I go an
+   extra way and use inline assembly instead. Which, compared to using the
+   intrinsics --- funnily enough --- reduces the amount of cursing and lengthy
+   comments explaining compiler bugs and differences to an absolute minimum.
+   If any of the following misbehaves, please check Git history for the
+   original implementation. */
+#if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
+namespace Implementation {
+    inline void cpuid(int data[4], int leaf, int count) {
+        /* What's in GCC's / Clang's cpuid.h. Clang-cl as well, as it doesn't
+           seem to know the __cpuidex() intrinsics. */
+        #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
+        #ifdef CORRADE_TARGET_32BIT
+        asm("cpuid":       \
+            "=a"(data[0]), "=b"(data[1]), "=c"(data[2]), "=d"(data[3]): \
+            "0"(leaf), "2"(count));
+        #else
+        /* Clang says "x86-64 uses %rbx as the base register", GCC says "%rbx
+           may be the PIC register", so probably important to preserve it or
+           some such? ¯\_(ツ)_/¯ */
+        asm("xchgq %%rbx,%q1\n" \
+            "cpuid\n" \
+            "xchgq %%rbx,%q1": \
+            "=a"(data[0]), "=b"(data[1]), "=c"(data[2]), "=d"(data[3]): \
+            "0"(leaf), "2"(count));
+        #endif
+
+        /* Declared at the top of the file */
+        #elif defined(CORRADE_TARGET_MSVC)
+        __cpuidex(data, leaf, count);
+        #else
+        #error
+        #endif
+    }
+}
+
+inline Features runtimeFeatures() {
+    union {
+        struct {
+            unsigned int ax, bx, cx, dx;
+        } e;
+        int data[4];
+    } cpuid{};
+
+    Implementation::cpuid(cpuid.data, 1, 0);
+
+    /* https://en.wikipedia.org/wiki/CPUID#EAX=1:_Processor_Info_and_Feature_Bits */
+    unsigned int out = 0;
+    if(cpuid.e.dx & (1 << 26)) out |= TypeTraits<Sse2T>::Index;
+    if(cpuid.e.cx & (1 <<  0)) out |= TypeTraits<Sse3T>::Index;
+    if(cpuid.e.cx & (1 <<  9)) out |= TypeTraits<Ssse3T>::Index;
+    if(cpuid.e.cx & (1 << 19)) out |= TypeTraits<Sse41T>::Index;
+    if(cpuid.e.cx & (1 << 20)) out |= TypeTraits<Sse42T>::Index;
+
+    /* https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits,
+       bit 5 says "ABM (lzcnt and popcnt)", but
+       https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation)
+       says that while LZCNT is advertised in the ABM CPUID bit, POPCNT is a
+       separate CPUID flag. Get POPCNT first, ABM later. */
+    if(cpuid.e.cx & (1 << 23)) out |= TypeTraits<PopcntT>::Index;
+
+    /* AVX needs OS support checked, as the OS needs to be capable of saving
+       and restoring the expanded registers when switching contexts:
+       https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Operating_system_support */
+    if((cpuid.e.cx & (1 << 27)) && /* XSAVE/XRESTORE CPU support */
+       (cpuid.e.cx & (1 << 28)))   /* AVX CPU support */
+    {
+        /* XGETBV indicates that the registers will be properly saved and
+           restored by the OS: https://stackoverflow.com/a/22521619. */
+
+        /* https://github.com/vectorclass/version2/blob/ff7450acfad9d3a7c6825d92cfb782a42ccfa71f/instrset_detect.cpp#L30-L32
+           Clang-cl as well, as it doesn't seem to know the MSVC intrinsics. */
+        #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
+        unsigned int a, d;
+        __asm("xgetbv": "=a"(a), "=d"(d): "c"(0): );
+        const unsigned long long xgetbv = a|(static_cast<unsigned long long>(d) << 32);
+
+        /* Declared at the top of the file */
+        #elif defined(CORRADE_TARGET_MSVC)
+        const unsigned long long xgetbv = _xgetbv(0);
+        #else
+        #error
+        #endif
+
+        if((xgetbv & 0x06) == 0x6)
+            out |= TypeTraits<AvxT>::Index;
+    }
+
+    /* If AVX is not supported, we don't check any following flags either */
+    if(out & TypeTraits<AvxT>::Index) {
+        if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
+        if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
+
+        /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
+        Implementation::cpuid(cpuid.data, 7, 0);
+        if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
+        if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
+        if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
+    }
+
+    /* And now the LZCNT bit, finally
+       https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits */
+    Implementation::cpuid(cpuid.data, 0x80000001, 0);
+    if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
+
+    return Features{out};
+}
 #endif
 
 }

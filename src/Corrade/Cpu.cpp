@@ -29,30 +29,6 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 
-#ifdef CORRADE_TARGET_X86
-#include <cstdint>
-#ifdef CORRADE_TARGET_MSVC
-#include <intrin.h>
-#include <immintrin.h>
-#elif defined(CORRADE_TARGET_GCC)
-#include <cpuid.h>
-/* _xgetbv() defined since GCC 8.1, in <xsaveintrin.h>, but I can't include
-   that one alone, have to include <immintrin.h> instead:
-    https://github.com/gcc-mirror/gcc/commit/b9bdd60b8792e2d3173ecfacd5c25aac894a94e5
-   On Clang it got first defined in 3.5:
-    https://github.com/llvm/llvm-project/commit/854f7d34ec3d7c0559ffde536cfa88fad5419bf0
-   but that's (look again) in Intrin.h (yes, uppercase), which got fixed to
-   be intrin.h in 3.9, however at least on Xcode 9.4 intrin.h has
-   `#include_next <intrin.h>` and there *just isn't* any other intrin.h so
-   it fails; then, looking at the commit history, the function changed
-   locations a few times, mostly as an attempt to fix compilation of V8 (?!?!)
-   and ... I have no patience for this anymore, so for Clang I'm using the same
-   inline assembly as for GCC 8.0 and earlier. */
-#if defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 801
-#include <immintrin.h>
-#endif
-#endif
-
 /* ARM on Linux and Android with API level 18+ */
 #elif defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
 #include <asm/hwcap.h>
@@ -150,121 +126,10 @@ int appleSysctlByName(const char* name) {
 }
 #endif
 
-#if (defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))) || (defined(CORRADE_TARGET_ARM) && ((defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(CORRADE_TARGET_APPLE)))
-#if defined(CORRADE_TARGET_X86) && defined(CORRADE_TARGET_GCC)
-/* GCC 10 complains otherwise, however 4.8 doesn't. Doing it via a function
-   attribute instead of passing -mxsave as detecting target architecture in
-   CMake is annoying at best. */
-__attribute__((__target__("xsave")))
-#endif
+#if defined(CORRADE_TARGET_ARM) && ((defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)) || defined(CORRADE_TARGET_APPLE))
 Features runtimeFeatures() {
-    /* Use cpuid on x86 and GCC/Clang/MSVC */
-    #if defined(CORRADE_TARGET_X86) && (defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_GCC))
-    union {
-        struct {
-            std::uint32_t ax, bx, cx, dx;
-        } e;
-        #ifdef CORRADE_TARGET_MSVC
-        /* MSVC's __cpuid() macro accepts an array instead of four pointers and
-           wants an int, not uint, for some reason */
-        std::int32_t data[4];
-        #endif
-    } cpuid{};
-
-    /* https://en.wikipedia.org/wiki/CPUID#EAX=1:_Processor_Info_and_Feature_Bits */
-    #ifdef CORRADE_TARGET_MSVC
-    __cpuid(cpuid.data, 1);
-    #elif defined(CORRADE_TARGET_GCC)
-    __get_cpuid(1, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
-    #endif
-
-    unsigned int out = 0;
-    if(cpuid.e.dx & (1 << 26)) out |= TypeTraits<Sse2T>::Index;
-    if(cpuid.e.cx & (1 <<  0)) out |= TypeTraits<Sse3T>::Index;
-    if(cpuid.e.cx & (1 <<  9)) out |= TypeTraits<Ssse3T>::Index;
-    if(cpuid.e.cx & (1 << 19)) out |= TypeTraits<Sse41T>::Index;
-    if(cpuid.e.cx & (1 << 20)) out |= TypeTraits<Sse42T>::Index;
-
-    /* https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits,
-       bit 5 says "ABM (lzcnt and popcnt)", but
-       https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation)
-       says that while LZCNT is advertised in the ABM CPUID bit, POPCNT is a
-       separate CPUID flag. Get POPCNT first, ABM later. */
-    if(cpuid.e.cx & (1 << 23)) out |= TypeTraits<PopcntT>::Index;
-
-    /* AVX needs OS support checked, as the OS needs to be capable of saving
-       and restoring the expanded registers when switching contexts:
-       https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Operating_system_support */
-    if((cpuid.e.cx & (1 << 27)) && /* XSAVE/XRESTORE CPU support */
-       (cpuid.e.cx & (1 << 28)))   /* AVX CPU support */
-    {
-        /* XGETBV indicates that the registers will be properly saved and
-           restored by the OS: https://stackoverflow.com/a/22521619. The
-           _xgetbv() function is available on MSVC and since GCC 8.1 and
-           probably on Clang also but I don't care -- see the comment at the
-           #include above. */
-        #if defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 801)
-        const bool available = (_xgetbv(0) & 0x6) == 0x6;
-        #else
-        /* https://github.com/vectorclass/version2/blob/ff7450acfad9d3a7c6825d92cfb782a42ccfa71f/instrset_detect.cpp#L30-L32 */
-        std::uint32_t a, d;
-        __asm("xgetbv" : "=a"(a),"=d"(d) : "c"(0) : );
-        const bool available = ((a|(std::uint64_t(d) << 32)) & 0x6) == 0x6;
-        #endif
-
-        if(available) out |= TypeTraits<AvxT>::Index;
-    }
-
-    /* If AVX is not supported, we don't check any following flags either */
-    if(out & TypeTraits<AvxT>::Index) {
-        if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
-        if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
-
-        /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
-        #ifdef CORRADE_TARGET_MSVC
-        __cpuidex(cpuid.data, 7, 0);
-        /* __get_cpuid_count() is only since GCC 7.1 and Clang 5.0:
-            https://github.com/gcc-mirror/gcc/commit/2488ebe5ef1788616c2fbc61e05af09f0749ebbe
-            https://github.com/llvm/llvm-project/commit/f6e8408a116405d0cc25b506e8c5b60ab4ab7bcd
-           Furthermore, Clang 5.0 is 9.3 on Apple, 9.2 has only Clang 4:
-            https://en.wikipedia.org/wiki/Xcode#Toolchain_versions */
-        #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 701) || (defined(CORRADE_TARGET_CLANG) && ((!defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 5) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__*100 + __clang_minor__ >= 903)))
-        __get_cpuid_count(7, 0, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
-        /* Looking at the above commits, on older GCC, __get_cpuid(7) seems to
-           do what __get_cpuid_count(7, 0) does on new GCC, however that's only
-           since 6.3:
-            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77756
-           Older Clang doesn't do any of that, and thus to avoid a
-           combinatorial explosion of test scenarios, we'll just directly use
-           the __cpuid assembly on both, which seems to be there since forever.
-           __get_cpuid[_count]() only does a bunch of bounds checking on top of
-           that anyway and if we didn't blow up on the assert above I HOPE we
-           should be fine to check for extended features level zero. For higher
-           levels (to check very recent AVX512 features) probably not but I
-           assume those would need very recent compilers anyway so when that
-           happens we can just pretend those don't exist on GCC 7.0 and
-           older. */
-        #else
-        __cpuid_count(7, 0, cpuid.e.ax, cpuid.e.bx, cpuid.e.cx, cpuid.e.dx);
-        #endif
-        if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
-        if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
-        if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
-    }
-
-    /* And now the LZCNT bit, finally
-       https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits */
-    #ifdef CORRADE_TARGET_MSVC
-    __cpuid(cpuid.data, 0x80000001);
-    #elif defined(CORRADE_TARGET_GCC)
-    __get_cpuid(0x80000001, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
-    #endif
-    if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
-
-    return Features{out};
-
     /* Use getauxval() on ARM on Linux and Android */
-    #elif defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+    #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
     /* People say getauxval() is "extremely slow":
         https://lemire.me/blog/2020/07/17/the-cost-of-runtime-dispatch/#comment-538459
        Like, can anything be worse than reading and parsing the text from
@@ -308,8 +173,9 @@ Features runtimeFeatures() {
 
     return Features{out};
 
-    /* No other implementation at the moment. The function should not be even
-       defined here in that case -- it's inlined in the header instead. */
+    /* No other (deinlined) implementation at the moment. The function should
+       not be even defined here in that case -- it's inlined in the header
+       instead, including the x86 implementation. */
     #else
     #error
     #endif
