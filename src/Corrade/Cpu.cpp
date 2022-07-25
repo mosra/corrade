@@ -28,7 +28,6 @@
 
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugAssert.h"
 
 #ifdef CORRADE_TARGET_X86
 #include <cstdint>
@@ -176,7 +175,7 @@ Features runtimeFeatures() {
     #ifdef CORRADE_TARGET_MSVC
     __cpuid(cpuid.data, 1);
     #elif defined(CORRADE_TARGET_GCC)
-    CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid(1, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
+    __get_cpuid(1, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
     #endif
 
     unsigned int out = 0;
@@ -230,7 +229,7 @@ Features runtimeFeatures() {
            Furthermore, Clang 5.0 is 9.3 on Apple, 9.2 has only Clang 4:
             https://en.wikipedia.org/wiki/Xcode#Toolchain_versions */
         #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 701) || (defined(CORRADE_TARGET_CLANG) && ((!defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 5) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__*100 + __clang_minor__ >= 903)))
-        CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid_count(7, 0, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
+        __get_cpuid_count(7, 0, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
         /* Looking at the above commits, on older GCC, __get_cpuid(7) seems to
            do what __get_cpuid_count(7, 0) does on new GCC, however that's only
            since 6.3:
@@ -258,7 +257,7 @@ Features runtimeFeatures() {
     #ifdef CORRADE_TARGET_MSVC
     __cpuid(cpuid.data, 0x80000001);
     #elif defined(CORRADE_TARGET_GCC)
-    CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(__get_cpuid(0x80000001, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx));
+    __get_cpuid(0x80000001, &cpuid.e.ax, &cpuid.e.bx, &cpuid.e.cx, &cpuid.e.dx);
     #endif
     if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
 
