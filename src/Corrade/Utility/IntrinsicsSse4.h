@@ -34,7 +34,10 @@ Equivalent to @cpp #include <smmintrin.h> @ce and
 -   GCC 4.8, where it contains an additional workaround to make the
     instructions available with just the @ref CORRADE_ENABLE_SSE41 and
     @ref CORRADE_ENABLE_SSE42 function attributes instead of having to specify
-    `-msse4.1`, `-msse4.2` or `-mpopcnt` for the whole compilation unit.
+    `-msse4.1` or `-msse4.2` for the whole compilation unit. This however can't
+    reliably be done for `-mpopcnt` because then it could not be freely
+    combined with other instruction sets, only used alone. You have to enable
+    these instructions globally in order to use them on GCC 4.8.
 -   Clang < 7, where `__POPCNT__` has to be explicitly defined in order to
     access the POPCNT instruction
 
@@ -89,19 +92,4 @@ together, unlike with other SSE variants.
 #endif
 #if defined(CORRADE_TARGET_CLANG) && __clang_major__ < 7
 #pragma pop_macro("__POPCNT__")
-#endif
-
-/* Unlike with SSE4.1 / SSE4.2 there's no weird interaction with the popcnt
-   intrinsics, so it could be even in the above block. But for extra safety and
-   consistency with AVX it's separate. */
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
-#pragma GCC push_options
-#pragma GCC target("popcnt")
-#pragma push_macro("__POPCNT__")
-#ifndef __POPCNT__
-#define __POPCNT__
-#endif
-#include <popcntintrin.h>
-#pragma pop_macro("__POPCNT__")
-#pragma GCC pop_options
 #endif

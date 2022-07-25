@@ -32,8 +32,11 @@ Equivalent to @cpp #include <immintrin.h> @ce on most compilers except for GCC
 4.8, where it contains an additional workaround to make the instructions
 available with just the @ref CORRADE_ENABLE_AVX, @ref CORRADE_ENABLE_AVX_F16C,
 @ref CORRADE_ENABLE_AVX_FMA or @ref CORRADE_ENABLE_AVX2 function attributes
-instead of having to specify `-mlzcnt`, `-mbmi`, `-mavx`, `-mf16c`, `-mfma` or
-`-mavx2` for the whole compilation unit.
+instead of having to specify `-mavx` or `-mavx2` for the whole compilation
+unit. This however can't reliably be done for `-mlzcnt`, `-mbmi`, `-mf16c` or
+`-mfma` because then it could not be freely combined with other instruction
+sets, only used alone. You have to enable these instructions globally in order
+to use them on GCC 4.8.
 
 As AVX-512 is supported only since GCC 4.9, which doesn't need this workaround,
 it's not handled here.
@@ -88,59 +91,5 @@ it's not handled here.
 #endif
 #include <avx2intrin.h>
 #pragma pop_macro("__AVX2__")
-#pragma GCC pop_options
-#endif
-
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
-#pragma GCC push_options
-#pragma GCC target("f16c")
-#pragma push_macro("__F16C__")
-#ifndef __F16C__
-#define __F16C__
-#endif
-#include <f16cintrin.h>
-#pragma pop_macro("__F16C__")
-#pragma GCC pop_options
-#endif
-
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
-#pragma GCC push_options
-#pragma GCC target("fma")
-#pragma push_macro("__FMA__")
-#ifndef __FMA__
-#define __FMA__
-#endif
-#include <fmaintrin.h>
-#pragma pop_macro("__FMA__")
-#pragma GCC pop_options
-#endif
-
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
-#pragma GCC push_options
-#pragma GCC target("lzcnt")
-#pragma GCC target("abm") /* GCC 4.8 needs this, 4.9 not; urecognized on Clang */
-#pragma push_macro("__LZCNT__")
-#pragma push_macro("__ABM__")
-#ifndef __ABM__
-#define __ABM__
-#endif
-#ifndef __LZCNT__
-#define __LZCNT__
-#endif
-#include <lzcntintrin.h>
-#pragma pop_macro("__ABM__")
-#pragma pop_macro("__LZCNT__")
-#pragma GCC pop_options
-#endif
-
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
-#pragma GCC push_options
-#pragma GCC target("bmi")
-#pragma push_macro("__BMI__")
-#ifndef __BMI__
-#define __BMI__
-#endif
-#include <bmiintrin.h>
-#pragma pop_macro("__BMI__")
 #pragma GCC pop_options
 #endif

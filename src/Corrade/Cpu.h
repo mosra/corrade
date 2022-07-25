@@ -2278,7 +2278,9 @@ expands to @cpp __attribute__((__target__("popcnt"))) @ce, allowing use of the
 instructions inside a function annotated with this macro without having to
 specify `-mpopcnt` for the whole compilation unit. On x86 MSVC expands to
 nothing, as the compiler doesn't restrict use of intrinsics in any way. Not
-defined on other compilers or architectures.
+defined on GCC 4.8, as there it's not generally possible to enable it alongside
+other instruction sets without running into linker errors. Not defined on other
+compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_POPCNT is defined (meaning POCNT is
 enabled for the whole compilation unit), this macro is defined as empty on all
@@ -2303,7 +2305,7 @@ may need to specify it together with others. See
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_POPCNT
 #endif
-#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
+#elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 409) || defined(CORRADE_TARGET_CLANG) /* matches clang-cl */
 #define CORRADE_ENABLE_POPCNT __attribute__((__target__("popcnt")))
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_POPCNT "popcnt",
@@ -2325,7 +2327,9 @@ nothing, as the compiler doesn't restrict use of intrinsics in any way. Unlike
 the SSE variants and POPCNT this macro is not defined on
 @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, BMI1, AVX and newer
 intrinsics are provided only if enabled on compiler command line. Not defined
-on other compilers or architectures.
+on GCC 4.8, as there it's not generally possible to enable it alongside
+unrelated instruction sets without running into linker errors. Not defined on
+other compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_LZCNT is defined (meaning LZCNT is
 enabled for the whole compilation unit), this macro is defined as empty on all
@@ -2350,19 +2354,10 @@ may need to specify it together with others. See
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_LZCNT
 #endif
-#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
-/* GCC 4.8 needs also -mabm. This option is not needed since 4.9 and is also
-   unrecognized on Clang. */
-#if defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 409
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 #define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt")))
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_LZCNT "lzcnt",
-#endif
-#else
-#define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt,abm")))
-#ifdef CORRADE_TARGET_GCC
-#define _CORRADE_ENABLE_LZCNT "lzcnt,abm",
-#endif
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __LZCNT__ is
@@ -2385,7 +2380,9 @@ specify `-mbmi` for the whole compilation unit. On x86 MSVC expands to nothing,
 as the compiler doesn't restrict use of intrinsics in any way. Unlike the SSE
 variants and POPCNT this macro is not defined on
 @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there LZCNT, BMI1, AVX and newer
-intrinsics are provided only if enabled on compiler command line.  Not defined on
+intrinsics are provided only if enabled on compiler command line. Not defined
+on GCC 4.8, as there it's not generally possible to enable it alongside
+unrelated instruction sets without running into linker errors. Not defined on
 other compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_BMI1 is defined (meaning BMI1 is
@@ -2411,7 +2408,7 @@ may need to specify it together with others. See
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_BMI1
 #endif
-#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 #define CORRADE_ENABLE_BMI1 __attribute__((__target__("bmi")))
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_BMI1 "bmi",
@@ -2490,7 +2487,9 @@ compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
 restrict use of intrinsics in any way. Unlike the SSE variants this macro is
 not defined on @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer
 intrinsics are provided only if enabled on compiler command line. Not defined
-on other compilers or architectures.
+on GCC 4.8, as there it's not generally possible to enable it alongside other
+instruction sets without running into linker errors. Not defined on other
+compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_AVX_F16C is present (meaning AVX F16C
 is enabled for the whole compilation unit), this macro is defined as empty on
@@ -2516,7 +2515,7 @@ information and usage example.
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_AVX_F16C
 #endif
-#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mf16c option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_F16C __attribute__((__target__("f16c")))
@@ -2544,7 +2543,9 @@ whole compilation unit. On x86 MSVC expands to nothing, as the compiler doesn't
 restrict use of intrinsics in any way. Unlike the SSE variants this macro is
 not defined on @ref CORRADE_TARGET_CLANG_CL "clang-cl", as there AVX and newer
 intrinsics are provided only if enabled on compiler command line. Not defined
-on other compilers or architectures.
+on GCC 4.8, as there it's not generally possible to enable it alongside other
+instruction sets without running into linker errors. Not defined on other
+compilers or architectures.
 
 As a special case, if @ref CORRADE_TARGET_AVX_FMA is present (meaning AVX with
 FMA is enabled for the whole compilation unit), this macro is defined as empty
@@ -2570,7 +2571,7 @@ information and usage example.
 #ifdef CORRADE_TARGET_GCC
 #define _CORRADE_ENABLE_AVX_FMA
 #endif
-#elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
+#elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mfma option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_FMA __attribute__((__target__("fma")))
