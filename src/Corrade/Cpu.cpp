@@ -29,12 +29,11 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 
-/* ARM on Linux and Android with API level 18+ */
-#elif defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
-#include <asm/hwcap.h>
+/* getauxval() for ARM on Linux and Android with API level 18+ */
+#if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
 #include <sys/auxv.h>
 
-/* ARM on macOS / iOS */
+/* sysctlbyname() for ARM on macOS / iOS */
 #elif defined(CORRADE_TARGET_ARM) && defined(CORRADE_TARGET_APPLE)
 #include <sys/sysctl.h>
 #endif
@@ -63,52 +62,6 @@ static_assert(sizeof(Cpu::NeonFma) == 1, "");
 static_assert(sizeof(Cpu::NeonFp16) == 1, "");
 #elif defined(CORRADE_TARGET_WASM)
 static_assert(sizeof(Cpu::Simd128) == 1, "");
-#endif
-
-#if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
-namespace Implementation {
-
-/* As getauxval() can't be called from within an ifunc resolver because there
-   it's too early for an external call, the value of AT_HWCAP is instead passed
-   to it from outside, on glibc 2.13+ and on Android API 30+:
-    https://github.com/bminor/glibc/commit/7520ff8c744a704ca39741c165a2360d63a4f47a
-    https://android.googlesource.com/platform/bionic/+/e949195f6489653ee3771535951ed06973246c3e/libc/include/sys/ifunc.h
-   Which means we need a variant of runtimeFeatures() that is able to operate
-   with a value fed from outside, which is then used inside such resolvers.
-   For simplicity this variant is available always and the public
-   Cpu::runtimeFeatures() just delegates to it. */
-/** @todo If AT_HWCAP2 or other bits are needed, it's passed to ifunc resolvers
-    only since glibc 2.30 (and Android API 30+, which is the same as before):
-    https://github.com/bminor/glibc/commit/2b8a3c86e7606cf1b0a997dad8af2d45ae8989c3 */
-Features runtimeFeatures(const unsigned long caps) {
-    unsigned int out = 0;
-    #ifdef CORRADE_TARGET_32BIT
-    if(caps & HWCAP_NEON) out |= TypeTraits<NeonT>::Index;
-    /* Since FMA is enabled by passing -mfpu=neon-vfpv4, I assume this is the
-       flag that corresponds to it. */
-    if(caps & HWCAP_VFPv4) out |= TypeTraits<NeonFmaT>::Index;
-    #else
-    /* On ARM64 NEON and NEON FMA is implicit. For extra security make use of
-       the CORRADE_TARGET_ defines (which should be always there). */
-    out |=
-        #ifdef CORRADE_TARGET_NEON
-        TypeTraits<NeonT>::Index|
-        #endif
-        #ifdef CORRADE_TARGET_NEON_FMA
-        TypeTraits<NeonFmaT>::Index|
-        #endif
-        0;
-    /* The HWCAP flags are extremely cryptic. The only vague confirmation is in
-       a *commit message* to the kernel hwcaps file, FFS. The HWCAP_FPHP seems
-       to correspond to scalar FP16, so the other should be the vector one?
-       https://github.com/torvalds/linux/blame/master/arch/arm64/include/uapi/asm/hwcap.h
-       This one also isn't present on 32-bit, so I assume it's ARM64-only? */
-    if(caps & HWCAP_ASIMDHP) out |= TypeTraits<NeonFp16T>::Index;
-    #endif
-    return Features{out};
-}
-
-}
 #endif
 
 /* Helper for getting macOS / iOS ARM properties. Yep, it's stringly typed. */

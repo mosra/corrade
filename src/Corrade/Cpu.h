@@ -1308,7 +1308,9 @@ template<class T> constexpr T tag() { return T{Implementation::Init}; }
 
 #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
 namespace Implementation {
-    CORRADE_UTILITY_EXPORT Features runtimeFeatures(unsigned long caps);
+    /* Needed for a friend declaration, implementation is at the very end of
+       the header */
+    Features runtimeFeatures(unsigned long caps);
 }
 #endif
 
@@ -3108,6 +3110,56 @@ inline Features runtimeFeatures() {
     if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
 
     return Features{out};
+}
+#endif
+
+/* ARM implementation on Linux and Android, inlined for the same reason as the
+   x86 variant above -- to make IFUNC work. As getauxval() can't be called from
+   within an ifunc resolver because there it's too early for an external call,
+   the value of AT_HWCAP is instead passed to it from outside, on glibc 2.13+
+   and on Android API 30+:
+    https://github.com/bminor/glibc/commit/7520ff8c744a704ca39741c165a2360d63a4f47a
+    https://android.googlesource.com/platform/bionic/+/e949195f6489653ee3771535951ed06973246c3e/libc/include/sys/ifunc.h
+   Which means we need a variant of runtimeFeatures() that is able to operate
+   with a value fed from outside, which is then used inside such resolvers. A
+   nice consequence of that is that we don't need any other headers.
+
+   The public Cpu::runtimeFeatures() is deinlined, calls getauxval() and passes
+   it into this function. */
+/** @todo If AT_HWCAP2 or other bits are needed, it's passed to ifunc resolvers
+    only since glibc 2.30 (and Android API 30+, which is the same as before):
+    https://github.com/bminor/glibc/commit/2b8a3c86e7606cf1b0a997dad8af2d45ae8989c3 */
+#if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
+namespace Implementation {
+    inline Features runtimeFeatures(const unsigned long caps) {
+        unsigned int out = 0;
+        #ifdef CORRADE_TARGET_32BIT
+        if(caps & (1 << 12) /*HWCAP_NEON*/) out |= TypeTraits<NeonT>::Index;
+        /* Since FMA is enabled by passing -mfpu=neon-vfpv4, I assume this is
+           the flag that corresponds to it. */
+        if(caps & (1 << 16) /*HWCAP_VFPv4*/) out |= TypeTraits<NeonFmaT>::Index;
+        #else
+        /* On ARM64 NEON and NEON FMA is implicit. For extra security make use
+           of the CORRADE_TARGET_ defines (which should be always there). */
+        out |=
+            #ifdef CORRADE_TARGET_NEON
+            TypeTraits<NeonT>::Index|
+            #endif
+            #ifdef CORRADE_TARGET_NEON_FMA
+            TypeTraits<NeonFmaT>::Index|
+            #endif
+            0;
+        /* The HWCAP flags are extremely cryptic. The only vague confirmation
+           is in a *commit message* to the kernel hwcaps file, FFS. The
+           HWCAP_FPHP seems to correspond to scalar FP16, so the other should
+           be the vector one?
+            https://github.com/torvalds/linux/blame/master/arch/arm64/include/uapi/asm/hwcap.h
+           This one also isn't present on 32-bit, so I assume it's
+           ARM64-only? */
+        if(caps & (1 << 10) /*HWCAP_ASIMDHP*/) out |= TypeTraits<NeonFp16T>::Index;
+        #endif
+        return Features{out};
+    }
 }
 #endif
 
