@@ -256,6 +256,10 @@ headers you won't use anyway. In comparison, using the @ref CORRADE_TARGET_SSE2
 etc. macros would only make the variant available if the whole compilation unit
 has a corresponding `-m` or `/arch:` option passed to the compiler.
 
+Finally, the @ref CORRADE_ENABLE() function allows multiple instruction sets to
+be enabled at the same time in a more concise way and consistently on both GCC
+and Clang.
+
 Definitions of the `lookup()` function variants from above would then look like
 below with the target attributes added. The extra instruction sets get
 explicitly enabled as well, in contrast a scalar variant would have no
@@ -1722,6 +1726,14 @@ best viable overload.
 */
 #define CORRADE_CPU_SELECT(tag) tag, Corrade::Cpu::Implementation::priority(tag)
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Called from CORRADE_CPU_DISPATCHER() and _CORRADE_ENABLE_CONCATENATE() to
+   pick a macro implementation based on how many arguments were passed. Source:
+   https://stackoverflow.com/a/11763277 */
+/** @todo move to Utility/Macros.h once it gets useful elsewhere */
+#define _CORRADE_HELPER_PICK(_0, _1, _2, _3, _4, _5, _6, _7, macroName, ...) macroName
+#endif
+
 /**
 @brief Create a function for a runtime dispatch on a base CPU instruction set
 @m_since_latest
@@ -1859,12 +1871,6 @@ sets into account as well use @ref CORRADE_CPU_DISPATCHER() instead.
     decltype(function(CORRADE_CPU_SELECT(Corrade::Cpu::Scalar))) function(Corrade::Cpu::Features features) { \
         return function ## Internal(features, Corrade::Cpu::Implementation::Tags<0>{Corrade::Cpu::Implementation::Init}, __VA_ARGS__); \
     }
-
-/* Called from CORRADE_CPU_DISPATCHER() to pick either _CORRADE_CPU_DISPATCHER0
-   if there are no extra arguments after function or _CORRADE_CPU_DISPATCHERn
-   if there is 1 to 7 extra args (assuming there isn't a need to have more than
-   7). Source: https://stackoverflow.com/a/11763277 */
-#define _CORRADE_CPU_DISPATCHER_PICK(_0, _1, _2, _3, _4, _5, _6, _7, macroName, ...) macroName
 #endif
 
 /**
@@ -1890,14 +1896,14 @@ For a dispatch using just the base instruction set use
 #define CORRADE_CPU_DISPATCHER(function, ...)
 #elif !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_CPU_DISPATCHER(...)                               \
-    _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__)
+    _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__)
 #else
 /* Workaround for MSVC not being able to expand __VA_ARGS__ correctly. Would
    work with /Zc:preprocessor or /experimental:preprocessor, but I'm not
    enabling that globally yet. Source: https://stackoverflow.com/a/5134656 */
 #define _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS(x) x
 #define CORRADE_CPU_DISPATCHER(...)                               \
-    _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_CPU_DISPATCHER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__))
+    _CORRADE_CPU_DISPATCHER_FFS_MSVC_EXPAND_THIS( _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHERn, _CORRADE_CPU_DISPATCHER0, )(__VA_ARGS__))
 #endif
 
 /**
@@ -2044,12 +2050,18 @@ more information and usage example.
     @cpp #include <emmintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Sse2}
+@see @relativeref{Corrade,Cpu::Sse2}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SSE2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE2
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE2
+#endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_SSE2 __attribute__((__target__("sse2")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE2 "sse2",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSE2
 #endif
@@ -2081,14 +2093,20 @@ Superset of @ref CORRADE_ENABLE_SSE2, implied by @ref CORRADE_ENABLE_SSSE3. See
     @cpp #include <pmmintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Sse3}
+@see @relativeref{Corrade,Cpu::Sse3}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE3
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE3
+#endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -msse3 option implies -msse2 on both GCC and Clang, so no need to
    specify those as well (verified with `echo | gcc -dM -E - -msse3`) */
 #define CORRADE_ENABLE_SSE3 __attribute__((__target__("sse3")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE3 "sse3",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSE3
 #endif
@@ -2120,14 +2138,20 @@ Superset of @ref CORRADE_ENABLE_SSE3, implied by @ref CORRADE_ENABLE_SSE41. See
     @cpp #include <tmmintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Ssse3}
+@see @relativeref{Corrade,Cpu::Ssse3}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SSSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSSE3
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSSE3
+#endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -mssse3 option implies -msse2 -msse3 on both GCC and Clang, so no need
    to specify those as well (verified with `echo | gcc -dM -E - -mssse3`) */
 #define CORRADE_ENABLE_SSSE3 __attribute__((__target__("ssse3")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSSE3 "ssse3",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSSE3
 #endif
@@ -2159,15 +2183,21 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
     due to both SSE4.1 and 4.2 intrinsics living in the same header. You can
     only use @ref CORRADE_ENABLE_SSE42 in this case.
 
-@see @relativeref{Corrade,Cpu::Sse41}
+@see @relativeref{Corrade,Cpu::Sse41}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SSE41) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE41
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE41
+#endif
 #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 409) || defined(CORRADE_TARGET_CLANG) /* also matches clang-cl */
 /* The -msse4.1 option implies -msse2 -msse3 -mssse3 on both GCC and Clang, so
    no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.1`) */
 #define CORRADE_ENABLE_SSE41 __attribute__((__target__("sse4.1")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE41 "sse4.1",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSE41
 #endif
@@ -2199,15 +2229,21 @@ Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
     @cpp #include <smmintrin.h> @ce and @cpp #include <nmmintrin.h> @ce to be
     able to access the intrinsics on this compiler.
 
-@see @relativeref{Corrade,Cpu::Sse42}
+@see @relativeref{Corrade,Cpu::Sse42}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SSE42) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE42
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE42
+#endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -msse4.2 option implies -msse2 -msse3 -mssse3 -msse4.1 on both GCC and
    Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.2`) */
 #define CORRADE_ENABLE_SSE42 __attribute__((__target__("sse4.2")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_SSE42 "sse4.2",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_SSE42
 #endif
@@ -2240,12 +2276,18 @@ may need to specify it together with others. See
     @cpp #include <nmmintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Popcnt}
+@see @relativeref{Corrade,Cpu::Popcnt}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_POPCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_POPCNT
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_POPCNT
+#endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_POPCNT __attribute__((__target__("popcnt")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_POPCNT "popcnt",
+#endif
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ENABLE_POPCNT
 #endif
@@ -2281,17 +2323,26 @@ may need to specify it together with others. See
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Lzcnt}
+@see @relativeref{Corrade,Cpu::Lzcnt}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_LZCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_LZCNT
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_LZCNT
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* GCC 4.8 needs also -mabm. This option is not needed since 4.9 and is also
    unrecognized on Clang. */
 #if defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 409
 #define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_LZCNT "lzcnt",
+#endif
 #else
 #define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt,abm")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_LZCNT "lzcnt,abm",
+#endif
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __LZCNT__ is
@@ -2333,12 +2384,18 @@ may need to specify it together with others. See
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Bmi1}
+@see @relativeref{Corrade,Cpu::Bmi1}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_BMI1) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_BMI1
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_BMI1
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 #define CORRADE_ENABLE_BMI1 __attribute__((__target__("bmi")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_BMI1 "bmi",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __BMI__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2377,15 +2434,21 @@ Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Avx}
+@see @relativeref{Corrade,Cpu::Avx}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mavx option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 on both GCC
    and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx`) */
 #define CORRADE_ENABLE_AVX __attribute__((__target__("avx")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX "avx",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __AVX__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2426,14 +2489,20 @@ information and usage example.
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::AvxF16c}
+@see @relativeref{Corrade,Cpu::AvxF16c}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX_F16C) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX_F16C
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX_F16C
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mf16c option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_F16C __attribute__((__target__("f16c")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX_F16C "f16c",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __F16C__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2474,14 +2543,20 @@ information and usage example.
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::AvxFma}
+@see @relativeref{Corrade,Cpu::AvxFma}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX_FMA
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX_FMA
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mfma option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_FMA __attribute__((__target__("fma")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX_FMA "fma",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __FMA__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2521,15 +2596,21 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
     @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
     compiler.
 
-@see @relativeref{Corrade,Cpu::Avx2}
+@see @relativeref{Corrade,Cpu::Avx2}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX2
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX2
+#endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
 /* The -mavx2 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx2`) */
 #define CORRADE_ENABLE_AVX2 __attribute__((__target__("avx2")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX2 "avx2",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __AVX2__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2561,15 +2642,21 @@ empty on all compilers.
 
 Superset of @ref CORRADE_ENABLE_AVX2. See @ref Cpu-usage-target-attributes for
 more information and usage example.
-@see @relativeref{Corrade,Cpu::Avx512f}
+@see @relativeref{Corrade,Cpu::Avx512f}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX512F) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX512F
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX512F
+#endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mavx512 option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx
    -mavx2 on both GCC and Clang, so no need to specify those as well (verified
    with `echo | gcc -dM -E - -mavx512f`) */
 #define CORRADE_ENABLE_AVX512F __attribute__((__target__("avx512f")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_AVX512F "avx512f",
+#endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
    still present in Jul 2022, meaning we can only use these if __AVX512F__ is
    defined. Funnily enough the older headers don't have this on their own, only
@@ -2602,10 +2689,13 @@ compilers. This is also the case for ARM64, where NEON support is implicit
 
 Implied by @ref CORRADE_ENABLE_NEON_FMA. See @ref Cpu-usage-target-attributes
 for more information and usage example.
-@see @relativeref{Corrade,Cpu::Neon}
+@see @relativeref{Corrade,Cpu::Neon}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_NEON) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON
+#endif
 /* https://github.com/android/ndk/issues/1066 is the only reported (and
    ignored) issue I found, feels strange that people would just not use ifunc
    or target attributes on Android at all and instead put everything in
@@ -2613,6 +2703,9 @@ for more information and usage example.
    ditched GCC, where this works properly. */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON __attribute__((__target__("fpu=neon")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON "fpu=neon",
+#endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON
 #endif
@@ -2638,13 +2731,19 @@ all compilers. This is also the case for ARM64, where NEON support is implicit
 
 Superset of @ref CORRADE_ENABLE_NEON, implied by @ref CORRADE_ENABLE_NEON_FP16.
 See @ref Cpu-usage-target-attributes for more information and usage example.
-@see @relativeref{Corrade,Cpu::NeonFma}
+@see @relativeref{Corrade,Cpu::NeonFma}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_NEON_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FMA
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON_FMA
+#endif
 /* See CORRADE_ENABLE_NEON above for details about Clang */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON_FMA __attribute__((__target__("fpu=neon-vfpv4")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON_FMA "fpu=neon-vfpv4",
+#endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FMA
 #endif
@@ -2669,13 +2768,19 @@ on all compilers.
 
 Superset of @ref CORRADE_ENABLE_NEON_FMA. See @ref Cpu-usage-target-attributes
 for more information and usage example.
-@see @relativeref{Corrade,Cpu::NeonFp16}
+@see @relativeref{Corrade,Cpu::NeonFp16}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_NEON_FP16) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FP16
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON_FP16
+#endif
 /* See CORRADE_ENABLE_NEON above for details about Clang */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON_FP16 __attribute__((__target__("arch=armv8.2-a+fp16")))
+#ifdef CORRADE_TARGET_GCC
+#define _CORRADE_ENABLE_NEON_FP16 "arch=armv8.2-a+fp16",
+#endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FP16
 #endif
@@ -2700,11 +2805,177 @@ is implemented, but likely only for instruction sets building on top of this
 one.
 
 See @ref Cpu-usage-target-attributes for more information and usage example.
-@see @relativeref{Corrade,Cpu::Simd128}
+@see @relativeref{Corrade,Cpu::Simd128}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_SIMD128) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SIMD128
+#ifdef CORRADE_TARGET_GCC /* Future-proofing, GCC has no WASM support ATM */
+#define _CORRADE_ENABLE_SIMD128
 #endif
+#endif
+#endif
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* GCC treats __attribute__((target("foo"))) __attribute__((target("bar"))) as
+   if only "bar" was specified, thus it's not possible to just put several
+   CORRADE_ENABLE_ macros after each other. Instead, the only accepted form is
+   __attribute__((target("foo,bar"))). Fortunately, string literal
+   concatenation works here, thus with some extra macro trickery we can produce
+   __attribute__((target("foo" "," "bar"))). The pieces are _CORRADE_ENABLE_*
+   variants defined if and only if a corresponding CORRADE_ENABLE_* macro is
+   defined. These can however be empty, thus it's not possible to just join
+   them all with "," in between. Instead, the macros themselves have a trailing
+   comma after the string literal (thus "foo",), which causes the empty macros
+   be filtered out when passed one after another (without commas) from
+   _CORRADE_ENABLEn to _CORRADE_ENABLE_CONCATENATE(). */
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
+#define _CORRADE_ENABLE_CONCATENATE0(unused)
+#define _CORRADE_ENABLE_CONCATENATE1(v0, unused)                            \
+    __attribute__((__target__(v0)))
+#define _CORRADE_ENABLE_CONCATENATE2(v0, v1, unused)                        \
+    __attribute__((__target__(v0 "," v1)))
+#define _CORRADE_ENABLE_CONCATENATE3(v0, v1, v2, unused)                    \
+    __attribute__((__target__(v0 "," v1 "," v2)))
+#define _CORRADE_ENABLE_CONCATENATE4(v0, v1, v2, v3, unused)                \
+    __attribute__((__target__(v0 "," v1 "," v2 "," v3)))
+#define _CORRADE_ENABLE_CONCATENATE5(v0, v1, v2, v3, v4, unused)            \
+    __attribute__((__target__(v0 "," v1 "," v2 "," v3 "," v4)))
+#define _CORRADE_ENABLE_CONCATENATE6(v0, v1, v2, v3, v4, v5, unused)        \
+    __attribute__((__target__(v0 "," v1 "," v2 "," v3 "," v4 "," v5)))
+#define _CORRADE_ENABLE_CONCATENATE7(v0, v1, v2, v3, v4, v5, v6, unused)    \
+    __attribute__((__target__(v0 "," v1 "," v2 "," v3 "," v4 "," v5 "," v6)))
+#define _CORRADE_ENABLE_CONCATENATE(...)                                    \
+    _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_ENABLE_CONCATENATE7, _CORRADE_ENABLE_CONCATENATE6, _CORRADE_ENABLE_CONCATENATE5, _CORRADE_ENABLE_CONCATENATE4, _CORRADE_ENABLE_CONCATENATE3, _CORRADE_ENABLE_CONCATENATE2, _CORRADE_ENABLE_CONCATENATE1, _CORRADE_ENABLE_CONCATENATE0, )(__VA_ARGS__)
+/* No _CORRADE_HELPER_PASTE() needed here, as there's enough other indirections
+   to make that work */
+#define _CORRADE_ENABLE1(v0)                                                \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+    )
+#define _CORRADE_ENABLE2(v0, v1)                                            \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+    )
+#define _CORRADE_ENABLE3(v0, v1, v2)                                        \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+        _CORRADE_ENABLE_ ## v2                                              \
+    )
+#define _CORRADE_ENABLE4(v0, v1, v2, v3)                                    \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+        _CORRADE_ENABLE_ ## v2                                              \
+        _CORRADE_ENABLE_ ## v3                                              \
+    )
+#define _CORRADE_ENABLE5(v0, v1, v2, v3, v4)                                \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+        _CORRADE_ENABLE_ ## v2                                              \
+        _CORRADE_ENABLE_ ## v3                                              \
+        _CORRADE_ENABLE_ ## v4                                              \
+    )
+#define _CORRADE_ENABLE6(v0, v1, v2, v3, v4, v5)                            \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+        _CORRADE_ENABLE_ ## v2                                              \
+        _CORRADE_ENABLE_ ## v3                                              \
+        _CORRADE_ENABLE_ ## v4                                              \
+        _CORRADE_ENABLE_ ## v5                                              \
+    )
+#define _CORRADE_ENABLE7(v0, v1, v2, v3, v4, v5, v6)                        \
+    _CORRADE_ENABLE_CONCATENATE(                                            \
+        _CORRADE_ENABLE_ ## v0                                              \
+        _CORRADE_ENABLE_ ## v1                                              \
+        _CORRADE_ENABLE_ ## v2                                              \
+        _CORRADE_ENABLE_ ## v3                                              \
+        _CORRADE_ENABLE_ ## v4                                              \
+        _CORRADE_ENABLE_ ## v5                                              \
+        _CORRADE_ENABLE_ ## v6                                              \
+    )
+/* None of this is needed for Clang, fortunately, so here the whole thing
+   expands to just CORRADE_ENABLE_FOO CORRADE_ENABLE_BAR. I hope GCC eventually
+   fixes this as well, so keeping both variants so I can drop the GCC-specific
+   one in the future. As another future-proof this also gets used for any
+   compilers other than MSVC. MSVC's preprocessor won't be able to perform the
+   delayed expansion so CORRADE_ENABLE()  */
+#elif defined(CORRADE_TARGET_CLANG) || !defined(CORRADE_TARGET_MSVC)
+/* Using _CORRADE_HELPER_PASTE2() instead of _CORRADE_HELPER_PASTE() here, as
+   that's enough to make that work and it's less work for the preprocessor.
+   Concatenating directly doesn't work, unlike in the above case for GCC. */
+#define _CORRADE_ENABLE1(v0)                                                \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)
+#define _CORRADE_ENABLE2(v0, v1)                                            \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)
+#define _CORRADE_ENABLE3(v0, v1, v2)                                        \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)
+#define _CORRADE_ENABLE4(v0, v1, v2, v3)                                    \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v3)
+#define _CORRADE_ENABLE5(v0, v1, v2, v3, v4)                                \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v3)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v4)
+#define _CORRADE_ENABLE6(v0, v1, v2, v3, v4, v5)                            \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v3)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v4)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v5)
+#define _CORRADE_ENABLE7(v0, v1, v2, v3, v4, v5, v6)                        \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v3)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v4)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v5)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v6)
+#define _CORRADE_ENABLE8(v0, v1, v2, v3, v4, v5, v6, v7)                    \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v0)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v1)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v2)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v3)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v4)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v5)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v6)                             \
+    _CORRADE_HELPER_PASTE2(CORRADE_ENABLE_, v7)
+#endif
+#endif
+
+/**
+@brief Enable multiple targets for given function
+@m_since_latest
+
+Accepts a comma-separated list of `CORRADE_ENABLE_*` macro suffixes,
+effectively enabling given combination. For the macro to work, all
+`CORRADE_ENABLE_*` macros corresponding to the arguments have to be defined,
+the common usage pattern is thus in combination with an @cpp #ifdef @ce. See
+@ref Cpu-usage-target-attributes for more information and an example.
+
+When multiple `CORRADE_ENABLE_*` macros are specified one after another, GCC
+would pick only the last specified, ignoring the others. For it, the macro
+expands into a single combined @cpp __attribute__((__target__(...))) @ce
+attribute. For other compilers except MSVC it's just a shorthand for multiple
+`CORRADE_ENABLE_*` macros one after another. On MSVC expands to nothing ---
+there the functions aren't annotated in anyway and moreover the default
+preprocessor behavior would make this extremely tricky to implement.
+*/
+#if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
+#define CORRADE_ENABLE(...) _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_ENABLE8, _CORRADE_ENABLE7, _CORRADE_ENABLE6, _CORRADE_ENABLE5, _CORRADE_ENABLE4, _CORRADE_ENABLE3, _CORRADE_ENABLE2, _CORRADE_ENABLE1, )(__VA_ARGS__)
+#else
+#define CORRADE_ENABLE(...)
 #endif
 
 }

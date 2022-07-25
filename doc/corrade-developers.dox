@@ -527,10 +527,16 @@ inverse.
     -   If it's a superset of / implied by any other `-m` option (as discovered
         when implementing the `CORRADE_TARGET_FOO` detection), mention that in
         the docs -- but only if it's consistent for GCC and Clang.
+    -   Add a `_CORRADE_ENABLE_FOO` variant for the GCC multiple target
+        attribute workaround -- one empty for when `CORRADE_TARGET_FOO` is
+        defined and one just the string with a comma after (`"foo",`)
 9.  Add a test for the `CORRADE_ENABLE_FOO` macro:
     -   New `callInstructionFor()` variant for given tag type
-    -   Annotated with the macro and also with an @cpp #ifdef @ce for the macro
-        around
+    -   Annotated with the "function variant" of the macro (thus
+        @cpp CORRADE_ENABLE(FOO) @ce) and also with an @cpp #ifdef @ce for the
+        macro around. The function variant should be used in order to test both
+        the `_CORRADE_ENABLE_FOO` macro (on GCC) and `CORRADE_ENABLE_FOO` (on
+        Clang and elsewhere).
     -   Ideally using just that instruction alone (such as is the case with
         `POPCNT`), if not then try to use an instruction set that's implied by
         it so it doesn't need a second `CORRADE_ENABLE_*`. Clearly mark which

@@ -107,6 +107,9 @@ struct CpuTest: TestSuite::Tester {
 
     template<class T> void enableMacros();
 
+    void enableMacrosMultiple();
+    void enableMacrosMultipleAllEmpty();
+
     void debug();
     void debugPacked();
 };
@@ -184,6 +187,9 @@ CpuTest::CpuTest() {
               #elif defined(CORRADE_TARGET_WASM)
               &CpuTest::enableMacros<Cpu::Simd128T>,
               #endif
+
+              &CpuTest::enableMacrosMultiple,
+              &CpuTest::enableMacrosMultipleAllEmpty,
 
               &CpuTest::debug,
               &CpuTest::debugPacked});
@@ -1212,7 +1218,7 @@ template<class T> int callInstructionFor() {
    into what code they get actually compiled. Except for the catch-all variant,
    which isn't interesting for disassembly. */
 #ifdef CORRADE_ENABLE_SSE2
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE2 int callInstructionFor<Cpu::Sse2T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SSE2) int callInstructionFor<Cpu::Sse2T>() {
     __m128i a = _mm_set_epi32(0x80808080, 0, 0x80808080, 0);
 
     /* All instructions SSE2 */
@@ -1223,7 +1229,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE2 int callInstructionFor<Cpu::
 }
 #endif
 #ifdef CORRADE_ENABLE_SSE3
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE3 int callInstructionFor<Cpu::Sse3T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SSE3) int callInstructionFor<Cpu::Sse3T>() {
     const std::uint32_t a[]{0, 10, 20, 30, 40};
 
     /* SSE3 */
@@ -1241,7 +1247,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE3 int callInstructionFor<Cpu::
 }
 #endif
 #ifdef CORRADE_ENABLE_SSSE3
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSSE3 int callInstructionFor<Cpu::Ssse3T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SSSE3) int callInstructionFor<Cpu::Ssse3T>() {
     __m128i a = _mm_set_epi32(-10, 20, -30, 40);
 
     /* SSSE3 */
@@ -1259,7 +1265,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSSE3 int callInstructionFor<Cpu:
 }
 #endif
 #ifdef CORRADE_ENABLE_SSE41
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE41 int callInstructionFor<Cpu::Sse41T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SSE41) int callInstructionFor<Cpu::Sse41T>() {
     __m128 a = _mm_set_ps(5.47f, 2.23f, 7.62f, 0.5f);
 
     /* SSE4.1 */
@@ -1277,7 +1283,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE41 int callInstructionFor<Cpu:
 }
 #endif
 #ifdef CORRADE_ENABLE_SSE42
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE42 int callInstructionFor<Cpu::Sse42T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SSE42) int callInstructionFor<Cpu::Sse42T>() {
     __m128i a = _mm_set_epi64x(50, 60);
     __m128i b = _mm_set_epi64x(60, 50);
 
@@ -1294,7 +1300,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SSE42 int callInstructionFor<Cpu:
 }
 #endif
 #ifdef CORRADE_ENABLE_POPCNT
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_POPCNT int callInstructionFor<Cpu::PopcntT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(POPCNT) int callInstructionFor<Cpu::PopcntT>() {
     /* Just pocnt alone; using volatile to prevent this from being folded into
        a constant */
     volatile unsigned int a = 0x0005c1a6;
@@ -1304,7 +1310,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_POPCNT int callInstructionFor<Cpu
 }
 #endif
 #ifdef CORRADE_ENABLE_LZCNT
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_LZCNT int callInstructionFor<Cpu::LzcntT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(LZCNT) int callInstructionFor<Cpu::LzcntT>() {
     /* Just lzcnt alone; using volatile to prevent this from being folded into
        a constant */
     volatile int a = 0x0005c1a6;
@@ -1319,7 +1325,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_LZCNT int callInstructionFor<Cpu:
 }
 #endif
 #ifdef CORRADE_ENABLE_BMI1
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_BMI1 int callInstructionFor<Cpu::Bmi1T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(BMI1) int callInstructionFor<Cpu::Bmi1T>() {
     /* Just lzcnt alone; using volatile to prevent this from being folded into
        a constant */
     volatile int a = 0x6583a000; /* 0x0005c1a6 but bit-reversed */
@@ -1336,7 +1342,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_BMI1 int callInstructionFor<Cpu::
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX int callInstructionFor<Cpu::AvxT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX) int callInstructionFor<Cpu::AvxT>() {
     __m256d a = _mm256_set_pd(5.47, 2.23, 7.62, 0.5);
 
     /* All instructions AVX */
@@ -1355,7 +1361,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX int callInstructionFor<Cpu::A
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX_F16C
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_F16C int callInstructionFor<Cpu::AvxF16cT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX_F16C) int callInstructionFor<Cpu::AvxF16cT>() {
     /* Values from Magnum::Math::Test::HalfTest::pack() */
     __m128 a = _mm_set_ps(0.0f, 123.75f, -0.000351512f, 3.0f);
 
@@ -1374,7 +1380,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_F16C int callInstructionFor<C
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX_FMA
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_FMA int callInstructionFor<Cpu::AvxFmaT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX_FMA) int callInstructionFor<Cpu::AvxFmaT>() {
     /* Values from Magnum::Math::Test::FunctionsTest::fma() */
     __m128 a = _mm_set_ps(0.0f,  2.0f,  1.5f,  0.5f);
     __m128 b = _mm_set_ps(0.0f,  3.0f,  2.0f, -1.0f);
@@ -1395,7 +1401,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX_FMA int callInstructionFor<Cp
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX2
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX2 int callInstructionFor<Cpu::Avx2T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX2) int callInstructionFor<Cpu::Avx2T>() {
     __m256i a = _mm256_set_epi64x(0x8080808080808080ull, 0, 0x8080808080808080ull, 0);
 
     /* Like callInstructionFor<Cpu::Sse2T>(), but expanded to AVX2 */
@@ -1406,7 +1412,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX2 int callInstructionFor<Cpu::
 }
 #endif
 #ifdef CORRADE_ENABLE_AVX512F
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX512F int callInstructionFor<Cpu::Avx512fT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX512F) int callInstructionFor<Cpu::Avx512fT>() {
     __m128 a = _mm_set1_ps(5.47f);
 
     /* AVX512 */
@@ -1417,7 +1423,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_AVX512F int callInstructionFor<Cp
 }
 #endif
 #ifdef CORRADE_ENABLE_NEON
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON int callInstructionFor<Cpu::NeonT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON) int callInstructionFor<Cpu::NeonT>() {
     int32x4_t a{-10, 20, -30, 40};
 
     /* All instructions NEON */
@@ -1435,7 +1441,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON int callInstructionFor<Cpu::
 }
 #endif
 #ifdef CORRADE_ENABLE_NEON_FMA
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FMA int callInstructionFor<Cpu::NeonFmaT>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FMA) int callInstructionFor<Cpu::NeonFmaT>() {
     /* Values from Magnum::Math::Test::FunctionsTest::fma() */
     float32x4_t a{0.0f,  2.0f,  1.5f,  0.5f};
     float32x4_t b{0.0f,  3.0f,  2.0f, -1.0f};
@@ -1456,7 +1462,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FMA int callInstructionFor<C
 }
 #endif
 #ifdef CORRADE_ENABLE_NEON_FP16
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FP16 int callInstructionFor<Cpu::NeonFp16T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FP16) int callInstructionFor<Cpu::NeonFp16T>() {
     float32x4_t a{5.47f, 2.23f, 7.62f, 0.5f};
     float16x4_t b = vcvt_f16_f32(a);
 
@@ -1476,7 +1482,7 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_NEON_FP16 int callInstructionFor<
 }
 #endif
 #ifdef CORRADE_ENABLE_SIMD128
-template<> CORRADE_NEVER_INLINE CORRADE_ENABLE_SIMD128 int callInstructionFor<Cpu::Simd128T>() {
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SIMD128) int callInstructionFor<Cpu::Simd128T>() {
     v128_t a = wasm_i32x4_make(-10, 20, -30, 40);
 
     /* All instructions SIMD128 */
@@ -1502,6 +1508,90 @@ template<class T> void CpuTest::enableMacros() {
 
     CORRADE_VERIFY(true); /* to capture correct function name */
     CORRADE_VERIFY(callInstructionFor<T>());
+}
+
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_AVX)
+/* If set to 1, should fail on GCC (unless CORRADE_TARGET_AVX is set) */
+#if 0
+CORRADE_ENABLE_AVX2 CORRADE_ENABLE_AVX
+#else
+/* If CORRADE_TARGET_SSE2 is set (on 64bit), it'll result in just "avx2,avx" */
+CORRADE_ENABLE(AVX2,SSE2,AVX)
+#endif
+int callInstructionMultiple() {
+    if(!(Cpu::runtimeFeatures() & Cpu::Avx2))
+        CORRADE_SKIP("AVX2 feature not supported");
+
+    /* Same as callInstructionFor<Cpu::Avx2T>() */
+    __m256i a = _mm256_set_epi64x(0x8080808080808080ull, 0, 0x8080808080808080ull, 0);
+
+    /* If the AVX2 instructions aren't enabled, this will fail to link */
+    int mask = _mm256_movemask_epi8(a);
+
+    CORRADE_COMPARE(mask, 0xff00ff00);
+    return mask;
+}
+#elif defined(CORRADE_ENABLE_NEON_FMA) && defined(CORRADE_ENABLE_NEON)
+/* If set to 1, should fail on GCC (unless CORRADE_TARGET_NEON is set) */
+#if 0
+CORRADE_ENABLE_NEON_FMA CORRADE_ENABLE_NEON
+#else
+CORRADE_ENABLE(NEON_FMA,NEON)
+#endif
+int callInstructionMultiple() {
+    if(!(Cpu::runtimeFeatures() & Cpu::NeonFma))
+        CORRADE_SKIP("NEON FMA feature not supported");
+
+    /* Same as callInstructionFor<Cpu::NeonFmaT>() */
+    float32x4_t a{0.0f,  2.0f,  1.5f,  0.5f};
+    float32x4_t b{0.0f,  3.0f,  2.0f, -1.0f};
+    float32x4_t c{0.0f, 0.75f, 0.25f,  0.1f};
+
+    union {
+        float32x4_t v;
+        float s[4];
+    } d;
+    /* If the FMA instructions aren't enabled, this will fail to link */
+    d.v = vfmaq_f32(c, b, a);
+
+    CORRADE_COMPARE(d.s[0], 0.0f);
+    CORRADE_COMPARE(d.s[1], 6.75f);
+    CORRADE_COMPARE(d.s[2], 3.25f);
+    CORRADE_COMPARE(d.s[3], -0.4f);
+    return d.s[2];
+}
+#else
+int callInstructionMultiple() {
+    CORRADE_SKIP("Not enough CORRADE_ENABLE_ macros defined");
+}
+#endif
+
+void CpuTest::enableMacrosMultiple() {
+    CORRADE_VERIFY(callInstructionMultiple());
+}
+
+/* If the ENABLE_ macro is empty, it should not result in any __attribute__
+   annotation */
+#ifdef CORRADE_TARGET_SSE2
+CORRADE_ENABLE(SSE2) int callInstructionMultipleAllEmpty() {
+    return 1;
+}
+#elif defined(CORRADE_TARGET_NEON)
+CORRADE_ENABLE(NEON) int callInstructionMultipleAllEmpty() {
+    return 1;
+}
+#elif defined(CORRADE_TARGET_SIMD128)
+CORRADE_ENABLE(SIMD128) int callInstructionMultipleAllEmpty() {
+    return 1;
+}
+#else
+int callInstructionMultipleAllEmpty() {
+    CORRADE_SKIP("No suitable CORRADE_TARGET_ macro defined");
+}
+#endif
+
+void CpuTest::enableMacrosMultipleAllEmpty() {
+    CORRADE_COMPARE(callInstructionMultipleAllEmpty(), 1);
 }
 
 void CpuTest::debug() {
