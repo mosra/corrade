@@ -74,7 +74,7 @@ elseif(CORRADE_BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 # Utility also does -ldl now
-target_link_libraries(CorradePluginManager CorradeUtility)
+target_link_libraries(CorradePluginManager PUBLIC CorradeUtility)
 
 install(TARGETS CorradePluginManager
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
@@ -93,9 +93,9 @@ if(CORRADE_BUILD_TESTS)
     if(CORRADE_BUILD_STATIC_PIC)
         set_target_properties(CorradePluginManagerTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
-    target_link_libraries(CorradePluginManagerTestLib CorradeUtility)
+    target_link_libraries(CorradePluginManagerTestLib PUBLIC CorradeUtility)
     if(CORRADE_TARGET_UNIX)
-        target_link_libraries(CorradePluginManagerTestLib ${CMAKE_DL_LIBS})
+        target_link_libraries(CorradePluginManagerTestLib PUBLIC ${CMAKE_DL_LIBS})
     endif()
 
     add_subdirectory(Test)
