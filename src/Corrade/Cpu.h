@@ -304,7 +304,7 @@ actual arguments:
 
 <b></b>
 
-@m_class{m-block m-info }
+@m_class{m-block m-danger }
 
 @par Instruction enabling macros
     An important difference with the @ref CORRADE_ENABLE_SSE2 "CORRADE_ENABLE_*"
@@ -313,8 +313,9 @@ actual arguments:
     from the wrapper function to the nested lambda. To make matters worse,
     older versions of Clang suffer from the inverse problem and ignore lambda
     attributes, so you have to specify them on both the lambda and the wrapper
-    function. The above AVX variant would look like this with relevant macros
-    added:
+    function. GCC 9.1 to 9.3 also has a [bug where it can't parse lambda attributes](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333),
+    use version 8, 9.4 or 10.3 instead. The above AVX variant would look like
+    this with relevant macros added:
 @par
     @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-target-attributes
 
