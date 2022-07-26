@@ -73,7 +73,8 @@ endif()
 
 # Main TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}
-    $<TARGET_OBJECTS:CorradeTestSuiteObjects>)
+    $<TARGET_OBJECTS:CorradeTestSuiteObjects>
+    ${PROJECT_SOURCE_DIR}/src/dummy.cpp) # XCode workaround, see file comment for details
 set_target_properties(CorradeTestSuite PROPERTIES
     DEBUG_POSTFIX "-d")
 if(NOT CORRADE_BUILD_STATIC)
@@ -107,7 +108,8 @@ if(CORRADE_BUILD_TESTS)
     # CorradeUtilityTestLib, leading to ODR violations and subsequently ASan
     # complaints.
     add_library(CorradeTestSuiteTestLib ${SHARED_OR_STATIC}
-        $<TARGET_OBJECTS:CorradeTestSuiteObjects>)
+        $<TARGET_OBJECTS:CorradeTestSuiteObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp) # XCode workaround, see file comment for details
     target_include_directories(CorradeTestSuiteTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
     set_target_properties(CorradeTestSuiteTestLib PROPERTIES DEBUG_POSTFIX "-d")
     if(CORRADE_BUILD_STATIC_PIC)
