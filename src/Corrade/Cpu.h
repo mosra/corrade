@@ -308,10 +308,13 @@ actual arguments:
 
 @par Instruction enabling macros
     An important difference with the @ref CORRADE_ENABLE_SSE2 "CORRADE_ENABLE_*"
-    macros is that they now have to go directly next to the lambda as GCC
+    macros is that they now have to go also directly next to the lambda as GCC
     [currently doesn't propagate the attributes](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80439)
-    from the wrapper function to the nested lambda. The above AVX variant would
-    look like this with relevant macros added:
+    from the wrapper function to the nested lambda. To make matters worse,
+    older versions of Clang suffer from the inverse problem and ignore lambda
+    attributes, so you have to specify them on both the lambda and the wrapper
+    function. The above AVX variant would look like this with relevant macros
+    added:
 @par
     @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-target-attributes
 

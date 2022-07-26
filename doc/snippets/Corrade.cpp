@@ -107,7 +107,7 @@ namespace Baz {
 TransformT transformImplementation(Cpu::Avx2T);
 /* [Cpu-usage-automatic-runtime-dispatch-target-attributes] */
 #ifdef CORRADE_ENABLE_AVX2
-TransformT transformImplementation(Cpu::Avx2T) {
+CORRADE_ENABLE_AVX2 TransformT transformImplementation(Cpu::Avx2T) {
     return [](Containers::ArrayView<float> data) CORRADE_ENABLE_AVX2 { DOXYGEN_ELLIPSIS(static_cast<void>(data);) };
 }
 #endif
