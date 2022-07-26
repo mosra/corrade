@@ -346,6 +346,10 @@ function(corrade_add_test test_name)
     set(_corrade_file_pair_match "^(.+)@([^@]+)$")
     set(_corrade_file_pair_replace "\\1;\\2")
 
+    # TestSuite library to link to. Gets reset below if the tests already link
+    # to their own variant.
+    set(testsuite_library Corrade::TestSuite)
+
     # Get DLL and path lists
     foreach(arg ${ARGN})
         if(arg STREQUAL LIBRARIES)
@@ -359,6 +363,12 @@ function(corrade_add_test test_name)
             set(_DOING_ARGUMENTS ON)
         else()
             if(_DOING_LIBRARIES)
+                # If Corrade's own tests link their own variant of TestSuite,
+                # don't link the implicit one as well, as otherwise we'd end
+                # up with duplicated symbols.
+                if(arg STREQUAL CorradeTestSuiteTestLib)
+                    set(testsuite_library )
+                endif()
                 list(APPEND libraries ${arg})
             elseif(_DOING_FILES)
                 # If the file is already a pair of file and destination, just
@@ -404,7 +414,7 @@ function(corrade_add_test test_name)
         add_library(${test_name} SHARED ${sources})
         set_target_properties(${test_name} PROPERTIES FRAMEWORK TRUE)
         # This is never Windows, so no need to bother with Corrade::Main
-        target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite)
+        target_link_libraries(${test_name} PRIVATE ${libraries} ${testsuite_library})
 
         set(test_runner_file ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.mm)
         configure_file(${CORRADE_TESTSUITE_XCTEST_RUNNER}
@@ -431,7 +441,7 @@ function(corrade_add_test test_name)
         endif()
     else()
         add_executable(${test_name} ${sources})
-        target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite Corrade::Main)
+        target_link_libraries(${test_name} PRIVATE ${libraries} ${testsuite_library} Corrade::Main)
 
         # Run tests using Node.js on Emscripten
         if(CORRADE_TARGET_EMSCRIPTEN)

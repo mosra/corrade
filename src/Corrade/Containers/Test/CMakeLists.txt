@@ -37,13 +37,19 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
+# In all following corrade_add_test() macros, if a test wants to use
+# CorradeUtilityTestLib, it has to link to CorradeTestSuiteTestLib instead.
+# Otherwise the implicitly linked CorradeTestSuite would drag in CorradeUtility
+# in addition to CorradeUtilityTestLib, leading to ODR violations and making
+# ASan builds fail.
+
 corrade_add_test(ContainersAnyReferenceTest AnyReferenceTest.cpp)
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
-corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(ContainersArrayTupleTest ArrayTupleTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersArrayViewStlTest ArrayViewStlTest.cpp)
 corrade_add_test(ContainersBigEnumSetTest BigEnumSetTest.cpp)
-corrade_add_test(ContainersBitArrayTest BitArrayTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(ContainersBitArrayTest BitArrayTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersBitArrayViewTest BitArrayViewTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 
@@ -78,12 +84,12 @@ corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
 corrade_add_test(ContainersStaticArrayViewStlTest StaticArrayViewStlTest.cpp)
 corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
 corrade_add_test(ContainersStridedArrayViewStlTest StridedArrayViewStlTest.cpp)
-corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersStringStlTest StringStlTest.cpp)
-corrade_add_test(ContainersStringViewTest StringViewTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(ContainersStringViewTest StringViewTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 
 corrade_add_test(ContainersStringViewBenchmark StringViewBenchmark.cpp
-    LIBRARIES CorradeUtilityTestLib
+    LIBRARIES CorradeTestSuiteTestLib
     FILES StringTestFiles/lorem-ipsum.txt)
 target_include_directories(ContainersStringViewBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

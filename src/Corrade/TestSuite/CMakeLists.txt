@@ -48,19 +48,18 @@ set(CorradeTestSuite_PRIVATE_HEADERS
     Implementation/BenchmarkCounters.h
     Implementation/BenchmarkStats.h)
 
-# TestSuite library
-add_library(CorradeTestSuite ${SHARED_OR_STATIC}
+# Objects shared between main and test library
+add_library(CorradeTestSuiteObjects OBJECT
     ${CorradeTestSuite_SRCS}
     ${CorradeTestSuite_HEADERS}
     ${CorradeTestSuite_PRIVATE_HEADERS})
-set_target_properties(CorradeTestSuite PROPERTIES
-    DEBUG_POSTFIX "-d")
+target_include_directories(CorradeTestSuiteObjects PUBLIC $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
 if(NOT CORRADE_BUILD_STATIC)
-    set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-elseif(CORRADE_BUILD_STATIC_PIC)
-    set_target_properties(CorradeTestSuite PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_compile_definitions(CorradeTestSuiteObjects PRIVATE "-DCorradeTestSuiteObjects_EXPORTS")
 endif()
-target_link_libraries(CorradeTestSuite CorradeUtility)
+if(NOT CORRADE_BUILD_STATIC OR CORRADE_BUILD_STATIC_PIC)
+    set_target_properties(CorradeTestSuiteObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
 if(CORRADE_TARGET_EMSCRIPTEN)
     # Since (probably) 1.38.36, the compiler needs to have exceptions enabled
     # as well (not just the linker), and directly for the TestSuite library.
@@ -69,8 +68,20 @@ if(CORRADE_TARGET_EMSCRIPTEN)
     # so doing it the old way --- and instead of the options being transitively
     # passed to the target, for the test target it's done explicitly inside
     # UseCorrade.cmake. Wasn't needed with 1.38.32.
-    set_property(TARGET CorradeTestSuite APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
+    set_property(TARGET CorradeTestSuiteObjects APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
 endif()
+
+# Main TestSuite library
+add_library(CorradeTestSuite ${SHARED_OR_STATIC}
+    $<TARGET_OBJECTS:CorradeTestSuiteObjects>)
+set_target_properties(CorradeTestSuite PROPERTIES
+    DEBUG_POSTFIX "-d")
+if(NOT CORRADE_BUILD_STATIC)
+    set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+elseif(CORRADE_BUILD_STATIC_PIC)
+    set_target_properties(CorradeTestSuite PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+target_link_libraries(CorradeTestSuite PUBLIC CorradeUtility)
 
 install(TARGETS CorradeTestSuite
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
@@ -88,6 +99,22 @@ endif()
 add_subdirectory(Compare)
 
 if(CORRADE_BUILD_TESTS)
+    # Library that links against CorradeUtilityTestLib instead of
+    # CorradeUtility for testing. No other difference. Not actually used by any
+    # TestSuite tests, but a special case needed only by the Utility library
+    # -- since TestSuite depends on Utility, Utility tests that would link to
+    # CorradeTestSuite would get CorradeUtility in addition to
+    # CorradeUtilityTestLib, leading to ODR violations and subsequently ASan
+    # complaints.
+    add_library(CorradeTestSuiteTestLib ${SHARED_OR_STATIC}
+        $<TARGET_OBJECTS:CorradeTestSuiteObjects>)
+    target_include_directories(CorradeTestSuiteTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    set_target_properties(CorradeTestSuiteTestLib PROPERTIES DEBUG_POSTFIX "-d")
+    if(CORRADE_BUILD_STATIC_PIC)
+        set_target_properties(CorradeTestSuiteTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
+    target_link_libraries(CorradeTestSuiteTestLib PUBLIC CorradeUtilityTestLib)
+
     add_subdirectory(Test)
 endif()
 

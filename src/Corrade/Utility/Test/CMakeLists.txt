@@ -39,10 +39,16 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
-corrade_add_test(UtilityAlgorithmsTest AlgorithmsTest.cpp LIBRARIES CorradeUtilityTestLib)
+# In all following corrade_add_test() macros, if a test wants to use
+# CorradeUtilityTestLib, it has to link to CorradeTestSuiteTestLib instead.
+# Otherwise the implicitly linked CorradeTestSuite would drag in CorradeUtility
+# in addition to CorradeUtilityTestLib, leading to ODR violations and making
+# ASan builds fail.
+
+corrade_add_test(UtilityAlgorithmsTest AlgorithmsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 target_compile_definitions(UtilityAlgorithmsTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 
-corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 set_tests_properties(UtilityArgumentsTest
     PROPERTIES ENVIRONMENT "ARGUMENTSTEST_SIZE=1337;ARGUMENTSTEST_VERBOSE=ON;ARGUMENTSTEST_COLOR=OFF;ARGUMENTSTEST_UNICODE=hýždě")
 
@@ -149,7 +155,7 @@ corrade_add_test(UtilityEndiannessTest EndiannessTest.cpp)
 corrade_add_test(UtilityErrorStringTest ErrorStringTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
-    LIBRARIES CorradeUtilityTestLib
+    LIBRARIES CorradeTestSuiteTestLib
     FILES
         ConfigurationTestFiles/bom.conf
         ConfigurationTestFiles/comments.conf
@@ -224,14 +230,14 @@ corrade_add_test(UtilityFatalTest FatalTest.cpp)
 set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
 
 corrade_add_test(UtilityJsonTest JsonTest.cpp
-    LIBRARIES CorradeUtilityTestLib
+    LIBRARIES CorradeTestSuiteTestLib
     FILES
         JsonTestFiles/error.json
         JsonTestFiles/parse-error.json)
 target_compile_definitions(UtilityJsonTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 target_include_directories(UtilityJsonTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test(UtilityJsonWriterTest JsonWriterTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityJsonWriterTest JsonWriterTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 target_include_directories(UtilityJsonWriterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityMemoryTest MemoryTest.cpp)
@@ -269,7 +275,7 @@ if(CORRADE_TARGET_UNIX)
 endif()
 target_include_directories(UtilityPathTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
@@ -290,12 +296,12 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
         CORRADE_CXX_STANDARD 17)
 endif()
 
-corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp)
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
-corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
@@ -306,7 +312,7 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
-    LIBRARIES CorradeUtilityTestLib
+    LIBRARIES CorradeTestSuiteTestLib
     FILES
         ResourceTestFiles/consequence.bin
         # Referenced from resources-overriden.conf
