@@ -96,6 +96,7 @@ endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
 if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package(Threads REQUIRED)
 
     # All define the same symbols so they need to be in separate libs
@@ -121,7 +122,7 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
 
     target_link_libraries(testsuite-basic PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-templated PUBLIC CorradeTestSuite)
-    target_link_libraries(testsuite-repeated PUBLIC CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(testsuite-repeated PUBLIC CorradeTestSuite Threads::Threads)
     target_link_libraries(testsuite-instanced PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-save-diagnostic PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-iteration PUBLIC CorradeTestSuite)
