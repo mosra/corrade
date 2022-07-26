@@ -2074,12 +2074,12 @@ more information and usage example.
 */
 #if defined(CORRADE_TARGET_SSE2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE2
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE2
 #endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE_SSE2 __attribute__((__target__("sse2")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE2 "sse2",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2117,14 +2117,14 @@ Superset of @ref CORRADE_ENABLE_SSE2, implied by @ref CORRADE_ENABLE_SSSE3. See
 */
 #if defined(CORRADE_TARGET_SSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE3
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE3
 #endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -msse3 option implies -msse2 on both GCC and Clang, so no need to
    specify those as well (verified with `echo | gcc -dM -E - -msse3`) */
 #define CORRADE_ENABLE_SSE3 __attribute__((__target__("sse3")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE3 "sse3",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2162,14 +2162,14 @@ Superset of @ref CORRADE_ENABLE_SSE3, implied by @ref CORRADE_ENABLE_SSE41. See
 */
 #if defined(CORRADE_TARGET_SSSE3) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSSE3
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSSE3
 #endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 /* The -mssse3 option implies -msse2 -msse3 on both GCC and Clang, so no need
    to specify those as well (verified with `echo | gcc -dM -E - -mssse3`) */
 #define CORRADE_ENABLE_SSSE3 __attribute__((__target__("ssse3")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSSE3 "ssse3",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2207,7 +2207,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_SSE41) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE41
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE41
 #endif
 #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 409) || defined(CORRADE_TARGET_CLANG) /* also matches clang-cl */
@@ -2215,7 +2215,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
    no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.1`) */
 #define CORRADE_ENABLE_SSE41 __attribute__((__target__("sse4.1")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE41 "sse4.1",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2253,7 +2253,7 @@ Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
 */
 #if defined(CORRADE_TARGET_SSE42) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SSE42
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE42
 #endif
 #elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
@@ -2261,7 +2261,7 @@ Superset of @ref CORRADE_ENABLE_SSE41, implied by @ref CORRADE_ENABLE_AVX. See
    Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -msse4.2`) */
 #define CORRADE_ENABLE_SSE42 __attribute__((__target__("sse4.2")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SSE42 "sse4.2",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2302,12 +2302,12 @@ may need to specify it together with others. See
 */
 #if defined(CORRADE_TARGET_POPCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_POPCNT
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_POPCNT
 #endif
 #elif (defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 409) || defined(CORRADE_TARGET_CLANG) /* matches clang-cl */
 #define CORRADE_ENABLE_POPCNT __attribute__((__target__("popcnt")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_POPCNT "popcnt",
 #endif
 #elif defined(CORRADE_TARGET_MSVC)
@@ -2351,12 +2351,12 @@ may need to specify it together with others. See
 */
 #if defined(CORRADE_TARGET_LZCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_LZCNT
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_LZCNT
 #endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 #define CORRADE_ENABLE_LZCNT __attribute__((__target__("lzcnt")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_LZCNT "lzcnt",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2405,12 +2405,12 @@ may need to specify it together with others. See
 */
 #if defined(CORRADE_TARGET_BMI1) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_BMI1
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_BMI1
 #endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 #define CORRADE_ENABLE_BMI1 __attribute__((__target__("bmi")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_BMI1 "bmi",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2455,7 +2455,7 @@ Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
 */
 #if defined(CORRADE_TARGET_AVX) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX
 #endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
@@ -2463,7 +2463,7 @@ Superset of @ref CORRADE_ENABLE_SSE42, implied by @ref CORRADE_ENABLE_AVX2. See
    and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx`) */
 #define CORRADE_ENABLE_AVX __attribute__((__target__("avx")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX "avx",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2512,14 +2512,14 @@ information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX_F16C) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX_F16C
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX_F16C
 #endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mf16c option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_F16C __attribute__((__target__("f16c")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX_F16C "f16c",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2568,14 +2568,14 @@ information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX_FMA
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX_FMA
 #endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
 /* The -mfma option implies -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx on
    both GCC and Clang (verified with `echo | gcc -dM -E - -mf16c`) */
 #define CORRADE_ENABLE_AVX_FMA __attribute__((__target__("fma")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX_FMA "fma",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2621,7 +2621,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX2) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX2
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX2
 #endif
 #elif defined(CORRADE_TARGET_GCC) /* does not match clang-cl */
@@ -2629,7 +2629,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
    both GCC and Clang, so no need to specify those as well (verified with
    `echo | gcc -dM -E - -mavx2`) */
 #define CORRADE_ENABLE_AVX2 __attribute__((__target__("avx2")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX2 "avx2",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2667,7 +2667,7 @@ more information and usage example.
 */
 #if defined(CORRADE_TARGET_AVX512F) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_AVX512F
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX512F
 #endif
 #elif defined(CORRADE_TARGET_GCC) && (__GNUC__*100 + __GNUC_MINOR__ >= 409 || defined(CORRADE_TARGET_CLANG)) /* does not match clang-cl */
@@ -2675,7 +2675,7 @@ more information and usage example.
    -mavx2 on both GCC and Clang, so no need to specify those as well (verified
    with `echo | gcc -dM -E - -mavx512f`) */
 #define CORRADE_ENABLE_AVX512F __attribute__((__target__("avx512f")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_AVX512F "avx512f",
 #endif
 /* https://github.com/llvm/llvm-project/commit/379a1952b37247975d2df8d23498675c9c8cc730,
@@ -2714,7 +2714,7 @@ for more information and usage example.
 */
 #if defined(CORRADE_TARGET_NEON) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON
 #endif
 /* https://github.com/android/ndk/issues/1066 is the only reported (and
@@ -2724,7 +2724,7 @@ for more information and usage example.
    ditched GCC, where this works properly. */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON __attribute__((__target__("fpu=neon")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON "fpu=neon",
 #endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2756,13 +2756,13 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_NEON_FMA) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FMA
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON_FMA
 #endif
 /* See CORRADE_ENABLE_NEON above for details about Clang */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON_FMA __attribute__((__target__("fpu=neon-vfpv4")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON_FMA "fpu=neon-vfpv4",
 #endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2793,13 +2793,13 @@ for more information and usage example.
 */
 #if defined(CORRADE_TARGET_NEON_FP16) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_NEON_FP16
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON_FP16
 #endif
 /* See CORRADE_ENABLE_NEON above for details about Clang */
 #elif defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
 #define CORRADE_ENABLE_NEON_FP16 __attribute__((__target__("arch=armv8.2-a+fp16")))
-#ifdef CORRADE_TARGET_GCC
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_NEON_FP16 "arch=armv8.2-a+fp16",
 #endif
 #elif defined(CORRADE_TARGET_MSVC) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2830,15 +2830,16 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
 */
 #if defined(CORRADE_TARGET_SIMD128) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_ENABLE_SIMD128
-#ifdef CORRADE_TARGET_GCC /* Future-proofing, GCC has no WASM support ATM */
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_SIMD128
 #endif
 #endif
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-/* GCC treats __attribute__((target("foo"))) __attribute__((target("bar"))) as
-   if only "bar" was specified, thus it's not possible to just put several
+/* GCC and Clang before version 8 treat
+    __attribute__((target("foo"))) __attribute__((target("bar")))
+   as if only "bar" was specified, thus it's not possible to just put several
    CORRADE_ENABLE_ macros after each other. Instead, the only accepted form is
    __attribute__((target("foo,bar"))). Fortunately, string literal
    concatenation works here, thus with some extra macro trickery we can produce
@@ -2849,7 +2850,7 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
    comma after the string literal (thus "foo",), which causes the empty macros
    be filtered out when passed one after another (without commas) from
    _CORRADE_ENABLEn to _CORRADE_ENABLE_CONCATENATE(). */
-#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)
+#if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) || __clang_major__ < 8)
 #define _CORRADE_ENABLE_CONCATENATE0(unused)
 #define _CORRADE_ENABLE_CONCATENATE1(v0, unused)                            \
     __attribute__((__target__(v0)))
@@ -2985,13 +2986,14 @@ effectively enabling given combination. For the macro to work, all
 the common usage pattern is thus in combination with an @cpp #ifdef @ce. See
 @ref Cpu-usage-target-attributes for more information and an example.
 
-When multiple `CORRADE_ENABLE_*` macros are specified one after another, GCC
-would pick only the last specified, ignoring the others. For it, the macro
-expands into a single combined @cpp __attribute__((__target__(...))) @ce
-attribute. For other compilers except MSVC it's just a shorthand for multiple
-`CORRADE_ENABLE_*` macros one after another. On MSVC expands to nothing ---
-there the functions aren't annotated in anyway and moreover the default
-preprocessor behavior would make this extremely tricky to implement.
+When multiple `CORRADE_ENABLE_*` macros are specified one after another, Clang
+before version 8 and GCC would pick only the last specified, ignoring the
+others. There the macro expands into a single combined
+@cpp __attribute__((__target__(...))) @ce attribute. For other compilers except
+MSVC it's just a shorthand for multiple `CORRADE_ENABLE_*` macros one after
+another. On MSVC expands to nothing --- there the functions aren't annotated in
+anyway and moreover the default preprocessor behavior would make this extremely
+tricky to implement.
 */
 #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE(...) _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_ENABLE8, _CORRADE_ENABLE7, _CORRADE_ENABLE6, _CORRADE_ENABLE5, _CORRADE_ENABLE4, _CORRADE_ENABLE3, _CORRADE_ENABLE2, _CORRADE_ENABLE1, )(__VA_ARGS__)

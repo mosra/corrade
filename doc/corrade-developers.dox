@@ -535,8 +535,8 @@ inverse.
     -   Annotated with the "function variant" of the macro (thus
         @cpp CORRADE_ENABLE(FOO) @ce) and also with an @cpp #ifdef @ce for the
         macro around. The function variant should be used in order to test both
-        the `_CORRADE_ENABLE_FOO` macro (on GCC) and `CORRADE_ENABLE_FOO` (on
-        Clang and elsewhere).
+        the `_CORRADE_ENABLE_FOO` macro (on Clang before version 8 and GCC) and
+        `CORRADE_ENABLE_FOO` (elsewhere).
     -   Ideally using just that instruction alone (such as is the case with
         `POPCNT`), if not then try to use an instruction set that's implied by
         it so it doesn't need a second `CORRADE_ENABLE_*`. Clearly mark which
