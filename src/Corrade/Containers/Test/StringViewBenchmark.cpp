@@ -31,6 +31,7 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 
 #include "configure.h"
@@ -49,6 +50,11 @@ struct StringViewBenchmark: TestSuite::Tester {
     void findCharacterCommonMemchr();
     void findCharacterCommonStlString();
 
+    void findCharacterCommonSmall();
+    void findCharacterCommonSmallMemchr();
+    /* No std::string variant as the overhead from slicing would make this
+       useless (and no, find() has no end position) */
+
     void findCharacterRare();
     void findCharacterRareNaive();
     void findCharacterRareMemchr();
@@ -58,6 +64,11 @@ struct StringViewBenchmark: TestSuite::Tester {
     void findLastCharacterCommonNaive();
     void findLastCharacterCommonMemrchr();
     void findLastCharacterCommonStlString();
+
+    void findLastCharacterCommonSmall();
+    void findLastCharacterCommonSmallMemrchr();
+    /* No std::string variant as the overhead from slicing would make this
+       useless (and no, rfind() has no end position) */
 
     void findLastCharacterRare();
     void findLastCharacterRareNaive();
@@ -73,6 +84,9 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findCharacterCommonMemchr,
                    &StringViewBenchmark::findCharacterCommonStlString,
 
+                   &StringViewBenchmark::findCharacterCommonSmall,
+                   &StringViewBenchmark::findCharacterCommonSmallMemchr,
+
                    &StringViewBenchmark::findCharacterRare,
                    &StringViewBenchmark::findCharacterRareNaive,
                    &StringViewBenchmark::findCharacterRareMemchr,
@@ -83,13 +97,16 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacterCommonMemrchr,
                    &StringViewBenchmark::findLastCharacterCommonStlString,
 
+                   &StringViewBenchmark::findLastCharacterCommonSmall,
+                   &StringViewBenchmark::findLastCharacterCommonSmallMemrchr,
+
                    &StringViewBenchmark::findLastCharacterRare,
                    &StringViewBenchmark::findLastCharacterRareNaive,
                    &StringViewBenchmark::findLastCharacterRareMemrchr,
                    &StringViewBenchmark::findLastCharacterRareStlString}, 100);
 }
 
-constexpr std::size_t CommonCharacterCount = 496;
+constexpr std::size_t CommonCharacterCount = 500;
 constexpr std::size_t RareCharacterCount = 90;
 constexpr std::size_t CharacterRepeats = 100;
 
@@ -162,6 +179,39 @@ void StringViewBenchmark::findCharacterCommonStlString() {
         while((found = a.find(' ', pos)) != std::string::npos) {
             ++count;
             pos = found + 1;
+        }
+    }
+
+    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+}
+
+void StringViewBenchmark::findCharacterCommonSmall() {
+    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
+    CORRADE_VERIFY(text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        StringView a = *text;
+        while(StringView found = a.prefix(Utility::min(std::size_t{15}, a.size())).find(' ')) {
+            ++count;
+            a = a.suffix(found.end());
+        }
+    }
+
+
+    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+}
+
+void StringViewBenchmark::findCharacterCommonSmallMemchr() {
+    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
+    CORRADE_VERIFY(text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        const char* a = text->data();
+        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', Utility::min(std::ptrdiff_t{15}, text->end() - a)))) {
+            ++count;
+            a = found + 1;
         }
     }
 
@@ -324,6 +374,43 @@ void StringViewBenchmark::findLastCharacterCommonStlString() {
     }
 
     CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+}
+
+void StringViewBenchmark::findLastCharacterCommonSmall() {
+    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
+    CORRADE_VERIFY(text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        StringView a = *text;
+        /** @todo use suffix() once it takes suffix size */
+        while(StringView found = a.exceptPrefix(Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(a.size()) - 15)).findLast(' ')) {
+            ++count;
+            a = a.prefix(found.begin());
+        }
+    }
+
+    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+}
+
+void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
+    #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("memrchr() not available");
+    #else
+    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
+    CORRADE_VERIFY(text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        std::size_t end = text->size();
+        while(const char* found = static_cast<const char*>(memrchr(text->begin() + Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15), ' ', end - Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15)))) {
+            ++count;
+            end = found - text->begin();
+        }
+    }
+
+    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    #endif
 }
 
 void StringViewBenchmark::findLastCharacterRare() {
