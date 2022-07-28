@@ -165,6 +165,8 @@ struct StringTest: TestSuite::Tester {
 
     void add();
     void addNullViews();
+    void multiply();
+    void multiplyNullView();
 
     void join();
     void joinNullViews();
@@ -302,6 +304,8 @@ StringTest::StringTest() {
 
               &StringTest::add,
               &StringTest::addNullViews,
+              &StringTest::multiply,
+              &StringTest::multiplyNullView,
 
               &StringTest::join,
               &StringTest::joinNullViews,
@@ -1911,6 +1915,26 @@ void StringTest::addNullViews() {
     CORRADE_COMPARE(StringView{} + StringView{}, "");
     CORRADE_COMPARE("hello"_s + nullptr, "hello");
     CORRADE_COMPARE(nullptr + "hello"_s, "hello");
+}
+
+void StringTest::multiply() {
+    /* Tests the StringView API as it's better to do it here instead of in
+       StringViewTest where we would need to include String */
+
+    CORRADE_COMPARE(""_s*37, "");
+    CORRADE_COMPARE(37*""_s, "");
+    CORRADE_COMPARE("hello"_s*0, "");
+    CORRADE_COMPARE(0*"hello"_s, "");
+    CORRADE_COMPARE("hello"_s*5, "hellohellohellohellohello");
+    CORRADE_COMPARE(5*"hello"_s, "hellohellohellohellohello");
+}
+
+void StringTest::multiplyNullView() {
+    /* Test that these don't trigger bullying from UBSan (memcpy called with
+       null pointers) */
+
+    CORRADE_COMPARE(StringView{}*37, "");
+    CORRADE_COMPARE(37*StringView{}, "");
 }
 
 void StringTest::join() {

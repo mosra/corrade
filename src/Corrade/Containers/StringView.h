@@ -671,7 +671,8 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * @snippet Containers.cpp StringView-join
          *
-         * @see @ref operator+(StringView, StringView)
+         * @see @ref operator+(StringView, StringView),
+         *      @ref operator*(StringView, std::size_t)
          */
         String join(ArrayView<const StringView> strings) const;
 
@@ -1093,6 +1094,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
         friend CORRADE_UTILITY_EXPORT bool operator>=(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT bool operator>(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
+        friend CORRADE_UTILITY_EXPORT String operator*(StringView, std::size_t);
 
         /* Used by the char* constructor, delinlined because it calls into
            std::strlen() */
@@ -1166,8 +1168,25 @@ For joining more than one string prefer to use @ref StringView::join() to avoid
 needless temporary allocations.
 @todo mutable && overloads that reuse the growable string storage instead of
     allocating new, when growable strings are a thing
+@see @ref operator*(StringView, std::size_t)
 */
 CORRADE_UTILITY_EXPORT String operator+(StringView a, StringView b);
+
+/**
+@brief String multiplication
+@m_since_latest
+
+Equivalent to string multiplication in Python, returns @p string repeated
+@p count times.
+@see @ref StringView::join(), @ref operator+(StringView, StringView)
+*/
+CORRADE_UTILITY_EXPORT String operator*(StringView string, std::size_t count);
+
+/**
+ * @overload
+ * @m_since_latest
+ */
+CORRADE_UTILITY_EXPORT String operator*(std::size_t count, StringView string);
 
 /* operator<<(Debug&, StringView) implemented directly in Debug */
 

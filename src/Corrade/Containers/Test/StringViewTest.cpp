@@ -125,6 +125,7 @@ struct StringViewTest: TestSuite::Tester {
     void compareNonEquality();
 
     /* operator+() tested in StringTest */
+    /* operator*() tested in StringTest */
 
     void access();
     void accessMutable();
