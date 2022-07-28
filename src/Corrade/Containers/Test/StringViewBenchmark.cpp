@@ -97,6 +97,9 @@ const struct {
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
     {Cpu::Sse2|Cpu::Bmi1, 16},
     #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Avx2|Cpu::Bmi1, 32},
+    #endif
 };
 
 StringViewBenchmark::StringViewBenchmark() {

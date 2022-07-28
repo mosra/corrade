@@ -40,7 +40,7 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
 
-#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+#if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
 #endif
 
@@ -191,7 +191,13 @@ namespace {
         still doing aligned loads, but branching for every.
     D.  Once there's less than 16 bytes left, it performs an unaligned load
         that may overlap with the previous aligned vector, similarly to the
-        initial unaligned load A. */
+        initial unaligned load A.
+
+    The 256-bit variant is mostly just about expanding from 16 bytes at a time
+    to 32 bytes at a time. The only difference is that instead of doing a
+    scalar fallback for less than 32 bytes, it delegates to the 128-bit
+    variant --- effectively performing the lookup with either two overlapping
+    16-byte vectors (or falling back to scalar for less than 16 bytes). */
 
 #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
 CORRADE_ENABLE(SSE2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::Sse2T, const char* at, const __m128i vn1) {
@@ -276,6 +282,94 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
         i = end - 16;
         return findCharacterSingleVectorUnaligned(Cpu::Sse2, i, vn1);
+    }
+
+    return {};
+  };
+}
+#endif
+
+#if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+CORRADE_ENABLE(AVX2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::Avx2T, const char* at, const __m256i vn1) {
+    /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason to
+       use it: https://stackoverflow.com/a/47426790 */
+    const __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(at));
+    if(const int mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1)))
+        return at + _tzcnt_u32(mask);
+    return {};
+}
+CORRADE_ENABLE(AVX2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVector(Cpu::Avx2T, const char* at, const __m256i vn1) {
+    CORRADE_INTERNAL_DEBUG_ASSERT(reinterpret_cast<std::uintptr_t>(at) % 32 == 0);
+
+    const __m256i chunk = _mm256_load_si256(reinterpret_cast<const __m256i*>(at));
+    if(const int mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1)))
+        return at + _tzcnt_u32(mask);
+    return {};
+}
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Bmi1)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(AVX2,BMI1) -> const char* {
+    const char* const end = data + size;
+
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? */
+    if(size < 32)
+        return stringFindCharacterImplementation(CORRADE_CPU_SELECT(Cpu::Sse2|Cpu::Bmi1))(data, size, character);
+
+    const __m256i vn1 = _mm256_set1_epi8(character);
+
+    /* Unconditionally do a lookup in the first vector a slower, unaligned
+       way. Any extra branching to avoid the unaligned load if already aligned
+       would be most probably more expensive than the actual unaligned load. */
+    /** @todo not great, slower than calling SSE directly :( */
+    if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Avx2, data, vn1))
+        return found;
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    for(; i + 4*32 < end; i += 4*32) {
+        const __m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
+        const __m256i b = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
+        const __m256i c = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 2);
+        const __m256i d = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 3);
+
+        const __m256i eqa = _mm256_cmpeq_epi8(vn1, a);
+        const __m256i eqb = _mm256_cmpeq_epi8(vn1, b);
+        const __m256i eqc = _mm256_cmpeq_epi8(vn1, c);
+        const __m256i eqd = _mm256_cmpeq_epi8(vn1, d);
+
+        const __m256i or1 = _mm256_or_si256(eqa, eqb);
+        const __m256i or2 = _mm256_or_si256(eqc, eqd);
+        const __m256i or3 = _mm256_or_si256(or1, or2);
+        if(_mm256_movemask_epi8(or3)) {
+            if(const int mask = _mm256_movemask_epi8(eqa))
+                return i + 0*32 + _tzcnt_u32(mask);
+            if(const int mask = _mm256_movemask_epi8(eqb))
+                return i + 1*32 + _tzcnt_u32(mask);
+            if(const int mask = _mm256_movemask_epi8(eqc))
+                return i + 2*32 + _tzcnt_u32(mask);
+            if(const int mask = _mm256_movemask_epi8(eqd))
+                return i + 3*32 + _tzcnt_u32(mask);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four vectors */
+    for(; i + 32 <= end; i += 32)
+        if(const char* const found = findCharacterSingleVector(Cpu::Avx2, i, vn1))
+            return found;
+
+    /* Handle remaining less than a vector with an unaligned search, again
+       overlapping back with the previous already-searched elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        i = end - 32;
+        return findCharacterSingleVectorUnaligned(Cpu::Avx2, i, vn1);
     }
 
     return {};
