@@ -227,12 +227,28 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,BMI1) -> const char* {
     const char* const end = data + size;
 
-    /* If we have less than 16 bytes, do it the stupid way */
-    /** @todo SWAR?? */
-    if(size < 16) {
-        for(const char* i = data; i != end; ++i)
-            if(*i == character) return i;
-        return {};
+    /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
+       loop this is 1.5-2x faster when unrolled. */
+    {
+        const char* j = data - 1;
+        switch(size) {
+            case 15: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 14: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 13: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 12: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 11: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 10: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  9: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  8: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  7: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  6: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  5: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  4: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  3: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  2: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  1: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  0: return {};
+        }
     }
 
     const __m128i vn1 = _mm_set1_epi8(character);
@@ -397,12 +413,30 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE_SIMD128 -> const char* {
     const char* const end = data + size;
 
-    /* If we have less than 16 bytes, do it the stupid way */
-    /** @todo SWAR?? */
-    if(size < 16) {
-        for(const char* i = data; i != end; ++i)
-            if(*i == character) return i;
-        return {};
+    /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
+       loop, this is 25% faster when unrolled. Strangely enough, if the switch
+       is put into an external always inline function to avoid duplication with
+       the SSE2 variant, it no longer gives the advantage. */
+    {
+        const char* j = data - 1;
+        switch(size) {
+            case 15: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 14: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 13: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 12: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 11: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 10: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  9: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  8: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  7: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  6: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  5: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  4: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  3: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  2: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  1: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case  0: return {};
+        }
     }
 
     const v128_t vn1 = wasm_i8x16_splat(character);
