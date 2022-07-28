@@ -170,7 +170,8 @@ Example usage:
 
 @snippet TestSuite.cpp Compare-Divisible
 
-See @ref TestSuite-Comparator-pseudo-types for more information.
+See @ref Aligned for similar functionality specialized for pointers. See
+@ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref NotDivisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
     @ref Greater, @ref Around, @ref NotEqual
 */
@@ -186,11 +187,38 @@ Example usage:
 
 @snippet TestSuite.cpp Compare-NotDivisible
 
-See @ref TestSuite-Comparator-pseudo-types for more information.
+See @ref NotAligned for similar functionality specialized for pointers. See
+@ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref Divisible, @ref Less, @ref LessOrEqual, @ref GreaterOrEqual,
     @ref Greater, @ref Around, @ref NotEqual
 */
 template<class T> class NotDivisible {};
+
+/**
+@brief Pseudo-type for verifying that a pointer is aligned
+@m_since_latest
+
+Like @ref Divisible, but specialized for pointers. Prints both values if the
+pointer *is not* aligned to given alignment value. Example usage:
+
+@snippet TestSuite.cpp Compare-Aligned
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+*/
+class Aligned {};
+
+/**
+@brief Pseudo-type for verifying that value is not divisible by
+@m_since_latest
+
+Like @ref NotDivisible, but specialized for pointers. Prints both values if the
+pointer *is* aligned to given alignment value. Example usage:
+
+@snippet TestSuite.cpp Compare-NotAligned
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+*/
+class NotAligned {};
 
 }
 
@@ -360,6 +388,46 @@ template<class T> class Comparator<Compare::NotDivisible<T>> {
     private:
         const T* _actualValue;
         const T* _expectedValue;
+};
+
+template<> class Comparator<Compare::Aligned> {
+    public:
+        ComparisonStatusFlags operator()(const void* actual, std::size_t expected) {
+            _actualValue = actual;
+            _expectedValue = expected;
+            return reinterpret_cast<std::ptrdiff_t>(_actualValue) % _expectedValue == 0 ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+        }
+
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Pointer" << actual << "is not aligned to" << expected
+                << "bytes," << _actualValue << "%" << _expectedValue
+                << "was not expected to be" << (reinterpret_cast<std::ptrdiff_t>(_actualValue) % _expectedValue);
+        }
+
+    private:
+        const void* _actualValue;
+        std::size_t _expectedValue;
+};
+
+template<> class Comparator<Compare::NotAligned> {
+    public:
+        ComparisonStatusFlags operator()(const void* actual, std::size_t expected) {
+            _actualValue = actual;
+            _expectedValue = expected;
+            return reinterpret_cast<std::ptrdiff_t>(_actualValue) % _expectedValue != 0 ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+        }
+
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Pointer" << actual << "is aligned to" << expected
+                << "bytes," << _actualValue << "%" << _expectedValue
+                << "was not expected to be 0";
+        }
+
+    private:
+        const void* _actualValue;
+        std::size_t _expectedValue;
 };
 
 #endif

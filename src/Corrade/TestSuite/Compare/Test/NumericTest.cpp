@@ -54,6 +54,9 @@ struct NumericTest: Tester {
 
     void divisible();
     void notDivisible();
+
+    void aligned();
+    void notAligned();
 };
 
 NumericTest::NumericTest() {
@@ -73,7 +76,10 @@ NumericTest::NumericTest() {
               &NumericTest::explicitBoolConversion,
 
               &NumericTest::divisible,
-              &NumericTest::notDivisible});
+              &NumericTest::notDivisible,
+
+              &NumericTest::aligned,
+              &NumericTest::notAligned});
 }
 
 struct BVec2 {
@@ -372,6 +378,44 @@ void NumericTest::notDivisible() {
     }
 
     CORRADE_COMPARE(out.str(), "Value a is divisible by c, 20 % 4 was not expected to be 0\n");
+}
+
+void NumericTest::aligned() {
+    float* a = reinterpret_cast<float*>(0xdeadbe14);
+    int b = 4;
+    int c = 8;
+    CORRADE_COMPARE(Comparator<Aligned>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Aligned>{}(a, c), ComparisonStatusFlag::Failed);
+
+    std::stringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<Aligned> compare;
+        ComparisonStatusFlags flags = compare(a, c);
+        compare.printMessage(flags, redirectOutput, "a", "c");
+    }
+
+    CORRADE_COMPARE(out.str(), "Pointer a is not aligned to c bytes, 0xdeadbe14 % 8 was not expected to be 4\n");
+}
+
+void NumericTest::notAligned() {
+    float* a = reinterpret_cast<float*>(0xdeadbe14);
+    int b = 8;
+    int c = 4;
+    CORRADE_COMPARE(Comparator<NotAligned>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<NotAligned>{}(a, c), ComparisonStatusFlag::Failed);
+
+    std::stringstream out;
+
+    {
+        Debug redirectOutput{&out};
+        Comparator<NotAligned> compare;
+        ComparisonStatusFlags flags = compare(a, c);
+        compare.printMessage(flags, redirectOutput, "a", "c");
+    }
+
+    CORRADE_COMPARE(out.str(), "Pointer a is aligned to c bytes, 0xdeadbe14 % 4 was not expected to be 0\n");
 }
 
 }}}}}
