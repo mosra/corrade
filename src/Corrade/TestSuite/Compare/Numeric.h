@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Compare::Less, @ref Corrade::TestSuite::Compare::LessOrEqual, @ref Corrade::TestSuite::Compare::GreaterOrEqual, @ref Corrade::TestSuite::Compare::Greater
+ * @brief Class @ref Corrade::TestSuite::Compare::Less, @ref Corrade::TestSuite::Compare::LessOrEqual, @ref Corrade::TestSuite::Compare::GreaterOrEqual, @ref Corrade::TestSuite::Compare::Greater, @ref Corrade::TestSuite::Compare::Around, @ref Corrade::TestSuite::Compare::NotEqual, @ref Corrade::TestSuite::Compare::Divisible, @ref Corrade::TestSuite::Compare::NotDivisible, function @ref Corrade::TestSuite::Compare::around()
  */
 
 #include "Corrade/TestSuite/Tester.h"
