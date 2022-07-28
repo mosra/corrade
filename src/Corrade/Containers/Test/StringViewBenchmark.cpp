@@ -33,6 +33,7 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
@@ -91,14 +92,27 @@ using namespace Containers::Literals;
 
 const struct {
     Cpu::Features features;
-    std::size_t vectorSize;
 } FindCharacterData[]{
-    {Cpu::Scalar, 16},
+    {Cpu::Scalar},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Sse2|Cpu::Bmi1, 16},
+    {Cpu::Sse2|Cpu::Bmi1},
     #endif
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Avx2|Cpu::Bmi1, 32},
+    {Cpu::Avx2|Cpu::Bmi1},
+    #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} FindCharacterSmallData[]{
+    {Cpu::Scalar, 15},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Sse2|Cpu::Bmi1, 15},
+    #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Avx2|Cpu::Bmi1, 15},
+    {Cpu::Avx2|Cpu::Bmi1, 31},
     #endif
 };
 
@@ -113,7 +127,7 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findCharacterCommonStlString}, 100);
 
     addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommonSmall}, 100,
-        Utility::Test::cpuVariantCount(FindCharacterData),
+        Utility::Test::cpuVariantCount(FindCharacterSmallData),
         &StringViewBenchmark::captureImplementations,
         &StringViewBenchmark::restoreImplementations);
 
@@ -246,12 +260,12 @@ void StringViewBenchmark::findCharacterCommonStlString() {
 
 void StringViewBenchmark::findCharacterCommonSmall() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = FindCharacterData[testCaseInstanceId()];
+    auto&& data = FindCharacterSmallData[testCaseInstanceId()];
     Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
     #else
-    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterSmallData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -262,12 +276,11 @@ void StringViewBenchmark::findCharacterCommonSmall() {
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         StringView a = *text;
-        while(StringView found = a.prefix(Utility::min(data.vectorSize - 1, a.size())).find(' ')) {
+        while(StringView found = a.prefix(Utility::min(data.size, a.size())).find(' ')) {
             ++count;
             a = a.suffix(found.end());
         }
     }
-
 
     CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
 }
