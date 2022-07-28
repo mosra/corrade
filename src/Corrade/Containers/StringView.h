@@ -671,7 +671,7 @@ template<class T> class CORRADE_UTILITY_EXPORT BasicStringView {
          *
          * @snippet Containers.cpp StringView-join
          *
-         * @ref operator+(StringView, StringView)
+         * @see @ref operator+(StringView, StringView)
          */
         String join(ArrayView<const StringView> strings) const;
 
