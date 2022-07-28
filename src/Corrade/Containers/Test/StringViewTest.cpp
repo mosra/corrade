@@ -26,12 +26,16 @@
 
 #include <sstream>
 
+#include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/Memory.h"
+#include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 namespace {
 
@@ -94,6 +98,9 @@ namespace Test { namespace {
 
 struct StringViewTest: TestSuite::Tester {
     explicit StringViewTest();
+
+    void captureImplementations();
+    void restoreImplementations();
 
     template<class T> void constructDefault();
     void constructDefaultConstexpr();
@@ -173,6 +180,10 @@ struct StringViewTest: TestSuite::Tester {
     void findStringMultipleOccurences();
     void findStringWhole();
     void findCharacter();
+    void findCharacterAligned();
+    void findCharacterUnaligned();
+    void findCharacterUnalignedLessThanTwoVectors();
+    void findCharacterUnalignedLessThanOneVector();
     void findEmpty();
     void findFlags();
     void findOr();
@@ -198,6 +209,19 @@ struct StringViewTest: TestSuite::Tester {
     void debugFlag();
     void debugFlags();
     void debug();
+
+    private:
+        decltype(Implementation::stringFindCharacter) findCharacterImplementation;
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} FindCharacterData[]{
+    {Cpu::Scalar, 16},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Sse2|Cpu::Bmi1, 16},
+    #endif
 };
 
 StringViewTest::StringViewTest() {
@@ -279,9 +303,18 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::findString,
               &StringViewTest::findStringMultipleOccurences,
-              &StringViewTest::findStringWhole,
-              &StringViewTest::findCharacter,
-              &StringViewTest::findEmpty,
+              &StringViewTest::findStringWhole});
+
+    addInstancedTests({&StringViewTest::findCharacter,
+                       &StringViewTest::findCharacterAligned,
+                       &StringViewTest::findCharacterUnaligned,
+                       &StringViewTest::findCharacterUnalignedLessThanTwoVectors,
+                       &StringViewTest::findCharacterUnalignedLessThanOneVector},
+        Utility::Test::cpuVariantCount(FindCharacterData),
+        &StringViewTest::captureImplementations,
+        &StringViewTest::restoreImplementations);
+
+    addTests({&StringViewTest::findEmpty,
               &StringViewTest::findFlags,
               &StringViewTest::findOr,
 
@@ -317,6 +350,18 @@ template<> struct NameFor<const char> {
 template<> struct NameFor<char> {
     static const char* name() { return "MutableStringView"; }
 };
+
+void StringViewTest::captureImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    findCharacterImplementation = Implementation::stringFindCharacter;
+    #endif
+}
+
+void StringViewTest::restoreImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    Implementation::stringFindCharacter = findCharacterImplementation;
+    #endif
+}
 
 template<class T> void StringViewTest::constructDefault() {
     setTestCaseTemplateName(NameFor<T>::name());
@@ -1592,6 +1637,17 @@ void StringViewTest::findStringWhole() {
 }
 
 void StringViewTest::findCharacter() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     StringView a = "hello cursed\0world!"_s;
 
     /* Single character at the start */
@@ -1643,6 +1699,219 @@ void StringViewTest::findCharacter() {
         CORRADE_COMPARE(found, "o");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
     }
+}
+
+void StringViewTest::findCharacterAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, with 12 vectors
+       in total, corresponding to the code paths:
+
+        +----+    +----+----+----+----+    +----+----+----+
+        |deef|    ! gg : hh :i  i: jj |    |k   | ll |   m|
+        +----+    +----+----+----+----+    +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = arrayView(a);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* First vector is treated separately. It should pick the first found of
+       the two; test also the very first and very last. */
+    string[0] = 'd';
+    string[7] = 'e';
+    string[data.vectorSize - 7] = 'e';
+    string[data.vectorSize - 1] = 'f';
+    CORRADE_COMPARE(string.find('d').data() - string.data(), 0);
+    CORRADE_COMPARE(string.find('e').data() - string.data(), 7);
+    CORRADE_COMPARE(string.find('f').data() - string.data(), data.vectorSize - 1);
+
+    /* Then it's four vectors at a time. First four would be empty, second four
+       would have the data. Test each of the four separately. For each it
+       should pick the first found of the two. */
+    string[data.vectorSize*5 + 3] = 'g';
+    string[data.vectorSize*6 - 3] = 'g';
+    string[data.vectorSize*6 + 7] = 'h';
+    string[data.vectorSize*7 - 7] = 'h';
+    string[data.vectorSize*7 + 0] = 'i';
+    string[data.vectorSize*8 - 1] = 'i';
+    string[data.vectorSize*8 + 2] = 'j';
+    string[data.vectorSize*9 - 2] = 'j';
+    CORRADE_COMPARE(string.find('g').data() - string.data(), data.vectorSize*5 + 3);
+    CORRADE_COMPARE(string.find('h').data() - string.data(), data.vectorSize*6 + 7);
+    CORRADE_COMPARE(string.find('i').data() - string.data(), data.vectorSize*7 + 0);
+    CORRADE_COMPARE(string.find('j').data() - string.data(), data.vectorSize*8 + 2);
+
+    /* Last less-than-four vectors are again treated separately. Again, for
+       each it should pick the last found of the two; test also the very first
+       and very last of the range. */
+    string[data.vectorSize* 9 + 0] = 'k';
+    string[data.vectorSize*10 + 4] = 'l';
+    string[data.vectorSize*11 - 4] = 'l';
+    string[data.vectorSize*12 - 1] = 'm';
+    CORRADE_COMPARE(string.find('k').data() - string.data(), data.vectorSize*9 + 0);
+    CORRADE_COMPARE(string.find('l').data() - string.data(), data.vectorSize*10 + 4);
+    CORRADE_COMPARE(string.find('m').data() - string.data(), data.vectorSize*12 - 1);
+
+    /* A character that's not found should be handled properly even after all
+       these complex code paths */
+    CORRADE_VERIFY(!string.find('n'));
+}
+
+void StringViewTest::findCharacterUnaligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing:
+        - the first unaligned vector having all bytes but one overlapping with
+          the four-at-a-time block
+        - there being just one four-at-a-time block (the if() branch that skips
+          the block was sufficiently tested in firstCharacterAligned())
+        - there being just one full vector after, and the last unaligned vector
+          again overlapping with all but one byte with it
+
+        +----+                +----+
+        |f   |                |   j|
+        +----+                +----+
+         +----+----+----+----+----+
+         |g   :    :    :   h|i   |
+         +----+----+----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4 + 2));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 4 + 2));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
+    CORRADE_COMPARE(string.size(), data.vectorSize*5 + 2);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* First byte should be handled by the initial unaligned check */
+    string[0] = 'f';
+    string[data.vectorSize - 1] = 'f';
+    CORRADE_COMPARE(string.find('f').data() - string.data(), 0);
+
+    /* The four-vectors-at-a-time should handle the aligned middle portion.
+       Test just the very first and very last of the aligned range. */
+    string[data.vectorSize*0 + 1] = 'g';
+    string[data.vectorSize*4 + 0] = 'h';
+    CORRADE_COMPARE_AS(string.data() + 1, data.vectorSize,
+        TestSuite::Compare::Aligned);
+    CORRADE_COMPARE(string.find('g').data() - string.data(), data.vectorSize*0 + 1);
+    CORRADE_COMPARE(string.find('h').data() - string.data(), data.vectorSize*4 + 0);
+
+    /* The byte right after the aligned block is handled by the "less than
+       four vectors" block */
+    string[data.vectorSize*4 - 1] = 'i';
+    CORRADE_COMPARE_AS(string.data() + data.vectorSize*4 + 1, data.vectorSize,
+        TestSuite::Compare::Aligned);
+    CORRADE_COMPARE(string.find('i').data() - string.data(), data.vectorSize*4 - 1);
+
+    /* Last byte should be handled by the final unaligned check */
+    string[string.size() - 1] = 'j';
+    CORRADE_COMPARE(string.find('j').data() - string.data(), data.vectorSize*5 + 1);
+
+    /* A character that's not found should be handled properly even after all
+       these complex code paths */
+    CORRADE_VERIFY(!string.find('k'));
+}
+
+void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
+       so there's just two unaligned blocks overlapping in a single byte:
+
+        +----+
+        |f   |
+        +----+
+         +----+
+         |g   !
+         +----+ */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* First byte should be handled by the initial unaligned check */
+    string[0] = 'f';
+    CORRADE_COMPARE(string.find('f').data() - string.data(), 0);
+
+    /* Last byte should be handled by the final unaligned check */
+    string[string.size() - 1] = 'g';
+    CORRADE_COMPARE(string.find('g').data() - string.data(), data.vectorSize*2 - 2);
+
+    /* A character that's not found should be handled properly here as well */
+    CORRADE_VERIFY(!string.find('h'));
+}
+
+void StringViewTest::findCharacterUnalignedLessThanOneVector() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
+       pointer even though it shouldn't matter here. It should pick the first
+       found of the two. */
+    Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
+    MutableStringView string = a.exceptPrefix(1);
+    string[7] = 'f';
+    string[data.vectorSize/2 + 1] = 'f';
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE(string.find('f').data() - string.data(), 7);
+
+    /* A character that's not found should be handled properly here as well */
+    CORRADE_VERIFY(!string.find('g'));
 }
 
 void StringViewTest::findEmpty() {

@@ -45,4 +45,37 @@
 #define CORRADE_UTILITY_LOCAL
 #endif
 
+/* Function-pointer-based CPU dispatch, exposing also the runtime dispatcher
+   implementation */
+#if defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH) || (defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH) && !defined(CORRADE_CPU_USE_IFUNC))
+    #define CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(name)                \
+        CORRADE_UTILITY_EXPORT decltype(name) name ## Implementation(Cpu::Features);
+    #define CORRADE_UTILITY_CPU_DISPATCHER(...) CORRADE_CPU_DISPATCHER(__VA_ARGS__)
+    #define CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(name) (*name)
+    #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)                 \
+        CORRADE_CPU_DISPATCHED_POINTER(dispatcher, __VA_ARGS__) CORRADE_NOOP
+    #define CORRADE_UTILITY_CPU_MAYBE_UNUSED
+
+/* IFUNC or compile-time CPU dispatch, runtime dispatcher is not exposed */
+#else
+    #define CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(name)
+    #define CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(name) (name)
+    /* Runtime dispatcher implementation is either hidden or not present at
+       all */
+    #if defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH) && defined(CORRADE_CPU_USE_IFUNC)
+        #define CORRADE_UTILITY_CPU_DISPATCHER(...)                         \
+            namespace { CORRADE_CPU_DISPATCHER(__VA_ARGS__) }
+        #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)             \
+            CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, __VA_ARGS__) CORRADE_NOOP
+        #define CORRADE_UTILITY_CPU_MAYBE_UNUSED
+    #elif !defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH)
+        #define CORRADE_UTILITY_CPU_DISPATCHER(...)
+        #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)             \
+            __VA_ARGS__ CORRADE_PASSTHROUGH
+        #define CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_UNUSED
+    #else
+    #error mosra messed up!
+    #endif
+#endif
+
 #endif

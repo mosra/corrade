@@ -35,6 +35,7 @@
 #include <cstddef>
 #include <initializer_list>
 
+#include "Corrade/Corrade.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/DebugAssert.h"
@@ -1270,7 +1271,8 @@ namespace Implementation {
    (that can't be overloaded) */
 CORRADE_UTILITY_EXPORT const char* stringFindString(const char* data, std::size_t size, const char* substring, std::size_t substringSize);
 CORRADE_UTILITY_EXPORT const char* stringFindLastString(const char* data, std::size_t size, const char* substring, std::size_t substringSize);
-CORRADE_UTILITY_EXPORT const char* stringFindCharacter(const char* data, std::size_t size, char character);
+CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringFindCharacter)(const char* data, std::size_t size, char character);
+CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(stringFindCharacter)
 CORRADE_UTILITY_EXPORT const char* stringFindLastCharacter(const char* data, std::size_t size, char character);
 CORRADE_UTILITY_EXPORT const char* stringFindAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
 CORRADE_UTILITY_EXPORT const char* stringFindLastAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);

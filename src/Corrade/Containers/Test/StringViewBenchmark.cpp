@@ -27,12 +27,15 @@
 #include <cstring>
 #include <string>
 
+#include "Corrade/Cpu.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
+#include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 #include "configure.h"
 
@@ -40,6 +43,9 @@ namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct StringViewBenchmark: TestSuite::Tester {
     explicit StringViewBenchmark();
+
+    void captureImplementations();
+    void restoreImplementations();
 
     /* The "Common" variants test rather the call / preamble / postamble
        overhead, while the "Rare" variants test the actual vectorized
@@ -74,21 +80,48 @@ struct StringViewBenchmark: TestSuite::Tester {
     void findLastCharacterRareNaive();
     void findLastCharacterRareMemrchr();
     void findLastCharacterRareStlString();
+
+    private:
+        #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(Implementation::stringFindCharacter) findCharacterImplementation;
+        #endif
 };
 
 using namespace Containers::Literals;
 
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} FindCharacterData[]{
+    {Cpu::Scalar, 16},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Sse2|Cpu::Bmi1, 16},
+    #endif
+};
+
 StringViewBenchmark::StringViewBenchmark() {
-    addBenchmarks({&StringViewBenchmark::findCharacterCommon,
-                   &StringViewBenchmark::findCharacterCommonNaive,
+    addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommon}, 100,
+        Utility::Test::cpuVariantCount(FindCharacterData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringViewBenchmark::findCharacterCommonNaive,
                    &StringViewBenchmark::findCharacterCommonMemchr,
-                   &StringViewBenchmark::findCharacterCommonStlString,
+                   &StringViewBenchmark::findCharacterCommonStlString}, 100);
 
-                   &StringViewBenchmark::findCharacterCommonSmall,
-                   &StringViewBenchmark::findCharacterCommonSmallMemchr,
+    addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommonSmall}, 100,
+        Utility::Test::cpuVariantCount(FindCharacterData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
 
-                   &StringViewBenchmark::findCharacterRare,
-                   &StringViewBenchmark::findCharacterRareNaive,
+    addBenchmarks({&StringViewBenchmark::findCharacterCommonSmallMemchr}, 100);
+
+    addInstancedBenchmarks({&StringViewBenchmark::findCharacterRare}, 100,
+        Utility::Test::cpuVariantCount(FindCharacterData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringViewBenchmark::findCharacterRareNaive,
                    &StringViewBenchmark::findCharacterRareMemchr,
                    &StringViewBenchmark::findCharacterRareStlString,
 
@@ -106,11 +139,34 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacterRareStlString}, 100);
 }
 
+void StringViewBenchmark::captureImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    findCharacterImplementation = Implementation::stringFindCharacter;
+    #endif
+}
+
+void StringViewBenchmark::restoreImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    Implementation::stringFindCharacter = findCharacterImplementation;
+    #endif
+}
+
 constexpr std::size_t CommonCharacterCount = 500;
 constexpr std::size_t RareCharacterCount = 90;
 constexpr std::size_t CharacterRepeats = 100;
 
 void StringViewBenchmark::findCharacterCommon() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
     CORRADE_VERIFY(text);
 
@@ -186,13 +242,24 @@ void StringViewBenchmark::findCharacterCommonStlString() {
 }
 
 void StringViewBenchmark::findCharacterCommonSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
     CORRADE_VERIFY(text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         StringView a = *text;
-        while(StringView found = a.prefix(Utility::min(std::size_t{15}, a.size())).find(' ')) {
+        while(StringView found = a.prefix(Utility::min(data.vectorSize - 1, a.size())).find(' ')) {
             ++count;
             a = a.suffix(found.end());
         }
@@ -219,6 +286,17 @@ void StringViewBenchmark::findCharacterCommonSmallMemchr() {
 }
 
 void StringViewBenchmark::findCharacterRare() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = FindCharacterData[testCaseInstanceId()];
+    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
     CORRADE_VERIFY(text);
     *text = *text*10;

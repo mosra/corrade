@@ -30,6 +30,7 @@
 #include <cstring>
 #include <string>
 
+#include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/GrowableArray.h"
@@ -38,6 +39,10 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
+
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+#include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -143,12 +148,159 @@ const char* stringFindLastString(const char* const data, const std::size_t size,
     return {};
 }
 
-const char* stringFindCharacter(const char* data, const std::size_t size, const char character) {
-    /* Making a utility function because yet again I'm not sure if null
-       pointers are allowed and cppreference says nothing about that, so in
-       case this needs to be patched it's better to have it in a single place */
-    return static_cast<const char*>(std::memchr(data, character, size));
+namespace {
+
+/* SIMD implementation of character lookup. Loosely based off
+   https://docs.rs/memchr/2.3.4/src/memchr/x86/sse2.rs.html, which in turn is
+   based off https://gms.tf/stdfind-and-memchr-optimizations.html, which at the
+   time of writing (Jul 2022) uses m.css, so the circle is complete :))
+
+   The code below is commented, but the core points are the following:
+
+    1.  do as much as possible via aligned loads,
+    2.  otherwise, do as much as possible via unaligned vector loads even at
+        the cost of ovelapping with an aligned load,
+    3.  otherwise, fall back to a smaller vector width (AVX -> SSE) or to a
+        scalar code
+
+   The 128-bit variant first checks if there's less than 16 bytes. If it is, it
+   just checks each of them sequentially. Otherwise, with 16 and more bytes,
+   the following is done:
+
+      +---+                         +---+
+      | A |                         | D |
+      +---+                         +---+
+        +---+---+---+---+     +---+--
+        | B :   :   :   | ... | C | ...
+        +---+---+---+---+     +---+--
+
+    A.  First it does an unconditional unaligned load of a single vector
+        (assuming an extra conditional branch would likely be slower than the
+        unaligned load ovehead), compares all bytes inside to the (broadcasted)
+        search value and for all bytes that are equal calculates a bitmask (if
+        4th and 7th byte is present, the bitmask has bit 4 and 7 set). Then, if
+        any bit is set, returns the  position of the first bit which is the
+        found index.
+    B.  Next it finds an aligned position. If the vector A was already aligned,
+        it will start right after, otherwise there may be up to 15 bytes
+        overlap that'll be checked twice. From the aligned position, to avoid
+        branching too often, it goes in a batch of four vectors at a time,
+        checking the result together for all four. Which also helps offset the
+        extra work from the initial overlap.
+    C.  Once there is less than four vectors left, it goes vector-by-vector,
+        still doing aligned loads, but branching for every.
+    D.  Once there's less than 16 bytes left, it performs an unaligned load
+        that may overlap with the previous aligned vector, similarly to the
+        initial unaligned load A. */
+
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+CORRADE_ENABLE(SSE2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::Sse2T, const char* at, const __m128i vn1) {
+    /* _mm_lddqu_si128 is just an alias to _mm_loadu_si128 on all CPUs with
+       SSSE3+, no reason to use it: https://stackoverflow.com/a/38383624 */
+    const __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(at));
+    if(const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1)))
+        return at + _tzcnt_u32(mask);
+    return {};
 }
+CORRADE_ENABLE(SSE2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVector(Cpu::Sse2T, const char* at, const __m128i vn1) {
+    CORRADE_INTERNAL_DEBUG_ASSERT(reinterpret_cast<std::uintptr_t>(at) % 16 == 0);
+
+    const __m128i chunk = _mm_load_si128(reinterpret_cast<const __m128i*>(at));
+    if(const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1)))
+        return at + _tzcnt_u32(mask);
+    return {};
+}
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2|Cpu::Bmi1)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,BMI1) -> const char* {
+    const char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo SWAR?? */
+    if(size < 16) {
+        for(const char* i = data; i != end; ++i)
+            if(*i == character) return i;
+        return {};
+    }
+
+    const __m128i vn1 = _mm_set1_epi8(character);
+
+    /* Unconditionally do a lookup in the first vector a slower, unaligned
+       way. Any extra branching to avoid the unaligned load if already aligned
+       would be most probably more expensive than the actual unaligned load. */
+    if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Sse2, data, vn1))
+        return found;
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    for(; i + 4*16 < end; i += 4*16) {
+        const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
+        const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
+        const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
+        const __m128i d = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 3);
+
+        const __m128i eqa = _mm_cmpeq_epi8(vn1, a);
+        const __m128i eqb = _mm_cmpeq_epi8(vn1, b);
+        const __m128i eqc = _mm_cmpeq_epi8(vn1, c);
+        const __m128i eqd = _mm_cmpeq_epi8(vn1, d);
+
+        const __m128i or1 = _mm_or_si128(eqa, eqb);
+        const __m128i or2 = _mm_or_si128(eqc, eqd);
+        const __m128i or3 = _mm_or_si128(or1, or2);
+        if(_mm_movemask_epi8(or3)) {
+            if(const int mask = _mm_movemask_epi8(eqa))
+                return i + 0*16 + _tzcnt_u32(mask);
+            if(const int mask = _mm_movemask_epi8(eqb))
+                return i + 1*16 + _tzcnt_u32(mask);
+            if(const int mask = _mm_movemask_epi8(eqc))
+                return i + 2*16 + _tzcnt_u32(mask);
+            if(const int mask = _mm_movemask_epi8(eqd))
+                return i + 3*16 + _tzcnt_u32(mask);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four vectors */
+    for(; i + 16 <= end; i += 16)
+        if(const char* const found = findCharacterSingleVector(Cpu::Sse2, i, vn1))
+            return found;
+
+    /* Handle remaining less than a vector with an unaligned search, again
+       overlapping back with the previous already-searched elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        return findCharacterSingleVectorUnaligned(Cpu::Sse2, i, vn1);
+    }
+
+    return {};
+  };
+}
+#endif
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
+  return [](const char* const data, const std::size_t size, const char character) -> const char* {
+    /* Yet again I'm not sure if null pointers are allowed and cppreference
+       says nothing about that, so this might need to get patched */
+    return static_cast<const char*>(std::memchr(data, character, size));
+  };
+}
+
+}
+
+#ifdef CORRADE_TARGET_X86
+CORRADE_UTILITY_CPU_DISPATCHER(stringFindCharacterImplementation, Cpu::Bmi1)
+#else
+CORRADE_UTILITY_CPU_DISPATCHER(stringFindCharacterImplementation)
+#endif
+CORRADE_UTILITY_CPU_DISPATCHED(stringFindCharacterImplementation, const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringFindCharacter)(const char* data, std::size_t size, char character))({
+    return stringFindCharacterImplementation(CORRADE_CPU_SELECT(Cpu::Default))(data, size, character);
+})
 
 const char* stringFindLastCharacter(const char* const data, const std::size_t size, const char character) {
     /* Linux has a memrchr() function but other OSes not. So let's just do it

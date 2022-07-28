@@ -34,7 +34,6 @@ if(CORRADE_WITH_UTILITY)
         Configuration.cpp
         ConfigurationValue.cpp
         MurmurHash2.cpp
-        Path.cpp
         Sha1.cpp
         System.cpp
 
@@ -57,6 +56,13 @@ if(CORRADE_WITH_UTILITY)
         ../Containers/BitArray.cpp
         ../Containers/String.cpp
         ../Containers/StringView.cpp)
+
+    # Files that directly or indirectly use CPU dispatch, such as calling
+    # Containers::String::contains(). The list gets added to either
+    # CorradeUtility_GracefulAssert_SRCS or CorradeUtility_SRCS below based on
+    # whether tests use a different CPU dispatch than the main library.
+    set(CorradeUtility_CpuDispatch_SRCS
+        Path.cpp)
 
     set(CorradeUtility_HEADERS
         Algorithms.h
@@ -127,7 +133,8 @@ if(CORRADE_WITH_UTILITY)
     if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
         list(APPEND CorradeUtility_SRCS
             FileWatcher.cpp
-            Tweakable.cpp
+            Tweakable.cpp)
+        list(APPEND CorradeUtility_CpuDispatch_SRCS
             TweakableParser.cpp)
         list(APPEND CorradeUtility_HEADERS
             FileWatcher.h
@@ -147,6 +154,16 @@ if(CORRADE_WITH_UTILITY)
     if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC)
         list(APPEND CorradeUtility_SRCS Implementation/WindowsWeakSymbol.cpp)
         list(APPEND CorradeUtility_PRIVATE_HEADERS Implementation/WindowsWeakSymbol.h)
+    endif()
+
+    # If the tests are built with pointer dispatch but the main libraries
+    # aren't, we have to compile select files separately for each. Otherwise
+    # some code would expect a function symbol to be exist and some expect a
+    # function pointer symbol.
+    if(CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH AND (NOT CORRADE_BUILD_CPU_RUNTIME_DISPATCH OR CORRADE_CPU_USE_IFUNC))
+        list(APPEND CorradeUtility_GracefulAssert_SRCS ${CorradeUtility_CpuDispatch_SRCS})
+    else()
+        list(APPEND CorradeUtility_SRCS ${CorradeUtility_CpuDispatch_SRCS})
     endif()
 
     # Objects shared between main and test library
@@ -197,11 +214,12 @@ if(CORRADE_WITH_UTILITY)
     install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
     if(CORRADE_BUILD_TESTS)
-        # Library with graceful assert for testing. If tests need such
-        # behavior, they should link to CorradeTestSuiteTestLib instead.
-        # Otherwise the implicitly linked CorradeTestSuite would drag in
-        # CorradeUtility in addition to CorradeUtilityTestLib, leading to ODR
-        # violations and making ASan builds fail.
+        # Library with graceful assert and function-pointer-based CPU dispatch
+        # for testing. If tests need such behavior, they should link to
+        # CorradeTestSuiteTestLib instead. Otherwise the implicitly linked
+        # CorradeTestSuite would drag in CorradeUtility in addition to
+        # CorradeUtilityTestLib, leading to ODR violations and making ASan
+        # builds fail.
         add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC}
             $<TARGET_OBJECTS:CorradeUtilityObjects>
             ${CorradeUtility_GracefulAssert_SRCS})
@@ -210,6 +228,9 @@ if(CORRADE_WITH_UTILITY)
         target_link_libraries(CorradeUtilityTestLib PUBLIC
             $<TARGET_PROPERTY:CorradeUtility,INTERFACE_LINK_LIBRARIES>)
         target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
+        if(CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH)
+            target_compile_definitions(CorradeUtilityTestLib PUBLIC "CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH")
+        endif()
         set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
         if(CORRADE_BUILD_STATIC_PIC)
             set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -243,6 +264,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 
         Implementation/ErrorString.cpp
 
+        ../Cpu.cpp
         ../Containers/String.cpp
         ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)
