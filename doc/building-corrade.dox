@@ -652,6 +652,16 @@ Building of tests is controlled by the following options:
     overhead from function pointers may however be significant on certain
     platforms, skewing benchmark results. Disable it to make the tests use the
     same dispatch method as the rest of the library.
+-   `CORRADE_BUILD_TESTS_FORCE_WASM_SIMD128` --- Force Emscripten unit tests to
+    be built with `-msimd128` independenently of `CMAKE_CXX_FLAGS`. Together
+    with `CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH` and presence of the
+    @ref CORRADE_ENABLE_SIMD128 preprocessor variable this makes it possible
+    for the tests to verify also WebAssembly SIMD variants of CPU-dependent
+    functionality instead of just the scalar version if the rest of the library
+    is built without `-msimd128`. Enabled by default if
+    `CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH` is set and Node.js version
+    15+ is found, which has finalized WebAssembly SIMD support. Disable to make
+    the tests use the same compilation flags as the rest of the library.
 
 The tests use Corrade's own @relativeref{Corrade,TestSuite} framework and can
 be run either manually (the binaries are located in `Test/` subdirectories in

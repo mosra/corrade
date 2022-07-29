@@ -264,6 +264,37 @@ option(CORRADE_BUILD_CPU_RUNTIME_DISPATCH "Build with runtime dispatch for CPU-d
 # this for benchmarks.
 cmake_dependent_option(CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH "Force pointer-based dispatch for unit tests to verify all variants of CPU-dependent functionality" ON "CORRADE_BUILD_TESTS" OFF)
 
+# Pass -msimd128 to tests to make it possible to verify also the WASM SIMD
+# functionality even if the actual library is built without. I thought it would
+# be a no-brainer, however *actual* finalized SIMD128 requires final Clang 13
+# (such version is reported since emsdk 2.0.13, but the actual final version
+# containing all intrinsics is only in emsdk 2.0.18), and Node.js 15+, which
+# contains V8 8.6:
+#   https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V15.md#2020-10-20-version-1500-current-bethgriggs
+# Final bitmask instructions were added in 8.5, Node.js 14 has 8.4:
+#   https://github.com/v8/v8/commit/aa5bcc09bf7d5d77056e6033918d79c30aa3f49a
+# However, even now, in the midst of 2022 wildfires, emsdk still bundles
+# Node.js 14.18 and there's no hope of it being upgraded any time soon:
+#   https://github.com/emscripten-core/emsdk/pull/877
+#   https://github.com/emscripten-core/emsdk/issues/947
+#   https://github.com/emscripten-core/emsdk/issues/1064
+# So instead of having -msimd128 always, I only enable it implicitly if Node.js
+# 15 is found, and then CORRADE_ENABLE_SIMD128 / CORRADE_TARGET_SIMD128 gets
+# enabled only if there's Clang 13 but also Emscripten 2.0.18+. What a mess.
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(ENABLE_IF_NODEJS_15 OFF)
+    if(CORRADE_BUILD_TESTS)
+        find_package(NodeJs REQUIRED QUIET)
+        if(NOT NodeJs_VERSION VERSION_LESS 15.0)
+            set(ENABLE_IF_NODEJS_15 ON)
+        elseif(NOT DEFINED CORRADE_BUILD_TESTS_FORCE_WASM_SIMD128)
+            message(WARNING "Disabling CORRADE_BUILD_TESTS_FORCE_WASM_SIMD128 by default as finalized WebAssembly SIMD support is only since Node.js 15 but found version ${NodeJs_VERSION}")
+        endif()
+    endif()
+
+    cmake_dependent_option(CORRADE_BUILD_TESTS_FORCE_WASM_SIMD128 "Force -msimd128 for unit tests to verify also WASM SIMD variants of CPU-dependent functionality" ${ENABLE_IF_NODEJS_15} "CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH" OFF)
+endif()
+
 # Backwards compatibility for unprefixed CMake options. If the user isn't
 # explicitly using prefixed options in the first run already, accept the
 # unprefixed options, and remember this decision for subsequent runs
