@@ -450,7 +450,22 @@ function(corrade_add_test test_name)
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
-            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs $<TARGET_FILE:${test_name}> ${arguments})
+            # Node.js before version 17 needs --experimental-wasm-simd. Version
+            # 17 upgraded to V8 9.1, which has the option enabled by default:
+            #   https://github.com/nodejs/node/commit/a7cbf19a82c75e9a65e90fb8ba4947e2fc52ef39
+            # Since the code defining these flags explicitly says "remove once
+            # they hit stable":
+            #   https://github.com/v8/v8/blob/ba8ad5dd17ea85c856c09c2ff603641487d1f0ca/src/wasm/wasm-feature-flags.h#L101-L109
+            # even though it causes numberous issues such as:
+            #   https://github.com/nodejs/node/issues/43592
+            # I'm future-proofing and not setting it for version 17+. From the
+            # other side, the flag goes back to ancient version 6 (2017), so it
+            # should be no problem to just pass it there always:
+            #   https://github.com/v8/v8/commit/45618a9ab5cc98a5de200b0116670e8c272f0c5f
+            if(NodeJS_VERSION VERSION_LESS 17)
+                set(experimental_wasm_simd --experimental-wasm-simd)
+            endif()
+            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs ${experimental_wasm_simd} $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
             foreach(file ${files})
