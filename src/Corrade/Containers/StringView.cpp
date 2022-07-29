@@ -228,25 +228,43 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
     const char* const end = data + size;
 
     /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
-       loop this is 1.5-2x faster when unrolled. */
+       loop this is 1.5-2x faster when unrolled. Interestingly enough, on GCC
+       (11) doing a pre-increment and `return j` leads to
+        lea    0x1(%rcx),%rax
+        mov    %rax,%r8
+        cmp    0x1(%rcx),%dl
+        je     0x63f43 <+243>
+       repeated 15 times (with <+243> returning %r8 for all), while a
+       post-increment and `return j - 1` is just
+        lea    0x1(%rax),%rcx
+        cmp    (%rax),%dl
+        je     0x63f20 <+208>
+       with %rax and %rcx alternating in every case and the jump always
+       different. That's 25% instructions less for the post-increment, and the
+       benchmark confirms that (~3.50 vs ~2.80 µs). Clang (13) does a similar
+       thing, although it has `lea, cmp, mov, je` in the first case instead and
+       `cmp, je, add` in the second case instead, and (probably due to the
+       different order?) the benchmark doesn't show any difference between the
+       two. Since post-increment significantly helps GCC and doesn't make
+       Clang slower, use it. */
     {
-        const char* j = data - 1;
+        const char* j = data;
         switch(size) {
-            case 15: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case 14: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case 13: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case 12: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case 11: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case 10: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  9: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  8: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  7: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  6: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  5: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  4: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  3: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  2: if(*++j == character) return j; CORRADE_FALLTHROUGH
-            case  1: if(*++j == character) return j; CORRADE_FALLTHROUGH
+            case 15: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
             case  0: return {};
         }
     }
@@ -416,7 +434,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
     /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
        loop, this is 25% faster when unrolled. Strangely enough, if the switch
        is put into an external always inline function to avoid duplication with
-       the SSE2 variant, it no longer gives the advantage. */
+       the SSE2 variant, it no longer gives the advantage. Furthermore, the
+       post-increment optimization from the x86 case doesn't help here at all,
+       on the contrary makes the code slightly slower. */
     {
         const char* j = data - 1;
         switch(size) {
