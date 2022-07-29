@@ -19,6 +19,14 @@ executors:
     # filesystem race and randomly complains that a file doesn't exist:
     # https://github.com/mosra/magnum/issues/413,
     # https://github.com/emscripten-core/emscripten/pull/10161
+    #
+    # Regarding SIMD, while 1.39.6 supports some WIP variant of it, the
+    # finalized support is only since 2.0.18 (and then the first non-broken
+    # emsdk is 2.0.25). But emsdk ships with Node.js 14, and only Node.js 15
+    # supports intrinsics that Emscripten 2.0.18 can produce, so there's no
+    # point in even trying, we wouldn't be able to run the tests anyway.
+    # TODO: revisit when https://github.com/emscripten-core/emsdk/issues/1064
+    #   or any other referenced issues are finally resolved
     - image: emscripten/emsdk:1.39.6-upstream
   python-3_6:
     docker:

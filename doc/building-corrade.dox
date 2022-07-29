@@ -986,8 +986,9 @@ for more information.
 @subsection building-corrade-ci-circleci CircleCI
 
 In `package/ci/` there is a `circle.yml` file with Linux GCC 4.8, Linux ARM64,
-macOS, Emscripten, AddressSanitizer, ThreadSanitizer, Android x86 and iOS
-x86_64 configuration. Online at https://circleci.com/gh/mosra/corrade.
+macOS, Emscripten (except SIMD, see the file for details), AddressSanitizer,
+ThreadSanitizer, Android x86 and iOS x86_64 configuration. Online at
+https://circleci.com/gh/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
