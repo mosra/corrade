@@ -335,9 +335,16 @@
 #endif
 #endif
 
-/* Undocumented, checked via `echo | em++ -x c++ -dM -E - -msimd128` */
+/* Undocumented, checked via `echo | em++ -x c++ -dM -E - -msimd128`.
+   Restricting to the finalized SIMD variant, which is since Clang 13:
+    https://github.com/llvm/llvm-project/commit/502f54049d17f5a107f833596fb2c31297a99773
+   Emscripten 2.0.13 sets Clang 13 as the minimum, however it doesn't imply
+   that emsdk 2.0.13 actually contains the final Clang 13. That's only since
+   2.0.18, thus to avoid nasty issues we have to check Emscripten version as
+   well :(
+    https://github.com/emscripten-core/emscripten/commit/deab7783df407b260f46352ffad2a77ca8fb0a4c */
 #elif defined(CORRADE_TARGET_WASM)
-#ifdef __wasm_simd128__
+#if defined(__wasm_simd128__) && __clang_major__ >= 13 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20018
 #define CORRADE_TARGET_SIMD128
 #endif
 #endif

@@ -800,7 +800,10 @@ GCC/Clang). Superset of @ref CORRADE_TARGET_NEON_FMA.
 
 Defined on @ref CORRADE_TARGET_WASM "WebAssembly" if
 [128-bit SIMD](https://github.com/webassembly/simd) instructions are enabled at
-compile time (`-msimd128` passed to Clang).
+compile time (`-msimd128` passed to Clang), and the compiler supports the
+finalized version of the intrinsics, which is since Clang 13 and Emscripten
+2.0.18. Emscripten SDK 2.0.13 to 2.0.17 ship with a Clang that reports as 13
+but isn't actually the final version.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Simd128},
     @ref CORRADE_ENABLE_SIMD128
 */
