@@ -488,6 +488,20 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
         const v128_t or1 = wasm_v128_or(eqa, eqb);
         const v128_t or2 = wasm_v128_or(eqc, eqd);
         const v128_t or3 = wasm_v128_or(or1, or2);
+        /* wasm_i8x16_bitmask(or3) maps directly to the SSE2 variant and is
+           thus fast on x86, but on ARM wasm_v128_any_true(or3) is faster. With
+           StringViewBenchmark::findCharacterRare() and runtime dispatch
+           disabled for tests, on x86 (node.js 17.8) bitmask is ~1.35 µs and
+           any_true ~1.85 µs; on ARM (Huawei P10, Vivaldi w/ Chromium 102)
+           bitmask is 14.3 µs and any_true 11.7 µs. Ideally we'd have two
+           runtime versions, one picking x86-friendly instructions and the
+           other ARM-friendly, but function pointer dispatch has a *massive*
+           overhead currently. Related info about instruction complexity:
+            https://github.com/WebAssembly/simd/pull/201
+            https://github.com/zeux/wasm-simd/blob/master/Instructions.md */
+        /** @todo revisit once runtime dispatch overhead gets better or once
+            compile-time tuning such as CORRADE_TARGET_WASM_SIMD128_ARM / _X86
+            exists */
         if(wasm_i8x16_bitmask(or3)) {
             if(const int mask = wasm_i8x16_bitmask(eqa))
                 return i + 0*16 + __builtin_ctz(mask);
