@@ -1483,19 +1483,24 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FP16) int callInstructionFor
 #endif
 #ifdef CORRADE_ENABLE_SIMD128
 template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(SIMD128) int callInstructionFor<Cpu::Simd128T>() {
-    v128_t a = wasm_i32x4_make(-10, 20, -30, 40);
+    v128_t a = wasm_f32x4_make(5.47, 2.23, 7.62, 0.5);
 
-    /* All instructions SIMD128 */
+    /* All instructions SIMD128. wasm_f32x4_ceil() is only available in the
+       finalized wasm intrinsics that's since Clang 13 which is used since
+       Emscripten 2.0.13, thus any older version should not have the
+       CORRADE_ENABLE_SIMD128 macro defined:
+        https://github.com/llvm/llvm-project/commit/502f54049d17f5a107f833596fb2c31297a99773
+        https://github.com/emscripten-core/emscripten/commit/deab7783df407b260f46352ffad2a77ca8fb0a4c */
     union {
         v128_t v;
-        int s[8];
+        float s[8];
     } b;
-    b.v = wasm_i32x4_abs(a);
+    b.v = wasm_f32x4_ceil(a);
 
-    CORRADE_COMPARE(b.s[0], 10);
-    CORRADE_COMPARE(b.s[1], 20);
-    CORRADE_COMPARE(b.s[2], 30);
-    CORRADE_COMPARE(b.s[3], 40);
+    CORRADE_COMPARE(b.s[0], 6.0);
+    CORRADE_COMPARE(b.s[1], 3.0);
+    CORRADE_COMPARE(b.s[2], 8.0);
+    CORRADE_COMPARE(b.s[3], 1.0);
     return b.s[0];
 }
 #endif
