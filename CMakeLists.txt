@@ -60,6 +60,8 @@ project(Corrade CXX)
 # Use folders for nice tree in Visual Studio and XCode
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
 include(CMakeDependentOption)
 
 # Options that used to be unprefixed. New options shouldn't be added to this
@@ -331,7 +333,6 @@ if(CORRADE_BUILD_TESTS)
     enable_testing()
 endif()
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
     if(NOT CORRADE_RC_EXECUTABLE)
