@@ -224,7 +224,9 @@ CORRADE_ENABLE(SSE2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleV
 }
 
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2|Cpu::Bmi1)) {
-  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,BMI1) -> const char* {
+  /* Can't use trailing return type due to a GCC 9.3 bug, which is the default
+     on Ubuntu 20.04: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,BMI1) {
     const char* const end = data + size;
 
     /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
@@ -265,7 +267,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
             case  3: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
             case  2: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
             case  1: if(*j++ == character) return j - 1; CORRADE_FALLTHROUGH
-            case  0: return {};
+            case  0: return static_cast<const char*>(nullptr);
         }
     }
 
@@ -324,7 +326,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
         return findCharacterSingleVectorUnaligned(Cpu::Sse2, i, vn1);
     }
 
-    return {};
+    return static_cast<const char*>(nullptr);
   };
 }
 #endif
@@ -348,7 +350,9 @@ CORRADE_ENABLE(AVX2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleV
 }
 
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Bmi1)) {
-  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(AVX2,BMI1) -> const char* {
+  /* Can't use trailing return type due to a GCC 9.3 bug, which is the default
+     on Ubuntu 20.04: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(AVX2,BMI1) {
     const char* const end = data + size;
 
     /* If we have less than 32 bytes, fall back to the SSE variant */
@@ -412,7 +416,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
         return findCharacterSingleVectorUnaligned(Cpu::Avx2, i, vn1);
     }
 
-    return {};
+    return static_cast<const char*>(nullptr);
   };
 }
 #endif

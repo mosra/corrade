@@ -97,14 +97,10 @@ commands:
         background: true
     - run:
         name: Update apt and install base packages
-        # Compared to Docker images this needs sudo. Default gcc is 9.3, which
-        # has https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 and breaks our
-        # CPU dispatch, 9.4 is for some reason a separate package.
+        # Compared to Docker images this needs sudo
         command: |
           sudo apt update
-          sudo apt install -y ninja-build g++-9
-          echo 'export CC=gcc-9' >> $BASH_ENV
-          echo 'export CXX=g++-9' >> $BASH_ENV
+          sudo apt install -y ninja-build
 
   install-gcc-4_8:
     steps:

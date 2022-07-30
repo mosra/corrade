@@ -110,6 +110,9 @@ struct CpuTest: TestSuite::Tester {
     void enableMacrosMultiple();
     void enableMacrosMultipleAllEmpty();
 
+    void enableMacrosLambda();
+    void enableMacrosLambdaMultiple();
+
     void debug();
     void debugPacked();
 };
@@ -190,6 +193,9 @@ CpuTest::CpuTest() {
 
               &CpuTest::enableMacrosMultiple,
               &CpuTest::enableMacrosMultipleAllEmpty,
+
+              &CpuTest::enableMacrosLambda,
+              &CpuTest::enableMacrosLambdaMultiple,
 
               &CpuTest::debug,
               &CpuTest::debugPacked});
@@ -1597,6 +1603,159 @@ int callInstructionMultipleAllEmpty() {
 
 void CpuTest::enableMacrosMultipleAllEmpty() {
     CORRADE_COMPARE(callInstructionMultipleAllEmpty(), 1);
+}
+
+/* On Clang it's enough to have the ENABLE macro just on the wrapper function.
+   On GCC it has to be attached to the lambda due to
+   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80439. However, older versions
+   of Clang suffer from the inverse problem and ignore lambda attributes, so it
+   has to stay on the function definition as well. Furthermore, if the trailing
+   return type is uncommented, the code will fail to compile on GCC 9.1 to 9.3:
+   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
+#ifdef CORRADE_ENABLE_AVX2
+CORRADE_ENABLE_AVX2 int callInstructionLambda() {
+  return []() CORRADE_ENABLE_AVX2 /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Avx2))
+        CORRADE_SKIP("AVX2 feature not supported");
+
+    /* Same as callInstructionFor<Cpu::Avx2T>() */
+    __m256i a = _mm256_set_epi64x(0x8080808080808080ull, 0, 0x8080808080808080ull, 0);
+
+    /* If the AVX2 instructions aren't enabled, this will fail to link */
+    int mask = _mm256_movemask_epi8(a);
+
+    CORRADE_COMPARE(mask, 0xff00ff00);
+    return mask;
+  }();
+}
+#elif defined(CORRADE_ENABLE_NEON)
+CORRADE_ENABLE_NEON int callInstructionLambda() {
+  return []() CORRADE_ENABLE_NEON /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Neon))
+        CORRADE_SKIP("NEON feature not supported");
+
+    /* Same as callInstructionFor<Cpu::NeonT>() */
+    int32x4_t a{-10, 20, -30, 40};
+
+    union {
+        int32x4_t v;
+        int s[8];
+    } b;
+    b.v = vabsq_s32(a);
+
+    CORRADE_COMPARE(b.s[0], 10);
+    CORRADE_COMPARE(b.s[1], 20);
+    CORRADE_COMPARE(b.s[2], 30);
+    CORRADE_COMPARE(b.s[3], 40);
+    return b.s[0];
+  }();
+}
+#elif defined(CORRADE_ENABLE_SIMD128)
+CORRADE_ENABLE_SIMD128 int callInstructionLambda() {
+  return []() CORRADE_ENABLE_SIMD128 /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Simd128))
+        CORRADE_SKIP("SIMD128 feature not supported");
+
+    /* Same as callInstructionFor<Cpu::Simd128T>() */
+    v128_t a = wasm_f32x4_make(5.47, 2.23, 7.62, 0.5);
+
+    union {
+        v128_t v;
+        float s[8];
+    } b;
+    b.v = wasm_f32x4_ceil(a);
+
+    CORRADE_COMPARE(b.s[0], 6.0);
+    CORRADE_COMPARE(b.s[1], 3.0);
+    CORRADE_COMPARE(b.s[2], 8.0);
+    CORRADE_COMPARE(b.s[3], 1.0);
+    return b.s[0];
+  }();
+}
+#else
+int callInstructionLambda() {
+    CORRADE_SKIP("No usable CORRADE_ENABLE_ macros defined");
+}
+#endif
+
+void CpuTest::enableMacrosLambda() {
+    /* Verifies that CORRADE_ENABLE_* can be applied also to lambdas. See the
+       comment above the implementations for more information. */
+    CORRADE_VERIFY(callInstructionLambda());
+}
+
+/* Same as callInstructionLambda(), just with CORRADE_ENABLE(*) instead of
+   CORRADE_ENABLE_* */
+#ifdef CORRADE_ENABLE_AVX2
+CORRADE_ENABLE(AVX2) int callInstructionLambdaMultiple() {
+  return []() CORRADE_ENABLE(AVX2) /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Avx2))
+        CORRADE_SKIP("AVX2 feature not supported");
+
+    /* Same as callInstructionFor<Cpu::Avx2T>() */
+    __m256i a = _mm256_set_epi64x(0x8080808080808080ull, 0, 0x8080808080808080ull, 0);
+
+    /* If the AVX2 instructions aren't enabled, this will fail to link */
+    int mask = _mm256_movemask_epi8(a);
+
+    CORRADE_COMPARE(mask, 0xff00ff00);
+    return mask;
+  }();
+}
+#elif defined(CORRADE_ENABLE_NEON)
+CORRADE_ENABLE(NEON) int callInstructionLambdaMultiple() {
+  return []() CORRADE_ENABLE(NEON) /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Neon))
+        CORRADE_SKIP("NEON feature not supported");
+
+    /* Same as callInstructionFor<Cpu::NeonT>() */
+    int32x4_t a{-10, 20, -30, 40};
+
+    union {
+        int32x4_t v;
+        int s[8];
+    } b;
+    b.v = vabsq_s32(a);
+
+    CORRADE_COMPARE(b.s[0], 10);
+    CORRADE_COMPARE(b.s[1], 20);
+    CORRADE_COMPARE(b.s[2], 30);
+    CORRADE_COMPARE(b.s[3], 40);
+    return b.s[0];
+  }();
+}
+#elif defined(CORRADE_ENABLE_SIMD128)
+CORRADE_ENABLE(SIMD128) int callInstructionLambdaMultiple() {
+  return []() CORRADE_ENABLE(SIMD128) /*-> int*/ {
+    if(!(Cpu::runtimeFeatures() & Cpu::Simd128))
+        CORRADE_SKIP("SIMD128 feature not supported");
+
+    /* Same as callInstructionFor<Cpu::Simd128T>() */
+    v128_t a = wasm_f32x4_make(5.47, 2.23, 7.62, 0.5);
+
+    union {
+        v128_t v;
+        float s[8];
+    } b;
+    b.v = wasm_f32x4_ceil(a);
+
+    CORRADE_COMPARE(b.s[0], 6.0);
+    CORRADE_COMPARE(b.s[1], 3.0);
+    CORRADE_COMPARE(b.s[2], 8.0);
+    CORRADE_COMPARE(b.s[3], 1.0);
+    return b.s[0];
+  }();
+}
+#else
+int callInstructionLambdaMultiple() {
+    CORRADE_SKIP("No usable CORRADE_ENABLE_ macros defined");
+}
+#endif
+
+void CpuTest::enableMacrosLambdaMultiple() {
+    /* Verifies that CORRADE_ENABLE(*) (the function macro variant) can be
+       applied to lambdas as well */
+    CORRADE_VERIFY(callInstructionLambdaMultiple());
 }
 
 void CpuTest::debug() {

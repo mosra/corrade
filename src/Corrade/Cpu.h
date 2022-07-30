@@ -306,16 +306,21 @@ actual arguments:
 
 @m_class{m-block m-danger }
 
-@par Instruction enabling macros
+@par Instruction enabling macros and lambdas
     An important difference with the @ref CORRADE_ENABLE_SSE2 "CORRADE_ENABLE_*"
     macros is that they now have to go also directly next to the lambda as GCC
     [currently doesn't propagate the attributes](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80439)
     from the wrapper function to the nested lambda. To make matters worse,
     older versions of Clang suffer from the inverse problem and ignore lambda
     attributes, so you have to specify them on both the lambda and the wrapper
-    function. GCC 9.1 to 9.3 also has a [bug where it can't parse lambda attributes](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333),
-    use version 8, 9.4 or 10.3 instead. The above AVX variant would look like
-    this with relevant macros added:
+    function. GCC 9.1 to 9.3 also has a [bug where it can't parse attributes on lambdas with a trailing return type](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333).
+    The preferrable solution is to not use a trailing return type at the cost
+    of potentially more verbose @cpp return @ce statements. Alternatively you
+    can require version 8, 9.4 or 10 instead, but note that 9.3 is the default
+    compiler on Ubuntu 20.04.
+@par
+    All things considered, the above AVX variant would look like this with
+    relevant macros added:
 @par
     @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-target-attributes
 
