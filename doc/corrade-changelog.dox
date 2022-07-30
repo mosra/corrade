@@ -122,7 +122,7 @@ namespace Corrade {
     an alternative to @cpp CORRADE_VERIFY(a.hasPrefix(b)) @ce and similar with
     a better failure diagnostic
 -   New @ref TestSuite::Compare::Aligned and
-    @relativrefef{TestSuite::Compare,NotAligned} comparators as a more
+    @relativeref{TestSuite::Compare,NotAligned} comparators as a more
     convenient alternative to @ref TestSuite::Compare::Divisible and
     @relativeref{TestSuite::Compare,NotDivisible} when dealing with pointers
 

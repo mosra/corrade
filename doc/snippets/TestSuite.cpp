@@ -196,6 +196,20 @@ CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::NotDivisible);
 }
 
 {
+/* [Compare-Aligned] */
+int* a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, 32, TestSuite::Compare::Aligned);
+/* [Compare-Aligned] */
+}
+
+{
+/* [Compare-NotAligned] */
+int* a = DOXYGEN_ELLIPSIS({});
+CORRADE_COMPARE_AS(a, 32, TestSuite::Compare::NotAligned);
+/* [Compare-NotAligned] */
+}
+
+{
 /* [Compare-StringHasPrefix] */
 Containers::StringView a = DOXYGEN_ELLIPSIS({});
 CORRADE_COMPARE_AS(a, "hello", TestSuite::Compare::StringHasPrefix);
