@@ -391,6 +391,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
         const __m256i or2 = _mm256_or_si256(eqc, eqd);
         const __m256i or3 = _mm256_or_si256(or1, or2);
         if(_mm256_movemask_epi8(or3)) {
+            /** @todo exploit the TZCNT property of returning 32 for zero
+                input somehow? trivial sum would work only if there's at most
+                one found byte among all 128 */
             if(const int mask = _mm256_movemask_epi8(eqa))
                 return i + 0*32 + _tzcnt_u32(mask);
             if(const int mask = _mm256_movemask_epi8(eqb))
