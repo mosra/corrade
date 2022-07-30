@@ -43,6 +43,9 @@
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
 #endif
+#ifdef CORRADE_ENABLE_NEON
+#include <arm_neon.h>
+#endif
 #ifdef CORRADE_ENABLE_SIMD128
 #include <wasm_simd128.h>
 #endif
@@ -201,6 +204,10 @@ namespace {
     scalar fallback for less than 32 bytes, it delegates to the 128-bit
     variant --- effectively performing the lookup with either two overlapping
     16-byte vectors (or falling back to scalar for less than 16 bytes).
+
+    The ARM variant has the high-level concept similar to x86, except that NEON
+    doesn't have a bitmask instruction. Instead a "right shift and narrow"
+    instruction is used, see comments there for details.
 
     The WASM variant is mostly a direct translation of the x86 variant, except
     as noted in code comments. */
@@ -417,6 +424,135 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
         i = end - 32;
         return findCharacterSingleVectorUnaligned(Cpu::Avx2, i, vn1);
+    }
+
+    return static_cast<const char*>(nullptr);
+  };
+}
+#endif
+
+#ifdef CORRADE_ENABLE_NEON
+/* AArch64 doesn't differentiate between aligned and unaligned loads. ARM32
+   does, but it's not exposed in the intrinsics, only in compiler-specific
+   ways. Since 32-bit ARM is increasingly rare, not bothering at all.
+   https://stackoverflow.com/a/53245244 */
+CORRADE_ENABLE(NEON) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::NeonT, const char* at, const uint8x16_t vn1) {
+    const uint8x16_t chunk = vld1q_u8(reinterpret_cast<const std::uint8_t*>(at));
+
+    /* Emulating _mm_movemask_epi8() on ARM is rather expensive, even the most
+       optimized variant listed at https://github.com/WebAssembly/simd/pull/201
+       is 6+ instructions. Instead, a "shift right and narrow" is used, based
+       on an idea from https://twitter.com/Danlark1/status/1539344281336422400
+       and further explained in https://github.com/facebook/zstd/pull/3139.
+
+       First, similarly to x86, an equivalence mask is calculated with bytes
+       being either ff or 00 based on whether they match:
+
+        00 ff ff 00 00 00 ff ff 00 00 00 00 ff 00 00 00
+
+       The result is reinterpreted as 8 16bit values:
+
+        00ff  ff00  0000  ffff  0000  0000  ff00  0000
+
+       Then, the vshrn_n_u16() instruction shifts each 16bit value four bits to
+       the right, and drops the high half:
+
+        000f  0ff0  0000  0fff  0000  0000  0ff0  0000
+          0f    f0    00    ff    00    00    f0    00
+
+       The result, stored in the lower half of a 128-bit register, is then
+       extracted as a single 64-bit number:
+
+        0ff0 00ff 0000 f000
+
+       This effectively reduces the original 128-bit mask to a half, with every
+       four bits describing a masked byte. While that's still 4x more than what
+       _mm_movemask_epi8() produces, it can be tested against zero using
+       regular scalar operations. Finally, `__builtin_ctzll(mask) >> 2` is
+       equivalent to what TZCNT on a 16bit mask produced by _mm_movemask_epi8()
+       would return -- there's simply just 4x more bits. */
+    const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
+    const uint64x1_t shrn64 = vreinterpret_u64_u8(vshrn_n_u16(eq16, 4));
+    if(const uint64_t mask = vget_lane_u64(shrn64, 0))
+        return at + (__builtin_ctzll(mask) >> 2);
+    return {};
+}
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Neon)) {
+  /* Can't use trailing return type due to a GCC 9.3 bug, which is the default
+     on Ubuntu 20.04: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(NEON) {
+    const char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way. Unlike x86 or WASM,
+       unrolling the loop here makes things actually worse. */
+    /** @todo investigate why */
+    if(size < 16) {
+        for(const char* i = data; i != end; ++i)
+            if(*i == character) return i;
+        return static_cast<const char*>(nullptr);
+    }
+
+    const uint8x16_t vn1 = vdupq_n_u8(character);
+
+    /* Unconditionally do a lookup in the first vector a slower, unaligned
+       way. Any extra branching to avoid the unaligned load if already aligned
+       would be most probably more expensive than the actual unaligned load. */
+    if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Neon, data, vn1))
+        return found;
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    for(; i + 4*16 < end; i += 4*16) {
+        const uint8x16_t a = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 0*16);
+        const uint8x16_t b = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 1*16);
+        const uint8x16_t c = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 2*16);
+        const uint8x16_t d = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 3*16);
+
+        const uint8x16_t eqa = vceqq_u8(vn1, a);
+        const uint8x16_t eqb = vceqq_u8(vn1, b);
+        const uint8x16_t eqc = vceqq_u8(vn1, c);
+        const uint8x16_t eqd = vceqq_u8(vn1, d);
+
+        /* Similar to findCharacterSingleVectorUnaligned(Cpu::NeonT), except
+           that four "shift right and narrow" operations are done, interleaving
+           the result into two registers instead of four */
+        const uint8x8_t maska = vshrn_n_u16(vreinterpretq_u16_u8(eqa), 4);
+        const uint8x16_t maskab = vshrn_high_n_u16(maska, vreinterpretq_u16_u8(eqb), 4);
+        const uint8x8_t maskc = vshrn_n_u16(vreinterpretq_u16_u8(eqc), 4);
+        const uint8x16_t maskcd = vshrn_high_n_u16(maskc, vreinterpretq_u16_u8(eqd), 4);
+
+        /* Which makes it possible to test with just one OR and a horizontal
+           add instead of three ORs and a horizontal add */
+        if(vaddvq_u8(vorrq_u8(maskab, maskcd))) {
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskab), 0))
+                return i + 0*16 + (__builtin_ctzll(mask) >> 2);
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskab), 1))
+                return i + 1*16 + (__builtin_ctzll(mask) >> 2);
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskcd), 0))
+                return i + 2*16 + (__builtin_ctzll(mask) >> 2);
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskcd), 1))
+                return i + 3*16 + (__builtin_ctzll(mask) >> 2);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four vectors */
+    for(; i + 16 <= end; i += 16)
+        if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Neon, i, vn1))
+            return found;
+
+    /* Handle remaining less than a vector with an unaligned search, again
+       overlapping back with the previous already-searched elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        return findCharacterSingleVectorUnaligned(Cpu::Neon, i, vn1);
     }
 
     return static_cast<const char*>(nullptr);

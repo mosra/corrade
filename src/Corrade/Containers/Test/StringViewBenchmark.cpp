@@ -100,6 +100,9 @@ const struct {
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
     {Cpu::Avx2|Cpu::Bmi1},
     #endif
+    #ifdef CORRADE_ENABLE_NEON
+    {Cpu::Neon},
+    #endif
     #ifdef CORRADE_ENABLE_SIMD128
     {Cpu::Simd128},
     #endif
@@ -116,6 +119,9 @@ const struct {
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
     {Cpu::Avx2|Cpu::Bmi1, 15},
     {Cpu::Avx2|Cpu::Bmi1, 31},
+    #endif
+    #ifdef CORRADE_ENABLE_NEON
+    {Cpu::Neon, 15},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
     {Cpu::Simd128, 15},
