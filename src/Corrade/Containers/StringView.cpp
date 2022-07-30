@@ -43,6 +43,9 @@
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
 #endif
+#ifdef CORRADE_ENABLE_SIMD128
+#include <wasm_simd128.h>
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -197,7 +200,10 @@ namespace {
     to 32 bytes at a time. The only difference is that instead of doing a
     scalar fallback for less than 32 bytes, it delegates to the 128-bit
     variant --- effectively performing the lookup with either two overlapping
-    16-byte vectors (or falling back to scalar for less than 16 bytes). */
+    16-byte vectors (or falling back to scalar for less than 16 bytes).
+
+    The WASM variant is mostly a direct translation of the x86 variant, except
+    as noted in code comments. */
 
 #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
 CORRADE_ENABLE(SSE2,BMI1) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::Sse2T, const char* at, const __m128i vn1) {
@@ -370,6 +376,88 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
         i = end - 32;
         return findCharacterSingleVectorUnaligned(Cpu::Avx2, i, vn1);
+    }
+
+    return {};
+  };
+}
+#endif
+
+#ifdef CORRADE_ENABLE_SIMD128
+/* WASM doesn't differentiate between aligned and unaligned load, it's always
+   unaligned :( */
+CORRADE_ENABLE_SIMD128 CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::Simd128T, const char* at, const v128_t vn1) {
+    const v128_t chunk = wasm_v128_load(at);
+    if(const int mask = wasm_i8x16_bitmask(wasm_i8x16_eq(chunk, vn1)))
+        return at + __builtin_ctz(mask);
+    return {};
+}
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE_SIMD128 -> const char* {
+    const char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo SWAR?? */
+    if(size < 16) {
+        for(const char* i = data; i != end; ++i)
+            if(*i == character) return i;
+        return {};
+    }
+
+    const v128_t vn1 = wasm_i8x16_splat(character);
+
+    /* Unconditionally do a lookup in the first vector a slower, unaligned
+       way. Any extra branching to avoid the unaligned load if already aligned
+       would be most probably more expensive than the actual unaligned load. */
+    if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Simd128, data, vn1))
+        return found;
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    for(; i + 4*16 < end; i += 4*16) {
+        const v128_t a = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
+        const v128_t b = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
+        const v128_t c = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 2);
+        const v128_t d = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 3);
+
+        const v128_t eqa = wasm_i8x16_eq(vn1, a);
+        const v128_t eqb = wasm_i8x16_eq(vn1, b);
+        const v128_t eqc = wasm_i8x16_eq(vn1, c);
+        const v128_t eqd = wasm_i8x16_eq(vn1, d);
+
+        const v128_t or1 = wasm_v128_or(eqa, eqb);
+        const v128_t or2 = wasm_v128_or(eqc, eqd);
+        const v128_t or3 = wasm_v128_or(or1, or2);
+        if(wasm_i8x16_bitmask(or3)) {
+            if(const int mask = wasm_i8x16_bitmask(eqa))
+                return i + 0*16 + __builtin_ctz(mask);
+            if(const int mask = wasm_i8x16_bitmask(eqb))
+                return i + 1*16 + __builtin_ctz(mask);
+            if(const int mask = wasm_i8x16_bitmask(eqc))
+                return i + 2*16 + __builtin_ctz(mask);
+            if(const int mask = wasm_i8x16_bitmask(eqd))
+                return i + 3*16 + __builtin_ctz(mask);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four vectors */
+    for(; i + 16 <= end; i += 16)
+        if(const char* const found = findCharacterSingleVectorUnaligned(Cpu::Simd128, i, vn1))
+            return found;
+
+    /* Handle remaining less than a vector with an unaligned search, again
+       overlapping back with the previous already-searched elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        return findCharacterSingleVectorUnaligned(Cpu::Simd128, i, vn1);
     }
 
     return {};

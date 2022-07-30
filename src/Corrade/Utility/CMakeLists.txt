@@ -214,12 +214,12 @@ if(CORRADE_WITH_UTILITY)
     install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
     if(CORRADE_BUILD_TESTS)
-        # Library with graceful assert and function-pointer-based CPU dispatch
-        # for testing. If tests need such behavior, they should link to
-        # CorradeTestSuiteTestLib instead. Otherwise the implicitly linked
-        # CorradeTestSuite would drag in CorradeUtility in addition to
-        # CorradeUtilityTestLib, leading to ODR violations and making ASan
-        # builds fail.
+        # Library with graceful assert, function-pointer-based CPU dispatch
+        # and WASM SIMD128 for testing. If tests need such behavior, they
+        # should link to CorradeTestSuiteTestLib instead. Otherwise the
+        # implicitly linked CorradeTestSuite would drag in CorradeUtility in
+        # addition to CorradeUtilityTestLib, leading to ODR violations and
+        # making ASan builds fail.
         add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC}
             $<TARGET_OBJECTS:CorradeUtilityObjects>
             ${CorradeUtility_GracefulAssert_SRCS})
@@ -230,6 +230,9 @@ if(CORRADE_WITH_UTILITY)
         target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
         if(CORRADE_BUILD_TESTS_FORCE_CPU_POINTER_DISPATCH)
             target_compile_definitions(CorradeUtilityTestLib PUBLIC "CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH")
+            if(CORRADE_TARGET_EMSCRIPTEN)
+                target_compile_options(CorradeUtilityTestLib PUBLIC "-msimd128")
+            endif()
         endif()
         set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
         if(CORRADE_BUILD_STATIC_PIC)
