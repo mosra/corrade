@@ -2998,6 +2998,11 @@ MSVC it's just a shorthand for multiple `CORRADE_ENABLE_*` macros one after
 another. On MSVC expands to nothing --- there the functions aren't annotated in
 anyway and moreover the default preprocessor behavior would make this extremely
 tricky to implement.
+
+@attention Due to the way the attributes are combined on Clang < 8 and GCC, in
+    certain cases the macro may silently accept even arguments that don't have
+    a corresponding `CORRADE_ENABLE_*` macro defined. To prevent portability
+    issues, pay extra attention to have a matching @cpp #ifdef @ce guard.
 */
 #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_ENABLE(...) _CORRADE_HELPER_PICK(__VA_ARGS__, _CORRADE_ENABLE8, _CORRADE_ENABLE7, _CORRADE_ENABLE6, _CORRADE_ENABLE5, _CORRADE_ENABLE4, _CORRADE_ENABLE3, _CORRADE_ENABLE2, _CORRADE_ENABLE1, )(__VA_ARGS__)
