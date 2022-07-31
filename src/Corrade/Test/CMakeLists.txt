@@ -33,7 +33,16 @@ corrade_add_test(MainTest MainTest.cpp
 # Prefixed with project name to avoid conflicts with TagsTest in Magnum
 corrade_add_test(CorradeTagsTest TagsTest.cpp)
 
-corrade_add_test(CpuTest CpuTest.cpp)
+# Platforms like Emscripten or Android that don't have dynamic plugin support
+# don't really have dynamic libraries either. Thus there's no point in trying
+# to benchmark a call into an external dynamic library.
+if(CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    add_library(CpuTestExternalLibrary STATIC CpuTestExternalLibrary.cpp)
+else()
+    add_library(CpuTestExternalLibrary SHARED CpuTestExternalLibrary.cpp)
+endif()
+target_link_libraries(CpuTestExternalLibrary PRIVATE CorradeUtility)
+corrade_add_test(CpuTest CpuTest.cpp LIBRARIES CpuTestExternalLibrary)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)

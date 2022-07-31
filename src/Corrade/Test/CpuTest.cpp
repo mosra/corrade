@@ -53,6 +53,8 @@
 #include <wasm_simd128.h>
 #endif
 
+#include "CpuTestExternalLibrary.h"
+
 namespace Corrade { namespace Test { namespace {
 
 struct CpuTest: TestSuite::Tester {
@@ -104,6 +106,14 @@ struct CpuTest: TestSuite::Tester {
     void tagDispatchedCompileTime();
     void tagDispatchedPointer();
     void tagDispatchedIfunc();
+
+    void benchmarkTagDispatchedCompileTime();
+    void benchmarkTagDispatchedPointer();
+    void benchmarkTagDispatchedIfunc();
+    void benchmarkTagDispatchedExternalLibraryCompileTime();
+    void benchmarkTagDispatchedExternalLibraryPointer();
+    void benchmarkTagDispatchedExternalLibraryIfunc();
+    void benchmarkTagDispatchedExternalLibraryEveryCall();
 
     template<class T> void enableMacros();
 
@@ -167,8 +177,17 @@ CpuTest::CpuTest() {
 
               &CpuTest::tagDispatchedCompileTime,
               &CpuTest::tagDispatchedPointer,
-              &CpuTest::tagDispatchedIfunc,
+              &CpuTest::tagDispatchedIfunc});
 
+    addBenchmarks({&CpuTest::benchmarkTagDispatchedCompileTime,
+                   &CpuTest::benchmarkTagDispatchedPointer,
+                   &CpuTest::benchmarkTagDispatchedIfunc,
+                   &CpuTest::benchmarkTagDispatchedExternalLibraryCompileTime,
+                   &CpuTest::benchmarkTagDispatchedExternalLibraryPointer,
+                   &CpuTest::benchmarkTagDispatchedExternalLibraryIfunc,
+                   &CpuTest::benchmarkTagDispatchedExternalLibraryEveryCall}, 100);
+
+    addTests({
               #ifdef CORRADE_TARGET_X86
               &CpuTest::enableMacros<Cpu::Sse2T>,
               &CpuTest::enableMacros<Cpu::Sse3T>,
@@ -1201,6 +1220,108 @@ void CpuTest::tagDispatchedIfunc() {
         CORRADE_COMPARE(dispatchedFeatures, Cpu::Scalar);
     }
     #endif
+}
+
+constexpr std::size_t BenchmarkDispatchedRepeats = 1000000;
+
+/* Otherwise Clang inlines even through the function pointer */
+#ifdef CORRADE_TARGET_CLANG
+CORRADE_NEVER_INLINE
+#endif
+int benchmarkDispatchedImplementation(int a) {
+    return a + 1;
+}
+
+CORRADE_NEVER_INLINE int benchmarkDispatchedCompileTime(int a) {
+    /* Because benchmarkDispatchedImplementation() is marked as never inline
+       on Clang, calling it from here would result in two deinlined calls,
+       skewing the benchmark */
+    #ifdef CORRADE_TARGET_CLANG
+    return a + 1;
+    #else
+    return benchmarkDispatchedImplementation(a);
+    #endif
+}
+
+void CpuTest::benchmarkTagDispatchedCompileTime() {
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedCompileTime(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+}
+
+auto benchmarkDispatchedImplementation(Cpu::Features) -> int(*)(int) {
+    return benchmarkDispatchedImplementation;
+}
+
+CORRADE_CPU_DISPATCHED_POINTER(benchmarkDispatchedImplementation, int(*benchmarkDispatchedPointer)(int))
+
+void CpuTest::benchmarkTagDispatchedPointer() {
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedPointer(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+}
+
+#ifdef CORRADE_CPU_USE_IFUNC
+CORRADE_CPU_DISPATCHED_IFUNC(benchmarkDispatchedImplementation, int benchmarkDispatchedIfunc(int))
+#endif
+
+void CpuTest::benchmarkTagDispatchedIfunc() {
+    #ifndef CORRADE_CPU_USE_IFUNC
+    CORRADE_SKIP("CORRADE_CPU_USE_IFUNC not available");
+    #else
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedIfunc(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+    #endif
+}
+
+void CpuTest::benchmarkTagDispatchedExternalLibraryCompileTime() {
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedExternalLibraryCompileTime(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+}
+
+void CpuTest::benchmarkTagDispatchedExternalLibraryPointer() {
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedExternalLibraryPointer(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+}
+
+void CpuTest::benchmarkTagDispatchedExternalLibraryIfunc() {
+    #ifndef CORRADE_CPU_USE_IFUNC
+    CORRADE_SKIP("CORRADE_CPU_USE_IFUNC not available");
+    #else
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedExternalLibraryIfunc(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
+    #endif
+}
+
+void CpuTest::benchmarkTagDispatchedExternalLibraryEveryCall() {
+    int a = 0;
+    CORRADE_BENCHMARK(BenchmarkDispatchedRepeats) {
+        a = Test::benchmarkDispatchedExternalLibraryEveryCall(Cpu::compiledFeatures())(a);
+    }
+
+    CORRADE_COMPARE(a, BenchmarkDispatchedRepeats);
 }
 
 /* Not using an argument here since we *don't* want the overload delegating
