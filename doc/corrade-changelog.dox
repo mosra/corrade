@@ -57,6 +57,7 @@ namespace Corrade {
     detection of 32-bit builds
 -   New @ref Cpu namespace that provides building blocks for compile-time and
     runtime CPU feature detection and dispatch on x86, ARM and WebAssembly
+    (see [mosra/corrade#115](https://github.com/mosra/corrade/pull/115))
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
