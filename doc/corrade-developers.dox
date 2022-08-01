@@ -618,24 +618,47 @@ inverse.
 
 @section corrade-developers-singles Checklist for creating/updating a single-header lib
 
+This assumes the `magnum-singles` repository is cloned next to the `corrade`
+repository.
+
 1.  Create/update a driver file in `src/singles/`, if needed
 2.  Update `src/singles/postprocess.sh`, if needed
 3.  Run `src/singles/postprocess.sh`, regenerating all headers
-4.  Copy everything from `src/singles/output/` to the magnum-singles
-    repository.
-5.  Check `git diff` for suspicious changes.
+4.  Check `git diff` for suspicious changes.
     -   no `-dirty` suffix in revision IDs
     -   no preprocessed LoC being over 10k
-6.  If nothing changes except for revision IDs, there's no need to update
+5.  If nothing changes except for revision IDs in the "Generated from" lines,
+    there's no need to update given file. Otherwise:
+    -   Ensure the working copy is clean with all commits pushed to `master` so
+        the generated revision IDs are stable. If not, commit and push all
+        changes first and regenerate the headers.
+    -   Then, write up a changelog entry in affected files, taking the revision
+        IDs from files generated earlier. Don't commit anything, otherwise the
+        revision ID changes again.
+    -   Then, generate again. This will make the changelog entry have the same
+        revision ID as the "Generated from" line.
+    -   Commit that into the `magnum-singles` repository and ensure the CI
+        passes.
+    -   After that, commit the changelog entry.
+6.  In case of new header-only libraries:
+    -   Commit & push all changes that are needed elsewhere, except for the new
+        file itself (and related doc updates, etc.)
+    -   Generate to get an revision ID.
+    -   Write an "Initial release" changelog entry using the generated revision
+        ID.
+    -   Generate again and verify the IDs still match.
+    -   Commit that into the `magnum-singles` repository, including a new test:
+        -   new file in `magnum-singles/test`, named after the header,
+            including the header and doing a simple operation that results in
+            @cpp return 0 @ce
+        -   new entry in `magnum-singles/package/ci/``*.yml`, compiling the new
+            test
+        Ensure the CI runs on the new file and passes.
+    -   After that, commit the new file and everything else inside Corrade.
 7.  Run `magnum-singles/package/generate-loc.sh`, update the README with its
     output (use block editing)
 8.  If there's something important to be mentioned, update the changelog in
     the README
-9.  Add a new test, if needed
-    -   new file in `magnum-singles/test`, named after the header, including
-        the header and doing a simple operation that results in @cpp return 0 @ce
-    -   new entry in `magnum-singles/package/ci/``*.yml`, compiling the new
-        test
 10. Push to the `next` branch. If green, merge to `master`, if not, restart
     from point 1.
 
