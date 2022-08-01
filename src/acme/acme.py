@@ -196,6 +196,7 @@ def sort_copyrights(copyrights: List[str]) -> List[str]:
 include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[">]).*?$')
 preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^\n]*?[^\s]?)(?P<comment>\s*/[/*].*)?$')
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
+cmakedefine_rx = re.compile(r'\s*#cmakedefine(01)?.*$')
 linecomment_rx = re.compile(r'^\s*(/\*.*\*/|//.*)?\s*$')
 copyright_rc = re.compile(r'^\s+Copyright © \d{4}.+$')
 blockcomment_start_rx = re.compile(r'^\s*/\*.*\s*$')
@@ -545,6 +546,12 @@ def acme(toplevel_file, output) -> List[str]:
                 match = define_rx.match(line)
                 if match and match.group('name') in forced_defines:
                     continue
+
+                # CMake define. Unconditionally ignore them, which is useful to
+                # supply a configure.h.cmake template instead of configure.h
+                # that may have various platform-specific defines baked in
+                # already.
+                if cmakedefine_rx.match(line): continue;
 
                 # Something else, copy verbatim to the output. Strip the
                 # trailing comment, if requested

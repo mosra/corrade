@@ -133,3 +133,9 @@ NEITHER THIS! INTERCAL FTW
 #if __has_include(<bits/c++config.h>) /* the __GLIBCXX__ define */
 // yay!
 #endif
+
+/* Unconditionally drop #cmakedefine and #cmakedefine01, but leave unknown
+   macros untouched */
+    #cmakedefine THING_HAS_INDENTED_FOO
+#cmakedefine01 THING_HAS_BAR
+#version 460

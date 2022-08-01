@@ -241,6 +241,11 @@ float calculate(float a, float b);
 @note On the other hand, saying @cpp #pragma ACME enable MyLib_Header_h @ce
     would cause the whole guarded contents to be discarded.
 
+As a special case, @cpp #cmakedefine @ce and @cpp #cmakedefine01 @ce statements
+are unconditionally removed. This is useful to for example supply a
+`configure.h.cmake` template to the script instead of a generated `configure.h`
+that may have unwanted build-specific defines baked in.
+
 @section acme-copyright Copyright information
 
 Commonly every header has a copyright block on top and it would be wasteful

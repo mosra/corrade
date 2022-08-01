@@ -68,3 +68,7 @@ auto this_gets_enabled() -> Yay { return {}; }
 #if __has_include(<bits/c++config.h>) /* the __GLIBCXX__ define */
 // yay!
 #endif
+
+/* Unconditionally drop #cmakedefine and #cmakedefine01, but leave unknown
+   macros untouched */
+#version 460
