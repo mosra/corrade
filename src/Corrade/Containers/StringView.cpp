@@ -363,7 +363,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
     const char* const end = data + size;
 
     /* If we have less than 32 bytes, fall back to the SSE variant */
-    /** @todo deinline it here? */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
     if(size < 32)
         return stringFindCharacterImplementation(CORRADE_CPU_SELECT(Cpu::Sse2|Cpu::Bmi1))(data, size, character);
 
@@ -509,6 +510,12 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
 
     /* Go four vectors at a time with the aligned pointer */
     for(; i + 4*16 < end; i += 4*16) {
+        /** @todo https://branchfree.org/2019/04/01/fitting-my-head-through-the-arm-holes-or-two-sequences-to-substitute-for-the-missing-pmovmskb-instruction-on-arm-neon/#comment-1768
+            suggests an interleaved vld4q8_u8() load instead of four separate
+            loads, and a sequence of vsriq_n_u8() that forms a single 64-bit
+            mask. Unfortunately that's actually slower than what i have here
+            (on Huawei P10 at least), maybe it'd be faster on newer archs? */
+
         const uint8x16_t a = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 0*16);
         const uint8x16_t b = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 1*16);
         const uint8x16_t c = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 2*16);
