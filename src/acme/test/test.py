@@ -65,6 +65,27 @@ class ParseExpression(unittest.TestCase):
         self.assertEqual(simplify_expression('elif', '!(!!0)'),
             (True, 'elif', '1'))
 
+    def test_basic_simplify_not(self):
+        # This shouldn't be treated as `1 && defined(SOMETHING)` and reduced to
+        # `defined(SOMETHING)`
+        self.assertEqual(simplify_expression('if', '_MSC_VER >= 1911 && defined(SOMETHING)'),
+            (None, 'if', '_MSC_VER >= 1911 && defined(SOMETHING)'))
+
+        # This shouldn't be treated as `1 || defined(SOMETHING)` and reduced to
+        # `1`
+        self.assertEqual(simplify_expression('if', '_MSC_VER >= 1911 || defined(SOMETHING)'),
+            (None, 'if', '_MSC_VER >= 1911 || defined(SOMETHING)'))
+
+        # This shouldn't be treated as `0 || defined(SOMETHING)` and reduced to
+        # `defined(SOMETHING)`
+        self.assertEqual(simplify_expression('if', '__GNUC__*100 + __GNUC_MINOR__ >= 510 || defined(SOMETHING)'),
+            (None, 'if', '__GNUC__*100 + __GNUC_MINOR__ >= 510 || defined(SOMETHING)'))
+
+        # This shouldn't be treated as `0 && defined(SOMETHING)` and reduced to
+        # `0`
+        self.assertEqual(simplify_expression('if', '__GNUC__*100 + __GNUC_MINOR__ >= 510 && defined(SOMETHING)'),
+            (None, 'if', '__GNUC__*100 + __GNUC_MINOR__ >= 510 && defined(SOMETHING)'))
+
     def test_negation_precedence(self):
         self.assertEqual(simplify_expression('if', '!0 || defined(FOO)'),
             (True, 'if', '1'))
