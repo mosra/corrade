@@ -53,6 +53,7 @@ Class, library or header    | Single-header version
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
 @ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
+@ref Corrade::Cpu           | [CorradeCpu.h](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.h)
 @ref Corrade/Utility/StlForwardArray.h | [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
 @ref Corrade/Utility/StlForwardString.h | [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)
 @ref Corrade/Utility/StlForwardTuple.h | [CorradeStlForwardTuple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardTuple.h)

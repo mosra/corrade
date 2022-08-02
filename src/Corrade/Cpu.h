@@ -74,6 +74,10 @@ find_package(Corrade REQUIRED Utility)
 target_link_libraries(your-app PRIVATE Corrade::Utility)
 @endcode
 
+This namespace together with all related macros is additionally available in a
+form of a @ref Cpu-single-header "single-header library". See also
+@ref building-corrade and @ref corrade-cmake for more information.
+
 @section Cpu-usage Usage
 
 The @ref Cpu namespace contains tags such as @ref Cpu::Avx2, @ref Cpu::Sse2,
@@ -397,6 +401,32 @@ Finally, when exposed in a header as appropriate, both the function and the
 function pointer variant can be then called the same way:
 
 @snippet Corrade.cpp Cpu-usage-automatic-cached-dispatch-call
+
+@anchor Cpu-single-header
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This namespace together with all related macros is also available as a
+    single-header, dependency-less [CorradeCpu.h](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+@par
+    To avoid bloat from OS-specific headers, this library contains a deinlined
+    implementation part, in particular for runtime feature detection on ARM.
+    Dedicate *exactly one* file in your project and add the following to it:
+@par
+    @code{.cpp}
+    #define CORRADE_CPU_IMPLEMENTATION
+    #include "CorradeCpu.h"
+    @endcode
+@par
+    If you need the deinlined symbols to be exported from a shared library,
+    @cpp #define CORRADE_UTILITY_EXPORT @ce as appropriate. To enable the
+    IFUNC functionality, @cpp #define CORRADE_CPU_USE_IFUNC @ce before
+    including the file.
 */
 namespace Cpu {
 
