@@ -35,10 +35,13 @@ import subprocess
 
 from typing import List, Tuple
 
+zero_or_something_rx = re.compile(r'\b0 \|\| ')
+one_and_something_rx = re.compile(r'\b1 && ')
+
 alone_in_parentheses_rx = re.compile(r'\((?P<inside>0|1|!?defined\((?P<name>[^)]+)\))\)')
-zero_and_something_rx = re.compile(r'0 && (0|1|!?defined\([^)]+\)|!?\()')
+zero_and_something_rx = re.compile(r'\b0 && (0|1|!?defined\([^)]+\)|!?\()')
 something_and_zero_rx = re.compile(r'(0|1|!?defined\([^)]+\)|\)) && 0')
-one_or_something_rx = re.compile(r'1 \|\| (0|1|!?defined\([^)]+\)|!?\()')
+one_or_something_rx = re.compile(r'\b1 \|\| (0|1|!?defined\([^)]+\)|!?\()')
 something_or_one_rx = re.compile(r'(0|1|!?defined\([^)]+\)|\)) \|\| 1')
 alone_defined_rx = re.compile(r'^(?P<not>!)?defined\((?P<name>[^)]+)\)$')
 
@@ -73,12 +76,22 @@ def simplify_expression(what, expression, forced_defines = {}):
                               ('!1', '0'),
                               # All these have to be after `!0` / `!1` so e.g.
                               # `!0 || b` doesn't get # simplified to `!b`
-                              ('0 || ', ''),
                               (' || 0', ''),
-                              ('1 && ', ''),
                               (' && 1', '')]:
             if expression.find(find) != -1:
                 expression = expression.replace(find, replace)
+                modified = True
+
+        # 0 || something, replace with just something
+        # 1 && something, replace with just something
+        # These have to be regexps, to avoid mistreating expressions like
+        # `a > 100 || something`
+        for rexp, repl in [(zero_or_something_rx, ''),
+                           (one_and_something_rx, '')]:
+            match = rexp.search(expression)
+            while match:
+                expression = expression[:match.start()] + repl + expression[match.end():]
+                match = rexp.search(expression)
                 modified = True
 
         # defined() / 0 / 1 alone in parentheses, remove parentheses
