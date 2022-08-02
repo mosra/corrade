@@ -50,6 +50,6 @@
 /* Make it possible to include Assert.h multiple times */
 #pragma ACME disable Corrade_Utility_Assert_h
 
-#pragma ACME revision * echo "$(git describe --long --match 'v*') ($(date -d @$(git log -1 --format=%at) +%Y-%m-%d))"
+#pragma ACME revision * echo "$(git describe --long --match 'v*' --abbrev=4) ($(date -d @$(git log -1 --format=%at) +%Y-%m-%d))"
 #pragma ACME stats loc wc -l
 #pragma ACME stats preprocessed g++ -std=c++11 -P -E -x c++ - | wc -l
