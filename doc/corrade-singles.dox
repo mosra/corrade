@@ -33,7 +33,7 @@ Selected Corrade functionality is also available as single-header libraries,
 with the goal of providing significantly smaller, faster-compiling and
 generally better alternatives to commonly available implementations while being
 as easy as possible to integrate into existing projects. The general rule is
-having preprocessed size not not exceeding 10k lines --- to put this in
+having preprocessed size not exceeding 10k lines --- to put this in
 perspective, not even the `<string>` header can fit there.
 
 So far, the following classes, libraries and utility headers are provided as
