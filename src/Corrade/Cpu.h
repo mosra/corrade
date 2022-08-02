@@ -31,10 +31,14 @@
  * @m_since_latest
  */
 
+#include <type_traits>
+
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
+#ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
+#endif
 
 /* Because can't use inline assembly when targeting 64bit on MSVC, and because
    <intrin.h> and <immintrin.h> is just too damn heavy to be included in a
@@ -1590,6 +1594,7 @@ template<class T> constexpr Implementation::Tags<~TypeTraits<T>::Index> operator
 }
 #endif
 
+#ifndef CORRADE_NO_DEBUG
 /** @debugoperator{Features} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, Features value);
 
@@ -1605,6 +1610,7 @@ namespace Implementation {
         return operator<<(debug, Features{value});
     }
 }
+#endif
 
 /**
 @brief CPU instruction sets enabled at compile time

@@ -26,21 +26,22 @@
 
 #include "Cpu.h"
 
+#ifndef CORRADE_NO_DEBUG
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
+#endif
 
+/** @todo these are indented to work around acme.py extracting them to the top,
+    fix properly */
 /* getauxval() for ARM on Linux and Android with API level 18+ */
 #if defined(CORRADE_TARGET_ARM) && defined(__linux__) && !(defined(CORRADE_TARGET_ANDROID) && __ANDROID_API__ < 18)
-#include <sys/auxv.h>
-
+    #include <sys/auxv.h>
 /* sysctlbyname() for ARM on macOS / iOS */
 #elif defined(CORRADE_TARGET_ARM) && defined(CORRADE_TARGET_APPLE)
-#include <sys/sysctl.h>
+    #include <sys/sysctl.h>
 #endif
 
 namespace Corrade { namespace Cpu {
-
-using namespace Containers::Literals;
 
 /* As the types all inherit from each other, there should be no members to
    keep them zero-cost. */
@@ -135,7 +136,10 @@ Features runtimeFeatures() {
 }
 #endif
 
+#ifndef CORRADE_NO_DEBUG
 Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
+    using namespace Containers::Literals;
+
     const bool packed = debug.immediateFlags() >= Utility::Debug::Flag::Packed;
 
     const Containers::StringView prefix = "|Cpu::"_s.exceptSuffix(packed ? 5 : 0);
@@ -184,5 +188,6 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 
     return debug;
 }
+#endif
 
 }}
