@@ -121,7 +121,8 @@ struct ArrayTest: TestSuite::Tester {
     void customDeleterZeroSize();
     void customDeleterMovedOutInstance();
     void customDeleterType();
-    void customDeleterTypeConstruct();
+    void customDeleterTypeNoConstructor();
+    void customDeleterTypeExplicitDefaultConstructor();
     void customDeleterTypeNullData();
     void customDeleterTypeZeroSize();
     void customDeleterTypeMovedOutInstance();
@@ -190,7 +191,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::customDeleterZeroSize,
               &ArrayTest::customDeleterMovedOutInstance,
               &ArrayTest::customDeleterType,
-              &ArrayTest::customDeleterTypeConstruct,
+              &ArrayTest::customDeleterTypeNoConstructor,
+              &ArrayTest::customDeleterTypeExplicitDefaultConstructor,
               &ArrayTest::customDeleterTypeNullData,
               &ArrayTest::customDeleterTypeZeroSize,
               &ArrayTest::customDeleterTypeMovedOutInstance,
@@ -943,7 +945,7 @@ void ArrayTest::customDeleterType() {
     CORRADE_COMPARE(deletedCount, 1);
 }
 
-void ArrayTest::customDeleterTypeConstruct() {
+void ArrayTest::customDeleterTypeNoConstructor() {
     struct CustomImplicitDeleter {
         void operator()(int*, std::size_t) {}
     };
@@ -953,6 +955,21 @@ void ArrayTest::customDeleterTypeConstruct() {
     Containers::Array<int, CustomImplicitDeleter> b{nullptr};
     int c;
     Containers::Array<int, CustomImplicitDeleter> d{&c, 1};
+    CORRADE_VERIFY(true);
+}
+
+void ArrayTest::customDeleterTypeExplicitDefaultConstructor() {
+    struct CustomExplicitDeleter {
+        explicit CustomExplicitDeleter() = default;
+
+        void operator()(int*, std::size_t) {}
+    };
+
+    /* Just verify that this compiles */
+    Containers::Array<int, CustomExplicitDeleter> a;
+    Containers::Array<int, CustomExplicitDeleter> b{nullptr};
+    int c;
+    Containers::Array<int, CustomExplicitDeleter> d{&c, 1, CustomExplicitDeleter{}};
     CORRADE_VERIFY(true);
 }
 
