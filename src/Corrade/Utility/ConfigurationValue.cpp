@@ -34,22 +34,22 @@
 
 namespace Corrade { namespace Utility {
 
-Containers::StringView ConfigurationValue<Containers::StringView>::fromString(const std::string& value, ConfigurationValueFlags) {
+Containers::StringView ConfigurationValue<Containers::StringView>::fromString(Containers::StringView value, ConfigurationValueFlags) {
     return value;
 }
-std::string ConfigurationValue<Containers::StringView>::toString(const Containers::StringView value, ConfigurationValueFlags) {
+Containers::String ConfigurationValue<Containers::StringView>::toString(const Containers::StringView value, ConfigurationValueFlags) {
     return value;
 }
 
-Containers::String ConfigurationValue<Containers::String>::fromString(const std::string& value, ConfigurationValueFlags) {
+Containers::String ConfigurationValue<Containers::String>::fromString(Containers::StringView value, ConfigurationValueFlags) {
     return value;
 }
-std::string ConfigurationValue<Containers::String>::toString(const Containers::String& value, ConfigurationValueFlags) {
+Containers::String ConfigurationValue<Containers::String>::toString(const Containers::String& value, ConfigurationValueFlags) {
     return value;
 }
 
 namespace Implementation {
-    template<class T> std::string IntegerConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
+    template<class T> Containers::String IntegerConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
 
         /* Hexadecimal / octal values */
@@ -65,8 +65,8 @@ namespace Implementation {
         return stream.str();
     }
 
-    template<class T> T IntegerConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        if(stringValue.empty()) return T{};
+    template<class T> T IntegerConfigurationValue<T>::fromString(Containers::StringView stringValue, ConfigurationValueFlags flags) {
+        if(stringValue.isEmpty()) return T{};
 
         std::istringstream stream{stringValue};
 
@@ -93,7 +93,7 @@ namespace Implementation {
     template struct IntegerConfigurationValue<long long>;
     template struct IntegerConfigurationValue<unsigned long long>;
 
-    template<class T> std::string FloatConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
+    template<class T> Containers::String FloatConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
 
         /* Scientific notation */
@@ -107,8 +107,8 @@ namespace Implementation {
         return stream.str();
     }
 
-    template<class T> T FloatConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        if(stringValue.empty()) return T{};
+    template<class T> T FloatConfigurationValue<T>::fromString(Containers::StringView stringValue, ConfigurationValueFlags flags) {
+        if(stringValue.isEmpty()) return T{};
 
         std::istringstream stream{stringValue};
 
@@ -130,24 +130,17 @@ namespace Implementation {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-std::string ConfigurationValue<std::string>::fromString(const std::string& value, ConfigurationValueFlags) {
-    return value;
-}
-std::string ConfigurationValue<std::string>::toString(const std::string& value, ConfigurationValueFlags) {
-    return value;
-}
-
-bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
+bool ConfigurationValue<bool>::fromString(Containers::StringView value, ConfigurationValueFlags) {
     return value == "1" || value == "yes" || value == "y" || value == "true";
 }
-std::string ConfigurationValue<bool>::toString(const bool value, ConfigurationValueFlags) {
+Containers::String ConfigurationValue<bool>::toString(const bool value, ConfigurationValueFlags) {
     return value ? "true" : "false";
 }
 
-char32_t ConfigurationValue<char32_t>::fromString(const std::string& value, ConfigurationValueFlags) {
+char32_t ConfigurationValue<char32_t>::fromString(Containers::StringView value, ConfigurationValueFlags) {
     return char32_t(ConfigurationValue<unsigned long long>::fromString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase));
 }
-std::string ConfigurationValue<char32_t>::toString(const char32_t value, ConfigurationValueFlags) {
+Containers::String ConfigurationValue<char32_t>::toString(const char32_t value, ConfigurationValueFlags) {
     return ConfigurationValue<unsigned long long>::toString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 }
 #endif

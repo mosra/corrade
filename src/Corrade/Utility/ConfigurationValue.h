@@ -31,7 +31,6 @@
  */
 
 #include "Corrade/Containers/EnumSet.h"
-#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -92,7 +91,7 @@ template<class T> struct ConfigurationValue {
     * @param flags         Flags
     * @return Value as string
     */
-    static std::string toString(const T& value, ConfigurationValueFlags flags);
+    static Containers::String toString(const T& value, ConfigurationValueFlags flags);
 
     /**
     * @brief Convert value from string
@@ -100,7 +99,7 @@ template<class T> struct ConfigurationValue {
     * @param flags         Flags
     * @return Value
     */
-    static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+    static T fromString(Containers::StringView stringValue, ConfigurationValueFlags flags);
     #endif
 };
 
@@ -115,8 +114,8 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<Containers::StringVi
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    static Containers::StringView fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(Containers::StringView value, ConfigurationValueFlags flags);
+    static Containers::StringView fromString(Containers::StringView value, ConfigurationValueFlags flags);
+    static Containers::String toString(Containers::StringView value, ConfigurationValueFlags flags);
     #endif
 };
 
@@ -131,8 +130,8 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<Containers::String> 
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    static Containers::String fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(const Containers::String& value, ConfigurationValueFlags flags);
+    static Containers::String fromString(Containers::StringView value, ConfigurationValueFlags flags);
+    static Containers::String toString(const Containers::String& value, ConfigurationValueFlags flags);
     #endif
 };
 
@@ -140,14 +139,14 @@ namespace Implementation {
     template<class T> struct CORRADE_UTILITY_EXPORT IntegerConfigurationValue {
         IntegerConfigurationValue() = delete;
 
-        static std::string toString(const T& value, ConfigurationValueFlags flags);
-        static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+        static Containers::String toString(const T& value, ConfigurationValueFlags flags);
+        static T fromString(Containers::StringView stringValue, ConfigurationValueFlags flags);
     };
     template<class T> struct CORRADE_UTILITY_EXPORT FloatConfigurationValue {
         FloatConfigurationValue() = delete;
 
-        static std::string toString(const T& value, ConfigurationValueFlags flags);
-        static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+        static Containers::String toString(const T& value, ConfigurationValueFlags flags);
+        static T fromString(Containers::StringView stringValue, ConfigurationValueFlags flags);
     };
 }
 
@@ -233,16 +232,6 @@ digits on platforms with 80-bit @cpp long double @ce and 15 digits on platforms
 */
 template<> struct ConfigurationValue<long double>: public Implementation::FloatConfigurationValue<long double> {};
 
-/** @brief Configuration value parser and writer for @ref std::string type */
-template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<std::string> {
-    ConfigurationValue() = delete;
-
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    static std::string fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(const std::string& value, ConfigurationValueFlags flags);
-    #endif
-};
-
 /**
 @brief Configuration value parser and writer for `bool` type
 
@@ -253,8 +242,8 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    static bool fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(bool value, ConfigurationValueFlags flags);
+    static bool fromString(Containers::StringView value, ConfigurationValueFlags flags);
+    static Containers::String toString(bool value, ConfigurationValueFlags flags);
     #endif
 };
 
@@ -267,8 +256,8 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    static char32_t fromString(const std::string& value, ConfigurationValueFlags);
-    static std::string toString(char32_t value, ConfigurationValueFlags);
+    static char32_t fromString(Containers::StringView value, ConfigurationValueFlags);
+    static Containers::String toString(char32_t value, ConfigurationValueFlags);
     #endif
 };
 
