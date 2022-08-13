@@ -24,6 +24,8 @@
     #define CORRADE_UTILITY_EXPORT as appropriate. To enable the IFUNC
     functionality, #define CORRADE_CPU_USE_IFUNC before including the file.
 
+    v2020.06-1018-gef42a6 (2022-08-13)
+    -   Properly checking XSAVE prerequisites for AVX-512
     v2020.06-1015-g8cbd6 (2022-08-02)
     -   Initial release
 
