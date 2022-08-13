@@ -3141,20 +3141,28 @@ inline Features runtimeFeatures() {
         #error
         #endif
 
-        if((xgetbv & 0x06) == 0x6)
+        /* If AVX is not supported, we don't check any following flags either */
+        if((xgetbv & 0x06) == 0x06 /* XSTATE_SSE|XSTATE_YMM */) {
             out |= TypeTraits<AvxT>::Index;
-    }
 
-    /* If AVX is not supported, we don't check any following flags either */
-    if(out & TypeTraits<AvxT>::Index) {
-        if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
-        if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
+            if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
+            if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
 
-        /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
-        Implementation::cpuid(cpuid.data, 7, 0);
-        if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
-        if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
-        if(cpuid.e.bx & (1 << 16)) out |= TypeTraits<Avx512fT>::Index;
+            /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
+            Implementation::cpuid(cpuid.data, 7, 0);
+            if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
+            if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
+        }
+
+        /* AVX-512 needs additional state saving support
+            https://patchwork.ozlabs.org/project/gcc/patch/20180329124309.GA12667@intel.com/#1884915
+            https://github.com/google/highway/blob/master/hwy/targets.cc#L279 */
+        if((cpuid.e.bx & (1 << 16)) &&
+           /* XSTATE_SSE|XSTATE_YMM|XSTATE_OPMASK|XSTATE_ZMM|XSTATE_HI_ZMM */
+           (xgetbv & 0xe6) == 0xe6)
+        {
+            out |= TypeTraits<Avx512fT>::Index;
+        }
     }
 
     /* And now the LZCNT bit, finally
