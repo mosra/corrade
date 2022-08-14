@@ -415,6 +415,7 @@ BasicStringView {
          * is not @cpp nullptr @ce, @cpp false @ce otherwise. If you rely on
          * just one of these conditions, use @ref isEmpty() and @ref data()
          * instead.
+         * @see @ref size()
          */
         constexpr explicit operator bool() const {
             return _data && (_sizePlusFlags & ~Implementation::StringViewSizeMask);

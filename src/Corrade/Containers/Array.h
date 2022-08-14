@@ -536,12 +536,18 @@ class Array {
          */
         D deleter() const { return _deleter; }
 
-        /** @brief Array size */
+        /**
+         * @brief Array size
+         *
+         * @see @ref isEmpty()
+         */
         std::size_t size() const { return _size; }
 
         /**
          * @brief Whether the array is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         bool isEmpty() const { return !_size; }
 

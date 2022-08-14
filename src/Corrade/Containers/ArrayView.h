@@ -368,12 +368,18 @@ template<class T> class ArrayView {
         /** @brief View data */
         constexpr T* data() const { return _data; }
 
-        /** @brief View size */
+        /**
+         * @brief View size
+         *
+         * @see @ref isEmpty()
+         */
         constexpr std::size_t size() const { return _size; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr bool isEmpty() const { return !_size; }
 
@@ -671,12 +677,18 @@ template<> class ArrayView<void> {
         /** @brief View data */
         constexpr void* data() const { return _data; }
 
-        /** @brief View size */
+        /**
+         * @brief View size
+         *
+         * @see @ref isEmpty()
+         */
         constexpr std::size_t size() const { return _size; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr bool isEmpty() const { return !_size; }
 
@@ -786,12 +798,18 @@ template<> class ArrayView<const void> {
         /** @brief View data */
         constexpr const void* data() const { return _data; }
 
-        /** @brief View size */
+        /**
+         * @brief View size
+         *
+         * @see @ref isEmpty()
+         */
         constexpr std::size_t size() const { return _size; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr bool isEmpty() const { return !_size; }
 
@@ -1092,12 +1110,18 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @brief View data */
         constexpr T* data() const { return _data; }
 
-        /** @brief View size */
+        /**
+         * @brief View size
+         *
+         * @see @ref isEmpty()
+         */
         constexpr std::size_t size() const { return size_; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr bool isEmpty() const { return !size_; }
 

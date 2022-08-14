@@ -582,6 +582,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Size to ensure consistent behavior
          * for all dimensions in generic implementations.
+         * @see @ref stride(), @ref isEmpty()
          */
         constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
 
@@ -592,12 +593,15 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Stride to ensure consistent
          * behavior for all dimensions in generic implementations.
+         * @see @ref size()
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr StridedDimensions<dimensions, bool> isEmpty() const {
             return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
@@ -1211,6 +1215,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Size to ensure consistent behavior
          * for all dimensions in generic implementations.
+         * @see @ref stride(), @ref isEmpty()
          */
         constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
 
@@ -1221,12 +1226,15 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Stride to ensure consistent
          * behavior for all dimensions in generic implementations.
+         * @see @ref size()
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr StridedDimensions<dimensions, bool> isEmpty() const {
             return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
@@ -1451,6 +1459,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Size to ensure consistent behavior
          * for all dimensions in generic implementations.
+         * @see @ref stride(), @ref isEmpty()
          */
         constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
 
@@ -1461,12 +1470,15 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * one-dimensional case so the usual numeric operations work as
          * expected. Explicitly cast to @ref Stride to ensure consistent
          * behavior for all dimensions in generic implementations.
+         * @see @ref size()
          */
         constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
          * @m_since_latest
+         *
+         * @see @ref size()
          */
         constexpr StridedDimensions<dimensions, bool> isEmpty() const {
             return isEmptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});

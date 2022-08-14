@@ -619,7 +619,7 @@ class CORRADE_UTILITY_EXPORT String {
          * otherwise. Compared to @ref BasicStringView::operator bool(), a
          * @ref String can never be @cpp nullptr @ce, so the pointer value
          * isn't taken into account here.
-         * @see @ref isEmpty()
+         * @see @ref isEmpty(), @ref size()
          */
         explicit operator bool() const;
 

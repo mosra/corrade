@@ -300,6 +300,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Array size
          *
          * Equivalent to @ref Size.
+         * @see @ref isEmpty()
          */
         constexpr std::size_t size() const { return size_; }
 
@@ -309,6 +310,7 @@ template<std::size_t size_, class T> class StaticArray {
          *
          * Always @cpp true @ce (it's not possible to create a zero-sized C
          * array).
+         * @see @ref size(), @ref Size
          */
         constexpr bool isEmpty() const { return !size_; }
 
