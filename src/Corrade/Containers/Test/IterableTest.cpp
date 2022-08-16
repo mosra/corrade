@@ -71,6 +71,7 @@ struct IterableTest: TestSuite::Tester {
 
     void iterator();
     void rangeBasedFor();
+    void rangeBasedForReference();
 };
 
 constexpr struct {
@@ -120,7 +121,8 @@ IterableTest::IterableTest() {
     addInstancedTests({&IterableTest::iterator},
         Containers::arraySize(IteratorData));
 
-    addTests({&IterableTest::rangeBasedFor});
+    addTests({&IterableTest::rangeBasedFor,
+              &IterableTest::rangeBasedForReference});
 }
 
 void IterableTest::constructDefault() {
@@ -627,6 +629,26 @@ void IterableTest::rangeBasedFor() {
     CORRADE_COMPARE(data[2], 2);
     CORRADE_COMPARE(data[3], 1);
     CORRADE_COMPARE(data[4], 33);
+}
+
+void IterableTest::rangeBasedForReference() {
+    int data0 = 7;
+    int data1 = 5;
+    int data2 = 0;
+    int data3 = -26;
+    int data4 = 33;
+    Reference<int> data[]{data0, data1, data2, data3, data4};
+    Iterable<int> ai = StridedArrayView1D<Reference<int>>{data}.slice(1, 4).flipped<0>();
+
+    int i = 0;
+    for(int& x: ai)
+        x = ++i;
+
+    CORRADE_COMPARE(data0, 7);
+    CORRADE_COMPARE(data1, 3);
+    CORRADE_COMPARE(data2, 2);
+    CORRADE_COMPARE(data3, 1);
+    CORRADE_COMPARE(data4, 33);
 }
 
 }}}}
