@@ -70,6 +70,8 @@ modification time:
 -   Windows, macOS and Emscripten file modification time APIs return the value
     in seconds, FAT filesystems have two-second precision
 
+<b></b>
+
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms and on
     @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On Emscripten it works on the
