@@ -243,7 +243,18 @@ void IterableTest::arrayViewMutableReferenceToConst() {
     const int dataA = 5;
     const int dataB = 0;
     const int dataC = -26;
-    Reference<const int> data[]{dataA, dataB, dataC};
+    Reference<const int> data[]{
+        #ifdef CORRADE_TARGET_MSVC
+        /* Without the explicit construction, MSVC (2015, 2017, 2019, 2022,
+           including /permissive-) complains that it's attempting to use the
+           deleted Reference<T>(T&&) constructor. No issue on GCC or Clang. */
+        Reference<const int>{dataA},
+        Reference<const int>{dataB},
+        Reference<const int>{dataC}
+        #else
+        dataA, dataB, dataC
+        #endif
+    };
     ArrayView<Reference<const int>> a = data;
 
     Iterable<const int> ai = a;
@@ -348,7 +359,18 @@ void IterableTest::stridedArrayViewMutableReferenceToConst() {
     const int dataA = -26;
     const int dataB = 0;
     const int dataC = 5;
-    Reference<const int> data[]{dataA, dataB, dataC};
+    Reference<const int> data[]{
+        #ifdef CORRADE_TARGET_MSVC
+        /* Without the explicit construction, MSVC (2015, 2017, 2019, 2022,
+           including /permissive-) complains that it's attempting to use the
+           deleted Reference<T>(T&&) constructor. No issue on GCC or Clang. */
+        Reference<const int>{dataA},
+        Reference<const int>{dataB},
+        Reference<const int>{dataC}
+        #else
+        dataA, dataB, dataC
+        #endif
+    };
     StridedArrayView1D<Reference<const int>> a = data;
 
     Iterable<const int> ai = a.flipped<0>();
