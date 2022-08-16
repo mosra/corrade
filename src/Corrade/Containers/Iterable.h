@@ -212,11 +212,11 @@ template<class T> class Iterable {
          * @see @ref front()
          */
         IterableIterator<T> begin() const {
-            return IterableIterator<T>{_data, _stride, 0};
+            return IterableIterator<T>{_data, _stride, _accessor, 0};
         }
         /** @overload */
         IterableIterator<T> cbegin() const {
-            return IterableIterator<T>{_data, _stride, 0};
+            return IterableIterator<T>{_data, _stride, _accessor, 0};
         }
 
         /**
@@ -225,11 +225,11 @@ template<class T> class Iterable {
          * @see @ref back()
          */
         IterableIterator<T> end() const {
-            return IterableIterator<T>{_data, _stride, _size};
+            return IterableIterator<T>{_data, _stride, _accessor, _size};
         }
         /** @overload */
         IterableIterator<T> cend() const {
-            return IterableIterator<T>{_data, _stride, _size};
+            return IterableIterator<T>{_data, _stride, _accessor, _size};
         }
 
         /**
@@ -319,7 +319,7 @@ template<class T> class IterableIterator {
 
         /** @brief Add an offset */
         IterableIterator operator+(std::ptrdiff_t i) const {
-            return IterableIterator<T>{_data, _stride, _i + i};
+            return IterableIterator<T>{_data, _stride, _accessor, _i + i};
         }
 
         /** @brief Add an offset and assign */
@@ -330,7 +330,7 @@ template<class T> class IterableIterator {
 
         /** @brief Subtract an offset */
         IterableIterator operator-(std::ptrdiff_t i) const {
-            return IterableIterator<T>{_data, _stride, _i - i};
+            return IterableIterator<T>{_data, _stride, _accessor, _i - i};
         }
 
         /** @brief Subtract an offset and assign */
@@ -358,16 +358,17 @@ template<class T> class IterableIterator {
 
         /** @brief Dereference */
         T& operator*() const {
-            return *const_cast<T*>(reinterpret_cast<const T*>(_data + _i*_stride));
+            return _accessor(_data + _i*_stride);
         }
 
     private:
         friend Iterable<T>;
 
-        explicit IterableIterator(const void* data, std::ptrdiff_t stride, std::size_t i) noexcept: _data{static_cast<const char*>(data)}, _stride{stride}, _i{i} {}
+        explicit IterableIterator(const void* data, std::ptrdiff_t stride, T&(*accessor)(const void*), std::size_t i) noexcept: _data{static_cast<const char*>(data)}, _stride{stride}, _accessor{accessor}, _i{i} {}
 
         const char* _data;
         std::ptrdiff_t _stride;
+        T&(*_accessor)(const void*);
         std::size_t _i;
 };
 
