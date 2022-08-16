@@ -2615,25 +2615,38 @@ void StridedArrayViewTest::iterator() {
         int:32;
     } d[7]{{443}, {1}, {2}, {3}, {4}, {5}, {6}};
 
-    /* Verifying also that iterators of different views are not compared equal */
+    /* Verifying also that iterators of different views and iterators of
+       different strides are not comparable */
     StridedArrayView1Di a{d, &d[0].value, 7, data.stride1};
     if(data.flipped) a = a.flipped<0>();
     StridedArrayView1Di b;
 
     CORRADE_VERIFY(a.begin() == a.begin());
+    /* These are equal if stride is zero */
+    CORRADE_COMPARE(a.begin() != a.every(2).begin(), data.stride1 != Stride1D{});
     CORRADE_VERIFY(a.begin() != b.begin());
     CORRADE_VERIFY(!(a.begin() != a.begin()));
+    /* These are equal if stride is zero */
+    CORRADE_COMPARE(!(a.begin() == a.every(2).begin()), data.stride1 != Stride1D{});
     CORRADE_VERIFY(!(a.begin() == b.begin()));
     CORRADE_VERIFY(a.begin() != a.begin() + 1);
 
     CORRADE_VERIFY(a.begin() < a.begin() + 1);
+    /* These can compare if stride is zero */
+    CORRADE_COMPARE(!(a.every(2).begin() < a.begin() + 1), data.stride1 != Stride1D{});
     CORRADE_VERIFY(!(a.begin() < a.begin()));
     CORRADE_VERIFY(a.begin() <= a.begin());
+    /* These can compare if stride is zero */
+    CORRADE_COMPARE(!(a.begin() <= a.every(2).begin()), data.stride1 != Stride1D{});
     CORRADE_VERIFY(!(a.begin() + 1 <= a.begin()));
 
     CORRADE_VERIFY(a.begin() + 1 > a.begin());
+    /* These can compare if stride is zero */
+    CORRADE_COMPARE(!(a.begin() + 1 > a.every(2).begin()), data.stride1 != Stride1D{});
     CORRADE_VERIFY(!(a.begin() > a.begin()));
     CORRADE_VERIFY(a.begin() >= a.begin());
+    /* These can compare if stride is zero */
+    CORRADE_COMPARE(!(a.begin() >= a.every(2).begin()), data.stride1 != Stride1D{});
     CORRADE_VERIFY(!(a.begin() >= a.begin() + 1));
 
     CORRADE_VERIFY(a.cbegin() == a.begin());

@@ -1957,32 +1957,32 @@ template<unsigned dimensions, class T> class StridedIterator {
 
         /** @brief Equality comparison */
         bool operator==(const StridedIterator<dimensions, T>& other) const {
-            return _data == other._data && _i == other._i;
+            return _data == other._data && _stride == other._stride && _i == other._i;
         }
 
         /** @brief Non-equality comparison */
         bool operator!=(const StridedIterator<dimensions, T>& other) const {
-            return _data != other._data || _i != other._i;
+            return _data != other._data || _stride != other._stride || _i != other._i;
         }
 
         /** @brief Less than comparison */
         bool operator<(const StridedIterator<dimensions, T>& other) const {
-            return _data == other._data && _i < other._i;
+            return _data == other._data && _stride == other._stride && _i < other._i;
         }
 
         /** @brief Less than or equal comparison */
         bool operator<=(const StridedIterator<dimensions, T>& other) const {
-            return _data == other._data && _i <= other._i;
+            return _data == other._data && _stride == other._stride && _i <= other._i;
         }
 
         /** @brief Greater than comparison */
         bool operator>(const StridedIterator<dimensions, T>& other) const {
-            return _data == other._data && _i > other._i;
+            return _data == other._data && _stride == other._stride && _i > other._i;
         }
 
         /** @brief Greater than or equal comparison */
         bool operator>=(const StridedIterator<dimensions, T>& other) const {
-            return _data == other._data && _i >= other._i;
+            return _data == other._data && _stride == other._stride && _i >= other._i;
         }
 
         /** @brief Add an offset */
