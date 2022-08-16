@@ -68,6 +68,10 @@ template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
 template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
+
+template<class> class Iterable;
+template<class> class IterableIterator;
+
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 

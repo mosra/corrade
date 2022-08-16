@@ -67,6 +67,7 @@ if(CMAKE_CXX_FLAGS MATCHES "[-/]fsanitize=address")
         PASS_REGULAR_EXPRESSION "AddressSanitizer: container-overflow")
 endif()
 
+corrade_add_test(ContainersIterableTest IterableTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersMoveReferenceTest MoveReferenceTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
@@ -98,6 +99,7 @@ corrade_add_test(ContainersTripleStlTest TripleStlTest.cpp)
 
 set_property(TARGET
     ContainersAnyReferenceTest
+    ContainersIterableTest
     ContainersLinkedListTest
     ContainersArrayTest
     ContainersArrayViewTest

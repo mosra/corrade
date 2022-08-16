@@ -38,6 +38,7 @@
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/Iterable.h"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
@@ -171,6 +172,17 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 }
 /* [bigEnumSetDebugOutput] */
 }
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
+void foo(Containers::Iterable<Utility::FileWatcher>);
+/* [Iterable-usage-implementation] */
+void foo(Containers::Iterable<Utility::FileWatcher> watchers) {
+    for(Utility::FileWatcher& watcher: watchers) {
+        DOXYGEN_ELLIPSIS(static_cast<void>(watcher);)
+    }
+}
+/* [Iterable-usage-implementation] */
+#endif
 
 namespace LL1 {
 class Object;

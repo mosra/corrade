@@ -25,14 +25,21 @@
 */
 
 #include <string>
+#include <vector>
 
+#include "Corrade/Containers/AnyReference.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayViewStl.h"
+#include "Corrade/Containers/Iterable.h"
 #include "Corrade/Containers/PairStl.h"
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Containers/ReferenceStl.h"
 #include "Corrade/Containers/TripleStl.h"
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
+#include "Corrade/Utility/FileWatcher.h"
+#endif
 
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
@@ -62,6 +69,30 @@ Containers::Array<int> c{5};            // c.size() == 5
 auto d = Containers::array<int>({5});   // d.size() == 1, d[0] == 5
 /* [Array-initializer-list] */
 }
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
+{
+/* [Iterable-usage] */
+void foo(Containers::Iterable<Utility::FileWatcher>);
+
+Utility::FileWatcher a{DOXYGEN_ELLIPSIS("a")}, b{DOXYGEN_ELLIPSIS("b")};
+Utility::FileWatcher cArray[3]{DOXYGEN_ELLIPSIS(Utility::FileWatcher{"c0"}, Utility::FileWatcher{"c1"}, Utility::FileWatcher{"c2"})};
+Containers::Array<Containers::Reference<Utility::FileWatcher>> array{DOXYGEN_ELLIPSIS(InPlaceInit, {a, b})};
+std::vector<Utility::FileWatcher> vector{DOXYGEN_ELLIPSIS()};
+
+foo({a, b}); /* passing (references to) variables directly */
+foo(cArray); /* passing a C array */
+foo(array);  /* passing an array of references */
+foo(vector); /* passing a STL vector */
+/* [Iterable-usage] */
+
+/* [Iterable-usage-boom] */
+Containers::Iterable<Utility::FileWatcher> iterable = {a, b};
+
+foo(iterable); // Boom!
+/* [Iterable-usage-boom] */
+}
+#endif
 
 {
 /* The include is already above, so doing it again here should be harmless */
