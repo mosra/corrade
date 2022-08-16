@@ -274,7 +274,7 @@ template<class T> class Iterable {
         const void* _data;
         std::size_t _size;
         std::ptrdiff_t _stride;
-        T&(*_accessor)(const void* data);
+        T&(*_accessor)(const void*);
 };
 
 /**
