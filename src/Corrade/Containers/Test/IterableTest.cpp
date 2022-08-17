@@ -36,6 +36,7 @@
 #include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/MoveReference.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -72,7 +73,11 @@ struct IterableTest: TestSuite::Tester {
     void iterator();
     void rangeBasedFor();
     void rangeBasedForReference();
+
+    void overloadsWithForwardDeclaredType();
 };
+
+using namespace Containers::Literals;
 
 constexpr struct {
     const char* name;
@@ -122,7 +127,9 @@ IterableTest::IterableTest() {
         Containers::arraySize(IteratorData));
 
     addTests({&IterableTest::rangeBasedFor,
-              &IterableTest::rangeBasedForReference});
+              &IterableTest::rangeBasedForReference,
+
+              &IterableTest::overloadsWithForwardDeclaredType});
 }
 
 void IterableTest::constructDefault() {
@@ -649,6 +656,31 @@ void IterableTest::rangeBasedForReference() {
     CORRADE_COMPARE(data2, 2);
     CORRADE_COMPARE(data3, 1);
     CORRADE_COMPARE(data4, 33);
+}
+
+struct ForwardDeclared;
+
+void IterableTest::overloadsWithForwardDeclaredType() {
+    /* If there's a set of overloads with some taking references or iterables
+       of types that have just forward declarations, it should still work --
+       we don't need the type (or its size) for anything here, and we
+       especially don't want to be forced to include complete definitions of
+       everything. */
+
+    struct Type {
+        const char* foo(int) const { return "int"; }
+        const char* foo(const ForwardDeclared&) const { return "ForwardDeclared"; }
+        const char* foo(Iterable<const int>) const { return "Iterable<int>"; }
+        const char* foo(Iterable<const ForwardDeclared>) const { return "Iterable<ForwardDeclared>"; }
+    } type;
+
+    int b;
+    const auto& a = *reinterpret_cast<const ForwardDeclared*>(&b);
+
+    CORRADE_COMPARE(type.foo(3), "int"_s);
+    CORRADE_COMPARE(type.foo({3, 7}), "Iterable<int>"_s);
+    CORRADE_COMPARE(type.foo(a), "ForwardDeclared"_s);
+    CORRADE_COMPARE(type.foo({a, a}), "Iterable<ForwardDeclared>"_s);
 }
 
 }}}}
