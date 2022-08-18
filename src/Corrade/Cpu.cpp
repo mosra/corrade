@@ -176,7 +176,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
     _c(Neon)
     _c(NeonFma)
     _c(NeonFp16)
-    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    #elif defined(CORRADE_TARGET_WASM)
     _c(Simd128)
     #endif
     #undef _c

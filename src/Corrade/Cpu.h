@@ -1233,6 +1233,9 @@ typedef
     #else
     ScalarT
     #endif
+
+    #else
+    ScalarT
     #endif
     DefaultBaseT;
 
