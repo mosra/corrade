@@ -747,9 +747,9 @@ void JsonWriterTest::arrayScope() {
 void JsonWriterTest::escapedString() {
     JsonWriter json;
 
-    /* UTF-8 doesn't get escaped */
+    /* UTF-8 doesn't get escaped; / also not */
     CORRADE_COMPARE(json.write("\"a\\h/o\bj\r \fs\nv\tě\"te!").toString(),
-        "\"\\\"a\\\\h\\/o\\bj\\r \\fs\\nv\\tě\\\"te!\"");
+        "\"\\\"a\\\\h/o\\bj\\r \\fs\\nv\\tě\\\"te!\"");
 }
 
 template<class T> void JsonWriterTest::negativeZero() {

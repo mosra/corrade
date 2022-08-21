@@ -565,10 +565,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * as appropriate. Expected to not be called after the top-level JSON
          * value was closed and not when an object key is expected --- use
          * @ref writeKey() in that case instead. The string is expected to be
-         * in UTF-8 but its validity isn't checked. Only the `"`, `\`, `/`,
-         * bell (@cpp '\b' @ce), form feed (@cpp '\f' @ce), newline
-         * (@cpp '\n' @ce), tab (@cpp '\t' @ce) and carriage return
-         * (@cpp '\r' @ce) values are escaped, UTF-8 bytes are written verbatim
+         * in UTF-8 but its validity isn't checked. Only the `"`, `\`, bell
+         * (@cpp '\b' @ce), form feed (@cpp '\f' @ce), newline (@cpp '\n' @ce),
+         * tab (@cpp '\t' @ce) and carriage return (@cpp '\r' @ce) values are
+         * escaped, the `/` character and UTF-8 bytes are written verbatim
          * without escaping.
          */
         JsonWriter& write(Containers::StringView value);

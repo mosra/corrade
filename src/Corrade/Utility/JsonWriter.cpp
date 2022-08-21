@@ -355,7 +355,11 @@ void JsonWriter::writeStringLiteralInternal(const Containers::StringView string)
             break;
         case '"':
         case '\\':
-        case '/':  /* JSON, why, you're weird */
+        /* Escaping / is possible but not required. The reason for this feature
+           is to allow putting closing HTML tags (such as </marquee>) inside
+           JSON which is then inside a <script>, and </ isn't allowed inside
+           strings. https://stackoverflow.com/a/1580682 */
+        /** @todo introduce an option to escape /, if ever needed in practice */
             arrayAppend(state.out, '\\');
             CORRADE_FALLTHROUGH
         default:
