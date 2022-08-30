@@ -89,6 +89,10 @@ in the `info` structure, so the views aren't needed after anymore.
     SIMD types, use a @ref Containers-ArrayTuple-allocators-deleters "custom allocator"
     together with a @ref Utility::allocateAligned() instead.
 
+Besides @ref ArrayView, the output view can also be a (multi-dimensional)
+@ref StridedArrayView or a @ref BitArrayView. See constructor overloads of the
+@ref Item class for reference.
+
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
 
 The usage isn't limited to just trivial types --- by default (or if you
