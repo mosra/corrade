@@ -416,7 +416,7 @@ benchmark types:
         if(testCase.second.type == TestCaseType::Test) continue;
 
         if(_state->verbose && _state->isDebugBuild) {
-            Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::White) << "  INFO" << Debug::resetColor << "Benchmarking a debug build.";
+            Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::Default) << "  INFO" << Debug::resetColor << "Benchmarking a debug build.";
         }
         #ifdef __linux__
         for(std::size_t i = 0, count = sysconf(_SC_NPROCESSORS_ONLN); i != count; ++i) {
