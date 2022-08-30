@@ -269,7 +269,14 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref color(), @ref boldColor()
          */
         enum class Color: char {
-            /** Black */
+            /**
+             * Black
+             *
+             * @attention The non-bold version of this color is often invisible
+             *      on terminals with dark background. You might want to use
+             *      @ref Color::Default instead to ensure visibility on both
+             *      bright and dark backgrounds.
+             */
             Black = 0,
 
             /** Red */
@@ -306,7 +313,14 @@ class CORRADE_UTILITY_EXPORT Debug {
             Cyan = 3,
             #endif
 
-            /** White */
+            /**
+             * White
+             *
+             * @attention The bold version of this color is often invisible
+             *      on terminals with bright background. You might want to use
+             *      @ref Color::Default instead to ensure visibility on both
+             *      bright and dark backgrounds.
+             */
             White = 7,
 
             /** Default (implementation/style-defined) */
