@@ -328,6 +328,15 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /**
          * @brief Construct a view with value-initialized elements
+         * @param[in] size          Desired view size in bits
+         * @param[out] outputView   Reference where to store the resulting view
+         *
+         * All @p size bits are value-initialized (i.e., zero-initialized).
+         */
+        /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableBitArrayView& outputView);
+
+        /**
+         * @brief Construct a view with value-initialized elements
          *
          * Alias to @ref Item(ValueInitT, std::size_t, ArrayView<T>&).
          */
@@ -338,6 +347,9 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /** @overload */
         template<unsigned dimensions, class T> /*implicit*/ Item(const StridedDimensions<dimensions, std::size_t>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
+
+        /** @overload */
+        /*implicit*/ Item(std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /**
          * @brief Construct a view without initializing its elements
@@ -373,6 +385,15 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
                create(). */
             outputView = {{nullptr, Implementation::sizeProduct(size)}, size};
         }
+
+        /**
+         * @brief Construct a bit array view without initializing its elements
+         * @param[in] size          Desired view size in bits
+         * @param[out] outputView   Reference where to store the resulting view
+         *
+         * Useful if you will be overwriting all elements later anyway.
+         */
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableBitArrayView& outputView);
 
         /**
          * @brief Construct a type-erased view without initializing its elements

@@ -32,6 +32,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -158,13 +159,15 @@ void ArrayTupleTest::constructEmptyArrays() {
         StridedArrayView1D<double> strided{ArrayView<double>{reinterpret_cast<double*>(1337), 3}};
         StridedArrayView3D<float> strided3D{ArrayView<float>{reinterpret_cast<float*>(1337), 24}, {2, 3, 4}};
         StridedArrayView2D<char> stridedErased{ArrayView<char>{reinterpret_cast<char*>(1337), 3}, {1, 3}};
+        MutableBitArrayView bits{reinterpret_cast<char*>(1337), 7, 53};
         ArrayTuple data{
             {0, chars},
             {0, noncopyable},
             {0, ints},
             {0, strided},
             {{0, 0, 0}, strided3D},
-            {Corrade::NoInit, 0, 4, 2, stridedErased}
+            {Corrade::NoInit, 0, 4, 2, stridedErased},
+            {0, bits}
         };
 
         CORRADE_COMPARE(data.size(), 0);
@@ -195,6 +198,11 @@ void ArrayTupleTest::constructEmptyArrays() {
         CORRADE_COMPARE(stridedErased.size(), (Containers::StridedArrayView2D<char>::Size{0, 4}));
         CORRADE_COMPARE(stridedErased.stride(),  (Containers::StridedArrayView2D<char>::Stride{4, 1}));
         CORRADE_VERIFY(!stridedErased.data());
+
+        /* Bit array pointer and both size and offset should be reset */
+        CORRADE_COMPARE(bits.offset(), 0);
+        CORRADE_COMPARE(bits.size(), 0);
+        CORRADE_VERIFY(!bits.data());
     }
 
     CORRADE_COMPARE(NonCopyable::constructed, 0);
@@ -231,6 +239,7 @@ void ArrayTupleTest::construct() {
         StridedArrayView1D<double> strided;
         StridedArrayView3D<float> strided3D;
         StridedArrayView2D<char> stridedErased;
+        MutableBitArrayView bits;
         ArrayTuple data{
             {17, chars},
             {4, noncopyable},
@@ -239,7 +248,8 @@ void ArrayTupleTest::construct() {
             {5, strided},
             {{2, 1, 4}, strided3D},
             /* There's no ValueInit alternative for the type-erased variant */
-            {Corrade::NoInit, 3, 4, 16, stridedErased}
+            {Corrade::NoInit, 3, 4, 16, stridedErased},
+            {27, bits},
         };
 
         /* Check base properties */
@@ -256,13 +266,14 @@ void ArrayTupleTest::construct() {
             8*4 +                   /* strided 3D, right after a field with
                                        higher padding */
                 8 +                 /* padding to align the next to 16 again */
-            3*4                     /* 12 bytes, but aligned to 16 */
+            3*4 +                   /* 12 bytes, but aligned to 16 */
+            4                       /* 27 bits, aligned to four bytes */
         );
         CORRADE_VERIFY(data.data());
         /* Custom deleter to call the destructors */
         CORRADE_VERIFY(data.deleter());
 
-        /* Check array sizes, strides and offsets */
+        /* Check array sizes, strides, offsets ... */
         CORRADE_COMPARE(chars.size(), 17);
         CORRADE_COMPARE(noncopyable.size(), 4);
         CORRADE_COMPARE(ints.size(), 7);
@@ -273,6 +284,10 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(strided3D.stride(),  (Containers::StridedArrayView3D<float>::Stride{16, 16, 4}));
         CORRADE_COMPARE(stridedErased.size(), (Containers::StridedArrayView2D<char>::Size{3, 4}));
         CORRADE_COMPARE(stridedErased.stride(),  (Containers::StridedArrayView2D<char>::Stride{4, 1}));
+        CORRADE_COMPARE(bits.offset(), 0);
+        CORRADE_COMPARE(bits.size(), 27);
+
+        /* ... and data pointers */
         CORRADE_COMPARE(static_cast<void*>(chars.data()), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)));
         CORRADE_COMPARE(static_cast<void*>(noncopyable.data()), data.data() +
@@ -291,6 +306,9 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(stridedErased.data(), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
                 (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8);
+        CORRADE_COMPARE(bits.data(), data.data() +
+            sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4);
 
         /* Check that trivial types are zero-init'd and nontrivial had their
            constructor called */
@@ -309,6 +327,8 @@ void ArrayTupleTest::construct() {
                 }
             }
         }
+        for(std::size_t i = 0; i != bits.size(); ++i)
+            CORRADE_VERIFY(!bits[i]);
     }
 
     /* Check that non-trivial destructors were called */
@@ -322,7 +342,7 @@ void ArrayTupleTest::constructNoInit() {
     NonCopyable::constructed = 0;
     NonCopyable::destructed = 0;
 
-    char storage[276];
+    char storage[280];
     for(char& i: storage) i = '\xce';
 
     CORRADE_VERIFY(true); /* to capture correct function name */
@@ -337,6 +357,8 @@ void ArrayTupleTest::constructNoInit() {
         StridedArrayView3D<float> strided3D;
         StridedArrayView2D<float> initializedStrided2D;
         StridedArrayView2D<char> stridedErased;
+        MutableBitArrayView bits;
+        MutableBitArrayView initializedBits;
         ArrayTuple data{
             {{Corrade::NoInit, 15, chars},
              {Corrade::ValueInit, 15, initializedChars},
@@ -346,7 +368,9 @@ void ArrayTupleTest::constructNoInit() {
              {Corrade::ValueInit, 4, initializedStrided},
              {Corrade::NoInit, {1, 2, 3}, strided3D},
              {Corrade::ValueInit, {3, 2}, initializedStrided2D},
-             {Corrade::NoInit, 3, 4, 4, stridedErased}},
+             {Corrade::NoInit, 3, 4, 4, stridedErased},
+             {Corrade::NoInit, 13, bits},
+             {Corrade::ValueInit, 14, initializedBits}},
             [&](std::size_t size, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
                 CORRADE_COMPARE_AS(size, Containers::arraySize(storage),
                     TestSuite::Compare::LessOrEqual);
@@ -385,6 +409,12 @@ void ArrayTupleTest::constructNoInit() {
             }), TestSuite::Compare::Container);
         CORRADE_COMPARE(NonCopyable::constructed, 2);
         CORRADE_COMPARE(NonCopyable::destructed, 0);
+        CORRADE_COMPARE((bits.size() + 7)/8, 2);
+        CORRADE_COMPARE((initializedBits.size() + 7)/8, 2);
+        for(std::size_t i = 0; i != 2; ++i) {
+            CORRADE_COMPARE(bits.data()[i], '\xce');
+            CORRADE_COMPARE(initializedBits.data()[i], 0);
+        }
 
         /* Construct the remaining NonCopyables, so their destruction is
            correctly reported */

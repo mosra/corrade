@@ -27,6 +27,7 @@
 #include "ArrayTuple.h"
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
 
 namespace Corrade { namespace Containers {
@@ -365,6 +366,18 @@ char* ArrayTuple::release() {
     _size = 0;
     _deleter = nullptr;
     return data;
+}
+
+ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, (size + 7)/8, Implementation::dataRef(outputView)} {
+    /* Populate size of the output view. Pointer gets updated inside
+       create(). */
+    outputView = {nullptr, 0, size};
+}
+
+ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableBitArrayView& outputView): Item{Corrade::NoInit, (size + 7)/8, Implementation::dataRef(outputView)} {
+    /* Populate size of the output view. Pointer gets updated inside
+       create(). */
+    outputView = {nullptr, 0, size};
 }
 
 ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, const std::size_t elementSize, const std::size_t elementAlignment, StridedArrayView2D<char>& outputView): _elementSize{elementSize}, _elementAlignment{elementAlignment}, _elementCount{size}, _constructor{}, _destructor{}, _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))} {

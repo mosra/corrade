@@ -42,6 +42,20 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+    /* So ArrayTuple can update the data pointer */
+    template<class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    T*& dataRef(BasicBitArrayView<T>& view) {
+        return view._data;
+    }
+}
+
 /**
 @brief Base for bit array views
 @m_since_latest
@@ -258,6 +272,8 @@ template<class T> class BasicBitArrayView {
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicBitArrayView;
         friend BitArray;
+        /* So ArrayTuple can update the data pointer */
+        friend T*& Implementation::dataRef<>(BasicBitArrayView<T>&);
 
         /* Used by BitArray view conversion to avoid going through the
            asserts and value decomposition in the public constructor. */
