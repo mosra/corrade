@@ -564,9 +564,10 @@ template<class T> class ArrayView {
         #endif
 
     private:
+        /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(ArrayView<T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
-        /* so Python buffer protocol can point to the size member */
+        /* So Python buffer protocol can point to the size member */
         friend std::size_t& Implementation::sizeRef<>(ArrayView<T>&);
         #endif
         T* _data;

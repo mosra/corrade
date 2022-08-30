@@ -991,9 +991,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         typedef typename std::conditional<std::is_const<T>::value, const char, char>::type ArithmeticType;
 
+        /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
-        /* so Python buffer protocol can point to the size / stride members */
+        /* So Python buffer protocol can point to the size / stride members */
         friend StridedDimensions<dimensions, std::size_t>& Implementation::sizeRef<>(StridedArrayView<dimensions, T>&);
         friend StridedDimensions<dimensions, std::ptrdiff_t>& Implementation::strideRef<>(StridedArrayView<dimensions, T>&);
         #endif
