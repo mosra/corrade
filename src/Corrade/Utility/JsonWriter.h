@@ -335,7 +335,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * written yet. When the top-level value *is* complete, the returned
          * size is equal to size of the data returned from @ref toString() and
          * @ref toFile().
-         * @see @ref isEmpty()
+         * @see @ref isEmpty(), @ref currentArraySize()
          */
         std::size_t size() const;
 
@@ -414,6 +414,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * Expects that an array is currently being written --- i.e.,
          * @ref beginArray() / @ref beginArrayScope() was recently called with
          * no @ref endArray() or @ref beginObject() call happening after.
+         * @see @ref size()
          */
         std::size_t currentArraySize() const;
 
