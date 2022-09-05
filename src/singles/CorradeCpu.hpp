@@ -13,16 +13,15 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
-    To avoid bloat from OS-specific headers, this library contains a deinlined
-    implementation part, in particular for runtime feature detection on ARM.
-    Dedicate *exactly one* file in your project and add the following to it:
+    The library has a separate non-inline implementation part, enable it *just
+    once* like this:
 
         #define CORRADE_CPU_IMPLEMENTATION
-        #include "CorradeCpu.h"
+        #include <CorradeCpu.hpp>
 
     If you need the deinlined symbols to be exported from a shared library,
-    #define CORRADE_UTILITY_EXPORT as appropriate. To enable the IFUNC
-    functionality, #define CORRADE_CPU_USE_IFUNC before including the file.
+    `#define CORRADE_UTILITY_EXPORT` as appropriate. To enable the IFUNC
+    functionality, `#define CORRADE_CPU_USE_IFUNC` before including the file.
 
     v2020.06-1018-gef42a6 (2022-08-13)
     -   Properly checking XSAVE prerequisites for AVX-512

@@ -410,17 +410,16 @@ function pointer variant can be then called the same way:
 
 @par Single-header version
     This namespace together with all related macros is also available as a
-    single-header, dependency-less [CorradeCpu.h](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.h)
+    single-header, dependency-less [CorradeCpu.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.hpp)
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
 @par
-    To avoid bloat from OS-specific headers, this library contains a deinlined
-    implementation part, in particular for runtime feature detection on ARM.
-    Dedicate *exactly one* file in your project and add the following to it:
+    The library has a separate non-inline implementation part, enable it
+    * *just once* like this:
 @par
     @code{.cpp}
     #define CORRADE_CPU_IMPLEMENTATION
-    #include "CorradeCpu.h"
+    #include <CorradeCpu.hpp>
     @endcode
 @par
     If you need the deinlined symbols to be exported from a shared library,

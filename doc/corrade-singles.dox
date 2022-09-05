@@ -53,7 +53,7 @@ Class, library or header    | Single-header version
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
 @ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
-@ref Corrade::Cpu           | [CorradeCpu.h](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.h)
+@ref Corrade::Cpu           | [CorradeCpu.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.hpp)
 @ref Corrade/Utility/StlForwardArray.h | [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
 @ref Corrade/Utility/StlForwardString.h | [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)
 @ref Corrade/Utility/StlForwardTuple.h | [CorradeStlForwardTuple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardTuple.h)
@@ -73,6 +73,27 @@ The files retain their own include guards, which makes it possible to mix them
 together. However, when combining more than one, make sure to have all files
 from the same revision to avoid API mismatches. The concrete revision that was
 used to generate each library is printed in its header comment.
+
+There are two kinds of libraries, distinguished with file extension:
+
+<ul><li>
+    The `*.h` extension denotes libraries that have everything inline in the
+    header. A simple @cpp #include @ce is all you need.
+</li><li>
+    The `*.hpp` extension denotes libraries that have a separate implementation
+    part with non-inline definitions. Desired usage is to build the
+    implementation *just once* by defining a macro before including the library
+    header:
+
+    @code{cpp}
+    #define CORRADE_LIBRARYNAME_IMPLEMENTATION
+    #include <CorradeLibraryName.hpp>
+    @endcode
+
+    In all other files the library is meant to be included without defining the
+    macro. Thanks to this approach, complex implementation details don't
+    inflate compile times while still keeping the library as a single file.
+</li></ul>
 
 @section corrade-singles-customization Customization points
 
