@@ -23,6 +23,10 @@
     `#define CORRADE_UTILITY_EXPORT` as appropriate. To enable the IFUNC
     functionality, `#define CORRADE_CPU_USE_IFUNC` before including the file.
 
+    v2020.06-1040-g30cd2 (2022-09-05)
+    -   Fixed a build issue on platforms that are neither x86, ARM nor WASM
+    -   Renamed to CorradeCpu.hpp to imply the separate implementation part
+        consistently with other header-only libraries
     v2020.06-1018-gef42a6 (2022-08-13)
     -   Properly checking XSAVE prerequisites for AVX-512
     v2020.06-1015-g8cbd6 (2022-08-02)
