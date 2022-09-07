@@ -90,6 +90,7 @@ struct ConfigurationTest: TestSuite::Tester {
     void iterateValuesRangeFor();
     void iterateValuesEmpty();
     void iterateValuesCommentsOnly();
+    void iterateValuesComments();
 };
 
 using namespace Containers::Literals;
@@ -135,7 +136,8 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::iterateValues,
               &ConfigurationTest::iterateValuesRangeFor,
               &ConfigurationTest::iterateValuesEmpty,
-              &ConfigurationTest::iterateValuesCommentsOnly});
+              &ConfigurationTest::iterateValuesCommentsOnly,
+              &ConfigurationTest::iterateValuesComments});
 
     /* Create testing dir */
     Path::make(CONFIGURATION_WRITE_TEST_DIR);
@@ -798,6 +800,33 @@ void ConfigurationTest::iterateValuesCommentsOnly() {
     const ConfigurationGroup* commentsOnly = conf.group("commentsOnly");
     CORRADE_VERIFY(commentsOnly);
     CORRADE_VERIFY(commentsOnly->values().begin() == commentsOnly->values().end());
+}
+
+void ConfigurationTest::iterateValuesComments() {
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* mixed = conf.group("mixed");
+    CORRADE_VERIFY(mixed);
+    ConfigurationGroup::Values valuesComments = mixed->valuesComments();
+    ConfigurationGroup::ValueIterator it = valuesComments.begin();
+
+    /* The begin() should not skip past comments */
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair(""_s, "# A comment"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair("b"_s, "value"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair(""_s, "; Another, which gets its leading whitespace trimmed"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    /* Test that pre-increment also does the right thing */
+    CORRADE_COMPARE(*it, pair("a"_s, "also"_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, ""_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, "# Another comment, and empty line after"_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, ""_s));
+    CORRADE_VERIFY(++it == valuesComments.end());
 }
 
 }}}}

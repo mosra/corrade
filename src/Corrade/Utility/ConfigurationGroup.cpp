@@ -57,24 +57,24 @@ Containers::Pair<Containers::StringView, Containers::StringView> ConfigurationGr
 }
 
 auto ConfigurationGroup::ValueIterator::operator++() -> ValueIterator& {
-    /* Values with empty keys are comments, skip those. On the other hand be
-       sure to not skip past the end. */
-    do ++_value; while(_value != _end && _value->key.empty());
+    /* Values with empty keys are comments, skip those if desired. On the other
+       hand be sure to not skip past the end. */
+    do ++_value; while(_value != _end && _skipComments && _value->key.empty());
     return *this;
 }
 
 auto ConfigurationGroup::ValueIterator::operator++(int) -> ValueIterator {
     const ValueIterator out = *this;
-    /* Values with empty keys are comments, skip those. On the other hand be
-       sure to not skip past the end. */
-    do ++_value; while(_value != _end && _value->key.empty());
+    /* Values with empty keys are comments, skip those if desired. On the other
+       hand be sure to not skip past the end. */
+    do ++_value; while(_value != _end && _skipComments && _value->key.empty());
     return out;
 }
 
-ConfigurationGroup::Values::Values(const Value* begin, const Value* end) noexcept: _begin{begin}, _end{end} {
-    /* Values with empty keys are comments, skip those and fake the begin to be
-       at the first real key/value pair. */
-    while(_begin != _end && _begin->key.empty())
+ConfigurationGroup::Values::Values(const Value* begin, const Value* end, bool skipComments) noexcept: _begin{begin}, _end{end}, _skipComments{skipComments} {
+    /* Values with empty keys are comments, skip those if desired and fake the
+       begin to be at the first real key/value pair. */
+    while(_begin != _end && _skipComments && _begin->key.empty())
         ++_begin;
 }
 
@@ -257,8 +257,14 @@ void ConfigurationGroup::removeAllGroups(const std::string& name) {
 
 auto ConfigurationGroup::values() const -> Values {
     /* STL iterators. Only pain, nothing else. */
-    return _values.empty() ? Values{nullptr, nullptr} :
-        Values{&_values[0], &_values[0] + _values.size()};
+    return _values.empty() ? Values{nullptr, nullptr, true} :
+        Values{&_values[0], &_values[0] + _values.size(), true};
+}
+
+auto ConfigurationGroup::valuesComments() const -> Values {
+    /* STL iterators. Only pain, nothing else. */
+    return _values.empty() ? Values{nullptr, nullptr, false} :
+        Values{&_values[0], &_values[0] + _values.size(), false};
 }
 
 auto ConfigurationGroup::findValue(const std::string& key, const unsigned int index) const -> std::vector<Value>::const_iterator {

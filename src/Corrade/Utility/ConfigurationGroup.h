@@ -271,8 +271,20 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @m_since_latest
          *
          * See @ref Utility-Configuration-iteration for more information.
+         * @see @ref valuesComments()
          */
         Values values() const;
+
+        /**
+         * @brief Iterate through values and comments
+         * @m_since_latest
+         *
+         * Compared to @ref values() gives back also lines that are empty and
+         * comment lines. In these cases, the first value of the returned pair
+         * is empty, and the second value contains the full line contents. See
+         * @ref Utility-Configuration-iteration for more information.
+         */
+        Values valuesComments() const;
 
         /**
          * @brief Whether this group has any values
@@ -589,7 +601,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup::ValueIterator {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* Needs to have the end pointer as well as it's skipping over comment
            entries when iterating and needs to know when to stop */
-        constexpr explicit ValueIterator(const Value* value, const Value* end) noexcept: _value{value}, _end{end} {}
+        constexpr explicit ValueIterator(const Value* value, const Value* end, bool skipComments) noexcept: _value{value}, _end{end}, _skipComments{skipComments} {}
         #endif
 
         /**
@@ -626,6 +638,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup::ValueIterator {
     private:
         const Value* _value;
         const Value* _end;
+        bool _skipComments;
 };
 
 
@@ -639,29 +652,30 @@ Returned from @ref ConfigurationGroup::values(). See
 class ConfigurationGroup::Values {
     public:
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        explicit Values(const Value* begin, const Value* end) noexcept;
+        explicit Values(const Value* begin, const Value* end, bool skipComments) noexcept;
         #endif
 
         /** @brief First value */
         ValueIterator begin() const {
-            return ValueIterator{_begin, _end};
+            return ValueIterator{_begin, _end, _skipComments};
         }
         /** @overload */
         ValueIterator cbegin() const {
-            return ValueIterator{_begin, _end};
+            return ValueIterator{_begin, _end, _skipComments};
         }
         /** @brief (One item after) last value */
         ValueIterator end() const {
-            return ValueIterator{_end, _end};
+            return ValueIterator{_end, _end, _skipComments};
         }
         /** @overload */
         ValueIterator cend() const {
-            return ValueIterator{_end, _end};
+            return ValueIterator{_end, _end, _skipComments};
         }
 
     private:
         const Value* _begin;
         const Value* _end;
+        bool _skipComments;
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
