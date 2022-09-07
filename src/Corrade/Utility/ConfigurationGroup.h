@@ -505,12 +505,6 @@ returned when iterating @ref ConfigurationGroup::groups(). See
 */
 template<class T> class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroupIterator {
     public:
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
-
-        constexpr explicit BasicGroupIterator(Group* group) noexcept: _group{group} {}
-        #endif
-
         /**
          * @brief Dereference the iterator
          *
@@ -548,6 +542,12 @@ template<class T> class CORRADE_UTILITY_EXPORT ConfigurationGroup::BasicGroupIte
         BasicGroupIterator<T> operator++(int);
 
     private:
+        template<class U> friend class BasicGroups;
+
+        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
+
+        constexpr explicit BasicGroupIterator(Group* group) noexcept: _group{group} {}
+
         Group* _group;
 };
 
@@ -561,12 +561,6 @@ returned from @ref ConfigurationGroup::groups(). See
 */
 template<class T> class ConfigurationGroup::BasicGroups {
     public:
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
-
-        constexpr explicit BasicGroups(Group* begin, Group* end) noexcept: _begin{begin}, _end{end} {}
-        #endif
-
         /** @brief First subgroup */
         BasicGroupIterator<T> begin() const {
             return BasicGroupIterator<T>{_begin};
@@ -585,6 +579,12 @@ template<class T> class ConfigurationGroup::BasicGroups {
         }
 
     private:
+        friend ConfigurationGroup;
+
+        typedef typename std::conditional<std::is_const<T>::value, const ConfigurationGroup::Group, ConfigurationGroup::Group>::type Group;
+
+        constexpr explicit BasicGroups(Group* begin, Group* end) noexcept: _begin{begin}, _end{end} {}
+
         Group* _begin;
         Group* _end;
 };
@@ -598,12 +598,6 @@ Returned when iterating @ref ConfigurationGroup::values(). See
 */
 class CORRADE_UTILITY_EXPORT ConfigurationGroup::ValueIterator {
     public:
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        /* Needs to have the end pointer as well as it's skipping over comment
-           entries when iterating and needs to know when to stop */
-        constexpr explicit ValueIterator(const Value* value, const Value* end, bool skipComments) noexcept: _value{value}, _end{end}, _skipComments{skipComments} {}
-        #endif
-
         /**
          * @brief Dereference the iterator
          *
@@ -636,6 +630,12 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup::ValueIterator {
         ValueIterator operator++(int);
 
     private:
+        friend Values;
+
+        /* Needs to have the end pointer as well as it's skipping over comment
+           entries when iterating and needs to know when to stop */
+        constexpr explicit ValueIterator(const Value* value, const Value* end, bool skipComments) noexcept: _value{value}, _end{end}, _skipComments{skipComments} {}
+
         const Value* _value;
         const Value* _end;
         bool _skipComments;
@@ -651,10 +651,6 @@ Returned from @ref ConfigurationGroup::values(). See
 */
 class ConfigurationGroup::Values {
     public:
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        explicit Values(const Value* begin, const Value* end, bool skipComments) noexcept;
-        #endif
-
         /** @brief First value */
         ValueIterator begin() const {
             return ValueIterator{_begin, _end, _skipComments};
@@ -673,6 +669,10 @@ class ConfigurationGroup::Values {
         }
 
     private:
+        friend ConfigurationGroup;
+
+        explicit Values(const Value* begin, const Value* end, bool skipComments) noexcept;
+
         const Value* _begin;
         const Value* _end;
         bool _skipComments;
