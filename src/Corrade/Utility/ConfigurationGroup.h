@@ -105,7 +105,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * Pointer to enclosing configuration is set to @cpp nullptr @ce, call
          * @ref addGroup() to add it somewhere.
          */
-        ConfigurationGroup(ConfigurationGroup&& other);
+        ConfigurationGroup(ConfigurationGroup&& other) noexcept;
 
         ~ConfigurationGroup();
 
@@ -125,7 +125,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * object.
          * @see @ref configuration()
          */
-        ConfigurationGroup& operator=(ConfigurationGroup&& other);
+        ConfigurationGroup& operator=(ConfigurationGroup&& other) noexcept;
 
         /**
          * @brief Enclosing configuration
