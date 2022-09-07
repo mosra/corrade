@@ -88,7 +88,7 @@ ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values
         group.group = new ConfigurationGroup(*group.group);
 }
 
-ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other): _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
+ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other) noexcept: _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
     /* Reset configuration pointer for subgroups */
     for(Group& group: _groups)
         group.group->_configuration = nullptr;
@@ -112,7 +112,7 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
     return *this;
 }
 
-ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) {
+ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) noexcept {
     /* Delete current groups */
     for(Group& group: _groups)
         delete group.group;

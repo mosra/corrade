@@ -72,14 +72,14 @@ Configuration::Configuration(std::istream& in, const Flags flags): Configuration
     if(parse({data.data(), data.size()})) _flags |= InternalFlag::IsValid;
 }
 
-Configuration::Configuration(Configuration&& other): ConfigurationGroup{std::move(other)}, _filename{std::move(other._filename)}, _flags{other._flags} {
+Configuration::Configuration(Configuration&& other) noexcept: ConfigurationGroup{std::move(other)}, _filename{std::move(other._filename)}, _flags{other._flags} {
     /* Redirect configuration pointer to this instance */
     setConfigurationPointer(this);
 }
 
 Configuration::~Configuration() { if(_flags & InternalFlag::Changed) save(); }
 
-Configuration& Configuration::operator=(Configuration&& other) {
+Configuration& Configuration::operator=(Configuration&& other) noexcept {
     ConfigurationGroup::operator=(std::move(other));
     _filename = std::move(other._filename);
     _flags = other._flags;

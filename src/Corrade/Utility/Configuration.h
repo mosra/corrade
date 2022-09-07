@@ -299,7 +299,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         Configuration(const Configuration&) = delete;
 
         /** @brief Move constructor */
-        Configuration(Configuration&& other);
+        Configuration(Configuration&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -312,7 +312,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         Configuration& operator=(const Configuration&) = delete;
 
         /** @brief Move assignment */
-        Configuration& operator=(Configuration&& other);
+        Configuration& operator=(Configuration&& other) noexcept;
 
         /** @brief Filename in UTF-8 */
         std::string filename() const;
