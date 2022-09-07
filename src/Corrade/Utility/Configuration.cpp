@@ -90,12 +90,6 @@ Configuration& Configuration::operator=(Configuration&& other) {
     return *this;
 }
 
-void Configuration::setConfigurationPointer(ConfigurationGroup* group) {
-    group->_configuration = this;
-
-    for(auto& g: group->_groups) setConfigurationPointer(g.group);
-}
-
 std::string Configuration::filename() const { return _filename; }
 
 void Configuration::setFilename(std::string filename) {

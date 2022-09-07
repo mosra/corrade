@@ -476,7 +476,11 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
             ConfigurationGroup* group;
         };
 
+        /* Used by Configuration constructor */
         CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* configuration);
+        /* Used by operator=() and addGroup(ConfigurationGroup*), and by
+           Configuration */
+        CORRADE_UTILITY_LOCAL void setConfigurationPointer(Configuration* configuration);
 
         CORRADE_UTILITY_LOCAL std::vector<Group>::iterator findGroup(const std::string& name, unsigned int index);
         CORRADE_UTILITY_LOCAL std::vector<Group>::const_iterator findGroup(const std::string& name, unsigned int index) const;

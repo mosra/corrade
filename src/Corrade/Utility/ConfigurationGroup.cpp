@@ -80,6 +80,12 @@ ConfigurationGroup::Values::Values(const Value* begin, const Value* end, bool sk
 
 ConfigurationGroup::ConfigurationGroup(): _configuration(nullptr) {}
 
+void ConfigurationGroup::setConfigurationPointer(Configuration* configuration) {
+    _configuration = configuration;
+    for(Group& group: _groups)
+        group.group->setConfigurationPointer(configuration);
+}
+
 ConfigurationGroup::ConfigurationGroup(Configuration* configuration): _configuration(configuration) {}
 
 ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values(other._values), _groups(other._groups), _configuration(nullptr) {
@@ -91,7 +97,7 @@ ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values
 ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other): _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
     /* Reset configuration pointer for subgroups */
     for(Group& group: _groups)
-        group.group->_configuration = nullptr;
+        group.group->setConfigurationPointer(nullptr);
 }
 
 ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
@@ -106,7 +112,7 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
     /* Deep copy groups */
     for(Group& group: _groups) {
         group.group = new ConfigurationGroup(*group.group);
-        group.group->_configuration = _configuration;
+        group.group->setConfigurationPointer(_configuration);
     }
 
     return *this;
@@ -123,7 +129,7 @@ ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) {
 
     /* Redirect configuration pointer for subgroups */
     for(Group& group: _groups)
-        group.group->_configuration = _configuration;
+        group.group->setConfigurationPointer(_configuration);
 
     return *this;
 }
@@ -205,7 +211,7 @@ void ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* g
     /* Set configuration pointer to actual */
     CORRADE_ASSERT(!group->_configuration,
         "Utility::Configuration::addGroup(): the group is already part of some configuration", );
-    group->_configuration = _configuration;
+    group->setConfigurationPointer(_configuration);
 
     CORRADE_ASSERT(!name.empty(),
         "Utility::ConfigurationGroup::addGroup(): empty group name", );

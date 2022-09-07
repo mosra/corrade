@@ -372,8 +372,6 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         CORRADE_UTILITY_LOCAL std::pair<Containers::ArrayView<const char>, const char*> parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath);
         CORRADE_UTILITY_LOCAL void save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 
-        CORRADE_UTILITY_LOCAL void setConfigurationPointer(ConfigurationGroup* group);
-
         std::string _filename;
         InternalFlags _flags;
 };
