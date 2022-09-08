@@ -57,28 +57,34 @@ Containers::Pair<Containers::StringView, Containers::StringView> ConfigurationGr
 }
 
 auto ConfigurationGroup::ValueIterator::operator++() -> ValueIterator& {
-    /* Values with empty keys are comments, skip those. On the other hand be
-       sure to not skip past the end. */
-    do ++_value; while(_value != _end && _value->key.empty());
+    /* Values with empty keys are comments, skip those if desired. On the other
+       hand be sure to not skip past the end. */
+    do ++_value; while(_value != _end && _skipComments && _value->key.empty());
     return *this;
 }
 
 auto ConfigurationGroup::ValueIterator::operator++(int) -> ValueIterator {
     const ValueIterator out = *this;
-    /* Values with empty keys are comments, skip those. On the other hand be
-       sure to not skip past the end. */
-    do ++_value; while(_value != _end && _value->key.empty());
+    /* Values with empty keys are comments, skip those if desired. On the other
+       hand be sure to not skip past the end. */
+    do ++_value; while(_value != _end && _skipComments && _value->key.empty());
     return out;
 }
 
-ConfigurationGroup::Values::Values(const Value* begin, const Value* end) noexcept: _begin{begin}, _end{end} {
-    /* Values with empty keys are comments, skip those and fake the begin to be
-       at the first real key/value pair. */
-    while(_begin != _end && _begin->key.empty())
+ConfigurationGroup::Values::Values(const Value* begin, const Value* end, bool skipComments) noexcept: _begin{begin}, _end{end}, _skipComments{skipComments} {
+    /* Values with empty keys are comments, skip those if desired and fake the
+       begin to be at the first real key/value pair. */
+    while(_begin != _end && _skipComments && _begin->key.empty())
         ++_begin;
 }
 
 ConfigurationGroup::ConfigurationGroup(): _configuration(nullptr) {}
+
+void ConfigurationGroup::setConfigurationPointer(Configuration* configuration) {
+    _configuration = configuration;
+    for(Group& group: _groups)
+        group.group->setConfigurationPointer(configuration);
+}
 
 ConfigurationGroup::ConfigurationGroup(Configuration* configuration): _configuration(configuration) {}
 
@@ -91,7 +97,7 @@ ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values
 ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other) noexcept: _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
     /* Reset configuration pointer for subgroups */
     for(Group& group: _groups)
-        group.group->_configuration = nullptr;
+        group.group->setConfigurationPointer(nullptr);
 }
 
 ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
@@ -106,7 +112,7 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
     /* Deep copy groups */
     for(Group& group: _groups) {
         group.group = new ConfigurationGroup(*group.group);
-        group.group->_configuration = _configuration;
+        group.group->setConfigurationPointer(_configuration);
     }
 
     return *this;
@@ -123,7 +129,7 @@ ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) no
 
     /* Redirect configuration pointer for subgroups */
     for(Group& group: _groups)
-        group.group->_configuration = _configuration;
+        group.group->setConfigurationPointer(_configuration);
 
     return *this;
 }
@@ -205,7 +211,7 @@ void ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* g
     /* Set configuration pointer to actual */
     CORRADE_ASSERT(!group->_configuration,
         "Utility::Configuration::addGroup(): the group is already part of some configuration", );
-    group->_configuration = _configuration;
+    group->setConfigurationPointer(_configuration);
 
     CORRADE_ASSERT(!name.empty(),
         "Utility::ConfigurationGroup::addGroup(): empty group name", );
@@ -257,8 +263,14 @@ void ConfigurationGroup::removeAllGroups(const std::string& name) {
 
 auto ConfigurationGroup::values() const -> Values {
     /* STL iterators. Only pain, nothing else. */
-    return _values.empty() ? Values{nullptr, nullptr} :
-        Values{&_values[0], &_values[0] + _values.size()};
+    return _values.empty() ? Values{nullptr, nullptr, true} :
+        Values{&_values[0], &_values[0] + _values.size(), true};
+}
+
+auto ConfigurationGroup::valuesComments() const -> Values {
+    /* STL iterators. Only pain, nothing else. */
+    return _values.empty() ? Values{nullptr, nullptr, false} :
+        Values{&_values[0], &_values[0] + _values.size(), false};
 }
 
 auto ConfigurationGroup::findValue(const std::string& key, const unsigned int index) const -> std::vector<Value>::const_iterator {

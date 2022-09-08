@@ -90,6 +90,7 @@ struct ConfigurationTest: TestSuite::Tester {
     void iterateValuesRangeFor();
     void iterateValuesEmpty();
     void iterateValuesCommentsOnly();
+    void iterateValuesComments();
 };
 
 using namespace Containers::Literals;
@@ -135,7 +136,8 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::iterateValues,
               &ConfigurationTest::iterateValuesRangeFor,
               &ConfigurationTest::iterateValuesEmpty,
-              &ConfigurationTest::iterateValuesCommentsOnly});
+              &ConfigurationTest::iterateValuesCommentsOnly,
+              &ConfigurationTest::iterateValuesComments});
 
     /* Create testing dir */
     Path::make(CONFIGURATION_WRITE_TEST_DIR);
@@ -606,31 +608,54 @@ void ConfigurationTest::multiLineValueCrlf() {
 }
 
 void ConfigurationTest::standaloneGroup() {
-    ConfigurationGroup group;
-    CORRADE_VERIFY(!group.configuration());
+    ConfigurationGroup* group = new ConfigurationGroup;
 
-    group.setValue("value", "hello");
-    group.addGroup("group")->addValue("number", 42);
+    group->setValue("value", "hello");
+    ConfigurationGroup* descendent = group->addGroup("descendent");
+    descendent->setValue("number", 42);
+    descendent->addGroup("deep");
 
-    CORRADE_COMPARE(group.value("value"), "hello");
-    CORRADE_COMPARE(group.group("group")->value<int>("number"), 42);
+    CORRADE_COMPARE(group->value("value"), "hello");
+    CORRADE_COMPARE(group->group("descendent")->value<int>("number"), 42);
+
+    /* No configuration is assigned initially */
+    CORRADE_VERIFY(!group->configuration());
+    CORRADE_VERIFY(!group->group("descendent")->configuration());
+    CORRADE_VERIFY(!group->group("descendent")->group("deep")->configuration());
+
+    /* But it gets assigned once it's added to a Configuration */
+    Configuration conf;
+    conf.addGroup("group", group);
+    CORRADE_COMPARE(group->configuration(), &conf);
+    CORRADE_COMPARE(group->group("descendent")->configuration(), &conf);
+    CORRADE_COMPARE(group->group("descendent")->group("deep")->configuration(), &conf);
 }
 
 void ConfigurationTest::copy() {
     Configuration conf;
 
     ConfigurationGroup* original = conf.addGroup("group");
-    original->addGroup("descendent")->setValue<int>("value", 42);
+    ConfigurationGroup* descendent = original->addGroup("descendent");
+    descendent->setValue("value", 42);
+    descendent->addGroup("deep");
+    CORRADE_COMPARE(original->configuration(), &conf);
+    CORRADE_COMPARE(original->group("descendent")->configuration(), &conf);
+    CORRADE_COMPARE(original->group("descendent")->group("deep")->configuration(), &conf);
 
+    /* The configuration isn't preserved on copy construction */
     ConfigurationGroup* constructedCopy = new ConfigurationGroup(*original);
     CORRADE_VERIFY(!constructedCopy->configuration());
     CORRADE_VERIFY(!constructedCopy->group("descendent")->configuration());
+    CORRADE_VERIFY(!constructedCopy->group("descendent")->group("deep")->configuration());
 
+    /* But on assignment it inherits the configuration used in the assigned to
+       instance */
     ConfigurationGroup* assignedCopy = conf.addGroup("another");
-    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
-    *assignedCopy = *original;
-    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
-    CORRADE_VERIFY(assignedCopy->group("descendent")->configuration() == &conf);
+    CORRADE_COMPARE(assignedCopy->configuration(), &conf);
+    *assignedCopy = *constructedCopy;
+    CORRADE_COMPARE(assignedCopy->configuration(), &conf);
+    CORRADE_COMPARE(assignedCopy->group("descendent")->configuration(), &conf);
+    CORRADE_COMPARE(assignedCopy->group("descendent")->group("deep")->configuration(), &conf);
 
     original->group("descendent")->setValue<int>("value", 666);
 
@@ -644,36 +669,42 @@ void ConfigurationTest::copy() {
 void ConfigurationTest::move() {
     Configuration conf;
     ConfigurationGroup* original = conf.addGroup("group");
-    original->addGroup("descendent")->setValue<int>("value", 42);
+    ConfigurationGroup* descendent = original->addGroup("descendent");
+    descendent->setValue("value", 42);
+    descendent->addGroup("deep");
 
     /* Move constructor for ConfigurationGroup */
     ConfigurationGroup* constructedMove = new ConfigurationGroup(std::move(*original));
     CORRADE_VERIFY(original->isEmpty());
     CORRADE_VERIFY(!constructedMove->configuration());
     CORRADE_VERIFY(!constructedMove->group("descendent")->configuration());
+    CORRADE_VERIFY(!constructedMove->group("descendent")->group("deep")->configuration());
 
     /* Move assignment for ConfigurationGroup */
     ConfigurationGroup* assignedMove = conf.addGroup("another");
-    CORRADE_VERIFY(assignedMove->configuration() == &conf);
+    CORRADE_COMPARE(assignedMove->configuration(), &conf);
     *assignedMove = std::move(*constructedMove);
     CORRADE_VERIFY(constructedMove->isEmpty());
-    CORRADE_VERIFY(assignedMove->configuration() == &conf);
-    CORRADE_VERIFY(assignedMove->group("descendent")->configuration() == &conf);
+    CORRADE_COMPARE(assignedMove->configuration(), &conf);
+    CORRADE_COMPARE(assignedMove->group("descendent")->configuration(), &conf);
+    CORRADE_COMPARE(assignedMove->group("descendent")->group("deep")->configuration(), &conf);
 
     delete constructedMove;
 
     /* Move constructor for Configuration */
     Configuration confConstructedMove(std::move(conf));
     CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_VERIFY(confConstructedMove.configuration() == &confConstructedMove);
-    CORRADE_VERIFY(confConstructedMove.group("group")->configuration() == &confConstructedMove);
+    CORRADE_COMPARE(confConstructedMove.configuration(), &confConstructedMove);
+    CORRADE_COMPARE(confConstructedMove.group("group")->configuration(), &confConstructedMove);
+    CORRADE_COMPARE(confConstructedMove.group("another")->group("descendent")->configuration(), &confConstructedMove);
 
     /* Move assignment for Configuration */
     Configuration confAssignedMove;
     confAssignedMove = std::move(confConstructedMove);
     CORRADE_VERIFY(confConstructedMove.isEmpty());
-    CORRADE_VERIFY(confAssignedMove.configuration() == &confAssignedMove);
-    CORRADE_VERIFY(confAssignedMove.group("group")->configuration() == &confAssignedMove);
+    CORRADE_COMPARE(confAssignedMove.configuration(), &confAssignedMove);
+    CORRADE_COMPARE(confAssignedMove.group("group")->configuration(), &confAssignedMove);
+    CORRADE_COMPARE(confAssignedMove.group("another")->group("descendent")->configuration(), &confAssignedMove);
 }
 
 void ConfigurationTest::iterateGroups() {
@@ -798,6 +829,33 @@ void ConfigurationTest::iterateValuesCommentsOnly() {
     const ConfigurationGroup* commentsOnly = conf.group("commentsOnly");
     CORRADE_VERIFY(commentsOnly);
     CORRADE_VERIFY(commentsOnly->values().begin() == commentsOnly->values().end());
+}
+
+void ConfigurationTest::iterateValuesComments() {
+    const Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "iterate.conf"));
+
+    const ConfigurationGroup* mixed = conf.group("mixed");
+    CORRADE_VERIFY(mixed);
+    ConfigurationGroup::Values valuesComments = mixed->valuesComments();
+    ConfigurationGroup::ValueIterator it = valuesComments.begin();
+
+    /* The begin() should not skip past comments */
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair(""_s, "# A comment"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair("b"_s, "value"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    CORRADE_COMPARE(*it++, pair(""_s, "; Another, which gets its leading whitespace trimmed"_s));
+    CORRADE_VERIFY(it != valuesComments.end());
+    /* Test that pre-increment also does the right thing */
+    CORRADE_COMPARE(*it, pair("a"_s, "also"_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, ""_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, "# Another comment, and empty line after"_s));
+    CORRADE_VERIFY(++it != valuesComments.end());
+    CORRADE_COMPARE(*it, pair(""_s, ""_s));
+    CORRADE_VERIFY(++it == valuesComments.end());
 }
 
 }}}}

@@ -417,6 +417,9 @@ namespace Corrade {
     zero (see [mosra/corrade#102](https://github.com/mosra/corrade/issues/102))
 -   Fixed @ref Utility::Arguments to produce an error instead of asserting in
     case a positional argument is specified as named
+-   Deep @ref Utility::ConfigurationGroup assignments didn't properly reassign
+    the @relativeref{Utility::ConfigurationGroup,configuration()} pointer,
+    leading to an assertion on save
 -   @ref Corrade/Utility/StlForwardTuple.h was fixed to do a full
     @cpp #include <tuple> @ce on libstdc++ before version 7 as there a forward
     declaration is not available

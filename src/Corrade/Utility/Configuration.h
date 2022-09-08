@@ -203,9 +203,10 @@ value names in the file:
 
 @snippet Utility.cpp Configuration-iteration
 
-When iterating through values, comments and empty lines are skipped --- while
-those are preserved in the file, there's no possibility to access them in any
-way.
+Comments and empty lines are skipped when using @ref values(). To access these
+as well, use @ref valuesComments() instead --- in case of comments and empty
+lines the first pair value is empty, and the second pair value contains the
+full line contents.
 
 @todo Renaming, copying groups
 @todo EOL autodetection according to system on unsure/new files (default is
@@ -370,8 +371,6 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         CORRADE_UTILITY_LOCAL bool parse(Containers::ArrayView<const char> in);
         CORRADE_UTILITY_LOCAL std::pair<Containers::ArrayView<const char>, const char*> parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath);
         CORRADE_UTILITY_LOCAL void save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
-
-        CORRADE_UTILITY_LOCAL void setConfigurationPointer(ConfigurationGroup* group);
 
         std::string _filename;
         InternalFlags _flags;
