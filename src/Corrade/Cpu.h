@@ -1175,8 +1175,10 @@ template<unsigned short A> struct BitCount {
    extra tag.
 
    MSVC 2015 and 2017 need the extra () inside Priority<>, otherwise they
-   demand that a typename is used for TypeTraits<T>::Index. Heh. */
-template<class T> Priority<(TypeTraits<T>::Index & ExtraTagMask ? 1 : BitIndex<TypeTraits<T>::Index & BaseTagMask>::Value*(ExtraTagCount + 1))> constexpr priority(T) {
+   demand that a typename is used for TypeTraits<T>::Index. Heh. Clang 14 warns
+   if I don't cast because bitwise operations between different enums are
+   deprecated in C++20.  */
+template<class T> Priority<(static_cast<unsigned int>(TypeTraits<T>::Index) & ExtraTagMask ? 1 : BitIndex<static_cast<unsigned int>(TypeTraits<T>::Index) & BaseTagMask>::Value*(ExtraTagCount + 1))> constexpr priority(T) {
     return {};
 }
 template<unsigned int value> Priority<(BitIndex<value & BaseTagMask>::Value*(ExtraTagCount + 1) + BitCount<((value & ExtraTagMask) >> ExtraTagBitOffset)>::Value)> constexpr priority(Tags<value>) {
@@ -1243,32 +1245,36 @@ typedef
 
 See the @ref DefaultExtra tag for more information.
 */
-typedef Implementation::Tags<
+/* Clang 14 warns if zero (an int) isn't first because bitwise operations
+   between different enums are deprecated in C++20. */
+typedef Implementation::Tags<0
     #ifdef CORRADE_TARGET_X86
     #ifdef CORRADE_TARGET_POPCNT
-    TypeTraits<PopcntT>::Index|
+    |TypeTraits<PopcntT>::Index
     #endif
     #ifdef CORRADE_TARGET_LZCNT
-    TypeTraits<LzcntT>::Index|
+    |TypeTraits<LzcntT>::Index
     #endif
     #ifdef CORRADE_TARGET_BMI1
-    TypeTraits<Bmi1T>::Index|
+    |TypeTraits<Bmi1T>::Index
     #endif
     #ifdef CORRADE_TARGET_AVX_FMA
-    TypeTraits<AvxFmaT>::Index|
+    |TypeTraits<AvxFmaT>::Index
     #endif
     #ifdef CORRADE_TARGET_AVX_F16C
-    TypeTraits<AvxF16cT>::Index|
+    |TypeTraits<AvxF16cT>::Index
     #endif
     #endif
-    0> DefaultExtraT;
+    > DefaultExtraT;
 
 /**
 @brief Default tag type
 
 See the @ref Default tag for more information.
 */
-typedef Implementation::Tags<TypeTraits<DefaultBaseT>::Index|DefaultExtraT::Value> DefaultT;
+/* Clang 14 warns if I don't cast because bitwise operations between different
+   enums are deprecated in C++20 */
+typedef Implementation::Tags<static_cast<unsigned int>(TypeTraits<DefaultBaseT>::Index)|DefaultExtraT::Value> DefaultT;
 
 /**
 @brief Default base tag
@@ -1384,8 +1390,10 @@ class Features {
          * @see @ref features()
          */
         template<class T, class = decltype(TypeTraits<T>::Index)> constexpr /*implicit*/ Features(T) noexcept: _data{TypeTraits<T>::Index} {
-            /* GCC 4.8 loudly complains about enum comparison if I don't cast, sigh */
-            static_assert(((TypeTraits<T>::Index & Implementation::ExtraTagMask) >> Implementation::ExtraTagBitOffset) < (1 << static_cast<unsigned int>(Implementation::ExtraTagCount)),
+            /* GCC 4.8 loudly complains about enum comparison if I don't cast;
+               Clang 14 warns if I don't cast because bitwise operations
+               between different enums are deprecated in C++20 */
+            static_assert(((static_cast<unsigned int>(TypeTraits<T>::Index) & Implementation::ExtraTagMask) >> Implementation::ExtraTagBitOffset) < (1 << static_cast<unsigned int>(Implementation::ExtraTagCount)),
                 "extra tag out of expected bounds");
         }
 
@@ -1560,9 +1568,12 @@ template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features ope
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Compared to the above, this produces a type that encodes the value instead
    of Features. Has to be in the same namespace as the tags, but since Tags<>
-   is an implementation detail, this is hidden from plain sight as well. */
-template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index | TypeTraits<U>::Index> operator|(T, U) {
-    return Implementation::Tags<TypeTraits<T>::Index | TypeTraits<U>::Index>{Implementation::Init};
+   is an implementation detail, this is hidden from plain sight as well.
+
+   Clang 14 warns if I don't cast because bitwise operations between different
+   enums are deprecated in C++20. */
+template<class T, class U> constexpr Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) | TypeTraits<U>::Index> operator|(T, U) {
+    return Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) | TypeTraits<U>::Index>{Implementation::Init};
 }
 template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index | value> operator|(T, Implementation::Tags<value>) {
     return Implementation::Tags<TypeTraits<T>::Index | value>{Implementation::Init};
@@ -1581,9 +1592,12 @@ template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features ope
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Compared to the above, this produces a type that encodes the value instead
    of Features. Has to be in the same namespace as the tags, but since Tags<>
-   is an implementation detail, this is hidden from plain sight as well. */
-template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index & TypeTraits<U>::Index> operator&(T, U) {
-    return Implementation::Tags<TypeTraits<T>::Index & TypeTraits<U>::Index>{Implementation::Init};
+   is an implementation detail, this is hidden from plain sight as well.
+
+   Clang 14 warns if I don't cast because bitwise operations between different
+   enums are deprecated in C++20. */
+template<class T, class U> constexpr Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) & TypeTraits<U>::Index> operator&(T, U) {
+    return Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) & TypeTraits<U>::Index>{Implementation::Init};
 }
 template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index & value> operator&(T, Implementation::Tags<value>) {
     return Implementation::Tags<TypeTraits<T>::Index & value>{Implementation::Init};
@@ -1602,9 +1616,12 @@ template<class T, class = decltype(TypeTraits<T>::Index)> constexpr Features ope
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Compared to the above, this produces a type that encodes the value instead
    of Features. Has to be in the same namespace as the tags, but since Tags<>
-   is an implementation detail, this is hidden from plain sight as well. */
-template<class T, class U> constexpr Implementation::Tags<TypeTraits<T>::Index ^ TypeTraits<U>::Index> operator^(T, U) {
-    return Implementation::Tags<TypeTraits<T>::Index ^ TypeTraits<U>::Index>{Implementation::Init};
+   is an implementation detail, this is hidden from plain sight as well.
+
+   Clang 14 warns if I don't cast because bitwise operations between different
+   enums are deprecated in C++20. */
+template<class T, class U> constexpr Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) ^ TypeTraits<U>::Index> operator^(T, U) {
+    return Implementation::Tags<static_cast<unsigned int>(TypeTraits<T>::Index) ^ TypeTraits<U>::Index>{Implementation::Init};
 }
 template<class T, unsigned int value> constexpr Implementation::Tags<TypeTraits<T>::Index ^ value> operator^(T, Implementation::Tags<value>) {
     return Implementation::Tags<TypeTraits<T>::Index ^ value>{Implementation::Init};
@@ -1665,62 +1682,64 @@ default-constructed) @ref Features.
 @see @ref DefaultBase, @ref DefaultExtra, @ref Default
 */
 constexpr Features compiledFeatures() {
-    return Features{
+    /* Clang 14 warns if zero (an int) isn't first because bitwise operations
+       between different enums are deprecated in C++20. */
+    return Features{0
         #ifdef CORRADE_TARGET_X86
         #ifdef CORRADE_TARGET_SSE2
-        TypeTraits<Sse2T>::Index|
+        |TypeTraits<Sse2T>::Index
         #endif
         #ifdef CORRADE_TARGET_SSE3
-        TypeTraits<Sse3T>::Index|
+        |TypeTraits<Sse3T>::Index
         #endif
         #ifdef CORRADE_TARGET_SSSE3
-        TypeTraits<Ssse3T>::Index|
+        |TypeTraits<Ssse3T>::Index
         #endif
         #ifdef CORRADE_TARGET_SSE41
-        TypeTraits<Sse41T>::Index|
+        |TypeTraits<Sse41T>::Index
         #endif
         #ifdef CORRADE_TARGET_SSE42
-        TypeTraits<Sse42T>::Index|
+        |TypeTraits<Sse42T>::Index
         #endif
         #ifdef CORRADE_TARGET_POPCNT
-        TypeTraits<PopcntT>::Index|
+        |TypeTraits<PopcntT>::Index
         #endif
         #ifdef CORRADE_TARGET_LZCNT
-        TypeTraits<LzcntT>::Index|
+        |TypeTraits<LzcntT>::Index
         #endif
         #ifdef CORRADE_TARGET_BMI1
-        TypeTraits<Bmi1T>::Index|
+        |TypeTraits<Bmi1T>::Index
         #endif
         #ifdef CORRADE_TARGET_AVX
-        TypeTraits<AvxT>::Index|
+        |TypeTraits<AvxT>::Index
         #endif
         #ifdef CORRADE_TARGET_AVX_FMA
-        TypeTraits<AvxFmaT>::Index|
+        |TypeTraits<AvxFmaT>::Index
         #endif
         #ifdef CORRADE_TARGET_AVX_F16C
-        TypeTraits<AvxF16cT>::Index|
+        |TypeTraits<AvxF16cT>::Index
         #endif
         #ifdef CORRADE_TARGET_AVX2
-        TypeTraits<Avx2T>::Index|
+        |TypeTraits<Avx2T>::Index
         #endif
 
         #elif defined(CORRADE_TARGET_ARM)
         #ifdef CORRADE_TARGET_NEON
-        TypeTraits<NeonT>::Index|
+        |TypeTraits<NeonT>::Index
         #endif
         #ifdef CORRADE_TARGET_NEON_FMA
-        TypeTraits<NeonFmaT>::Index|
+        |TypeTraits<NeonFmaT>::Index
         #endif
         #ifdef CORRADE_TARGET_NEON_FP16
-        TypeTraits<NeonFp16T>::Index|
+        |TypeTraits<NeonFp16T>::Index
         #endif
 
         #elif defined(CORRADE_TARGET_WASM)
         #ifdef CORRADE_TARGET_SIMD128
-        TypeTraits<Simd128T>::Index|
+        |TypeTraits<Simd128T>::Index
         #endif
         #endif
-        0};
+        };
 }
 
 /**
