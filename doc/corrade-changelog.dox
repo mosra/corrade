@@ -312,6 +312,7 @@ namespace Corrade {
     representation
 -   The @ref CORRADE_FALLTHROUGH macro is implemented on MSVC 2019 16.6 if
     compiling as C++17.
+-   Minor exception guarantee improvements (see [mosra/corrade#148](https://github.com/mosra/corrade/pull/148))
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
