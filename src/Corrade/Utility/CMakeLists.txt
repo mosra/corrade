@@ -261,6 +261,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         Debug.cpp
         Configuration.cpp
         ConfigurationGroup.cpp
+        ConfigurationValue.cpp
         Format.cpp
         Path.cpp
         String.cpp

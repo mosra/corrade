@@ -114,6 +114,13 @@ void ResourceCompileTest::compileFrom() {
     CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestData", conf),
         Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
         TestSuite::Compare::StringToFile);
+
+    Containers::Optional<Containers::Array<Containers::String>> dependencies = Implementation::resourceDependencies(conf);
+    CORRADE_VERIFY(dependencies);
+    CORRADE_COMPARE_AS(*dependencies, Containers::arrayView<Containers::String>({
+        Path::join(RESOURCE_TEST_DIR, "../ResourceTestFiles/predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin")
+    }), TestSuite::Compare::Container);
 }
 
 void ResourceCompileTest::compileFromNothing() {
@@ -121,6 +128,11 @@ void ResourceCompileTest::compileFromNothing() {
     CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestNothingData", conf),
         Path::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
         TestSuite::Compare::StringToFile);
+
+    Containers::Optional<Containers::Array<Containers::String>> dependencies = Implementation::resourceDependencies(conf);
+    CORRADE_VERIFY(dependencies);
+    CORRADE_COMPARE_AS(*dependencies, Containers::arrayView<Containers::String>({
+    }), TestSuite::Compare::Container);
 }
 
 void ResourceCompileTest::compileFromUtf8Filenames() {
@@ -128,17 +140,34 @@ void ResourceCompileTest::compileFromUtf8Filenames() {
     CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestUtf8Data", conf),
         Path::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
         TestSuite::Compare::StringToFile);
+
+    Containers::Optional<Containers::Array<Containers::String>> dependencies = Implementation::resourceDependencies(conf);
+    CORRADE_VERIFY(dependencies);
+    CORRADE_COMPARE_AS(*dependencies, Containers::arrayView<Containers::String>({
+        Path::join(RESOURCE_TEST_DIR, "hýždě.bin")
+    }), TestSuite::Compare::Container);
 }
 
 void ResourceCompileTest::compileFromNonexistentResource() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", "nonexistent.conf").empty());
-    CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
+    CORRADE_VERIFY(!Implementation::resourceDependencies("nonexistent.conf"));
+    CORRADE_COMPARE(out.str(),
+        "    Error: file nonexistent.conf does not exist\n"
+        "    Error: file nonexistent.conf does not exist\n");
 }
 
 void ResourceCompileTest::compileFromNonexistentFile() {
     Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf");
+
+    /* In this case the file existence is not checked, as the file could an
+       output of another buildsystem job */
+    Containers::Optional<Containers::Array<Containers::String>> dependencies = Implementation::resourceDependencies(conf);
+    CORRADE_VERIFY(dependencies);
+    CORRADE_COMPARE_AS(*dependencies, Containers::arrayView<Containers::String>({
+        "/nonexistent.dat"
+    }), TestSuite::Compare::Container);
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -150,6 +179,8 @@ void ResourceCompileTest::compileFromNonexistentFile() {
 }
 
 void ResourceCompileTest::compileFromEmptyGroup() {
+    /* Group name has no effect on dependency lists, not testing */
+
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -173,6 +204,8 @@ void ResourceCompileTest::compileFromEmptyFilename() {
 }
 
 void ResourceCompileTest::compileFromEmptyAlias() {
+    /* Alias name has no effect on dependency lists, not testing */
+
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",

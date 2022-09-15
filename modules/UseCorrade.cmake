@@ -531,19 +531,17 @@ function(corrade_add_resource name configurationFile)
         message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package() or enable CORRADE_WITH_UTILITY / CORRADE_WITH_RC if you have Corrade as a CMake subproject.")
     endif()
 
-    # Parse dependencies from the file
-    set(dependencies )
-    set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
-    get_filename_component(configurationFilePath ${configurationFile} PATH)
-
-    file(STRINGS "${configurationFile}" files REGEX ${filenameRegex} ENCODING UTF-8)
-    foreach(file ${files})
-        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${file}")
-        if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
-            set(filename "${configurationFilePath}/${filename}")
-        endif()
-        list(APPEND dependencies "${filename}")
-    endforeach()
+    # Get dependency information for proper incremental rebuilds
+    execute_process(
+        # TODO yeah can't use a target name here, and of course what would this
+        #   do if the corrade-rc binary isn't even built yet?!
+        COMMAND Corrade::rc ${name} --dependencies ${configurationFile}
+        RESULT_VARIABLE dependencies
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    message(STATUS "eyy" ${dependencies})
+    # In the unlikely case where there would be ; in the filenames themselves
+    string(REGEX REPLACE ";" "\\\\;" dependencies "${dependencies}")
+    string(REGEX REPLACE "\n" ";" dependencies "${dependencies}")
 
     # Force IDEs display also the resource files in project view
     add_custom_target(${name}-dependencies SOURCES ${dependencies})
