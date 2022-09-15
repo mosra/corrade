@@ -31,6 +31,7 @@
 #define JSONWRITER_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/JsonWriterTestFiles"
 
 #define PATH_TEST_DIR "${UTILITY_TEST_DIR}/PathTestFiles"
+#define PATH_TEST_DIR_GLOB "${UTILITY_TEST_DIR}/PathTestFilesGlob"
 #define PATH_TEST_DIR_SYMLINK "${UTILITY_TEST_DIR}/PathTestFilesSymlink"
 #define PATH_TEST_DIR_UTF8 "${UTILITY_TEST_DIR}/PathTestFilesUtf8"
 #define PATH_WRITE_TEST_DIR "${UTILITY_BINARY_TEST_DIR}/PathTestFiles"

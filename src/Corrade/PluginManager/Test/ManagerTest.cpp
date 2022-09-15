@@ -283,7 +283,7 @@ void ManagerTest::pluginDirectoryNotReadable() {
         PluginManager::Manager<SomePlugin> manager{directory};
     }
     CORRADE_COMPARE_AS(out.str(),
-        Utility::formatString("Utility::Path::list(): can't list {}: error ", directory),
+        Utility::formatString("Utility::Path::glob(): can't glob {}/*{}: error ", directory, AbstractPlugin::pluginSuffix()),
         TestSuite::Compare::StringHasPrefix);
 }
 

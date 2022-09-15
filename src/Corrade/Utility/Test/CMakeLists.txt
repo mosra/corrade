@@ -249,11 +249,13 @@ set(UtilityPathTest_SRCS PathTest.cpp)
 if(CORRADE_TARGET_IOS)
     set_source_files_properties(
         PathTestFiles
+        PathTestFilesGlob
         PathTestFilesSymlink
         PathTestFilesUtf8
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     list(APPEND PathDirectoryTest_SRCS
         PathTestFiles
+        PathTestFilesGlob
         PathTestFilesSymlink
         PathTestFilesUtf8)
 endif()
@@ -261,6 +263,13 @@ corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
     FILES
         PathTestFiles/dir/dummy
         PathTestFiles/file
+        PathTestFilesGlob/.file.txt
+        PathTestFilesGlob/file.txtlol
+        PathTestFilesGlob/file1.txt
+        PathTestFilesGlob/file11.txt
+        PathTestFilesGlob/file12.txt
+        PathTestFilesGlob/.dir.txt/dummy
+        PathTestFilesGlob/dir.txt/dummy
         PathTestFilesSymlink/dir/dummy
         PathTestFilesSymlink/dir-symlink
         PathTestFilesSymlink/file
