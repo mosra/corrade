@@ -41,13 +41,7 @@ struct WrongMetadata: AbstractPlugin {
     static Containers::StringView pluginInterface() { return {}; }
 
     static Containers::Array<Containers::String> pluginSearchPaths() {
-        return {InPlaceInit, {
-            #ifndef CMAKE_INTDIR
-            Utility::Path::join(PLUGINS_DIR, "wrong-metadata")
-            #else
-            Utility::Path::join(Utility::Path::join(PLUGINS_DIR, "wrong-metadata"), CMAKE_INTDIR)
-            #endif
-        }};
+        return {InPlaceInit, {Utility::Path::join(PLUGINS_DIR, "wrong-metadata")}};
     }
 
     explicit WrongMetadata(AbstractManager& manager, Containers::StringView plugin): AbstractPlugin{manager, plugin} {}
