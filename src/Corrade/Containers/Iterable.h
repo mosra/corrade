@@ -44,11 +44,13 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     /* Used internally to make ArrayView overloads picked over
        StridedArrayView. I hoped I wouldn't need this messy hack anywhere else
        than in the Cpu library but here we go. */
     template<int priority> struct IterableOverloadPriority: IterableOverloadPriority<priority - 1> {};
     template<> struct IterableOverloadPriority<0> {};
+    #endif
 }
 
 /**
