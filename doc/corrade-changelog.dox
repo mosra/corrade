@@ -200,7 +200,7 @@ namespace Corrade {
     `NoInit` deleter
 -   Added @ref Containers::arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&)
     as a convenience shorthand for @ref Containers::arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args)
--   @ref Containers::arrayAppend(Array<T>&, ArrayView<const T>) and
+-   @ref Containers::arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type) and
     @ref Containers::arrayAppend(Array<T>&, NoInitT, std::size_t) are now no-op
     in case the item count is zero
 -   Added an ability to construct a @ref Containers::StridedArrayView1D from a
