@@ -242,6 +242,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * is only guaranteed to stay valid until the next call to
          * @ref setPluginDirectory() or until the manager gets destroyed. The
          * view is always @ref Containers::StringViewFlag::NullTerminated.
+         * @see @ref AbstractPlugin::pluginSearchPaths(),
+         *      @ref implicitPluginSearchPaths()
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
@@ -263,6 +265,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * If @p directory is @ref Containers::StringViewFlag::Global, no
          * internal copy of the string is made.
+         * @see @ref AbstractPlugin::pluginSearchPaths(),
+         *      @ref implicitPluginSearchPaths()
          * @partialsupport Not available on platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
