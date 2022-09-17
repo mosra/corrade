@@ -1722,6 +1722,9 @@ constexpr Features compiledFeatures() {
         #ifdef CORRADE_TARGET_AVX2
         |TypeTraits<Avx2T>::Index
         #endif
+        #ifdef CORRADE_TARGET_AVX512F
+        TypeTraits<Avx512fT>::Index|
+        #endif
 
         #elif defined(CORRADE_TARGET_ARM)
         #ifdef CORRADE_TARGET_NEON
