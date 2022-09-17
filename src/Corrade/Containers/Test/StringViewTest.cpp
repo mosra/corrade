@@ -123,6 +123,7 @@ struct StringViewTest: TestSuite::Tester {
     template<class T> void convertArrayView();
     template<class T> void convertVoidArrayView();
     void convertConstFromArrayView();
+    void convertToConstArrayView();
     void convertConstFromArray();
     void convertExternalView();
     void convertConstFromExternalView();
@@ -261,6 +262,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
               &StringViewTest::convertConstFromArrayView,
+              &StringViewTest::convertToConstArrayView,
               &StringViewTest::convertConstFromArray,
               &StringViewTest::convertVoidArrayView<const char>,
               &StringViewTest::convertVoidArrayView<char>,
@@ -649,6 +651,17 @@ void StringViewTest::convertConstFromArrayView() {
     CORRADE_COMPARE(string.size(), 7); /* keeps the same size */
     CORRADE_COMPARE(string.flags(), StringViewFlags{});
     CORRADE_COMPARE(static_cast<const void*>(string.data()), &data[0]);
+}
+
+void StringViewTest::convertToConstArrayView() {
+    char data[] = "hello";
+    MutableStringView a = data;
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
+    CORRADE_COMPARE(a.size(), 5);
+
+    ArrayView<const char> b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
 }
 
 void StringViewTest::convertConstFromArray() {

@@ -208,6 +208,19 @@ the null-terminated copy will be always allocated, avoiding this problem:
 
 @snippet Containers.cpp StringView-c-string-allocatedinit
 
+@section Containers-BasicStringView-array-views Conversion to array views
+
+String views are implicitly convertible to @ref ArrayView as described in the
+following table. This also extends to other container types constructibe from
+@ref ArrayView, which means for example that a @ref StridedArrayView1D is
+implicitly convertible from a string view as well.
+
+String view type                | ↭ | Array view type
+------------------------------- | - | ---------------------
+@ref StringView                 | → | @ref ArrayView "ArrayView<const char>"
+@ref MutableStringView          | → | @ref ArrayView "ArrayView<const char>"
+@ref MutableStringView          | → | @ref ArrayView "ArrayView<char>"
+
 @section Containers-BasicStringView-stl STL compatibility
 
 Instances of @ref StringView and @ref BasicStringView are *implicitly*
@@ -383,18 +396,6 @@ BasicStringView {
            there's no const-adding conversion. Instead, the implementer is
            supposed to add an ArrayViewConverter variant for that. */
         template<class U, class = decltype(Implementation::StringViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ BasicStringView(U&& other) noexcept: BasicStringView{Implementation::StringViewConverter<T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
-
-        /**
-         * @brief Convert to an @ref ArrayView
-         *
-         * The resulting view has the same size as this string @ref size() ---
-         * the null terminator, if any, is not counted into it.
-         */
-        /*implicit*/ operator ArrayView<T>() const noexcept;
-        /*implicit*/ operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept; /**< @overload */
-
-        /** @todo convert mutable to const ArrayView, how to do without having
-            to do it via a template (and thus including ArrayView?) */
 
         /**
          * @brief Convert the view to external representation
@@ -1367,6 +1368,27 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAnyOr(co
 
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {
     return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
+}
+
+namespace Implementation {
+
+template<class, class> struct ArrayViewConverter;
+template<class> struct ErasedArrayViewConverter;
+
+/* Strangely enough, if the from() functions don't accept T& but just T, it
+   leads to an infinite template recursion depth */
+template<> struct ArrayViewConverter<char, BasicStringView<char>> {
+    CORRADE_UTILITY_EXPORT static ArrayView<char> from(const BasicStringView<char>& other);
+};
+template<> struct ArrayViewConverter<const char, BasicStringView<char>> {
+    CORRADE_UTILITY_EXPORT static ArrayView<const char> from(const BasicStringView<char>& other);
+};
+template<> struct ArrayViewConverter<const char, BasicStringView<const char>> {
+    CORRADE_UTILITY_EXPORT static ArrayView<const char> from(const BasicStringView<const char>& other);
+};
+template<class T> struct ErasedArrayViewConverter<BasicStringView<T>>: ArrayViewConverter<T, BasicStringView<T>> {};
+template<class T> struct ErasedArrayViewConverter<const BasicStringView<T>>: ArrayViewConverter<T, BasicStringView<T>> {};
+
 }
 
 }}

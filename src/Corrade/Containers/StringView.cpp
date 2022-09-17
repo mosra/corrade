@@ -64,14 +64,6 @@ template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicS
 
 template<class T> BasicStringView<T>::BasicStringView(const ArrayView<T> other, const StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
-template<class T> BasicStringView<T>::operator ArrayView<T>() const noexcept {
-    return {_data, size()};
-}
-
-template<class T> BasicStringView<T>::operator ArrayView<typename std::conditional<std::is_const<T>::value, const void, void>::type>() const noexcept {
-    return {_data, size()};
-}
-
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
     Array<BasicStringView<T>> parts;
     T* const end = this->end();
@@ -1114,6 +1106,16 @@ Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlags value) {
 }
 
 namespace Implementation {
+
+ArrayView<char> ArrayViewConverter<char, BasicStringView<char>>::from(const BasicStringView<char>& other) {
+    return {other.data(), other.size()};
+}
+ArrayView<const char> ArrayViewConverter<const char, BasicStringView<char>>::from(const BasicStringView<char>& other) {
+    return {other.data(), other.size()};
+}
+ArrayView<const char> ArrayViewConverter<const char, BasicStringView<const char>>::from(const BasicStringView<const char>& other) {
+    return {other.data(), other.size()};
+}
 
 StringView StringViewConverter<const char, std::string>::from(const std::string& other) {
     return StringView{other.data(), other.size(), StringViewFlag::NullTerminated};
