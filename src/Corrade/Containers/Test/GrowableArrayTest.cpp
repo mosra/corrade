@@ -3126,6 +3126,7 @@ template<template<class> class Allocator, std::size_t alignment> void GrowableAr
 
 void GrowableArrayTest::appendInsertConflictingType() {
     Array<unsigned> a;
+    Array<unsigned> b{Corrade::InPlaceInit, {3}};
 
     /* If the second argument is just const T& or T&&, these would fail to
        compile due to a conflict in template type resolution (int vs unsigned).
@@ -3134,14 +3135,18 @@ void GrowableArrayTest::appendInsertConflictingType() {
     const int value = 5;
     arrayAppend(a, value);
     arrayAppend(a, 5);
+    arrayAppend(a, b);
     arrayAppend<ArrayAllocator>(a, value);
     arrayAppend<ArrayAllocator>(a, 5);
+    arrayAppend<ArrayAllocator>(a, b);
     arrayInsert(a, 0, value);
     arrayInsert(a, 0, 5);
+    arrayInsert(a, 0, b);
     arrayInsert<ArrayAllocator>(a, 0, value);
     arrayInsert<ArrayAllocator>(a, 0, 5);
+    arrayInsert<ArrayAllocator>(a, 0, b);
     CORRADE_COMPARE_AS(a,
-        Containers::arrayView<unsigned>({5, 5, 5, 5, 5, 5, 5, 5}),
+        Containers::arrayView<unsigned>({3, 5, 5, 3, 5, 5, 5, 5, 3, 5, 5, 3}),
         TestSuite::Compare::Container);
 }
 
