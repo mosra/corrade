@@ -7,7 +7,7 @@ arch=('i686' 'x86_64')
 url="https://magnum.graphics/corrade/"
 license=('MIT')
 makedepends=('cmake' 'ninja')
-options=(!strip)
+options=('!strip' '!buildflags')
 provides=('corrade-git')
 
 _rootdir=$startdir/../../
@@ -16,28 +16,27 @@ build() {
     mkdir -p "$_rootdir/build"
     cd "$_rootdir/build"
 
-    # Disable optimization (saves A LOT of compilation time)
-    newcxxflags=$(echo $CXXFLAGS | sed s/-O.//g | sed s/-D_FORTIFY_SOURCE=.//g)
-    export CXXFLAGS="$newcxxflags"
-
     cmake .. \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_CONFIGURATION_TYPES="Debug;Release" \
+        -DCMAKE_CROSS_CONFIGS=all \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCORRADE_BUILD_TESTS=ON \
-        -G Ninja
-    ninja
+        -G "Ninja Multi-Config"
+    ninja all:all
 }
 
 check() {
+    cd "$_rootdir/build"
     export CORRADE_TEST_COLOR=ON
 
-    cd "$_rootdir/build"
-    # The Tester test *needs* benchmarks enabled to pass properly
-    ctest --output-on-failure -R TestSuiteTesterTest
-    CORRADE_TEST_SKIP_BENCHMARKS=ON ctest --output-on-failure -j5 -E TestSuiteTesterTest
+    for config in Debug Release; do
+        # The Tester test *needs* benchmarks enabled to pass properly
+        ctest -C $config --output-on-failure -R TestSuiteTesterTest
+        CORRADE_TEST_SKIP_BENCHMARKS=ON ctest -C $config --output-on-failure -j5 -E TestSuiteTesterTest
+    done
 }
 
 package() {
     cd "$_rootdir/build"
-    DESTDIR="$pkgdir/" ninja install
+    DESTDIR="$pkgdir/" ninja install:Debug install/strip:Release
 }
