@@ -38,5 +38,12 @@ check() {
 
 package() {
     cd "$_rootdir/build"
-    DESTDIR="$pkgdir/" ninja install:Debug install/strip:Release
+    DESTDIR="$pkgdir/" ninja install:Debug
+
+    # Prevent the Release build from overwriting Debug binaries
+    for i in $(ls $pkgdir/usr/bin/corrade-*); do
+        mv ${i}{,d}
+    done
+
+    DESTDIR="$pkgdir/" ninja install/strip:Release
 }
