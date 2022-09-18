@@ -58,6 +58,9 @@ namespace Corrade {
 -   New @ref Cpu namespace that provides building blocks for compile-time and
     runtime CPU feature detection and dispatch on x86, ARM and WebAssembly
     (see [mosra/corrade#115](https://github.com/mosra/corrade/pull/115))
+-   Added pretty-printers for GDB. See @ref corrade-debuggers and
+    [mosra/corrade#147](https://github.com/mosra/corrade/pull/147) for more
+    information.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 

@@ -25,5 +25,17 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-install(DIRECTORY gdb
-    DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
+# TODO: GDB also has an ability to auto-load script files from a system-wide
+# directory, which would make it possible to load them without having to
+# manually update `.gdbinit` files. Unfortunately, this requires GDB to be
+# compiled with `--with-system-gdbinit-dir`, which neither ArchLinux nor Ubuntu
+# does, both set only `--with-system-gdbinit` which would mean having to
+# *append* to that file on install. Not the way to go.
+#
+# TODO: there's also an option to install those next to the libraries (such as
+# having /usr/lib/CorradeContainers-gdb.py), or embedded in the binaries in the
+# .debug_gdb_scripts section. Both still require some whitelisting from the
+# user, though, so no automagic either:
+#   https://sourceware.org/gdb/onlinedocs/gdb/Python-Auto_002dloading.html#Python-Auto_002dloading
+#   https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html#dotdebug_005fgdb_005fscripts-section
+install(DIRECTORY gdb DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
