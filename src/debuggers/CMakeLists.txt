@@ -38,4 +38,6 @@
 # user, though, so no automagic either:
 #   https://sourceware.org/gdb/onlinedocs/gdb/Python-Auto_002dloading.html#Python-Auto_002dloading
 #   https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html#dotdebug_005fgdb_005fscripts-section
-install(DIRECTORY gdb DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
+if(NOT CORRADE_TARGET_MSVC AND NOT CORRADE_TARGET_EMSCRIPTEN)
+    install(DIRECTORY gdb DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
+endif()
