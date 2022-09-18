@@ -63,5 +63,19 @@ file using the @m_class{m-doc-external} [source](https://sourceware.org/gdb/onli
 command. See also corresponding [GDB docs](https://sourceware.org/gdb/onlinedocs/gdb.html#Initialization-Files)
 and [CLion docs](https://www.jetbrains.com/help/clion/configuring-debugger-options.html#gdbinit-lldbinit)
 for more information.
+
+@section corrade-debuggers-natvis MSVC Natvis files
+
+The [src/debuggers/natvis](https://github.com/mosra/corrade/tree/master/src/debuggers/natvis)
+directory contains MSVC natvis files for most @ref Containers APIs. Contents of
+this directory are also copied into
+@cb{.sh} ${CMAKE_PREFIX_PATH}/share/corrade/debuggers/natvis @ce during
+installation.
+
+Easiest way to use is to copy them to the user-specific Natvis directory for
+given version of Visual Studio, such as @cb{.bat} %USERPROFILE%/Documents/Visual Studio 2022/Visualizers @ce.
+
+See also corresponding [Natvis docs](https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2022)
+for more information.
 */
 }

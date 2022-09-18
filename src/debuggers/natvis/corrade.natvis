@@ -1,0 +1,197 @@
+<!--
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018, 2019, 2020, 2021, 2022
+              Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2021 Jonathan Hale <squareys@googlemail.com>
+    Copyright © 2022 Pablo Escobar <mail@rvrs.in>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+-->
+
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!-- Containers::Array -->
+  <Type Name="Corrade::Containers::Array&lt;*&gt;">
+    <DisplayString>{{ size={_size} }}</DisplayString>
+    <Expand>
+      <Item Name="[deleter]" ExcludeView="simple" Condition="_deleter != nullptr">_deleter</Item>
+      <Synthetic Name="[deleter]" ExcludeView="simple" Condition="_deleter == nullptr">
+        <DisplayString>operator delete[]</DisplayString>
+      </Synthetic>
+      <ArrayItems>
+        <Size>_size</Size>
+        <ValuePointer>_data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!-- Containers::ArrayView -->
+  <Type Name="Corrade::Containers::ArrayView&lt;*&gt;">
+    <DisplayString>{{ size={_size} }}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>_size</Size>
+        <ValuePointer>_data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!-- Containers::BitArray -->
+  <Type Name="Corrade::Containers::BitArray">
+    <Intrinsic Name="offset" Expression="_sizeOffset &amp; 0x07"/>
+    <Intrinsic Name="size" Expression="_sizeOffset &gt;&gt; 3"/>
+    <DisplayString>{{ size={size()} }}</DisplayString>
+    <Expand>
+      <Item Name="[deleter]" ExcludeView="simple" Condition="_deleter != nullptr">_deleter</Item>
+      <Synthetic Name="[deleter]" ExcludeView="simple" Condition="_deleter == nullptr">
+        <DisplayString>operator delete[]</DisplayString>
+      </Synthetic>
+      <IndexListItems>
+        <Size>size()</Size>
+        <ValueNode>(bool)(_data[(offset() + $i)/8] &amp; (1 &lt;&lt; ((offset() + $i)%8)))</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+  <!-- Containers::[Mutable]BitArrayView -->
+  <Type Name="Corrade::Containers::BasicBitArrayView&lt;*&gt;">
+    <Intrinsic Name="offset" Expression="_sizeOffset &amp; 0x07"/>
+    <Intrinsic Name="size" Expression="_sizeOffset &gt;&gt; 3"/>
+    <DisplayString>{{ size={size()} }}</DisplayString>
+    <Expand>
+      <IndexListItems>
+        <Size>size()</Size>
+        <ValueNode>(bool)(_data[(offset() + $i)/8] &amp; (1 &lt;&lt; ((offset() + $i)%8)))</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+  <!-- Containers::Optional -->
+  <Type Name="Corrade::Containers::Optional&lt;*&gt;">
+    <DisplayString Condition="!_set">NullOpt</DisplayString>
+    <DisplayString>{_value}</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="_set">_value</ExpandedItem>
+    </Expand>
+  </Type>
+  <!-- Containers::Pair -->
+  <Type Name="Corrade::Containers::Pair&lt;*&gt;">
+    <DisplayString IncludeView="noparens">{_first}, {_second}</DisplayString>
+    <DisplayString ExcludeView="noparens">({_first}, {_second})</DisplayString>
+    <Expand>
+      <Item Name="first">_first</Item>
+      <Item Name="second">_second</Item>
+    </Expand>
+  </Type>
+  <!-- Containers::Triple -->
+  <Type Name="Corrade::Containers::Triple&lt;*&gt;">
+    <DisplayString IncludeView="noparens">{_first}, {_second}, {_third}</DisplayString>
+    <DisplayString ExcludeView="noparens">({_first}, {_second}, {_third})</DisplayString>
+    <Expand>
+      <Item Name="first">_first</Item>
+      <Item Name="second">_second</Item>
+      <Item Name="third">_third</Item>
+    </Expand>
+  </Type>
+  <!-- Containers::Pointer -->
+  <Type Name="Corrade::Containers::Pointer&lt;*&gt;">
+    <!-- SmartPointer enables extra visualization for the underlying data -->
+    <SmartPointer Usage="Minimal">_pointer</SmartPointer>
+    <DisplayString Condition="!_pointer">empty</DisplayString>
+    <DisplayString>{*_pointer}</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="_pointer">_pointer</ExpandedItem>
+    </Expand>
+  </Type>
+  <!-- Containers::Reference -->
+  <Type Name="Corrade::Containers::Reference&lt;*&gt;">
+    <DisplayString>{_reference,na}</DisplayString>
+    <Expand>
+      <ExpandedItem>_reference</ExpandedItem>
+    </Expand>
+  </Type>
+  <!-- Containers::StaticArray -->
+  <Type Name="Corrade::Containers::StaticArray&lt;*&gt;">
+    <DisplayString>{{ size={$T1} }}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>$T1</Size>
+        <ValuePointer>_data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!-- Containers::StaticArrayView -->
+  <Type Name="Corrade::Containers::StaticArrayView&lt;*&gt;">
+    <DisplayString>{{ size={$T1} }}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>$T1</Size>
+        <ValuePointer>_data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!-- Containers::StridedArrayView1D -->
+  <Type Name="Corrade::Containers::StridedArrayView&lt;1,*&gt;">
+    <DisplayString>{{ size={_size._data[0]} }}</DisplayString>
+    <Expand>
+      <Item Name="[stride]" ExcludeView="simple">_stride._data[0]</Item>
+      <IndexListItems>
+        <Size>_size._data[0]</Size>
+        <ValueNode>*($T1 *)((char*)(_data) + $i*_stride._data[0])</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+  <!-- Containers::String -->
+  <Type Name="Corrade::Containers::String">
+    <Intrinsic Name="isSmall" Expression="(_small.size &amp; 0x80) != 0"/>
+    <Intrinsic Name="data" Expression="isSmall() ? _small.data : _large.data"/>
+    <Intrinsic Name="size" Expression="isSmall() ? _small.size &amp; ~0x80 : _large.size"/>
+    <!-- String is null-terminated, but can include null-characters before the end, so use explicit size -->
+    <!-- Display as UTF-8 -->
+    <DisplayString>{data(),[size()]s8}</DisplayString>
+    <!-- Note: StringView ("Text Visualizer") supports a range but always cuts off at null-characters -->
+    <StringView>data(),[size()]s8</StringView>
+    <Expand>
+      <Item Name="[size]" ExcludeView="simple">size()</Item>
+      <Item Name="[deleter]" ExcludeView="simple" Condition="!isSmall() &amp;&amp; _large.deleter != nullptr">_large.deleter</Item>
+      <Synthetic Name="[deleter]" ExcludeView="simple" Condition="!isSmall() &amp;&amp; _large.deleter == nullptr">
+        <DisplayString>operator delete[]</DisplayString>
+      </Synthetic>
+      <ArrayItems>
+        <Size>size()</Size>
+        <ValuePointer>data()</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!-- Containers::[Mutable]StringView -->
+  <Type Name="Corrade::Containers::BasicStringView&lt;*&gt;">
+    <Intrinsic Name="size" Expression="_sizePlusFlags &amp; ~Implementation::StringViewSizeMask"/>
+    <Intrinsic Name="flags" Expression="_sizePlusFlags &amp; Implementation::StringViewSizeMask"/>
+    <DisplayString>{_data,[size()]s8}</DisplayString>
+    <StringView>_data,[size()]s8</StringView>
+    <Expand>
+      <Item Name="[size]" ExcludeView="simple">size()</Item>
+      <Item Name="[null-terminated]" ExcludeView="simple">(flags() &amp; StringViewFlag::NullTerminated) != 0</Item>
+      <Item Name="[global]" ExcludeView="simple">(flags() &amp; StringViewFlag::Global) != 0</Item>
+      <ArrayItems>
+        <Size>size()</Size>
+        <ValuePointer>_data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
+<!-- kate: hl xml -->

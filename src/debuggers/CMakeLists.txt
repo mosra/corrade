@@ -41,3 +41,10 @@
 if(NOT CORRADE_TARGET_MSVC AND NOT CORRADE_TARGET_EMSCRIPTEN)
     install(DIRECTORY gdb DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
 endif()
+
+# TODO embed those directly in the PDB:
+#   https://reviews.llvm.org/D48703
+#   https://gitlab.kitware.com/cmake/cmake/-/issues/16874
+if(CORRADE_TARGET_MSVC)
+    install(DIRECTORY natvis DESTINATION ${CORRADE_DATA_INSTALL_DIR}/debuggers)
+endif()
