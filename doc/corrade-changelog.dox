@@ -215,6 +215,8 @@ namespace Corrade {
 -   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     constructor is no longer @cpp explicit @ce to allow for easier use in
     initializer lists
+-   Added a @ref Containers::Pointer::emplace() "Containers::Pointer<T>::emplace<U>()"
+    overload for in-place construction of a derived type
 -   @ref Containers::ScopeGuard now has a @ref NoCreate constructor and is
     movable in order to support deferred creation
 -   Added a templated overload of @ref Containers::StridedArrayView::asContiguous()

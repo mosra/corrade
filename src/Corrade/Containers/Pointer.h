@@ -300,6 +300,24 @@ template<class T> class Pointer {
         }
 
         /**
+         * @brief Emplace a new value of a derived type
+         * @m_since_latest
+         *
+         * Calls @cpp delete @ce on the previously stored pointer and allocates
+         * a new object of type @p U by passing @p args to its constructor.
+         */
+        template<class U, class ...Args> U& emplace(Args&&... args) {
+            delete _pointer;
+            /* This works around a featurebug in C++ where new T{} doesn't work
+               for an explicit defaulted constructor. Additionally it works
+               around GCC 4.8 bugs where copy/move construction can't be done
+               with {} for plain structs. */
+            U* const derived = Implementation::allocate<U>(Utility::forward<Args>(args)...);
+            _pointer = derived;
+            return *derived;
+        }
+
+        /**
          * @brief Release the pointer ownership
          *
          * Resets the stored pointer to @cpp nullptr @ce, returning the

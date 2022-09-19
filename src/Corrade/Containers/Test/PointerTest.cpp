@@ -99,6 +99,7 @@ struct PointerTest: TestSuite::Tester {
 
     void reset();
     void emplace();
+    void emplaceDerivedType();
     void release();
 
     void cast();
@@ -135,6 +136,7 @@ PointerTest::PointerTest() {
 
     addTests({&PointerTest::reset,
               &PointerTest::emplace,
+              &PointerTest::emplaceDerivedType,
               &PointerTest::release}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::cast,
@@ -476,9 +478,32 @@ void PointerTest::emplace() {
         CORRADE_COMPARE(a->a, 5);
 
         /* Using int{} to test perfect forwarding */
-        a.emplace(16, int{});
+        Immovable& out = a.emplace(16, int{});
         CORRADE_VERIFY(a);
-        CORRADE_COMPARE(a->a, 16);
+        CORRADE_COMPARE(&out, &*a);
+        CORRADE_COMPARE(out.a, 16);
+    }
+
+    CORRADE_COMPARE(Immovable::constructed, 2);
+    CORRADE_COMPARE(Immovable::destructed, 2);
+}
+
+void PointerTest::emplaceDerivedType() {
+    {
+        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
+        CORRADE_VERIFY(a);
+        CORRADE_COMPARE(a->a, 5);
+
+        struct Derived: Immovable {
+            Derived(int a, int&&): Immovable{0}, a{a} {}
+            int a;
+        };
+
+        /* Using int{} to test perfect forwarding */
+        Derived& out = a.emplace<Derived>(3, int{});
+        CORRADE_VERIFY(a);
+        CORRADE_COMPARE(&out, &*a);
+        CORRADE_COMPARE(out.a, 3);
     }
 
     CORRADE_COMPARE(Immovable::constructed, 2);
