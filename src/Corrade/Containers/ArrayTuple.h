@@ -67,7 +67,10 @@ individually @ref Containers-Array-growable "grow each array", using dedicated
 A common use case is when dealing with C APIs that accept pointers to several
 different arrays and the sizes are not known at compile time. The following
 snippet shows filling a Vulkan @m_class{m-doc-external} [VkRenderpassCreateInfo](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkRenderPassCreateInfo.html)
-structure with dynamic attachment, subpass and subpass dependency description:
+structure with dynamic attachment, subpass and subpass dependency description.
+The `data` constructor will allocate a single block of memory for 3
+attachments, 2 subpasses and 7 dependencies and points the `attachments`,
+`subpasses` and `dependencies` views to it:
 
 @snippet Containers.cpp ArrayTuple-usage
 

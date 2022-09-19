@@ -518,25 +518,24 @@ struct VkRenderPassCreateInfo {
     unsigned dependencyCount;
     const VkSubpassDependency* pDependencies;
 };
-std::size_t subpassCount{}, dependencyCount{};
 /* [ArrayTuple-usage] */
 Containers::ArrayView<VkAttachmentDescription> attachments;
 Containers::ArrayView<VkSubpassDescription> subpasses;
 Containers::ArrayView<VkSubpassDependency> dependencies;
 Containers::ArrayTuple data{
     {3, attachments},
-    {subpassCount, subpasses},
-    {dependencyCount, dependencies}
+    {2, subpasses},
+    {7, dependencies}
 };
 
 // Fill the attachment, subpass and dependency info...
 
 VkRenderPassCreateInfo info{DOXYGEN_ELLIPSIS()};
-info.attachmentCount = attachments.size();
+info.attachmentCount = 3;
 info.pAttachments = attachments;
-info.subpassCount = subpasses.size();
+info.subpassCount = 2;
 info.pSubpasses = subpasses;
-info.dependencyCount = dependencies.size();
+info.dependencyCount = 7;
 info.pDependencies = dependencies;
 /* [ArrayTuple-usage] */
 static_cast<void>(info);
