@@ -871,8 +871,7 @@ const Utility::JsonToken& gltfNode = gltf->root();
 /* [Json-usage-direct-array-access] */
 Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
 if(const Utility::JsonToken* gltfNodeTranslation = gltfNode.find("translation"))
-    if(!(translation = gltf->parseFloatArray(*gltfNodeTranslation)) ||
-         translation->size() != 3)
+    if(!(translation = gltf->parseFloatArray(*gltfNodeTranslation, 3)))
         Utility::Fatal{} << "Node translation is not a 3-component float vector";
 
 Containers::Optional<Containers::StridedArrayView1D<const unsigned>> children;
