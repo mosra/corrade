@@ -1723,7 +1723,7 @@ constexpr Features compiledFeatures() {
         |TypeTraits<Avx2T>::Index
         #endif
         #ifdef CORRADE_TARGET_AVX512F
-        TypeTraits<Avx512fT>::Index|
+        |TypeTraits<Avx512fT>::Index
         #endif
 
         #elif defined(CORRADE_TARGET_ARM)
