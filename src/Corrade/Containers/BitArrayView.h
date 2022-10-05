@@ -362,7 +362,7 @@ template<class T> template<class U> inline typename std::enable_if<!std::is_cons
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = _data[((_sizeOffset & 0x07) + i) >> 3];
-    byte ^= (-static_cast<char>(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
+    byte ^= (-char(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
 }
 
 template<class T> constexpr BasicBitArrayView<T> BasicBitArrayView<T>::slice(const std::size_t begin, const std::size_t end) const {
