@@ -32,7 +32,7 @@ check() {
     for config in Debug Release; do
         # The Tester test *needs* benchmarks enabled to pass properly
         ctest -C $config --output-on-failure -R TestSuiteTesterTest
-        CORRADE_TEST_SKIP_BENCHMARKS=ON ctest -C $config --output-on-failure -j5 -E TestSuiteTesterTest
+        CORRADE_TEST_SKIP_BENCHMARKS=ON ctest -C $config --output-on-failure -j9 -E TestSuiteTesterTest
     done
 }
 
