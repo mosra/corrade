@@ -382,6 +382,7 @@ namespace Corrade {
     @ref CORRADE_BUILD_CPU_RUNTIME_DISPATCH CMake option. Platforms without
     IFUNC support implement runtime dispatch using function pointers instead of
     indirect functions and have this currently disabled by default.
+-   Various warning fixes (see [mosra/corrade#151](https://github.com/mosra/corrade/pull/151))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
