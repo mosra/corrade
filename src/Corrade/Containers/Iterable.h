@@ -388,7 +388,10 @@ template<class T> class IterableIterator {
     private:
         friend Iterable<T>;
 
-        explicit IterableIterator(const void* data, std::ptrdiff_t stride, T&(*accessor)(const void*), std::size_t i) noexcept: _data{static_cast<const char*>(data)}, _stride{stride}, _accessor{accessor}, _i{i} {}
+        explicit IterableIterator(const void* data, std::ptrdiff_t stride, T&(*accessor)(const void*), std::size_t i) noexcept:
+            /* _data{} will cause GCC 4.8 to warn that "parameter 'data' set
+                but not used" */
+            _data(static_cast<const char*>(data)), _stride{stride}, _accessor{accessor}, _i{i} {}
 
         const char* _data;
         std::ptrdiff_t _stride;
