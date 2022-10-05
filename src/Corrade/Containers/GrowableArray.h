@@ -354,6 +354,9 @@ template<class T> struct ArrayAllocator {
      * return a new capacity with an an optimal tradeoff between reallocation
      * count and memory usage, the value then being passed to
      * @ref reallocate().
+     *
+     * See documentation of a particular implementation (such as
+     * @ref ArrayNewAllocator::grow()) for details about growth strategy.
      */
     static std::size_t grow(T* array, std::size_t desired);
 
@@ -776,8 +779,10 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @m_since{2020,06}
 
 If the array is not growable or the capacity is not large enough, the array
-capacity is grown first. Then, @p value is copy-constructed at the end of the
-array and @ref Array::size() increased by 1.
+capacity is grown first according to rules described in the
+@ref ArrayAllocator::grow() "grow()" function of a particular allocator. Then,
+@p value is copy-constructed at the end of the array and @ref Array::size()
+increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(1) @f$ providing the allocator growth
 ratio is exponential. On top of what the @p Allocator (or the default
@@ -995,8 +1000,10 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppe
 
 Expects that @p index is not larger than @ref Array::size(). If the array is
 not growable or the capacity is not large enough, the array capacity is grown
-first. Then, items starting at @p index are moved one item forward, @p value is
-copied to @p index and @ref Array::size() is increased by 1.
+first according to rules described in the
+@ref ArrayAllocator::grow() "grow()" function of a particular allocator. Then,
+items starting at @p index are moved one item forward, @p value is copied to
+@p index and @ref Array::size() is increased by 1.
 
 Amortized complexity is @f$ \mathcal{O}(n) @f$. On top of what the @p Allocator
 (or the default @ref ArrayAllocator) itself needs, @p T is required to be

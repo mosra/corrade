@@ -305,7 +305,7 @@ template<class T> class Optional {
         /**
          * @brief Non-equality comparison to a value
          *
-         * Returns negation of @ref operator!=(const T&) const.
+         * Returns negation of @ref operator==(const T&) const.
          */
         bool operator!=(const T& other) const { return !operator==(other); }
 
