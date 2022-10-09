@@ -168,6 +168,26 @@ template<class U> class className {                                         \
         enum: bool { value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
 }
 
+/** @hideinitializer
+@brief C++20 is_constant_evaluated
+@m_since{2022,10}
+
+Expands to a predicate determining whether given @cpp constexpr @ce function
+is being evaluated at compile-time or not. Under C++14 rules, constexpr
+functions may be defined as long as at least some of the code paths are able
+to be executed at compile-time. As long as a fallback is present, features
+such as SIMD or inline assembly may be used in functions marked constexpr.
+
+This support is available on all C++20 capable compilers, but also certain
+ones (Clang 9, GCC 9, MSVC 2022 17.1) that expose the feature as a non-portable
+extension. In which case it may be used under C++14 relaxed constexpr rules.
+*/
+#if (defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__ >= 9) || (defined(CORRADE_TARGET_APPLE_CLANG) && __clang_major__*100 + __clang_minor__ >= 1104) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 9) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1931)
+#define CORRADE_IS_CONSTANT_EVALUATED (__builtin_is_constant_evaluated())
+#elif CORRADE_CXX_STANDARD >= 202002
+#define CORRADE_IS_CONSTANT_EVALUATED (std::is_constant_evaluated())
+#endif
+
 namespace Implementation {
     /* As of Eigen 3.4.0, due to these two commits in particular,
         https://gitlab.com/libeigen/eigen/-/commit/c0ca8a9fa3e03ad7ecb270adfe760a1bff7c0829

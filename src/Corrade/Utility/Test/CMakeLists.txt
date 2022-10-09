@@ -234,6 +234,15 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
         corrade_add_test(UtilityMacrosCpp20Test MacrosCpp20Test.cpp)
         set_target_properties(UtilityMacrosCpp20Test PROPERTIES CORRADE_CXX_STANDARD 20)
     endif()
+
+
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "11.4") OR
+       (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.25"))
+        corrade_add_test(UtilityTypeTraitsCpp20Test TypeTraitsCpp20Test.cpp)
+        set_target_properties(UtilityTypeTraitsCpp20Test PROPERTIES CORRADE_CXX_STANDARD 14)
+    endif()
 endif()
 
 # It should return with a non-zero exit code
