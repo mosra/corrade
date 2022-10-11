@@ -284,6 +284,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         /**
          * @brief Set preferred plugins for given alias
+         * @m_since_latest
          *
          * By default, if more than one plugin provides given @p alias, one of
          * them is arbitrarily chosen. With this function it's possible to
@@ -299,6 +300,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * If @p alias is @ref Containers::StringViewFlag::Global, no internal
          * copy of the string is made.
          */
+        void setPreferredPlugins(Containers::StringView alias, Containers::ArrayView<const Containers::StringView> plugins);
+        /** @overload */
         void setPreferredPlugins(Containers::StringView alias, std::initializer_list<Containers::StringView> plugins);
 
         /**

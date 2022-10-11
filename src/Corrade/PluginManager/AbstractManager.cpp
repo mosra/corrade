@@ -468,7 +468,7 @@ void AbstractManager::reloadPluginDirectory() {
 }
 #endif
 
-void AbstractManager::setPreferredPlugins(Containers::StringView alias, const std::initializer_list<Containers::StringView> plugins) {
+void AbstractManager::setPreferredPlugins(const Containers::StringView alias, const Containers::ArrayView<const Containers::StringView> plugins) {
     /* Of course std::map::find() would allocate a new String in order to
        find it, prevent that from happening by wrapping a view */
     /** @todo clean this up once we kill std::map */
@@ -495,6 +495,10 @@ void AbstractManager::setPreferredPlugins(Containers::StringView alias, const st
         _state->aliases.insert({Containers::String::nullTerminatedGlobalView(alias), *foundPlugin->second});
         break;
     }
+}
+
+void AbstractManager::setPreferredPlugins(const Containers::StringView alias, const std::initializer_list<Containers::StringView> plugins) {
+    return setPreferredPlugins(alias, Containers::arrayView(plugins));
 }
 
 Containers::Array<Containers::StringView> AbstractManager::pluginList() const {
