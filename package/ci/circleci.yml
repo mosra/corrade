@@ -370,16 +370,43 @@ jobs:
 workflows:
   version: 2
   build:
+    # While there's no actual execution or data dependency between the jobs,
+    # this is done in order to reduce unnecessary credit usage. The base and
+    # non-deprecated Linux builds are taken as the main sanity checks. Only
+    # if they pass, the rest of the jobs gets gradually executed, with further
+    # dependencies especially for the macOS jobs that take the most credits.
     jobs:
     - linux
-    - linux-arm64
-    - linux-static
+    - linux-arm64:
+        requires:
+        - linux
+    - linux-static:
+        requires:
+        - linux
     - linux-nondeprecated
-    - linux-sanitizers
-    - linux-threadsanitizer
-    - macos
-    - macos-static
-    - emscripten
-    - android-x86
-    - ios
+    - linux-sanitizers:
+        requires:
+        - linux
+    - linux-threadsanitizer:
+        requires:
+        - linux-sanitizers
+    - macos:
+        requires:
+        - linux
+        - linux-nondeprecated
+    - macos-static:
+        requires:
+        - macos
+        - linux-static
+    - emscripten:
+        requires:
+        - linux-static
+    - android-x86:
+        requires:
+        - linux-static
+        - linux-arm64
+    - ios:
+        requires:
+        - macos-static
+        - linux-arm64
     - acme
