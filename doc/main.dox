@@ -46,28 +46,41 @@ target_link_libraries(your-app PRIVATE Corrade::Main)
 
 See also @ref building-corrade and @ref corrade-cmake for more information.
 
-@m_class{m-block m-success}
-
-@par Corrade::Main on non-Windows systems
-    If you're not on Windows, congratulations. Your system is great and there's
-    no need for any sanity-restoring countermeasures. Linking to `Corrade::Main`
-    via CMake on such systems is a no-op.
-
 If you're on Windows, linking to the `Corrade::Main` library does the
 following:
 
 -   allows you to always use the standard @cpp main() @ce (instead of
-    @cpp _tmain() @ce, @cpp wWinMain() @ce and other atrocities)
--   makes it possible to create executables with @cmake add_executable(... WIN32 ...) @ce
-    and hide the console window again without requiring you to do any sad
-    things to your main function
+    @cpp _tmain() @ce, @cpp wWinMain() @ce and other Windows-specific variants)
+-   makes it possible to create executables with
+    @cmake add_executable(... WIN32 ...) @ce and hide the console window again
+    without requiring you to replace your @cpp main() @ce with
+    @cpp WinMain() @ce
 -   gives you @cpp char** argv @ce in UTF-8, converting them from
-    Windows-specific wide-char APIs
+    Windows-specific wide-char representation
 -   sets up console output to be in UTF-8 as well, so special characters and
     non-ASCII alphabets display correctly
 -   if @ref CORRADE_UTILITY_USE_ANSI_COLORS is enabled, enables processing of
     ANSI escape codes in the console, so @ref Utility::Debug colored output and
     other advanced terminal features work properly
+
+@m_class{m-block m-success}
+
+@par When not to use Corrade::Main
+    If you're not on Windows, everything listed above works by default already.
+    Linking to `Corrade::Main` via CMake on non-Windows systems is a no-op.
+@par
+    If you're on Windows but don't use the standard C @cpp main() @ce function
+    (or can't use it, for example in a MFC application), linking to
+    `Corrade::Main` will fail with an error such as the following:
+@par
+    @code{.shell-session}
+    CorradeMain.lib(CorradeMain.cpp.obj) : error LNK2001: unresolved external symbol main
+    @endcode
+@par
+    In that case the solution is to not link to `Corrade::Main` at all. Such
+    cases likely involve GUI applications that don't need access to the console
+    or `argc` / `argv`, so the features provided by `Corrade::Main` are not
+    that useful.
 
 @section main-utf8-arguments Standard main() with UTF-8 command-line arguments
 
