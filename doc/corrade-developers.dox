@@ -654,7 +654,10 @@ repository.
         -   new entry in `magnum-singles/package/ci/``*.yml`, compiling the new
             test
         Ensure the CI runs on the new file and passes.
-    -   After that, commit the new file and everything else inside Corrade.
+    -   After that, commit the new file and everything else inside Corrade:
+        -   Also mention it in `doc/corrade-singles.dox`
+        -   And reference the single-header lib from the class documentation
+            itself (look at e.g. @ref Containers::Pointer for an example)
 7.  Run `magnum-singles/package/generate-loc.sh`, update the README with its
     output (use block editing)
 8.  If there's something important to be mentioned, update the changelog in
