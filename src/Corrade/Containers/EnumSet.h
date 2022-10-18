@@ -67,7 +67,7 @@ definitions. This macro works with templated classes as well.
 
 <b></b>
 
-@m_class{m-block m-success}
+@m_class{m-block m-warning}
 
 @par Storing more than 64 values
     The @ref EnumSet is limited by the maximum size of a builtin type, which is
@@ -75,6 +75,16 @@ definitions. This macro works with templated classes as well.
     standard and thus not portable. If you need to store a larger set and
     you're fine with some limitations, check out @ref BigEnumSet. If you need
     an unbounded runtime-sized set of bits, use @ref BitArray instead.
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradeEnumSet.h](https://github.com/mosra/magnum-singles/tree/master/CorradeEnumSet.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
 
 @see @ref enumCastUnderlyingType(), @ref enumSetDebugOutput()
 */
