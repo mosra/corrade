@@ -381,6 +381,10 @@ Defined if the code is being compiled by GCC or GCC-compatible Clang (which is
 example). While this variable is exposed in CMake as well, it's not guaranteed
 that the reported compiler is consistent between CMake and C++ --- for example,
 a library can be built with GCC and then used via Clang.
+
+Major GCC version number can be accessed using the `__GNUC__` macro. Clang
+always reports itself as GCC 4.4, its version is reported in `__clang_major__`
+instead.
 @see @ref CORRADE_TARGET_CLANG, @ref CORRADE_TARGET_APPLE_CLANG,
     @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
     @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_UNIX,
@@ -399,6 +403,11 @@ variable is defined, usually @ref CORRADE_TARGET_GCC is also defined, except
 for Clang-CL. While this variable is exposed in CMake as well, it's not
 guaranteed that the reported compiler is consistent between CMake and C++ ---
 for example, a library can be built with Clang and then used via GCC.
+
+Major Clang version number can be accessed using the `__clang_major__` macro,
+however note that Apple Clang (in Xcode)
+[uses its own numbering](https://en.wikipedia.org/wiki/Xcode#Toolchain_versions)
+--- for example Clang 10 is actually Apple Clang 12.
 @see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_APPLE_CLANG,
     @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
     @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_UNIX,
@@ -419,6 +428,12 @@ uses a different versioning scheme. While this variable is exposed in CMake as
 well, it's not guaranteed that the reported compiler is consistent between
 CMake and C++ --- for example, a library can be built with Clang and then used
 via GCC.
+
+Major Apple Clang version number can be accessed using the `__clang_major__`
+macro, which is the same macro as vanilla Clang. There is no macro that exposes
+the matching vanilla Clang version, the only option is to use
+[an external mapping table](https://en.wikipedia.org/wiki/Xcode#Toolchain_versions)
+--- for example Apple Clang 12 is actually Clang 10.
 @see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
     @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
     @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
@@ -436,6 +451,10 @@ also defined (but @ref CORRADE_TARGET_GCC not). While this variable is exposed
 in CMake as well, it's not guaranteed that the reported compiler is consistent
 between CMake and C++ --- for example, a library can be built with Clang-CL and
 then used via MSVC.
+
+Clang-CL uses the same versioning scheme as vanilla Clang, accessible using the
+`__clang_major__` macro. It also exposes the `_MSC_VER` macro, reporting the
+MSVC version it's compatible with.
 @see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
     @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_MSVC,
     @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
@@ -452,6 +471,10 @@ this variable is defined, @ref CORRADE_TARGET_CLANG might also be defined.
 While this variable is exposed in CMake as well, it's not guaranteed that the
 reported compiler is consistent between CMake and C++ --- for example, a
 library can be built with MSVC and then used via Clang-CL.
+
+MSVC version can be accessed using the `_MSC_VER` macro. The macro uses an
+[internal version numbering](https://en.wikipedia.org/wiki/Microsoft_Visual_C++#Internal_version_numbering),
+so for example MSVC 2019 16.7 (14.27) is reported as 1927.
 @see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
     @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
     @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
@@ -487,6 +510,10 @@ also sometimes used on Linux. Note that unlike other `CORRADE_TARGET_*`
 variables, this variable, @ref CORRADE_TARGET_LIBSTDCXX and
 @ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
 is non-trivial.
+
+Major libc++ version number can be accessed using the `_LIBCPP_VERSION` version
+macro. While libc++ can only be used with Clang (and not GCC), its version
+might or might not be the same as `__clang_major__`.
 @see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_DINKUMWARE,
     @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_CLANG
 */
@@ -503,6 +530,14 @@ Clang is able to use libstdc++ as well. Note that unlike other `CORRADE_TARGET_*
 variables, this variable, @ref CORRADE_TARGET_LIBCXX and
 @ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
 is non-trivial.
+
+Major libstdc++ version number can be accessed using the `_GLIBCXX_RELEASE`
+macro, however it's available only since libstdc++ 7. Older versions define
+just `__GLIBCXX__`, which contains a release date (and the dates, of course,
+[overlap for patch releases](https://stackoverflow.com/a/37119478) and can be
+just anything for custom GCC forks). If libstdc++ is used together with GCC, it
+can be assumed both have the same version; if libstdc++ is used together with
+Clang, the versions can be arbitrary.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_DINKUMWARE,
     @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_GCC,
     @ref CORRADE_TARGET_CLANG
@@ -519,8 +554,12 @@ MSVC). Note that Clang is able to use this implementation as well.  Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_LIBSTDCXX and  @ref CORRADE_TARGET_DINKUMWARE are not
 exposed in CMake because the detection is non-trivial.
+
+The MSVC standard library is closely tied to a compiler version, thus
+`_MSC_VER` can be used to determine its version on both MSVC and Clang-CL.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
-    @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_MSVC
+    @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_MSVC,
+    @ref CORRADE_TARGET_CLANG_CL
 */
 #define CORRADE_TARGET_DINKUMWARE
 #undef CORRADE_TARGET_DINKUMWARE
