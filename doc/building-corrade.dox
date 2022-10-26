@@ -329,10 +329,13 @@ latest stable version of Corrade:
 brew install mosra/magnum/corrade
 @endcode
 
-To install the latest Git revision, use
+But often you may want to install the latest Git revision instead:
 
 @code{.sh}
 brew install --HEAD mosra/magnum/corrade
+
+# If already installed, use the following to upgrade
+brew upgrade --fetch-HEAD mosra/magnum/corrade
 @endcode
 
 If you want to pass additional flags to CMake or
