@@ -46,7 +46,6 @@ struct MacrosTest: TestSuite::Tester {
     void deprecated();
     void unused();
     void fallthrough();
-    void cxxStandard();
     void alwaysNeverInline();
     void assume();
     void likelyUnlikely();
@@ -64,7 +63,6 @@ MacrosTest::MacrosTest() {
               &MacrosTest::deprecated,
               &MacrosTest::unused,
               &MacrosTest::fallthrough,
-              &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
               &MacrosTest::assume,
               &MacrosTest::likelyUnlikely,
@@ -183,10 +181,6 @@ void MacrosTest::fallthrough() {
 
     CORRADE_COMPARE(d[0], 5);
     CORRADE_COMPARE(d[1], 4);
-}
-
-void MacrosTest::cxxStandard() {
-    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103, TestSuite::Compare::GreaterOrEqual);
 }
 
 CORRADE_ALWAYS_INLINE int alwaysInline() { return 5; }
