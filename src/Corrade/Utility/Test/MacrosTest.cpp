@@ -46,6 +46,7 @@ struct MacrosTest: TestSuite::Tester {
     void deprecated();
     void unused();
     void fallthrough();
+    void constexpr14();
     void alwaysNeverInline();
     void assume();
     void likelyUnlikely();
@@ -63,6 +64,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::deprecated,
               &MacrosTest::unused,
               &MacrosTest::fallthrough,
+              &MacrosTest::constexpr14,
               &MacrosTest::alwaysNeverInline,
               &MacrosTest::assume,
               &MacrosTest::likelyUnlikely,
@@ -164,6 +166,20 @@ struct Four {
 void MacrosTest::unused() {
     CORRADE_COMPARE(three(6), 3);
     CORRADE_COMPARE(Four{}.a, 4);
+}
+
+CORRADE_CONSTEXPR14 int sumInAStupidWay(int number) {
+    int sum = 0;
+    for(int i = 0; i != number; ++i)
+        sum += i;
+    return sum;
+}
+
+void MacrosTest::constexpr14() {
+    /* Compared to MacrosCpp14Test::constexpr14(), here the macro should
+       compile to nothing, making it behave like a regular function */
+    CORRADE_CONSTEXPR14 int sum = sumInAStupidWay(17);
+    CORRADE_COMPARE(sum, 136);
 }
 
 void MacrosTest::fallthrough() {
