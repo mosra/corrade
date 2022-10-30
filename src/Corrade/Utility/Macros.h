@@ -390,11 +390,20 @@ regarding RAII.
 @brief C++14 constexpr
 @m_since{2020,06}
 
-Expands to @cpp constexpr @ce on C++14 and newer, empty on C++11. Useful for
-selectively marking functions that make use of C++14 relaxed constexpr rules.
+Expands to @cpp constexpr @ce if C++14 or newer standard is enabled and if the
+compiler implements C++14 relaxed constexpr rules (which includes GCC 5+, Clang
+3.5+ and MSVC 2017+), empty otherwise. Useful for selectively marking functions
+that make use of C++14 constexpr.
 @see @ref CORRADE_CXX_STANDARD
 */
-#if CORRADE_CXX_STANDARD >= 201402
+/* MSVC2015 reports itself as supporting C++14 in _MSVC_LANG (its variant of
+   __cplusplus, see https://stackoverflow.com/a/74193034) but C++14 constexpr
+   is only implemented since MSVC2017. The value of __cplusplus is set to
+   201402 since GCC 5 and Clang 3.5 (https://stackoverflow.com/a/30997455),
+   while C++14 constexpr is supported since GCC 5 and Clang 3.4. Since those
+   are both quite old, the check can thus be coarser and just assume that C++14
+   constexpr is supported only if __cplusplus is 201402. */
+#if CORRADE_CXX_STANDARD >= 201402 && !defined(CORRADE_MSVC2015_COMPATIBILITY)
 #define CORRADE_CONSTEXPR14 constexpr
 #else
 #define CORRADE_CONSTEXPR14
