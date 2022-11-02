@@ -341,7 +341,7 @@ bool Debug::isTty(std::ostream* const output) {
 
     /* We can autodetect via isatty() on Unix-like systems and Windows with
        ANSI colors enabled */
-    #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX)
+    #elif (defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_UTILITY_USE_ANSI_COLORS)) || defined(CORRADE_TARGET_UNIX)
     return
         /* Windows RT projects have C4996 treated as error by default. WHY.
            Also, clang-cl doesn't understand warning IDs yet, so using its own

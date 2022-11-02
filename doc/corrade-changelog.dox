@@ -383,6 +383,8 @@ namespace Corrade {
     IFUNC support implement runtime dispatch using function pointers instead of
     indirect functions and have this currently disabled by default.
 -   Various warning fixes (see [mosra/corrade#151](https://github.com/mosra/corrade/pull/151))
+-   Preventing a build error on Emscripten if `CORRADE_UTILITY_USE_ANSI_COLORS`
+    is passed to CMake (see [mosra/corrade#153](https://github.com/mosra/corrade/issues/153))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
