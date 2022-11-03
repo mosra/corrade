@@ -66,6 +66,7 @@ struct ResourceTest: TestSuite::Tester {
     void getEmptyFileRaw();
     void getEmptyFileString();
     void getNonexistentFile();
+    void filenameWithSpaces();
 
     void overrideGroup();
     void overrideGroupNonexistent();
@@ -93,6 +94,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::getEmptyFileRaw,
               &ResourceTest::getEmptyFileString,
               &ResourceTest::getNonexistentFile,
+              &ResourceTest::filenameWithSpaces,
 
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupNonexistent,
@@ -314,6 +316,17 @@ void ResourceTest::getNonexistentFile() {
     CORRADE_COMPARE(out.str(),
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n"
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
+}
+
+void ResourceTest::filenameWithSpaces() {
+    Resource rs{"spaces"};
+
+    /* Both of these should get compiled correctly as well as found by CMake
+       for dependency tracking */
+    CORRADE_COMPARE(rs.getString("name with spaces.txt"), "hello\n");
+    CORRADE_COMPARE_AS(rs.getString("predisposition.bin"),
+        Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::overrideGroup() {

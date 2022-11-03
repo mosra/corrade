@@ -454,6 +454,8 @@ namespace Corrade {
 -   Fixed the @ref CORRADE_CONSTEXPR14 macro be empty on MSVC 2015, which
     doesn't support C++14 relaxed constexpr rules yet. See also
     [mosra/corrade#152](https://github.com/mosra/corrade/pull/152).
+-   Fixed the @cmake corrade_add_resource() @ce CMake macro to properly trim
+    trailing whitespace before looking for files for dependency tracking.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

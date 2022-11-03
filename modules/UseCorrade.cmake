@@ -533,12 +533,19 @@ function(corrade_add_resource name configurationFile)
 
     # Parse dependencies from the file
     set(dependencies )
-    set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
+    set(filenameRegex "^[ \t]*filename[ \t]*=(.+)$")
     get_filename_component(configurationFilePath ${configurationFile} PATH)
 
-    file(STRINGS "${configurationFile}" files REGEX ${filenameRegex} ENCODING UTF-8)
-    foreach(file ${files})
-        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${file}")
+    file(STRINGS "${configurationFile}" filenames REGEX ${filenameRegex} ENCODING UTF-8)
+    foreach(filename ${filenames})
+        # Get the filename together with leading/trailing whitespace and quotes
+        # from the file line
+        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${filename}")
+        # Strip leading/trailing whitespace
+        string(STRIP "${filename}" filename)
+        # If it's quoted (for example because the filename itself has spaces),
+        # remove the quotes
+        string(REGEX REPLACE "^\"([^\"]+)\"$" "\\1" filename "${filename}")
         if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
             set(filename "${configurationFilePath}/${filename}")
         endif()

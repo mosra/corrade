@@ -318,11 +318,13 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeTestSuiteTe
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
 corrade_add_resource(ResourceTestEmptyFileData ResourceTestFiles/resources-empty-file.conf)
 corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resources-nothing.conf)
+corrade_add_resource(ResourceTestSpacesData ResourceTestFiles/resources-spaces.conf)
 corrade_add_test(UtilityResourceTest
     ResourceTest.cpp
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
+    ${ResourceTestSpacesData}
     LIBRARIES CorradeTestSuiteTestLib
     FILES
         ResourceTestFiles/consequence.bin
