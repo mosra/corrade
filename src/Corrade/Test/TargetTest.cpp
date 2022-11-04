@@ -49,7 +49,7 @@ struct TargetTest: TestSuite::Tester {
     void msvcPermissiveFlag();
     #endif
     void stl();
-    void simd();
+    void cpu();
 };
 
 TargetTest::TargetTest() {
@@ -62,7 +62,7 @@ TargetTest::TargetTest() {
               &TargetTest::msvcPermissiveFlag,
               #endif
               &TargetTest::stl,
-              &TargetTest::simd});
+              &TargetTest::cpu});
 }
 
 void TargetTest::system() {
@@ -275,7 +275,7 @@ void TargetTest::stl() {
     CORRADE_COMPARE(unique, 1);
 }
 
-void TargetTest::simd() {
+void TargetTest::cpu() {
     std::ostringstream out;
 
     #ifdef CORRADE_TARGET_X86
