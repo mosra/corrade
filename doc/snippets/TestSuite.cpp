@@ -322,14 +322,26 @@ CORRADE_VERIFY(delta < 0.1f);
 }
 
 {
-bool extremelyStable = false;
-float delta{};
 /* [CORRADE_FAIL] */
-CORRADE_FAIL_IF(delta > 0.05f && !extremelyStable,
-    "Low precision due to system instability, delta is" << delta);
+#ifdef CORRADE_TARGET_BIG_ENDIAN
+CORRADE_FAIL("The test assumes Big Endian is extinct.");
+#endif
 
-CORRADE_VERIFY(delta < 0.1f);
+union {
+    char fourcc[4];
+    int value;
+} data{{'D', 'I', 'V', 'X'}};
+
+CORRADE_COMPARE(data.value, 0x58564944);
 /* [CORRADE_FAIL] */
+}
+
+{
+int answer = 43;
+/* [CORRADE_FAIL_IF] */
+CORRADE_FAIL_IF(answer != 42, "Answer to the Ultimate Question of Life, the "
+    "Universe, and Everything is" << answer);
+/* [CORRADE_FAIL_IF] */
 }
 
 {
@@ -354,6 +366,20 @@ setTestCaseName(Utility::format("{}<{}>", CORRADE_FUNCTION, name));
 /* [Tester-setTestCaseTemplateName] */
 }
 }
+
+/* [CORRADE_FAIL-wrong] */
+void test() {
+    DOXYGEN_ELLIPSIS(int answer = 43;)
+
+    if(answer != 42) {
+        CORRADE_FAIL("Answer to the Ultimate Question of Life, the Universe, "
+            "and Everything is" << answer);
+    }
+
+    // Wrong, if the answer is 42, the test case is reported as not having any
+    // checks
+}
+/* [CORRADE_FAIL-wrong] */
 
 /* [CORRADE_BENCHMARK] */
 void benchmark() {

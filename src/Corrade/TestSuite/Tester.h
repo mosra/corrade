@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
+ * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
  */
 
 #include <cstdint>
@@ -1783,7 +1783,8 @@ This macro is meant to be called in a test case in a
 @relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
 in a helper function or lambda called from inside a test case with some
 caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP()
+@see @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_FAIL_IF(),
+    @ref CORRADE_SKIP()
 */
 #define CORRADE_INFO(...)                                                   \
     Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
@@ -1807,12 +1808,49 @@ This macro is meant to be called in a test case in a
 @relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
 in a helper function or lambda called from inside a test case with some
 caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP()
+@see @ref CORRADE_FAIL(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP()
 */
 #define CORRADE_WARN(...)                                                   \
     Corrade::TestSuite::Tester::instance().infoOrWarn(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
         _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
     })}, __LINE__, true)
+
+/** @hideinitializer
+@brief Explicitly fail a test case
+@param ...      Failure message to print
+@m_since_latest
+
+Useful for example to test a particular @cpp #define @ce, in which case there's
+no expression or value to pass to @ref CORRADE_VERIFY() / @ref CORRADE_COMPARE();
+or to check that given code path is never reached.
+
+@snippet TestSuite.cpp CORRADE_FAIL
+
+The message is prefixed with @cb{.ansi} [1;31mFAIL @ce including a file and
+line where the failure happened and execution of given test case is terminated.
+The message can be formatted in the same way as in @ref CORRADE_ASSERT(), including stream output operators. Note that, however, it isn't meant to
+be used as the single verification macro in a test case:
+
+@snippet TestSuite.cpp CORRADE_FAIL-wrong
+
+In such a case, @ref CORRADE_FAIL_IF() should be used to ensure it's always
+reached when running the test:
+
+@snippet TestSuite.cpp CORRADE_FAIL_IF
+
+This macro is meant to be called in a test case in a
+@relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
+in a helper function or lambda called from inside a test case with some
+caveats. See @ref CORRADE_VERIFY() for details.
+@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_SKIP()
+*/
+/* Not delegating to CORRADE_FAIL_IF() because I feel like the varargs are a
+   useful property here, making it consistent with the CORRADE_INFO() and
+   CORRADE_WARN() macros. */
+#define CORRADE_FAIL(...)                                                   \
+    Corrade::TestSuite::Tester::instance().failIf(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
+        _CORRADE_HELPER_PASTE(infoDebug, __LINE__) << __VA_ARGS__;          \
+    })}, true)
 
 /** @hideinitializer
 @brief Explicitly fail a test case if a condition is true
@@ -1827,13 +1865,14 @@ Useful when the implicit failure diagnostic from @ref CORRADE_VERIFY() or
 and execution of given test case is terminated. The message can be formatted in
 the same way as in @ref CORRADE_ASSERT(), including stream output operators:
 
-@snippet TestSuite.cpp CORRADE_FAIL
+@snippet TestSuite.cpp CORRADE_FAIL_IF
 
 This macro is meant to be called in a test case in a
 @relativeref{Corrade,TestSuite::Tester} subclass. It's possible to also call it
 in a helper function or lambda called from inside a test case with some
 caveats. See @ref CORRADE_VERIFY() for details.
-@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_SKIP()
+@see @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(),
+    @ref CORRADE_SKIP()
 */
 #define CORRADE_FAIL_IF(condition, message)                                 \
     Corrade::TestSuite::Tester::instance().failIf(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION, __LINE__), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(infoDebug, __LINE__)) { \
@@ -1859,7 +1898,8 @@ This macro is meant to be called in a test case in a
 also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 @see @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(),
-    @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL_IF()
+    @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(),
+    @ref CORRADE_FAIL_IF()
 */
 #define CORRADE_SKIP(...)                                                   \
     Corrade::TestSuite::Tester::instance().skip(Corrade::TestSuite::Tester::Printer{(Corrade::TestSuite::Tester::instance().registerTestCase(CORRADE_FUNCTION), [&](Corrade::Utility::Debug&& _CORRADE_HELPER_PASTE(skipDebug, __LINE__)) { \

@@ -1,6 +1,6 @@
 Starting TesterTest::Test with 3 test cases...
      ? [01] <unknown>()
-  FAIL [18] compareSaveDiagnostic() at here.cpp:409
+  FAIL [18] compareSaveDiagnostic() at here.cpp:413
         Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
  SAVED [18] compareSaveDiagnostic() -> /some/path/b.txt
 Aborted TesterTest::Test after first failure out of 1 checks so far. 1 checks saved diagnostic files. 1 test cases didn't contain any checks!
