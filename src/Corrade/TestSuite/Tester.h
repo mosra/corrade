@@ -1815,10 +1815,10 @@ caveats. See @ref CORRADE_VERIFY() for details.
     })}, __LINE__, true)
 
 /** @hideinitializer
-@brief Explicitly fail a test case if a condition is false
-@param condition    Condition that's expected to evaluate to @cpp true @ce
+@brief Explicitly fail a test case if a condition is true
+@param condition    Condition that's expected to evaluate to @cpp false @ce
 @param message      Failure message which will be printed if the condition is
-    @cpp false @ce
+    @cpp true @ce
 @m_since_latest
 
 Useful when the implicit failure diagnostic from @ref CORRADE_VERIFY() or
