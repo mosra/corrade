@@ -441,6 +441,10 @@ namespace Corrade {
     had to be worked around by throwing an exception instead. This workaround
     became obsolete and got removed in 2017, but this option was left there by
     accident. Now it's removed as well.
+-   @ref PluginManager::Manager no longer dies on startup on an internal
+    assertion if duplicate static plugins are encountered. This can happen when
+    a static plugin is linked to multiple dynamic libraries or modules which
+    then get used in a single executable.
 -   Calling @ref PluginManager::AbstractManager::setPreferredPlugins() with a
     plugin of given alias being instantiated led to an internal assertion when
     the plugin got later unloaded.

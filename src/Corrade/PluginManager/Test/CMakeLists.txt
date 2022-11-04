@@ -124,6 +124,29 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
         GlobalStateAcrossLibrariesTest.cpp
         LIBRARIES PluginManagerGlobalStateAcrossLibrariesLibrary)
     target_include_directories(PluginManagerGlobalStateAcrossLi___Test PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+
+    add_library(DuplicateStaticPluginLibrary1 SHARED
+        AbstractAnimal.cpp
+        DuplicateStaticPluginLibrary.cpp)
+    add_library(DuplicateStaticPluginLibrary2 SHARED
+        AbstractAnimal.cpp
+        DuplicateStaticPluginLibrary.cpp)
+    target_link_libraries(DuplicateStaticPluginLibrary1
+        PUBLIC CorradePluginManagerTestLib
+        PRIVATE Canary)
+    target_link_libraries(DuplicateStaticPluginLibrary2
+        PUBLIC CorradePluginManagerTestLib
+        PRIVATE Canary Dird)
+    target_compile_definitions(DuplicateStaticPluginLibrary1 PRIVATE BUILDING_LIBRARY1)
+    target_compile_definitions(DuplicateStaticPluginLibrary2 PRIVATE BUILDING_LIBRARY2)
+    target_include_directories(DuplicateStaticPluginLibrary1 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+    target_include_directories(DuplicateStaticPluginLibrary2 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+
+    corrade_add_test(PluginManagerDuplicateStaticPluginTest
+        AbstractAnimal.cpp
+        DuplicateStaticPluginTest.cpp
+        LIBRARIES DuplicateStaticPluginLibrary1 DuplicateStaticPluginLibrary2)
+    target_include_directories(PluginManagerDuplicateStaticPluginTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 endif()
 
 add_subdirectory(animals)

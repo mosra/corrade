@@ -265,15 +265,24 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
             configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         }
 
-        /* Insert the plugin into our list. The names should be globally
-           unique, so the insertion is expected to always succeed (if it
-           wouldn't, we would have a leak here). */
+        /* Insert a plugin placeholder into our list. In rare cursed cases it
+           may happen that the same static plugin is present multiple times due
+           to being linked to multiple dynamic libraries. That's likely an
+           undesired buildsystem issue, but shouldn't be fatal, so print a
+           warning and skip it */
         const auto inserted = _state->plugins.emplace(
             /* The plugin name is guaranteed to be a global literal even though
                it's just a const char*, wrap it without copying */
             Containers::String::nullTerminatedView(staticPlugin->plugin),
-            Containers::pointer(new Plugin{*staticPlugin, std::move(configuration)}));
-        CORRADE_INTERNAL_ASSERT(inserted.second);
+            nullptr);
+        if(!inserted.second) {
+            Utility::Warning{} << "PluginManager::Manager: duplicate static plugin" << staticPlugin->plugin << Utility::Debug::nospace << ", ignoring";
+            continue;
+        }
+
+        /* If it got successfully inserted, create the actual plugin state */
+        inserted.first->second.emplace(*staticPlugin, std::move(configuration));
+
         Plugin& p = *inserted.first->second;
 
         p.staticPlugin->initializer();

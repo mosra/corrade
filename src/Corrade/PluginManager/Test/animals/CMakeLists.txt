@@ -50,6 +50,10 @@ endif()
 
 corrade_add_static_plugin(Dird ${CMAKE_CURRENT_BINARY_DIR} Dird.conf Dird.cpp)
 target_link_libraries(Dird PRIVATE CorradePluginManagerTestLib)
+if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)
+    # The plugin gets linked to a shared test lib in a static build
+    set_target_properties(Dird PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
 
 set_target_properties(
     Canary Canary-dependencies
