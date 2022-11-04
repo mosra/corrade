@@ -95,7 +95,7 @@ void GrowableArraySanitizerFailTest::testVector() {
     #endif
     /* No mention of this at https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/,
        need to test to be sure it's not there. */
-    CORRADE_VERIFY(!"This shouldn't be reached");
+    CORRADE_FAIL("This shouldn't be reached");
     #endif
 }
 
@@ -120,7 +120,7 @@ void GrowableArraySanitizerFailTest::testString() {
     #endif
     /* No mention of this at https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/,
        need to test to be sure it's not there. */
-    CORRADE_VERIFY(!"This shouldn't be reached");
+    CORRADE_FAIL("This shouldn't be reached");
     #endif
 }
 

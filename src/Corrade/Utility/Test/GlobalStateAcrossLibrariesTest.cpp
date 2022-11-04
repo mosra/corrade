@@ -47,7 +47,7 @@ GlobalStateAcrossLibrariesTest::GlobalStateAcrossLibrariesTest() {
 
 void GlobalStateAcrossLibrariesTest::debug() {
     #if defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_BUILD_STATIC)
-    CORRADE_VERIFY(!"CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
+    CORRADE_FAIL("CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
     #endif
 
     std::ostringstream out;
@@ -68,7 +68,7 @@ void GlobalStateAcrossLibrariesTest::debug() {
 
 void GlobalStateAcrossLibrariesTest::resource() {
     #if defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_BUILD_STATIC)
-    CORRADE_VERIFY(!"CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
+    CORRADE_FAIL("CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
     #endif
 
     /* The resource is complied into the the library, but the executable should

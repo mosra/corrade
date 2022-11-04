@@ -70,21 +70,21 @@ void TargetTest::system() {
     #ifdef CORRADE_TARGET_APPLE
     Debug{&out} << "CORRADE_TARGET_APPLE";
     #ifndef CORRADE_TARGET_UNIX
-    CORRADE_VERIFY(!"CORRADE_TARGET_APPLE defined but CORRADE_TARGET_UNIX not");
+    CORRADE_FAIL("CORRADE_TARGET_APPLE defined but CORRADE_TARGET_UNIX not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_ANDROID
     Debug{&out} << "CORRADE_TARGET_ANDROID";
     #ifndef CORRADE_TARGET_UNIX
-    CORRADE_VERIFY(!"CORRADE_TARGET_ANDROID defined but CORRADE_TARGET_UNIX not");
+    CORRADE_FAIL("CORRADE_TARGET_ANDROID defined but CORRADE_TARGET_UNIX not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     Debug{&out} << "CORRADE_TARGET_EMSCRIPTEN";
     #ifdef CORRADE_TARGET_UNIX
-    CORRADE_VERIFY(!"CORRADE_TARGET_EMSCRIPTEN defined but CORRADE_TARGET_UNIX as well");
+    CORRADE_FAIL("CORRADE_TARGET_EMSCRIPTEN defined but CORRADE_TARGET_UNIX as well");
     #endif
     #endif
 
@@ -95,17 +95,17 @@ void TargetTest::system() {
     #ifdef CORRADE_TARGET_WINDOWS_RT
     Debug{&out} << "CORRADE_TARGET_WINDOWS_RT";
     #ifndef CORRADE_TARGET_WINDOWS
-    CORRADE_VERIFY(!"CORRADE_TARGET_WINDOWS_RT defined but CORRADE_TARGET_WINDOWS not");
+    CORRADE_FAIL("CORRADE_TARGET_WINDOWS_RT defined but CORRADE_TARGET_WINDOWS not");
     #endif
     #ifdef CORRADE_TARGET_UNIX
-    CORRADE_VERIFY(!"CORRADE_TARGET_WINDOWS_RT defined but CORRADE_TARGET_UNIX as well");
+    CORRADE_FAIL("CORRADE_TARGET_WINDOWS_RT defined but CORRADE_TARGET_UNIX as well");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_WINDOWS
     Debug{&out} << "CORRADE_TARGET_WINDOWS";
     #ifdef CORRADE_TARGET_UNIX
-    CORRADE_VERIFY(!"CORRADE_TARGET_WINDOWS defined but CORRADE_TARGET_UNIX as well");
+    CORRADE_FAIL("CORRADE_TARGET_WINDOWS defined but CORRADE_TARGET_UNIX as well");
     #endif
     #endif
 
@@ -202,31 +202,31 @@ void TargetTest::compiler() {
     CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
 
     #if defined(CMAKE_CORRADE_TARGET_GCC) != defined(CORRADE_TARGET_GCC)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_GCC");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_GCC");
     #endif
 
     #if defined(CMAKE_CORRADE_TARGET_CLANG) != defined(CORRADE_TARGET_CLANG)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_CLANG");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_CLANG");
     #endif
 
     #if defined(CMAKE_CORRADE_TARGET_APPLE_CLANG) != defined(CORRADE_TARGET_APPLE_CLANG)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_APPLE_CLANG");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_APPLE_CLANG");
     #endif
 
     #if defined(CMAKE_CORRADE_TARGET_CLANG_CL) != defined(CORRADE_TARGET_CLANG_CL)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_CLANG_CL");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_CLANG_CL");
     #endif
 
     #if defined(CMAKE_CORRADE_TARGET_MSVC) != defined(CORRADE_TARGET_MSVC)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_MSVC");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_MSVC");
     #endif
 
     #if defined(CMAKE_CORRADE_TARGET_MINGW) != defined(CORRADE_TARGET_MINGW)
-    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_MINGW");
+    CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_MINGW");
     #endif
 
     #if defined(CORRADE_TARGET_CLANG) && defined(CORRADE_TARGET_MSVC) == defined(CORRADE_TARGET_GCC)
-    CORRADE_VERIFY(!"Clang should have either a MSVC or a GCC frontend, but not both");
+    CORRADE_FAIL("Clang should have either a MSVC or a GCC frontend, but not both");
     #endif
 }
 
@@ -286,67 +286,67 @@ void TargetTest::simd() {
     #ifdef CORRADE_TARGET_SSE3
     Debug{&out} << "CORRADE_TARGET_SSE3";
     #ifndef CORRADE_TARGET_SSE2
-    CORRADE_VERIFY(!"CORRADE_TARGET_SSE3 defined but CORRADE_TARGET_SSE2 not");
+    CORRADE_FAIL("CORRADE_TARGET_SSE3 defined but CORRADE_TARGET_SSE2 not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_SSSE3
     Debug{&out} << "CORRADE_TARGET_SSSE3";
     #ifndef CORRADE_TARGET_SSE3
-    CORRADE_VERIFY(!"CORRADE_TARGET_SSSE3 defined but CORRADE_TARGET_SSE3 not");
+    CORRADE_FAIL("CORRADE_TARGET_SSSE3 defined but CORRADE_TARGET_SSE3 not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_SSE41
     Debug{&out} << "CORRADE_TARGET_SSSE41";
     #ifndef CORRADE_TARGET_SSSE3
-    CORRADE_VERIFY(!"CORRADE_TARGET_SSE41 defined but CORRADE_TARGET_SSSE3 not");
+    CORRADE_FAIL("CORRADE_TARGET_SSE41 defined but CORRADE_TARGET_SSSE3 not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_SSE42
     Debug{&out} << "CORRADE_TARGET_SSSE42";
     #ifndef CORRADE_TARGET_SSE41
-    CORRADE_VERIFY(!"CORRADE_TARGET_SSE42 defined but CORRADE_TARGET_SSE41 not");
+    CORRADE_FAIL("CORRADE_TARGET_SSE42 defined but CORRADE_TARGET_SSE41 not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_AVX
     Debug{&out} << "CORRADE_TARGET_AVX";
     #ifndef CORRADE_TARGET_SSE42
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX defined but CORRADE_TARGET_SSE42 not");
+    CORRADE_FAIL("CORRADE_TARGET_AVX defined but CORRADE_TARGET_SSE42 not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_AVX_F16C
     Debug{&out} << "CORRADE_TARGET_AVX_F16C";
     #ifndef CORRADE_TARGET_AVX
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX_F16C defined but CORRADE_TARGET_AVX not");
+    CORRADE_FAIL("CORRADE_TARGET_AVX_F16C defined but CORRADE_TARGET_AVX not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_AVX_FMA
     Debug{&out} << "CORRADE_TARGET_AVX_FMA";
     #ifndef CORRADE_TARGET_AVX_F16C
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX_FMA defined but CORRADE_TARGET_AVX_F16C not");
+    CORRADE_FAIL("CORRADE_TARGET_AVX_FMA defined but CORRADE_TARGET_AVX_F16C not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_AVX2
     Debug{&out} << "CORRADE_TARGET_AVX2";
     #ifndef CORRADE_TARGET_AVX_FMA
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX_FMA not");
+    CORRADE_FAIL("CORRADE_TARGET_AVX2 defined but CORRADE_TARGET_AVX_FMA not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_AVX512F
     Debug{&out} << "CORRADE_TARGET_AVX512F";
     #ifndef CORRADE_TARGET_AVX2
-    CORRADE_VERIFY(!"CORRADE_TARGET_AVX512F defined but CORRADE_TARGET_AVX2 not");
+    CORRADE_FAIL("CORRADE_TARGET_AVX512F defined but CORRADE_TARGET_AVX2 not");
     #endif
     #endif
     #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX_F16C) || defined(CORRADE_TARGET_AVX_FMA) || defined(CORRADE_TARGET_AVX2) || defined(CORRADE_TARGET_AVX512F)
-    CORRADE_VERIFY(!"CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
+    CORRADE_FAIL("CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
     #endif
 
     #ifdef CORRADE_TARGET_ARM
@@ -357,19 +357,19 @@ void TargetTest::simd() {
     #ifdef CORRADE_TARGET_NEON_FMA
     Debug{&out} << "CORRADE_TARGET_NEON_FMA";
     #ifndef CORRADE_TARGET_NEON
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FMA defined but CORRADE_TARGET_NEON not");
+    CORRADE_FAIL("CORRADE_TARGET_NEON_FMA defined but CORRADE_TARGET_NEON not");
     #endif
     #endif
 
     #ifdef CORRADE_TARGET_NEON_FP16
     Debug{&out} << "CORRADE_TARGET_NEON_FP16";
     #ifndef CORRADE_TARGET_NEON_FMA
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON_FP16 defined but CORRADE_TARGET_NEON_FMA not");
+    CORRADE_FAIL("CORRADE_TARGET_NEON_FP16 defined but CORRADE_TARGET_NEON_FMA not");
     #endif
     #endif
 
     #elif defined(CORRADE_TARGET_NEON) || defined(CORRADE_TARGET_NEON_FP16) || defined(CORRADE_TARGET_NEON_FMA)
-    CORRADE_VERIFY(!"CORRADE_TARGET_NEON* defined but CORRADE_TARGET_ARM not");
+    CORRADE_FAIL("CORRADE_TARGET_NEON* defined but CORRADE_TARGET_ARM not");
     #endif
 
     #ifdef CORRADE_TARGET_WASM
@@ -377,7 +377,7 @@ void TargetTest::simd() {
     Debug{&out} << "CORRADE_TARGET_SIMD128";
     #endif
     #elif defined(CORRADE_TARGET_SIMD128)
-    CORRADE_VERIFY(!"CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_WASM not");
+    CORRADE_FAIL("CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_WASM not");
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();

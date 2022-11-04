@@ -1727,7 +1727,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
 
             CORRADE_ITERATION(error);
             CORRADE_ITERATION(key);
-            CORRADE_VERIFY(!"this shouldn't get here");
+            CORRADE_FAIL("Shouldn't get here");
             return true;
         }, &count);
 
@@ -1765,7 +1765,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
 
             CORRADE_ITERATION(error);
             CORRADE_ITERATION(key);
-            CORRADE_VERIFY(!"this shouldn't get here");
+            CORRADE_FAIL("Shouldn't get here");
             return true;
         }, &count);
 

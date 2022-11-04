@@ -51,7 +51,7 @@ GlobalStateAcrossLibrariesTest::GlobalStateAcrossLibrariesTest() {
 
 void GlobalStateAcrossLibrariesTest::test() {
     #if defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_BUILD_STATIC)
-    CORRADE_VERIFY(!"CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
+    CORRADE_FAIL("CORRADE_BUILD_STATIC_UNIQUE_GLOBALS enabled but CORRADE_BUILD_STATIC not");
     #endif
 
     /* Canary is linked to the library, the executable should see it too unless
