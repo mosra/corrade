@@ -394,7 +394,7 @@ void ManagerTest::pluginSearchPathsNotProvided() {
     {
         PluginManager::Manager<SomePlugin> manager;
     }
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager: either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
 }
 
 void ManagerTest::pluginSearchPathsNotFound() {
@@ -410,7 +410,7 @@ void ManagerTest::pluginSearchPathsNotFound() {
     {
         PluginManager::Manager<SomePlugin> manager;
     }
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::Manager(): none of the plugin search paths in {nonexistent, /absolute/but/nonexistent} exists and pluginDirectory was not set, skipping plugin discovery\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager: none of the plugin search paths in {nonexistent, /absolute/but/nonexistent} exists and pluginDirectory was not set, skipping plugin discovery\n");
 }
 #endif
 

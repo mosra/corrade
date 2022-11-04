@@ -310,7 +310,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
     if(pluginDirectory) setPluginDirectory(pluginDirectory);
     else {
         CORRADE_ASSERT(!pluginSearchPaths.isEmpty(),
-            "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
+            "PluginManager::Manager: either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
 
         const Containers::Optional<Containers::String> executableLocation = Utility::Path::executableLocation();
         CORRADE_INTERNAL_ASSERT(executableLocation);
@@ -330,7 +330,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
            we have static plugins (the aliases are non-empty) -- in that case
            assume the user might want to only use static plugins. */
         if(!_state->pluginDirectory && _state->aliases.empty())
-            Utility::Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
+            Utility::Warning{} << "PluginManager::Manager: none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
     }
     #endif
 }
