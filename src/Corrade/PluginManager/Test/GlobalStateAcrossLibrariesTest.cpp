@@ -30,9 +30,14 @@
 #include "Corrade/Utility/DebugStl.h"
 
 #include "AbstractAnimal.h"
-#include "GlobalStateAcrossLibrariesLibrary.h"
 
-namespace Corrade { namespace PluginManager { namespace Test { namespace {
+namespace Corrade { namespace PluginManager { namespace Test {
+
+/* Defined in GlobalStateAcrossLibrariesLibrary.cpp, which is compiled to a
+   separate dynamic library  */
+CORRADE_VISIBILITY_IMPORT Containers::Array<Containers::String> staticPluginsLoadedInALibrary();
+
+namespace {
 
 struct GlobalStateAcrossLibrariesTest: TestSuite::Tester {
     explicit GlobalStateAcrossLibrariesTest();

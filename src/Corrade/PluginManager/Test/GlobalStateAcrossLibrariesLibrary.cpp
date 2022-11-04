@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "GlobalStateAcrossLibrariesLibrary.h"
-
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/PluginManager/Manager.h"
 
@@ -37,6 +35,7 @@ static void importPlugin() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
+CORRADE_VISIBILITY_EXPORT Containers::Array<Containers::String> staticPluginsLoadedInALibrary();
 Containers::Array<Containers::String> staticPluginsLoadedInALibrary() {
     importPlugin();
 
