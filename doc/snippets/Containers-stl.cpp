@@ -73,7 +73,7 @@ auto d = Containers::array<int>({5});   // d.size() == 1, d[0] == 5
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 {
 /* [Iterable-usage] */
-void foo(Containers::Iterable<Utility::FileWatcher>);
+void foo(const Containers::Iterable<Utility::FileWatcher>&);
 
 Utility::FileWatcher a{DOXYGEN_ELLIPSIS("a")}, b{DOXYGEN_ELLIPSIS("b")};
 Utility::FileWatcher cArray[3]{DOXYGEN_ELLIPSIS(Utility::FileWatcher{"c0"}, Utility::FileWatcher{"c1"}, Utility::FileWatcher{"c2"})};

@@ -145,7 +145,7 @@ template<class T> class Iterable {
            that work, this class would have to replicate all [Strided]ArrayView
            constructors, which isn't feasible:
 
-            void foo(Iterable<int>);
+            void foo(const Iterable<int>&);
             int data[]{ 5, 17, 13 };
             foo(data); // won't match the Iterable(ArrayView<T>) constructor
             Iterable<int> i = data; // won't work either
@@ -402,7 +402,7 @@ template<class T> class IterableIterator {
 /** @relates IterableIterator
 @brief Add strided iterator to an offset
 */
-template<class T> inline IterableIterator<T> operator+(std::ptrdiff_t i, IterableIterator<T> it) {
+template<class T> inline IterableIterator<T> operator+(std::ptrdiff_t i, const IterableIterator<T>& it) {
     return it + i;
 }
 

@@ -404,7 +404,7 @@ void IterableTest::initializerList() {
     /* Capturing this way to be able to verify the contents without having to
        explicitly specify the type and without the initializer list going out
        of scope too early */
-    [](Iterable<const int> ai) {
+    [](const Iterable<const int>& ai) {
         CORRADE_VERIFY(ai.data());
         CORRADE_COMPARE(ai.size(), 3);
         /* It's always a reference, having an initializer_list<T> overload
@@ -436,7 +436,7 @@ void IterableTest::initializerListReference() {
     /* Capturing this way to be able to verify the contents without having to
        explicitly specify the type and without the initializer list going out
        of scope too early */
-    [](Iterable<NonCopyable> ai) {
+    [](const Iterable<NonCopyable>& ai) {
         CORRADE_VERIFY(ai.data());
         CORRADE_COMPARE(ai.size(), 3);
         CORRADE_COMPARE(ai.stride(), sizeof(AnyReference<const int>));
@@ -670,8 +670,8 @@ void IterableTest::overloadsWithForwardDeclaredType() {
     struct Type {
         const char* foo(int) const { return "int"; }
         const char* foo(const ForwardDeclared&) const { return "ForwardDeclared"; }
-        const char* foo(Iterable<const int>) const { return "Iterable<int>"; }
-        const char* foo(Iterable<const ForwardDeclared>) const { return "Iterable<ForwardDeclared>"; }
+        const char* foo(const Iterable<const int>&) const { return "Iterable<int>"; }
+        const char* foo(const Iterable<const ForwardDeclared>&) const { return "Iterable<ForwardDeclared>"; }
     } type;
 
     int b;

@@ -174,9 +174,9 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 }
 
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
-void foo(Containers::Iterable<Utility::FileWatcher>);
+void foo(const Containers::Iterable<Utility::FileWatcher>&);
 /* [Iterable-usage-implementation] */
-void foo(Containers::Iterable<Utility::FileWatcher> watchers) {
+void foo(const Containers::Iterable<Utility::FileWatcher>& watchers) {
     for(Utility::FileWatcher& watcher: watchers) {
         DOXYGEN_ELLIPSIS(static_cast<void>(watcher);)
     }
