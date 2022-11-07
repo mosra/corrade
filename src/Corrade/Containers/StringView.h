@@ -43,6 +43,11 @@
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+/* For join(), which used to take an ArrayView<StringView> */
+#include "Corrade/Containers/StringIterable.h"
+#endif
+
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
@@ -685,21 +690,15 @@ BasicStringView {
          * @see @ref operator+(StringView, StringView),
          *      @ref operator*(StringView, std::size_t)
          */
-        String join(ArrayView<const StringView> strings) const;
-
-        /** @overload */
-        String join(std::initializer_list<StringView> strings) const;
+        String join(const StringIterable& strings) const;
 
         /**
          * @brief Join strings with this view as the delimiter, skipping empty parts
          *
-         * Like @ref join(), but empty views in @p strings are skipped instead
+         * Like @ref join(), but empty items in @p strings are skipped instead
          * of causing multiple repeated delimiters in the output.
          */
-        String joinWithoutEmptyParts(ArrayView<const StringView> strings) const;
-
-        /** @overload */
-        String joinWithoutEmptyParts(std::initializer_list<StringView> strings) const;
+        String joinWithoutEmptyParts(const StringIterable& strings) const;
 
         /**
          * @brief Whether the string begins with given prefix

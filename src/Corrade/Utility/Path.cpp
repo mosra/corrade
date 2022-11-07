@@ -96,6 +96,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Debug.h"
 
 #if defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN)

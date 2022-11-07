@@ -880,20 +880,14 @@ class CORRADE_UTILITY_EXPORT String {
          * @todo a mutable && overload that reuses the growable string storage
          *      instead of allocating new, when growable strings are a thing
          */
-        String join(ArrayView<const StringView> strings) const;
-
-        /** @overload */
-        String join(std::initializer_list<StringView> strings) const;
+        String join(const StringIterable& strings) const;
 
         /**
          * @brief Join strings with this view as the delimiter, skipping empty parts
          *
          * Equivalent to @ref BasicStringView::joinWithoutEmptyParts().
          */
-        String joinWithoutEmptyParts(ArrayView<const StringView> strings) const;
-
-        /** @overload */
-        String joinWithoutEmptyParts(std::initializer_list<StringView> strings) const;
+        String joinWithoutEmptyParts(const StringIterable& strings) const;
 
         /**
          * @brief Whether the string begins with given prefix

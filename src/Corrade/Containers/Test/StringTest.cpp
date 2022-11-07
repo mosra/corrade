@@ -30,6 +30,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"

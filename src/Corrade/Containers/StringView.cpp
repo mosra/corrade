@@ -36,6 +36,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
@@ -833,7 +834,7 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
     };
 }
 
-template<class T> String BasicStringView<T>::join(const ArrayView<const StringView> strings) const {
+template<class T> String BasicStringView<T>::join(const StringIterable& strings) const {
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
     std::size_t totalSize = strings.isEmpty() ? 0 : (strings.size() - 1)*delimiterSize;
@@ -864,11 +865,7 @@ template<class T> String BasicStringView<T>::join(const ArrayView<const StringVi
     return result;
 }
 
-template<class T> String BasicStringView<T>::join(const std::initializer_list<StringView> strings) const {
-    return join(arrayView(strings));
-}
-
-template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const ArrayView<const StringView> strings) const {
+template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const StringIterable& strings) const {
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
     std::size_t totalSize = 0;
@@ -903,10 +900,6 @@ template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const ArrayVi
     CORRADE_INTERNAL_ASSERT(out == end);
 
     return result;
-}
-
-template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const std::initializer_list<StringView> strings) const {
-    return joinWithoutEmptyParts(arrayView(strings));
 }
 
 template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
