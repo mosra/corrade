@@ -312,70 +312,70 @@ template<class T> class IterableIterator {
         typedef T Type;     /**< @brief Element type */
 
         /** @brief Equality comparison */
-        bool operator==(const IterableIterator& other) const {
+        bool operator==(const IterableIterator<T>& other) const {
             return _data == other._data && _stride == other._stride && _i == other._i;
         }
 
         /** @brief Non-equality comparison */
-        bool operator!=(const IterableIterator& other) const {
+        bool operator!=(const IterableIterator<T>& other) const {
             return _data != other._data || _stride != other._stride || _i != other._i;
         }
 
         /** @brief Less than comparison */
-        bool operator<(const IterableIterator& other) const {
+        bool operator<(const IterableIterator<T>& other) const {
             return _data == other._data && _stride == other._stride && _i < other._i;
         }
 
         /** @brief Less than or equal comparison */
-        bool operator<=(const IterableIterator& other) const {
+        bool operator<=(const IterableIterator<T>& other) const {
             return _data == other._data && _stride == other._stride && _i <= other._i;
         }
 
         /** @brief Greater than comparison */
-        bool operator>(const IterableIterator& other) const {
+        bool operator>(const IterableIterator<T>& other) const {
             return _data == other._data && _stride == other._stride && _i > other._i;
         }
 
         /** @brief Greater than or equal comparison */
-        bool operator>=(const IterableIterator& other) const {
+        bool operator>=(const IterableIterator<T>& other) const {
             return _data == other._data && _stride == other._stride && _i >= other._i;
         }
 
         /** @brief Add an offset */
-        IterableIterator operator+(std::ptrdiff_t i) const {
+        IterableIterator<T> operator+(std::ptrdiff_t i) const {
             return IterableIterator<T>{_data, _stride, _accessor, _i + i};
         }
 
         /** @brief Add an offset and assign */
-        IterableIterator& operator+=(std::ptrdiff_t i) {
+        IterableIterator<T>& operator+=(std::ptrdiff_t i) {
             _i += i;
             return *this;
         }
 
         /** @brief Subtract an offset */
-        IterableIterator operator-(std::ptrdiff_t i) const {
+        IterableIterator<T> operator-(std::ptrdiff_t i) const {
             return IterableIterator<T>{_data, _stride, _accessor, _i - i};
         }
 
         /** @brief Subtract an offset and assign */
-        IterableIterator& operator-=(std::ptrdiff_t i) {
+        IterableIterator<T>& operator-=(std::ptrdiff_t i) {
             _i -= i;
             return *this;
         }
 
         /** @brief Iterator difference */
-        std::ptrdiff_t operator-(const IterableIterator& it) const {
+        std::ptrdiff_t operator-(const IterableIterator<T>& it) const {
             return _i - it._i;
         }
 
         /** @brief Go back to previous position */
-        IterableIterator& operator--() {
+        IterableIterator<T>& operator--() {
             --_i;
             return *this;
         }
 
         /** @brief Advance to next position */
-        IterableIterator& operator++() {
+        IterableIterator<T>& operator++() {
             ++_i;
             return *this;
         }
