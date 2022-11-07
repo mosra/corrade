@@ -77,7 +77,8 @@ namespace Corrade {
     owning and non-owning containers of bits
 -   New @ref Containers::Iterable helper to provide an indirection for
     iterating over both containers of values and containers of references in
-    a single code path
+    a single code path, and a @ref Containers::StringIterable doing the same
+    for strings, string views and plain @cpp char* @ce.
 -   New @ref Containers::Pair and @ref Containers::Triple classes that fix
     various issues and pitfalls of @ref std::pair and provide a lightweight
     alternative to a three-element @ref std::tuple

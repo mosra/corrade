@@ -98,6 +98,8 @@ particular @ref isEmpty(), @ref size(), @ref operator[](), @ref front(),
 @ref back() as well as range-for access:
 
 @snippet Containers.cpp Iterable-usage-implementation
+
+@see @ref StringIterable
 */
 template<class T> class Iterable {
     /** @todo Iterable<T&> and <T&&> specializations taking only Reference /

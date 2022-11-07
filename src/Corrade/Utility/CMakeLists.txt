@@ -55,6 +55,7 @@ if(CORRADE_WITH_UTILITY)
         ../Containers/ArrayTuple.cpp
         ../Containers/BitArray.cpp
         ../Containers/String.cpp
+        ../Containers/StringIterable.cpp
         ../Containers/StringView.cpp)
 
     # Files that directly or indirectly use CPU dispatch, such as calling
@@ -269,6 +270,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 
         ../Cpu.cpp
         ../Containers/String.cpp
+        ../Containers/StringIterable.cpp
         ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)
         list(APPEND CorradeUtilityRc_SRCS

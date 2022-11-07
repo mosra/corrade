@@ -48,6 +48,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Triple.h"
 #include "Corrade/Utility/Debug.h"
@@ -227,6 +228,25 @@ class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
 };
 /* [LinkedList-private-inheritance] */
 }
+
+namespace SI {
+using namespace Containers::Literals;
+/* [StringIterable-usage] */
+int main(int argc, char** argv);
+int main(int argc, char** argv) {
+    Utility::Debug{} << " "_s.join(Containers::arrayView(argv, argc)); DOXYGEN_IGNORE(return 0;)
+}
+/* [StringIterable-usage] */
+}
+
+void foo(const Containers::StringIterable&);
+/* [StringIterable-usage-implementation] */
+void foo(const Containers::StringIterable& strings) {
+    for(Containers::StringView string: strings) {
+        DOXYGEN_ELLIPSIS(static_cast<void>(string);)
+    }
+}
+/* [StringIterable-usage-implementation] */
 
 int main() {
 
@@ -1159,6 +1179,16 @@ Containers::StridedArrayView3D<std::uint8_t> rgb =
     Containers::arrayCast<3, std::uint8_t>(view);
 /* [arrayCast-StridedArrayView-inflate] */
 static_cast<void>(rgb);
+}
+
+{
+using namespace Containers::Literals;
+
+/* [StringIterable-usage-boom] */
+Containers::StringIterable iterable = {"hello", "world"};
+
+Utility::Debug{} << " "_s.join(iterable); // Boom!
+/* [StringIterable-usage-boom] */
 }
 
 {

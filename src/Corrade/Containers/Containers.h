@@ -89,6 +89,9 @@ template<class> class BasicStringView;
 typedef BasicStringView<const char> StringView;
 typedef BasicStringView<char> MutableStringView;
 
+class StringIterable;
+class StringIterableIterator;
+
 template<class, class, class> class Triple;
 #endif
 

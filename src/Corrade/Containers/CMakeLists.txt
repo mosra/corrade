@@ -62,6 +62,7 @@ set(CorradeContainers_HEADERS
     StridedArrayView.h
     StridedArrayViewStl.h
     String.h
+    StringIterable.h
     StringStl.h
     StringStlHash.h
     StringStlView.h
