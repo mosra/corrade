@@ -625,7 +625,7 @@ void IterableTest::iterator() {
 
 void IterableTest::rangeBasedFor() {
     int data[]{7, 5, 0, -26, 33};
-    Iterable<int> ai = StridedArrayView1D<int>{data}.slice(1, 4).flipped<0>();
+    Iterable<int> ai = Containers::stridedArrayView(data).slice(1, 4).flipped<0>();
 
     int i = 0;
     for(int& x: ai)
@@ -645,7 +645,7 @@ void IterableTest::rangeBasedForReference() {
     int data3 = -26;
     int data4 = 33;
     Reference<int> data[]{data0, data1, data2, data3, data4};
-    Iterable<int> ai = StridedArrayView1D<Reference<int>>{data}.slice(1, 4).flipped<0>();
+    Iterable<int> ai = Containers::stridedArrayView(data).slice(1, 4).flipped<0>();
 
     int i = 0;
     for(int& x: ai)
