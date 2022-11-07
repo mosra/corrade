@@ -39,6 +39,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
@@ -477,7 +478,7 @@ void AbstractManager::reloadPluginDirectory() {
 }
 #endif
 
-void AbstractManager::setPreferredPlugins(const Containers::StringView alias, const Containers::ArrayView<const Containers::StringView> plugins) {
+void AbstractManager::setPreferredPlugins(const Containers::StringView alias, const Containers::StringIterable& plugins) {
     /* Of course std::map::find() would allocate a new String in order to
        find it, prevent that from happening by wrapping a view */
     /** @todo clean this up once we kill std::map */
@@ -504,10 +505,6 @@ void AbstractManager::setPreferredPlugins(const Containers::StringView alias, co
         _state->aliases.insert({Containers::String::nullTerminatedGlobalView(alias), *foundPlugin->second});
         break;
     }
-}
-
-void AbstractManager::setPreferredPlugins(const Containers::StringView alias, const std::initializer_list<Containers::StringView> plugins) {
-    return setPreferredPlugins(alias, Containers::arrayView(plugins));
 }
 
 Containers::Array<Containers::StringView> AbstractManager::pluginList() const {

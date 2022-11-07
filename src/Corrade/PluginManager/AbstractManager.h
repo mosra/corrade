@@ -39,6 +39,8 @@
 #ifdef CORRADE_BUILD_DEPRECATED
 /* A lot of APIs used to take or return std::string before */
 #include "Corrade/Containers/StringStl.h"
+/* For setPreferredPlugins(), which used to take an ArrayView<StringView> */
+#include "Corrade/Containers/StringIterable.h"
 #endif
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -300,9 +302,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * If @p alias is @ref Containers::StringViewFlag::Global, no internal
          * copy of the string is made.
          */
-        void setPreferredPlugins(Containers::StringView alias, Containers::ArrayView<const Containers::StringView> plugins);
-        /** @overload */
-        void setPreferredPlugins(Containers::StringView alias, std::initializer_list<Containers::StringView> plugins);
+        void setPreferredPlugins(Containers::StringView alias, const Containers::StringIterable& plugins);
 
         /**
          * @brief List of all available plugin names
