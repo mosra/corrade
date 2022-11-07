@@ -7,16 +7,12 @@ arch=('i686' 'x86_64')
 url="https://magnum.graphics/corrade/"
 license=('MIT')
 makedepends=('cmake' 'ninja' 'gcc48')
-options=(!strip)
+options=(!strip !buildflags)
 provides=('corrade-git')
 
 _rootdir=$startdir/../../
 
 build() {
-    # Disable flags unknown to GCC 4.8
-    newcxxflags=$(echo $CXXFLAGS | sed s/-fstack-protector-strong.//g | sed s/.-fno-plt//g)
-    export CXXFLAGS="$newcxxflags"
-
     if [ ! -d "$_rootdir/build-gcc48" ] ; then
         mkdir "$_rootdir/build-gcc48"
         cd "$_rootdir/build-gcc48"
