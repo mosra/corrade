@@ -264,27 +264,27 @@ template<class T> class Iterable {
            IterableTest::overloadsWithForwardDeclaredType() test for a
            repro case. */
 
-        /*implicit*/ Iterable(ArrayView<T> view, Implementation::IterableOverloadPriority<1>) noexcept;
-        /*implicit*/ Iterable(ArrayView<const Reference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
-        /*implicit*/ Iterable(ArrayView<const MoveReference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
-        /*implicit*/ Iterable(ArrayView<const AnyReference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
+        explicit Iterable(ArrayView<T> view, Implementation::IterableOverloadPriority<1>) noexcept;
+        explicit Iterable(ArrayView<const Reference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
+        explicit Iterable(ArrayView<const MoveReference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
+        explicit Iterable(ArrayView<const AnyReference<T>> view, Implementation::IterableOverloadPriority<1>) noexcept;
 
         /* Variants of the above that accept "WhateverReference<mutable T>"
            and pass through to WhateverReference<T> */
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(ArrayView<const Reference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const Reference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(ArrayView<const MoveReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const MoveReference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(ArrayView<const AnyReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const AnyReference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(ArrayView<const Reference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const Reference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(ArrayView<const MoveReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const MoveReference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(ArrayView<const AnyReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<1>) noexcept: Iterable{reinterpret_cast<const ArrayView<const AnyReference<T>>&>(view), Implementation::IterableOverloadPriority<1>{}} {}
 
-        /*implicit*/ Iterable(StridedArrayView1D<T> view, Implementation::IterableOverloadPriority<0>) noexcept;
-        /*implicit*/ Iterable(StridedArrayView1D<const Reference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
-        /*implicit*/ Iterable(StridedArrayView1D<const MoveReference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
-        /*implicit*/ Iterable(StridedArrayView1D<const AnyReference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
+        explicit Iterable(StridedArrayView1D<T> view, Implementation::IterableOverloadPriority<0>) noexcept;
+        explicit Iterable(StridedArrayView1D<const Reference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
+        explicit Iterable(StridedArrayView1D<const MoveReference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
+        explicit Iterable(StridedArrayView1D<const AnyReference<T>> view, Implementation::IterableOverloadPriority<0>) noexcept;
 
         /* Variants of the above that accept "WhateverReference<mutable T>"
            and pass through to WhateverReference<T> */
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(StridedArrayView1D<const Reference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const Reference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(StridedArrayView1D<const MoveReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const MoveReference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
-        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(StridedArrayView1D<const AnyReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const AnyReference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(StridedArrayView1D<const Reference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const Reference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(StridedArrayView1D<const MoveReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const MoveReference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
+        template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> explicit Iterable(StridedArrayView1D<const AnyReference<typename std::remove_const<T>::type>> view, Implementation::IterableOverloadPriority<0>) noexcept: Iterable{reinterpret_cast<const StridedArrayView1D<const AnyReference<T>>&>(view), Implementation::IterableOverloadPriority<0>{}} {}
 
         const void* _data;
         std::size_t _size;
