@@ -94,7 +94,7 @@ instances to an API:
 @par Dangling references
     Because the type is, like an @ref ArrayView, just a non-owning view on the
     input data, to avoid dangling references it's recommended to *never*
-    instantiate the type directly and pass the input data directly instead. The
+    explicitly instantiate the type. Pass the input data directly instead. The
     snippet below would compile, however on the last line the API will be
     accessing an already-destroyed @link std::initializer_list @endlink:
 @par
@@ -143,7 +143,7 @@ template<class T> class Iterable {
            `T[] -> ArrayView<T> -> Iterable<T>` is one custom conversion
            sequence more than allowed in a copy initialization, and to make
            that work, this class would have to replicate all [Strided]ArrayView
-           constructors, which isn't feasible:
+           constructors, which isn't feasible.
 
             void foo(const Iterable<int>&);
             int data[]{ 5, 17, 13 };
