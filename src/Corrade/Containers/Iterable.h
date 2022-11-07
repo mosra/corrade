@@ -38,20 +38,11 @@
    mentioning that one needs to include AnyReference. Ah C++ :/ */
 #include "Corrade/Containers/AnyReference.h"
 
+#include "Corrade/Containers/iterableHelpers.h"
 #include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers {
-
-namespace Implementation {
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    /* Used internally to make ArrayView overloads picked over
-       StridedArrayView. I hoped I wouldn't need this messy hack anywhere else
-       than in the Cpu library but here we go. */
-    template<int priority> struct IterableOverloadPriority: IterableOverloadPriority<priority - 1> {};
-    template<> struct IterableOverloadPriority<0> {};
-    #endif
-}
 
 /**
 @brief Wrapper for any sequential container of values or references
