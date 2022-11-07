@@ -115,7 +115,8 @@ CORRADE_DEPRECATED("use Path::join() instead") CORRADE_UTILITY_EXPORT std::strin
 
 /**
 @brief Join paths
-@m_deprecated_since_latest Use @ref Path::join(std::initializer_list<Containers::StringView>) instead.
+@m_deprecated_since_latest Use @ref Path::join(const Containers::StringIterable&)
+    instead.
 */
 CORRADE_DEPRECATED("use Path::join() instead") CORRADE_UTILITY_EXPORT std::string join(std::initializer_list<std::string> paths);
 

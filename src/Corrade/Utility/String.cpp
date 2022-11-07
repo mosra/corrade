@@ -32,6 +32,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h"
 
 namespace Corrade { namespace Utility { namespace String {

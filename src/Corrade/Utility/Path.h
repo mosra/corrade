@@ -37,6 +37,11 @@
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/visibility.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+/* For join(), which used to take an ArrayView<StringView> */
+#include "Corrade/Containers/StringIterable.h"
+#endif
+
 namespace Corrade { namespace Utility {
 
 /**
@@ -179,8 +184,7 @@ just a single path, returns it verbatim.
 The implementation expects forward slashes as directory separators. Use
 @ref fromNativeSeparators() to convert from a platform-specific format.
 */
-CORRADE_UTILITY_EXPORT Containers::String join(Containers::ArrayView<const Containers::StringView> paths);
-CORRADE_UTILITY_EXPORT Containers::String join(std::initializer_list<Containers::StringView> paths); /**< @overload */
+CORRADE_UTILITY_EXPORT Containers::String join(const Containers::StringIterable& paths);
 
 /**
 @brief Check if given file or directory exists

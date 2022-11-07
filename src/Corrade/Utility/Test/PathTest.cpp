@@ -32,6 +32,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"

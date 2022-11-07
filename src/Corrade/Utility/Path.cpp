@@ -211,7 +211,7 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
     return "/"_s.join({path, filename});
 }
 
-Containers::String join(const Containers::ArrayView<const Containers::StringView> paths) {
+Containers::String join(const Containers::StringIterable& paths) {
     if(paths.isEmpty()) return {};
 
     /** @todo once growable strings are a thing, do this in a loop instead of
@@ -226,10 +226,6 @@ Containers::String join(const Containers::ArrayView<const Containers::StringView
         path = join(path, paths[i]);
 
     return path;
-}
-
-Containers::String join(const std::initializer_list<Containers::StringView> paths) {
-    return join(Containers::arrayView(paths));
 }
 
 bool exists(const Containers::StringView filename) {
