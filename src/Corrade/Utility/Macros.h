@@ -417,7 +417,7 @@ Stronger than the standard @cpp inline @ce keyword where supported, but even
 then the compiler might decide to not inline the function (for example if it's
 recursive). Expands to @cpp __attribute__((always_inline)) inline @ce on GCC
 and Clang (both keywords need to be specified,
-[docs](https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Attributes.html)),
+[docs](https://gcc.gnu.org/onlinedocs/gcc/extensions-to-the-c-language-family/declaring-attributes-of-functions/common-function-attributes.html#fn-attr-always_inline)),
 to @cpp __forceinline @ce on MSVC ([docs](https://docs.microsoft.com/en-us/cpp/cpp/inline-functions-cpp))
 and to just @cpp inline @ce elsewhere. On GCC and Clang this makes the function
 inline also in Debug mode (`-g`), while on MSVC compiling in Debug (`/Ob0`)
@@ -441,7 +441,7 @@ always suppresses all inlining. Example usage:
 
 Prevents the compiler from inlining a function during an optimization pass.
 Expands to @cpp __attribute__((noinline)) @ce on GCC and Clang
-([docs](https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Attributes.html)),
+([docs](https://gcc.gnu.org/onlinedocs/gcc/extensions-to-the-c-language-family/declaring-attributes-of-functions/common-function-attributes.html#fn-attr-noinline)),
 to @cpp __declspec(noinline) @ce on MSVC
 ([docs](https://docs.microsoft.com/en-us/cpp/cpp/noinline)) and is empty
 elsewhere. Example usage:
