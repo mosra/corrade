@@ -176,10 +176,10 @@ main.cpp:13
 and finally, 42
 @endcode
 
-At the moment, this feature is available on GCC at least since version 4.8 and
-Clang 9+, elsewhere it behaves like the unexclamated version. You can check for
-its availability using the @ref CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
-predefined macro.
+At the moment, this feature is available on GCC at least since version 4.8,
+Clang 9+ and MSVC 2019 16.6 and newer. Elsewhere it behaves like the
+unexclamated version. You can check for its availability using the
+@ref CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION predefined macro.
 
 @section Utility-Debug-windows ANSI color support and UTF-8 output on Windows
 
