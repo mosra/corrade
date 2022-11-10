@@ -573,8 +573,10 @@ void CpuTest::featuresCompare() {
     Cpu::Features features = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
     CORRADE_VERIFY(features == features);
     CORRADE_VERIFY(!(features != features));
+    #if CORRADE_CXX_STANDARD < 202002
     CORRADE_VERIFY(Cpu::Sse3 == Cpu::Sse3);
     CORRADE_VERIFY(Cpu::Sse3 != Cpu::Sse41);
+    #endif
 
     CORRADE_VERIFY(Cpu::Scalar <= Cpu::Sse41);
     CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Scalar);
