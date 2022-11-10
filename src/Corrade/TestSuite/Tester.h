@@ -1571,10 +1571,11 @@ the location information as a direct link to an IDE or text editor --- clicking
 on @cb{.shell-session} …/PathTest.cpp:55 @ce will open the editor at the line
 containing the @cpp "two extensions" @ce test case instance.
 
-At the moment, this feature is available on GCC at least since version 4.8,
-Clang 9+ and MSVC 2019 16.6 and newer. Elsewhere it behaves like if just a
-regular @ref Test::setTestCaseDescription(Containers::StringView) was used. You
-can check for its availability using the
+At the moment, this feature is available on GCC at least since version 4.8
+(although it may not be giving correct results until version 12), Clang 9+ and
+MSVC 2019 16.6 and newer. Elsewhere it behaves like if just a regular
+@ref Tester::setTestCaseDescription(Containers::StringView) was used. You can
+check for its availability using the
 @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED predefined macro.
 
 @see @ref Tester, @ref testsuite

@@ -138,6 +138,9 @@ void TestCaseDescriptionSourceLocationTest::test() {
 
     CORRADE_VERIFY(result == 1);
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 12
+    CORRADE_EXPECT_FAIL("GCC 11 and older reports all lines the same, pointing to the closing bracket, which is less useful.");
+    #endif
     CORRADE_COMPARE_AS(out.str(),
         Utility::Path::join(TEST_DIR, "TestCaseDescriptionSourceLocationTestFiles/test.txt"),
         Compare::StringToFile);
