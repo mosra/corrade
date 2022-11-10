@@ -211,6 +211,8 @@ struct StringViewTest: TestSuite::Tester {
     void debugFlags();
     void debug();
 
+    void compileTimeInit();
+
     private:
         decltype(Implementation::stringFindCharacter) findCharacterImplementation;
 };
@@ -349,7 +351,9 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
-              &StringViewTest::debug});
+              &StringViewTest::debug,
+
+              &StringViewTest::compileTimeInit});
 }
 
 using namespace Literals;
@@ -456,7 +460,7 @@ template<class T, class From> void StringViewTest::constructCharArray() {
     /* In all cases it should be interpreted the same as with a pointer, never
        with the array being taken as an ArrayView */
     From string[] = "hello\0world!";
-    const BasicStringView<T> view = string;
+    const BasicStringView<T> view = static_cast<From*>(string);
     CORRADE_VERIFY(view);
     CORRADE_VERIFY(!view.isEmpty());
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
@@ -2698,6 +2702,27 @@ void StringViewTest::debug() {
        everything together */
     Debug{&out} << "lolwat, using iostream to\0test string views?!"_s;
     CORRADE_COMPARE(out.str(), (std::string{"lolwat, using iostream to\0test string views?!\n", 46}));
+}
+
+void StringViewTest::compileTimeInit() {
+    constexpr StringView a = "foo";
+    static_assert(a.flags() & StringViewFlag::NullTerminated);
+    CORRADE_VERIFY(a.flags() & StringViewFlag::NullTerminated);
+    const StringView b = static_cast<const char*>("foo");
+    static_assert(a.size() == 3);
+    CORRADE_COMPARE(a.size(), 3);
+    CORRADE_COMPARE(b, a);
+
+    constexpr StringView c = "foo\0bar";
+    constexpr auto d = "foo\0bar"_s;
+    CORRADE_COMPARE(c, d);
+    CORRADE_COMPARE(c.size(), 7);
+    static_assert(c.size() == 7);
+    static_assert(c.flags() & StringViewFlag::NullTerminated);
+    CORRADE_VERIFY(c.flags() & StringViewFlag::NullTerminated);
+
+    #if CORRADE_CXX_STANDARD >= 202002
+    #endif
 }
 
 }}}}

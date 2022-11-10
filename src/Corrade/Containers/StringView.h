@@ -363,6 +363,9 @@ BasicStringView {
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
 
+        /** @brief Construct a @ref StringView from an array with known size */
+        template<std::size_t N> constexpr /*implicit*/ BasicStringView(const T(&data)[N], StringViewFlags flags = {}) noexcept : BasicStringView{data, N&&data[N-1]==T(0)?N-1:N, flags|(N&&data[N-1]==T(0) ? StringViewFlag::NullTerminated : StringViewFlags{})} {}
+
         /**
          * @brief Construct from a null-terminated C string
          *
