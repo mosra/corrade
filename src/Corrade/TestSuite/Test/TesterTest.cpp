@@ -1081,7 +1081,7 @@ void TesterTest::test() {
         /* Replace mangled name of std::out_of_range from the exception() tests
            with a placeholder to remove platform-specific differences */
         Utility::String::replaceAll(out.str(), typeid(const std::out_of_range&).name(), "[mangled std::out_of_range]"),
-        Utility::Path::join(TESTER_TEST_DIR, "test.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/test.txt"),
         Compare::StringToFile);
 }
 
@@ -1123,7 +1123,7 @@ void TesterTest::skipOnly() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "skipOnly.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/skipOnly.txt"),
         Compare::StringToFile);
 }
 
@@ -1186,7 +1186,7 @@ void TesterTest::skipTests() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "skipTests.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/skipTests.txt"),
         Compare::StringToFile);
 }
 
@@ -1210,7 +1210,7 @@ void TesterTest::skipBenchmarks() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "skipBenchmarks.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/skipBenchmarks.txt"),
         Compare::StringToFile);
 }
 
@@ -1282,7 +1282,7 @@ void TesterTest::shuffleOne() {
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "shuffleOne.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/shuffleOne.txt"),
         Compare::StringToFile);
 }
 
@@ -1304,7 +1304,7 @@ void TesterTest::repeatEvery() {
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "repeatEvery.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/repeatEvery.txt"),
         Compare::StringToFile);
 }
 
@@ -1326,7 +1326,7 @@ void TesterTest::repeatAll() {
 
     CORRADE_VERIFY(result == 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "repeatAll.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/repeatAll.txt"),
         Compare::StringToFile);
 }
 
@@ -1367,7 +1367,7 @@ void TesterTest::abortOnFail() {
 
     CORRADE_VERIFY(result == 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "abortOnFail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/abortOnFail.txt"),
         Compare::StringToFile);
 }
 
@@ -1391,7 +1391,7 @@ void TesterTest::abortOnFailSkip() {
 
     CORRADE_VERIFY(result == 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "abortOnFailSkip.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/abortOnFailSkip.txt"),
         Compare::StringToFile);
 }
 
@@ -1417,7 +1417,7 @@ void TesterTest::noXfail() {
 
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "noXfail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/noXfail.txt"),
         Compare::StringToFile);
 }
 
@@ -1444,7 +1444,7 @@ void TesterTest::noCatch() {
 
     CORRADE_VERIFY(failed);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "noCatch.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/noCatch.txt"),
         Compare::StringToFile);
 }
 
@@ -1471,7 +1471,7 @@ void TesterTest::compareMessageVerboseDisabled() {
     /* Should not print any message (and not fail) */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "compareMessageVerboseDisabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/compareMessageVerboseDisabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1496,7 +1496,7 @@ void TesterTest::compareMessageVerboseEnabled() {
     /* Should print a verbose message (and not fail) */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "compareMessageVerboseEnabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/compareMessageVerboseEnabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1523,7 +1523,7 @@ void TesterTest::compareMessageFailed() {
     /* Should not print any message, just the failure */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "compareMessageFailed.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/compareMessageFailed.txt"),
         Compare::StringToFile);
 }
 
@@ -1550,7 +1550,7 @@ void TesterTest::compareMessageXfail() {
     /* Should not print any message, just the XFAIL, and succeed */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "compareMessageXfail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/compareMessageXfail.txt"),
         Compare::StringToFile);
 }
 
@@ -1577,7 +1577,7 @@ void TesterTest::saveDiagnosticVerboseDisabled() {
     /* Should not save any file, not fail and not print anything */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticVerboseDisabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticVerboseDisabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1602,7 +1602,7 @@ void TesterTest::saveDiagnosticVerboseEnabled() {
     /* Should save a verbose.txt file, but not fail */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticVerboseEnabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticVerboseEnabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1631,7 +1631,7 @@ void TesterTest::saveDiagnosticFailedDisabled() {
     /* Should not save any file, only hint about the flag in the final wrap-up */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticFailedDisabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticFailedDisabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1658,7 +1658,7 @@ void TesterTest::saveDiagnosticFailedEnabled() {
     /* Should save the file and print both the error and SAVED */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticFailedEnabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticFailedEnabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1686,7 +1686,7 @@ void TesterTest::saveDiagnosticXfailDisabled() {
        if diagnostic is enabled or not */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticXfail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticXfail.txt"),
         Compare::StringToFile);
 }
 
@@ -1714,7 +1714,7 @@ void TesterTest::saveDiagnosticXfailEnabled() {
        if diagnostic is enabled or not */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticXfail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticXfail.txt"),
         Compare::StringToFile);
 }
 
@@ -1746,7 +1746,7 @@ void TesterTest::saveDiagnosticXpassDisabled() {
        final wrap-up */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticXpassDisabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticXpassDisabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1775,7 +1775,7 @@ void TesterTest::saveDiagnosticXpassEnabled() {
     /* Should save the file, print both XPASS and SAVED */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticXpassEnabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticXpassEnabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1803,7 +1803,7 @@ void TesterTest::saveDiagnosticSucceededDisabled() {
        there's no error */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticSucceededDisabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticSucceededDisabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1828,7 +1828,7 @@ void TesterTest::saveDiagnosticSucceededEnabled() {
     /* Should save the file (and print) even though there's no error */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticSucceededEnabled.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticSucceededEnabled.txt"),
         Compare::StringToFile);
 }
 
@@ -1854,7 +1854,7 @@ void TesterTest::saveDiagnosticAbortOnFail() {
 
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "saveDiagnosticAbortOnFail.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/saveDiagnosticAbortOnFail.txt"),
         Compare::StringToFile);
 }
 
@@ -1886,7 +1886,7 @@ void TesterTest::benchmarkWallClock() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkWallClock.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkWallClock.txt"),
         Compare::StringToFile);
 }
 
@@ -1918,7 +1918,7 @@ void TesterTest::benchmarkCpuClock() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkCpuClock.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkCpuClock.txt"),
         Compare::StringToFile);
 }
 
@@ -1950,7 +1950,7 @@ void TesterTest::benchmarkCpuCycles() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkCpuCycles.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkCpuCycles.txt"),
         Compare::StringToFile);
 }
 
@@ -1980,7 +1980,7 @@ void TesterTest::benchmarkDiscardAll() {
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkDiscardAll.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkDiscardAll.txt"),
         Compare::StringToFile);
 }
 
@@ -2015,7 +2015,7 @@ void TesterTest::benchmarkDebugBuildNote() {
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkDebugBuildNote.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkDebugBuildNote.txt"),
         Compare::StringToFile);
 }
 
@@ -2041,7 +2041,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
     Tester::registerArguments(argc, argv);
 
     Test t{&out, TesterConfiguration{}
-        .setCpuScalingGovernorFile(Utility::Path::join(TESTER_TEST_DIR, "cpu-governor-performance.txt"))
+        .setCpuScalingGovernorFile(Utility::Path::join(TEST_DIR, "TesterTestFiles/cpu-governor-performance.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(this, &out, &out);
@@ -2049,7 +2049,7 @@ void TesterTest::benchmarkCpuScalingNoWarning() {
     CORRADE_COMPARE(result, 0);
     /* Same as wall clock output */
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkWallClock.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkWallClock.txt"),
         Compare::StringToFile);
 }
 
@@ -2076,14 +2076,14 @@ void TesterTest::benchmarkCpuScalingWarning() {
     Tester::registerArguments(argc, argv);
 
     Test t{&out, TesterConfiguration{}
-        .setCpuScalingGovernorFile(Utility::Path::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
+        .setCpuScalingGovernorFile(Utility::Path::join(TEST_DIR, "TesterTestFiles/cpu-governor-powersave.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(this, &out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarning.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkCpuScalingWarning.txt"),
         Compare::StringToFile);
 }
 
@@ -2108,7 +2108,7 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
     Tester::registerArguments(argc, argv);
 
     Test t{&out, TesterConfiguration{}
-        .setCpuScalingGovernorFile(Utility::Path::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
+        .setCpuScalingGovernorFile(Utility::Path::join(TEST_DIR, "TesterTestFiles/cpu-governor-powersave.txt"))
     };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(this, &out, &out);
@@ -2116,11 +2116,11 @@ void TesterTest::benchmarkCpuScalingWarningVerbose() {
     CORRADE_COMPARE(result, 0);
     #ifndef CORRADE_TARGET_ANDROID
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerbose.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkCpuScalingWarningVerbose.txt"),
         Compare::StringToFile);
     #else
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerboseAndroid.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/benchmarkCpuScalingWarningVerboseAndroid.txt"),
         Compare::StringToFile);
     #endif
 }
@@ -2161,7 +2161,7 @@ void TesterTest::testName() {
     CORRADE_COMPARE(t.testName(), "MyCustomTestName");
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Path::join(TESTER_TEST_DIR, "testName.txt"),
+        Utility::Path::join(TEST_DIR, "TesterTestFiles/testName.txt"),
         Compare::StringToFile);
 }
 

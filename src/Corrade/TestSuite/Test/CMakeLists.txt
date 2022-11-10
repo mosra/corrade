@@ -31,11 +31,11 @@ set(CMAKE_FOLDER "Corrade/TestSuite/Test")
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     set(RELATIVE_TEST_DIR ".")
     set(ABSOLUTE_TEST_DIR ".")
-    set(TESTER_TEST_DIR "TesterTestFiles")
+    set(TEST_DIR ".")
 else()
     set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
-    set(TESTER_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/TesterTestFiles)
+    set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
