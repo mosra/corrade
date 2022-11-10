@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE, @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED, @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
+ * @brief Macros @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE, @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED, @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED, @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 
 #include <type_traits>
@@ -57,6 +57,25 @@ these are still two distinct types, similarly to how @cpp int @ce and
 /* Actual definitions is in configure.h so Magnum doesn't need to pull in this
    whole thing in its TypeTraits just for this macro */
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+#endif
+
+/**
+@brief Whether source location builtins are supported
+@m_since_latest
+
+Defined if compiler-specific builtins used to implement the C++20
+@ref std::source_location feature are available. Defined on GCC at least since
+version 4.8, Clang 9+ and MSVC 2019 16.6 and newer; on all three they're
+present also in the C++11 mode.
+
+Used by @relativeref{Corrade,Utility::Debug} to optionally annotate the output
+with source location information. See @ref Utility-Debug-source-location for
+details.
+*/
+/* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
+   __apple_build_version__ according to https://stackoverflow.com/a/19391724 */
+#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)) || (defined(CORRADE_TARGET_CLANG) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9))) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)
+#define CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
 #endif
 
 namespace Implementation {

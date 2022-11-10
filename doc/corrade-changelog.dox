@@ -599,6 +599,10 @@ namespace Corrade {
     doesn't depend on any debug output. If @ref CORRADE_BUILD_DEPRECATED is
     enabled, the @ref Corrade/Utility/Assert.h pulls it in for backwards
     compatibility.
+-   The `CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION` macro, which was closely
+    tied to @ref Utiity::Debug, is deprecated in favor of a more general
+    @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED that's defined inside
+    @ref Corrade/Utility/TypeTraits.h instead.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` CMake variable, needed for
     installations into older Android NDKs, is obsolete and no longer needed for
     NDK r19+. It still does what's expected on builds with

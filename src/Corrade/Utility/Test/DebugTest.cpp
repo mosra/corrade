@@ -986,7 +986,7 @@ void DebugTest::sourceLocation() {
         Debug{} << "this no longer";
     }
 
-    #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     CORRADE_COMPARE(out.str(),
         __FILE__ ":980: hello\n"
         __FILE__ ":982: and this is from another line\n"

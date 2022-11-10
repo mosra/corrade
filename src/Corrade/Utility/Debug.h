@@ -42,19 +42,18 @@
 
 namespace Corrade { namespace Utility {
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Source location support in debug output
-@m_since{2020,06}
-
-Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
-source location support. Available on GCC at least since version 4.8, Clang 9+
-and MSVC 2019 16.6 and newer. See @ref Utility-Debug-source-location for more
-information.
+@m_deprecated_since_latest Use @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    instead.
 */
-/* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
-   __apple_build_version__ according to https://stackoverflow.com/a/19391724 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG)) || (defined(CORRADE_TARGET_CLANG) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9))) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1926)
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED)
 #define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+#endif
+#endif
+
+#ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
 namespace Implementation { struct DebugSourceLocation; }
 #endif
 
@@ -179,7 +178,7 @@ and finally, 42
 At the moment, this feature is available on GCC at least since version 4.8,
 Clang 9+ and MSVC 2019 16.6 and newer. Elsewhere it behaves like the
 unexclamated version. You can check for its availability using the
-@ref CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION predefined macro.
+@ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED predefined macro.
 
 @section Utility-Debug-windows ANSI color support and UTF-8 output on Windows
 
@@ -759,7 +758,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         InternalFlags _immediateFlags;
 
     private:
-        #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+        #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         friend Implementation::DebugSourceLocation;
         #endif
 
@@ -774,7 +773,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         Color _previousColor;
         bool _previousColorBold;
         #endif
-        #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+        #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         const char* _sourceLocationFile{};
         int _sourceLocationLine{};
         #endif
@@ -791,12 +790,12 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flags value);
 
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 
-#ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+#ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
 namespace Implementation {
     struct CORRADE_UTILITY_EXPORT DebugSourceLocation {
         #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC)
-        /* Not using std::experimental::source_location because it's not in
-           libc++ 9 yet and GCC version has a C++14 usage of constexpr */
+        /* Not using std::source_location because it's not in libc++ 9 yet and
+           GCC version has a C++14 usage of constexpr */
         /*implicit*/ DebugSourceLocation(Debug&& debug, const char* file = __builtin_FILE(), int line = __builtin_LINE());
         #else
         #error this needs to be implemented for new compilers

@@ -63,7 +63,7 @@
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
 #endif
 
-#ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+#ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
 #include "Corrade/Utility/Assert.h"
 #endif
 
@@ -427,7 +427,7 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     #endif
 }
 
-#if !defined(DOXYGEN_GENERATING_OUTPUT) && defined(CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION)
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && defined(CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED)
 namespace Implementation {
 DebugSourceLocation::DebugSourceLocation(Debug&& debug, const char* file, int line): debug{&debug} {
     debug._sourceLocationFile = file;
@@ -453,7 +453,7 @@ Warning::Warning(const Flags flags): Warning{debugGlobals.warningOutput, flags} 
 Error::Error(const Flags flags): Error{debugGlobals.errorOutput, flags} {}
 
 void Debug::cleanupOnDestruction() {
-    #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     /* Print source location if not printed yet -- this means saying a
        !Debug{}; will print just that, while Debug{}; is a no-op */
     if(_output && _sourceLocationFile) {
@@ -511,7 +511,7 @@ Fatal::~Fatal() {
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 
-    #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     /* Print source location, if not printed yet */
     if(_sourceLocationFile) {
         CORRADE_INTERNAL_ASSERT(_immediateFlags & InternalFlag::NoSpace);
