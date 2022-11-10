@@ -90,6 +90,12 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/cpu-governor-powersave.txt)
 target_include_directories(TestSuiteTesterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+corrade_add_test(TestSuiteTestCaseDesc___LocationTest TestCaseDescriptionSourceLocationTest.cpp
+    FILES
+        TestCaseDescriptionSourceLocationTestFiles/test.txt
+        TestCaseDescriptionSourceLocationTestFiles/noSupport.txt)
+target_include_directories(TestSuiteTestCaseDesc___LocationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 corrade_add_test(TestSuiteBenchmarkStatsTest BenchmarkStatsTest.cpp)
 
 corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp

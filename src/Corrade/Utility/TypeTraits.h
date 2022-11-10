@@ -64,13 +64,18 @@ these are still two distinct types, similarly to how @cpp int @ce and
 @m_since_latest
 
 Defined if compiler-specific builtins used to implement the C++20
-@ref std::source_location feature are available. Defined on GCC at least since
-version 4.8, Clang 9+ and MSVC 2019 16.6 and newer; on all three they're
-present also in the C++11 mode.
+@m_class{m-doc-external} [std::source_location](https://en.cppreference.com/w/cpp/utility/source_location)
+feature are available. Defined on GCC at least since version 4.8, Clang 9+ and
+MSVC 2019 16.6 and newer; on all three they're present also in the C++11 mode.
+Used by:
 
-Used by @relativeref{Corrade,Utility::Debug} to optionally annotate the output
-with source location information. See @ref Utility-Debug-source-location for
-details.
+-   @relativeref{Corrade,Utility::Debug} to optionally annotate the output
+    with source location information. See @ref Utility-Debug-source-location
+    for details.
+-   @relativeref{Corrade,TestSuite::Tester} to provide better file/line
+    information for instanced test cases. See the
+    @relativeref{Corrade,TestSuite::TestCaseDescriptionSourceLocation} class
+    for details.
 */
 /* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
    __apple_build_version__ according to https://stackoverflow.com/a/19391724 */

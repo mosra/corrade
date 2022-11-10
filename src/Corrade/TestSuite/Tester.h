@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
+ * @brief Class @ref Corrade::TestSuite::Tester, @ref Corrade::TestSuite::TestCaseDescriptionSourceLocation, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_INFO(), @ref CORRADE_WARN(), @ref CORRADE_FAIL(), @ref CORRADE_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_SKIP_IF_NO_ASSERT(), @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT(), @ref CORRADE_ITERATION(), @ref CORRADE_BENCHMARK()
  */
 
 #include <cstdint>
@@ -62,6 +62,8 @@ namespace Implementation {
         typedef typename std::common_type<Actual, Expected>::type Type;
     };
 }
+
+class TestCaseDescriptionSourceLocation;
 
 /**
 @brief Base class for tests and benchmarks
@@ -193,6 +195,9 @@ fails, it doesn't stop the other instances from being executed. Similarly to
 the templated tests, @ref setTestCaseDescription() allows you to set a
 human-readable description of given instance. If not called, the instances are
 just numbered in the output.
+
+See also the @ref TestCaseDescriptionSourceLocation class for improved
+file/line diagnostics for instanced test cases.
 
 @section TestSuite-Tester-iteration-annotations Testing in a loop
 
@@ -1258,7 +1263,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Additional text displayed after the test case name. By default
          * the description is empty for non-instanced test cases and instance
-         * ID for instanced test cases.
+         * ID for instanced test cases. If you use
+         * @ref setTestCaseDescription(const TestCaseDescriptionSourceLocation&)
+         * instead, output messages will contain also the file/line where the
+         * instanced test case data were defined. See the
+         * @ref TestCaseDescriptionSourceLocation class documentation for an
+         * example.
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
          * @ref Containers::StringViewFlag::NullTerminated set (such as coming
@@ -1270,6 +1280,18 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void setTestCaseDescription(Containers::StringView description);
         /* So people aren't forced to include StringView if they don't want */
         void setTestCaseDescription(const char* description); /**< @overload */
+
+        /**
+         * @brief Set test case description with source location
+         * @m_since_latest
+         *
+         * Compared to @ref setTestCaseDescription(Containers::StringView),
+         * output messages printed for the test case will contain also the
+         * file/line where the instanced test case data were defined. See the
+         * @ref TestCaseDescriptionSourceLocation class documentation for an
+         * example.
+         */
+        void setTestCaseDescription(const TestCaseDescriptionSourceLocation& description);
 
         /**
          * @brief Test case description
@@ -1518,6 +1540,83 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void addTestCaseInternal(const TestCase& testCase);
 
         Containers::Pointer<TesterState> _state;
+};
+
+/**
+@brief Instanced test case description with source location
+@m_since_latest
+
+When used instead of @ref Containers::StringView or @cpp const char* @ce to
+define @ref TestSuite-Tester-instanced "instanced test case descriptions", any
+messages printed to the output will contain also the file/line info of where
+the instance data were defined in addition of file/line location from where the
+message originated:
+
+@m_class{m-code-figure}
+
+@parblock
+
+@snippet testsuite-description-source-location.cpp 0
+
+<b></b>
+
+@m_class{m-nopad m-console-wrap}
+
+@include testsuite-description-source-location.ansi
+
+@endparblock
+
+Useful especially in combination with terminals that are capable of treating
+the location information as a direct link to an IDE or text editor --- clicking
+on @cb{.shell-session} …/PathTest.cpp:55 @ce will open the editor at the line
+containing the @cpp "two extensions" @ce test case instance.
+
+At the moment, this feature is available on GCC at least since version 4.8,
+Clang 9+ and MSVC 2019 16.6 and newer. Elsewhere it behaves like if just a
+regular @ref Test::setTestCaseDescription(Containers::StringView) was used. You
+can check for its availability using the
+@ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED predefined macro.
+
+@see @ref Tester, @ref testsuite
+*/
+class CORRADE_TESTSUITE_EXPORT TestCaseDescriptionSourceLocation {
+    public:
+        /** @brief Constructor */
+        /*implicit*/ TestCaseDescriptionSourceLocation(Containers::StringView description
+            #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+            #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC)
+            /* Not using std::experimental::source_location because it's not in
+               libc++ 9 yet and GCC version has a C++14 usage of constexpr */
+            , int line = __builtin_LINE()
+            #else
+            #error this needs to be implemented for new compilers
+            #endif
+            #endif
+        );
+        /** @overload */
+        /* So people aren't forced to include StringView if they don't want */
+        /*implicit*/ TestCaseDescriptionSourceLocation(const char* description
+            #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+            #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC)
+            /* Not using std::experimental::source_location because it's not in
+               libc++ 9 yet and GCC version has a C++14 usage of constexpr */
+            , int line = __builtin_LINE()
+            #else
+            #error this needs to be implemented for new compilers
+            #endif
+            #endif
+        );
+
+    private:
+        friend Tester;
+
+        /* A silly way to avoid including StringView */
+        const char* _data;
+        std::size_t _size;
+        std::size_t _flags;
+        #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+        int _line;
+        #endif
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

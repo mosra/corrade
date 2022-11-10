@@ -138,6 +138,8 @@ namespace Corrade {
     @relativeref{TestSuite::Compare,NotAligned} comparators as a more
     convenient alternative to @ref TestSuite::Compare::Divisible and
     @relativeref{TestSuite::Compare,NotDivisible} when dealing with pointers
+-   New @ref TestSuite::TestCaseDescriptionSourceLocation helper for improved
+    file/line info in instanced test cases
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
@@ -600,7 +602,7 @@ namespace Corrade {
     enabled, the @ref Corrade/Utility/Assert.h pulls it in for backwards
     compatibility.
 -   The `CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION` macro, which was closely
-    tied to @ref Utiity::Debug, is deprecated in favor of a more general
+    tied to @ref Utility::Debug, is deprecated in favor of a more general
     @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED that's defined inside
     @ref Corrade/Utility/TypeTraits.h instead.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` CMake variable, needed for

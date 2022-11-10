@@ -181,6 +181,10 @@ struct Tester::TesterState {
     std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
         testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
         checkCount{}, diagnosticCount{};
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    /* Comes from TestCaseDescriptionSourceLocation */
+    std::size_t testCaseDataLine{};
+    #endif
 
     std::uint64_t benchmarkBegin{};
     std::uint64_t benchmarkResult{};
@@ -521,6 +525,9 @@ benchmark types:
             _state->testCaseDescription = {};
         else
             _state->testCaseDescription = std::to_string(testCase.second.instanceId);
+        #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+        _state->testCaseDataLine = 0;
+        #endif
 
         /* Final combined repeat count */
         const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
@@ -728,6 +735,16 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
 
 void Tester::printFileLineInfo(Debug& out, std::size_t line) {
     out << "at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << line;
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    /* Line from which the instance data come from. Can be set independently
+       of whether the test case is actually instanced. */
+    if(_state->testCaseDataLine) {
+        /* Prints the filename again, which may look like unnecessary noise,
+           but that's what makes it clickable in the terminal and that's the
+           priority */
+        out << "with data at" << _state->testFilename << Debug::nospace << ":" << Debug::nospace << _state->testCaseDataLine;
+    }
+    #endif
 
     /* If we have checks annotated with an iteration macro, print those. These
        are linked in reverse order so we have to reverse the vector before
@@ -984,12 +1001,25 @@ Containers::StringView Tester::testCaseDescription() const {
 void Tester::setTestCaseDescription(const Containers::StringView description) {
     /* If the name comes from a global string literal, avoid a needless copy */
     _state->testCaseDescription = Containers::String::nullTerminatedGlobalView(description);
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    /* Reset the line info from a potential earlier call to
+       setTestCaseDescription(TestCaseDescriptionSourceLocation) in the same
+       test case */
+    _state->testCaseDataLine = 0;
+    #endif
 }
 
 void Tester::setTestCaseDescription(const char* const description) {
     /* Delegating to the above overload instead of going directly to have both
        implicitly covered by the tests */
     setTestCaseDescription(Containers::StringView{description});
+}
+
+void Tester::setTestCaseDescription(const TestCaseDescriptionSourceLocation& description) {
+    setTestCaseDescription(Containers::StringView{description._data, description._size, Containers::StringViewFlag(description._flags)});
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    _state->testCaseDataLine = description._line;
+    #endif
 }
 
 Containers::StringView Tester::benchmarkName() const {
@@ -1103,5 +1133,25 @@ Tester::BenchmarkRunner::~BenchmarkRunner() {
 const char* Tester::BenchmarkRunner::end() const {
      return reinterpret_cast<char*>(_instance._state->benchmarkBatchSize);
 }
+
+TestCaseDescriptionSourceLocation::TestCaseDescriptionSourceLocation(const Containers::StringView description
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    , int line
+    #endif
+): _data{description.data()}, _size{description.size()}, _flags{std::size_t(description.flags())}
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    , _line{line}
+    #endif
+    {}
+
+TestCaseDescriptionSourceLocation::TestCaseDescriptionSourceLocation(const char* const description
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    , int line
+    #endif
+): TestCaseDescriptionSourceLocation{Containers::StringView{description}
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    , line
+    #endif
+} {}
 
 }}

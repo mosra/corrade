@@ -1,0 +1,10 @@
+[1;39mStarting PathTest with 4 test cases...[0m
+[1;39m    OK[0;34m [[1;36m1[0;34m][1;39m extension([0msimple[1;39m)[0m
+[1;39m    OK[0;34m [[1;36m2[0;34m][1;39m extension([0mno extension[1;39m)[0m
+[1;31m  FAIL[0;34m [[1;36m3[0;34m][1;39m extension([0mtwo extensions[1;39m)[0m at …/PathTest.cpp:68 with data at …/PathTest.cpp:55
+        Values fileExtension(data.filename) and data.ext are not the same, actual is
+        .gz
+        but expected
+        .tar.gz
+[1;39m    OK[0;34m [[1;36m4[0;34m][1;39m extension([0mdirectory with a dot[1;39m)[0m
+[1;39mFinished PathTest with[1;31m 1 errors[1;39m out of 4 checks.[0m
