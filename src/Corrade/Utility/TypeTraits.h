@@ -54,7 +54,7 @@ differs from the 80-bit representation elsewhere, so it's always treated as
 these are still two distinct types, similarly to how @cpp int @ce and
 @cpp signed int @ce behave the same but are treated as different types.
 */
-/* Actual definitions is in configure.h so Magnum doesn't need to pull in this
+/* Actual definition is in configure.h so Magnum doesn't need to pull in this
    whole thing in its TypeTraits just for this macro */
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif

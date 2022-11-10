@@ -288,7 +288,7 @@ to checking an expression result with @ref CORRADE_VERIFY():
 @snippet TestSuite.cpp Compare-around-just-one
 </li>
 <li>
-Finally, [Magnum](https://magnum.graphics) has a
+Finally, [Magnum](https://magnum.graphics) has more comparators, including a
 @m_class{m-doc-external} [DebugTools::CompareImage](https://doc.magnum.graphics/magnum/classMagnum_1_1DebugTools_1_1CompareImage.html)
 that's able to fuzzy-compare two images pixel-by-pixel and visualize the
 difference as an ASCII art directly in the console.
