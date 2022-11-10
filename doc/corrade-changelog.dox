@@ -599,12 +599,13 @@ namespace Corrade {
     doesn't depend on any debug output. If @ref CORRADE_BUILD_DEPRECATED is
     enabled, the @ref Corrade/Utility/Assert.h pulls it in for backwards
     compatibility.
--   The `CORRADE_INCLUDE_INSTALL_PREFIX` variable, needed for installations
-    into older Android NDKs, is obsolete and no longer needed for NDK r19+. It
-    still does what's expected on builds with `CORRADE_BUILD_DEPRECATED`
-    enabled, however you'll get a deprecation notice. Since the variable got
-    saved to CMake cache, to get rid of the message, you may need to either
-    recreate your build directory or explicitly delete it from the cache.
+-   The `CORRADE_INCLUDE_INSTALL_PREFIX` CMake variable, needed for
+    installations into older Android NDKs, is obsolete and no longer needed for
+    NDK r19+. It still does what's expected on builds with
+    `CORRADE_BUILD_DEPRECATED` enabled, however you'll get a deprecation
+    notice. Since the variable got saved to CMake cache, to get rid of the
+    message, you may need to either recreate your build directory or explicitly
+    delete it from the cache.
 -   The @cpp Corrade/Containers/Tags.h @ce header,
     @cpp Containers::DefaultInit @ce, @cpp Containers::ValueInit @ce,
     @cpp Containers::NoInit @ce, @cpp Containers::NoCreate @ce,
