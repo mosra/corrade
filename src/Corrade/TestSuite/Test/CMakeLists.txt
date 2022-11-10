@@ -28,6 +28,19 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/TestSuite/Test")
 
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(RELATIVE_TEST_DIR ".")
+    set(ABSOLUTE_TEST_DIR ".")
+    set(TESTER_TEST_DIR "TesterTestFiles")
+else()
+    set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
+    set(TESTER_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/TesterTestFiles)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+
 corrade_add_test(TestSuiteArgumentsTest ArgumentsTest.cpp
     ARGUMENTS --arguments-value hello)
 
@@ -76,19 +89,6 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/cpu-governor-performance.txt
         TesterTestFiles/cpu-governor-powersave.txt)
 target_include_directories(TestSuiteTesterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
-    set(RELATIVE_TEST_DIR ".")
-    set(ABSOLUTE_TEST_DIR ".")
-    set(TESTER_TEST_DIR "TesterTestFiles")
-else()
-    set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
-    set(TESTER_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/TesterTestFiles)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 corrade_add_test(TestSuiteBenchmarkStatsTest BenchmarkStatsTest.cpp)
 
