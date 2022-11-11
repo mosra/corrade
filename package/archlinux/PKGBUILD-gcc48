@@ -40,5 +40,3 @@ package() {
     cd "$_rootdir/build-gcc48"
     DESTDIR="$pkgdir/" ninja install
 }
-
-# kate: hl bash
