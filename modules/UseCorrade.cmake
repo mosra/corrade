@@ -343,6 +343,16 @@ function(corrade_add_test test_name)
         message(FATAL_ERROR "The Corrade::TestSuite target, needed by corrade_add_test(), doesn't exist. Add the TestSuite component to your find_package() or enable CORRADE_WITH_TESTSUITE if you have Corrade as a CMake subproject.")
     endif()
 
+    # If CORRADE_TESTSUITE_TEST_TARGET is set, tests aren't built by default
+    # (in the ALL target) but instead set as dependencies of a target named
+    # after the value of CORRADE_TESTSUITE_TEST_TARGET.
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        if(NOT TARGET ${CORRADE_TESTSUITE_TEST_TARGET})
+            add_custom_target(${CORRADE_TESTSUITE_TEST_TARGET})
+        endif()
+        set(EXCLUDE_FROM_ALL_IF_TEST_TARGET EXCLUDE_FROM_ALL)
+    endif()
+
     set(_corrade_file_pair_match "^(.+)@([^@]+)$")
     set(_corrade_file_pair_replace "\\1;\\2")
 
@@ -411,7 +421,7 @@ function(corrade_add_test test_name)
     endforeach()
 
     if(CORRADE_TESTSUITE_TARGET_XCTEST)
-        add_library(${test_name} SHARED ${sources})
+        add_library(${test_name} SHARED ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} ${sources})
         set_target_properties(${test_name} PROPERTIES FRAMEWORK TRUE)
         # This is never Windows, so no need to bother with Corrade::Main
         target_link_libraries(${test_name} PRIVATE ${libraries} ${testsuite_library})
@@ -440,7 +450,7 @@ function(corrade_add_test test_name)
             message(WARNING "corrade_add_test() ARGUMENTS are not supported when CORRADE_TESTSUITE_TARGET_XCTEST is enabled")
         endif()
     else()
-        add_executable(${test_name} ${sources})
+        add_executable(${test_name} ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} ${sources})
         target_link_libraries(${test_name} PRIVATE ${libraries} ${testsuite_library} Corrade::Main)
 
         # Run tests using Node.js on Emscripten
@@ -516,6 +526,16 @@ function(corrade_add_test test_name)
                 MACOSX_BUNDLE ON
                 MACOSX_BUNDLE_GUI_IDENTIFIER ${CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX}.${test_name}
                 XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
+        endif()
+    endif()
+
+    # If a custom test target is used instead of ALL, add the test as a
+    # dependency of it so they can still be all built with a single command.
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        if(CORRADE_TESTSUITE_TARGET_XCTEST)
+            add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} ${test_name}Runner)
+        else()
+            add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} ${test_name})
         endif()
     endif()
 

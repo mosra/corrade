@@ -312,6 +312,15 @@ On @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" this automatically adds
 early-exit from test cases (failure, expected failure, skipped test case...) is
 done via exceptions.
 
+By default, the tests are compiled as part of the implicit `ALL` target. If
+that's undesirable, the `CORRADE_TESTSUITE_TEST_TARGET` variable can be set to
+create a dedicated target for building just the tests. For example, passing
+`-DCORRADE_TESTSUITE_TEST_TARGET=build-tests` to CMake will mean
+@cb{.sh} cmake --build . @ce builds only the project, and
+@cb{.sh} cmake --build . --target build-tests @ce builds the tests. The
+variable can be also set by the project itself, and even to a different value
+for different tests for more precise grouping.
+
 @subsection corrade-cmake-add-resource Compile data resources into application binary
 
 @code{.cmake}

@@ -388,6 +388,10 @@ namespace Corrade {
 -   Various warning fixes (see [mosra/corrade#151](https://github.com/mosra/corrade/pull/151))
 -   Preventing a build error on Emscripten if `CORRADE_UTILITY_USE_ANSI_COLORS`
     is passed to CMake (see [mosra/corrade#153](https://github.com/mosra/corrade/issues/153))
+-   The @ref corrade-cmake-add-test "corrade_add_test()" CMake macro now
+    recognizes a new `CORRADE_TESTSUITE_TEST_TARGET` CMake variable to put
+    tests into a dedicated target instead of building them as part of the
+    implicit `ALL` target.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

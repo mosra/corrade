@@ -677,6 +677,12 @@ ctest --output-on-failure
 in the build directory. It's not needed to install anything anywhere to run the
 tests.
 
+By default the tests are compiled as part of the implicit `ALL` target. Use the
+`CORRADE_TESTSUITE_TEST_TARGET` CMake variable to create a dedicated target for
+building just the tests. See the documentation of the
+@ref corrade-cmake-add-test "corrade_add_test()" CMake macro for more
+information.
+
 @subsection building-corrade-doc Building documentation
 
 The documentation is generated using [Doxygen](http://doxygen.org) with the
