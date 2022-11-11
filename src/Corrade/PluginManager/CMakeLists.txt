@@ -84,7 +84,7 @@ install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INST
 
 if(CORRADE_BUILD_TESTS)
     # Library with graceful assert for testing
-    add_library(CorradePluginManagerTestLib ${SHARED_OR_STATIC}
+    add_library(CorradePluginManagerTestLib ${SHARED_OR_STATIC} ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
         $<TARGET_OBJECTS:CorradePluginManagerObjects>
         ${CorradePluginManager_GracefulAssert_SRCS})
     target_include_directories(CorradePluginManagerTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -98,7 +98,7 @@ if(CORRADE_BUILD_TESTS)
         target_link_libraries(CorradePluginManagerTestLib PUBLIC ${CMAKE_DL_LIBS})
     endif()
 
-    add_subdirectory(Test)
+    add_subdirectory(Test ${EXCLUDE_FROM_ALL_IF_TEST_TARGET})
 endif()
 
 # Corrade::PluginManager target alias for superprojects

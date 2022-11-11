@@ -37,12 +37,15 @@ set_directory_properties(PROPERTIES
     CORRADE_CXX_STANDARD 11
     CORRADE_USE_PEDANTIC_FLAGS ON)
 
-add_library(snippets STATIC
+add_library(snippets STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
     Corrade.cpp
     Containers.cpp
     Containers-stl.cpp
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
+if(CORRADE_TESTSUITE_TEST_TARGET)
+    add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets)
+endif()
 
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
@@ -51,11 +54,14 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.9") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
-        add_library(snippets-cpp14 STATIC
+        add_library(snippets-cpp14 STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
             Containers-cpp14.cpp)
         target_link_libraries(snippets-cpp14 PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp14 PROPERTIES
             CORRADE_CXX_STANDARD 14)
+        if(CORRADE_TESTSUITE_TEST_TARGET)
+            add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-cpp14)
+        endif()
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -63,12 +69,15 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
-        add_library(snippets-cpp17 STATIC
+        add_library(snippets-cpp17 STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
             Corrade-cpp17.cpp
             Containers-stl17.cpp)
         target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp17 PROPERTIES
             CORRADE_CXX_STANDARD 17)
+        if(CORRADE_TESTSUITE_TEST_TARGET)
+            add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-cpp17)
+        endif()
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -76,22 +85,31 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
-        add_library(snippets-cpp2a STATIC
+        add_library(snippets-cpp2a STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
             Containers-stl2a.cpp)
         target_link_libraries(snippets-cpp2a PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp2a PROPERTIES
             CORRADE_CXX_STANDARD 20)
+        if(CORRADE_TESTSUITE_TEST_TARGET)
+            add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-cpp2a)
+        endif()
     endif()
 endif()
 
 if(CORRADE_WITH_INTERCONNECT)
-    add_library(snippets-Interconnect STATIC Interconnect.cpp)
+    add_library(snippets-Interconnect STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-Interconnect)
+    endif()
 endif()
 
 if(CORRADE_WITH_PLUGINMANAGER)
-    add_library(snippets-PluginManager STATIC PluginManager.cpp)
+    add_library(snippets-PluginManager STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-PluginManager)
+    endif()
 endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
@@ -100,26 +118,26 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
 
     # All define the same symbols so they need to be in separate libs
-    add_library(snippets-TestSuite STATIC TestSuite.cpp)
+    add_library(snippets-TestSuite STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} TestSuite.cpp)
     target_link_libraries(snippets-TestSuite PRIVATE CorradeTestSuite)
-    add_library(snippets-TestSuite2 STATIC TestSuite2.cpp)
+    add_library(snippets-TestSuite2 STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} TestSuite2.cpp)
     target_link_libraries(snippets-TestSuite2 PRIVATE CorradeTestSuite)
-    add_library(snippets-TestSuite3 STATIC TestSuite3.cpp)
+    add_library(snippets-TestSuite3 STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} TestSuite3.cpp)
     target_link_libraries(snippets-TestSuite3 PRIVATE CorradeTestSuite)
 
     # TestSuite documentation snippets. I need them executable so I can
     # copy&paste the output to the documentation. Also mot using
     # corrade_add_test() because these tests shouldn't be run as part of CTest
     # -- some of them fail on purpose
-    add_executable(testsuite-basic testsuite-basic.cpp)
-    add_executable(testsuite-templated testsuite-templated.cpp)
-    add_executable(testsuite-repeated testsuite-repeated.cpp)
-    add_executable(testsuite-instanced testsuite-instanced.cpp)
-    add_executable(testsuite-save-diagnostic testsuite-save-diagnostic.cpp)
-    add_executable(testsuite-iteration testsuite-iteration.cpp)
-    add_executable(testsuite-benchmark testsuite-benchmark.cpp)
-    add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
-    add_executable(testsuite-description-source-location testsuite-description-source-location.cpp)
+    add_executable(testsuite-basic ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-basic.cpp)
+    add_executable(testsuite-templated ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-templated.cpp)
+    add_executable(testsuite-repeated ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-repeated.cpp)
+    add_executable(testsuite-instanced ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-instanced.cpp)
+    add_executable(testsuite-save-diagnostic ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-save-diagnostic.cpp)
+    add_executable(testsuite-iteration ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-iteration.cpp)
+    add_executable(testsuite-benchmark ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-benchmark.cpp)
+    add_executable(testsuite-benchmark-custom ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-benchmark-custom.cpp)
+    add_executable(testsuite-description-source-location ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-description-source-location.cpp)
 
     target_link_libraries(testsuite-basic PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-templated PUBLIC CorradeTestSuite)
@@ -147,9 +165,25 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
             testsuite-description-source-location
             APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
     endif()
+
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET}
+            testsuite-basic
+            testsuite-templated
+            testsuite-repeated
+            testsuite-instanced
+            testsuite-save-diagnostic
+            testsuite-iteration
+            testsuite-benchmark
+            testsuite-benchmark-custom
+            testsuite-description-source-location)
+    endif()
 endif()
 
 if(CORRADE_TARGET_ANDROID)
-    add_library(snippets-android STATIC android.cpp)
+    add_library(snippets-android STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} android.cpp)
     target_link_libraries(snippets-android PRIVATE CorradeUtility)
+    if(CORRADE_TESTSUITE_TEST_TARGET)
+        add_dependencies(${CORRADE_TESTSUITE_TEST_TARGET} snippets-android)
+    endif()
 endif()

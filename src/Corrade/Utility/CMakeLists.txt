@@ -221,7 +221,7 @@ if(CORRADE_WITH_UTILITY)
         # implicitly linked CorradeTestSuite would drag in CorradeUtility in
         # addition to CorradeUtilityTestLib, leading to ODR violations and
         # making ASan builds fail.
-        add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC}
+        add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
             $<TARGET_OBJECTS:CorradeUtilityObjects>
             ${CorradeUtility_GracefulAssert_SRCS})
         target_include_directories(CorradeUtilityTestLib PUBLIC
@@ -240,7 +240,7 @@ if(CORRADE_WITH_UTILITY)
             set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
         endif()
 
-        add_subdirectory(Test)
+        add_subdirectory(Test ${EXCLUDE_FROM_ALL_IF_TEST_TARGET})
     endif()
 
     # Corrade::Utility target alias for superprojects

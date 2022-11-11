@@ -113,7 +113,7 @@ if(CORRADE_WITH_UTILITY OR CORRADE_WITH_RC)
 endif()
 
 if(CORRADE_BUILD_TESTS)
-    add_subdirectory(Test)
+    add_subdirectory(Test ${EXCLUDE_FROM_ALL_IF_TEST_TARGET})
 endif()
 
 if(CORRADE_WITH_MAIN)

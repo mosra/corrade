@@ -107,7 +107,7 @@ if(CORRADE_BUILD_TESTS)
     # CorradeTestSuite would get CorradeUtility in addition to
     # CorradeUtilityTestLib, leading to ODR violations and subsequently ASan
     # complaints.
-    add_library(CorradeTestSuiteTestLib ${SHARED_OR_STATIC}
+    add_library(CorradeTestSuiteTestLib ${SHARED_OR_STATIC} ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
         $<TARGET_OBJECTS:CorradeTestSuiteObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp) # XCode workaround, see file comment for details
     target_include_directories(CorradeTestSuiteTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -117,7 +117,7 @@ if(CORRADE_BUILD_TESTS)
     endif()
     target_link_libraries(CorradeTestSuiteTestLib PUBLIC CorradeUtilityTestLib)
 
-    add_subdirectory(Test)
+    add_subdirectory(Test ${EXCLUDE_FROM_ALL_IF_TEST_TARGET})
 endif()
 
 # Corrade::TestSuite target alias for superprojects
