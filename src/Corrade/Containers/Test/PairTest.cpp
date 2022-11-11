@@ -721,10 +721,11 @@ void PairTest::copy() {
     /* Haha */
     CORRADE_VERIFY(std::is_trivially_copy_constructible<std::pair<float, int>>::value);
     CORRADE_VERIFY(!std::is_trivially_copy_assignable<std::pair<float, int>>::value);
-    #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1920)
-    /* What the actual fuck? MSVC 2019 says this is copyable but not copy
-       assignable, older versions are consistent with libc++ and libstdc++.
-       Bug? */
+    #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1920) && !(defined(CORRADE_TARGET_CLANG_CL) && __clang_major__ >= 15)
+    /* MSVC 2019 says this is copyable but not copy assignable, older versions
+       are consistent with libc++ and libstdc++. Bug? Clang-cl 15 *also* seems
+       to think it's trivially copyable (but not assignable), so I guess it's
+       something fishy inside MSVC STL? */
     CORRADE_VERIFY(!std::is_trivially_copyable<std::pair<float, int>>::value);
     #endif
     #endif
