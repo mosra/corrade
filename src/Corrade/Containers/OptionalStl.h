@@ -36,6 +36,7 @@ information.
 */
 
 #include <optional>
+#include <type_traits>
 
 #include "Corrade/Containers/Optional.h"
 
@@ -64,6 +65,31 @@ template<class T> struct OptionalConverter<T, std::optional<T>> {
 template<class T> struct DeducedOptionalConverter<std::optional<T>>: OptionalConverter<T, std::optional<T>> {};
 
 }}}
+#endif
+
+namespace std {
+
+template<class T> struct tuple_size<Corrade::Containers::Optional<T>> : std::integral_constant<std::size_t, 2> {};
+template<class T> struct tuple_element<0, Corrade::Containers::Optional<T>> { using type = T; };
+template<class T> struct tuple_element<1, Corrade::Containers::Optional<T>> { using type = bool; };
+
+}
+
+#if CORRADE_CXX_STANDARD >= 201703
+namespace Corrade { namespace Containers {
+
+template<std::size_t N, class T>
+typename std::tuple_element<N, Optional<T>>::type
+get(const Optional<T>& value) noexcept(std::is_nothrow_default_constructible<T>() && std::is_nothrow_copy_constructible<T>())
+{
+    static_assert(N < 2, "");
+    static_assert(std::is_default_constructible<T>() && std::is_copy_constructible<T>(), "");
+    if constexpr (N == 0)
+        return value ? *value : T{};
+    if constexpr (N == 1)
+        return bool(value);
+}
+}}
 #endif
 
 #endif

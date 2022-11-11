@@ -37,13 +37,15 @@ struct OptionalStlTest: TestSuite::Tester {
     void convertCopyNull();
     void convertMove();
     void convertMoveNull();
+    void destructuringBind();
 };
 
 OptionalStlTest::OptionalStlTest() {
     addTests({&OptionalStlTest::convertCopy,
               &OptionalStlTest::convertCopyNull,
               &OptionalStlTest::convertMove,
-              &OptionalStlTest::convertMoveNull});
+              &OptionalStlTest::convertMoveNull,
+              &OptionalStlTest::destructuringBind});
 }
 
 void OptionalStlTest::convertCopy() {
@@ -106,6 +108,36 @@ void OptionalStlTest::convertMoveNull() {
 
     std::optional<Pointer<int>> c(Utility::move(b));
     CORRADE_VERIFY(!c);
+}
+
+void OptionalStlTest::destructuringBind()
+{
+#if CORRADE_CXX_STANDARD < 201703
+    CORRADE_SKIP("structured binding test requires C++17");
+#else
+    const auto [a, a1] = Optional<int>(42);
+    CORRADE_COMPARE(a, 42);
+    CORRADE_COMPARE(a1, true);
+    const auto [b, b1] = Optional<int>();
+    CORRADE_COMPARE(b, 0);
+    CORRADE_COMPARE(b1, false);
+
+    struct UserType {
+        int value = 0;
+        UserType() = default;
+        explicit UserType(int x) : value{x} {}
+        UserType(const UserType&) = default;
+        bool operator==(const UserType& o) const { return value == o.value; }
+    };
+
+    const auto [c, c1] = Optional<UserType>(InPlaceInit, 37);
+    CORRADE_VERIFY(c == UserType(37));
+    CORRADE_COMPARE(c1, true);
+
+    const auto [d, d1] = Optional<UserType>();
+    CORRADE_VERIFY(d == UserType());
+    CORRADE_COMPARE(d1, false);
+#endif
 }
 
 }}}}
