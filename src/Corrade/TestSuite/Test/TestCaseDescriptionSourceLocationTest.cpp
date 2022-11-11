@@ -145,6 +145,7 @@ void TestCaseDescriptionSourceLocationTest::test() {
         Utility::Path::join(TEST_DIR, "TestCaseDescriptionSourceLocationTestFiles/test.txt"),
         Compare::StringToFile);
     #else
+    CORRADE_INFO("CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED not available");
     CORRADE_COMPARE_AS(out.str(),
         Utility::Path::join(TEST_DIR, "TestCaseDescriptionSourceLocationTestFiles/noSupport.txt"),
         Compare::StringToFile);
