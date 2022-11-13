@@ -41,7 +41,24 @@ construction and assignment. See @ref Containers-Pair-stl for more information.
 
 /* Listing these namespaces doesn't add anything to the docs, so don't */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-namespace Corrade { namespace Containers { namespace Implementation {
+
+#if CORRADE_CXX_STANDARD >= 201703
+namespace std {
+template<class F, class S> struct tuple_size<Corrade::Containers::Pair<F, S>> : std::integral_constant<std::size_t, 2> {};
+template<class F, class S> struct tuple_element<0, Corrade::Containers::Pair<F, S>> { using type = F; };
+template<class F, class S> struct tuple_element<1, Corrade::Containers::Pair<F, S>> { using type = S; };
+}
+#endif
+
+namespace Corrade { namespace Containers {
+
+#if CORRADE_CXX_STANDARD >= 201703
+template<std::size_t N, class F, class S> constexpr const std::tuple_element_t<N, Pair<F, S>>& get(const Pair<F, S>& value) { if constexpr(N == 1) return value.second(); else return value.first(); }
+template<std::size_t N, class F, class S> constexpr std::tuple_element_t<N, Pair<F, S>>& get(Pair<F, S>& value) { if constexpr(N == 1) return value.second(); else return value.first(); }
+template<std::size_t N, class F, class S> constexpr std::tuple_element_t<N, Pair<F, S>> get(Pair<F, S>&& value) { if constexpr(N == 1) return value.second(); else return value.first(); }
+#endif
+
+namespace Implementation {
 
 template<class F, class S> struct PairConverter<F, S, std::pair<F, S>> {
     static Pair<F, S> from(const std::pair<F, S>& other) {
