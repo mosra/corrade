@@ -1237,7 +1237,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Fixed-size view slice
          * @m_since{2019,10}
          *
-         * Expects (at compile time) that @cpp begin < end_ @ce and @p end_ is
+         * Expects (at compile time) that @cpp begin_ < end_ @ce and @p end_ is
          * not larger than @ref Size.
          */
         template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
