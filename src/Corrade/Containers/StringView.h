@@ -155,10 +155,10 @@ that the conversion will not preserve the global / null-terminated annotations.
 @subsection Containers-BasicStringView-usage-slicing String view slicing
 
 The string view class inherits the slicing APIs of @ref ArrayView ---
-@ref slice(), @ref prefix(), @ref suffix(), @ref exceptPrefix() and
-@ref exceptSuffix() --- and in addition it provides string-specific utilities.
-These are are all derived from the slicing APIs, which means they also return
-sub-views of the original string:
+@ref slice(), @ref sliceSize(), @ref prefix(), @ref suffix(),
+@ref exceptPrefix() and @ref exceptSuffix() --- and in addition it provides
+string-specific utilities. These are are all derived from the slicing APIs,
+which means they also return sub-views of the original string:
 
 <ul>
 <li>@ref split() and @ref splitWithoutEmptyParts() split the view on given set
@@ -508,8 +508,9 @@ BasicStringView {
          * after) the end of the original null-terminated string, the result
          * has @ref StringViewFlag::NullTerminated also.
          * @m_keywords{substr()}
-         * @see @ref prefix(), @ref suffix(), @ref exceptPrefix(),
-         *      @ref exceptSuffix(), @ref slice(std::size_t, std::size_t) const
+         * @see @ref sliceSize(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix(),
+         *      @ref slice(std::size_t, std::size_t) const
          */
         constexpr BasicStringView<T> slice(T* begin, T* end) const;
 
@@ -517,12 +518,29 @@ BasicStringView {
         constexpr BasicStringView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
+         * @brief View slice of given size
+         *
+         * Equivalent to @cpp data.slice(begin, begin + size) @ce.
+         * @see @ref slice(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix(),
+         *      @ref sliceSize(std::size_t, std::size_t) const
+         */
+        constexpr BasicStringView<T> sliceSize(T* begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
+
+        /** @overload */
+        constexpr BasicStringView<T> sliceSize(std::size_t begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
+
+        /**
          * @brief View prefix until a pointer
          *
          * Equivalent to @cpp string.slice(string.begin(), end) @ce. If @p end
          * is @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce view.
-         * @see @ref slice(T*, T*) const, @ref suffix(T*) const,
-         *      @ref prefix(std::size_t) const
+         * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
+         *      @ref suffix(T*) const, @ref prefix(std::size_t) const
          */
         constexpr BasicStringView<T> prefix(T* end) const {
             return end ? slice(_data, end) : BasicStringView<T>{};
@@ -534,7 +552,8 @@ BasicStringView {
          * Equivalent to @cpp string.slice(begin, string.end()) @ce. If
          * @p begin is @cpp nullptr @ce and the original view isn't, returns a
          * zero-sized @cpp nullptr @ce view.
-         * @see @ref slice(T*, T*) const, @ref prefix(T*) const
+         * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
+         *      @ref prefix(T*) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
         constexpr BasicStringView<T> suffix(T* begin) const {
@@ -546,6 +565,7 @@ BasicStringView {
          *
          * Equivalent to @cpp string.slice(0, size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(), @ref prefix(T*) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
@@ -562,6 +582,7 @@ BasicStringView {
          *
          * Equivalent to @cpp string.slice(size, string.size()) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref prefix(std::size_t) const,
          *      @ref exceptSuffix(std::size_t) const,
          *      @ref exceptPrefix(StringView) const
@@ -584,6 +605,7 @@ BasicStringView {
          *
          * Equivalent to @cpp string.slice(0, string.size() - size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(std::size_t) const,
          *      @ref exceptSuffix(StringView) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin

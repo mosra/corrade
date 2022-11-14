@@ -616,6 +616,38 @@ class Array {
         }
 
         /**
+         * @brief View on a slice of given size
+         * @m_since_latest
+         *
+         * Equivalent to @ref ArrayView::sliceSize(T*, std::size_t) const and
+         * overloads.
+         */
+        ArrayView<T> sliceSize(T* begin, std::size_t size) {
+            return ArrayView<T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<const T> sliceSize(const T* begin, std::size_t size) const {
+            return ArrayView<const T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<T> sliceSize(std::size_t begin, std::size_t size) {
+            return ArrayView<T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<const T> sliceSize(std::size_t begin, std::size_t size) const {
+            return ArrayView<const T>{*this}.sliceSize(begin, size);
+        }
+
+        /**
          * @brief Fixed-size view on a slice
          *
          * Equivalent to @ref ArrayView::slice(T*) const and overloads.
@@ -652,6 +684,24 @@ class Array {
          */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
             return ArrayView<const T>(*this).template slice<begin_, end_>();
+        }
+
+        /**
+         * @brief Fixed-size view on a slice of given size
+         * @m_since_latest
+         *
+         * Equivalent to @ref ArrayView::sliceSize() const.
+         */
+        template<std::size_t begin_, std::size_t size_> StaticArrayView<size_, T> sliceSize() {
+            return ArrayView<T>(*this).template sliceSize<begin_, size_>();
+        }
+
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        template<std::size_t begin_, std::size_t size_> StaticArrayView<size_, const T> sliceSize() const {
+            return ArrayView<const T>(*this).template sliceSize<begin_, size_>();
         }
 
         /**

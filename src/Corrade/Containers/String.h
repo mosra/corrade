@@ -722,6 +722,20 @@ class CORRADE_UTILITY_EXPORT String {
         StringView slice(std::size_t begin, std::size_t end) const; /**< @overload */
 
         /**
+         * @brief View on a slice of given size
+         *
+         * Equivalent to @ref BasicStringView::sliceSize(). Both arguments are
+         * expected to be in range. If `begin + size` points to (one item
+         * after) the end of the original (null-terminated) string, the result
+         * has @ref StringViewFlag::NullTerminated set.
+         * @m_keywords{substr()}
+         */
+        MutableStringView sliceSize(char* begin, std::size_t size);
+        StringView sliceSize(const char* begin, std::size_t size) const; /**< @overload */
+        MutableStringView sliceSize(std::size_t begin, std::size_t size); /**< @overload */
+        StringView sliceSize(std::size_t begin, std::size_t size) const; /**< @overload */
+
+        /**
          * @brief View on a prefix until a pointer
          *
          * Equivalent to @ref BasicStringView::prefix(T*) const. If @p end

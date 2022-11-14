@@ -1757,6 +1757,7 @@ template<class T> void StringTest::slice() {
 
     T a = "hello";
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
+    CORRADE_COMPARE(a.sliceSize(1, 3), "ell"_s);
     CORRADE_COMPARE(a.prefix(3), "hel"_s);
     CORRADE_COMPARE(a.prefix(2).flags(), StringViewFlags{});
     CORRADE_COMPARE(a.exceptPrefix(2), "llo"_s);
@@ -1772,6 +1773,7 @@ template<class T> void StringTest::slicePointer() {
 
     T a = "hello";
     CORRADE_COMPARE(a.slice(a.data() + 1, a.data() + 4), "ell"_s);
+    CORRADE_COMPARE(a.sliceSize(a.data() + 1, 3), "ell"_s);
     CORRADE_COMPARE(a.prefix(a.data() + 3), "hel"_s);
     CORRADE_COMPARE(a.prefix(a.data() + 2).flags(), StringViewFlags{});
     CORRADE_COMPARE(a.suffix(a.data() + 2), "llo"_s);

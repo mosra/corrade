@@ -378,6 +378,38 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
+         * @brief View on a slice of given size
+         * @m_since_latest
+         *
+         * Equivalent to @ref StaticArrayView::sliceSize(T*, std::size_t) const
+         * and overloads.
+         */
+        ArrayView<T> sliceSize(T* begin, std::size_t size) {
+            return ArrayView<T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<const T> sliceSize(const T* begin, std::size_t size) const {
+            return ArrayView<const T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<T> sliceSize(std::size_t begin, std::size_t size) {
+            return ArrayView<T>{*this}.sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        ArrayView<const T> sliceSize(std::size_t begin, std::size_t size) const {
+            return ArrayView<const T>{*this}.sliceSize(begin, size);
+        }
+
+        /**
          * @brief Fixed-size view on a slice
          *
          * Equivalent to @ref StaticArrayView::slice(T*) const and overloads.
@@ -414,6 +446,24 @@ template<std::size_t size_, class T> class StaticArray {
          */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
             return StaticArrayView<size_, const T>(*this).template slice<begin_, end_>();
+        }
+
+        /**
+         * @brief Fixed-size view on a slice of given size
+         * @m_since_latest
+         *
+         * Equivalent to @ref StaticArrayView::sliceSize() const.
+         */
+        template<std::size_t begin_, std::size_t size__> StaticArrayView<size__, T> sliceSize() {
+            return StaticArrayView<size_, T>(*this).template sliceSize<begin_, size__>();
+        }
+
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        template<std::size_t begin_, std::size_t size__> StaticArrayView<size__, const T> sliceSize() const {
+            return StaticArrayView<size_, const T>(*this).template sliceSize<begin_, size__>();
         }
 
         /**

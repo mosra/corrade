@@ -426,6 +426,11 @@ template<class T> void BitArrayTest::slice() {
         CORRADE_COMPARE(slice.offset(), 3);
         CORRADE_COMPARE(slice.size(), 18);
     } {
+        typename ConstTraits<T>::ViewType slice = a.sliceSize(29, 18);
+        CORRADE_COMPARE(static_cast<const void*>(slice.data()), a.data() + 4);
+        CORRADE_COMPARE(slice.offset(), 3);
+        CORRADE_COMPARE(slice.size(), 18);
+    } {
         typename ConstTraits<T>::ViewType slice = a.prefix(12);
         CORRADE_COMPARE(static_cast<const void*>(slice.data()), a.data());
         CORRADE_COMPARE(slice.offset(), 6);

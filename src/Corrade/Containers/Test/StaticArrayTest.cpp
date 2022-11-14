@@ -763,17 +763,29 @@ void StaticArrayTest::slice() {
     StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
     const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
-    ArrayView b = a.slice(1, 4);
-    CORRADE_COMPARE(b.size(), 3);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    ArrayView b1 = a.slice(1, 4);
+    CORRADE_COMPARE(b1.size(), 3);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
 
-    ConstArrayView bc = ac.slice(1, 4);
-    CORRADE_COMPARE(bc.size(), 3);
-    CORRADE_COMPARE(bc[0], 2);
-    CORRADE_COMPARE(bc[1], 3);
-    CORRADE_COMPARE(bc[2], 4);
+    ConstArrayView bc1 = ac.slice(1, 4);
+    CORRADE_COMPARE(bc1.size(), 3);
+    CORRADE_COMPARE(bc1[0], 2);
+    CORRADE_COMPARE(bc1[1], 3);
+    CORRADE_COMPARE(bc1[2], 4);
+
+    ArrayView b2 = a.sliceSize(1, 3);
+    CORRADE_COMPARE(b2.size(), 3);
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
+
+    ConstArrayView bc2 = ac.sliceSize(1, 3);
+    CORRADE_COMPARE(bc2.size(), 3);
+    CORRADE_COMPARE(bc2[0], 2);
+    CORRADE_COMPARE(bc2[1], 3);
+    CORRADE_COMPARE(bc2[2], 4);
 
     ArrayView c = a.prefix(3);
     CORRADE_COMPARE(c.size(), 3);
@@ -816,17 +828,29 @@ void StaticArrayTest::slicePointer() {
     StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
     const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 
-    ArrayView b = a.slice(a + 1, a + 4);
-    CORRADE_COMPARE(b.size(), 3);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    ArrayView b1 = a.slice(a + 1, a + 4);
+    CORRADE_COMPARE(b1.size(), 3);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
 
-    ConstArrayView bc = ac.slice(ac + 1, ac + 4);
-    CORRADE_COMPARE(bc.size(), 3);
-    CORRADE_COMPARE(bc[0], 2);
-    CORRADE_COMPARE(bc[1], 3);
-    CORRADE_COMPARE(bc[2], 4);
+    ConstArrayView bc1 = ac.slice(ac + 1, ac + 4);
+    CORRADE_COMPARE(bc1.size(), 3);
+    CORRADE_COMPARE(bc1[0], 2);
+    CORRADE_COMPARE(bc1[1], 3);
+    CORRADE_COMPARE(bc1[2], 4);
+
+    ArrayView b2 = a.sliceSize(a + 1, 3);
+    CORRADE_COMPARE(b2.size(), 3);
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
+
+    ConstArrayView bc2 = ac.sliceSize(ac + 1, 3);
+    CORRADE_COMPARE(bc2.size(), 3);
+    CORRADE_COMPARE(bc2[0], 2);
+    CORRADE_COMPARE(bc2[1], 3);
+    CORRADE_COMPARE(bc2[2], 4);
 
     ArrayView c = a.prefix(a + 3);
     CORRADE_COMPARE(c.size(), 3);
@@ -876,6 +900,16 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(bc2[0], 2);
     CORRADE_COMPARE(bc2[1], 3);
     CORRADE_COMPARE(bc2[2], 4);
+
+    Containers::StaticArrayView<3, int> b3 = a.sliceSize<1, 3>();
+    CORRADE_COMPARE(b3[0], 2);
+    CORRADE_COMPARE(b3[1], 3);
+    CORRADE_COMPARE(b3[2], 4);
+
+    Containers::StaticArrayView<3, const int> bc3 = ac.sliceSize<1, 3>();
+    CORRADE_COMPARE(bc3[0], 2);
+    CORRADE_COMPARE(bc3[1], 3);
+    CORRADE_COMPARE(bc3[2], 4);
 
     Containers::StaticArrayView<3, int> c = a.prefix<3>();
     CORRADE_COMPARE(c[0], 1);

@@ -314,6 +314,14 @@ class CORRADE_UTILITY_EXPORT BitArray {
         BitArrayView slice(std::size_t begin, std::size_t end) const; /**< @overload */
 
         /**
+         * @brief View on a slice of given size
+         *
+         * Equivalent to @ref BasicBitArrayView::sliceSize().
+         */
+        MutableBitArrayView sliceSize(std::size_t begin, std::size_t size);
+        BitArrayView sliceSize(std::size_t begin, std::size_t size) const; /**< @overload */
+
+        /**
          * @brief View on the first @p size bits
          *
          * Equivalent to @ref BasicBitArrayView::prefix().

@@ -801,7 +801,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * views slices just the top-level dimension, use
          * @ref slice(const Size&, const Size&) const to slice in all
          * dimensions.
-         * @see @ref prefix(), @ref exceptPrefix(), @ref exceptSuffix()
+         * @see @ref sliceSize(), @ref prefix(), @ref exceptPrefix(),
+         *      @ref exceptSuffix()
          * @todoc link to suffix() once it takes size and not begin
          */
         StridedArrayView<dimensions, T> slice(std::size_t begin, std::size_t end) const;
@@ -814,15 +815,44 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * only the first slice is taken from the remaining dimensions; if
          * @p newDimensions is larger than @ref Dimensions, size of the new
          * dimensions is set to @cpp 1 @ce and and stride to size of @ref Type.
-         * @see @ref slice(std::size_t, std::size_t) const, @ref slice() const
+         * @see @ref sliceSize(const Size&, const Size&) const,
+         *      @ref slice(std::size_t, std::size_t) const, @ref slice() const
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const;
+
+        /**
+         * @brief View slice of given size in the first dimension
+         * @m_since_latest
+         *
+         * Equivalent to @cpp data.slice(begin, begin + size) @ce. On
+         * multi-dimensional views slices just the top-level dimension, use
+         * @ref sliceSize(const Size&, const Size&) const to slice in all
+         * dimensions.
+         * @see @ref slice(), @ref prefix(), @ref exceptPrefix(),
+         *      @ref exceptSuffix()
+         * @todoc link to suffix() once it takes size and not begin
+         */
+        StridedArrayView<dimensions, T> sliceSize(std::size_t begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
+
+        /**
+         * @brief View slice of given size in all dimensions
+         * @m_since_latest
+         *
+         * Equivalent to @cpp data.slice(begin, end) @ce, where @p end is
+         * @cpp begin[i] + size[i] @ce for all dimensions.
+         * @see @ref sliceSize(std::size_t, std::size_t) const,
+         *      @ref slice(const Size&, const Size&) const
+         */
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> sliceSize(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& size) const;
 
         /**
          * @brief Expand or shrink dimension count
          *
          * Equivalent to @cpp data.slice<newDimensions>({}, data.size()) @ce.
-         * @see @ref slice(const Size&, const Size&) const
+         * @see @ref slice(const Size&, const Size&) const,
+         *      @ref sliceSize(const Size&, const Size&) const
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice() const {
             return slice<newDimensions>({}, _size);
@@ -903,6 +933,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * views slices just the top-level dimension, use
          * @ref prefix(const Size&) const to slice in all dimensions.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(std::size_t) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
@@ -915,6 +946,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *
          * Equivalent to @cpp data.slice<newDimensions>({}, size) @ce.
          * @see @ref slice(const Size&, const Size&) const,
+         *      @ref sliceSize(const Size&, const Size&) const,
          *      @ref exceptPrefix(const Size&) const,
          *      @ref prefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes size and not begin
@@ -935,6 +967,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * multi-dimensional views slices just the top-level dimension, use
          * @ref exceptPrefix(const Size&) const to slice in all dimensions.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref prefix(std::size_t) const,
          *      @ref exceptSuffix(const Size&) const
          */
@@ -957,6 +990,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *
          * Equivalent to @cpp data.slice<newDimensions>(size, data.size()) @ce.
          * @see @ref slice(const Size&, const Size&) const,
+         *      @ref sliceSize(const Size&, const Size&) const,
          *      @ref prefix(const Size&) const,
          *      @ref exceptSuffix(const Size&) const,
          *      @ref exceptSuffix(std::size_t) const
@@ -982,6 +1016,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * multi-dimensional views slices just the top-level dimension, use
          * @ref exceptSuffix(const Size&) const to slice in all dimensions.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(const Size&) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
@@ -1006,6 +1041,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce, where
          * @p end is @cpp data.size()[i] - size[i] @ce for all dimensions.
          * @see @ref slice(const Size&, const Size&) const,
+         *      @ref sliceSize(const Size&, const Size&) const,
          *      @ref exceptPrefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes size and not begin
          */
@@ -2348,6 +2384,13 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     };
 }
 #endif
+
+template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::sliceSize(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& size) const {
+    Containers::Size<dimensions> end{Corrade::NoInit};
+    for(std::size_t i = 0; i != dimensions; ++i)
+        end._data[i] = begin._data[i] + size._data[i];
+    return slice<newDimensions>(begin, end);
+}
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::exceptSuffix(const Containers::Size<dimensions>& size) const {
     Containers::Size<dimensions> end{Corrade::NoInit};

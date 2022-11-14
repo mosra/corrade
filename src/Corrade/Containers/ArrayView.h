@@ -117,16 +117,16 @@ mutable as well.
 
 Except for the usual element access via @ref begin(), @ref end() and
 @ref operator T*() that provides also access via @cpp [] @ce, there's a
-collection of slicing functions --- @ref slice(), @ref prefix(), @ref suffix(),
-@ref exceptPrefix() and @ref exceptSuffix():
+collection of slicing functions --- @ref slice(), @ref sliceSize(),
+@ref prefix(), @ref suffix(), @ref exceptPrefix() and @ref exceptSuffix():
 
 @snippet Containers.cpp ArrayView-usage-slicing
 
-The @ref slice(), @ref prefix(), @ref suffix() APIs accept also a pointer as
-the begin/end arguments. As a special case, if @ref prefix() and @ref suffix()
-are called with @cpp nullptr @ce, they return a zero-sized @cpp nullptr @ce
-view. Both are useful when doing various kinds of searches and propagating
-failure states, for example as shown below:
+The @ref slice(), @ref sliceSize(), @ref prefix(), @ref suffix() APIs accept
+also a pointer as the begin/end arguments. As a special case, if @ref prefix()
+and @ref suffix() are called with @cpp nullptr @ce, they return a zero-sized
+@cpp nullptr @ce view. Both are useful when doing various kinds of searches and
+propagating failure states, for example as shown below:
 
 @snippet Containers.cpp ArrayView-usage-slicing2
 
@@ -426,13 +426,35 @@ template<class T> class ArrayView {
          * @brief View slice
          *
          * Both arguments are expected to be in range.
-         * @see @ref prefix(), @ref suffix(), @ref exceptPrefix(),
-         *      @ref exceptSuffix(), @ref slice(std::size_t, std::size_t) const
+         * @see @ref sliceSize(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix(),
+         *      @ref slice(std::size_t, std::size_t) const
          */
         constexpr ArrayView<T> slice(T* begin, T* end) const;
 
         /** @overload */
         constexpr ArrayView<T> slice(std::size_t begin, std::size_t end) const;
+
+        /**
+         * @brief View slice of given size
+         * @m_since_latest
+         *
+         * Equivalent to @cpp data.slice(begin, begin + size) @ce.
+         * @see @ref slice(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix(),
+         *      @ref sliceSize(std::size_t, std::size_t) const
+         */
+        constexpr ArrayView<T> sliceSize(T* begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
+
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        constexpr ArrayView<T> sliceSize(std::size_t begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
 
         /**
          * @brief Fixed-size view slice
@@ -452,17 +474,28 @@ template<class T> class ArrayView {
          *
          * At compile time expects that @cpp begin < end_ @ce, at runtime that
          * @p end_ is not larger than @ref size().
-         * @see @ref slice(T*) const, @ref prefix() const
+         * @see @ref sliceSize(), @ref slice(T*) const, @ref prefix() const
          */
         template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
+
+        /**
+         * @brief Fixed-size view slice of given size
+         * @m_since_latest
+         *
+         * Expects that `begin_ + size_` is not larger than @ref size().
+         * @see @ref slice() const
+         */
+        template<std::size_t begin_, std::size_t size_> constexpr StaticArrayView<size_, T> sliceSize() const {
+            return slice<begin_, begin_ + size_>();
+        }
 
         /**
          * @brief View prefix until a pointer
          *
          * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
          * @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce array.
-         * @see @ref slice(T*, T*) const, @ref suffix(T*) const,
-         *      @ref prefix(std::size_t) const
+         * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
+         *      @ref suffix(T*) const, @ref prefix(std::size_t) const
          */
         constexpr ArrayView<T> prefix(T* end) const {
             return end ? slice(_data, end) : nullptr;
@@ -474,7 +507,8 @@ template<class T> class ArrayView {
          * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
          * @cpp nullptr @ce and the original array isn't, returns zero-sized
          * @cpp nullptr @ce array.
-         * @see @ref slice(T*, T*) const, @ref prefix(T*) const
+         * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
+         *      @ref prefix(T*) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
         constexpr ArrayView<T> suffix(T* begin) const {
@@ -486,6 +520,7 @@ template<class T> class ArrayView {
          *
          * Equivalent to @cpp data.slice(0, size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(), @ref prefix(T*) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
@@ -503,7 +538,7 @@ template<class T> class ArrayView {
          * @brief Fixed-size view on the first @p size_ items
          *
          * Equivalent to @cpp data.slice<0, size_>() @ce.
-         * @see @ref slice() const, @ref suffix() const
+         * @see @ref slice() const, @ref sliceSize() const, @ref suffix() const
          */
         template<std::size_t size_> constexpr StaticArrayView<size_, T> prefix() const {
             return slice<0, size_>();
@@ -514,7 +549,7 @@ template<class T> class ArrayView {
          * @m_since_latest
          *
          * Equivalent to @cpp data.slice<size_>(data.size() - size_) @ce.
-         * @see @ref slice() const, @ref prefix() const
+         * @see @ref slice() const, @ref sliceSize() const, @ref prefix() const
          */
         template<std::size_t size_> constexpr StaticArrayView<size_, T> suffix() const {
             return slice<size_>(_size - size_);
@@ -526,6 +561,7 @@ template<class T> class ArrayView {
          *
          * Equivalent to @cpp data.slice(size, data.size()) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref prefix(std::size_t) const, @ref exceptSuffix()
          */
         constexpr ArrayView<T> exceptPrefix(std::size_t size) const {
@@ -546,7 +582,9 @@ template<class T> class ArrayView {
          * @m_since_latest
          *
          * Equivalent to @cpp data.slice(0, data.size() - size) @ce.
-         * @see @ref slice(std::size_t, std::size_t) const, @ref exceptPrefix()
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref sliceSize(std::size_t, std::size_t) const,
+         *      @ref exceptPrefix()
          * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
         constexpr ArrayView<T> exceptSuffix(std::size_t size) const {
@@ -982,8 +1020,8 @@ owning version of this container is a @ref StaticArray.
 
 The general API is similar to what's shown in
 @ref Containers-ArrayView-usage "ArrayView usage docs", except that here are
-additional compile-time overloads of @ref slice(), @ref prefix(),
-@ref suffix(), @ref exceptPrefix() and @ref exceptSuffix().
+additional compile-time overloads of @ref slice(), @ref sliceSize(),
+@ref prefix(), @ref suffix(), @ref exceptPrefix() and @ref exceptSuffix().
 
 @snippet Containers.cpp StaticArrayView-usage
 
@@ -1174,6 +1212,18 @@ template<std::size_t size_, class T> class StaticArrayView {
             return ArrayView<T>(*this).slice(begin, end);
         }
 
+        /** @copydoc ArrayView::sliceSize(T*, std::size_t) const */
+        constexpr ArrayView<T> sliceSize(T* begin, std::size_t size) const {
+            return ArrayView<T>(*this).sliceSize(begin, size);
+        }
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        constexpr ArrayView<T> sliceSize(std::size_t begin, std::size_t size) const {
+            return ArrayView<T>(*this).sliceSize(begin, size);
+        }
+
         /** @copydoc ArrayView::slice(T*) const */
         template<std::size_t size__> constexpr StaticArrayView<size__, T> slice(T* begin) const {
             return ArrayView<T>(*this).template slice<size__>(begin);
@@ -1191,6 +1241,17 @@ template<std::size_t size_, class T> class StaticArrayView {
          * not larger than @ref Size.
          */
         template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
+
+        /**
+         * @brief Fixed-size view slice of given size
+         * @m_since_latest
+         *
+         * Expects (at compile time) that @cpp begin_ + size_ @ce is not larger
+         * than @ref Size.
+         */
+        template<std::size_t begin_, std::size_t size__> constexpr StaticArrayView<size__, T> sliceSize() const {
+            return slice<begin_, begin_ + size__>();
+        }
 
         /** @copydoc ArrayView::prefix(T*) const */
         constexpr ArrayView<T> prefix(T* end) const {

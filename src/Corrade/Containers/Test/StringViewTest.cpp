@@ -1020,13 +1020,17 @@ void StringViewTest::slice() {
     MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
 
     CORRADE_COMPARE(a.slice(1, 4), "ell"_s);
+    CORRADE_COMPARE(a.sliceSize(1, 3), "ell"_s);
     CORRADE_COMPARE(a.prefix(3), "hel"_s);
     CORRADE_COMPARE(a.exceptPrefix(2), "llo"_s);
     CORRADE_COMPARE(a.exceptSuffix(2), "hel"_s);
 
     constexpr StringView ca = "hello"_s;
-    constexpr StringView cb = ca.slice(1, 4);
-    CORRADE_COMPARE(cb, "ell");
+    constexpr StringView cb1 = ca.slice(1, 4);
+    CORRADE_COMPARE(cb1, "ell");
+
+    constexpr StringView cb2 = ca.sliceSize(1, 3);
+    CORRADE_COMPARE(cb2, "ell");
 
     constexpr StringView cc = ca.prefix(3);
     CORRADE_COMPARE(cc, "hel");
@@ -1044,6 +1048,7 @@ void StringViewTest::slicePointer() {
     MutableStringView a{data, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
 
     CORRADE_COMPARE(a.slice(data + 1, data + 4), "ell"_s);
+    CORRADE_COMPARE(a.sliceSize(data + 1, 3), "ell"_s);
     CORRADE_COMPARE(a.prefix(data + 3), "hel"_s);
     CORRADE_COMPARE(a.suffix(data + 2), "llo"_s);
 
@@ -1052,8 +1057,11 @@ void StringViewTest::slicePointer() {
     #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER <= 1900) && !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 6)
     constexpr const char* cdata = "hello";
     constexpr StringView ca{cdata, 5};
-    constexpr StringView cb = ca.slice(cdata + 1, cdata + 4);
-    CORRADE_COMPARE(cb, "ell");
+    constexpr StringView cb1 = ca.slice(cdata + 1, cdata + 4);
+    CORRADE_COMPARE(cb1, "ell");
+
+    constexpr StringView cb2 = ca.sliceSize(cdata + 1, 3);
+    CORRADE_COMPARE(cb2, "ell");
 
     constexpr StringView cc = ca.prefix(cdata + 3);
     CORRADE_COMPARE(cc, "hel");

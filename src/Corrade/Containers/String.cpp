@@ -486,6 +486,22 @@ StringView String::slice(const std::size_t begin, const std::size_t end) const {
     return StringView{*this}.slice(begin, end);
 }
 
+MutableStringView String::sliceSize(char* const begin, const std::size_t size) {
+    return MutableStringView{*this}.sliceSize(begin, size);
+}
+
+StringView String::sliceSize(const char* const begin, const std::size_t size) const {
+    return StringView{*this}.sliceSize(begin, size);
+}
+
+MutableStringView String::sliceSize(const std::size_t begin, const std::size_t size) {
+    return MutableStringView{*this}.sliceSize(begin, size);
+}
+
+StringView String::sliceSize(const std::size_t begin, const std::size_t size) const {
+    return StringView{*this}.sliceSize(begin, size);
+}
+
 MutableStringView String::prefix(char* const end) {
     return MutableStringView{*this}.prefix(end);
 }

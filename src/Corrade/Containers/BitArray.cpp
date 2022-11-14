@@ -110,6 +110,13 @@ BitArrayView BitArray::slice(const std::size_t begin, const std::size_t end) con
     return BitArrayView{*this}.slice(begin, end);
 }
 
+MutableBitArrayView BitArray::sliceSize(const std::size_t begin, const std::size_t size) {
+    return MutableBitArrayView{*this}.sliceSize(begin, size);
+}
+BitArrayView BitArray::sliceSize(const std::size_t begin, const std::size_t size) const {
+    return BitArrayView{*this}.sliceSize(begin, size);
+}
+
 MutableBitArrayView BitArray::prefix(const std::size_t size) {
     return MutableBitArrayView{*this}.prefix(size);
 }

@@ -2821,11 +2821,17 @@ void StridedArrayViewTest::slice() {
     } data[5]{{1, 0.0f}, {2, 5.0f}, {3, -1.0f}, {4, 0.5f}, {5, -0.1f}};
     StridedArrayView1Di a{data, &data[0].value, 5, 8};
 
-    StridedArrayView1Di b = a.slice(1, 4);
-    CORRADE_COMPARE(b.size(), 3);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    StridedArrayView1Di b1 = a.slice(1, 4);
+    CORRADE_COMPARE(b1.size(), 3);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
+
+    StridedArrayView1Di b2 = a.sliceSize(1, 3);
+    CORRADE_COMPARE(b2.size(), 3);
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
 
     StridedArrayView1Di c = a.prefix(3);
     CORRADE_COMPARE(c.size(), 3);
@@ -2873,11 +2879,17 @@ void StridedArrayViewTest::slice3D() {
 
     StridedArrayView3Di a = {data, &data[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    StridedArrayView3Di b = a.slice({0, 1, 1}, {1, 2, 3});
-    CORRADE_COMPARE(b.size(), (Size3D{1, 1, 2}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(b[0][0][0], 234810);
-    CORRADE_COMPARE(b[0][0][1], 232342);
+    StridedArrayView3Di b1 = a.slice({0, 1, 1}, {1, 2, 3});
+    CORRADE_COMPARE(b1.size(), (Size3D{1, 1, 2}));
+    CORRADE_COMPARE(b1.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(b1[0][0][0], 234810);
+    CORRADE_COMPARE(b1[0][0][1], 232342);
+
+    StridedArrayView3Di b2 = a.sliceSize({0, 1, 1}, {1, 1, 2});
+    CORRADE_COMPARE(b2.size(), (Size3D{1, 1, 2}));
+    CORRADE_COMPARE(b2.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(b2[0][0][0], 234810);
+    CORRADE_COMPARE(b2[0][0][1], 232342);
 
     StridedArrayView3Di c = a.prefix({1, 1, 3});
     CORRADE_COMPARE(c.size(), (Size3D{1, 1, 3}));
@@ -2933,11 +2945,17 @@ void StridedArrayViewTest::slice3DFirstDimension() {
 
     StridedArrayView3Di a = {data, &data[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    StridedArrayView3Di b = a.slice(0, 1);
-    CORRADE_COMPARE(b.size(), (Size3D{1, 2, 3}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
-    CORRADE_COMPARE(b[0][0][0], 2);
-    CORRADE_COMPARE(b[0][0][1], 16);
+    StridedArrayView3Di b1 = a.slice(1, 2);
+    CORRADE_COMPARE(b1.size(), (Size3D{1, 2, 3}));
+    CORRADE_COMPARE(b1.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(b1[0][0][0], 23);
+    CORRADE_COMPARE(b1[0][0][1], 76);
+
+    StridedArrayView3Di b2 = a.sliceSize(1, 1);
+    CORRADE_COMPARE(b2.size(), (Size3D{1, 2, 3}));
+    CORRADE_COMPARE(b2.stride(), (Stride3D{48, 24, 8}));
+    CORRADE_COMPARE(b2[0][0][0], 23);
+    CORRADE_COMPARE(b2[0][0][1], 76);
 
     StridedArrayView3Di c = a.prefix(1);
     CORRADE_COMPARE(c.size(), (Size3D{1, 2, 3}));

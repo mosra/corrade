@@ -96,9 +96,9 @@ to an arbitrary bit in the first byte, you're expected to take also
 @subsection Containers-BasicBitArrayView-usage-slicing View slicing
 
 Slicing functions match the @ref ArrayView interface --- @ref slice(),
-@ref prefix(), @ref suffix(), @ref exceptPrefix() and @ref exceptSuffix(),
-all operating with bit offsets. No pointer-taking overloads are provided as
-byte-level slicing would be too coarse.
+@ref sliceSize(), @ref prefix(), @ref suffix(), @ref exceptPrefix() and
+@ref exceptSuffix(), all operating with bit offsets. No pointer-taking
+overloads are provided as byte-level slicing would be too coarse.
 */
 /* All member functions are const because the view doesn't own the data */
 template<class T> class BasicBitArrayView {
@@ -223,16 +223,28 @@ template<class T> class BasicBitArrayView {
          * @brief View slice
          *
          * Both arguments are expected to be less than @p size().
-         * @see @ref prefix(), @ref suffix(), @ref exceptPrefix(),
-         *      @ref exceptSuffix()
+         * @see @ref sliceSize(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix()
          */
         constexpr BasicBitArrayView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
-         * @brief View on the first @p count bits
+         * @brief View slice of given size
+         *
+         * Equivalent to @cpp data.slice(begin, begin + size) @ce.
+         * @see @ref slice(), @ref prefix(), @ref suffix(),
+         *      @ref exceptPrefix(), @ref exceptSuffix()
+         */
+        constexpr BasicBitArrayView<T> sliceSize(std::size_t begin, std::size_t size) const {
+            return slice(begin, begin + size);
+        }
+
+        /**
+         * @brief View on the first @p size bits
          *
          * Equivalent to @cpp data.slice(0, size) @ce.
-         * @see @ref slice(), @ref exceptPrefix(), @ref suffix()
+         * @see @ref slice(), @ref sliceSize(), @ref exceptPrefix(),
+         *      @ref suffix()
          */
         constexpr BasicBitArrayView<T> prefix(std::size_t size) const {
             return slice(0, size);
@@ -242,7 +254,8 @@ template<class T> class BasicBitArrayView {
          * @brief View on the last @p size bits
          *
          * Equivalent to @cpp data.slice(data.size() - size, data.size()) @ce.
-         * @see @ref slice(), @ref exceptSuffix(), @ref prefix()
+         * @see @ref slice(), @ref sliceSize(), @ref exceptSuffix(),
+         *      @ref prefix()
          */
         constexpr BasicBitArrayView<T> suffix(std::size_t size) const {
             return slice((_sizeOffset >> 3) - size, _sizeOffset >> 3);
@@ -252,7 +265,8 @@ template<class T> class BasicBitArrayView {
          * @brief View except the first @p size bits
          *
          * Equivalent to @cpp data.slice(size, data.size()) @ce.
-         * @see @ref slice(), @ref prefix(), @ref exceptSuffix()
+         * @see @ref slice(), @ref sliceSize(), @ref prefix(),
+         *      @ref exceptSuffix()
          */
         constexpr BasicBitArrayView<T> exceptPrefix(std::size_t size) const {
             return slice(size, _sizeOffset >> 3);
@@ -262,7 +276,8 @@ template<class T> class BasicBitArrayView {
          * @brief View except the last @p size bits
          *
          * Equivalent to @cpp data.slice(0, data.size() - size) @ce.
-         * @see @ref slice(), @ref suffix(), @ref exceptPrefix()
+         * @see @ref slice(), @ref sliceSize(), @ref suffix(),
+         *      @ref exceptPrefix()
          */
         constexpr BasicBitArrayView<T> exceptSuffix(std::size_t size) const {
             return slice(0, (_sizeOffset >> 3) - size);
