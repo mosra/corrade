@@ -377,16 +377,19 @@ workflows:
     # dependencies especially for the macOS jobs that take the most credits.
     jobs:
     - linux
+    - linux-nondeprecated
     - linux-arm64:
         requires:
         - linux
+        - linux-nondeprecated
     - linux-static:
         requires:
         - linux
-    - linux-nondeprecated
+        - linux-nondeprecated
     - linux-sanitizers:
         requires:
         - linux
+        - linux-nondeprecated
     - linux-threadsanitizer:
         requires:
         - linux-sanitizers
