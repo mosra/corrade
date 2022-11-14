@@ -46,25 +46,25 @@ namespace Implementation {
     /* Used in the assertion that data array is large enough. If any size
        element is zero, the data can be zero-sized as well. Otherwise we have
        to compare against max stride. */
-    template<unsigned dimensions> constexpr bool isAnySizeZero(const StridedDimensions<dimensions, std::size_t>&, Sequence<>) {
+    template<unsigned dimensions> constexpr bool isAnySizeZero(const Size<dimensions>&, Sequence<>) {
         return false;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr bool isAnySizeZero(const StridedDimensions<dimensions, std::size_t>& size, Sequence<first, next...>) {
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr bool isAnySizeZero(const Size<dimensions>& size, Sequence<first, next...>) {
         return !size[first] || isAnySizeZero(size, Sequence<next...>{});
     }
-    template<unsigned dimensions> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>&, const StridedDimensions<dimensions, std::ptrdiff_t>&, Sequence<>) {
+    template<unsigned dimensions> constexpr std::size_t largestStride(const Size<dimensions>&, const Stride<dimensions>&, Sequence<>) {
         return 0;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, Sequence<first, next...>) {
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const Size<dimensions>& size, const Stride<dimensions>& stride, Sequence<first, next...>) {
         return Utility::max(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
     }
 
     /* Calculates stride when just size is passed */
-    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const StridedDimensions<dimensions, std::size_t>&, std::size_t, Sequence<>) {
+    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>&, std::size_t, Sequence<>) {
         return 1;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const StridedDimensions<dimensions, std::size_t>& size, std::size_t index, Sequence<first, next...>) {
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>& size, std::size_t index, Sequence<first, next...>) {
         /* GCC since version 10.2 complains that
             warning: comparison of unsigned expression in ‘< 0’ is always false [-Wtype-limits]
            and there's no way to silence that except for a pragma (doing things
@@ -87,7 +87,7 @@ namespace Implementation {
         #pragma GCC diagnostic pop
         #endif
     }
-    template<unsigned dimensions, std::size_t ...index> constexpr StridedDimensions<dimensions, std::ptrdiff_t> strideForSize(const StridedDimensions<dimensions, std::size_t>& size, std::size_t typeSize, Sequence<index...>) {
+    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const Size<dimensions>& size, std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
     /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
@@ -105,7 +105,7 @@ namespace Implementation {
     }
     /* So ArrayTuple can know the total size without having to include this
        header */
-    template<unsigned dimensions> std::size_t sizeProduct(const StridedDimensions<dimensions, std::size_t>& size) {
+    template<unsigned dimensions> std::size_t sizeProduct(const Size<dimensions>& size) {
         std::size_t out = 1;
         for(std::size_t i = 0; i != dimensions; ++i)
             out *= size[i];
@@ -120,7 +120,7 @@ namespace Implementation {
            to friend dataRef<>() being used below. AMAZING */
         inline
         #endif
-    StridedDimensions<dimensions, std::size_t>& sizeRef(StridedArrayView<dimensions, T>& view) {
+    Size<dimensions>& sizeRef(StridedArrayView<dimensions, T>& view) {
         return view._size;
     }
     template<unsigned dimensions, class T>
@@ -130,20 +130,22 @@ namespace Implementation {
            to friend dataRef<>() being used below. AMAZING */
         inline
         #endif
-    StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(StridedArrayView<dimensions, T>& view) {
+    Stride<dimensions>& strideRef(StridedArrayView<dimensions, T>& view) {
         return view._stride;
     }
     #endif
 }
 
 /**
-@brief Helper for specifying sizes and strides for @ref StridedArrayView
+@brief Multi-dimensional size and stride for @ref StridedArrayView
 @m_since{2019,10}
 
 Main property compared to a plain C array of value is convertibility from/to
 @ref StaticArrayView, implicit conversion from/to a scalar type in the
 one-dimensional case and element-wise equality comparison. See
 @ref StridedArrayView for actual usage examples.
+@see @ref Size, @ref Size1D, @ref Size2D, @ref Size3D, @ref Size4D,
+    @ref Stride, @ref Stride1D, @ref Stride2D, @ref Stride3D, @ref Stride4D
 */
 template<unsigned dimensions, class T> class StridedDimensions {
     public:
@@ -242,6 +244,90 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
         T _data[dimensions];
 };
+
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
+/**
+@brief Multi-dimensional size for @ref StridedArrayView
+@m_since_latest
+
+@see @ref Size1D, @ref Size2D, @ref Size3D, @ref Size4D, @ref Stride
+*/
+template<unsigned dimensions> using Size = StridedDimensions<dimensions, std::size_t>;
+#endif
+
+/**
+@brief Size for @ref StridedArrayView1D
+@m_since_latest
+
+@see @ref Size2D, @ref Size3D, @ref Size4D, @ref Stride1D
+*/
+typedef Size<1> Size1D;
+
+/**
+@brief Size for @ref StridedArrayView2D
+@m_since_latest
+
+@see @ref Size1D, @ref Size3D, @ref Size4D, @ref Stride2D
+*/
+typedef Size<2> Size2D;
+
+/**
+@brief Size for @ref StridedArrayView3D
+@m_since_latest
+
+@see @ref Size1D, @ref Size2D, @ref Size4D, @ref Stride3D
+*/
+typedef Size<3> Size3D;
+
+/**
+@brief Size for @ref StridedArrayView4D
+@m_since_latest
+
+@see @ref Size1D, @ref Size2D, @ref Size3D, @ref Stride4D
+*/
+typedef Size<4> Size4D;
+
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
+/**
+@brief Multi-dimensional stride for @ref StridedArrayView
+@m_since_latest
+
+@see @ref Stride1D, @ref Size2D, @ref Size3D, @ref Size4D, @ref Stride
+*/
+template<unsigned dimensions> using Stride = StridedDimensions<dimensions, std::ptrdiff_t>;
+#endif
+
+/**
+@brief Stride for @ref StridedArrayView1D
+@m_since_latest
+
+@see @ref Stride2D, @ref Stride3D, @ref Stride4D, @ref Size1D
+*/
+typedef Stride<1> Stride1D;
+
+/**
+@brief Stride for @ref StridedArrayView2D
+@m_since_latest
+
+@see @ref Stride1D, @ref Stride3D, @ref Stride4D, @ref Size2D
+*/
+typedef Stride<2> Stride2D;
+
+/**
+@brief Stride for @ref StridedArrayView3D
+@m_since_latest
+
+@see @ref Stride1D, @ref Stride2D, @ref Stride4D, @ref Size3D
+*/
+typedef Stride<3> Stride3D;
+
+/**
+@brief Stride for @ref StridedArrayView4D
+@m_since_latest
+
+@see @ref Stride1D, @ref Stride2D, @ref Stride3D, @ref Size4D
+*/
+typedef Stride<4> Stride4D;
 
 /**
 @brief Multi-dimensional array view with size and stride information
@@ -387,17 +473,23 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         typedef typename std::conditional<std::is_const<T>::value, const void, void>::type ErasedType;
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Size values
-         * @m_since{2019,10}
+         * @m_deprecated_since_latest Use @ref Containers::Size instead.
+         * @todo when removing, clean up all Containers::Size<dimensions> in
+         *      the class to be just Size<dimensions> again
          */
-        typedef StridedDimensions<dimensions, std::size_t> Size;
+        typedef CORRADE_DEPRECATED("use Containers::Size instead") Containers::Size<dimensions> Size;
 
         /**
          * @brief Stride values
-         * @m_since{2019,10}
+         * @m_deprecated_since_latest Use @ref Containers::Stride instead.
+         * @todo when removing, clean up all Containers::Stride<dimensions> in
+         *      the class to be just Stride<dimensions> again
          */
-        typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
+        typedef CORRADE_DEPRECATED("use Containers::Stride instead") Containers::Stride<dimensions> Stride;
+        #endif
 
         enum: unsigned {
             /**
@@ -432,7 +524,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * conditions, so be extra careful when specifying these.
          * @see @ref stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType>, T*, std::size_t, std::ptrdiff_t)
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Size& size, const Stride& stride) noexcept: _data{(
+        constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
             /* A strided array view is usually not created from scratch in
                tight loops (except for slicing) and should be as checked as
                possible, so it's not a debug assert */
@@ -457,7 +549,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * second parameter.
          * @see @ref stridedArrayView(ArrayView<T>, std::size_t, std::ptrdiff_t)
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
 
         /**
          * @brief Construct a view with explicit size
@@ -469,7 +561,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * implicitly @cpp sizeof(T) @ce. In an one-dimensional case you
          * probably want to use @ref StridedArrayView(ArrayView<U>) instead.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Size& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
          * @brief Construct a view on an array with explicit length
@@ -584,7 +676,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * for all dimensions in generic implementations.
          * @see @ref stride(), @ref isEmpty()
          */
-        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Containers::Size<dimensions>&>::type size() const { return _size; }
 
         /**
          * @brief Array stride
@@ -595,7 +687,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * behavior for all dimensions in generic implementations.
          * @see @ref size()
          */
-        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
+        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Containers::Stride<dimensions>&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
@@ -724,7 +816,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * dimensions is set to @cpp 1 @ce and and stride to size of @ref Type.
          * @see @ref slice(std::size_t, std::size_t) const, @ref slice() const
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice(const Size& begin, const Size& end) const;
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const;
 
         /**
          * @brief Expand or shrink dimension count
@@ -827,7 +919,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref prefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes count and not begin
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> prefix(const Size& count) const {
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> prefix(const Containers::Size<dimensions>& count) const {
             return slice<newDimensions>({}, count);
         }
 
@@ -869,7 +961,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref exceptSuffix(const Size&) const,
          *      @ref exceptSuffix(std::size_t) const
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptPrefix(const Size& count) const {
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptPrefix(const Containers::Size<dimensions>& count) const {
             return slice<newDimensions>(count, _size);
         }
 
@@ -877,7 +969,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /** @copybrief exceptPrefix()
          * @m_deprecated_since_latest Use @ref exceptPrefix() instead.
          */
-        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptPrefix() instead") StridedArrayView<newDimensions, T> suffix(const Size& begin) const {
+        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptPrefix() instead") StridedArrayView<newDimensions, T> suffix(const Containers::Size<dimensions>& begin) const {
             return slice<newDimensions>(begin, _size);
         }
         #endif
@@ -917,14 +1009,14 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref exceptPrefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes count and not begin
          */
-        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptSuffix(const Size& count) const;
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptSuffix(const Containers::Size<dimensions>& count) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @copybrief exceptSuffix()
          * @m_deprecated_since_latest Use @ref exceptSuffix() instead.
          */
-        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptSuffix() instead") StridedArrayView<newDimensions, T> except(const Size& count) const {
+        template<unsigned newDimensions = dimensions> CORRADE_DEPRECATED("use exceptSuffix() instead") StridedArrayView<newDimensions, T> except(const Containers::Size<dimensions>& count) const {
             return exceptSuffix<newDimensions>(count);
         }
         #endif
@@ -948,7 +1040,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * accordingly. Negative @p skip is equivalent to first calling
          * @ref flipped() and then this function with a positive value.
          */
-        StridedArrayView<dimensions, T> every(const Stride& skip) const;
+        StridedArrayView<dimensions, T> every(const Containers::Stride<dimensions>& skip) const;
 
         /**
          * @brief Transpose two dimensions
@@ -995,8 +1087,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
         friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* So Python buffer protocol can point to the size / stride members */
-        friend StridedDimensions<dimensions, std::size_t>& Implementation::sizeRef<>(StridedArrayView<dimensions, T>&);
-        friend StridedDimensions<dimensions, std::ptrdiff_t>& Implementation::strideRef<>(StridedArrayView<dimensions, T>&);
+        friend Size<dimensions>& Implementation::sizeRef<>(StridedArrayView<dimensions, T>&);
+        friend Stride<dimensions>& Implementation::strideRef<>(StridedArrayView<dimensions, T>&);
         #endif
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
@@ -1011,15 +1103,15 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
            getting matched when pass */
-        constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, ErasedType* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride, ErasedType* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 
         ErasedType* _data;
-        Size _size;
-        Stride _stride;
+        Containers::Size<dimensions> _size;
+        Containers::Stride<dimensions> _stride;
 };
 
 /**
@@ -1065,11 +1157,23 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         typedef void ErasedType;
 
-        /** @brief Size values */
-        typedef StridedDimensions<dimensions, std::size_t> Size;
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Size values
+         * @m_deprecated_since_latest Use @ref Containers::Size instead.
+         * @todo when removing, clean up all Containers::Size<dimensions> in
+         *      the class to be just Size<dimensions> again
+         */
+        typedef CORRADE_DEPRECATED("use Containers::Size instead") Containers::Size<dimensions> Size;
 
-        /** @brief Stride values */
-        typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
+        /**
+         * @brief Stride values
+         * @m_deprecated_since_latest Use @ref Containers::Stride instead.
+         * @todo when removing, clean up all Containers::Stride<dimensions> in
+         *      the class to be just Stride<dimensions> again
+         */
+        typedef CORRADE_DEPRECATED("use Containers::Stride instead") Containers::Stride<dimensions> Stride;
+        #endif
 
         enum: unsigned {
             Dimensions = dimensions     /**< View dimensions */
@@ -1099,7 +1203,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, void* member, const Size& size, const Stride& stride) noexcept: _data{(
+        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
             /* A strided array view is usually not created from scratch in
                tight loops (except for slicing) and should be as checked as
                possible, so it's not a debug assert */
@@ -1122,7 +1226,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * with @p data as the first parameter and @cpp data.data() @ce as the
          * second parameter.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
 
         /* size-only constructor not provided for void overloads as there's
            little chance one would want an implicit stride of 1 */
@@ -1218,7 +1322,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * for all dimensions in generic implementations.
          * @see @ref stride(), @ref isEmpty()
          */
-        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Containers::Size<dimensions>&>::type size() const { return _size; }
 
         /**
          * @brief Array stride
@@ -1229,7 +1333,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * behavior for all dimensions in generic implementations.
          * @see @ref size()
          */
-        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
+        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Containers::Stride<dimensions>&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
@@ -1256,15 +1360,15 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
            getting matched when pass */
-        constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride, void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 
         void* _data;
-        Size _size;
-        Stride _stride;
+        Containers::Size<dimensions> _size;
+        Containers::Stride<dimensions> _stride;
 };
 
 /**
@@ -1310,11 +1414,23 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          */
         typedef const void ErasedType;
 
-        /** @brief Size values */
-        typedef StridedDimensions<dimensions, std::size_t> Size;
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Size values
+         * @m_deprecated_since_latest Use @ref Containers::Size instead.
+         * @todo when removing, clean up all Containers::Size<dimensions> in
+         *      the class to be just Size<dimensions> again
+         */
+        typedef CORRADE_DEPRECATED("use Containers::Size instead") Containers::Size<dimensions> Size;
 
-        /** @brief Stride values */
-        typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
+        /**
+         * @brief Stride values
+         * @m_deprecated_since_latest Use @ref Containers::Stride instead.
+         * @todo when removing, clean up all Containers::Stride<dimensions> in
+         *      the class to be just Stride<dimensions> again
+         */
+        typedef CORRADE_DEPRECATED("use Containers::Stride instead") Containers::Stride<dimensions> Stride;
+        #endif
 
         enum: unsigned {
             Dimensions = dimensions     /**< View dimensions */
@@ -1344,7 +1460,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const void* member, const Size& size, const Stride& stride) noexcept: _data{(
+        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
             /* A strided array view is usually not created from scratch in
                tight loops (except for slicing) and should be as checked as
                possible, so it's not a debug assert */
@@ -1370,7 +1486,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * with @p data as the first parameter and @cpp data.data() @ce as the
          * second parameter.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
 
         /**
          * @brief Construct a const void view on an array with explicit length
@@ -1462,7 +1578,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * for all dimensions in generic implementations.
          * @see @ref stride(), @ref isEmpty()
          */
-        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Containers::Size<dimensions>&>::type size() const { return _size; }
 
         /**
          * @brief Array stride
@@ -1473,7 +1589,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * behavior for all dimensions in generic implementations.
          * @see @ref size()
          */
-        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
+        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Containers::Stride<dimensions>&>::type stride() const { return _stride; }
 
         /**
          * @brief Whether the view is empty
@@ -1505,15 +1621,15 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
            getting matched when pass */
-        constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, const void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride, const void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
             return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
         }
 
         const void* _data;
-        Size _size;
-        Stride _stride;
+        Containers::Size<dimensions> _size;
+        Containers::Stride<dimensions> _stride;
 };
 
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
@@ -1792,8 +1908,8 @@ template<> struct ArrayCastFlattenOrInflate<0> {
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] % sizeof(U) == 0,
             "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a" << sizeof(U) << Utility::Debug::nospace << "-byte type got" << sizeof(T)*view._size._data[dimensions - 1], {});
 
-        StridedDimensions<dimensions, std::size_t> size;
-        StridedDimensions<dimensions, std::ptrdiff_t> stride;
+        Size<dimensions> size;
+        Stride<dimensions> stride;
         size._data[dimensions - 1] = sizeof(T)*view._size._data[dimensions - 1]/sizeof(U);
         stride._data[dimensions - 1] = sizeof(U);
         for(std::size_t i = 0; i != dimensions - 1; ++i) {
@@ -1811,8 +1927,8 @@ template<> struct ArrayCastFlattenOrInflate<+1> {
            as it is already checked with the above static_assert() at compile
            time -- assuming no stride was smaller than sizeof(T) before, it
            won't be smaller than sizeof(U) either since sizeof(T) > sizeof(U) */
-        StridedDimensions<dimensions + 1, std::size_t> size;
-        StridedDimensions<dimensions + 1, std::ptrdiff_t> stride;
+        Size<dimensions + 1> size;
+        Stride<dimensions + 1> stride;
         size._data[dimensions] = lastDimensionSize;
         stride._data[dimensions] = sizeof(U);
         for(std::size_t i = 0; i != dimensions; ++i) {
@@ -1946,7 +2062,7 @@ template<unsigned dimensions, class T> class StridedIterator {
         typedef typename std::conditional<dimensions == 1, T&, StridedArrayView<dimensions - 1, T>>::type ElementType;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        /*implicit*/ StridedIterator(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, std::size_t i) noexcept: _data{data}, _size{size}, _stride{stride}, _i{i} {}
+        /*implicit*/ StridedIterator(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size<dimensions>& size, const Stride<dimensions>& stride, std::size_t i) noexcept: _data{data}, _size{size}, _stride{stride}, _i{i} {}
 
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         /* Needed by MSVC 2015 to make StridedIterator usable with
@@ -2038,8 +2154,8 @@ template<unsigned dimensions, class T> class StridedIterator {
 
     private:
         typename std::conditional<std::is_const<T>::value, const void, void>::type* _data;
-        StridedDimensions<dimensions, std::size_t> _size;
-        StridedDimensions<dimensions, std::ptrdiff_t> _stride;
+        Size<dimensions> _size;
+        Stride<dimensions> _stride;
         std::size_t _i;
 };
 
@@ -2076,8 +2192,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
        be as checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(isContiguous<dimension>(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
 
-    StridedDimensions<dimension + 1, std::size_t> size;
-    StridedDimensions<dimension + 1, std::ptrdiff_t> stride;
+    Containers::Size<dimension + 1> size;
+    Containers::Stride<dimension + 1> stride;
     for(std::size_t i = 0; i != dimension; ++i) {
         size._data[i] = _size._data[i];
         stride._data[i] = _stride._data[i];
@@ -2093,15 +2209,15 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
 
 namespace Implementation {
     template<unsigned dimensions, class T> struct StridedElement {
-        static StridedArrayView<dimensions - 1, T> get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, std::size_t i) {
+        static StridedArrayView<dimensions - 1, T> get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size<dimensions>& size, const Stride<dimensions>& stride, std::size_t i) {
             return StridedArrayView<dimensions - 1, T>{
-                StridedDimensions<dimensions - 1, std::size_t>(size._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
-                StridedDimensions<dimensions - 1, std::ptrdiff_t>(stride._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
+                Size<dimensions - 1>(size._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
+                Stride<dimensions - 1>(stride._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
                 static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]};
         }
     };
     template<class T> struct StridedElement<1, T> {
-        static T& get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const StridedDimensions<1, std::size_t>&, const StridedDimensions<1, std::ptrdiff_t>& stride, std::size_t i) {
+        static T& get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size1D&, const Stride1D& stride, std::size_t i) {
             return *(reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]));
         }
     };
@@ -2128,16 +2244,16 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
         << begin << Utility::Debug::nospace << ":"
         << Utility::Debug::nospace << end << Utility::Debug::nospace
         << "] out of range for" << _size._data[0] << "elements", {});
-    Size size = _size;
+    Containers::Size<dimensions> size = _size;
     size._data[0] = std::size_t(end - begin);
     return StridedArrayView<dimensions, T>{size, _stride,
         static_cast<ArithmeticType*>(_data) + begin*_stride._data[0]};
 }
 
-template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Size& begin, const Size& end) const {
+template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const {
     constexpr unsigned minDimensions = dimensions < newDimensions ? dimensions : newDimensions;
-    StridedDimensions<newDimensions, std::size_t> size{Corrade::NoInit};
-    StridedDimensions<newDimensions, std::ptrdiff_t> stride{Corrade::NoInit};
+    Size<newDimensions> size{Corrade::NoInit};
+    Stride<newDimensions> stride{Corrade::NoInit};
     auto data = static_cast<ArithmeticType*>(_data);
 
     /* Adjust data pointer based on offsets of all source dimensions */
@@ -2233,24 +2349,24 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
 }
 #endif
 
-template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::exceptSuffix(const Size& count) const {
-    Size end{Corrade::NoInit};
+template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::exceptSuffix(const Containers::Size<dimensions>& count) const {
+    Containers::Size<dimensions> end{Corrade::NoInit};
     for(std::size_t i = 0; i != dimensions; ++i)
         end._data[i] = _size._data[i] - count._data[i];
     return slice<newDimensions>({}, end);
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const std::ptrdiff_t step) const {
-    Stride steps;
+    Containers::Stride<dimensions> steps;
     steps[0] = step;
     for(std::size_t i = 1; i != dimensions; ++i) steps[i] = 1;
     return every(steps);
 }
 
-template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const Stride& step) const {
+template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const Containers::Stride<dimensions>& step) const {
     ErasedType* data = _data;
-    Size size = _size;
-    Stride stride = _stride;
+    Containers::Size<dimensions> size = _size;
+    Containers::Stride<dimensions> stride = _stride;
     for(std::size_t dimension = 0; dimension != dimensions; ++dimension) {
         /* Unlike plain slice(begin, end), complex slicing is usually not
            called in tight loops and should be as checked as possible, so it's
@@ -2277,8 +2393,8 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
     static_assert(dimensionA < dimensions && dimensionB < dimensions,
         "dimensions out of range");
 
-    Size size = _size;
-    Stride stride = _stride;
+    Containers::Size<dimensions> size = _size;
+    Containers::Stride<dimensions> stride = _stride;
     std::swap(size._data[dimensionA], size._data[dimensionB]);
     std::swap(stride._data[dimensionA], stride._data[dimensionB]);
     return StridedArrayView{size, stride, _data};
@@ -2288,7 +2404,7 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
     static_assert(dimension < dimensions, "dimension out of range");
 
     ErasedType* data = static_cast<ArithmeticType*>(_data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
-    Stride stride = _stride;
+    Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] *= -1;
     return StridedArrayView{_size, stride, data};
 }
@@ -2301,9 +2417,9 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
     CORRADE_ASSERT(_size._data[dimension] == 1,
         "Containers::StridedArrayView::broadcasted(): can't broadcast dimension" << dimension << "with" << _size._data[dimension] << "elements", {});
 
-    Size size_ = _size;
+    Containers::Size<dimensions> size_ = _size;
     size_._data[dimension] = size;
-    Stride stride = _stride;
+    Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] = 0;
     return StridedArrayView{size_, stride, _data};
 }

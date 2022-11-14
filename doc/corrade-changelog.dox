@@ -234,6 +234,11 @@ namespace Corrade {
     member typedef for consistency with other containers
 -   @ref Containers::StridedArrayView can now be used in STL algorithms such as
     @ref std::lower_bound() if you include @ref Corrade/Containers/StridedArrayViewStl.h
+-   Added convenience @ref Containers::Size, @ref Containers::Size1D,
+    @ref Containers::Size2D, @ref Containers::Size3D, @ref Containers::Size4D,
+    @ref Containers::Stride, @ref Containers::Stride1D,
+    @ref Containers::Stride2D, @ref Containers::Stride3D and
+    @ref Containers::Stride4D aliases for @ref Containers::StridedDimensions
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
@@ -505,6 +510,14 @@ namespace Corrade {
         @cpp suffix() @ce API, taking a suffix length instead of an offset, is
         scheduled to be reintroduced once enough time passes after the
         deprecated API gets removed to avoid silent breakages in existing code.
+-   `Size` and `Stride` typedefs in @ref Containers::StridedArrayView are
+    deprecated in favor of @relativeref{Containers,Size},
+    @relativeref{Containers,Size1D}, @relativeref{Containers,Size2D},
+    @relativeref{Containers,Size3D}, @relativeref{Containers,Size4D},
+    @relativeref{Containers,Stride}, @relativeref{Containers,Stride1D},
+    @relativeref{Containers,Stride2D}, @relativeref{Containers,Stride3D} and
+    @relativeref{Containers,Stride4D} aliases living directly in the
+    @ref Containers namespace, as those are significantly shorter to type
 -   @cpp Utility::Directory::isSandboxed() @ce is deprecated in favor of
     @ref Utility::System::isSandboxed(), as that's the better place for this
     API to live in

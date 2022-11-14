@@ -79,9 +79,9 @@ void copy(const Containers::StridedArrayView1D<const char>& src, const Container
 }
 
 void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
-    const Containers::StridedDimensions<2, std::size_t> srcSize = src.size();
+    const Containers::Size2D srcSize = src.size();
     #ifndef CORRADE_NO_ASSERT
-    const Containers::StridedDimensions<2, std::size_t> dstSize = dst.size();
+    const Containers::Size2D dstSize = dst.size();
     #endif
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
@@ -102,9 +102,9 @@ void copy(const Containers::StridedArrayView2D<const char>& src, const Container
 }
 
 void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
-    const Containers::StridedDimensions<3, std::size_t> srcSize = src.size();
+    const Containers::Size3D srcSize = src.size();
     #ifndef CORRADE_NO_ASSERT
-    const Containers::StridedDimensions<3, std::size_t> dstSize = dst.size();
+    const Containers::Size3D dstSize = dst.size();
     #endif
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
@@ -125,9 +125,9 @@ void copy(const Containers::StridedArrayView3D<const char>& src, const Container
 }
 
 void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
-    const Containers::StridedDimensions<4, std::size_t> srcSize = src.size();
+    const Containers::Size4D srcSize = src.size();
     #ifndef CORRADE_NO_ASSERT
-    const Containers::StridedDimensions<4, std::size_t> dstSize = dst.size();
+    const Containers::Size4D dstSize = dst.size();
     #endif
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
@@ -147,8 +147,8 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
     if(src.isContiguous() && dst.isContiguous())
         std::memcpy(dstPtr, srcPtr, size[0]*size[1]*size[2]*size[3]);
     else {
-        const Containers::StridedDimensions<4, std::ptrdiff_t> srcStride_ = src.stride();
-        const Containers::StridedDimensions<4, std::ptrdiff_t> dstStride_ = dst.stride();
+        const Containers::Stride4D srcStride_ = src.stride();
+        const Containers::Stride4D dstStride_ = dst.stride();
         const std::ptrdiff_t* const srcStride = srcStride_.begin();
         const std::ptrdiff_t* const dstStride = dstStride_.begin();
 

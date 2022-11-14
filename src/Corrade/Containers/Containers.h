@@ -60,6 +60,17 @@ typedef BasicBitArrayView<const char> BitArrayView;
 typedef BasicBitArrayView<char> MutableBitArrayView;
 
 template<unsigned, class> class StridedDimensions;
+template<unsigned dimensions> using Size = StridedDimensions<dimensions, std::size_t>;
+typedef Size<1> Size1D;
+typedef Size<2> Size2D;
+typedef Size<3> Size3D;
+typedef Size<4> Size4D;
+template<unsigned dimensions> using Stride = StridedDimensions<dimensions, std::ptrdiff_t>;
+typedef Stride<1> Stride1D;
+typedef Stride<2> Stride2D;
+typedef Stride<3> Stride3D;
+typedef Stride<4> Stride4D;
+
 template<unsigned, class> class StridedArrayView;
 template<unsigned, class> class StridedIterator;
 template<class T> using StridedArrayView1D = StridedArrayView<1, T>;

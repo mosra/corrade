@@ -190,13 +190,13 @@ void ArrayTupleTest::constructEmptyArrays() {
         CORRADE_COMPARE(strided.size(), 0);
         CORRADE_VERIFY(!strided.data());
         CORRADE_COMPARE(strided.stride(), 8);
-        CORRADE_COMPARE(strided3D.size(), (Containers::StridedArrayView3D<float>::Size{0, 0, 0}));
-        CORRADE_COMPARE(strided3D.stride(),  (Containers::StridedArrayView3D<float>::Stride{0, 0, 4}));
+        CORRADE_COMPARE(strided3D.size(), (Containers::Size3D{0, 0, 0}));
+        CORRADE_COMPARE(strided3D.stride(),  (Containers::Stride3D{0, 0, 4}));
         CORRADE_VERIFY(!strided3D.data());
 
         /* second dimension size and stride is always set for erased views */
-        CORRADE_COMPARE(stridedErased.size(), (Containers::StridedArrayView2D<char>::Size{0, 4}));
-        CORRADE_COMPARE(stridedErased.stride(),  (Containers::StridedArrayView2D<char>::Stride{4, 1}));
+        CORRADE_COMPARE(stridedErased.size(), (Containers::Size2D{0, 4}));
+        CORRADE_COMPARE(stridedErased.stride(),  (Containers::Stride2D{4, 1}));
         CORRADE_VERIFY(!stridedErased.data());
 
         /* Bit array pointer and both size and offset should be reset */
@@ -280,10 +280,10 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(aligned.size(), 3);
         CORRADE_COMPARE(strided.size(), 5);
         CORRADE_COMPARE(strided.stride(), 8);
-        CORRADE_COMPARE(strided3D.size(), (Containers::StridedArrayView3D<float>::Size{2, 1, 4}));
-        CORRADE_COMPARE(strided3D.stride(),  (Containers::StridedArrayView3D<float>::Stride{16, 16, 4}));
-        CORRADE_COMPARE(stridedErased.size(), (Containers::StridedArrayView2D<char>::Size{3, 4}));
-        CORRADE_COMPARE(stridedErased.stride(),  (Containers::StridedArrayView2D<char>::Stride{4, 1}));
+        CORRADE_COMPARE(strided3D.size(), (Containers::Size3D{2, 1, 4}));
+        CORRADE_COMPARE(strided3D.stride(),  (Containers::Stride3D{16, 16, 4}));
+        CORRADE_COMPARE(stridedErased.size(), (Containers::Size2D{3, 4}));
+        CORRADE_COMPARE(stridedErased.stride(),  (Containers::Stride2D{4, 1}));
         CORRADE_COMPARE(bits.offset(), 0);
         CORRADE_COMPARE(bits.size(), 27);
 

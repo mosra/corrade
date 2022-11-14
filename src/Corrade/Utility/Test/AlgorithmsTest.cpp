@@ -96,7 +96,7 @@ const struct {
 
 const struct {
     const char* name;
-    Containers::StridedDimensions<2, std::ptrdiff_t> srcStride, dstStride;
+    Containers::Stride2D srcStride, dstStride;
     bool flipped, transposed;
 } Copy2DData[]{
     {"contiguous", {5, 1}, {5, 1}, false, false},
@@ -110,7 +110,7 @@ const struct {
 
 const struct {
     const char* name;
-    Containers::StridedDimensions<3, std::ptrdiff_t> srcStride, dstStride;
+    Containers::Stride3D srcStride, dstStride;
     bool flipped, transposed;
 } Copy3DData[]{
     {"contiguous", {15, 5, 1}, {15, 5, 1}, false, false},
@@ -126,7 +126,7 @@ const struct {
 
 const struct {
     const char* name;
-    Containers::StridedDimensions<4, std::ptrdiff_t> srcStride, dstStride;
+    Containers::Stride4D srcStride, dstStride;
     bool flipped, transposed;
 } Copy4DData[]{
     {"contiguous", {105, 15, 5, 1}, {105, 15, 5, 1}, false, false},

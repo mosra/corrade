@@ -48,7 +48,7 @@ template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list);
 namespace Implementation {
     template<class T> T*& dataRef(Containers::ArrayView<T>&);
     template<unsigned dimensions, class T> T*& dataRef(Containers::StridedArrayView<dimensions, T>&);
-    template<unsigned dimensions> std::size_t sizeProduct(const StridedDimensions<dimensions, std::size_t>&);
+    template<unsigned dimensions> std::size_t sizeProduct(const Size<dimensions>&);
 }
 #endif
 
@@ -327,7 +327,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         }
 
         /** @overload */
-        template<unsigned dimensions, class T> /*implicit*/ Item(Corrade::ValueInitT, const StridedDimensions<dimensions, std::size_t>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::ValueInit, Implementation::sizeProduct(size), Implementation::dataRef(outputView)} {
+        template<unsigned dimensions, class T> /*implicit*/ Item(Corrade::ValueInitT, const Size<dimensions>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::ValueInit, Implementation::sizeProduct(size), Implementation::dataRef(outputView)} {
             /* Populate size of the output view. Pointer gets updated inside
                create(). */
             outputView = {{nullptr, Implementation::sizeProduct(size)}, size};
@@ -353,7 +353,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         template<class T> /*implicit*/ Item(std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /** @overload */
-        template<unsigned dimensions, class T> /*implicit*/ Item(const StridedDimensions<dimensions, std::size_t>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
+        template<unsigned dimensions, class T> /*implicit*/ Item(const Size<dimensions>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /** @overload */
         /*implicit*/ Item(std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, size, outputView} {}
@@ -387,7 +387,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         }
 
         /** @overload */
-        template<unsigned dimensions, class T> /*implicit*/ Item(Corrade::NoInitT, const StridedDimensions<dimensions, std::size_t>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::NoInit, Implementation::sizeProduct(size), Implementation::dataRef(outputView)} {
+        template<unsigned dimensions, class T> /*implicit*/ Item(Corrade::NoInitT, const Size<dimensions>& size, StridedArrayView<dimensions, T>& outputView): Item{Corrade::NoInit, Implementation::sizeProduct(size), Implementation::dataRef(outputView)} {
             /* Populate size of the output view. Pointer gets updated inside
                create(). */
             outputView = {{nullptr, Implementation::sizeProduct(size)}, size};

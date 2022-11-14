@@ -272,12 +272,6 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void castInflateVoidInvalid();
 };
 
-typedef StridedDimensions<1, std::size_t> Size1D;
-typedef StridedDimensions<1, std::ptrdiff_t> Stride1D;
-typedef StridedDimensions<2, std::size_t> Size2D;
-typedef StridedDimensions<2, std::ptrdiff_t> Stride2D;
-typedef StridedDimensions<3, std::size_t> Size3D;
-typedef StridedDimensions<3, std::ptrdiff_t> Stride3D;
 typedef StridedArrayView1D<int> StridedArrayView1Di;
 typedef StridedArrayView1D<const int> ConstStridedArrayView1Di;
 typedef StridedArrayView2D<int> StridedArrayView2Di;
@@ -3143,8 +3137,8 @@ void StridedArrayViewTest::sliceMemberPointer() {
     Containers::StridedArrayView2D<Data> view2D{data, {1, 2}};
     Containers::StridedArrayView2D<short> second2D = view2D.slice(&Data::second);
     CORRADE_COMPARE(second2D.data(), &view2D[0][0].second);
-    CORRADE_COMPARE(second2D.size(), (Containers::StridedArrayView2D<short>::Size{1, 2}));
-    CORRADE_COMPARE(second2D.stride(), (Containers::StridedArrayView2D<short>::Stride{sizeof(Data)*2, sizeof(Data)}));
+    CORRADE_COMPARE(second2D.size(), (Containers::Size2D{1, 2}));
+    CORRADE_COMPARE(second2D.stride(), (Containers::Stride2D{sizeof(Data)*2, sizeof(Data)}));
     CORRADE_COMPARE_AS(second2D[0],
         Containers::stridedArrayView<short>({3, 11}),
         TestSuite::Compare::Container);
@@ -3268,8 +3262,8 @@ void StridedArrayViewTest::sliceMemberFunctionPointer() {
     Containers::StridedArrayView2D<Data> view2D{data, {1, 2}};
     Containers::StridedArrayView2D<short> second2D = view2D.slice(&Data::second);
     CORRADE_COMPARE(second2D.data(), reinterpret_cast<char*>(data) + 4);
-    CORRADE_COMPARE(second2D.size(), (Containers::StridedArrayView2D<short>::Size{1, 2}));
-    CORRADE_COMPARE(second2D.stride(), (Containers::StridedArrayView2D<short>::Stride{sizeof(Data)*2, sizeof(Data)}));
+    CORRADE_COMPARE(second2D.size(), (Containers::Size2D{1, 2}));
+    CORRADE_COMPARE(second2D.stride(), (Containers::Stride2D{sizeof(Data)*2, sizeof(Data)}));
     CORRADE_COMPARE_AS(second2D[0],
         Containers::stridedArrayView<short>({3, 11}),
         TestSuite::Compare::Container);
