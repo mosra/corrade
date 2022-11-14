@@ -29,6 +29,7 @@
 #include "Corrade/Utility/Debug.h"
 
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
+#define DOXYGEN_IGNORE(...) __VA_ARGS__
 
 using namespace Corrade;
 
@@ -209,7 +210,7 @@ using namespace Bar;
 #endif
 /* [Cpu-usage-automatic-cached-dispatch-call] */
 #ifdef LOOKUP_USES_FUNCTION_POINTER
-int (*lookup)(DOXYGEN_ELLIPSIS(int));
+int (*lookup)(DOXYGEN_ELLIPSIS(int))DOXYGEN_IGNORE( = nullptr);
 #else
 int lookup(DOXYGEN_ELLIPSIS(int));
 #endif
