@@ -741,27 +741,27 @@ class CORRADE_UTILITY_EXPORT String {
         StringView suffix(const char* begin) const; /**< @overload */
 
         /**
-         * @brief View on the first @p count bytes
+         * @brief View on the first @p size bytes
          *
          * Equivalent to @ref BasicStringView::prefix(std::size_t) const. If
-         * @p count is equal to @ref size(), the result has
+         * @p size is equal to @ref size(), the result has
          * @ref StringViewFlag::NullTerminated set.
          */
-        MutableStringView prefix(std::size_t count);
-        StringView prefix(std::size_t count) const; /**< @overload */
+        MutableStringView prefix(std::size_t size);
+        StringView prefix(std::size_t size) const; /**< @overload */
 
-        /* Here will be suffix(std::size_t count), view on the last count
+        /* Here will be suffix(std::size_t size), view on the last size
            bytes, once the deprecated suffix(std::size_t begin) is gone and
            enough time passes to not cause silent breakages in existing code. */
 
         /**
-         * @brief View except the first @p count bytes
+         * @brief View except the first @p size bytes
          *
          * Equivalent to @ref BasicStringView::exceptPrefix(). The result has
          * always @ref StringViewFlag::NullTerminated set.
          */
-        MutableStringView exceptPrefix(std::size_t count);
-        StringView exceptPrefix(std::size_t count) const; /**< @overload */
+        MutableStringView exceptPrefix(std::size_t size);
+        StringView exceptPrefix(std::size_t size) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @copybrief exceptPrefix()
@@ -775,14 +775,14 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
-         * @brief View except the last @p count bytes
+         * @brief View except the last @p size bytes
          *
          * Equivalent to @ref BasicStringView::exceptSuffix(). If
-         * @p count is @cpp 0 @ce, the result has
+         * @p size is @cpp 0 @ce, the result has
          * @ref StringViewFlag::NullTerminated set.
          */
-        MutableStringView exceptSuffix(std::size_t count);
-        StringView exceptSuffix(std::size_t count) const; /**< @overload */
+        MutableStringView exceptSuffix(std::size_t size);
+        StringView exceptSuffix(std::size_t size) const; /**< @overload */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**

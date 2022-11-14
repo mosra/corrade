@@ -382,20 +382,20 @@ template<std::size_t size_, class T> class StaticArray {
          *
          * Equivalent to @ref StaticArrayView::slice(T*) const and overloads.
          */
-        template<std::size_t count> StaticArrayView<count, T> slice(T* begin) {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t size__> StaticArrayView<size__, T> slice(T* begin) {
+            return ArrayView<T>(*this).template slice<size__>(begin);
         }
         /** @overload */
-        template<std::size_t count> StaticArrayView<count, const T> slice(const T* begin) const {
-            return ArrayView<const T>(*this).template slice<count>(begin);
+        template<std::size_t size__> StaticArrayView<size__, const T> slice(const T* begin) const {
+            return ArrayView<const T>(*this).template slice<size__>(begin);
         }
         /** @overload */
-        template<std::size_t count> StaticArrayView<count, T> slice(std::size_t begin) {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t size__> StaticArrayView<size__, T> slice(std::size_t begin) {
+            return ArrayView<T>(*this).template slice<size__>(begin);
         }
         /** @overload */
-        template<std::size_t count> StaticArrayView<count, const T> slice(std::size_t begin) const {
-            return ArrayView<const T>(*this).template slice<count>(begin);
+        template<std::size_t size__> StaticArrayView<size__, const T> slice(std::size_t begin) const {
+            return ArrayView<const T>(*this).template slice<size__>(begin);
         }
 
         /**
@@ -443,49 +443,49 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
-         * @brief View on the first @p count items
+         * @brief View on the first @p size items
          *
          * Equivalent to @ref StaticArrayView::prefix(std::size_t) const.
          */
-        ArrayView<T> prefix(std::size_t count) {
-            return ArrayView<T>(*this).prefix(count);
+        ArrayView<T> prefix(std::size_t size) {
+            return ArrayView<T>(*this).prefix(size);
         }
         /** @overload */
-        ArrayView<const T> prefix(std::size_t count) const {
-            return ArrayView<const T>(*this).prefix(count);
+        ArrayView<const T> prefix(std::size_t size) const {
+            return ArrayView<const T>(*this).prefix(size);
         }
 
-        /* Here will be suffix(std::size_t count), view on the last count
+        /* Here will be suffix(std::size_t size), view on the last size
            items, once the deprecated suffix(std::size_t begin) is gone and
            enough time passes to not cause silent breakages in existing code. */
 
         /**
-         * @brief Fixed-size view on the first @p count items
+         * @brief Fixed-size view on the first @p size__ items
          *
          * Equivalent to @ref StaticArrayView::prefix() const and overloads.
          */
-        template<std::size_t count> StaticArrayView<count, T> prefix();
-        template<std::size_t count> StaticArrayView<count, const T> prefix() const; /**< @overload */
+        template<std::size_t size__> StaticArrayView<size__, T> prefix();
+        template<std::size_t size__> StaticArrayView<size__, const T> prefix() const; /**< @overload */
 
-        /* Here will be suffix<count>(), view on the last count items, once
+        /* Here will be suffix<size__>(), view on the last size__ items, once
            the deprecated suffix<begin_>() is gone and enough time passes to
            not cause silent breakages in existing code. */
 
         /**
-         * @brief View except the first @p count items
+         * @brief View except the first @p size items
          * @m_since_latest
          *
          * Equivalent to @ref StaticArrayView::exceptPrefix(std::size_t) const.
          */
-        ArrayView<T> exceptPrefix(std::size_t count) {
-            return ArrayView<T>(*this).exceptPrefix(count);
+        ArrayView<T> exceptPrefix(std::size_t size) {
+            return ArrayView<T>(*this).exceptPrefix(size);
         }
         /**
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> exceptPrefix(std::size_t count) const {
-            return ArrayView<const T>(*this).exceptPrefix(count);
+        ArrayView<const T> exceptPrefix(std::size_t size) const {
+            return ArrayView<const T>(*this).exceptPrefix(size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -504,21 +504,21 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
         /**
-         * @brief Fixed-size view except the first @p count items
+         * @brief Fixed-size view except the first @p size__ items
          * @m_since_latest
          *
          * Equivalent to @ref StaticArrayView::exceptPrefix() const and
          * overloads.
          */
-        template<std::size_t count> StaticArrayView<size_ - count, T> exceptPrefix() {
-            return StaticArrayView<size_, T>(*this).template exceptPrefix<count>();
+        template<std::size_t size__> StaticArrayView<size_ - size__, T> exceptPrefix() {
+            return StaticArrayView<size_, T>(*this).template exceptPrefix<size__>();
         }
          /**
           * @overload
           * @m_since_latest
           */
-        template<std::size_t count> StaticArrayView<size_ - count, const T> exceptPrefix() const {
-            return StaticArrayView<size_, const T>(*this).template exceptPrefix<count>();
+        template<std::size_t size__> StaticArrayView<size_ - size__, const T> exceptPrefix() const {
+            return StaticArrayView<size_, const T>(*this).template exceptPrefix<size__>();
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -539,20 +539,20 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
         /**
-         * @brief View except the last @p count items
+         * @brief View except the last @p size items
          * @m_since_latest
          *
          * Equivalent to @ref StaticArrayView::exceptSuffix(std::size_t) const.
          */
-        ArrayView<T> exceptSuffix(std::size_t count) {
-            return ArrayView<T>(*this).exceptSuffix(count);
+        ArrayView<T> exceptSuffix(std::size_t size) {
+            return ArrayView<T>(*this).exceptSuffix(size);
         }
         /**
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> exceptSuffix(std::size_t count) const {
-            return ArrayView<const T>(*this).exceptSuffix(count);
+        ArrayView<const T> exceptSuffix(std::size_t size) const {
+            return ArrayView<const T>(*this).exceptSuffix(size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -573,20 +573,20 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
         /**
-         * @brief Fixed-size view except the last @p count items
+         * @brief Fixed-size view except the last @p size__ items
          * @m_since_latest
          *
          * Equivalent to @ref StaticArrayView::exceptSuffix() const.
          */
-        template<std::size_t count> StaticArrayView<size_ - count, T> exceptSuffix() {
-            return StaticArrayView<size_, T>(*this).template exceptSuffix<count>();
+        template<std::size_t size__> StaticArrayView<size_ - size__, T> exceptSuffix() {
+            return StaticArrayView<size_, T>(*this).template exceptSuffix<size__>();
         }
         /**
          * @overload
          * @m_since_latest
          */
-        template<std::size_t count> StaticArrayView<size_ - count, const T> exceptSuffix() const {
-            return StaticArrayView<size_, const T>(*this).template exceptSuffix<count>();
+        template<std::size_t size__> StaticArrayView<size_ - size__, const T> exceptSuffix() const {
+            return StaticArrayView<size_, const T>(*this).template exceptSuffix<size__>();
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -798,14 +798,14 @@ template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T
     return *this;
 }
 
-template<std::size_t size_, class T> template<std::size_t count> StaticArrayView<count, T> StaticArray<size_, T>::prefix() {
-    static_assert(count <= size_, "prefix size too large");
-    return StaticArrayView<count, T>{_data};
+template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, T> StaticArray<size_, T>::prefix() {
+    static_assert(size__ <= size_, "prefix size too large");
+    return StaticArrayView<size__, T>{_data};
 }
 
-template<std::size_t size_, class T> template<std::size_t count> StaticArrayView<count, const T> StaticArray<size_, T>::prefix() const {
-    static_assert(count <= size_, "prefix size too large");
-    return StaticArrayView<count, const T>{_data};
+template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, const T> StaticArray<size_, T>::prefix() const {
+    static_assert(size__ <= size_, "prefix size too large");
+    return StaticArrayView<size__, const T>{_data};
 }
 
 namespace Implementation {

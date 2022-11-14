@@ -231,41 +231,41 @@ template<class T> class BasicBitArrayView {
         /**
          * @brief View on the first @p count bits
          *
-         * Equivalent to @cpp data.slice(0, count) @ce.
+         * Equivalent to @cpp data.slice(0, size) @ce.
          * @see @ref slice(), @ref exceptPrefix(), @ref suffix()
          */
-        constexpr BasicBitArrayView<T> prefix(std::size_t count) const {
-            return slice(0, count);
+        constexpr BasicBitArrayView<T> prefix(std::size_t size) const {
+            return slice(0, size);
         }
 
         /**
-         * @brief View on the last @p count bits
+         * @brief View on the last @p size bits
          *
-         * Equivalent to @cpp data.slice(data.size() - count, data.size()) @ce.
+         * Equivalent to @cpp data.slice(data.size() - size, data.size()) @ce.
          * @see @ref slice(), @ref exceptSuffix(), @ref prefix()
          */
-        constexpr BasicBitArrayView<T> suffix(std::size_t count) const {
-            return slice((_sizeOffset >> 3) - count, _sizeOffset >> 3);
+        constexpr BasicBitArrayView<T> suffix(std::size_t size) const {
+            return slice((_sizeOffset >> 3) - size, _sizeOffset >> 3);
         }
 
         /**
-         * @brief View except the first @p count bits
+         * @brief View except the first @p size bits
          *
-         * Equivalent to @cpp data.slice(count, data.size()) @ce.
+         * Equivalent to @cpp data.slice(size, data.size()) @ce.
          * @see @ref slice(), @ref prefix(), @ref exceptSuffix()
          */
-        constexpr BasicBitArrayView<T> exceptPrefix(std::size_t count) const {
-            return slice(count, _sizeOffset >> 3);
+        constexpr BasicBitArrayView<T> exceptPrefix(std::size_t size) const {
+            return slice(size, _sizeOffset >> 3);
         }
 
         /**
-         * @brief View except the last @p count bits
+         * @brief View except the last @p size bits
          *
-         * Equivalent to @cpp data.slice(0, data.size() - count) @ce.
+         * Equivalent to @cpp data.slice(0, data.size() - size) @ce.
          * @see @ref slice(), @ref suffix(), @ref exceptPrefix()
          */
-        constexpr BasicBitArrayView<T> exceptSuffix(std::size_t count) const {
-            return slice(0, (_sizeOffset >> 3) - count);
+        constexpr BasicBitArrayView<T> exceptSuffix(std::size_t size) const {
+            return slice(0, (_sizeOffset >> 3) - size);
         }
 
     private:

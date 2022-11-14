@@ -535,39 +535,39 @@ BasicStringView {
          * @p begin is @cpp nullptr @ce and the original view isn't, returns a
          * zero-sized @cpp nullptr @ce view.
          * @see @ref slice(T*, T*) const, @ref prefix(T*) const
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
         constexpr BasicStringView<T> suffix(T* begin) const {
             return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask));
         }
 
         /**
-         * @brief View on the first @p count bytes
+         * @brief View on the first @p size bytes
          *
-         * Equivalent to @cpp string.slice(0, count) @ce.
+         * Equivalent to @cpp string.slice(0, size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(), @ref prefix(T*) const
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
-        constexpr BasicStringView<T> prefix(std::size_t count) const {
-            return slice(0, count);
+        constexpr BasicStringView<T> prefix(std::size_t size) const {
+            return slice(0, size);
         }
 
-        /* Here will be suffix(std::size_t count), view on the last count
+        /* Here will be suffix(std::size_t size), view on the last size
            bytes, once the deprecated suffix(std::size_t begin) is gone and
            enough time passes to not cause silent breakages in existing code. */
 
         /**
-         * @brief View except the first @p count bytes
+         * @brief View except the first @p size bytes
          *
-         * Equivalent to @cpp string.slice(count, string.size()) @ce.
+         * Equivalent to @cpp string.slice(size, string.size()) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
          *      @ref prefix(std::size_t) const,
          *      @ref exceptSuffix(std::size_t) const,
          *      @ref exceptPrefix(StringView) const
          */
-        constexpr BasicStringView<T> exceptPrefix(std::size_t count) const {
-            return slice(count, _sizePlusFlags & ~Implementation::StringViewSizeMask);
+        constexpr BasicStringView<T> exceptPrefix(std::size_t size) const {
+            return slice(size, _sizePlusFlags & ~Implementation::StringViewSizeMask);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -580,16 +580,16 @@ BasicStringView {
         #endif
 
         /**
-         * @brief View except the last @p count bytes
+         * @brief View except the last @p size bytes
          *
-         * Equivalent to @cpp string.slice(0, string.size() - count) @ce.
+         * Equivalent to @cpp string.slice(0, string.size() - size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(std::size_t) const,
          *      @ref exceptSuffix(StringView) const
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
-        constexpr BasicStringView<T> exceptSuffix(std::size_t count) const {
-            return slice(0, (_sizePlusFlags & ~Implementation::StringViewSizeMask) - count);
+        constexpr BasicStringView<T> exceptSuffix(std::size_t size) const {
+            return slice(0, (_sizePlusFlags & ~Implementation::StringViewSizeMask) - size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED

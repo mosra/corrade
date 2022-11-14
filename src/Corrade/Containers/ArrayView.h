@@ -437,14 +437,14 @@ template<class T> class ArrayView {
         /**
          * @brief Fixed-size view slice
          *
-         * Both @p begin and @cpp begin + count @ce are expected to be in
+         * Both @p begin and @cpp begin + size_ @ce are expected to be in
          * range.
          * @see @ref prefix() const
          */
-        template<std::size_t count> constexpr StaticArrayView<count, T> slice(T* begin) const;
+        template<std::size_t size_> constexpr StaticArrayView<size_, T> slice(T* begin) const;
 
         /** @overload */
-        template<std::size_t count> constexpr StaticArrayView<count, T> slice(std::size_t begin) const;
+        template<std::size_t size_> constexpr StaticArrayView<size_, T> slice(std::size_t begin) const;
 
         /**
          * @brief Fixed-size view slice
@@ -475,61 +475,61 @@ template<class T> class ArrayView {
          * @cpp nullptr @ce and the original array isn't, returns zero-sized
          * @cpp nullptr @ce array.
          * @see @ref slice(T*, T*) const, @ref prefix(T*) const
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
         constexpr ArrayView<T> suffix(T* begin) const {
             return _data && !begin ? nullptr : slice(begin, _data + _size);
         }
 
         /**
-         * @brief View on the first @p count items
+         * @brief View on the first @p size items
          *
-         * Equivalent to @cpp data.slice(0, count) @ce.
+         * Equivalent to @cpp data.slice(0, size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
          *      @ref exceptPrefix(), @ref prefix(T*) const
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
-        constexpr ArrayView<T> prefix(std::size_t count) const {
-            return slice(0, count);
+        constexpr ArrayView<T> prefix(std::size_t size) const {
+            return slice(0, size);
         }
 
-        /* Here will be suffix(std::size_t count), view on the last count
+        /* Here will be suffix(std::size_t size), view on the last size
            items, once the deprecated suffix(std::size_t begin) is gone and
            enough time passes to not cause silent breakages in existing code.
-           The fixed-size suffix<count>() below could be added already as it
+           The fixed-size suffix<size_>() below could be added already as it
            doesn't clash with anything. */
 
         /**
-         * @brief Fixed-size view on the first @p count items
+         * @brief Fixed-size view on the first @p size_ items
          *
-         * Equivalent to @cpp data.slice<0, count>() @ce.
+         * Equivalent to @cpp data.slice<0, size_>() @ce.
          * @see @ref slice() const, @ref suffix() const
          */
-        template<std::size_t count> constexpr StaticArrayView<count, T> prefix() const {
-            return slice<0, count>();
+        template<std::size_t size_> constexpr StaticArrayView<size_, T> prefix() const {
+            return slice<0, size_>();
         }
 
         /**
-         * @brief Fixed-size view on the last @p count items
+         * @brief Fixed-size view on the last @p size_ items
          * @m_since_latest
          *
-         * Equivalent to @cpp data.slice<count>(data.size() - count) @ce.
+         * Equivalent to @cpp data.slice<size_>(data.size() - size_) @ce.
          * @see @ref slice() const, @ref prefix() const
          */
-        template<std::size_t count> constexpr StaticArrayView<count, T> suffix() const {
-            return slice<count>(_size - count);
+        template<std::size_t size_> constexpr StaticArrayView<size_, T> suffix() const {
+            return slice<size_>(_size - size_);
         }
 
         /**
-         * @brief View except the first @p count items
+         * @brief View except the first @p size items
          * @m_since_latest
          *
-         * Equivalent to @cpp data.slice(count, data.size()) @ce.
+         * Equivalent to @cpp data.slice(size, data.size()) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
          *      @ref prefix(std::size_t) const, @ref exceptSuffix()
          */
-        constexpr ArrayView<T> exceptPrefix(std::size_t count) const {
-            return slice(count, _size);
+        constexpr ArrayView<T> exceptPrefix(std::size_t size) const {
+            return slice(size, _size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -542,15 +542,15 @@ template<class T> class ArrayView {
         #endif
 
         /**
-         * @brief View except the last @p count items
+         * @brief View except the last @p size items
          * @m_since_latest
          *
-         * Equivalent to @cpp data.slice(0, data.size() - count) @ce.
+         * Equivalent to @cpp data.slice(0, data.size() - size) @ce.
          * @see @ref slice(std::size_t, std::size_t) const, @ref exceptPrefix()
-         * @todoc link to suffix(std::size_t) once it takes count and not begin
+         * @todoc link to suffix(std::size_t) once it takes size and not begin
          */
-        constexpr ArrayView<T> exceptSuffix(std::size_t count) const {
-            return slice(0, _size - count);
+        constexpr ArrayView<T> exceptSuffix(std::size_t size) const {
+            return slice(0, _size - size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1175,12 +1175,12 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /** @copydoc ArrayView::slice(T*) const */
-        template<std::size_t count> constexpr StaticArrayView<count, T> slice(T* begin) const {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t size__> constexpr StaticArrayView<size__, T> slice(T* begin) const {
+            return ArrayView<T>(*this).template slice<size__>(begin);
         }
         /** @overload */
-        template<std::size_t count> constexpr StaticArrayView<count, T> slice(std::size_t begin) const {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t size__> constexpr StaticArrayView<size__, T> slice(std::size_t begin) const {
+            return ArrayView<T>(*this).template slice<size__>(begin);
         }
 
         /**
@@ -1203,32 +1203,32 @@ template<std::size_t size_, class T> class StaticArrayView {
         }
 
         /** @copydoc ArrayView::prefix(std::size_t) const */
-        constexpr ArrayView<T> prefix(std::size_t count) const {
-            return ArrayView<T>(*this).prefix(count);
+        constexpr ArrayView<T> prefix(std::size_t size) const {
+            return ArrayView<T>(*this).prefix(size);
         }
 
-        /* Here will be suffix(std::size_t count), view on the last count
+        /* Here will be suffix(std::size_t size), view on the last size
            items, once the deprecated suffix(std::size_t begin) is gone and
            enough time passes to not cause silent breakages in existing code. */
 
         /**
-         * @brief Fixed-size view on the first @p count items
+         * @brief Fixed-size view on the first @p size_ items
          *
-         * Equivalent to @cpp data.slice<0, count>() @ce.
+         * Equivalent to @cpp data.slice<0, size_>() @ce.
          * @see @ref slice() const
-         * @todoc link to suffix() const once it takes count and not begin
+         * @todoc link to suffix() const once it takes size and not begin
          */
-        template<std::size_t count> constexpr StaticArrayView<count, T> prefix() const {
-            return slice<0, count>();
+        template<std::size_t size__> constexpr StaticArrayView<size__, T> prefix() const {
+            return slice<0, size__>();
         }
 
-        /* Here will be suffix<count>(), view on the last count items, once
+        /* Here will be suffix<size__>(), view on the last size__ items, once
            the deprecated suffix<begin_>() is gone and enough time passes to
            not cause silent breakages in existing code. */
 
         /** @copydoc ArrayView::exceptPrefix(std::size_t) const */
-        constexpr ArrayView<T> exceptPrefix(std::size_t count) const {
-            return ArrayView<T>(*this).exceptPrefix(count);
+        constexpr ArrayView<T> exceptPrefix(std::size_t size__) const {
+            return ArrayView<T>(*this).exceptPrefix(size__);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1241,14 +1241,14 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
 
         /**
-         * @brief Fixed-size view except the first @p count items
+         * @brief Fixed-size view except the first @p size__ items
          * @m_since_latest
          *
-         * Equivalent to @cpp data.slice<count, Size>() @ce.
+         * Equivalent to @cpp data.slice<size__, Size>() @ce.
          * @see @ref slice() const
          */
-        template<std::size_t count> constexpr StaticArrayView<size_ - count, T> exceptPrefix() const {
-            return slice<count, size_>();
+        template<std::size_t size__> constexpr StaticArrayView<size_ - size__, T> exceptPrefix() const {
+            return slice<size__, size_>();
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1262,8 +1262,8 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
 
         /** @copydoc ArrayView::exceptSuffix(std::size_t) const */
-        constexpr ArrayView<T> exceptSuffix(std::size_t count) const {
-            return ArrayView<T>(*this).exceptSuffix(count);
+        constexpr ArrayView<T> exceptSuffix(std::size_t size) const {
+            return ArrayView<T>(*this).exceptSuffix(size);
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1277,14 +1277,14 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
 
         /**
-         * @brief Fixed-size view except the last @p count items
+         * @brief Fixed-size view except the last @p size__ items
          * @m_since_latest
          *
-         * Equivalent to @cpp data.slice<0, Size - count>() @ce.
+         * Equivalent to @cpp data.slice<0, Size - size__>() @ce.
          * @see @ref slice() const
          */
-        template<std::size_t count> constexpr StaticArrayView<size_ - count, T> exceptSuffix() const {
-            return slice<0, size_ - count>();
+        template<std::size_t size__> constexpr StaticArrayView<size_ - size__, T> exceptSuffix() const {
+            return slice<0, size_ - size__>();
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1449,26 +1449,26 @@ template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::bac
     return _data[size_ - 1];
 }
 
-template<class T> template<std::size_t count> constexpr StaticArrayView<count, T> ArrayView<T>::slice(T* begin) const {
-    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin + count <= _data + _size,
+template<class T> template<std::size_t size_> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(T* begin) const {
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin + size_ <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data
             << Utility::Debug::nospace << ":"
-            << Utility::Debug::nospace << begin + count - _data
+            << Utility::Debug::nospace << begin + size_ - _data
             << Utility::Debug::nospace << "] out of range for" << _size
             << "elements"),
-        StaticArrayView<count, T>{begin};
+        StaticArrayView<size_, T>{begin};
 }
 
-template<class T> template<std::size_t count> constexpr StaticArrayView<count, T> ArrayView<T>::slice(std::size_t begin) const {
-    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin + count <= _size,
+template<class T> template<std::size_t size_> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(std::size_t begin) const {
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin + size_ <= _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin
             << Utility::Debug::nospace << ":"
-            << Utility::Debug::nospace << begin + count
+            << Utility::Debug::nospace << begin + size_
             << Utility::Debug::nospace << "] out of range for" << _size
             << "elements"),
-        StaticArrayView<count, T>{_data + begin};
+        StaticArrayView<size_, T>{_data + begin};
 }
 
 template<class T> template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> ArrayView<T>::slice() const {

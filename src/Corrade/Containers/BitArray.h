@@ -314,36 +314,36 @@ class CORRADE_UTILITY_EXPORT BitArray {
         BitArrayView slice(std::size_t begin, std::size_t end) const; /**< @overload */
 
         /**
-         * @brief View on the first @p count bits
+         * @brief View on the first @p size bits
          *
          * Equivalent to @ref BasicBitArrayView::prefix().
          */
-        MutableBitArrayView prefix(std::size_t count);
-        BitArrayView prefix(std::size_t count) const; /**< @overload */
+        MutableBitArrayView prefix(std::size_t size);
+        BitArrayView prefix(std::size_t size) const; /**< @overload */
 
         /**
-         * @brief View on the last @p count bits
+         * @brief View on the last @p size bits
          *
          * Equivalent to @ref BasicBitArrayView::suffix().
          */
-        MutableBitArrayView suffix(std::size_t count);
-        BitArrayView suffix(std::size_t count) const; /**< @overload */
+        MutableBitArrayView suffix(std::size_t size);
+        BitArrayView suffix(std::size_t size) const; /**< @overload */
 
         /**
-         * @brief View except the first @p count bits
+         * @brief View except the first @p size bits
          *
          * Equivalent to @ref BasicBitArrayView::exceptPrefix().
          */
-        MutableBitArrayView exceptPrefix(std::size_t count);
-        BitArrayView exceptPrefix(std::size_t count) const; /**< @overload */
+        MutableBitArrayView exceptPrefix(std::size_t size);
+        BitArrayView exceptPrefix(std::size_t size) const; /**< @overload */
 
         /**
-         * @brief View except the last @p count bits
+         * @brief View except the last @p size bits
          *
          * Equivalent to @ref BasicBitArrayView::exceptSuffix().
          */
-        MutableBitArrayView exceptSuffix(std::size_t count);
-        BitArrayView exceptSuffix(std::size_t count) const; /**< @overload */
+        MutableBitArrayView exceptSuffix(std::size_t size);
+        BitArrayView exceptSuffix(std::size_t size) const; /**< @overload */
 
         /**
          * @brief Release data storage

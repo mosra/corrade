@@ -110,32 +110,32 @@ BitArrayView BitArray::slice(const std::size_t begin, const std::size_t end) con
     return BitArrayView{*this}.slice(begin, end);
 }
 
-MutableBitArrayView BitArray::prefix(const std::size_t count) {
-    return MutableBitArrayView{*this}.prefix(count);
+MutableBitArrayView BitArray::prefix(const std::size_t size) {
+    return MutableBitArrayView{*this}.prefix(size);
 }
-BitArrayView BitArray::prefix(const std::size_t count) const {
-    return BitArrayView{*this}.prefix(count);
-}
-
-MutableBitArrayView BitArray::suffix(const std::size_t count) {
-    return MutableBitArrayView{*this}.suffix(count);
-}
-BitArrayView BitArray::suffix(const std::size_t count) const {
-    return BitArrayView{*this}.suffix(count);
+BitArrayView BitArray::prefix(const std::size_t size) const {
+    return BitArrayView{*this}.prefix(size);
 }
 
-MutableBitArrayView BitArray::exceptPrefix(const std::size_t count) {
-    return MutableBitArrayView{*this}.exceptPrefix(count);
+MutableBitArrayView BitArray::suffix(const std::size_t size) {
+    return MutableBitArrayView{*this}.suffix(size);
 }
-BitArrayView BitArray::exceptPrefix(const std::size_t count) const {
-    return BitArrayView{*this}.exceptPrefix(count);
+BitArrayView BitArray::suffix(const std::size_t size) const {
+    return BitArrayView{*this}.suffix(size);
 }
 
-MutableBitArrayView BitArray::exceptSuffix(const std::size_t count) {
-    return MutableBitArrayView{*this}.exceptSuffix(count);
+MutableBitArrayView BitArray::exceptPrefix(const std::size_t size) {
+    return MutableBitArrayView{*this}.exceptPrefix(size);
 }
-BitArrayView BitArray::exceptSuffix(const std::size_t count) const {
-    return BitArrayView{*this}.exceptSuffix(count);
+BitArrayView BitArray::exceptPrefix(const std::size_t size) const {
+    return BitArrayView{*this}.exceptPrefix(size);
+}
+
+MutableBitArrayView BitArray::exceptSuffix(const std::size_t size) {
+    return MutableBitArrayView{*this}.exceptSuffix(size);
+}
+BitArrayView BitArray::exceptSuffix(const std::size_t size) const {
+    return BitArrayView{*this}.exceptSuffix(size);
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const BitArray& value) {

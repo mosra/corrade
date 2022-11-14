@@ -502,20 +502,20 @@ StringView String::suffix(const char* const begin) const {
     return StringView{*this}.suffix(begin);
 }
 
-MutableStringView String::prefix(const std::size_t count) {
-    return MutableStringView{*this}.prefix(count);
+MutableStringView String::prefix(const std::size_t size) {
+    return MutableStringView{*this}.prefix(size);
 }
 
-StringView String::prefix(const std::size_t count) const {
-    return StringView{*this}.prefix(count);
+StringView String::prefix(const std::size_t size) const {
+    return StringView{*this}.prefix(size);
 }
 
-MutableStringView String::exceptPrefix(const std::size_t count) {
-    return MutableStringView{*this}.exceptPrefix(count);
+MutableStringView String::exceptPrefix(const std::size_t size) {
+    return MutableStringView{*this}.exceptPrefix(size);
 }
 
-StringView String::exceptPrefix(const std::size_t count) const {
-    return StringView{*this}.exceptPrefix(count);
+StringView String::exceptPrefix(const std::size_t size) const {
+    return StringView{*this}.exceptPrefix(size);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -528,21 +528,21 @@ StringView String::suffix(const std::size_t begin) const {
 }
 #endif
 
-MutableStringView String::exceptSuffix(const std::size_t count) {
-    return MutableStringView{*this}.exceptSuffix(count);
+MutableStringView String::exceptSuffix(const std::size_t size) {
+    return MutableStringView{*this}.exceptSuffix(size);
 }
 
-StringView String::exceptSuffix(const std::size_t count) const {
-    return StringView{*this}.exceptSuffix(count);
+StringView String::exceptSuffix(const std::size_t size) const {
+    return StringView{*this}.exceptSuffix(size);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
-MutableStringView String::except(const std::size_t count) {
-    return MutableStringView{*this}.exceptSuffix(count);
+MutableStringView String::except(const std::size_t size) {
+    return MutableStringView{*this}.exceptSuffix(size);
 }
 
-StringView String::except(const std::size_t count) const {
-    return StringView{*this}.exceptSuffix(count);
+StringView String::except(const std::size_t size) const {
+    return StringView{*this}.exceptSuffix(size);
 }
 #endif
 
