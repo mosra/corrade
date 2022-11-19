@@ -1,16 +1,16 @@
 Starting TestCaseDescriptionSourceLocationTest::Test with 7 test cases...
     OK [1] test(three)
-  FAIL [2] test(five) at here.cpp:75
+  FAIL [2] test(five) at here.cpp:77
         This message should have data location info
     OK [3] test(seventy)
-  WARN [4] somethingElse() at here.cpp:79
+  WARN [4] somethingElse() at here.cpp:81
         This message shouldn't have any stale info about data location
-  INFO [5] resetWithoutLine(three) at here.cpp:87
+  INFO [5] resetWithoutLine(three) at here.cpp:89
         This message has the data location info
-  INFO [6] resetWithoutLine(five) at here.cpp:87
+  INFO [6] resetWithoutLine(five) at here.cpp:89
         This message has the data location info
-  FAIL [6] resetWithoutLine(five) at here.cpp:93
+  FAIL [6] resetWithoutLine(five) at here.cpp:95
         This message shouldn't have data location info anymore
-  INFO [7] resetWithoutLine(seventy) at here.cpp:87
+  INFO [7] resetWithoutLine(seventy) at here.cpp:89
         This message has the data location info
 Finished TestCaseDescriptionSourceLocationTest::Test with 2 errors out of 1 checks.

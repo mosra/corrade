@@ -38,6 +38,8 @@
 
 namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
+using namespace Containers::Literals;
+
 struct Test: Tester {
     explicit Test();
 
@@ -96,11 +98,22 @@ void Test::resetWithoutLine() {
 struct TestCaseDescriptionSourceLocationTest: Tester {
     explicit TestCaseDescriptionSourceLocationTest();
 
+    void stringConversion();
     void test();
 };
 
 TestCaseDescriptionSourceLocationTest::TestCaseDescriptionSourceLocationTest() {
-    addTests({&TestCaseDescriptionSourceLocationTest::test});
+    addTests({&TestCaseDescriptionSourceLocationTest::stringConversion,
+              &TestCaseDescriptionSourceLocationTest::test});
+}
+
+void TestCaseDescriptionSourceLocationTest::stringConversion() {
+    TestCaseDescriptionSourceLocation a = "yello\0world"_s;
+
+    Containers::StringView b = a;
+    CORRADE_COMPARE(b, "yello\0world"_s);
+    CORRADE_COMPARE(b.size(), 11);
+    CORRADE_COMPARE(b.flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
 }
 
 void TestCaseDescriptionSourceLocationTest::test() {

@@ -1016,7 +1016,7 @@ void Tester::setTestCaseDescription(const char* const description) {
 }
 
 void Tester::setTestCaseDescription(const TestCaseDescriptionSourceLocation& description) {
-    setTestCaseDescription(Containers::StringView{description._data, description._size, Containers::StringViewFlag(description._flags)});
+    setTestCaseDescription(Containers::StringView{description});
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     _state->testCaseDataLine = description._line;
     #endif
@@ -1153,5 +1153,9 @@ TestCaseDescriptionSourceLocation::TestCaseDescriptionSourceLocation(const char*
     , line
     #endif
 } {}
+
+TestCaseDescriptionSourceLocation::operator Containers::StringView() const {
+    return {_data, _size, Containers::StringViewFlag(_flags)};
+}
 
 }}

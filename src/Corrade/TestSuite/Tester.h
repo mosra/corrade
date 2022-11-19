@@ -1608,6 +1608,9 @@ class CORRADE_TESTSUITE_EXPORT TestCaseDescriptionSourceLocation {
             #endif
         );
 
+        /** @brief Conversion to a string view */
+        operator Containers::StringView() const;
+
     private:
         friend Tester;
 
