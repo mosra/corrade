@@ -72,8 +72,15 @@ future). To preserve backward compatibility, Corrade is by default built with
 deprecated API included.
 @see @ref building-corrade, @ref corrade-cmake
 */
+/* This macro is enabled by default in Doxyfile, but we may still want to
+   temporarily remove it from there to catch outdated links. This makes it work
+   in both cases. */
+#ifdef CORRADE_BUILD_DEPRECATED
 #define CORRADE_BUILD_DEPRECATED
-/* (enabled by default) */
+#else
+#define CORRADE_BUILD_DEPRECATED
+#undef CORRADE_BUILD_DEPRECATED
+#endif
 
 /**
 @brief Static library build
