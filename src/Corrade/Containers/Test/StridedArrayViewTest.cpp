@@ -2324,7 +2324,7 @@ void StridedArrayViewTest::asContiguous() {
 }
 
 void StridedArrayViewTest::asContiguousNonContiguous() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     /* Taken from above */
     int a[2*3*5];

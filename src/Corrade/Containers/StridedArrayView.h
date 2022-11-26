@@ -2214,9 +2214,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
 }
 
 template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions, T>::asContiguous() const {
-    /* Unlike slice() etc, this is usually not called in tight loops and should
-       be as checked as possible, so it's not a debug assert */
-    CORRADE_ASSERT(isContiguous(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
+    CORRADE_DEBUG_ASSERT(isContiguous(),
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
     std::size_t size = 1;
     for(std::size_t i = 0; i != dimensions; ++i) size *= _size._data[i];
     return {static_cast<T*>(_data), size};
@@ -2224,9 +2223,8 @@ template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions,
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimension + 1, T> StridedArrayView<dimensions, T>::asContiguous() const {
     static_assert(dimension < dimensions, "dimension out of bounds");
-    /* Unlike slice() etc, this is usually not called in tight loops and should
-       be as checked as possible, so it's not a debug assert */
-    CORRADE_ASSERT(isContiguous<dimension>(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
+    CORRADE_DEBUG_ASSERT(isContiguous<dimension>(),
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
 
     Containers::Size<dimension + 1> size;
     Containers::Stride<dimension + 1> stride;
