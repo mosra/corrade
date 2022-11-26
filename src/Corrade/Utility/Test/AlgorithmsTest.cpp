@@ -53,6 +53,7 @@ struct AlgorithmsTest: TestSuite::Tester {
     void copyInitializerListStridedZeroSize();
 
     void copyNonMatchingSizes();
+    void copyStridedNonMatchingSizes();
     void copyDifferentViewTypes();
     void copyInitializerListToDifferentViewTypes();
     template<class T> void copyMultiDimensionalArray();
@@ -228,6 +229,7 @@ AlgorithmsTest::AlgorithmsTest() {
               &AlgorithmsTest::copyInitializerListStridedZeroSize,
 
               &AlgorithmsTest::copyNonMatchingSizes,
+              &AlgorithmsTest::copyStridedNonMatchingSizes,
               &AlgorithmsTest::copyDifferentViewTypes,
               &AlgorithmsTest::copyInitializerListToDifferentViewTypes,
               &AlgorithmsTest::copyMultiDimensionalArray<int>,
@@ -479,6 +481,30 @@ void AlgorithmsTest::copyInitializerListStridedZeroSize() {
 }
 
 void AlgorithmsTest::copyNonMatchingSizes() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    char a[2*3*5*7]{};
+
+    /* Normal */
+    Utility::copy(Containers::ArrayView<const char>{a, 2},
+                  Containers::ArrayView<char>{a, 3});
+
+    /* Initializer list. There's no special code path for this, just to be
+       sure it doesn't get auto-sliced or something. */
+    Utility::copy({1, 2}, Containers::ArrayView<char>{a, 3});
+    Utility::copy({1, 2, 3, 4}, Containers::ArrayView<char>{a, 3});
+
+    CORRADE_COMPARE(out.str(),
+        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
+
+        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
+        "Utility::Algorithms::copy(): sizes 4 and 3 don't match\n");
+}
+
+void AlgorithmsTest::copyStridedNonMatchingSizes() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
@@ -486,10 +512,6 @@ void AlgorithmsTest::copyNonMatchingSizes() {
 
     char a[2*3*5*7]{};
     int b[2*3*5*7]{};
-
-    /* Normal */
-    Utility::copy(Containers::ArrayView<const char>{a, 2},
-                  Containers::ArrayView<char>{a, 3});
 
     /* Strided */
     Utility::copy(Containers::StridedArrayView1D<const char>{a, 2},
@@ -505,22 +527,12 @@ void AlgorithmsTest::copyNonMatchingSizes() {
     Utility::copy(Containers::StridedArrayView3D<const int>{b, {2, 3, 5}},
                   Containers::StridedArrayView3D<int>{b, {2, 3, 4}});
 
-    /* Initializer list. There's no special code path for this, just to be
-       sure it doesn't get auto-sliced or something. */
-    Utility::copy({1, 2}, Containers::ArrayView<char>{a, 3});
-    Utility::copy({1, 2, 3, 4}, Containers::ArrayView<char>{a, 3});
-
     CORRADE_COMPARE(out.str(),
-        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
-
         "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3} and {2, 4} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5} and {2, 4, 5} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5, 7} and {2, 3, 5, 6} don't match\n"
-        "Utility::Algorithms::copy(): sizes {2, 3, 5, 4} and {2, 3, 4, 4} don't match\n"
-
-        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
-        "Utility::Algorithms::copy(): sizes 4 and 3 don't match\n");
+        "Utility::Algorithms::copy(): sizes {2, 3, 5, 4} and {2, 3, 4, 4} don't match\n");
 }
 
 void AlgorithmsTest::copyDifferentViewTypes() {

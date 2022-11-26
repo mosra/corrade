@@ -48,7 +48,9 @@ void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayV
     #ifndef CORRADE_NO_ASSERT
     const std::size_t dstSize = dst.size();
     #endif
-    CORRADE_ASSERT(srcSize == dstSize,
+    /* A debug assertion since this API should be as close with overhead to a
+       raw memcpy() as possible */
+    CORRADE_DEBUG_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
     /* Apparently memcpy() can't be called with null pointers, even if size is
@@ -61,6 +63,10 @@ void copy(const Containers::StridedArrayView1D<const char>& src, const Container
     #ifndef CORRADE_NO_ASSERT
     const std::size_t dstSize = dst.size();
     #endif
+    /* Compared to the contiguous ArrayView copy() this has a full assertion,
+       as the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
@@ -83,6 +89,10 @@ void copy(const Containers::StridedArrayView2D<const char>& src, const Container
     #ifndef CORRADE_NO_ASSERT
     const Containers::Size2D dstSize = dst.size();
     #endif
+    /* Compared to the contiguous ArrayView copy() this has a full assertion,
+       as the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
@@ -106,6 +116,10 @@ void copy(const Containers::StridedArrayView3D<const char>& src, const Container
     #ifndef CORRADE_NO_ASSERT
     const Containers::Size3D dstSize = dst.size();
     #endif
+    /* Compared to the contiguous ArrayView copy() this has a full assertion,
+       as the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
@@ -129,6 +143,10 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
     #ifndef CORRADE_NO_ASSERT
     const Containers::Size4D dstSize = dst.size();
     #endif
+    /* Compared to the contiguous ArrayView copy() this has a full assertion,
+       as the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(srcSize == dstSize,
         "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 

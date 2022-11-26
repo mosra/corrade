@@ -242,6 +242,10 @@ template<class To, class ToView
 }
 
 template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimensions, const char>& src, const Containers::StridedArrayView<dimensions, char>& dst) {
+    /* Compared to the contiguous ArrayView copy() this has a full assertion,
+       as the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(src.size() == dst.size(),
         "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
@@ -258,6 +262,10 @@ template<unsigned dimensions, class T> void copy(const Containers::StridedArrayV
         #endif
         , "types must be trivially copyable");
 
+    /* The arrayCast() has a full assertions as well -- the expectation here is
+       that the StridedArrayView variants are called on large chunks of data
+       where the assert overhead doesn't matter that much compared to the
+       safety gains. */
     return copy(Containers::arrayCast<dimensions + 1, const char>(src),
                 Containers::arrayCast<dimensions + 1, char>(dst));
 }
@@ -287,6 +295,10 @@ template<unsigned dimension, unsigned dimensions, class T> void flipInPlace(cons
 
     const Containers::StridedArrayView<dimensions + 1, char> expanded =
         Containers::arrayCast<dimensions + 1, char>(view);
+    /* Compared to the contiguous ArrayView APIs this has a full assertion, as
+       the expectation is that it's called on large chunks of data where the
+       assert overhead doesn't matter that much compared to the safety
+       gains. */
     CORRADE_ASSERT(expanded.template isContiguous<dimension + 1>(),
         "Utility::flipInPlace(): the view is not contiguous after dimension" << dimension, );
     Implementation::flipSecondToLastDimensionInPlace(expanded.template asContiguous<dimension + 1>());
