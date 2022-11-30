@@ -315,7 +315,7 @@ void ArrayTupleTest::construct() {
         for(char i: chars) CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(NonCopyable::constructed, 4);
         CORRADE_COMPARE(NonCopyable::destructed, 0);
-        for(char i: ints) CORRADE_COMPARE(i, 0);
+        for(int i: ints) CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(Aligned<16>::constructed, 3);
         CORRADE_COMPARE(Aligned<16>::destructed, 0);
         for(double i: strided) CORRADE_COMPARE(i, 0.0);
