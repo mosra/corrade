@@ -1617,7 +1617,7 @@ class CORRADE_TESTSUITE_EXPORT TestCaseDescriptionSourceLocation {
         /* A silly way to avoid including StringView */
         const char* _data;
         std::size_t _size;
-        std::size_t _flags;
+        Containers::StringViewFlags _flags;
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         int _line;
         #endif

@@ -1138,7 +1138,7 @@ TestCaseDescriptionSourceLocation::TestCaseDescriptionSourceLocation(const Conta
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     , int line
     #endif
-): _data{description.data()}, _size{description.size()}, _flags{std::size_t(description.flags())}
+): _data{description.data()}, _size{description.size()}, _flags{description.flags()}
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     , _line{line}
     #endif
@@ -1155,7 +1155,7 @@ TestCaseDescriptionSourceLocation::TestCaseDescriptionSourceLocation(const char*
 } {}
 
 TestCaseDescriptionSourceLocation::operator Containers::StringView() const {
-    return {_data, _size, Containers::StringViewFlag(_flags)};
+    return {_data, _size, _flags};
 }
 
 }}
