@@ -267,7 +267,7 @@ void ArrayTupleTest::construct() {
                                        higher padding */
                 8 +                 /* padding to align the next to 16 again */
             3*4 +                   /* 12 bytes, but aligned to 16 */
-            4                       /* 27 bits, aligned to four bytes */
+            4                       /* 27 bits, padded to four bytes */
         );
         CORRADE_VERIFY(data.data());
         /* Custom deleter to call the destructors */
@@ -369,6 +369,7 @@ void ArrayTupleTest::constructNoInit() {
              {Corrade::NoInit, {1, 2, 3}, strided3D},
              {Corrade::ValueInit, {3, 2}, initializedStrided2D},
              {Corrade::NoInit, 3, 4, 4, stridedErased},
+             /* There's no ValueInit alternative for the type-erased variant */
              {Corrade::NoInit, 13, bits},
              {Corrade::ValueInit, 14, initializedBits}},
             [&](std::size_t size, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {

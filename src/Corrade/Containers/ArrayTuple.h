@@ -93,8 +93,8 @@ in the `info` structure, so the views aren't needed after anymore.
     together with a @ref Utility::allocateAligned() instead.
 
 Besides @ref ArrayView, the output view can also be a (multi-dimensional)
-@ref StridedArrayView or a @ref BitArrayView. See constructor overloads of the
-@ref Item class for reference.
+@ref StridedArrayView or a @ref BasicBitArrayView "MutableBitArrayView". See
+constructor overloads of the @ref Item class for reference.
 
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
 
@@ -394,7 +394,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         }
 
         /**
-         * @brief Construct a bit array view without initializing its elements
+         * @brief Construct a view without initializing its elements
          * @param[in] size          Desired view size in bits
          * @param[out] outputView   Reference where to store the resulting view
          *
@@ -420,7 +420,8 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
     private:
         friend ArrayTuple;
 
-        /* Common code shared by ArrayView and StridedArrayView variants */
+        /* Common code shared by ArrayView, StridedArrayView and BitArrayView
+           variants */
         template<class T> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
@@ -489,15 +490,17 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
             #endif
         }, _destinationPointer{reinterpret_cast<void**>(&deleterDestination)} {}
 
-        /* In case of a memory deleter item, element size is 0 for the default
-           deleter, sizeof(void*) for stateless function pointers and size of
-           the deleter state otherwise. */
+        /* In case of a memory deleter item:
+           - element size is 0 for the default deleter, sizeof(void*) for
+             stateless function pointers and size of the deleter state
+             otherwise, */
         std::size_t _elementSize,
-            /* alignment is 0 if the deleter is the default one or a stateless
-               function pointer which doesn't need to be stored explicitly, and
-               alignment of the deleter state for stateful deleters */
+            /* - alignment is 0 if the deleter is the default one or a
+                 stateless function pointer which doesn't need to be stored
+                 explicitly, and alignment of the deleter state for stateful
+                 deleters, */
             _elementAlignment,
-            /* element count is always 1 */
+            /* - element count is always 1. */
             _elementCount;
 
         /* Constructor is null if using the NoInit constructor; in case of
