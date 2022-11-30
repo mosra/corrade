@@ -291,6 +291,11 @@ namespace Implementation {
 }
 #endif
 
+namespace Implementation {
+    /* To avoid including <cstring> */
+    CORRADE_UTILITY_EXPORT void arrayTupleMemset(void* data, std::size_t size);
+}
+
 /**
 @brief Array tuple item
 
@@ -422,7 +427,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /* Common code shared by ArrayView, StridedArrayView and BitArrayView
            variants */
-        template<class T> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
+        template<class T, typename std::enable_if<!std::is_trivially_constructible<T>::value || !std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
             _constructor = [](void* data, std::size_t) {
@@ -431,6 +436,21 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
                 Implementation::construct(*static_cast<T*>(data));
             };
         }
+
+        /* Specialization of the above for trivially constructible &
+           destructible types, in which case a single memset() is used to
+           zero-init the memory instead of constructing element by element.
+           Deliberately not handling trivially constructible but not trivially
+           destructible cases, as many compilers don't differentiate the two.
+           See the constructTriviallyConstructibleNonTriviallyDestructible()
+           test case for details. */
+        template<class T, typename std::enable_if<std::is_trivially_constructible<T>::value && std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer):
+            _elementSize{sizeof(T)*size}, _elementAlignment{alignof(T)},
+            _elementCount{1},
+            _constructor{Implementation::arrayTupleMemset},
+            _destructor{},
+            _destinationPointer{&reinterpret_cast<void*&>(destinationPointer)}
+        {}
 
         template<class T> explicit Item(Corrade::NoInitT, std::size_t size, T*& destinationPointer):
             _elementSize{sizeof(T)}, _elementAlignment{alignof(T)}, _elementCount{size},

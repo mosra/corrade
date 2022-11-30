@@ -60,6 +60,8 @@ struct ArrayTupleTest: TestSuite::Tester {
     void constructTriviallyDestructibleStatelessDeleter();
     void constructTriviallyDestructibleStatefulAlignedNonTriviallyDestructibleDeleter();
 
+    void constructTriviallyConstructibleNonTriviallyDestructible();
+
     void constructCopy();
     void constructMove();
 
@@ -92,6 +94,8 @@ ArrayTupleTest::ArrayTupleTest() {
               &ArrayTupleTest::constructTriviallyDestructibleCustomAllocatorDefaultDeleter,
               &ArrayTupleTest::constructTriviallyDestructibleStatelessDeleter,
               &ArrayTupleTest::constructTriviallyDestructibleStatefulAlignedNonTriviallyDestructibleDeleter,
+
+              &ArrayTupleTest::constructTriviallyConstructibleNonTriviallyDestructible,
 
               &ArrayTupleTest::constructCopy,
               &ArrayTupleTest::constructMove,
@@ -763,6 +767,43 @@ void ArrayTupleTest::constructTriviallyDestructibleStatefulAlignedNonTriviallyDe
     /* Apart from all destructions coming from the copies, one extra destructor
        should be called at the end to match the initial construction */
     CORRADE_COMPARE(destructorCallCount, copyConstructorCallCount + 1);
+}
+
+struct NonTriviallyDestructible {
+    static int destructorCallCount;
+
+    int a;
+
+    ~NonTriviallyDestructible() {
+        ++destructorCallCount;
+    }
+};
+
+int NonTriviallyDestructible::destructorCallCount = 0;
+
+void ArrayTupleTest::constructTriviallyConstructibleNonTriviallyDestructible() {
+    /* If a type is trivially constructible but not trivially destructible, it
+       *should not* go through the simplified constructor that just calls
+       std::memcpy() on the whole data. This test verifies that.
+
+       However, on many compilers, if a type isn't trivially destructible, it's
+       also marked as not trivially constructible. Such case is with GCC and
+       Clang. See the "Notes" here for more information:
+       https://en.cppreference.com/w/cpp/types/is_constructible. */
+    if(!std::is_trivially_constructible<NonTriviallyDestructible>::value)
+        CORRADE_SKIP("Non-trivially-destructible types aren't marked as is_trivially_constructible on this compiler, can't test.");
+
+    CORRADE_VERIFY(!std::is_trivially_destructible<NonTriviallyDestructible>::value);
+
+    NonTriviallyDestructible::destructorCallCount = 0;
+    {
+        ArrayView<NonTriviallyDestructible> view;
+        ArrayTuple data{
+            {Corrade::ValueInit, 5, view}
+        };
+        CORRADE_COMPARE(NonTriviallyDestructible::destructorCallCount, 0);
+    }
+    CORRADE_COMPARE(NonTriviallyDestructible::destructorCallCount, 5);
 }
 
 void ArrayTupleTest::constructCopy() {

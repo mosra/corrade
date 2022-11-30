@@ -26,6 +26,8 @@
 
 #include "ArrayTuple.h"
 
+#include <cstring>
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
@@ -366,6 +368,14 @@ char* ArrayTuple::release() {
     _size = 0;
     _deleter = nullptr;
     return data;
+}
+
+namespace Implementation {
+
+void arrayTupleMemset(void* const data, const std::size_t size) {
+    std::memset(data, 0, size);
+}
+
 }
 
 ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, (size + 7)/8, Implementation::dataRef(outputView)} {
