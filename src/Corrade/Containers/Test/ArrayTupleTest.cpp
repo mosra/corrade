@@ -190,13 +190,13 @@ void ArrayTupleTest::constructEmptyArrays() {
         CORRADE_COMPARE(strided.size(), 0);
         CORRADE_VERIFY(!strided.data());
         CORRADE_COMPARE(strided.stride(), 8);
-        CORRADE_COMPARE(strided3D.size(), (Containers::Size3D{0, 0, 0}));
-        CORRADE_COMPARE(strided3D.stride(),  (Containers::Stride3D{0, 0, 4}));
+        CORRADE_COMPARE(strided3D.size(), (Size3D{0, 0, 0}));
+        CORRADE_COMPARE(strided3D.stride(),  (Stride3D{0, 0, 4}));
         CORRADE_VERIFY(!strided3D.data());
 
         /* second dimension size and stride is always set for erased views */
-        CORRADE_COMPARE(stridedErased.size(), (Containers::Size2D{0, 4}));
-        CORRADE_COMPARE(stridedErased.stride(),  (Containers::Stride2D{4, 1}));
+        CORRADE_COMPARE(stridedErased.size(), (Size2D{0, 4}));
+        CORRADE_COMPARE(stridedErased.stride(),  (Stride2D{4, 1}));
         CORRADE_VERIFY(!stridedErased.data());
 
         /* Bit array pointer and both size and offset should be reset */
@@ -280,10 +280,10 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(aligned.size(), 3);
         CORRADE_COMPARE(strided.size(), 5);
         CORRADE_COMPARE(strided.stride(), 8);
-        CORRADE_COMPARE(strided3D.size(), (Containers::Size3D{2, 1, 4}));
-        CORRADE_COMPARE(strided3D.stride(),  (Containers::Stride3D{16, 16, 4}));
-        CORRADE_COMPARE(stridedErased.size(), (Containers::Size2D{3, 4}));
-        CORRADE_COMPARE(stridedErased.stride(),  (Containers::Stride2D{4, 1}));
+        CORRADE_COMPARE(strided3D.size(), (Size3D{2, 1, 4}));
+        CORRADE_COMPARE(strided3D.stride(),  (Stride3D{16, 16, 4}));
+        CORRADE_COMPARE(stridedErased.size(), (Size2D{3, 4}));
+        CORRADE_COMPARE(stridedErased.stride(),  (Stride2D{4, 1}));
         CORRADE_COMPARE(bits.offset(), 0);
         CORRADE_COMPARE(bits.size(), 27);
 
@@ -373,7 +373,7 @@ void ArrayTupleTest::constructNoInit() {
              {Corrade::NoInit, 13, bits},
              {Corrade::ValueInit, 14, initializedBits}},
             [&](std::size_t size, std::size_t) -> std::pair<char*, void(*)(char*, std::size_t)> {
-                CORRADE_COMPARE_AS(size, Containers::arraySize(storage),
+                CORRADE_COMPARE_AS(size, arraySize(storage),
                     TestSuite::Compare::LessOrEqual);
                 return {storage, [](char*, std::size_t) {}};
             }
@@ -383,16 +383,16 @@ void ArrayTupleTest::constructNoInit() {
            only the constructors for the ValueInit'd view were called */
         for(char i: chars) CORRADE_COMPARE(i, '\xce');
         for(char i: initializedChars) CORRADE_COMPARE(i, 0);
-        for(auto i: Containers::arrayCast<2, char>(strided))
-            CORRADE_COMPARE_AS(i, Containers::stridedArrayView({
+        for(auto i: arrayCast<2, char>(strided))
+            CORRADE_COMPARE_AS(i, stridedArrayView({
                 '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce'
             }), TestSuite::Compare::Container);
         for(double i: initializedStrided) CORRADE_COMPARE(i, 0.0);
         /* MSVC 2015 needs the {}s, FFS */
-        for(auto i: Containers::arrayCast<4, char>(strided3D)) {
+        for(auto i: arrayCast<4, char>(strided3D)) {
             for(auto j: i) {
                 for(auto k: j) {
-                    CORRADE_COMPARE_AS(k, Containers::stridedArrayView({
+                    CORRADE_COMPARE_AS(k, stridedArrayView({
                         '\xce', '\xce', '\xce', '\xce'
                     }), TestSuite::Compare::Container);
                 }
@@ -405,7 +405,7 @@ void ArrayTupleTest::constructNoInit() {
             }
         }
         for(auto i: stridedErased)
-            CORRADE_COMPARE_AS(i, Containers::stridedArrayView({
+            CORRADE_COMPARE_AS(i, stridedArrayView({
                 '\xce', '\xce', '\xce', '\xce'
             }), TestSuite::Compare::Container);
         CORRADE_COMPARE(NonCopyable::constructed, 2);
