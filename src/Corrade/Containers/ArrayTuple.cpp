@@ -31,6 +31,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StringView.h"
 
 namespace Corrade { namespace Containers {
 
@@ -389,6 +390,47 @@ ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableBitArray
        create(). */
     outputView = {nullptr, 0, size};
 }
+
+ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableStringView& outputView, StringViewFlags flags): Item{Corrade::ValueInit, (size + (flags & StringViewFlag::NullTerminated ? 1 : 0)), Implementation::dataRef(outputView)} {
+    CORRADE_ASSERT(!(flags & ~StringViewFlag::NullTerminated),
+        "Containers::ArrayTuple:" << (flags & ~StringViewFlag::NullTerminated) << "not allowed for a string view", );
+
+    /* Populate size of the output view. Pointer gets updated inside
+       create(), however here we have to set it to something non-null to not
+       trip on an assert in case the NullTerminated flag is set. */
+    char zero[1]{};
+    outputView = {zero, size, flags};
+}
+
+ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableStringView& outputView): Item{Corrade::ValueInit, size, outputView, {}} {}
+
+ArrayTuple::Item::Item(const std::size_t size, MutableStringView& outputView, StringViewFlags flags): Item{Corrade::ValueInit, size, outputView, flags} {}
+
+ArrayTuple::Item::Item(const std::size_t size, MutableStringView& outputView): Item{size, outputView, {}} {}
+
+/* Similarly to the ValueInit specialization that memset()s the whole range at
+   once, this also treats the whole range as a single element in order to
+   properly set the null byte if StringViewFlag::NullTerminated is set */
+ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableStringView& outputView, const StringViewFlags flags):
+    _elementSize{size + (flags & StringViewFlag::NullTerminated ? 1 : 0)}, _elementAlignment{1},
+    _elementCount{1},
+    _constructor{flags & StringViewFlag::NullTerminated ? [](void* data, std::size_t size) {
+        static_cast<char*>(data)[size - 1] = '\0';
+    } : static_cast<void(*)(void*, std::size_t)>(nullptr)},
+    _destructor{},
+    _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))}
+{
+    CORRADE_ASSERT(!(flags & ~StringViewFlag::NullTerminated),
+        "Containers::ArrayTuple:" << (flags & ~StringViewFlag::NullTerminated) << "not allowed for a string view", );
+
+    /* Populate size of the output view. Pointer gets updated inside
+       create(), however here we have to set it to something non-null to not
+       trip on an assert in case the NullTerminated flag is set. */
+    char zero[1]{};
+    outputView = {zero, size, flags};
+}
+
+ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableStringView& outputView): Item{Corrade::NoInit, size, outputView, {}} {}
 
 ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, const std::size_t elementSize, const std::size_t elementAlignment, StridedArrayView2D<char>& outputView): _elementSize{elementSize}, _elementAlignment{elementAlignment}, _elementCount{size}, _constructor{}, _destructor{}, _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))} {
     /* Populate size of the output view. Pointer gets updated inside create(). */

@@ -52,6 +52,17 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
     template<class, class> struct StringViewConverter;
+    /* So ArrayTuple can update the data pointer */
+    template<class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    T*& dataRef(BasicStringView<T>& view) {
+        return view._data;
+    }
 }
 
 /**
@@ -1119,6 +1130,8 @@ BasicStringView {
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;
         friend String;
+        /* So ArrayTuple can update the data pointer */
+        friend T*& Implementation::dataRef<>(BasicStringView<T>&);
 
         /* MSVC demands the export macro to be here as well */
         friend CORRADE_UTILITY_EXPORT bool operator==(StringView, StringView);

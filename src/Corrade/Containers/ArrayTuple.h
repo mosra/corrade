@@ -93,8 +93,9 @@ in the `info` structure, so the views aren't needed after anymore.
     together with a @ref Utility::allocateAligned() instead.
 
 Besides @ref ArrayView, the output view can also be a (multi-dimensional)
-@ref StridedArrayView or a @ref BasicBitArrayView "MutableBitArrayView". See
-constructor overloads of the @ref Item class for reference.
+@ref StridedArrayView, a @ref BasicBitArrayView "MutableBitArrayView" or a
+@ref BasicStringView "MutableStringView". See constructor overloads of the
+@ref Item class for reference.
 
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
 
@@ -349,6 +350,25 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /**
          * @brief Construct a view with value-initialized elements
+         * @param[in] size          Desired view size
+         * @param[out] outputView   Reference where to store the resulting view
+         * @param[in] flags         Desired string view flags. Only
+         *      @ref StringViewFlag::NullTerminated is allowed.
+         *
+         * All @p size bytes are value-initialized (i.e., zero-initialized). If
+         * @p flags contains @ref StringViewFlag::NullTerminated, one extra
+         * @cpp '\0' @ce byte is added after the string.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableStringView& outputView, StringViewFlags flags = {});
+        #else
+        /* To avoid having to include EnumSet.h */
+        /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableStringView& outputView, StringViewFlags flags);
+        /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableStringView& outputView);
+        #endif
+
+        /**
+         * @brief Construct a view with value-initialized elements
          *
          * Alias to @ref Item(ValueInitT, std::size_t, ArrayView<T>&).
          */
@@ -362,6 +382,15 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /** @overload */
         /*implicit*/ Item(std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, size, outputView} {}
+
+        /** @overload */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ Item(std::size_t size, MutableStringView& outputView, StringViewFlags flags = {});
+        #else
+        /* To avoid having to include EnumSet.h */
+        /*implicit*/ Item(std::size_t size, MutableStringView& outputView, StringViewFlags flags);
+        /*implicit*/ Item(std::size_t size, MutableStringView& outputView);
+        #endif
 
         /**
          * @brief Construct a view without initializing its elements
@@ -408,6 +437,25 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableBitArrayView& outputView);
 
         /**
+         * @brief Construct a view without initializing its contents
+         * @param[in] size          Desired view size
+         * @param[out] outputView   Reference where to store the resulting view
+         * @param[in] flags         Desired string view flags. Only
+         *      @ref StringViewFlag::NullTerminated is allowed.
+         *
+         * Useful if you will be overwriting all contents later anyway. If
+         * @p flags contains @ref StringViewFlag::NullTerminated, one extra
+         * @cpp '\0' @ce byte is added after the string.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableStringView& outputView, StringViewFlags flags = {});
+        #else
+        /* To avoid having to include EnumSet.h */
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableStringView& outputView, StringViewFlags flags);
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableStringView& outputView);
+        #endif
+
+        /**
          * @brief Construct a type-erased view without initializing its elements
          * @param[in] size              Desired view size
          * @param[in] elementSize       Desired view element size
@@ -425,8 +473,8 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
     private:
         friend ArrayTuple;
 
-        /* Common code shared by ArrayView, StridedArrayView and BitArrayView
-           variants */
+        /* Common code shared by ArrayView, StridedArrayView, BitArrayView and
+           StringView variants */
         template<class T, typename std::enable_if<!std::is_trivially_constructible<T>::value || !std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
