@@ -841,7 +841,13 @@ void ArrayTupleTest::constructTriviallyConstructibleNonTriviallyDestructible() {
        also marked as not trivially constructible. Such case is with GCC and
        Clang. See the "Notes" here for more information:
        https://en.cppreference.com/w/cpp/types/is_constructible. */
-    if(!std::is_trivially_constructible<NonTriviallyDestructible>::value)
+    if(!
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        std::is_trivially_constructible<NonTriviallyDestructible>::value
+        #else
+        std::has_trivial_default_constructor<NonTriviallyDestructible>::value
+        #endif
+    )
         CORRADE_SKIP("Non-trivially-destructible types aren't marked as is_trivially_constructible on this compiler, can't test.");
 
     CORRADE_VERIFY(!std::is_trivially_destructible<NonTriviallyDestructible>::value);
