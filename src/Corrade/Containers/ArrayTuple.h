@@ -425,7 +425,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         template<class T> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
-            _constructor = [](void* data) {
+            _constructor = [](void* data, std::size_t) {
                 /* Default-construct the T and work around various compiler
                    issues, see construct() for details */
                 Implementation::construct(*static_cast<T*>(data));
@@ -504,8 +504,9 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
             _elementCount;
 
         /* Constructor is null if using the NoInit constructor; in case of
-           memory deleters it's null always */
-        void(*_constructor)(void*);
+           memory deleters it's null always. Second argument is
+           _elementSize. */
+        void(*_constructor)(void*, std::size_t);
 
         /* Destructor is set for non-trivially-destructible types; in case of
            memory deleters only if it's a default or a stateful deleter */
