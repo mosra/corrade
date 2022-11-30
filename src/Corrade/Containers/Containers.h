@@ -95,6 +95,10 @@ template<class> class AnyReference;
 
 class ScopeGuard;
 
+enum class StringViewFlag: std::size_t;
+/* This is defined again in StringView.h using actual enum values to ensure
+   consistency */
+typedef EnumSet<StringViewFlag, (std::size_t{3} << (sizeof(std::size_t)*8 - 2))> StringViewFlags;
 class String;
 template<class> class BasicStringView;
 typedef BasicStringView<const char> StringView;
