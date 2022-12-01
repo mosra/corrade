@@ -116,7 +116,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         /* See the corresponding comment inside the Iterable class for why
            we can'ŧ just accept ArrayView etc. directly here and why we have
            to capture an arbitrary U&& instead */
-        template<class U, class = decltype(StringIterable{std::declval<U&&>(), Implementation::IterableOverloadPriority<1>{}})> /*implicit*/ StringIterable(U&& data): StringIterable{Utility::forward<U>(data), Implementation::IterableOverloadPriority<1>{}} {}
+        template<class U, class = decltype(StringIterable{std::declval<U&&>(), Implementation::IterableOverloadPriority<1>{}})> /*implicit*/ StringIterable(U&& data) noexcept: StringIterable{Utility::forward<U>(data), Implementation::IterableOverloadPriority<1>{}} {}
 
         /** @brief Construct from an initializer list */
         /*implicit*/ StringIterable(std::initializer_list<StringView> view) noexcept;
