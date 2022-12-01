@@ -33,10 +33,12 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayViewStl.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -64,6 +66,8 @@ struct StringIterableTest: TestSuite::Tester {
 
     void iterator();
     template<class T> void rangeBasedFor();
+
+    void customIterable();
 };
 
 using namespace Containers::Literals;
@@ -108,6 +112,8 @@ StringIterableTest::StringIterableTest() {
     addTests<StringIterableTest>({
         &StringIterableTest::rangeBasedFor<String>,
         &StringIterableTest::rangeBasedFor<const char*>});
+
+    addTests({&StringIterableTest::customIterable});
 }
 
 void StringIterableTest::constructDefault() {
@@ -115,6 +121,8 @@ void StringIterableTest::constructDefault() {
     StringIterable ai2 = nullptr;
     CORRADE_COMPARE(ai.data(), nullptr);
     CORRADE_COMPARE(ai2.data(), nullptr);
+    CORRADE_COMPARE(ai.context(), nullptr);
+    CORRADE_COMPARE(ai2.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 0);
     CORRADE_COMPARE(ai2.size(), 0);
     CORRADE_COMPARE(ai.stride(), 0);
@@ -124,6 +132,7 @@ void StringIterableTest::constructDefault() {
 
     constexpr StringIterable cai = nullptr;
     CORRADE_COMPARE(cai.data(), nullptr);
+    CORRADE_COMPARE(cai.context(), nullptr);
     CORRADE_COMPARE(cai.size(), 0);
     CORRADE_COMPARE(cai.stride(), 0);
     CORRADE_VERIFY(cai.isEmpty());
@@ -154,6 +163,7 @@ template<class T> void StringIterableTest::arrayView() {
 
     StringIterable ai = a;
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -169,6 +179,7 @@ void StringIterableTest::arrayViewCharArray() {
 
     StringIterable ai = a;
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(const char*));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -190,6 +201,7 @@ template<class T> void StringIterableTest::arrayViewMutable() {
 
     StringIterable ai = a;
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -207,6 +219,7 @@ template<class T> void StringIterableTest::stridedArrayView() {
 
     StringIterable ai = a.template flipped<0>();
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T)));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -222,6 +235,7 @@ void StringIterableTest::stridedArrayViewCharArray() {
 
     StringIterable ai = a.flipped<0>();
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(const char*)));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -243,6 +257,7 @@ template<class T> void StringIterableTest::stridedArrayViewMutable() {
 
     StringIterable ai = a.template flipped<0>();
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T)));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -261,6 +276,7 @@ void StringIterableTest::initializerList() {
        of scope too early */
     [](const StringIterable& ai) {
         CORRADE_VERIFY(ai.data());
+        CORRADE_COMPARE(ai.context(), nullptr);
         CORRADE_COMPARE(ai.size(), 3);
         /* It's always a StringView, having an initializer_list<String> etc.
            overloads would cause nasty ambiguities */
@@ -278,6 +294,7 @@ void StringIterableTest::cArray() {
 
     StringIterable ai = data;
     CORRADE_COMPARE(ai.data(), data);
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(StringView));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -292,6 +309,7 @@ void StringIterableTest::array() {
 
     StringIterable ai = a;
     CORRADE_COMPARE(ai.data(), a.data());
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(String));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -306,6 +324,7 @@ void StringIterableTest::stlVector() {
 
     StringIterable ai = a;
     CORRADE_COMPARE(ai.data(), a.data());
+    CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(const char*));
     CORRADE_VERIFY(!ai.isEmpty());
@@ -425,6 +444,28 @@ template<class T> void StringIterableTest::rangeBasedFor() {
         concatenated = concatenated + x;
 
     CORRADE_COMPARE(concatenated, "-2605");
+}
+
+void StringIterableTest::customIterable() {
+    const char* string = "eyehandnoselegear";
+    int offsets[]{0, 3, 7, 11, 14, 17};
+
+    StringIterable iterable{offsets, string, 5, sizeof(int), [](const void* data, const void* context) {
+        auto* dataI = static_cast<const int*>(data);
+        return StringView{static_cast<const char*>(context) + *dataI, std::size_t(dataI[1] - dataI[0])};
+    }};
+    CORRADE_COMPARE(iterable.data(), offsets);
+    CORRADE_COMPARE(iterable.context(), string);
+    CORRADE_COMPARE(iterable.size(), 5);
+    CORRADE_COMPARE(iterable.stride(), sizeof(int));
+    CORRADE_COMPARE_AS(iterable, Containers::arrayView({
+        "eye"_s, "hand"_s, "nose"_s, "leg"_s, "ear"_s
+    }), TestSuite::Compare::Container);
+
+    /* Verify also that the non-iterator accessors get the right numbers */
+    CORRADE_COMPARE(iterable.front(), "eye");
+    CORRADE_COMPARE(iterable[3], "leg");
+    CORRADE_COMPARE(iterable.back(), "ear");
 }
 
 }}}}

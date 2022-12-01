@@ -100,7 +100,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          * Creates an instance with @cpp nullptr @ce data and size and stride
          * set to @cpp 0 @ce.
          */
-        constexpr /*implicit*/ StringIterable(std::nullptr_t = nullptr) noexcept: _data{}, _size{}, _stride{}, _accessor{} {}
+        constexpr /*implicit*/ StringIterable(std::nullptr_t = nullptr) noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
 
         /**
          * @brief Construct from any sequential iterable container
@@ -122,12 +122,35 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         /*implicit*/ StringIterable(std::initializer_list<StringView> view) noexcept;
 
         /**
-         * @brief Data pointer
+         * @brief Construct a custom iterable
+         * @param data      Container data pointer
+         * @param context   Context pointer or @cpp nullptr @ce
+         * @param size      Number of items in the container
+         * @param stride    Stride between items in the container
+         * @param accessor  Accessor function
+         *
+         * For item `i`, the @p accessor gets @cpp data + i*stride @ce in the
+         * first argument and @p context in the second argument. The @p context
+         * is useful for example in case the iterated container contains just
+         * offsets to string values stored in an external location.
+         */
+        explicit StringIterable(const void* data, const void* context, std::size_t size, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*)) noexcept: _data{data}, _context{context}, _size{size}, _stride{stride}, _accessor{accessor} {}
+
+        /**
+         * @brief Container data pointer
          *
          * Not meant to be used directly, as the returned value may point to an
          * arbitrary string (view) type, with no possibility to distinguish it.
          */
         const void* data() const { return _data; }
+
+        /**
+         * @brief Context pointer
+         *
+         * Filled only by @ref StringIterable(const void*, const void*, std::size_t, std::ptrdiff_t, StringView(*)(const void*, const void*)),
+         * @cpp nullptr @ce otherwise.
+         */
+        const void* context() const { return _context; }
 
         /**
          * @brief Number of items in the container
@@ -214,9 +237,10 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         explicit StringIterable(StridedArrayView1D<const char* const> view, Implementation::IterableOverloadPriority<0>) noexcept;
 
         const void* _data;
+        const void* _context;
         std::size_t _size;
         std::ptrdiff_t _stride;
-        StringView(*_accessor)(const void*);
+        StringView(*_accessor)(const void*, const void*);
 };
 
 /**
@@ -259,7 +283,7 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
 
         /** @brief Add an offset */
         StringIterableIterator operator+(std::ptrdiff_t i) const {
-            return StringIterableIterator{_data, _stride, _accessor, _i + i};
+            return StringIterableIterator{_data, _context, _stride, _accessor, _i + i};
         }
 
         /** @brief Add an offset and assign */
@@ -270,7 +294,7 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
 
         /** @brief Subtract an offset */
         StringIterableIterator operator-(std::ptrdiff_t i) const {
-            return StringIterableIterator{_data, _stride, _accessor, _i - i};
+            return StringIterableIterator{_data, _context, _stride, _accessor, _i - i};
         }
 
         /** @brief Subtract an offset and assign */
@@ -307,14 +331,15 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
     private:
         friend StringIterable;
 
-        explicit StringIterableIterator(const void* data, std::ptrdiff_t stride, StringView(*accessor)(const void*), std::size_t i) noexcept:
+        explicit StringIterableIterator(const void* data, const void* context, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*), std::size_t i) noexcept:
             /* _data{} will cause GCC 4.8 to warn that "parameter 'data' set
                 but not used" */
-            _data(static_cast<const char*>(data)), _stride{stride}, _accessor{accessor}, _i{i} {}
+            _data(static_cast<const char*>(data)), _context{context}, _stride{stride}, _accessor{accessor}, _i{i} {}
 
         const char* _data;
+        const void* _context;
         std::ptrdiff_t _stride;
-        StringView(*_accessor)(const void*);
+        StringView(*_accessor)(const void*, const void*);
         std::size_t _i;
 };
 
@@ -326,19 +351,19 @@ inline StringIterableIterator operator+(std::ptrdiff_t i, const StringIterableIt
 }
 
 inline StringIterableIterator StringIterable::begin() const {
-    return StringIterableIterator{_data, _stride, _accessor, 0};
+    return StringIterableIterator{_data, _context, _stride, _accessor, 0};
 }
 
 inline StringIterableIterator StringIterable::cbegin() const {
-    return StringIterableIterator{_data, _stride, _accessor, 0};
+    return StringIterableIterator{_data, _context, _stride, _accessor, 0};
 }
 
 inline StringIterableIterator StringIterable::end() const {
-    return StringIterableIterator{_data, _stride, _accessor, _size};
+    return StringIterableIterator{_data, _context, _stride, _accessor, _size};
 }
 
 inline StringIterableIterator StringIterable::cend() const {
-    return StringIterableIterator{_data, _stride, _accessor, _size};
+    return StringIterableIterator{_data, _context, _stride, _accessor, _size};
 }
 
 }}
