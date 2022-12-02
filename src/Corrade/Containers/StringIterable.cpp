@@ -33,60 +33,60 @@
 
 namespace Corrade { namespace Containers {
 
-StringIterable::StringIterable(const ArrayView<const StringView> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(StringView)}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const ArrayView<const StringView> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(StringView)}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const StringView*>(data);
 }} {}
 
-StringIterable::StringIterable(const ArrayView<const MutableStringView> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(StringView)}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const ArrayView<const MutableStringView> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(StringView)}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const MutableStringView*>(data);
 }} {}
 
-StringIterable::StringIterable(const ArrayView<const String> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(String)}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const ArrayView<const String> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(String)}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const String*>(data);
 }} {}
 
-StringIterable::StringIterable(const ArrayView<const char* const> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(const char*)}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const ArrayView<const char* const> view, Implementation::IterableOverloadPriority<1>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{sizeof(const char*)}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const char* const*>(data);
 }} {}
 
-StringIterable::StringIterable(const StridedArrayView1D<const StringView> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const StridedArrayView1D<const StringView> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const StringView*>(data);
 }} {}
 
-StringIterable::StringIterable(const StridedArrayView1D<const MutableStringView> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const StridedArrayView1D<const MutableStringView> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const MutableStringView*>(data);
 }} {}
 
-StringIterable::StringIterable(const StridedArrayView1D<const String> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const StridedArrayView1D<const String> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const String*>(data);
 }} {}
 
-StringIterable::StringIterable(const StridedArrayView1D<const char* const> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*) -> StringView {
+StringIterable::StringIterable(const StridedArrayView1D<const char* const> view, Implementation::IterableOverloadPriority<0>) noexcept: _data{view.data()}, _context{}, _size{view.size()}, _stride{view.stride()}, _accessor{[](const void* data, const void*, std::ptrdiff_t, std::size_t) -> StringView {
     return *static_cast<const char* const*>(data);
 }} {}
 
 StringIterable::StringIterable(const std::initializer_list<StringView> view) noexcept: StringIterable{Containers::arrayView(view)} {}
 
 StringView StringIterable::operator[](const std::size_t i) const {
-    CORRADE_DEBUG_ASSERT(i < _size, "Containers::StringIterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data, _context));
+    CORRADE_DEBUG_ASSERT(i < _size, "Containers::StringIterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data, _context, _stride, i));
 
-    return _accessor(static_cast<const char*>(_data) + i*_stride, _context);
+    return _accessor(static_cast<const char*>(_data) + i*_stride, _context, _stride, i);
 }
 
 StringView StringIterable::front() const {
-    CORRADE_DEBUG_ASSERT(_size, "Containers::StringIterable::front(): view is empty", _accessor(_data, _context));
+    CORRADE_DEBUG_ASSERT(_size, "Containers::StringIterable::front(): view is empty", _accessor(_data, _context, _stride, 0));
 
-    return _accessor(_data, _context);
+    return _accessor(_data, _context, _stride, 0);
 }
 
 StringView StringIterable::back() const {
-    CORRADE_DEBUG_ASSERT(_size, "Containers::StringIterable::back(): view is empty", _accessor(_data, _context));
+    CORRADE_DEBUG_ASSERT(_size, "Containers::StringIterable::back(): view is empty", _accessor(_data, _context, _stride, 0));
 
-    return _accessor(static_cast<const char*>(_data) + (_size - 1)*_stride, _context);
+    return _accessor(static_cast<const char*>(_data) + (_size - 1)*_stride, _context, _stride, _size - 1);
 }
 
 StringView StringIterableIterator::operator*() const {
-    return _accessor(_data + _i*_stride, _context);
+    return _accessor(_data + _i*_stride, _context, _stride, _i);
 }
 
 }}

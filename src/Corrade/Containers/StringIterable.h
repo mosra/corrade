@@ -130,11 +130,15 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          * @param accessor  Accessor function
          *
          * For item `i`, the @p accessor gets @cpp data + i*stride @ce in the
-         * first argument and @p context in the second argument. The @p context
-         * is useful for example in case the iterated container contains just
-         * offsets to string values stored in an external location.
+         * first argument, @p context in the second argument, @p stride in the
+         * third argument and `i` in the fourth argument. The @p context is
+         * useful for example in case the iterated container contains just
+         * offsets to string values stored in an external location. The index
+         * can be used for handling various edge cases in the accessor, the
+         * stride for example if it's needed to retrieve the previous or next
+         * data value as well.
          */
-        explicit StringIterable(const void* data, const void* context, std::size_t size, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*)) noexcept: _data{data}, _context{context}, _size{size}, _stride{stride}, _accessor{accessor} {}
+        explicit StringIterable(const void* data, const void* context, std::size_t size, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*, std::ptrdiff_t, std::size_t)) noexcept: _data{data}, _context{context}, _size{size}, _stride{stride}, _accessor{accessor} {}
 
         /**
          * @brief Container data pointer
@@ -240,7 +244,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         const void* _context;
         std::size_t _size;
         std::ptrdiff_t _stride;
-        StringView(*_accessor)(const void*, const void*);
+        StringView(*_accessor)(const void*, const void*, std::ptrdiff_t, std::size_t);
 };
 
 /**
@@ -253,32 +257,32 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
     public:
         /** @brief Equality comparison */
         bool operator==(const StringIterableIterator& other) const {
-            return _data == other._data && _stride == other._stride && _i == other._i;
+            return _data == other._data && _context == other._context && _stride == other._stride && _i == other._i;
         }
 
         /** @brief Non-equality comparison */
         bool operator!=(const StringIterableIterator& other) const {
-            return _data != other._data || _stride != other._stride || _i != other._i;
+            return _data != other._data || _context != other._context || _stride != other._stride || _i != other._i;
         }
 
         /** @brief Less than comparison */
         bool operator<(const StringIterableIterator& other) const {
-            return _data == other._data && _stride == other._stride && _i < other._i;
+            return _data == other._data && _context == other._context && _stride == other._stride && _i < other._i;
         }
 
         /** @brief Less than or equal comparison */
         bool operator<=(const StringIterableIterator& other) const {
-            return _data == other._data && _stride == other._stride && _i <= other._i;
+            return _data == other._data && _context == other._context && _stride == other._stride && _i <= other._i;
         }
 
         /** @brief Greater than comparison */
         bool operator>(const StringIterableIterator& other) const {
-            return _data == other._data && _stride == other._stride && _i > other._i;
+            return _data == other._data && _context == other._context && _stride == other._stride && _i > other._i;
         }
 
         /** @brief Greater than or equal comparison */
         bool operator>=(const StringIterableIterator& other) const {
-            return _data == other._data && _stride == other._stride && _i >= other._i;
+            return _data == other._data && _context == other._context && _stride == other._stride && _i >= other._i;
         }
 
         /** @brief Add an offset */
@@ -331,7 +335,7 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
     private:
         friend StringIterable;
 
-        explicit StringIterableIterator(const void* data, const void* context, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*), std::size_t i) noexcept:
+        explicit StringIterableIterator(const void* data, const void* context, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*, std::ptrdiff_t, std::size_t), std::size_t i) noexcept:
             /* _data{} will cause GCC 4.8 to warn that "parameter 'data' set
                 but not used" */
             _data(static_cast<const char*>(data)), _context{context}, _stride{stride}, _accessor{accessor}, _i{i} {}
@@ -339,7 +343,7 @@ class CORRADE_UTILITY_EXPORT StringIterableIterator {
         const char* _data;
         const void* _context;
         std::ptrdiff_t _stride;
-        StringView(*_accessor)(const void*, const void*);
+        StringView(*_accessor)(const void*, const void*, std::ptrdiff_t, std::size_t);
         std::size_t _i;
 };
 

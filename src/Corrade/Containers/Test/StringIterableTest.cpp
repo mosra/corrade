@@ -68,6 +68,8 @@ struct StringIterableTest: TestSuite::Tester {
     template<class T> void rangeBasedFor();
 
     void customIterable();
+    void customIterableIndex();
+    void customIterableStride();
 };
 
 using namespace Containers::Literals;
@@ -113,7 +115,9 @@ StringIterableTest::StringIterableTest() {
         &StringIterableTest::rangeBasedFor<String>,
         &StringIterableTest::rangeBasedFor<const char*>});
 
-    addTests({&StringIterableTest::customIterable});
+    addTests({&StringIterableTest::customIterable,
+              &StringIterableTest::customIterableIndex,
+              &StringIterableTest::customIterableStride});
 }
 
 void StringIterableTest::constructDefault() {
@@ -450,7 +454,7 @@ void StringIterableTest::customIterable() {
     const char* string = "eyehandnoselegear";
     int offsets[]{0, 3, 7, 11, 14, 17};
 
-    StringIterable iterable{offsets, string, 5, sizeof(int), [](const void* data, const void* context) {
+    StringIterable iterable{offsets, string, 5, sizeof(int), [](const void* data, const void* context, std::ptrdiff_t, std::size_t) {
         auto* dataI = static_cast<const int*>(data);
         return StringView{static_cast<const char*>(context) + *dataI, std::size_t(dataI[1] - dataI[0])};
     }};
@@ -458,6 +462,62 @@ void StringIterableTest::customIterable() {
     CORRADE_COMPARE(iterable.context(), string);
     CORRADE_COMPARE(iterable.size(), 5);
     CORRADE_COMPARE(iterable.stride(), sizeof(int));
+    CORRADE_COMPARE_AS(iterable, Containers::arrayView({
+        "eye"_s, "hand"_s, "nose"_s, "leg"_s, "ear"_s
+    }), TestSuite::Compare::Container);
+
+    /* Verify also that the non-iterator accessors get the right numbers */
+    CORRADE_COMPARE(iterable.front(), "eye");
+    CORRADE_COMPARE(iterable[3], "leg");
+    CORRADE_COMPARE(iterable.back(), "ear");
+}
+
+void StringIterableTest::customIterableIndex() {
+    const char* string = "eyehandnoselegear";
+    int offsets[]{0, 3, 7, 11, 14, 17};
+
+    /* Like customIterable(), but supplying a zero stride so the `data` passed
+       is always the same and using the index instead */
+    StringIterable iterable{offsets, string, 5, 0, [](const void* data, const void* context, std::ptrdiff_t, std::size_t i) {
+        auto* dataI = static_cast<const int*>(data);
+        return StringView{static_cast<const char*>(context) + dataI[i], std::size_t(dataI[i + 1] - dataI[i])};
+    }};
+    CORRADE_COMPARE(iterable.data(), offsets);
+    CORRADE_COMPARE(iterable.context(), string);
+    CORRADE_COMPARE(iterable.size(), 5);
+    CORRADE_COMPARE(iterable.stride(), 0);
+    CORRADE_COMPARE_AS(iterable, Containers::arrayView({
+        "eye"_s, "hand"_s, "nose"_s, "leg"_s, "ear"_s
+    }), TestSuite::Compare::Container);
+
+    /* Verify also that the non-iterator accessors get the right numbers */
+    CORRADE_COMPARE(iterable.front(), "eye");
+    CORRADE_COMPARE(iterable[3], "leg");
+    CORRADE_COMPARE(iterable.back(), "ear");
+}
+
+void StringIterableTest::customIterableStride() {
+    const char* string = "eyehandnoselegear";
+    Containers::Pair<long, int> offsets[]{
+        {0, 666},
+        {3, 666},
+        {7, 666},
+        {11, 666},
+        {14, 666},
+        {17, 666}
+    };
+
+    /* Like customIterable(), but the stride is non-trivial and has to be taken
+       into account when retrieving the next offset */
+    StringIterable iterable{offsets, string, 5, sizeof(Containers::Pair<long, int>), [](const void* data, const void* context, std::ptrdiff_t stride, std::size_t) {
+        int current = *static_cast<const int*>(data);
+        int next = *reinterpret_cast<const int*>(static_cast<const char*>(data) + stride);
+        return StringView{static_cast<const char*>(context) + current, std::size_t(next - current)};
+    }};
+    CORRADE_COMPARE(iterable.data(), offsets);
+    CORRADE_COMPARE(iterable.context(), string);
+    CORRADE_COMPARE(iterable.size(), 5);
+    CORRADE_COMPARE(iterable.stride(), sizeof(Containers::Pair<long, int>));
     CORRADE_COMPARE_AS(iterable, Containers::arrayView({
         "eye"_s, "hand"_s, "nose"_s, "leg"_s, "ear"_s
     }), TestSuite::Compare::Container);
