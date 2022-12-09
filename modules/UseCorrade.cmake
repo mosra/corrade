@@ -466,7 +466,7 @@ function(corrade_add_test test_name)
             # Since the code defining these flags explicitly says "remove once
             # they hit stable":
             #   https://github.com/v8/v8/blob/ba8ad5dd17ea85c856c09c2ff603641487d1f0ca/src/wasm/wasm-feature-flags.h#L101-L109
-            # even though it causes numberous issues such as:
+            # even though it causes numerous issues such as:
             #   https://github.com/nodejs/node/issues/43592
             # I'm future-proofing and not setting it for version 17+. From the
             # other side, the flag goes back to ancient version 6 (2017), so it
