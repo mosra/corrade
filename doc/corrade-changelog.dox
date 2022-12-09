@@ -60,8 +60,9 @@ namespace Corrade {
     (see [mosra/corrade#115](https://github.com/mosra/corrade/pull/115))
 -   Added MSVC Natvis files and pretty-printers for GDB. See
     @ref corrade-debuggers,
-    [mosra/corrade#111](https://github.com/mosra/corrade/issues/111) and
-    [mosra/corrade#147](https://github.com/mosra/corrade/pull/147) for more
+    [mosra/corrade#111](https://github.com/mosra/corrade/issues/111),
+    [mosra/corrade#147](https://github.com/mosra/corrade/pull/147) and
+    [mosra/corrade#160](https://github.com/mosra/corrade/pull/160) for more
     information.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
@@ -734,7 +735,8 @@ namespace Corrade {
 -   Various fixes (see [mosra/corrade#108](https://github.com/mosra/corrade/pull/108),
     [mosra/corrade#119](https://github.com/mosra/corrade/pull/119),
     [mosra/corrade#120](https://github.com/mosra/corrade/pull/120),
-    [mosra/magnum#600](https://github.com/mosra/magnum/issues/600))
+    [mosra/magnum#600](https://github.com/mosra/magnum/issues/600),
+    [mosra/corrade#161](https://github.com/mosra/corrade/pull/161))
 
 @section corrade-changelog-2020-06 2020.06
 
