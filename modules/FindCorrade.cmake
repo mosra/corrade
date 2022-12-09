@@ -215,7 +215,7 @@
 #                     <metadata file>
 #                     <sources>...)
 #
-# Unline the above version this puts everything into ``<debug install dir>`` on
+# Unlike the above version this puts everything into ``<debug install dir>`` on
 # both DLL and non-DLL platforms. If ``<debug install dir>`` is set to
 # :variable:`CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes), the files
 # are copied directly, without the need to perform install step. Note that the
