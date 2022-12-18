@@ -68,7 +68,7 @@ StringIterable::StringIterable(const StridedArrayView1D<const char* const> view,
 StringIterable::StringIterable(const std::initializer_list<StringView> view) noexcept: StringIterable{Containers::arrayView(view)} {}
 
 StringView StringIterable::operator[](const std::size_t i) const {
-    CORRADE_DEBUG_ASSERT(i < _size, "Containers::StringIterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data, _context, _stride, i));
+    CORRADE_DEBUG_ASSERT(i < _size, "Containers::StringIterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data, _context, _stride, 0));
 
     return _accessor(static_cast<const char*>(_data) + i*_stride, _context, _stride, i);
 }
