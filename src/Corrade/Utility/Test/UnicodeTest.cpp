@@ -227,15 +227,19 @@ void UnicodeTest::widen() {
     Containers::Array<wchar_t> a = Unicode::widen(TextNarrow);
     CORRADE_COMPARE_AS(a, TextWide,
         TestSuite::Compare::Container);
-    /* There should be an explicit null terminator */
-    CORRADE_COMPARE(a[a.size()], 0);
+    /* There should be an explicit null terminator. Not using operator[]() but
+       rather raw memory access, since operator[]() has a range-checking debug
+       assertion. */
+    CORRADE_COMPARE(a.data()[a.size()], 0);
 
     /* With implicit size gets cut off after the first \0 */
     Containers::Array<wchar_t> b = Unicode::widen(TextNarrow.data());
     CORRADE_COMPARE_AS(b, TextWide.prefix(13),
         TestSuite::Compare::Container);
-    /* There should be an explicit null terminator */
-    CORRADE_COMPARE(b[b.size()], 0);
+    /* There should be an explicit null terminator. Not using operator[]() but
+       rather raw memory access, since operator[]() has a range-checking debug
+       assertion. */
+    CORRADE_COMPARE(b.data()[b.size()], 0);
 }
 
 void UnicodeTest::widenEmpty() {
@@ -243,18 +247,22 @@ void UnicodeTest::widenEmpty() {
     CORRADE_COMPARE_AS(a,
         Containers::ArrayView<const wchar_t>{},
         TestSuite::Compare::Container);
-    /* There should be an explicit null terminator */
+    /* There should be an explicit null terminator. Not using operator[]() but
+       rather raw memory access, since operator[]() has a range-checking debug
+       assertion. */
     CORRADE_VERIFY(a.data());
-    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a.data()[0], 0);
 
     /* With implicit size */
     Containers::Array<wchar_t> b = Unicode::widen("");
     CORRADE_COMPARE_AS(b,
         Containers::ArrayView<const wchar_t>{},
         TestSuite::Compare::Container);
-    /* There should be an explicit null terminator */
+    /* There should be an explicit null terminator. Not using operator[]() but
+       rather raw memory access, since operator[]() has a range-checking debug
+       assertion. */
     CORRADE_VERIFY(b.data());
-    CORRADE_COMPARE(b[0], 0);
+    CORRADE_COMPARE(b.data()[0], 0);
 }
 
 void UnicodeTest::widenStl() {

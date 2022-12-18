@@ -138,8 +138,11 @@ void GrowableArraySanitizerFailTest::test() {
        Testing only a single kind of operation here to verify the annotations
        actually cause the expected abort and ASan message. Validity of the
        annotations after each operation is verified in GrowableArrayTest
-       itself. */
-    array[80] = 5;
+       itself.
+
+       Also not using operator[]() but rather raw memory access, since
+       operator[]() has a range-checking debug assertion on its own. */
+    array.data()[80] = 5;
     #endif
 }
 

@@ -926,19 +926,43 @@ void StringViewTest::accessMutable() {
 void StringViewTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
-    Error redirectError{&out};
-
     /* Use an empty literal to have flags set, testing that the implementation
        uses size() and not _size */
     StringView a = ""_s;
-    CORRADE_VERIFY(a.flags());
+    StringView aNotNullTerminated{"", 0};
+    StringView b = "hello";
+    StringView bNotNullTerminated = "hello!"_s.exceptSuffix(1);
+    CORRADE_COMPARE(a.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(aNotNullTerminated.flags(), StringViewFlags{});
+    CORRADE_COMPARE(b.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(bNotNullTerminated.flags(), StringViewFlag::Global);
 
+    /* Accessing the null terminator is fine if it's present */
+    a[0];
+    b[5];
+
+    std::stringstream out;
+    Error redirectError{&out};
+    /* front() / back() should return the first ever byte before the null
+       terminator and the last ever byte before the null terminator. There
+       isn't any, so it asserts. */
     a.front();
     a.back();
+    a[1];
+    aNotNullTerminated.front();
+    aNotNullTerminated.back();
+    aNotNullTerminated[0];
+    b[6];
+    bNotNullTerminated[5];
     CORRADE_COMPARE(out.str(),
         "Containers::StringView::front(): view is empty\n"
-        "Containers::StringView::back(): view is empty\n");
+        "Containers::StringView::back(): view is empty\n"
+        "Containers::StringView::operator[](): index 1 out of range for 0 null-terminated bytes\n"
+        "Containers::StringView::front(): view is empty\n"
+        "Containers::StringView::back(): view is empty\n"
+        "Containers::StringView::operator[](): index 0 out of range for 0 bytes\n"
+        "Containers::StringView::operator[](): index 6 out of range for 5 null-terminated bytes\n"
+        "Containers::StringView::operator[](): index 5 out of range for 5 bytes\n");
 }
 
 void StringViewTest::sliceInvalid() {

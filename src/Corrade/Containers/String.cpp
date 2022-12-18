@@ -357,10 +357,14 @@ String::operator Array<char>() && {
     Array<char> out;
     if(_small.size & 0x80) {
         const std::size_t size = _small.size & ~SmallSizeMask;
-        /* Allocate the output including a null terminator at the end, but
-           don't include it in the size */
-        out = Array<char>{Array<char>{Corrade::NoInit, size + 1}.release(), size};
+        /* Allocate the output including a filled null terminator at the end
+           ... */
+        out = Array<char>{Corrade::NoInit, size + 1};
         out[size] = '\0';
+        /* ... but don't actually include it in the size. The null terminator
+           has to be filled before we shrink the size because otherwise it'd
+           trip up on the OOB assert. */
+        out = Array<char>{out.release(), size};
         std::memcpy(out.data(), _small.data, size);
     } else {
         out = Array<char>{_large.data, _large.size, deleter()};
@@ -460,12 +464,18 @@ char String::back() const {
     return const_cast<String&>(*this).back();
 }
 
-char& String::operator[](std::size_t i) {
+char& String::operator[](const std::size_t i) {
+    /* Accessing the null terminator is fine */
+    CORRADE_DEBUG_ASSERT(i < size() + 1,
+        "Containers::String::operator[](): index" << i << "out of range for" << size() << "null-terminated bytes", _small.data[0]);
     if(_small.size & 0x80) return _small.data[i];
     return _large.data[i];
 }
 
-char String::operator[](std::size_t i) const {
+char String::operator[](const std::size_t i) const {
+    /* Accessing the null terminator is fine */
+    CORRADE_DEBUG_ASSERT(i < size() + 1,
+        "Containers::String::operator[](): index" << i << "out of range for" << size() << "null-terminated bytes", _small.data[0]);
     if(_small.size & 0x80) return _small.data[i];
     return _large.data[i];
 }

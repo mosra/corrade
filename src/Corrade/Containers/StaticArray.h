@@ -324,7 +324,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Pointer to the first element
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         T* begin() { return _data; }
         const T* begin() const { return _data; }            /**< @overload */
@@ -333,7 +333,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Pointer to (one item after) the last element
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         T* end() { return _data + size_; }
         const T* end() const { return _data + size_; }      /**< @overload */
@@ -342,7 +342,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief First element
          *
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         T& front() { return _data[0]; }
         const T& front() const { return _data[0]; }         /**< @overload */
@@ -350,10 +350,29 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Last element
          *
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         T& back() { return _data[size_ - 1]; }
         const T& back() const { return _data[size_ - 1]; }  /**< @overload */
+
+        /**
+         * @brief Element access
+         * @m_since_latest
+         *
+         * Expects that @p i is less than @ref size().
+         * @see @ref front(), @ref back()
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        T& operator[](std::size_t i);
+        const T& operator[](std::size_t i) const; /**< @overload */
+        #else
+        /* Has to be done this way because otherwise it causes ambiguity with a
+           builtin operator[] for pointers if an int or ssize_t is used due to
+           the implicit pointer conversion. Sigh. */
+        /** @todo clean up once implicit pointer conversion is removed */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> T& operator[](U i);
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> const T& operator[](U i) const;
+        #endif
 
         /**
          * @brief View on a slice
@@ -846,6 +865,16 @@ template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T
     for(std::size_t i = 0; i != other.size(); ++i)
         swap(_data[i], other._data[i]);
     return *this;
+}
+
+template<std::size_t size_, class T> template<class U, class> const T& StaticArray<size_, T>::operator[](const U i) const {
+    CORRADE_DEBUG_ASSERT(std::size_t(i) < size_,
+        "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements", _data[0]);
+    return _data[i];
+}
+
+template<std::size_t size_, class T> template<class U, class> T& StaticArray<size_, T>::operator[](const U i) {
+    return const_cast<T&>(static_cast<const StaticArray<size_, T>&>(*this)[i]);
 }
 
 template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, T> StaticArray<size_, T>::prefix() {

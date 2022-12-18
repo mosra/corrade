@@ -631,11 +631,14 @@ void ArrayTest::accessInvalid() {
     Error redirectError{&out};
 
     Array a;
+    Array b{5};
     a.front();
     a.back();
+    b[5];
     CORRADE_COMPARE(out.str(),
         "Containers::Array::front(): array is empty\n"
-        "Containers::Array::back(): array is empty\n");
+        "Containers::Array::back(): array is empty\n"
+        "Containers::Array::operator[](): index 5 out of range for 5 elements\n");
 }
 
 void ArrayTest::rvalueArrayAccess() {

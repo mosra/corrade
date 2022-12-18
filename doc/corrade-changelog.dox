@@ -669,6 +669,13 @@ namespace Corrade {
     explicitly @cmake include(UseEmscripten) @ce or update the `toolchains`
     submodule, which now includes the file implicitly. See
     [mosra/corrade#104](https://github.com/mosra/corrade/issues/104).
+-   @ref Containers::Array, @relativeref{Containers,StaticArray},
+    @relativeref{Containers,ArrayView}, @relativeref{Containers,StaticArrayView},
+    @relativeref{Containers,String} and @relativeref{Containers,StringView} now
+    contain debug assertions for OOB element access, if necessary implementing
+    an @cpp operator[]() @ce instead of relying on implicit pointer
+    conversions. Code that previously inadvertently made out-of-bound access
+    will now assert in debug builds.
 -   @ref Containers::LinkedList destruction was changed in a way that makes
     @ref Containers::LinkedListItem::list() still accessible in a destructor
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make

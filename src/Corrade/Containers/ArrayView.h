@@ -393,7 +393,7 @@ template<class T> class ArrayView {
         /**
          * @brief Pointer to the first element
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; } /**< @overload */
@@ -401,7 +401,7 @@ template<class T> class ArrayView {
         /**
          * @brief Pointer to (one item after) the last element
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         constexpr T* end() const { return _data+_size; }
         constexpr T* cend() const { return _data+_size; } /**< @overload */
@@ -410,7 +410,7 @@ template<class T> class ArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -418,9 +418,26 @@ template<class T> class ArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
+
+        /**
+         * @brief Element access
+         * @m_since_latest
+         *
+         * Expects that @p i is less than @ref size().
+         * @see @ref front(), @ref back()
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr T& operator[](std::size_t i) const;
+        #else
+        /* Has to be done this way because otherwise it causes ambiguity with a
+           builtin operator[] for pointers if an int or ssize_t is used due to
+           the implicit pointer conversion. Sigh. */
+        /** @todo clean up once implicit pointer conversion is removed */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr T& operator[](U i) const;
+        #endif
 
         /**
          * @brief View slice
@@ -1174,7 +1191,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Pointer to the first element
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; } /**< @overload */
@@ -1182,7 +1199,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Pointer to (one item after) the last element
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         constexpr T* end() const { return _data + size_; }
         constexpr T* cend() const { return _data + size_; } /**< @overload */
@@ -1191,7 +1208,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -1199,9 +1216,26 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
+
+        /**
+         * @brief Element access
+         * @m_since_latest
+         *
+         * Expects that @p i is less than @ref size().
+         * @see @ref front(), @ref back()
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr T& operator[](std::size_t i) const;
+        #else
+        /* Has to be done this way because otherwise it causes ambiguity with a
+           builtin operator[] for pointers if an int or ssize_t is used due to
+           the implicit pointer conversion. Sigh. */
+        /** @todo clean up once implicit pointer conversion is removed */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr T& operator[](U i) const;
+        #endif
 
         /** @copydoc ArrayView::slice(T*, T*) const */
         constexpr ArrayView<T> slice(T* begin, T* end) const {
@@ -1478,6 +1512,11 @@ template<class T> constexpr T& ArrayView<T>::back() const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(_size, "Containers::ArrayView::back(): view is empty"), _data[_size - 1];
 }
 
+template<class T> template<class U, class> constexpr T& ArrayView<T>::operator[](const U i) const {
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < _size,
+        "Containers::ArrayView::operator[](): index" << i << "out of range for" << _size << "elements"), _data[i];
+}
+
 template<class T> constexpr ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
@@ -1508,6 +1547,11 @@ template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::fro
 template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::back() const {
     static_assert(size_, "view is empty");
     return _data[size_ - 1];
+}
+
+template<std::size_t size_, class T> template<class U, class> constexpr T& StaticArrayView<size_, T>::operator[](const U i) const {
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < size_,
+        "Containers::StaticArrayView::operator[](): index" << i << "out of range for" << size_ << "elements"), _data[i];
 }
 
 template<class T> template<std::size_t size_> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(T* begin) const {

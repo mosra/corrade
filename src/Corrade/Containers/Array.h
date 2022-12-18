@@ -561,7 +561,7 @@ class Array {
         /**
          * @brief Pointer to first element
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         T* begin() { return _data; }
         const T* begin() const { return _data; }        /**< @overload */
@@ -570,7 +570,7 @@ class Array {
         /**
          * @brief Pointer to (one item after) last element
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         T* end() { return _data+_size; }
         const T* end() const { return _data+_size; }    /**< @overload */
@@ -580,7 +580,7 @@ class Array {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         T& front();
         const T& front() const; /**< @overload */
@@ -589,10 +589,29 @@ class Array {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         T& back();
         const T& back() const; /**< @overload */
+
+        /**
+         * @brief Element access
+         * @m_since_latest
+         *
+         * Expects that @p i is less than @ref size().
+         * @see @ref front(), @ref back()
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        T& operator[](std::size_t i);
+        const T& operator[](std::size_t i) const; /**< @overload */
+        #else
+        /* Has to be done this way because otherwise it causes ambiguity with a
+           builtin operator[] for pointers if an int or ssize_t is used due to
+           the implicit pointer conversion. Sigh. */
+        /** @todo clean up once implicit pointer conversion is removed */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> T& operator[](U i);
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> const T& operator[](U i) const;
+        #endif
 
         /**
          * @brief View on a slice
@@ -957,6 +976,12 @@ template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D
     return *this;
 }
 
+template<class T, class D> template<class U, class> const T& Array<T, D>::operator[](const U i) const {
+    CORRADE_DEBUG_ASSERT(std::size_t(i) < _size,
+        "Containers::Array::operator[](): index" << i << "out of range for" << _size << "elements", _data[0]);
+    return _data[i];
+}
+
 template<class T, class D> const T& Array<T, D>::front() const {
     CORRADE_DEBUG_ASSERT(_size, "Containers::Array::front(): array is empty", _data[0]);
     return _data[0];
@@ -965,6 +990,10 @@ template<class T, class D> const T& Array<T, D>::front() const {
 template<class T, class D> const T& Array<T, D>::back() const {
     CORRADE_DEBUG_ASSERT(_size, "Containers::Array::back(): array is empty", _data[_size - 1]);
     return _data[_size - 1];
+}
+
+template<class T, class D> template<class U, class> T& Array<T, D>::operator[](const U i) {
+    return const_cast<T&>(static_cast<const Array<T, D>&>(*this)[i]);
 }
 
 template<class T, class D> T& Array<T, D>::front() {
@@ -992,23 +1021,23 @@ namespace Implementation {
 template<class U, class T, class D> struct ArrayViewConverter<U, Array<T, D>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>&& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<T, D>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<const T, D>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<const T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class T, class D> struct ErasedArrayViewConverter<Array<T, D>>: ArrayViewConverter<T, Array<T, D>> {};

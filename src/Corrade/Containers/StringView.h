@@ -475,7 +475,7 @@ BasicStringView {
         /**
          * @brief Pointer to the first byte
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; } /**< @overload */
@@ -483,7 +483,7 @@ BasicStringView {
         /**
          * @brief Pointer to (one item after) the last byte
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         constexpr T* end() const {
             return _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask);
@@ -496,7 +496,7 @@ BasicStringView {
          * @brief First byte
          *
          * Expects there is at least one byte.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -504,12 +504,18 @@ BasicStringView {
          * @brief Last byte
          *
          * Expects there is at least one byte.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
 
-        /** @brief Element access */
-        constexpr T& operator[](std::size_t i) const { return _data[i]; }
+        /**
+         * @brief Element access
+         *
+         * Expects that @p i is less than @ref size(), or less than or equal to
+         * @ref size() if the string is @ref StringViewFlag::NullTerminated.
+         * @see @ref front(), @ref back()
+         */
+        constexpr T& operator[](std::size_t i) const;
 
         /**
          * @brief View slice
@@ -1253,6 +1259,12 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
     return StringView{data, size, StringViewFlag(std::size_t(StringViewFlag::Global)|std::size_t(StringViewFlag::NullTerminated))};
 }
 
+}
+
+template<class T> constexpr T& BasicStringView<T>::operator[](const std::size_t i) const {
+    /* Accessing the null terminator is fine, if it's there */
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(i < size() + (flags() & StringViewFlag::NullTerminated ? 1 : 0),
+        "Containers::StringView::operator[](): index" << i << "out of range for" << size() << (flags() & StringViewFlag::NullTerminated ? "null-terminated bytes" : "bytes")), _data[i];
 }
 
 template<class T> constexpr T& BasicStringView<T>::front() const {

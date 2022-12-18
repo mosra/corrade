@@ -1028,8 +1028,9 @@ Containers::Optional<Containers::String> readString(const Containers::StringView
 
         /* Now it's safe to set the null terminator. In case the array is not
            growable, the allocation doesn't have any ASan annotations, so it's
-           fine. */
-        (*data)[size] = '\0';
+           fine. However, Array's operator[]() has a debug assert checking for
+           the size as well so we need to access the raw memory instead. */
+        (*data).data()[size] = '\0';
 
         /* For the returned String we'll always use the original size,
            excluding ignoring the size change from arrayResize(). */

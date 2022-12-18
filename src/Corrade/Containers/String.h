@@ -670,7 +670,7 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Pointer to the first byte
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         char* begin();
         const char* begin() const; /**< @overload */
@@ -679,7 +679,7 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Pointer to (one item after) the last byte
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         char* end();
         const char* end() const; /**< @overload */
@@ -689,7 +689,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief First byte
          *
          * Expects there is at least one byte.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         char& front();
         char front() const; /**< @overload */
@@ -698,12 +698,17 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Last byte
          *
          * Expects there is at least one byte.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         char& back();
         char back() const; /**< @overload */
 
-        /** @brief Element access */
+        /**
+         * @brief Element access
+         *
+         * Expects that @p i is less than or equal to @ref size().
+         * @see @ref front(), @ref back()
+         */
         char& operator[](std::size_t i);
         char operator[](std::size_t i) const; /**< @overload */
 

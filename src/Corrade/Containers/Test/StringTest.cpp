@@ -1195,8 +1195,9 @@ void StringTest::convertArray() {
     CORRADE_COMPARE(StringView{array}, "Allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
     /* The original allocation includes a null terminator, it should be here as
-       well */
-    CORRADE_COMPARE(array[array.size()], '\0');
+       well. Accessing directly the raw data because operator[] would trigger
+       an OOB assert. */
+    CORRADE_COMPARE(array.data()[array.size()], '\0');
 
     /* State should be the same as with release(), so of a default-constructed
        instance -- with zero size, but a non-null null-terminated data */
@@ -1213,8 +1214,10 @@ void StringTest::convertArraySmall() {
     Array<char> array = std::move(a);
     CORRADE_COMPARE(StringView{array}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
-    /* The newly allocated array should include the null terminator */
-    CORRADE_COMPARE(array[array.size()], '\0');
+    /* The original allocation includes a null terminator, it should be here as
+       well. Accessing directly the raw data because operator[] would trigger
+       an OOB assert. */
+    CORRADE_COMPARE(array.data()[array.size()], '\0');
 
     /* State should be the same as with release(), so of a default-constructed
        instance -- with zero size, but a non-null null-terminated data */
@@ -1735,18 +1738,36 @@ void StringTest::accessSmall() {
 void StringTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
+    /* Use both an allocated and a SSO instance to test we're not checking the
+       members directly */
+    String a;
+    String b = "hello";
+    String bAllocated{AllocatedInit, "hello"};
+    CORRADE_VERIFY(a.isSmall());
+    CORRADE_VERIFY(b.isSmall());
+    CORRADE_VERIFY(!bAllocated.isSmall());
+
+    /* Accessing the null terminator is fine */
+    a[0];
+    b[5];
+    bAllocated[5];
+
     std::stringstream out;
     Error redirectError{&out};
-
-    /* Use a SSO instance to test we're not checking the members directly */
-    String a;
-    CORRADE_VERIFY(a.isSmall());
-
+    /* front() / back() should return the first ever byte before the null
+       terminator and the last ever byte before the null terminator. There
+       isn't any, so it asserts. */
     a.front();
     a.back();
+    a[1];
+    b[6];
+    bAllocated[6];
     CORRADE_COMPARE(out.str(),
         "Containers::String::front(): string is empty\n"
-        "Containers::String::back(): string is empty\n");
+        "Containers::String::back(): string is empty\n"
+        "Containers::String::operator[](): index 1 out of range for 0 null-terminated bytes\n"
+        "Containers::String::operator[](): index 6 out of range for 5 null-terminated bytes\n"
+        "Containers::String::operator[](): index 6 out of range for 5 null-terminated bytes\n");
 }
 
 template<class T> void StringTest::slice() {
