@@ -40,6 +40,7 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
+    template<unsigned, class, class> struct StridedDimensionsConverter;
     template<unsigned, class> struct StridedElement;
     template<int> struct ArrayCastFlattenOrInflate;
 
@@ -167,16 +168,27 @@ template<unsigned dimensions, class T> class StridedDimensions {
             static_assert(sizeof...(Args) + 1 == dimensions, "wrong value count");
         }
 
-        /** @brief Construct from a view */
-        constexpr /*implicit*/ StridedDimensions(StaticArrayView<dimensions, const T> values) noexcept: StridedDimensions{values.data(), typename Implementation::GenerateSequence<dimensions>::Type{}} {}
-
         /** @brief Construct from an array */
         constexpr /*implicit*/ StridedDimensions(const T(&values)[dimensions]) noexcept: StridedDimensions{values, typename Implementation::GenerateSequence<dimensions>::Type{}} {}
 
-        /** @brief Conversion to an array view */
-        constexpr /*implicit*/ operator StaticArrayView<dimensions, const T>() const {
-            /* GCC 4.8 needs this to be explicit */
-            return staticArrayView(_data);
+        /**
+         * @brief Construct from an external representation
+         * @m_since_latest
+         *
+         * Conversion from a @ref StaticArrayView of the same type and
+         * dimension count is builtin.
+         */
+        template<class U, class = decltype(Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StridedDimensions(U&& other) noexcept: StridedDimensions{Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
+
+        /**
+         * @brief Convert to an external representation
+         * @m_since_latest
+         *
+         * Conversion to a @ref StaticArrayView of the same type and dimension
+         * count is builtin.
+         */
+        template<class U, class = decltype(Implementation::StridedDimensionsConverter<dimensions, T, U>::to(std::declval<StridedDimensions<dimensions, T>>()))> constexpr /*implicit*/ operator U() const noexcept {
+            return Implementation::StridedDimensionsConverter<dimensions, T, U>::to(*this);
         }
 
         /**
@@ -244,6 +256,22 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
         T _data[dimensions];
 };
+
+namespace Implementation {
+
+template<unsigned dimensions, class T> struct StridedDimensionsConverter<dimensions, T, StaticArrayView<std::size_t(dimensions), const T>> {
+    constexpr static StridedDimensions<dimensions, T> from(StaticArrayView<dimensions, const T> view) {
+        return fromInternal(view.data(), typename GenerateSequence<dimensions>::Type{});
+    }
+    constexpr static StaticArrayView<dimensions, const T> to(const StridedDimensions<dimensions, T>& dimensions_) {
+        return StaticArrayView<dimensions, const T>{dimensions_.begin()};
+    }
+    template<std::size_t ...sequence> constexpr static StridedDimensions<dimensions, T> fromInternal(const T* data, Sequence<sequence...>) {
+        return {data[sequence]...};
+    }
+};
+
+}
 
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 /**

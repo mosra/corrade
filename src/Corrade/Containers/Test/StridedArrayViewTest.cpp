@@ -33,6 +33,13 @@
 
 namespace {
 
+struct Rectangle {
+    constexpr Rectangle(int rows, int cols): rows{rows}, cols{cols} {}
+
+    int rows;
+    int cols;
+};
+
 struct IntView {
     IntView(int* data, std::size_t size): data{data}, size{size} {}
 
@@ -52,6 +59,15 @@ struct ConstIntView {
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
+
+template<> struct StridedDimensionsConverter<2, std::size_t, Rectangle> {
+    constexpr static Size2D from(const Rectangle& other) {
+        return {std::size_t(other.rows), std::size_t(other.cols)};
+    }
+    constexpr static Rectangle to(const Size2D& to) {
+        return {int(to[0]), int(to[1])};
+    }
+};
 
 template<> struct ArrayViewConverter<int, IntView> {
     static ArrayView<int> from(IntView other) {
@@ -88,11 +104,11 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void dimensionsConstructDefault();
     void dimensionsConstruct();
     void dimensionsConstruct3D();
-    void dimensionsConstructView();
     void dimensionsConstructNoInit();
-    void dimensionsConvertView();
     void dimensionsConvertScalar();
     void dimensionsConvertScalar3D();
+    void dimensionsConvertExternal();
+    void dimensionsConvertExternalStaticArrayView();
     void dimensionsCompare();
     void dimensionsAccess();
     void dimensionsAccessInvalid();
@@ -302,11 +318,11 @@ StridedArrayViewTest::StridedArrayViewTest() {
     addTests({&StridedArrayViewTest::dimensionsConstructDefault,
               &StridedArrayViewTest::dimensionsConstruct,
               &StridedArrayViewTest::dimensionsConstruct3D,
-              &StridedArrayViewTest::dimensionsConstructView,
               &StridedArrayViewTest::dimensionsConstructNoInit,
-              &StridedArrayViewTest::dimensionsConvertView,
               &StridedArrayViewTest::dimensionsConvertScalar,
               &StridedArrayViewTest::dimensionsConvertScalar3D,
+              &StridedArrayViewTest::dimensionsConvertExternal,
+              &StridedArrayViewTest::dimensionsConvertExternalStaticArrayView,
               &StridedArrayViewTest::dimensionsCompare,
               &StridedArrayViewTest::dimensionsAccess,
               &StridedArrayViewTest::dimensionsAccessInvalid,
@@ -536,24 +552,6 @@ void StridedArrayViewTest::dimensionsConstruct3D() {
     CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, std::size_t, std::size_t, std::size_t>::value);
 }
 
-constexpr std::size_t SizeData[]{34, 67, 98989};
-
-void StridedArrayViewTest::dimensionsConstructView() {
-    std::size_t sizes[]{1, 37, 4564};
-
-    Size3D a = sizes;
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(a[1], 37);
-    CORRADE_COMPARE(a[2], 4564);
-
-    constexpr Size3D ca = SizeData;
-    CORRADE_COMPARE(ca[0], 34);
-    CORRADE_COMPARE(ca[1], 67);
-    CORRADE_COMPARE(ca[2], 98989);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<Size3D, Containers::StaticArrayView<3, const std::size_t>>::value);
-}
-
 void StridedArrayViewTest::dimensionsConstructNoInit() {
     Size3D a{1, 37, 4564};
 
@@ -592,22 +590,6 @@ void StridedArrayViewTest::dimensionsConstructNoInit() {
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Size1D>::value);
 }
 
-constexpr Size3D Sizes{34, 67, 98989};
-
-void StridedArrayViewTest::dimensionsConvertView() {
-    Size3D a{1, 37, 4564};
-
-    Containers::StaticArrayView<3, const std::size_t> view = a;
-    CORRADE_COMPARE(view[0], 1);
-    CORRADE_COMPARE(view[1], 37);
-    CORRADE_COMPARE(view[2], 4564);
-
-    constexpr Containers::StaticArrayView<3, const std::size_t> cview = Sizes;
-    CORRADE_COMPARE(cview[0], 34);
-    CORRADE_COMPARE(cview[1], 67);
-    CORRADE_COMPARE(cview[2], 98989);
-}
-
 void StridedArrayViewTest::dimensionsConvertScalar() {
     Size1D a = 1337;
     std::size_t b = a;
@@ -621,6 +603,54 @@ void StridedArrayViewTest::dimensionsConvertScalar() {
 void StridedArrayViewTest::dimensionsConvertScalar3D() {
     CORRADE_VERIFY(std::is_convertible<Size1D, std::size_t>::value);
     CORRADE_VERIFY(!std::is_convertible<Size3D, std::size_t>::value);
+}
+
+constexpr Size2D Sizes{34, 67};
+
+void StridedArrayViewTest::dimensionsConvertExternal() {
+    Size2D a{12, 37};
+
+    Rectangle b = a;
+    CORRADE_COMPARE(b.rows, 12);
+    CORRADE_COMPARE(b.cols, 37);
+
+    Size2D c = b;
+    CORRADE_COMPARE(c[0], 12);
+    CORRADE_COMPARE(c[1], 37);
+
+    constexpr Rectangle cb = Sizes;
+    CORRADE_COMPARE(cb.rows, 34);
+    CORRADE_COMPARE(cb.cols, 67);
+
+    constexpr Size2D cc = cb;
+    CORRADE_COMPARE(cc[0], 34);
+    CORRADE_COMPARE(cc[1], 67);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size2D, Rectangle>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Rectangle, Size2D>::value);
+}
+
+void StridedArrayViewTest::dimensionsConvertExternalStaticArrayView() {
+    Size2D a{12, 37};
+
+    Containers::StaticArrayView<2, const std::size_t> b = a;
+    CORRADE_COMPARE(b[0], 12);
+    CORRADE_COMPARE(b[1], 37);
+
+    Size2D c = b;
+    CORRADE_COMPARE(c[0], 12);
+    CORRADE_COMPARE(c[1], 37);
+
+    constexpr Containers::StaticArrayView<2, const std::size_t> cb = Sizes;
+    CORRADE_COMPARE(cb[0], 34);
+    CORRADE_COMPARE(cb[1], 67);
+
+    constexpr Size2D cc = cb;
+    CORRADE_COMPARE(cc[0], 34);
+    CORRADE_COMPARE(cc[1], 67);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size2D, Containers::StaticArrayView<2, const std::size_t>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StaticArrayView<2, const std::size_t>, Size2D>::value);
 }
 
 void StridedArrayViewTest::dimensionsCompare() {
@@ -659,8 +689,8 @@ void StridedArrayViewTest::dimensionsAccess() {
     std::size_t cacend = *(Sizes.cend() - 1);
     CORRADE_COMPARE(cabegin, 34);
     CORRADE_COMPARE(cacbegin, 34);
-    CORRADE_COMPARE(caend, 98989);
-    CORRADE_COMPARE(cacend, 98989);
+    CORRADE_COMPARE(caend, 67);
+    CORRADE_COMPARE(cacend, 67);
 }
 
 void StridedArrayViewTest::dimensionsAccessInvalid() {
