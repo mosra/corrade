@@ -585,7 +585,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Construct a view with explicit size
          * @m_since{2019,10}
          *
-         * Assuming @p data are contiguous, stride is calculated implicitly
+         * Assuming @p data is contiguous, stride is calculated implicitly
          * from @p size --- stride of a dimension is stride of the next
          * dimension times next dimension size, while last dimension stride is
          * implicitly @cpp sizeof(T) @ce. In an one-dimensional case you
@@ -783,13 +783,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<unsigned dimension> StridedArrayView<dimension + 1, T> asContiguous() const;
 
-        /** @brief Element access */
-        ElementType operator[](std::size_t i) const;
-
         /**
          * @brief Iterator to first element
          *
-         * @see @ref front()
+         * @see @ref front(), @ref operator[]()
          */
         StridedIterator<dimensions, T> begin() const { return {_data, _size, _stride, 0}; }
         /** @overload */
@@ -798,7 +795,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Iterator to (one item after) last element
          *
-         * @see @ref back()
+         * @see @ref back(), @ref operator[]()
          */
         StridedIterator<dimensions, T> end() const {
             return {_data, _size, _stride, _size[0]};
@@ -812,7 +809,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin()
+         * @see @ref begin(), @ref operator[]()
          */
         ElementType front() const;
 
@@ -820,9 +817,17 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end()
+         * @see @ref end(), @ref operator[]()
          */
         ElementType back() const;
+
+        /**
+         * @brief Element access
+         *
+         * Expects that @p i is less than @ref size().
+         * @see @ref front(), @ref back()
+         */
+        ElementType operator[](std::size_t i) const;
 
         /**
          * @brief View slice in the first dimension
@@ -2290,11 +2295,6 @@ namespace Implementation {
     };
 }
 
-template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::operator[](const std::size_t i) const -> ElementType {
-    CORRADE_DEBUG_ASSERT(i < _size._data[0], "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size._data[0] << "elements", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i)));
-    return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i);
-}
-
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::front() const -> ElementType {
     CORRADE_DEBUG_ASSERT(_size._data[0], "Containers::StridedArrayView::front(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, 0);
@@ -2303,6 +2303,11 @@ template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::fro
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::back() const -> ElementType {
     CORRADE_DEBUG_ASSERT(_size._data[0], "Containers::StridedArrayView::back(): view is empty", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, _size._data[0] - 1);
+}
+
+template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::operator[](const std::size_t i) const -> ElementType {
+    CORRADE_DEBUG_ASSERT(i < _size._data[0], "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size._data[0] << "elements", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i)));
+    return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i);
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::slice(std::size_t begin, std::size_t end) const {

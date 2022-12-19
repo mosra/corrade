@@ -113,7 +113,9 @@ template<class T> class BasicBitArrayView {
          * @param size      Bit count
          *
          * The @p offset is expected to be less than 8, @p size has to fit into
-         * 29 bits on 32-bit platforms and 61 bits on 64-bit platforms.
+         * 29 bits on 32-bit platforms and 61 bits on 64-bit platforms. Use
+         * @ref BasicBitArrayView(T*, std::size_t, std::size_t) in a
+         * @cpp constexpr @ce context instead.
          */
         /*implicit*/ BasicBitArrayView(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView<T>{static_cast<T*>(data), offset, size} {}
 
@@ -135,7 +137,7 @@ template<class T> class BasicBitArrayView {
 
         /* No bool conversion operator right now, as it's yet unclear what
            semantic should it have -- return false if it's nullptr, if the size
-           is zero (or both?). or if all bits are false? */
+           is zero (or both?), or if all bits are false? */
 
         /**
          * @brief Array data
