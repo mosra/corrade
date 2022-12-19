@@ -548,7 +548,11 @@ endfunction()
 function(corrade_add_resource name configurationFile)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::rc)
-        message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package() or enable CORRADE_WITH_UTILITY / CORRADE_WITH_RC if you have Corrade as a CMake subproject.")
+        if(CMAKE_CROSSCOMPILING)
+            message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Build a native version, either make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option, and add the Utility / rc component to your find_package(Corrade).")
+        else()
+            message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package(Corrade) or enable CORRADE_WITH_UTILITY / CORRADE_WITH_RC if you have Corrade as a CMake subproject.")
+        endif()
     endif()
 
     # Parse dependencies from the file

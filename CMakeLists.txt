@@ -379,7 +379,7 @@ endif()
 if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
     if(NOT CORRADE_RC_EXECUTABLE)
-        message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
+        message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found. Build it and either make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option.")
     endif()
     # Strictly speaking the GLOBAL isn't needed, but when crosscompiling with
     # Corrade as a CMake subproject and find_package(Corrade REQUIRED rc) (or
