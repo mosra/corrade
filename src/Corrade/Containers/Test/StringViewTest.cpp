@@ -24,12 +24,15 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Deliberately including first to make sure it works without ArrayView being
+   included first */
+#include "Corrade/Containers/StringView.h"
+
 #include <sstream>
 
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
-#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
@@ -122,6 +125,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructNullptrNullTerminated();
 
     template<class T> void convertArrayView();
+    void convertArrayViewConstexpr();
     template<class T> void convertVoidArrayView();
     void convertConstFromArrayView();
     void convertToConstArrayView();
@@ -263,6 +267,7 @@ StringViewTest::StringViewTest() {
 
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
+              &StringViewTest::convertArrayViewConstexpr,
               &StringViewTest::convertConstFromArrayView,
               &StringViewTest::convertToConstArrayView,
               &StringViewTest::convertConstFromArray,
@@ -662,6 +667,18 @@ template<class T> void StringViewTest::convertArrayView() {
     ArrayView<T> array2 = string;
     CORRADE_COMPARE(array2.size(), 7); /* keeps the same size */
     CORRADE_COMPARE(static_cast<const void*>(array2.data()), &data[0]);
+}
+
+constexpr const char String[] = "hell\0!!"; /* 7 chars + \0 at the end */
+
+void StringViewTest::convertArrayViewConstexpr() {
+    constexpr StringView view = {arrayView(String).exceptSuffix(1), StringViewFlag::Global|StringViewFlag::NullTerminated};
+    constexpr std::size_t size = view.size();
+    constexpr StringViewFlags flags = view.flags();
+    constexpr const void* data = view.data();
+    CORRADE_COMPARE(size, 7);
+    CORRADE_COMPARE(flags, StringViewFlag::Global|StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(data, String);
 }
 
 void StringViewTest::convertConstFromArrayView() {

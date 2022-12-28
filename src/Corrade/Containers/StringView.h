@@ -1164,9 +1164,9 @@ BasicStringView {
 
         /* Called from BasicStringView(U&&, StringViewFlags), see its comment
            for details; arguments in a flipped order to avoid accidental
-           ambiguity. Not constexpr/inline to avoid header dependency on
-           ArrayView.h. */
-        explicit BasicStringView(StringViewFlags flags, ArrayView<T> data) noexcept;
+           ambiguity. The ArrayView type is a template to avoid having to
+           include ArrayView.h. */
+        template<class U, class = typename std::enable_if<std::is_same<T, U>::value>::type> constexpr explicit BasicStringView(StringViewFlags flags, ArrayView<U> data) noexcept: BasicStringView{data.data(), data.size(), flags} {}
 
         /* Used by the char* constructor, delinlined because it calls into
            std::strlen() */
