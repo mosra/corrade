@@ -976,11 +976,13 @@ template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D
     return *this;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D> template<class U, class> const T& Array<T, D>::operator[](const U i) const {
     CORRADE_DEBUG_ASSERT(std::size_t(i) < _size,
         "Containers::Array::operator[](): index" << i << "out of range for" << _size << "elements", _data[0]);
     return _data[i];
 }
+#endif
 
 template<class T, class D> const T& Array<T, D>::front() const {
     CORRADE_DEBUG_ASSERT(_size, "Containers::Array::front(): array is empty", _data[0]);
@@ -992,9 +994,11 @@ template<class T, class D> const T& Array<T, D>::back() const {
     return _data[_size - 1];
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D> template<class U, class> T& Array<T, D>::operator[](const U i) {
     return const_cast<T&>(static_cast<const Array<T, D>&>(*this)[i]);
 }
+#endif
 
 template<class T, class D> T& Array<T, D>::front() {
     return const_cast<T&>(static_cast<const Array<T, D>&>(*this).front());

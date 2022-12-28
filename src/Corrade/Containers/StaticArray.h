@@ -867,6 +867,7 @@ template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T
     return *this;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<std::size_t size_, class T> template<class U, class> const T& StaticArray<size_, T>::operator[](const U i) const {
     CORRADE_DEBUG_ASSERT(std::size_t(i) < size_,
         "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements", _data[0]);
@@ -876,6 +877,7 @@ template<std::size_t size_, class T> template<class U, class> const T& StaticArr
 template<std::size_t size_, class T> template<class U, class> T& StaticArray<size_, T>::operator[](const U i) {
     return const_cast<T&>(static_cast<const StaticArray<size_, T>&>(*this)[i]);
 }
+#endif
 
 template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, T> StaticArray<size_, T>::prefix() {
     static_assert(size__ <= size_, "prefix size too large");
