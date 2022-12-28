@@ -147,7 +147,8 @@ template<class T> class Iterable {
            By accepting any type, it's just one custom conversion
            (`T[] -> Iterable<T>`), so `foo(data)` works, and then the
            constructor delegation will work because there any number of custom
-           conversions is allowed. Spec for reference:
+           conversions is allowed. Similar approach is chosen in StringIterable
+           and StringView. Spec for reference:
             https://en.cppreference.com/w/cpp/language/copy_initialization
         */
         template<class U, class = decltype(Iterable{std::declval<U&&>(), Implementation::IterableOverloadPriority<1>{}})> /*implicit*/ Iterable(U&& data) noexcept: Iterable{Utility::forward<U>(data), Implementation::IterableOverloadPriority<1>{}} {}

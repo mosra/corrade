@@ -368,8 +368,29 @@ BasicStringView {
          * The resulting view has the same size as @p data, by default no
          * null-termination is assumed.
          */
-        /* Not constexpr/inline to avoid header dependency on ArrayView.h */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ BasicStringView(ArrayView<T> data, StringViewFlags flags = {}) noexcept;
+        #else
+        /* This has to accept any type and then delegate to a private
+           constructor instead of directly taking ArrayView<T>, due to how
+           overload resolution works in copy initialization as opposed to a
+           direct constructor/function call. If it would take ArrayView<T>
+           directly, `Array<char> -> ArrayView<const char> -> StringView`
+           wouldn't work because it's one custom conversion sequence more than
+           allowed in a copy initialization, and to make that work, this class
+           would have to replicate all ArrayView constructors including
+           conversion from Array etc., which isn't feasible. Similar approach
+           is chosen in Iterable and StringIterable.
+
+           It's also explicitly disallowing T[] arguments (which are implicitly
+           convertible to an ArrayView), because those should be picking the T*
+           overload and rely on strlen(), consistently with how C string
+           literals work; and disallowing construction from a StringView
+           because it'd get preferred over the implicit copy constructor. */
+        /** @todo even though the implicit copy constructor would be overriden
+            without the is_same part, is_trivially_copyable still says yes?! */
+        template<class U, class = typename std::enable_if<!std::is_array<typename std::remove_reference<U&&>::type>::value && !std::is_same<typename std::decay<U&&>::type, BasicStringView<T>>::value, decltype(ArrayView<T>{std::declval<U&&>()})>::type> constexpr /*implicit*/ BasicStringView(U&& data, StringViewFlags flags = {}) noexcept: BasicStringView{flags, ArrayView<T>(data)} {}
+        #endif
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
@@ -390,15 +411,7 @@ BasicStringView {
          * The @ref BasicStringView(std::nullptr_t) overload (which is a
          * default constructor) is additionally @cpp constexpr @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept;
-        #else
-        /* The template has to be here in order to avoid ambiguity when
-           creating a StringView from something that's not exactly
-           ArrayView<T>, leading to both the ArrayView<T> and T* constructors
-           being picked */
-        template<class U, class = typename std::enable_if<std::is_same<typename std::decay<U>::type, typename std::remove_const<T>::type*>::value || std::is_same<typename std::decay<U>::type, T*>::value>::type> /*implicit*/ BasicStringView(U&& data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
-        #endif
+        /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -1148,6 +1161,12 @@ BasicStringView {
         friend CORRADE_UTILITY_EXPORT bool operator>(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator*(StringView, std::size_t);
+
+        /* Called from BasicStringView(U&&, StringViewFlags), see its comment
+           for details; arguments in a flipped order to avoid accidental
+           ambiguity. Not constexpr/inline to avoid header dependency on
+           ArrayView.h. */
+        explicit BasicStringView(StringViewFlags flags, ArrayView<T> data) noexcept;
 
         /* Used by the char* constructor, delinlined because it calls into
            std::strlen() */

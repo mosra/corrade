@@ -670,10 +670,8 @@ void StringViewTest::convertConstFromArrayView() {
     CORRADE_COMPARE(array.size(), 7); /* includes the null terminator */
 
     /* Tests mainly that this doesn't lead to an ambigous overload with the
-       char* constructor. `string = array` doesn't work because there's no
-       direct coversion from ArrayView<char> to StringView, only through
-       ArrayView<const char>. */
-    StringView string{array};
+       char* constructor */
+    StringView string = array;
     CORRADE_COMPARE(string.size(), 7); /* keeps the same size */
     CORRADE_COMPARE(string.flags(), StringViewFlags{});
     CORRADE_COMPARE(static_cast<const void*>(string.data()), &data[0]);
@@ -695,10 +693,8 @@ void StringViewTest::convertConstFromArray() {
     CORRADE_COMPARE(array.size(), 4);
 
     /* Tests mainly that this doesn't lead to an ambigous overload with the
-       char* constructor. `string = array` doesn't work because there's no
-       direct coversion from Array<char> to StringView, only through
-       ArrayView<const char>. */
-    StringView string{array};
+       char* constructor */
+    StringView string = array;
     CORRADE_COMPARE(string.size(), 4); /* keeps the same size */
     CORRADE_COMPARE(string.flags(), StringViewFlags{});
     CORRADE_COMPARE(static_cast<const void*>(string.data()), &array[0]);

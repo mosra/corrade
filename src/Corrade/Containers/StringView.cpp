@@ -63,7 +63,7 @@ template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: 
    needs an explicit export otherwise the symbol doesn't get exported. */
 template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
 
-template<class T> BasicStringView<T>::BasicStringView(const ArrayView<T> other, const StringViewFlags flags) noexcept: BasicStringView{other.data(), other.size(), flags} {}
+template<class T> BasicStringView<T>::BasicStringView(const StringViewFlags flags, const ArrayView<T> other) noexcept: BasicStringView{other.data(), other.size(), flags} {}
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
     Array<BasicStringView<T>> parts;
