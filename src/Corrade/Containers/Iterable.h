@@ -150,7 +150,7 @@ template<class T> class Iterable {
            conversions is allowed. Spec for reference:
             https://en.cppreference.com/w/cpp/language/copy_initialization
         */
-        template<class U, class = decltype(Iterable{std::declval<U&&>(), Implementation::IterableOverloadPriority<1>{}})> /*implicit*/ Iterable(U&& data): Iterable{Utility::forward<U>(data), Implementation::IterableOverloadPriority<1>{}} {}
+        template<class U, class = decltype(Iterable{std::declval<U&&>(), Implementation::IterableOverloadPriority<1>{}})> /*implicit*/ Iterable(U&& data) noexcept: Iterable{Utility::forward<U>(data), Implementation::IterableOverloadPriority<1>{}} {}
 
         /**
          * @brief Construct from an initializer list
