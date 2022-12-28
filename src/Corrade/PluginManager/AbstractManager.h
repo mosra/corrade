@@ -487,7 +487,7 @@ struct StaticPlugin {
     void(*initializer)();
     void(*finalizer)();
     /* This field shouldn't be written to by anything else than
-       importStaticPlugin() / ejectStaticPlugin(). It's zero-initilized by
+       importStaticPlugin() / ejectStaticPlugin(). It's zero-initialized by
        default and those use it to avoid inserting a single item to the linked
        list more than once. */
     StaticPlugin* next;
