@@ -445,6 +445,12 @@ void TripleTest::constructCopyCopyCopy() {
     CORRADE_COMPARE(ca.second(), 7);
     CORRADE_COMPARE(ca.third(), true);
 
+    CORRADE_VERIFY(std::is_copy_constructible<Triple<int, int, int>>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<Triple<int, int, int>>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Triple<int, int, int>>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Triple<int, int, int>>::value);
+    #endif
     CORRADE_VERIFY(std::is_nothrow_constructible<Triple<Copyable, Copyable, Copyable>, const Copyable&, const Copyable&, const Copyable&>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Throwable, Copyable, Copyable>, const Throwable&, const Copyable&, const Copyable&>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Copyable, Throwable, Copyable>, const Copyable&, const Throwable&, const Copyable&>::value);

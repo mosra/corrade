@@ -115,6 +115,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructFromStaticVoid();
     void constructFromStaticConstVoid();
     void constructDerived();
+    void constructCopy();
     void constructInitializerList();
 
     void convertBool();
@@ -173,6 +174,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructFromStaticVoid,
               &ArrayViewTest::constructFromStaticConstVoid,
               &ArrayViewTest::constructDerived,
+              &ArrayViewTest::constructCopy,
               &ArrayViewTest::constructInitializerList,
 
               &ArrayViewTest::convertBool,
@@ -558,6 +560,30 @@ void ArrayViewTest::constructDerived() {
     CORRADE_VERIFY(cav == &DerivedArray[0]);
     CORRADE_COMPARE(ca.size(), 5);
     CORRADE_COMPARE(cav.size(), 5);
+}
+
+void ArrayViewTest::constructCopy() {
+    int data[30];
+    ArrayView a{data, 20};
+
+    ArrayView b = a;
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), 20);
+
+    int data2[3];
+    ArrayView c{data2};
+    c = b;
+    CORRADE_COMPARE(c.data(), &data[0]);
+    CORRADE_COMPARE(c.size(), 20);
+
+    CORRADE_VERIFY(std::is_copy_constructible<ArrayView>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<ArrayView>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<ArrayView>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<ArrayView>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<ArrayView>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<ArrayView>::value);
 }
 
 void ArrayViewTest::constructInitializerList() {

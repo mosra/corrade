@@ -44,6 +44,7 @@ struct BigEnumSetTest: TestSuite::Tester {
     void construct();
     void constructOutOfRange();
     void constructNoInit();
+    void constructCopy();
 
     void operatorOr();
     void operatorAnd();
@@ -64,6 +65,7 @@ BigEnumSetTest::BigEnumSetTest() {
               &BigEnumSetTest::construct,
               &BigEnumSetTest::constructOutOfRange,
               &BigEnumSetTest::constructNoInit,
+              &BigEnumSetTest::constructCopy,
 
               &BigEnumSetTest::operatorOr,
               &BigEnumSetTest::operatorAnd,
@@ -230,6 +232,32 @@ void BigEnumSetTest::constructNoInit() {
         #pragma GCC diagnostic pop
         #endif
     }
+}
+
+void BigEnumSetTest::constructCopy() {
+    Features a = Feature::Tested;
+
+    Features b = a;
+    CORRADE_COMPARE(b.data()[0], 0);
+    CORRADE_COMPARE(b.data()[1], TestedBit);
+    CORRADE_COMPARE(b.data()[2], 0);
+    CORRADE_COMPARE(b.data()[3], 0);
+
+    Features c = Feature::Cheap;
+    c = b;
+    CORRADE_COMPARE(c.data()[0], 0);
+    CORRADE_COMPARE(c.data()[1], TestedBit);
+    CORRADE_COMPARE(c.data()[2], 0);
+    CORRADE_COMPARE(c.data()[3], 0);
+
+    CORRADE_VERIFY(std::is_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<Features>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Features>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Features>::value);
 }
 
 void BigEnumSetTest::operatorOr() {

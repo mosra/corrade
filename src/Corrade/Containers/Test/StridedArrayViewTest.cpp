@@ -120,6 +120,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructStaticView();
     void constructStaticViewVoid();
     void constructStaticViewConstVoid();
+    void constructCopy();
     void constructInitializerList();
 
     void construct3DEmpty();
@@ -321,6 +322,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructStaticView,
               &StridedArrayViewTest::constructStaticViewVoid,
               &StridedArrayViewTest::constructStaticViewConstVoid,
+              &StridedArrayViewTest::constructCopy,
               &StridedArrayViewTest::constructInitializerList,
 
               &StridedArrayViewTest::construct3DEmpty,
@@ -1264,6 +1266,30 @@ void StridedArrayViewTest::constructStaticViewConstVoid() {
     CORRADE_VERIFY(ccc.data() == Array10);
     CORRADE_COMPARE(ccc.size(), 10);
     CORRADE_COMPARE(ccc.stride(), 4);
+}
+
+void StridedArrayViewTest::constructCopy() {
+    int data[30];
+    StridedArrayView1Di a{data, 20};
+
+    StridedArrayView1Di b = a;
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), 20);
+
+    int data2[3];
+    StridedArrayView1Di c{data2};
+    c = b;
+    CORRADE_COMPARE(c.data(), &data[0]);
+    CORRADE_COMPARE(c.size(), 20);
+
+    CORRADE_VERIFY(std::is_copy_constructible<StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<StridedArrayView1Di>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<StridedArrayView1Di>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<StridedArrayView1Di>::value);
 }
 
 void StridedArrayViewTest::constructInitializerList() {

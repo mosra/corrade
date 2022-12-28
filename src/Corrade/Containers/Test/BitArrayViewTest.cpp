@@ -42,6 +42,7 @@ struct BitArrayViewTest: TestSuite::Tester {
     void constructFromMutable();
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
+    void constructCopy();
 
     void access();
     void accessMutable();
@@ -63,6 +64,7 @@ BitArrayViewTest::BitArrayViewTest() {
               &BitArrayViewTest::constructFromMutable,
               &BitArrayViewTest::constructOffsetTooLarge,
               &BitArrayViewTest::constructSizeTooLarge,
+              &BitArrayViewTest::constructCopy,
 
               &BitArrayViewTest::access,
               &BitArrayViewTest::accessMutable,
@@ -179,6 +181,32 @@ void BitArrayViewTest::constructSizeTooLarge() {
     #else
     CORRADE_COMPARE(out.str(), "Containers::BitArrayView: size expected to be smaller than 2^29 bits, got 536870912\n");
     #endif
+}
+
+void BitArrayViewTest::constructCopy() {
+    std::uint64_t data = 0x0fffff700u;
+
+    BitArrayView a{&data, 5, 47};
+
+    BitArrayView b = a;
+    CORRADE_COMPARE(b.offset(), 5);
+    CORRADE_COMPARE(b.size(), 47);
+    CORRADE_COMPARE(static_cast<const void*>(b.data()), &data);
+
+    BitArrayView c{&a, 0, 1};
+    c = b;
+    CORRADE_COMPARE(c.offset(), 5);
+    CORRADE_COMPARE(c.size(), 47);
+    CORRADE_COMPARE(static_cast<const void*>(c.data()), &data);
+
+    CORRADE_VERIFY(std::is_copy_constructible<BitArrayView>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<BitArrayView>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<BitArrayView>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<BitArrayView>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<BitArrayView>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<BitArrayView>::value);
 }
 
 void BitArrayViewTest::access() {

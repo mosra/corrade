@@ -404,6 +404,12 @@ void PairTest::constructCopyCopy() {
     CORRADE_COMPARE(ca.first(), 35.0f);
     CORRADE_COMPARE(ca.second(), 7);
 
+    CORRADE_VERIFY(std::is_copy_constructible<Pair<int, int>>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<Pair<int, int>>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Pair<int, int>>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Pair<int, int>>::value);
+    #endif
     CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>, const Copyable&, const Copyable&>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, Copyable>, const Throwable&, const Copyable&>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Copyable, Throwable>, const Copyable&, const Throwable&>::value);

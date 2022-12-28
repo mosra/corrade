@@ -37,6 +37,7 @@ struct EnumSetTest: TestSuite::Tester {
 
     void construct();
     void constructNoInit();
+    void constructCopy();
 
     void operatorOr();
     void operatorAnd();
@@ -89,6 +90,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 EnumSetTest::EnumSetTest() {
     addTests({&EnumSetTest::construct,
               &EnumSetTest::constructNoInit,
+              &EnumSetTest::constructCopy,
 
               &EnumSetTest::operatorOr,
               &EnumSetTest::operatorAnd,
@@ -145,6 +147,26 @@ void EnumSetTest::constructNoInit() {
         #pragma GCC diagnostic pop
         #endif
     }
+}
+
+void EnumSetTest::constructCopy() {
+    Features a = Feature::Tested;
+
+    Features b = a;
+    CORRADE_COMPARE(int(b), 1 << 2);
+
+    Features c = Feature::Cheap;
+    c = b;
+    CORRADE_COMPARE(int(c), 1 << 2);
+
+    CORRADE_VERIFY(std::is_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<Features>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Features>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Features>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Features>::value);
 }
 
 void EnumSetTest::operatorOr() {

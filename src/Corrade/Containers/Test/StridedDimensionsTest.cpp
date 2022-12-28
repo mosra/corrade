@@ -66,6 +66,7 @@ struct StridedDimensionsTest: TestSuite::Tester {
     void construct();
     void construct3D();
     void constructNoInit();
+    void constructCopy();
 
     void convertScalar();
     void convertScalar3D();
@@ -84,6 +85,7 @@ StridedDimensionsTest::StridedDimensionsTest() {
               &StridedDimensionsTest::construct,
               &StridedDimensionsTest::construct3D,
               &StridedDimensionsTest::constructNoInit,
+              &StridedDimensionsTest::constructCopy,
 
               &StridedDimensionsTest::convertScalar,
               &StridedDimensionsTest::convertScalar3D,
@@ -183,6 +185,30 @@ void StridedDimensionsTest::constructNoInit() {
 
     /* Implicit conversion from NoInitT not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Size1D>::value);
+}
+
+void StridedDimensionsTest::constructCopy() {
+    Size3D a = {1, 37, 4564};
+
+    Size3D b = a;
+    CORRADE_COMPARE(b[0], 1);
+    CORRADE_COMPARE(b[1], 37);
+    CORRADE_COMPARE(b[2], 4564);
+
+    Size3D c{2, 5, 6};
+    c = b;
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 37);
+    CORRADE_COMPARE(c[2], 4564);
+
+    CORRADE_VERIFY(std::is_copy_constructible<Size3D>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<Size3D>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Size3D>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Size3D>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Size3D>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Size3D>::value);
 }
 
 void StridedDimensionsTest::convertScalar() {

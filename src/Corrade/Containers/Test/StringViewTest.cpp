@@ -115,6 +115,7 @@ struct StringViewTest: TestSuite::Tester {
     void constructEmpty();
     void constructNullptr();
     void constructFromMutable();
+    void constructCopy();
     void constructLiteral();
     void constructLiteralEmpty();
     void constructTooLarge();
@@ -254,6 +255,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructEmpty,
               &StringViewTest::constructNullptr,
               &StringViewTest::constructFromMutable,
+              &StringViewTest::constructCopy,
               &StringViewTest::constructLiteral,
               &StringViewTest::constructLiteralEmpty,
               &StringViewTest::constructTooLarge,
@@ -563,6 +565,30 @@ void StringViewTest::constructFromMutable() {
     /* It shouldn't be possible the other way around */
     CORRADE_VERIFY(std::is_convertible<MutableStringView, StringView>::value);
     CORRADE_VERIFY(!std::is_convertible<StringView, MutableStringView>::value);
+}
+
+void StringViewTest::constructCopy() {
+    StringView a{"hello\0!", 8, StringViewFlag::Global|StringViewFlag::NullTerminated};
+
+    StringView b = a;
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(b.size(), a.size());
+    CORRADE_COMPARE(b.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    StringView c{"hey,", 3, StringViewFlag::Global};
+    c = b;
+    CORRADE_COMPARE(c.data(), a.data());
+    CORRADE_COMPARE(c.size(), a.size());
+    CORRADE_COMPARE(c.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    CORRADE_VERIFY(std::is_copy_constructible<StringView>::value);
+    CORRADE_VERIFY(std::is_copy_assignable<StringView>::value);
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<StringView>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<StringView>::value);
+    #endif
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<StringView>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<StringView>::value);
 }
 
 void StringViewTest::constructLiteral() {
