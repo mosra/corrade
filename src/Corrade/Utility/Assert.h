@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
 #include "Corrade/Utility/Move.h"
@@ -51,10 +51,11 @@ namespace Corrade { namespace Utility {
 This macro is not defined by Corrade, but rather meant to be defined by the
 user. When defined, assertions are not checked at all. See documentation of
 @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(),
-@ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(),
-@ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
-and @ref CORRADE_ASSERT_UNREACHABLE() for detailed description of given macro
-behavior.
+@ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(),
+@ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
+@ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
+and @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() for detailed description of
+given macro behavior.
 @see @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
 */
 #define CORRADE_NO_ASSERT
@@ -68,11 +69,13 @@ user. Unlike @ref CORRADE_NO_ASSERT and in case the error output is redirected
 (i.e., in a test verifying the assert behavior) this macro checks assertions
 and prints a message on error, but does not call @ref std::abort(). Useful for
 testing assertion behavior. See documentation of @ref CORRADE_ASSERT(),
-@ref CORRADE_CONSTEXPR_ASSERT() and @ref CORRADE_ASSERT_OUTPUT() for detailed
-description of given macro behavior. The @ref CORRADE_INTERNAL_ASSERT(),
-@ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
-and @ref CORRADE_ASSERT_UNREACHABLE() are meant to check internal conditions
-and thus are not affected by this macro.
+@ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT() and
+@ref CORRADE_ASSERT_UNREACHABLE() for detailed description of given macro
+behavior. The @ref CORRADE_INTERNAL_ASSERT(),
+@ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
+@ref CORRADE_INTERNAL_ASSERT_EXPRESSION() and
+@ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() are meant to check internal
+conditions and thus are not affected by this macro.
 
 When both @ref CORRADE_NO_ASSERT and @ref CORRADE_GRACEFUL_ASSERT are defined,
 @ref CORRADE_NO_ASSERT has a precedence.
@@ -86,14 +89,16 @@ When both @ref CORRADE_NO_ASSERT and @ref CORRADE_GRACEFUL_ASSERT are defined,
 This macro is not defined by Corrade, but rather meant to be defined by the
 user. This macro causes all  @ref CORRADE_ASSERT(),
 @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(),
-@ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
-@ref CORRADE_INTERNAL_ASSERT_OUTPUT() and @ref CORRADE_ASSERT_UNREACHABLE() to
-be only wrappers around the standard @cpp assert() @ce, using just the
-expression and discarding the message, if any. This makes them more
-lightweight, since @ref Corrade::Utility::Debug does not need to be pulled in,
-on the other hand only the failed expression is printed to the output without
-any human-readable description. See documentation of a particular assert macro
-for more information.
+@ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT(),
+@ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
+@ref CORRADE_INTERNAL_ASSERT_EXPRESSION() and
+@ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() to be only wrappers around the
+standard @cpp assert() @ce, using just the expression and discarding the
+message, if any. This makes them more lightweight, since
+@ref Corrade::Utility::Debug does not need to be pulled in, on the other hand
+only the failed expression is printed to the output without any human-readable
+description. See documentation of a particular assert macro for more
+information.
 
 When this macro is defined, @ref CORRADE_NO_ASSERT and the standard
 @cpp NDEBUG @ce macro have the same effect.
