@@ -66,11 +66,14 @@ struct StridedDimensionsTest: TestSuite::Tester {
     void construct();
     void construct3D();
     void constructNoInit();
+
     void convertScalar();
     void convertScalar3D();
     void convertExternal();
     void convertExternalStaticArrayView();
+
     void compare();
+
     void access();
     void accessInvalid();
     void accessRangeFor();
@@ -81,11 +84,14 @@ StridedDimensionsTest::StridedDimensionsTest() {
               &StridedDimensionsTest::construct,
               &StridedDimensionsTest::construct3D,
               &StridedDimensionsTest::constructNoInit,
+
               &StridedDimensionsTest::convertScalar,
               &StridedDimensionsTest::convertScalar3D,
               &StridedDimensionsTest::convertExternal,
               &StridedDimensionsTest::convertExternalStaticArrayView,
+
               &StridedDimensionsTest::compare,
+
               &StridedDimensionsTest::access,
               &StridedDimensionsTest::accessInvalid,
               &StridedDimensionsTest::accessRangeFor});
