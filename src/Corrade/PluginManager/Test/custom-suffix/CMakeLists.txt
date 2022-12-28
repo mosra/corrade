@@ -40,7 +40,7 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 endif()
 
 corrade_add_static_plugin(CustomSuffixStatic ${CMAKE_CURRENT_BINARY_DIR} CustomSuffixStatic.modconf CustomSuffixStatic.cpp)
-set_target_properties(CustomSuffixStatic CustomSuffixStatic-dependencies PROPERTIES
+set_target_properties(CustomSuffixStatic PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/custom-suffix
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/custom-suffix
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/custom-suffix)

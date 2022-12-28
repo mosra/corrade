@@ -734,19 +734,27 @@ function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
 
     # Compile resources. If the metadata file is disabled, the resource is
     # empty.
-    set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
+    set(resource_out ${CMAKE_CURRENT_BINARY_DIR}/resource_${plugin_name}.cpp)
     if(metadata_file)
-        get_filename_component(metadata_file_suffix ${metadata_file} EXT)
-        get_filename_component(metadata_file_absolute ${metadata_file} ABSOLUTE)
-        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${metadata_file_absolute}\"\nalias=${plugin_name}${metadata_file_suffix}")
-        corrade_add_resource(${plugin_name} "${resource_file}")
+        add_custom_command(
+            OUTPUT ${resource_out}
+            COMMAND Corrade::rc ${plugin_name} --single ${metadata_file} ${resource_out}
+            DEPENDS Corrade::rc ${metadata_file}
+            COMMENT "Compiling static plugin metadata file ${resource_out}"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     else()
-        file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n")
-        corrade_add_resource(${plugin_name} "${resource_file}")
+        set(metadata_file ${CMAKE_CURRENT_BINARY_DIR}/${plugin_name}-empty.conf)
+        add_custom_command(
+            OUTPUT ${resource_out}
+            COMMAND ${CMAKE_COMMAND} -E touch ${metadata_file}
+            COMMAND Corrade::rc ${plugin_name} --single ${metadata_file} ${resource_out}
+            DEPENDS Corrade::rc
+            COMMENT "Compiling static plugin metadata file ${resource_out}"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif()
 
     # Create static library and bring all needed options along
-    add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
+    add_library(${plugin_name} STATIC ${ARGN} ${resource_out})
     set_target_properties(${plugin_name} PROPERTIES CORRADE_CXX_STANDARD 11)
     target_compile_definitions(${plugin_name} PRIVATE "CORRADE_STATIC_PLUGIN")
     target_include_directories(${plugin_name} PUBLIC $<TARGET_PROPERTY:Corrade::PluginManager,INTERFACE_INCLUDE_DIRECTORIES>)

@@ -56,8 +56,8 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
 endif()
 
 set_target_properties(
-    Canary Canary-dependencies
-    Dird Dird-dependencies
+    Canary
+    Dird
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/animals
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/animals

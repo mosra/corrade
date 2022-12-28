@@ -46,7 +46,6 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo drop once PluginMetadata is <string>-free */
 #include "Corrade/Utility/Configuration.h"
-#include "Corrade/Utility/Resource.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/Utility/Path.h"
@@ -261,8 +260,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
            initialize it (unless the plugin is metadata-less) */
         Utility::Configuration configuration;
         if(_state->pluginMetadataSuffix) {
-            Utility::Resource rs{"CorradeStaticPlugin_"_s + staticPlugin->plugin};
-            std::istringstream metadata(rs.getString(staticPlugin->plugin + _state->pluginMetadataSuffix));
+            std::istringstream metadata{std::string{reinterpret_cast<const char*>(staticPlugin->metadataData), staticPlugin->metadataSize}};
             configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         }
 

@@ -481,6 +481,8 @@ struct StaticPlugin {
        literals */
     const char* plugin;
     const char* interface;
+    const unsigned char* metadataData;
+    std::size_t metadataSize;
     AbstractManager::Instancer instancer;
     void(*initializer)();
     void(*finalizer)();
@@ -523,9 +525,7 @@ of application execution. It's also safe to call this macro more than once.
 /* This "bundles" CORRADE_RESOURCE_INITIALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
     extern int pluginImporter_##name();                                     \
-    extern int resourceInitializer_##name();                                \
-    pluginImporter_##name();                                                \
-    resourceInitializer_##name();
+    pluginImporter_##name();
 
 /** @hideinitializer
 @brief Eject a previously imported static plugin
@@ -545,9 +545,7 @@ of application execution. It's also safe to call this macro more than once.
 /* This "bundles" CORRADE_RESOURCE_FINALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_EJECT(name)                                          \
     extern int pluginEjector_##name();                                      \
-    extern int resourceFinalizer_##name();                                  \
-    pluginEjector_##name();                                                 \
-    resourceFinalizer_##name();
+    pluginEjector_##name();
 
 /** @brief Plugin version */
 #define CORRADE_PLUGIN_VERSION 7
@@ -596,9 +594,13 @@ See @ref plugin-management for more information about plugin compilation.
         Corrade::PluginManager::Implementation::StaticPlugin staticPlugin_##name; \
     }                                                                       \
     int pluginImporter_##name();                                            \
+    extern const unsigned char resourceData_##name[];                       \
+    extern const std::size_t resourceSize_##name;                           \
     int pluginImporter_##name() {                                           \
         staticPlugin_##name.plugin = #name;                                 \
         staticPlugin_##name.interface = interface_;                         \
+        staticPlugin_##name.metadataData = resourceData_##name;             \
+        staticPlugin_##name.metadataSize = resourceSize_##name;             \
         staticPlugin_##name.instancer =                                     \
             [](Corrade::PluginManager::AbstractManager& manager, const Corrade::Containers::StringView& plugin) -> void* { \
                 return new className{manager, plugin};                      \
