@@ -45,7 +45,7 @@ namespace Corrade { namespace Utility {
 
 void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayView<void>& dst) {
     const std::size_t srcSize = src.size();
-    #ifndef CORRADE_NO_ASSERT
+    #ifndef CORRADE_NO_DEBUG_ASSERT
     const std::size_t dstSize = dst.size();
     #endif
     /* A debug assertion since this API should be as close with overhead to a
