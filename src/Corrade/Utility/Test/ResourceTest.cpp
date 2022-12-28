@@ -365,6 +365,20 @@ void ResourceTest::overrideGroupDifferent() {
     CORRADE_COMPARE(out.str(), "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
 }
 
+void ResourceTest::overrideGroupFileNonexistent() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
+    Resource rs{"test"};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    rs.getString("consequence2.txt");
+    /* The file is in the overriden group, but not in the compiled-in data and
+       thus it fails */
+    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence2.txt' was not found in group 'test'\n");
+}
+
 void ResourceTest::overrideGroupFileFallback() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -402,20 +416,6 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(consequence.flags(), Containers::StringViewFlag::Global);
-}
-
-void ResourceTest::overrideGroupFileNonexistent() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
-    Resource rs{"test"};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    rs.getString("consequence2.txt");
-    /* The file is in the overriden group, but not in the compiled-in data and
-       thus it fails */
-    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence2.txt' was not found in group 'test'\n");
 }
 
 }}}}
