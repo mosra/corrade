@@ -2035,11 +2035,10 @@ some caveats. See @ref CORRADE_VERIFY() for details.
 @brief Skip a test case if Corrade debug asserts are disabled
 @m_since_latest
 
-If @ref CORRADE_NO_ASSERT is defined or @ref CORRADE_IS_DEBUG_BUILD is not
-defined and @cpp NDEBUG @ce is defined, expands to a @ref CORRADE_SKIP() call.
-Otherwise expands to @cpp do {} while(false) @ce. To be used in test cases that
-verify @ref CORRADE_DEBUG_ASSERT() and other assertion macros and which would
-misbehave or crash if asserts are compiled out. Use
+If @ref CORRADE_NO_DEBUG_ASSERT is defined, expands to a @ref CORRADE_SKIP()
+call. Otherwise expands to @cpp do {} while(false) @ce. To be used in test
+cases that verify @ref CORRADE_DEBUG_ASSERT() and other assertion macros and
+which would misbehave or crash if asserts are compiled out. Use
 @ref CORRADE_SKIP_IF_NO_ASSERT() for testing @ref CORRADE_ASSERT() and other
 assertion macros.
 
@@ -2049,6 +2048,8 @@ also call it in a helper function or lambda called from inside a test case with
 some caveats. See @ref CORRADE_VERIFY() for details.
 */
 #ifdef CORRADE_NO_ASSERT
+/* Not using CORRADE_NO_DEBUG_ASSERT in order to provide a clearer reason why
+   the tests got skipped */
 #define CORRADE_SKIP_IF_NO_DEBUG_ASSERT() CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test debug assertions")
 #elif !defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)
 #define CORRADE_SKIP_IF_NO_DEBUG_ASSERT() CORRADE_SKIP("CORRADE_IS_DEBUG_BUILD not defined and NDEBUG defined, can't test debug assertions")

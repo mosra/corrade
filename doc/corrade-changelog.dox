@@ -185,7 +185,8 @@ namespace Corrade {
     @ref CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION() and
     @ref CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() macros that expand to
     their non-`DEBUG` counterparts on debug builds and get compiled out on
-    release builds. See also [mosra/corrade#136](https://github.com/mosra/corrade/issues/136).
+    release builds; as well as a @ref CORRADE_NO_DEBUG_ASSERT define for
+    querying if debug assertions are enabled. See also [mosra/corrade#136](https://github.com/mosra/corrade/issues/136).
 -   New @ref CORRADE_LIKELY() and @ref CORRADE_UNLIKELY() macros for
     instruction cache microoptimizations in tight loops
 -   New @ref CORRADE_PASSTHROUGH() helper macro, an inverse of

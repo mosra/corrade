@@ -47,12 +47,38 @@ asserts.
 
 namespace Corrade { namespace Utility {
 
+/**
+@brief Whether debug assertions are disabled
+@m_since_latest
+
+Defined either if @ref CORRADE_NO_ASSERT is defined or if
+@ref CORRADE_IS_DEBUG_BUILD is not defined and @cpp NDEBUG @ce is defined. When
+defined, debug assertions are not checked at all. See documentation of
+@ref CORRADE_DEBUG_ASSERT(), @ref CORRADE_CONSTEXPR_DEBUG_ASSERT(),
+@ref CORRADE_DEBUG_ASSERT_OUTPUT(), @ref CORRADE_DEBUG_ASSERT_UNREACHABLE(),
+@ref CORRADE_INTERNAL_DEBUG_ASSERT(),
+@ref CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT(),
+@ref CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(),
+@ref CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION()
+and @ref CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() for detailed description
+of given macro behavior.
+
+@attention Compared to @ref CORRADE_NO_ASSERT, this macro is *not* meant to be
+    defined by the user. Instead, control its behavior by (un)defining the
+    macros it relies on.
+*/
+#if defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)) || defined(DOXYGEN_GENERATING_OUTPUT)
+#define CORRADE_NO_DEBUG_ASSERT
+#ifdef DOXYGEN_GENERATING_OUTPUT
+#undef CORRADE_NO_DEBUG_ASSERT
+#endif
+#endif
+
 /** @hideinitializer
 @brief Debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_ASSERT() if @ref CORRADE_NO_ASSERT is not defined and
-either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is *not*
+Expands to @ref CORRADE_ASSERT() if @ref CORRADE_NO_DEBUG_ASSERT is not
 defined. Otherwise expands to @cpp do {} while(false) @ce.
 
 You can override this implementation by placing your own
@@ -60,7 +86,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_DEBUG_ASSERT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_DEBUG_ASSERT(condition, message, returnValue)               \
     CORRADE_ASSERT(condition, message, returnValue)
 #else
@@ -72,16 +98,15 @@ You can override this implementation by placing your own
 @brief Constexpr debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_CONSTEXPR_ASSERT() if @ref CORRADE_NO_ASSERT is not
-defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise expands to @cpp static_cast<void>(0) @ce.
+Expands to @ref CORRADE_CONSTEXPR_ASSERT() if @ref CORRADE_NO_DEBUG_ASSERT is
+not defined. Otherwise expands to @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_CONSTEXPR_DEBUG_ASSERT @ce before including the
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_CONSTEXPR_DEBUG_ASSERT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_CONSTEXPR_DEBUG_ASSERT(condition, message)                  \
     CORRADE_CONSTEXPR_ASSERT(condition, message)
 #else
@@ -93,16 +118,15 @@ You can override this implementation by placing your own
 @brief Call output debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_ASSERT_OUTPUT() if @ref CORRADE_NO_ASSERT is not
-defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise expands to @cpp static_cast<void>(call) @ce.
+Expands to @ref CORRADE_ASSERT_OUTPUT() if @ref CORRADE_NO_DEBUG_ASSERT is not
+defined. Otherwise expands to @cpp static_cast<void>(call) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_DEBUG_ASSERT_OUTPUT @ce before including the
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_DEBUG_ASSERT_OUTPUT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_DEBUG_ASSERT_OUTPUT(call, message, returnValue)             \
     CORRADE_ASSERT_OUTPUT(call, message, returnValue)
 #else
@@ -115,9 +139,8 @@ You can override this implementation by placing your own
 @brief Debug assert that the code is unreachable
 @m_since_latest
 
-Expands to @ref CORRADE_ASSERT_UNREACHABLE() if @ref CORRADE_NO_ASSERT is not
-defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise expands to a compiler builtin on GCC, Clang and
+Expands to @ref CORRADE_ASSERT_UNREACHABLE() if @ref CORRADE_NO_DEBUG_ASSERT is
+not defined. Otherwise expands to a compiler builtin on GCC, Clang and
 MSVC; calls @ref std::abort() otherwise. A @cpp return @ce statement can thus
 be safely omitted in a code path following this macro even in a release build
 without causing any compiler warnings or errors.
@@ -127,7 +150,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_DEBUG_ASSERT_UNREACHABLE
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue)              \
     CORRADE_ASSERT_UNREACHABLE(message, returnValue)
 #else
@@ -145,16 +168,15 @@ You can override this implementation by placing your own
 @brief Internal debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_INTERNAL_ASSERT() if @ref CORRADE_NO_ASSERT is not
-defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or @cpp NDEBUG @ce is
-* *not* defined. Otherwise expands to @cpp do {} while(false) @ce.
+Expands to @ref CORRADE_INTERNAL_ASSERT() if @ref CORRADE_NO_DEBUG_ASSERT is
+not defined. Otherwise expands to @cpp do {} while(false) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_DEBUG_ASSERT @ce before including the
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_INTERNAL_DEBUG_ASSERT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_INTERNAL_DEBUG_ASSERT(condition)                            \
     CORRADE_INTERNAL_ASSERT(condition)
 #else
@@ -166,9 +188,8 @@ You can override this implementation by placing your own
 @brief Internal constexpr debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT() if @ref CORRADE_NO_ASSERT
-is not defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or
-@cpp NDEBUG @ce is *not* defined. Otherwise expands to
+Expands to @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT() if
+@ref CORRADE_NO_DEBUG_ASSERT is not defined. Otherwise expands to
 @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
@@ -176,7 +197,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT(condition)                  \
     CORRADE_INTERNAL_CONSTEXPR_ASSERT(condition)
 #else
@@ -188,9 +209,8 @@ You can override this implementation by placing your own
 @brief Internal call output debug assertion macro
 @m_since_latest
 
-Expands to @ref CORRADE_INTERNAL_ASSERT_OUTPUT() if @ref CORRADE_NO_ASSERT is
-not defined and either @ref CORRADE_IS_DEBUG_BUILD is defined or
-@cpp NDEBUG @ce is *not* defined. Otherwise expands to
+Expands to @ref CORRADE_INTERNAL_ASSERT_OUTPUT() if
+@ref CORRADE_NO_DEBUG_ASSERT is not defined. Otherwise expands to
 @cpp static_cast<void>(call) @ce.
 
 You can override this implementation by placing your own
@@ -198,7 +218,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(call)                          \
     CORRADE_INTERNAL_ASSERT_OUTPUT(call)
 #else
@@ -211,8 +231,7 @@ You can override this implementation by placing your own
 @m_since_latest
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() if
-@ref CORRADE_NO_ASSERT is not defined and either @ref CORRADE_IS_DEBUG_BUILD is
-defined or @cpp NDEBUG @ce is *not* defined. Otherwise expands to nothing,
+@ref CORRADE_NO_DEBUG_ASSERT is not defined. Otherwise expands to nothing,
 leaving just the parenthesized expression out of it.
 
 You can override this implementation by placing your own
@@ -220,7 +239,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION(...)                       \
     CORRADE_INTERNAL_ASSERT_EXPRESSION(__VA_ARGS__)
 #else
@@ -234,8 +253,7 @@ You can override this implementation by placing your own
 @m_since_latest
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() if
-@ref CORRADE_NO_ASSERT is not defined and either @ref CORRADE_IS_DEBUG_BUILD is
-defined or @cpp NDEBUG @ce is *not* defined. Otherwise expands to a compiler
+@ref CORRADE_NO_DEBUG_ASSERT is not defined. Otherwise expands to a compiler
 builtin on GCC, Clang and MSVC; calls @ref std::abort() otherwise. A
 @cpp return @ce statement can thus be safely omitted in a code path following
 this macro even in a release build without causing any compiler warnings or
@@ -246,7 +264,7 @@ You can override this implementation by placing your own
 @ref Corrade/Utility/DebugAssert.h header.
 */
 #ifndef CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE
-#if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG))
+#ifndef CORRADE_NO_DEBUG_ASSERT
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE()                         \
     CORRADE_INTERNAL_ASSERT_UNREACHABLE()
 #else
