@@ -319,12 +319,16 @@ corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
 corrade_add_resource(ResourceTestEmptyFileData ResourceTestFiles/resources-empty-file.conf)
 corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resources-nothing.conf)
 corrade_add_resource(ResourceTestSpacesData ResourceTestFiles/resources-spaces.conf)
+corrade_add_resource(ResourceTestSingleData ResourceTestFiles/consequence.bin SINGLE)
+corrade_add_resource(ResourceTestSingleEmptyData ResourceTestFiles/empty.bin SINGLE)
 corrade_add_test(UtilityResourceTest
     ResourceTest.cpp
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
     ${ResourceTestSpacesData}
+    ${ResourceTestSingleData}
+    ${ResourceTestSingleEmptyData}
     LIBRARIES CorradeTestSuiteTestLib
     FILES
         ResourceTestFiles/consequence.bin
@@ -362,6 +366,8 @@ corrade_add_test(UtilityResourceCompileTest
         ResourceTestFiles/compiled.cpp
         ResourceTestFiles/compiled-empty.cpp
         ResourceTestFiles/compiled-nothing.cpp
+        ResourceTestFiles/compiled-single.cpp
+        ResourceTestFiles/compiled-single-empty.cpp
         ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/empty.bin

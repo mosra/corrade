@@ -58,16 +58,26 @@ for more information.
 @section corrade-rc-usage Usage
 
 @code{.sh}
-corrade-rc [-h|--help] [--] name resources.conf output.cpp
+corrade-rc [-h|--help] [--single] [--] name input output.cpp
 @endcode
+
+By default expects that `input` is a resource configuration file containing a
+@cb{.ini} group @ce name and zero or more @cb{.ini} [file] @ce groups with
+input filenames. If `--single` is specified, the `input` file is read and
+directly compiled into a C++ source file, exposing the data under
+@cpp extern const unsigned char resourceData_name[] @ce and
+@cpp extern const std::size_t resourceSize_name @ce symbols, with no dependency
+on @ref Utility::Resource.
 
 Arguments:
 
 -   `name` --- exported symbol name
--   `resources.conf` --- resource configuration file (see @ref Utility::Resource
-    for format description)
+-   `input` --- resource configuration file (see @ref Utility::Resource for
+    format description) or a single file to process
 -   `output.cpp` --- output file
 -   `-h`, `--help` --- display this help message and exit
+-   `--single` --- compile a single file instead of parsing a configuration
+    file
 */
 
 }
@@ -78,10 +88,18 @@ using namespace Corrade;
 int main(int argc, char** argv) {
     Utility::Arguments args;
     args.addArgument("name").setHelp("name", "exported symbol name")
-        .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
+        .addArgument("input").setHelp("input", "resource configuration file or a single file to process", "input")
         .addArgument("output").setHelp("output", "output file", "output.cpp")
+        .addBooleanOption("single").setHelp("single", "compile a single file instead of parsing a configuration file")
         .setCommand("corrade-rc")
-        .setGlobalHelp("Corrade resource compiler.")
+        .setGlobalHelp(R"(Corrade resource compiler.
+
+By default expects that input is a resource configuration file containing a
+group name and zero or more [file] groups with input filenames. If --single
+is specified, the input file is read and directly compiled into a C++ source
+file, exposing the data under `extern const unsigned char resourceData_<name>[]`
+and `extern const std::size_t resourceSize_<name>` symbols, with no dependency
+on Corrade's resource system.)")
         .parse(argc, argv);
 
     /* Remove previous output file. Only if it exists, to not print an error
@@ -92,7 +110,9 @@ int main(int argc, char** argv) {
         return 1;
 
     /* Compile file */
-    const std::string compiled = Utility::Implementation::resourceCompileFrom(args.value("name"), args.value("conf"));
+    const std::string compiled = args.isSet("single") ?
+        Utility::Implementation::resourceCompileSingle(args.value("name"), args.value("input")) :
+        Utility::Implementation::resourceCompileFrom(args.value("name"), args.value("input"));
 
     /* Compilation failed */
     if(compiled.empty()) return 2;

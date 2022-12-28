@@ -249,6 +249,27 @@ std::string resourceCompileFrom(const std::string& name, const std::string& conf
     return resourceCompile(name, group, fileData);
 }
 
+std::string resourceCompileSingle(const Containers::StringView name, const Containers::StringView filename) {
+    const Containers::Optional<Containers::Array<char>> data = Path::read(filename);
+    if(!data) {
+        Error() << "    Error: cannot open file" << filename;
+        return {};
+    }
+
+    /* In case the data is empty, output a single-byte array. Alternatively we
+       could special-case this and output a nullptr const char*, but that would
+       have a different signature from const char[] and thus could cause
+       problems, and would be 4x/8x larger than the single byte. */
+    return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+
+#include <cstddef>
+
+extern const std::size_t resourceSize_{0} = {1};
+extern const unsigned char resourceData_{0}[]{{{2}
+}};
+)", name, data->size(), data->isEmpty() ? "\n    0x00" : hexcode(*data));
+}
+
 }}}}
 
 #endif

@@ -545,7 +545,13 @@ function(corrade_add_test test_name)
     set_tests_properties(${test_name} PROPERTIES REQUIRED_FILES "${absolute_files}")
 endfunction()
 
-function(corrade_add_resource name configurationFile)
+function(corrade_add_resource name input)
+    foreach(arg ${ARGN})
+        if(arg STREQUAL SINGLE)
+            set(single_file --single)
+        endif()
+    endforeach()
+
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::rc)
         if(CMAKE_CROSSCOMPILING)
@@ -555,29 +561,32 @@ function(corrade_add_resource name configurationFile)
         endif()
     endif()
 
-    # Parse dependencies from the file
-    set(dependencies )
-    set(filenameRegex "^[ \t]*filename[ \t]*=(.+)$")
-    get_filename_component(configurationFilePath ${configurationFile} PATH)
+    # Parse dependencies from the file, unless it's a single file
+    if(NOT single_file)
+        set(dependencies )
+        set(filenameRegex "^[ \t]*filename[ \t]*=(.+)$")
+        get_filename_component(configurationFilePath ${input} PATH)
 
-    file(STRINGS "${configurationFile}" filenames REGEX ${filenameRegex} ENCODING UTF-8)
-    foreach(filename ${filenames})
-        # Get the filename together with leading/trailing whitespace and quotes
-        # from the file line
-        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${filename}")
-        # Strip leading/trailing whitespace
-        string(STRIP "${filename}" filename)
-        # If it's quoted (for example because the filename itself has spaces),
-        # remove the quotes
-        string(REGEX REPLACE "^\"([^\"]+)\"$" "\\1" filename "${filename}")
-        if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
-            set(filename "${configurationFilePath}/${filename}")
-        endif()
-        list(APPEND dependencies "${filename}")
-    endforeach()
+        file(STRINGS "${input}" filenames REGEX ${filenameRegex} ENCODING UTF-8)
+        foreach(filename ${filenames})
+            # Get the filename together with leading/trailing whitespace and quotes
+            # from the file line
+            string(REGEX REPLACE ${filenameRegex} "\\1" filename "${filename}")
+            # Strip leading/trailing whitespace
+            string(STRIP "${filename}" filename)
+            # If it's quoted (for example because the filename itself has spaces),
+            # remove the quotes
+            string(REGEX REPLACE "^\"([^\"]+)\"$" "\\1" filename "${filename}")
+            if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
+                set(filename "${configurationFilePath}/${filename}")
+            endif()
+            list(APPEND dependencies "${filename}")
+        endforeach()
 
-    # Force IDEs display also the resource files in project view
-    add_custom_target(${name}-dependencies SOURCES ${dependencies})
+        # Force IDEs display also the resource files in project view
+        add_custom_target(${name}-dependencies SOURCES ${dependencies})
+        list(APPEND dependencies ${name}-dependencies)
+    endif()
 
     # Output file name
     set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
@@ -586,13 +595,13 @@ function(corrade_add_resource name configurationFile)
     # list file changes (otherwise it parses the file only during the explicit
     # configure step and never again, thus additions/deletions are not
     # recognized automatically)
-    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${configurationFile})
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${input})
 
     # Run command
     add_custom_command(
         OUTPUT "${out}"
-        COMMAND Corrade::rc ${name} "${configurationFile}" "${out}"
-        DEPENDS Corrade::rc ${configurationFile} ${dependencies} ${name}-dependencies
+        COMMAND Corrade::rc ${single_file} ${name} "${input}" "${out}"
+        DEPENDS Corrade::rc ${input} ${dependencies}
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 

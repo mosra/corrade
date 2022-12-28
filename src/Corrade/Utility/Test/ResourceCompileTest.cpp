@@ -50,6 +50,10 @@ struct ResourceCompileTest: TestSuite::Tester {
     void compileFromEmptyGroup();
     void compileFromEmptyFilename();
     void compileFromEmptyAlias();
+
+    void compileSingle();
+    void compileSingleNonexistentFile();
+    void compileSingleEmptyFile();
 };
 
 ResourceCompileTest::ResourceCompileTest() {
@@ -65,7 +69,11 @@ ResourceCompileTest::ResourceCompileTest() {
               &ResourceCompileTest::compileFromNonexistentFile,
               &ResourceCompileTest::compileFromEmptyGroup,
               &ResourceCompileTest::compileFromEmptyFilename,
-              &ResourceCompileTest::compileFromEmptyAlias});
+              &ResourceCompileTest::compileFromEmptyAlias,
+
+              &ResourceCompileTest::compileSingle,
+              &ResourceCompileTest::compileSingleNonexistentFile,
+              &ResourceCompileTest::compileSingleEmptyFile});
 }
 
 void ResourceCompileTest::compile() {
@@ -181,6 +189,28 @@ void ResourceCompileTest::compileFromEmptyAlias() {
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
+}
+
+void ResourceCompileTest::compileSingle() {
+    CORRADE_COMPARE_AS(Implementation::resourceCompileSingle("ResourceTestData", Path::join(RESOURCE_TEST_DIR, "consequence.bin")),
+        Path::join(RESOURCE_TEST_DIR, "compiled-single.cpp"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceCompileTest::compileSingleNonexistentFile() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(Implementation::resourceCompileSingle("ResourceTestData", "/nonexistent.dat").empty());
+    /* There's an error message from Path::read() before */
+    CORRADE_COMPARE_AS(out.str(),
+        "\n    Error: cannot open file /nonexistent.dat\n",
+        TestSuite::Compare::StringHasSuffix);
+}
+
+void ResourceCompileTest::compileSingleEmptyFile() {
+    CORRADE_COMPARE_AS(Implementation::resourceCompileSingle("ResourceTestData", Path::join(RESOURCE_TEST_DIR, "empty.bin")),
+        Path::join(RESOURCE_TEST_DIR, "compiled-single-empty.cpp"),
+        TestSuite::Compare::StringToFile);
 }
 
 }}}}

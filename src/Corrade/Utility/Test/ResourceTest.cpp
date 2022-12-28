@@ -44,6 +44,13 @@
 
 #include "configure.h"
 
+/* Compiled using corrade_add_resource(... SINGLE), tested with
+   single() and singleEmpty() */
+extern const std::size_t resourceSize_ResourceTestSingleData;
+extern const std::size_t resourceSize_ResourceTestSingleEmptyData;
+extern const unsigned char resourceData_ResourceTestSingleData[];
+extern const unsigned char resourceData_ResourceTestSingleEmptyData[];
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ResourceTest: TestSuite::Tester {
@@ -74,6 +81,9 @@ struct ResourceTest: TestSuite::Tester {
     void overrideGroupFileNonexistent();
     void overrideGroupFileFallback();
     void overrideGroupFileFallbackReadError();
+
+    void single();
+    void singleEmpty();
 };
 
 ResourceTest::ResourceTest() {
@@ -101,7 +111,10 @@ ResourceTest::ResourceTest() {
               &ResourceTest::overrideGroupDifferent,
               &ResourceTest::overrideGroupFileNonexistent,
               &ResourceTest::overrideGroupFileFallback,
-              &ResourceTest::overrideGroupFileFallbackReadError});
+              &ResourceTest::overrideGroupFileFallbackReadError,
+
+              &ResourceTest::single,
+              &ResourceTest::singleEmpty});
 }
 
 using namespace Containers::Literals;
@@ -416,6 +429,18 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(consequence.flags(), Containers::StringViewFlag::Global);
+}
+
+void ResourceTest::single() {
+    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(resourceData_ResourceTestSingleData), resourceSize_ResourceTestSingleData}),
+        Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::singleEmpty() {
+    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(resourceData_ResourceTestSingleEmptyData), resourceSize_ResourceTestSingleEmptyData}),
+        Path::join(RESOURCE_TEST_DIR, "empty.bin"),
+        TestSuite::Compare::StringToFile);
 }
 
 }}}}

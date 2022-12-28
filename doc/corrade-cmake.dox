@@ -324,20 +324,34 @@ for different tests for more precise grouping.
 @subsection corrade-cmake-add-resource Compile data resources into application binary
 
 @code{.cmake}
-corrade_add_resource(<name> <resources.conf>)
+corrade_add_resource(<name> <input> [SINGLE])
 @endcode
 
-Depends on corrade-rc, which is part of Corrade utilities. This command
-generates resource data using given configuration file in current build
-directory. Argument name is name under which the resources can be explicitly
-loaded. Variable `name` contains compiled resource filename, which is then
-used for compiling library / executable. The `resources.conf` file can also
-contain UTF-8-encoded filenames. See @ref resource-management for more
-information. Example usage:
+Depends on @ref corrade-rc "corrade-rc", which is part of Corrade utilities.
+This command generates resource data using a resource configuration file passed
+in `<input>`. The `<name>` argument is a CMake variable name that subsequently
+contains a filename of the resulting C++ file, which is meant to be passed to
+@cmake add_executable() @ce or @cpp add_library() @ce, and is also a C
+identifier under which the resources can be explicitly loaded if needed as
+described in @ref CORRADE_RESOURCE_INITIALIZE(). See @ref Utility::Resource and
+@ref resource-management for more information. Example usage:
 
 @code{.cmake}
 corrade_add_resource(app_resources resources.conf)
 add_executable(app source1 source2 ... ${app_resources})
+@endcode
+
+Alternatively, the `SINGLE` signature can be used to directly compile a single
+file into a C++ source file containing its binary representation, exposing the
+data under @cpp extern const unsigned char resourceData_name[] @ce and
+@cpp extern const std::size_t resourceSize_name @ce symbols, with no dependency
+on @ref Utility::Resource.
+
+@code{.cmake}
+corrade_add_resource(binary_contents binary.dat SINGLE)
+# resourceData_binary_contents and resourceSize_binary_contents should be then
+# directly referenced by application sources
+add_executable(app ... ${binary_contents})
 @endcode
 
 @subsection corrade-cmake-add-plugin Add dynamic plugin

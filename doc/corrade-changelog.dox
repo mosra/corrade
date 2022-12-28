@@ -191,6 +191,10 @@ namespace Corrade {
     instruction cache microoptimizations in tight loops
 -   New @ref CORRADE_PASSTHROUGH() helper macro, an inverse of
     @ref CORRADE_NOOP()
+-   Added a `--single` option to the @ref corrade-rc "corrade-rc" executable as
+    well as @ref corrade-cmake-add-resource "corrade_add_resource(... SINGLE)"
+    for compiling a single input file into a C++ file containing its binary
+    representation
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
