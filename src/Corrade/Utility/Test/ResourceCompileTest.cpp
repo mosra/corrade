@@ -70,13 +70,14 @@ ResourceCompileTest::ResourceCompileTest() {
 
 void ResourceCompileTest::compile() {
     /* Testing also null bytes and signed overflow, don't change binaries */
-    Containers::Optional<Containers::String> consequence = Path::readString(Path::join(RESOURCE_TEST_DIR, "consequence.bin"));
-    Containers::Optional<Containers::String> predisposition = Path::readString(Path::join(RESOURCE_TEST_DIR, "predisposition.bin"));
+    Containers::Optional<Containers::Array<char>> consequence = Path::read(Path::join(RESOURCE_TEST_DIR, "consequence.bin"));
+    Containers::Optional<Containers::Array<char>> predisposition = Path::read(Path::join(RESOURCE_TEST_DIR, "predisposition.bin"));
     CORRADE_VERIFY(consequence);
     CORRADE_VERIFY(predisposition);
-    std::vector<std::pair<std::string, std::string>> input{
-        {"consequence.bin", *consequence},
-        {"predisposition.bin", *predisposition}};
+    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
+        {"consequence.bin", *std::move(consequence)},
+        {"predisposition.bin", *std::move(predisposition)}
+    };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
         TestSuite::Compare::StringToFile);
@@ -85,9 +86,10 @@ void ResourceCompileTest::compile() {
 void ResourceCompileTest::compileNotSorted() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::vector<std::pair<std::string, std::string>> input{
+    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
         {"predisposition.bin", {}},
-        {"consequence.bin",{}}};
+        {"consequence.bin",{}}
+    };
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -102,8 +104,9 @@ void ResourceCompileTest::compileNothing() {
 }
 
 void ResourceCompileTest::compileEmptyFile() {
-    std::vector<std::pair<std::string, std::string>> input{
-        {"empty.bin", ""}};
+    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
+        {"empty.bin", {}}
+    };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
         TestSuite::Compare::StringToFile);

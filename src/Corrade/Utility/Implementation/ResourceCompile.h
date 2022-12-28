@@ -30,8 +30,9 @@
 #include <iomanip>
 #include <map>
 #include <sstream>
-#include <vector>
 
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Utility/Configuration.h"
@@ -55,11 +56,11 @@ namespace Corrade { namespace Utility { namespace Implementation { namespace {
 
 /** @todo this whole thing needs a serious cleanup and deSTLification */
 
-std::string comment(const std::string& comment) {
-    return "\n    /* " + comment + " */";
+std::string comment(const Containers::StringView comment) {
+    return Utility::formatString("\n    /* {} */", comment);
 }
 
-std::string hexcode(const std::string& data) {
+std::string hexcode(const Containers::ArrayView<const char> data) {
     std::ostringstream out;
     out << std::hex;
 
@@ -78,19 +79,19 @@ std::string hexcode(const std::string& data) {
     return out.str();
 }
 
-inline bool lessFilename(const std::pair<std::string, std::string>& a, const std::pair<std::string, std::string>& b) {
-    return a.first < b.first;
+inline bool lessFilename(const Containers::Pair<Containers::StringView, Containers::Array<char>>& a, const Containers::Pair<Containers::StringView, Containers::Array<char>>& b) {
+    return a.first() < b.first();
 }
 
 /* Compile data resource file. Resource name is the one to use in
    CORRADE_RESOURCE_INITIALIZE(), group name is the one to load the resources
    from. Output is a C++ file with hexadecimal data representation. */
-std::string resourceCompile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
+std::string resourceCompile(const std::string& name, const std::string& group, const Containers::ArrayView<const Containers::Pair<Containers::StringView, Containers::Array<char>>> files) {
     CORRADE_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename),
         "Utility::Resource::compile(): the file list is not sorted", {});
 
     /* Special case for empty file list */
-    if(files.empty()) {
+    if(files.isEmpty()) {
         return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include "Corrade/Corrade.h"
@@ -127,8 +128,8 @@ int resourceFinalizer_{0}() {{
 
     /* Convert data to hexacodes */
     for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        filenamesLen += it->first.size();
-        dataLen += it->second.size();
+        filenamesLen += it->first().size();
+        dataLen += it->second().size();
 
         if(it != files.begin()) {
             filenames += '\n';
@@ -137,11 +138,11 @@ int resourceFinalizer_{0}() {{
 
         positions += Utility::formatString("\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
 
-        filenames += comment(it->first);
-        filenames += hexcode(it->first);
+        filenames += comment(it->first());
+        filenames += hexcode(Containers::StringView{it->first()});
 
-        data += comment(it->first);
-        data += hexcode(it->second);
+        data += comment(it->first());
+        data += hexcode(it->second());
     }
 
     /* Remove last comma from positions and filenames array */
@@ -149,7 +150,7 @@ int resourceFinalizer_{0}() {{
     filenames.resize(filenames.size()-1);
 
     /* Remove last comma from data array only if the last file is not empty */
-    if(!files.back().second.empty())
+    if(!files.back().second().isEmpty())
         data.resize(data.size()-1);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
@@ -224,22 +225,22 @@ std::string resourceCompileFrom(const std::string& name, const std::string& conf
 
     /* Load all files */
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
-    std::vector<std::pair<std::string, std::string>> fileData;
-    fileData.reserve(files.size());
+    Containers::Array<Containers::Pair<Containers::StringView, Containers::Array<char>>> fileData;
+    arrayReserve(fileData, files.size());
     for(const auto file: files) {
-        const std::string filename = file->value("filename");
-        const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
-        if(filename.empty() || alias.empty()) {
+        const Containers::StringView filename = file->value<Containers::StringView>("filename");
+        const Containers::StringView alias = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : filename;
+        if(filename.isEmpty() || alias.isEmpty()) {
             Error() << "    Error: filename or alias of file" << fileData.size()+1 << "in group" << group << "is empty";
             return {};
         }
 
-        Containers::Optional<Containers::String> contents = Path::readString(Path::join(path, filename));
+        Containers::Optional<Containers::Array<char>> contents = Path::read(Path::join(path, filename));
         if(!contents) {
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(alias, *std::move(contents));
+        arrayAppend(fileData, InPlaceInit, alias, *std::move(contents));
     }
 
     /* The list has to be sorted before passing it to compile() */
