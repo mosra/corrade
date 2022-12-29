@@ -33,8 +33,15 @@
 
 namespace {
 
-struct Rectangle {
-    constexpr Rectangle(int rows, int cols): rows{rows}, cols{cols} {}
+struct Rectangleu {
+    constexpr Rectangleu(unsigned rows, unsigned cols): rows{rows}, cols{cols} {}
+
+    unsigned rows;
+    unsigned cols;
+};
+
+struct Rectanglei {
+    constexpr Rectanglei(int rows, int cols): rows{rows}, cols{cols} {}
 
     int rows;
     int cols;
@@ -46,11 +53,20 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
 
-template<> struct StridedDimensionsConverter<2, std::size_t, Rectangle> {
-    constexpr static Size2D from(const Rectangle& other) {
+template<> struct StridedDimensionsConverter<2, std::size_t, Rectangleu> {
+    constexpr static Size2D from(const Rectangleu& other) {
         return {std::size_t(other.rows), std::size_t(other.cols)};
     }
-    constexpr static Rectangle to(const Size2D& to) {
+    constexpr static Rectangleu to(const Size2D& to) {
+        return {unsigned(to[0]), unsigned(to[1])};
+    }
+};
+
+template<> struct ExplicitStridedDimensionsConverter<2, std::size_t, Rectanglei> {
+    constexpr static Size2D from(const Rectanglei& other) {
+        return {std::size_t(other.rows), std::size_t(other.cols)};
+    }
+    constexpr static Rectanglei to(const Size2D& to) {
         return {int(to[0]), int(to[1])};
     }
 };
@@ -71,6 +87,7 @@ struct StridedDimensionsTest: TestSuite::Tester {
     void convertScalar();
     void convertScalar3D();
     void convertExternal();
+    void convertExternalExplicit();
     void convertExternalStaticArrayView();
 
     void compare();
@@ -90,6 +107,7 @@ StridedDimensionsTest::StridedDimensionsTest() {
               &StridedDimensionsTest::convertScalar,
               &StridedDimensionsTest::convertScalar3D,
               &StridedDimensionsTest::convertExternal,
+              &StridedDimensionsTest::convertExternalExplicit,
               &StridedDimensionsTest::convertExternalStaticArrayView,
 
               &StridedDimensionsTest::compare,
@@ -231,7 +249,7 @@ constexpr Size2D Sizes{34, 67};
 void StridedDimensionsTest::convertExternal() {
     Size2D a{12, 37};
 
-    Rectangle b = a;
+    Rectangleu b = a;
     CORRADE_COMPARE(b.rows, 12);
     CORRADE_COMPARE(b.cols, 37);
 
@@ -239,7 +257,7 @@ void StridedDimensionsTest::convertExternal() {
     CORRADE_COMPARE(c[0], 12);
     CORRADE_COMPARE(c[1], 37);
 
-    constexpr Rectangle cb = Sizes;
+    constexpr Rectangleu cb = Sizes;
     CORRADE_COMPARE(cb.rows, 34);
     CORRADE_COMPARE(cb.cols, 67);
 
@@ -247,8 +265,37 @@ void StridedDimensionsTest::convertExternal() {
     CORRADE_COMPARE(cc[0], 34);
     CORRADE_COMPARE(cc[1], 67);
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<Size2D, Rectangle>::value);
-    CORRADE_VERIFY(std::is_nothrow_constructible<Rectangle, Size2D>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size2D, Rectangleu>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Rectangleu, Size2D>::value);
+}
+
+void StridedDimensionsTest::convertExternalExplicit() {
+    Size2D a{12, 37};
+
+    Rectanglei b{a};
+    CORRADE_COMPARE(b.rows, 12);
+    CORRADE_COMPARE(b.cols, 37);
+
+    Size2D c{b};
+    CORRADE_COMPARE(c[0], 12);
+    CORRADE_COMPARE(c[1], 37);
+
+    constexpr Rectanglei cb{Sizes};
+    CORRADE_COMPARE(cb.rows, 34);
+    CORRADE_COMPARE(cb.cols, 67);
+
+    constexpr Size2D cc{cb};
+    CORRADE_COMPARE(cc[0], 34);
+    CORRADE_COMPARE(cc[1], 67);
+
+    /* Shouldn't be implicitly convertible */
+    CORRADE_VERIFY(std::is_convertible<Rectangleu, Size2D>::value);
+    CORRADE_VERIFY(std::is_convertible<Size2D, Rectangleu>::value);
+    CORRADE_VERIFY(!std::is_convertible<Rectanglei, Size2D>::value);
+    CORRADE_VERIFY(!std::is_convertible<Size2D, Rectanglei>::value);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Size2D, Rectanglei>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Rectanglei, Size2D>::value);
 }
 
 void StridedDimensionsTest::convertExternalStaticArrayView() {

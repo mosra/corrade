@@ -41,6 +41,7 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
     template<unsigned, class, class> struct StridedDimensionsConverter;
+    template<unsigned, class, class> struct ExplicitStridedDimensionsConverter;
     /* Used by StridedArrayView, needed here to friend them */
     template<unsigned, class> struct StridedElement;
     template<int> struct ArrayCastFlattenOrInflate;
@@ -87,7 +88,17 @@ template<unsigned dimensions, class T> class StridedDimensions {
          * Conversion from a @ref StaticArrayView of the same type and
          * dimension count is builtin.
          */
-        template<class U, class = decltype(Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StridedDimensions(U&& other) noexcept: StridedDimensions{Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
+        template<class U, typename std::enable_if<sizeof(decltype(Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))) != 0, int>::type = 0> constexpr /*implicit*/ StridedDimensions(U&& other) noexcept: StridedDimensions{Implementation::StridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
+
+        /**
+         * @brief Explicitly construct from an external representation
+         * @m_since_latest
+         *
+         * Compared to the above, this conversion is explicit and thus meant to
+         * be used in scenarios with a potential for data loss, such as
+         * conversion between signed and unsigned types.
+         */
+        template<class U, typename std::enable_if<sizeof(decltype(Implementation::ExplicitStridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))) != 0, int>::type = 0> constexpr explicit StridedDimensions(U&& other) noexcept: StridedDimensions{Implementation::ExplicitStridedDimensionsConverter<dimensions, T, typename std::decay<U&&>::type>::from(Utility::forward<U>(other))} {}
 
         /**
          * @brief Convert to an external representation
@@ -96,8 +107,20 @@ template<unsigned dimensions, class T> class StridedDimensions {
          * Conversion to a @ref StaticArrayView of the same type and dimension
          * count is builtin.
          */
-        template<class U, class = decltype(Implementation::StridedDimensionsConverter<dimensions, T, U>::to(std::declval<StridedDimensions<dimensions, T>>()))> constexpr /*implicit*/ operator U() const noexcept {
+        template<class U, typename std::enable_if<sizeof(decltype(Implementation::StridedDimensionsConverter<dimensions, T, U>::to(std::declval<StridedDimensions<dimensions, T>>()))) != 0, int>::type = 0> constexpr /*implicit*/ operator U() const noexcept {
             return Implementation::StridedDimensionsConverter<dimensions, T, U>::to(*this);
+        }
+
+        /**
+         * @brief Explicitly convert to an external representation
+         * @m_since_latest
+         *
+         * Compared to the above, this conversion is explicit and thus meant to
+         * be used in scenarios with a potential for data loss, such as
+         * conversion between signed and unsigned types.
+         */
+        template<class U, typename std::enable_if<sizeof(decltype(Implementation::ExplicitStridedDimensionsConverter<dimensions, T, U>::to(std::declval<StridedDimensions<dimensions, T>>()))) != 0, int>::type = 0> constexpr explicit operator U() const noexcept {
+            return Implementation::ExplicitStridedDimensionsConverter<dimensions, T, U>::to(*this);
         }
 
         /**
