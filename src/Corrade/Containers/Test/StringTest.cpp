@@ -2032,7 +2032,7 @@ void StringTest::split() {
     const String ca = "ab//c/def";
     {
         Array<StringView> s = ca.split('/');
-        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, ""_s, "c"_s, "def"_s}),
+        CORRADE_COMPARE_AS(s, (StringIterable{"ab", "", "c", "def"}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
         CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
@@ -2040,7 +2040,7 @@ void StringTest::split() {
         CORRADE_COMPARE(s[3].flags(), StringViewFlag::NullTerminated);
     } {
         Array<StringView> s = ca.splitWithoutEmptyParts('/');
-        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+        CORRADE_COMPARE_AS(s, (StringIterable{"ab", "c", "def"}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
         CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
@@ -2048,22 +2048,12 @@ void StringTest::split() {
     }
 
     String a = "ab//c/def";
-    {
-        /** @todo any chance this could get done better? */
-        String s1 = "ab";
-        String s2 = "c";
-        String s3 = "def";
-        CORRADE_COMPARE_AS(a.split('/'),
-            array<MutableStringView>({s1, {}, s2, s3}),
-            TestSuite::Compare::Container);
-    } {
-        String s1 = "ab";
-        String s2 = "c";
-        String s3 = "def";
-        CORRADE_COMPARE_AS(a.splitWithoutEmptyParts('/'),
-            array<MutableStringView>({s1, s2, s3}),
-            TestSuite::Compare::Container);
-    }
+    CORRADE_COMPARE_AS(a.split('/'),
+        (StringIterable{"ab", {}, "c", "def"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(a.splitWithoutEmptyParts('/'),
+        (StringIterable{"ab", "c", "def"}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::splitOnAny() {
@@ -2075,7 +2065,7 @@ void StringTest::splitOnAny() {
     const String ca = "ab.:c;def";
     {
         Array<StringView> s = ca.splitOnAnyWithoutEmptyParts(delimiters);
-        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+        CORRADE_COMPARE_AS(s, (StringIterable{"ab", "c", "def"}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
         CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
@@ -2083,15 +2073,9 @@ void StringTest::splitOnAny() {
     }
 
     String a = "ab.:c;def";
-    {
-        /** @todo any chance this could get done better? */
-        String s1 = "ab";
-        String s2 = "c";
-        String s3 = "def";
-        CORRADE_COMPARE_AS(a.splitOnAnyWithoutEmptyParts(delimiters),
-            array<MutableStringView>({s1, s2, s3}),
-            TestSuite::Compare::Container);
-    }
+    CORRADE_COMPARE_AS(a.splitOnAnyWithoutEmptyParts(delimiters),
+        (StringIterable{"ab", "c", "def"}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::splitOnWhitespace() {
@@ -2101,7 +2085,7 @@ void StringTest::splitOnWhitespace() {
     const String ca = "ab\n  c\t\rdef";
     {
         Array<StringView> s = ca.splitOnWhitespaceWithoutEmptyParts();
-        CORRADE_COMPARE_AS(s, arrayView({"ab"_s, "c"_s, "def"_s}),
+        CORRADE_COMPARE_AS(s, StringIterable({"ab", "c", "def"}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
         CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
@@ -2109,15 +2093,9 @@ void StringTest::splitOnWhitespace() {
     }
 
     String a = "ab\n  c\t\rdef";
-    {
-        /** @todo any chance this could get done better? */
-        String s1 = "ab";
-        String s2 = "c";
-        String s3 = "def";
-        CORRADE_COMPARE_AS(a.splitOnWhitespaceWithoutEmptyParts(),
-            array<MutableStringView>({s1, s2, s3}),
-            TestSuite::Compare::Container);
-    }
+    CORRADE_COMPARE_AS(a.splitOnWhitespaceWithoutEmptyParts(),
+        (StringIterable{"ab", "c", "def"}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::partition() {
@@ -2127,7 +2105,7 @@ void StringTest::partition() {
     const String ca = "ab=c";
     {
         Array3<StringView> p = ca.partition('=');
-        CORRADE_COMPARE_AS(p, (Array3<StringView>{"ab", "=", "c"}),
+        CORRADE_COMPARE_AS(p, (StringIterable{"ab", "=", "c"}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE(p[0].flags(), StringViewFlags{});
         CORRADE_COMPARE(p[1].flags(), StringViewFlags{});
@@ -2135,15 +2113,9 @@ void StringTest::partition() {
     }
 
     String a = "ab=c";
-    {
-        /** @todo any chance this could get done better? */
-        String p1 = "ab";
-        String p2 = "=";
-        String p3 = "c";
-        CORRADE_COMPARE_AS(a.partition('='),
-            (Array3<MutableStringView>{p1, p2, p3}),
-            TestSuite::Compare::Container);
-    }
+    CORRADE_COMPARE_AS(a.partition('='),
+        (StringIterable{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::add() {
