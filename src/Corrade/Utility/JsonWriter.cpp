@@ -162,8 +162,7 @@ void JsonWriter::writeCommaNewlineIndentInternal() {
     if(state.needsCommaBefore) arrayAppend(state.out, state.commaAndSpace);
 
     /* Newline and indent */
-    /** @todo F.F.S. what's up with the crazy casts */
-    arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+    arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
 }
 
 void JsonWriter::finalizeValue() {
@@ -248,8 +247,7 @@ JsonWriter& JsonWriter::endObject() {
     /* If a comma is expected it means a value was written. Add a newline and
        an indent in that case, otherwise nothing. */
     if(state.needsCommaBefore)
-        /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+        arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
 
     /* Object closing brace */
     arrayAppend(state.out, '}');
@@ -296,8 +294,7 @@ JsonWriter& JsonWriter::endArray() {
     /* If a comma is expected it means a value was written. Add a newline and
        an indent in that case, otherwise nothing. */
     if(state.needsCommaBefore)
-        /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+        arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
 
     /* Array closing brace */
     arrayAppend(state.out, ']');
@@ -403,8 +400,7 @@ JsonWriter& JsonWriter::writeInternal(const Containers::StringView literal) {
     writeCommaNewlineIndentInternal();
 
     /* Literal value */
-    /** @todo F.F.S. what's up with the crazy casts */
-    arrayAppend(state.out, Containers::ArrayView<const char>{literal});
+    arrayAppend(state.out, literal);
 
     /* Decide what to expect next or finalize the document if the top level
        value got written */
@@ -526,8 +522,7 @@ void JsonWriter::writeArrayCommaNewlineIndentInternal(const std::size_t i, const
         if(i) arrayAppend(state.out, state.commaAndSpace);
 
         /* And a newline and indent */
-        /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+        arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
 
     /* Otherwise just a comma (and potential space) after */
     } else if(i) arrayAppend(state.out, state.arrayCommaAndSpace);
@@ -543,8 +538,7 @@ void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const 
         arrayRemoveSuffix(state.levels, 1);
 
         /* Add a newline and an indent */
-        /** @todo F.F.S. what's up with the crazy casts */
-        arrayAppend(state.out, Containers::ArrayView<const char>{state.whitespace.prefix(state.levels.back().first())});
+        arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
     }
 
     /* Array closing brace */
@@ -737,8 +731,7 @@ JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {
     writeCommaNewlineIndentInternal();
 
     /* Literal value */
-    /** @todo F.F.S. what's up with the crazy casts */
-    arrayAppend(state.out, Containers::ArrayView<const char>{json});
+    arrayAppend(state.out, json);
 
     /* Decide what to expect next or finalize the document if the top level
        value got written */
