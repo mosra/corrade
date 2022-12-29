@@ -57,11 +57,11 @@ template<class T> BasicStringView<T>::BasicStringView(T* const data, const Strin
     data ? std::strlen(data) : 0,
     flags|(data ? StringViewFlag::NullTerminated : StringViewFlag::Global)} {}
 
-template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
+template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: BasicStringView{string.data(), string.size(), string.viewFlags()} {}
 
 /* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
    needs an explicit export otherwise the symbol doesn't get exported. */
-template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), StringViewFlag::NullTerminated} {}
+template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), string.viewFlags()} {}
 
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
     Array<BasicStringView<T>> parts;

@@ -45,28 +45,42 @@ namespace {
 
 static_assert(std::size_t(LargeSizeMask) == Implementation::StringViewSizeMask,
     "reserved bits should be the same in String and StringView");
+static_assert(std::size_t(LargeSizeMask) == (std::size_t(StringViewFlag::Global)|(std::size_t(Implementation::SmallStringBit) << (sizeof(std::size_t) - 1)*8)),
+    "small string and global view bits should cover both reserved bits");
 
 String String::nullTerminatedView(StringView view) {
-    if(view.flags() & StringViewFlag::NullTerminated)
-        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    if(view.flags() & StringViewFlag::NullTerminated) {
+        String out{view.data(), view.size(), [](char*, std::size_t){}};
+        out._large.size |= std::size_t(view.flags() & StringViewFlag::Global);
+        return out;
+    }
     return String{view};
 }
 
 String String::nullTerminatedView(AllocatedInitT, StringView view) {
-    if(view.flags() & StringViewFlag::NullTerminated)
-        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    if(view.flags() & StringViewFlag::NullTerminated) {
+        String out{view.data(), view.size(), [](char*, std::size_t){}};
+        out._large.size |= std::size_t(view.flags() & StringViewFlag::Global);
+        return out;
+    }
     return String{AllocatedInit, view};
 }
 
 String String::nullTerminatedGlobalView(StringView view) {
-    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global))
-        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global)) {
+        String out{view.data(), view.size(), [](char*, std::size_t){}};
+        out._large.size |= std::size_t(StringViewFlag::Global);
+        return out;
+    }
     return String{view};
 }
 
 String String::nullTerminatedGlobalView(AllocatedInitT, StringView view) {
-    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global))
-        return String{view.data(), view.size(), [](char*, std::size_t){}};
+    if(view.flags() >= (StringViewFlag::NullTerminated|StringViewFlag::Global)) {
+        String out{view.data(), view.size(), [](char*, std::size_t){}};
+        out._large.size |= std::size_t(StringViewFlag::Global);
+        return out;
+    }
     return String{AllocatedInit, view};
 }
 
@@ -102,7 +116,13 @@ inline void String::construct(const char* const data, const std::size_t size) {
 inline void String::destruct() {
     /* If not SSO, delete the data */
     if(_small.size & Implementation::SmallStringBit) return;
-    if(_large.deleter) _large.deleter(_large.data, _large.size);
+    /* Instances created with a custom deleter either don't the Global bit set
+       at all, or have it set but the deleter is a no-op passed from
+       nullTerminatedView() / nullTerminatedGlobalView(). Thus *technically*
+       it's not needed to clear the LargeSizeMask (which implies there's also
+       no way to test that it got cleared), but do it for consistency. */
+    if(_large.deleter)
+        _large.deleter(_large.data, _large.size & ~LargeSizeMask);
     else delete[] _large.data;
 }
 
@@ -192,7 +212,7 @@ String::String(AllocatedInitT, String&& other) {
     /* Otherwise take over the data */
     } else {
         _large.data = other._large.data;
-        _large.size = other._large.size;
+        _large.size = other._large.size; /* including the potential Global bit */
         _large.deleter = other._large.deleter;
     }
 
@@ -297,7 +317,7 @@ String::String(String&& other) noexcept {
        SSO, as for small string we would be doing a copy of _small.data and
        then also a copy of _small.size *including* the two highest bits */
     _large.data = other._large.data;
-    _large.size = other._large.size;
+    _large.size = other._large.size; /* including the potential Global bit */
     _large.deleter = other._large.deleter;
     other._large.data = nullptr;
     other._large.size = 0;
@@ -327,7 +347,7 @@ String& String::operator=(String&& other) noexcept {
          deleting anything. */
     using std::swap;
     swap(other._large.data, _large.data);
-    swap(other._large.size, _large.size);
+    swap(other._large.size, _large.size); /* including the potential Global bit */
     swap(other._large.deleter, _large.deleter);
     return *this;
 }
@@ -366,7 +386,7 @@ String::operator Array<char>() && {
         out = Array<char>{out.release(), size};
         std::memcpy(out.data(), _small.data, size);
     } else {
-        out = Array<char>{_large.data, _large.size, deleter()};
+        out = Array<char>{_large.data, _large.size & ~LargeSizeMask, deleter()};
     }
 
     /* Same as in release(). Create a zero-size small string to fullfil the
@@ -383,7 +403,11 @@ String::operator bool() const {
     /* The data pointer is guaranteed to be non-null, so no need to check it */
     if(_small.size & Implementation::SmallStringBit)
         return _small.size & ~SmallSizeMask;
-    return _large.size;
+    return _large.size & ~LargeSizeMask;
+}
+
+StringViewFlags String::viewFlags() const {
+    return StringViewFlag(_large.size & std::size_t(StringViewFlag::Global))|StringViewFlag::NullTerminated;
 }
 
 const char* String::data() const {
@@ -401,7 +425,7 @@ char* String::data() {
 bool String::isEmpty() const {
     if(_small.size & Implementation::SmallStringBit)
         return !(_small.size & ~SmallSizeMask);
-    return !_large.size;
+    return !(_large.size & ~LargeSizeMask);
 }
 
 auto String::deleter() const -> Deleter {
@@ -414,7 +438,7 @@ auto String::deleter() const -> Deleter {
 std::size_t String::size() const {
     if(_small.size & Implementation::SmallStringBit)
         return _small.size & ~SmallSizeMask;
-    return _large.size;
+    return _large.size & ~LargeSizeMask;
 }
 
 char* String::begin() {
@@ -438,19 +462,19 @@ const char* String::cbegin() const {
 char* String::end() {
     if(_small.size & Implementation::SmallStringBit)
         return _small.data + (_small.size & ~SmallSizeMask);
-    return _large.data + _large.size;
+    return _large.data + (_large.size & ~LargeSizeMask);
 }
 
 const char* String::end() const {
     if(_small.size & Implementation::SmallStringBit)
         return _small.data + (_small.size & ~SmallSizeMask);
-    return _large.data + _large.size;
+    return _large.data + (_large.size & ~LargeSizeMask);
 }
 
 const char* String::cend() const {
     if(_small.size & Implementation::SmallStringBit)
         return _small.data + (_small.size & ~SmallSizeMask);
-    return _large.data + _large.size;
+    return _large.data + (_large.size & ~LargeSizeMask);
 }
 
 /** @todo does it make a practical sense (debug perf) to rewrite these two

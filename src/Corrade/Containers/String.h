@@ -46,7 +46,7 @@ namespace Implementation {
     template<class> struct StringConverter;
 
     enum: std::size_t {
-        SmallStringBit = 0x80,
+        SmallStringBit = 0x40,
         SmallStringSize = sizeof(std::size_t)*3 - 1
     };
 }
@@ -261,8 +261,9 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * If the view is @ref StringViewFlag::NullTerminated, returns a
          * non-owning reference to it without any extra allocations or copies
-         * involved. Otherwise creates a null-terminated owning copy using
-         * @ref String(StringView).
+         * involved, propagating also @ref StringViewFlag::Global to
+         * @ref viewFlags() if present. Otherwise creates a null-terminated
+         * owning copy using @ref String(StringView).
          *
          * This function is primarily meant for efficiently passing
          * @ref BasicStringView "StringView" instances to APIs that expect
@@ -290,7 +291,8 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * If the view is both @ref StringViewFlag::NullTerminated and
          * @ref StringViewFlag::Global, returns a non-owning reference to it
-         * without any extra allocations or copies involved. Otherwise creates
+         * without any extra allocations or copies involved, propagating also
+         * @ref StringViewFlag::Global to @ref viewFlags(). Otherwise creates
          * a null-terminated owning copy using @ref String(StringView).
          *
          * This function is primarily meant for efficiently storing
@@ -635,6 +637,17 @@ class CORRADE_UTILITY_EXPORT String {
         bool isSmall() const {
             return _small.size & Implementation::SmallStringBit;
         }
+
+        /**
+         * @brief View flags
+         *
+         * A @ref BasicStringView "StringView" constructed from this instance
+         * will have these flags. @ref StringViewFlag::NullTerminated is
+         * present always, @ref StringViewFlag::Global if the string was
+         * originally created from a global null-terminated view with
+         * @ref nullTerminatedView() or @ref nullTerminatedGlobalView().
+         */
+        StringViewFlags viewFlags() const;
 
         /**
          * @brief String data
@@ -1216,12 +1229,12 @@ class CORRADE_UTILITY_EXPORT String {
 
         /* Small string optimization. Following size restrictions from
            StringView (which uses the top two bits for marking global and
-           null-terminated views), we can use the highest bit to denote a small
-           string. The second highest bit is currently unused, as it wouldn't
-           make sense to allow a String to be larger than StringView, since
-           these are two mutually convertible and interchangeable in many
-           cases. In case of a large string, there's size, data pointer and
-           deleter pointer, either 24 (or 12) bytes in total. In case of a
+           null-terminated views), we can use the second highest bit of the
+           size to denote a small string. The highest bit, marked as G in the
+           below diagram, is used to preserve StringViewFlag::Global in case of
+           a nullTerminatedGlobalView() and a subsequent conversion back to a
+           StringView. In case of a large string, there's size, data pointer
+           and deleter pointer, either 24 (or 12) bytes in total. In case of a
            small string, we can store the size only in one byte out of 8 (or
            4), which then gives us 23 (or 11) bytes for storing the actual
            data, excluding the null terminator that's at most 22 / 10 ASCII
@@ -1232,13 +1245,13 @@ class CORRADE_UTILITY_EXPORT String {
            clarity as well):
 
             +-------------------------------+---------+
-            |             string            | si | 01 |
+            |             string            | si | 1G |
             |              data             | ze |    |
             |             23B/11B           | 6b | 2b |
             +-------------------+-----+++++++---------+
                                 | LSB |||||||   MSB   |
             +---------+---------+-----+++++++---------+
-            |  data   |  data   |      size      | 00 |
+            |  data   |  data   |      size      | 0G |
             | pointer | deleter |                |    |
             |  8B/4B  |  8B/4B  |  56b/24b  | 6b | 2b |
             +---------+---------+-----------+---------+
@@ -1246,13 +1259,13 @@ class CORRADE_UTILITY_EXPORT String {
            On BE it's like this:
 
             +---------+-------------------------------+
-            | 10 | si |             string            |
+            | G1 | si |             string            |
             |    | ze |              data             |
             | 2b | 6b |             23B/11B           |
             +---------+++++++-----+-------------------+
             |   MSB   ||||||| LSB |
             +---------+++++++-----+---------+---------+
-            | 00 |     size       |  data   |  data   |
+            | G0 |     size       |  data   |  data   |
             |    |                | pointer | deleter |
             | 2b | 6b |  56b/24b  |  8B/4B  |  8B/4B  |
             +---------+-----------+---------+---------+

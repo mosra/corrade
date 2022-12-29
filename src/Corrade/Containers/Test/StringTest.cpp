@@ -117,6 +117,8 @@ struct StringTest: TestSuite::Tester {
     void convertMutableStringView();
     void convertMutableStringViewSmall();
     void convertMutableStringViewSmallAllocatedInit();
+    void convertStringViewNullTerminatedGlobalView();
+
     void convertArrayView();
     void convertArrayViewSmall();
     void convertArrayViewSmallAllocatedInit();
@@ -127,6 +129,7 @@ struct StringTest: TestSuite::Tester {
     void convertArraySmall();
     void convertArraySmallAllocatedInit();
     void convertArrayCustomDeleter();
+    void convertArrayNullTerminatedGlobalView();
     void convertExternal();
 
     void compare();
@@ -143,15 +146,20 @@ struct StringTest: TestSuite::Tester {
     void copySmallToSmall();
 
     void moveConstructLarge();
+    void moveConstructLargeNullTerminatedGlobalView();
     void moveConstructLargeAllocatedInit();
+    void moveConstructLargeAllocatedInitNullTerminatedGlobalView();
     void moveLargeToLarge();
+    void moveLargeToLargeNullTerminatedGlobalView();
     void moveLargeToSmall();
+    void moveLargeToSmallNullTerminatedGlobalView();
     void moveConstructSmall();
     void moveConstructSmallAllocatedInit();
     void moveSmallToLarge();
     void moveSmallToSmall();
 
     void access();
+    void accessNullTerminatedGlobalView();
     void accessSmall();
     void accessInvalid();
 
@@ -254,6 +262,8 @@ StringTest::StringTest() {
               &StringTest::convertMutableStringView,
               &StringTest::convertMutableStringViewSmall,
               &StringTest::convertMutableStringViewSmallAllocatedInit,
+              &StringTest::convertStringViewNullTerminatedGlobalView,
+
               &StringTest::convertArrayView,
               &StringTest::convertArrayViewSmall,
               &StringTest::convertArrayViewSmallAllocatedInit,
@@ -264,6 +274,7 @@ StringTest::StringTest() {
               &StringTest::convertArraySmall,
               &StringTest::convertArraySmallAllocatedInit,
               &StringTest::convertArrayCustomDeleter,
+              &StringTest::convertArrayNullTerminatedGlobalView,
               &StringTest::convertExternal,
 
               &StringTest::compare,
@@ -280,15 +291,20 @@ StringTest::StringTest() {
               &StringTest::copySmallToSmall,
 
               &StringTest::moveConstructLarge,
+              &StringTest::moveConstructLargeNullTerminatedGlobalView,
               &StringTest::moveConstructLargeAllocatedInit,
+              &StringTest::moveConstructLargeAllocatedInitNullTerminatedGlobalView,
               &StringTest::moveLargeToLarge,
+              &StringTest::moveLargeToLargeNullTerminatedGlobalView,
               &StringTest::moveLargeToSmall,
+              &StringTest::moveLargeToSmallNullTerminatedGlobalView,
               &StringTest::moveConstructSmall,
               &StringTest::moveConstructSmallAllocatedInit,
               &StringTest::moveSmallToLarge,
               &StringTest::moveSmallToSmall,
 
               &StringTest::access,
+              &StringTest::accessNullTerminatedGlobalView,
               &StringTest::accessSmall,
               &StringTest::accessInvalid,
 
@@ -381,6 +397,7 @@ void StringTest::constructDefault() {
     String a;
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_VERIFY(a.data());
@@ -400,6 +417,7 @@ void StringTest::constructTakeOwnership() {
         }};
         CORRADE_VERIFY(a);
         CORRADE_VERIFY(!a.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
         CORRADE_VERIFY(!a.isEmpty());
         CORRADE_COMPARE(a.size(), sizeof(data) - 1);
         CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
@@ -421,6 +439,7 @@ void StringTest::constructTakeOwnershipConst() {
         String a{data, 12, [](char*, std::size_t) {}};
         CORRADE_VERIFY(a);
         CORRADE_VERIFY(!a.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
         CORRADE_VERIFY(!a.isEmpty());
         CORRADE_COMPARE(a.size(), 12);
         CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
@@ -444,6 +463,7 @@ void StringTest::constructTakeOwnershipImplicitSize() {
         }};
         CORRADE_VERIFY(a);
         CORRADE_VERIFY(!a.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
         CORRADE_VERIFY(!a.isEmpty());
         CORRADE_COMPARE(a.size(), 5);
         CORRADE_COMPARE(static_cast<const void*>(a.data()), data);
@@ -502,6 +522,7 @@ void StringTest::constructPointer() {
     String a = "Allocated hello for a verbose world\0that rules";
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], 'A');
@@ -514,6 +535,7 @@ void StringTest::constructPointerSmall() {
     String a = "hello\0world!";
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
     CORRADE_COMPARE(a.data()[0], 'h');
@@ -529,6 +551,7 @@ void StringTest::constructPointerSmallAllocatedInit() {
     String a{AllocatedInit, "hello\0world!"};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
     CORRADE_COMPARE(a.data()[0], 'h');
@@ -540,6 +563,7 @@ void StringTest::constructPointerNull() {
     String a = nullptr;
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -549,6 +573,7 @@ void StringTest::constructPointerNullAllocatedInit() {
     String a{AllocatedInit, nullptr};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -559,6 +584,7 @@ void StringTest::constructPointerSize() {
     String a{"Allocated hello\0for a verbose world\0that rules", 35};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], 'A');
@@ -570,6 +596,7 @@ void StringTest::constructPointerSizeZero() {
     String a{"Allocated hello for a verbose world", 0};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -579,6 +606,7 @@ void StringTest::constructPointerSizeSmall() {
     String a{"this\0world\0is hell", 10}; /* `is hell` doesn't get copied */
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
     CORRADE_COMPARE(a.data()[0], 't');
@@ -590,6 +618,7 @@ void StringTest::constructPointerSizeSmallAllocatedInit() {
     String a{AllocatedInit, "this\0world\0is hell", 10};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
     CORRADE_COMPARE(a.data()[0], 't');
@@ -601,6 +630,7 @@ void StringTest::constructPointerSizeNullZero() {
     String a{nullptr, 0};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -610,6 +640,7 @@ void StringTest::constructPointerSizeNullZeroAllocatedInit() {
     String a{AllocatedInit, nullptr, 0};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -649,6 +680,7 @@ void StringTest::constructValueInit() {
     String a{Corrade::ValueInit, 35};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -660,6 +692,7 @@ void StringTest::constructValueInitSmall() {
     String a{Corrade::ValueInit, 10};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -675,6 +708,7 @@ void StringTest::constructValueInitZeroSize() {
     String a{Corrade::ValueInit, 0};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -703,6 +737,7 @@ void StringTest::constructDirectInit() {
     String a{Corrade::DirectInit, 35, 'X'};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
     CORRADE_COMPARE(a.data()[0], 'X');
@@ -714,6 +749,7 @@ void StringTest::constructDirectInitSmall() {
     String a{Corrade::DirectInit, 10, 'X'};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
     CORRADE_COMPARE(a.data()[0], 'X');
@@ -729,6 +765,7 @@ void StringTest::constructDirectInitZeroSize() {
     String a{Corrade::DirectInit, 0, 'X'};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -757,6 +794,7 @@ void StringTest::constructNoInit() {
     String a{Corrade::NoInit, 35};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 35);
     /* Contents can be just anything */
@@ -767,6 +805,7 @@ void StringTest::constructNoInitSmall() {
     String a{Corrade::NoInit, 10};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 10);
     /* Contents can be just anything */
@@ -781,6 +820,7 @@ void StringTest::constructNoInitZeroSize() {
     String a{Corrade::ValueInit, 0};
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(a.data()[0], '\0');
@@ -817,6 +857,8 @@ void StringTest::constructNullTerminatedGlobalView() {
         CORRADE_COMPARE(a, local);
         CORRADE_VERIFY(a.isSmall());
         CORRADE_VERIFY(b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
         CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
         CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
     }
@@ -829,10 +871,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         String b = String::nullTerminatedGlobalView(localNullTerminated);
         CORRADE_COMPARE(a, localNullTerminated);
         CORRADE_COMPARE(b, localNullTerminated);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         /* b is small, has no deleter */
     }
@@ -845,10 +889,14 @@ void StringTest::constructNullTerminatedGlobalView() {
         String b = String::nullTerminatedGlobalView(globalNullTerminated);
         CORRADE_COMPARE(a, globalNullTerminated);
         CORRADE_COMPARE(b, globalNullTerminated);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
-        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        /* The Global flag is set even in nullTerminatedView() because why
+           not */
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
+        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
     }
@@ -861,10 +909,12 @@ void StringTest::constructNullTerminatedGlobalView() {
         String b = String::nullTerminatedGlobalView(global);
         CORRADE_COMPARE(a, global);
         CORRADE_COMPARE(b, global);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
         CORRADE_VERIFY(a.isSmall());
         CORRADE_VERIFY(b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
         /* both a and b is small, has no deleter */
     }
 
@@ -879,11 +929,28 @@ void StringTest::constructNullTerminatedGlobalView() {
         String b = String::nullTerminatedGlobalView(null);
         CORRADE_COMPARE(a, null);
         CORRADE_COMPARE(b, null);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
         CORRADE_VERIFY(a.isSmall());
         CORRADE_VERIFY(b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
         /* both a and b is small, has no deleter */
+    }
+
+    /* Verify that the extra bits are cleared for all accessor APIs */
+    for(StringView view: {local, localNullTerminated, global, globalNullTerminated, null}) {
+        CORRADE_ITERATION(view);
+
+        String a = String::nullTerminatedView(view);
+        String b = String::nullTerminatedGlobalView(view);
+
+        CORRADE_COMPARE(!!a, !!view);
+        CORRADE_COMPARE(!!b, !!view);
+        CORRADE_COMPARE(a.isEmpty(), view.isEmpty());
+        CORRADE_COMPARE(b.isEmpty(), view.isEmpty());
+        CORRADE_COMPARE(a.size(), view.size());
+        CORRADE_COMPARE(b.size(), view.size());
     }
 }
 
@@ -897,10 +964,12 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         String b = String::nullTerminatedGlobalView(AllocatedInit, local);
         CORRADE_COMPARE(a, local);
         CORRADE_COMPARE(b, local);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != local.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != local.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
     }
@@ -913,10 +982,12 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         String b = String::nullTerminatedGlobalView(AllocatedInit, localNullTerminated);
         CORRADE_COMPARE(a, localNullTerminated);
         CORRADE_COMPARE(b, localNullTerminated);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), localNullTerminated.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != localNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(!b.deleter());
     }
@@ -929,10 +1000,14 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         String b = String::nullTerminatedGlobalView(AllocatedInit, globalNullTerminated);
         CORRADE_COMPARE(a, globalNullTerminated);
         CORRADE_COMPARE(b, globalNullTerminated);
-        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
-        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        /* The Global flag is set even in nullTerminatedView() because why
+           not */
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+        CORRADE_COMPARE(static_cast<void*>(a.data()), globalNullTerminated.data());
+        CORRADE_COMPARE(static_cast<void*>(b.data()), globalNullTerminated.data());
         CORRADE_VERIFY(a.deleter());
         CORRADE_VERIFY(b.deleter());
     }
@@ -945,10 +1020,12 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         String b = String::nullTerminatedGlobalView(AllocatedInit, global);
         CORRADE_COMPARE(a, global);
         CORRADE_COMPARE(b, global);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != global.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != global.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
     }
@@ -964,12 +1041,29 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         String b = String::nullTerminatedGlobalView(AllocatedInit, null);
         CORRADE_COMPARE(a, null);
         CORRADE_COMPARE(b, null);
-        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
-        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
         CORRADE_VERIFY(!a.isSmall());
         CORRADE_VERIFY(!b.isSmall());
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+        CORRADE_VERIFY(static_cast<void*>(a.data()) != null.data());
+        CORRADE_VERIFY(static_cast<void*>(b.data()) != null.data());
         CORRADE_VERIFY(!a.deleter());
         CORRADE_VERIFY(!b.deleter());
+    }
+
+    /* Verify that the extra bits are cleared for all accessor APIs */
+    for(StringView view: {local, localNullTerminated, global, globalNullTerminated, null}) {
+        CORRADE_ITERATION(view);
+
+        String a = String::nullTerminatedView(view);
+        String b = String::nullTerminatedGlobalView(view);
+
+        CORRADE_COMPARE(!!a, !!view);
+        CORRADE_COMPARE(!!b, !!view);
+        CORRADE_COMPARE(a.isEmpty(), view.isEmpty());
+        CORRADE_COMPARE(b.isEmpty(), view.isEmpty());
+        CORRADE_COMPARE(a.size(), view.size());
+        CORRADE_COMPARE(b.size(), view.size());
     }
 }
 
@@ -1074,6 +1168,26 @@ void StringTest::convertMutableStringViewSmallAllocatedInit() {
     CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(aView.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView.data()), a.data());
+}
+
+void StringTest::convertStringViewNullTerminatedGlobalView() {
+    String a = String::nullTerminatedView("null terminated"_s);
+    String aAllocated = String::nullTerminatedView(AllocatedInit, "null terminated, allocated"_s);
+    String aGlobal = String::nullTerminatedGlobalView("null terminated, global"_s);
+    String aGlobalAllocated = String::nullTerminatedGlobalView(AllocatedInit, "null terminated, global, allocated"_s);
+
+    /* Using pointers to avoid extra complexity from copy/move constructors
+       potentially discarding the flags */
+    for(String* s: {&a, &aAllocated, &aGlobal, &aGlobalAllocated}) {
+        CORRADE_COMPARE(s->viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+        StringView aView = *s;
+        MutableStringView aMutableView = *s;
+        CORRADE_COMPARE(aView, *s);
+        CORRADE_COMPARE(aMutableView, *s);
+        CORRADE_COMPARE(aView.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+        CORRADE_COMPARE(aMutableView.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+    }
 }
 
 void StringTest::convertArrayView() {
@@ -1254,6 +1368,17 @@ void StringTest::convertArrayCustomDeleter() {
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_VERIFY(a.data());
     CORRADE_COMPARE(a.data()[0], '\0');
+}
+
+void StringTest::convertArrayNullTerminatedGlobalView() {
+    StringView view = "Allocated hello\0for a verbose world"_s;
+    String a = String::nullTerminatedGlobalView(view);
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    /* The size should be returned with the Global bit cleared */
+    Array<char> array = std::move(a);
+    CORRADE_COMPARE(array.size(), view.size());
+    CORRADE_COMPARE(StringView{array}, view);
 }
 
 void StringTest::convertExternal() {
@@ -1536,6 +1661,19 @@ void StringTest::moveConstructLarge() {
     CORRADE_VERIFY(std::is_nothrow_move_constructible<String>::value);
 }
 
+void StringTest::moveConstructLargeNullTerminatedGlobalView() {
+    StringView view = "Allocated hello for a verbose world"_s;
+
+    String a = String::nullTerminatedGlobalView(view);
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    /* The Global flag should be preserved */
+    String b = Utility::move(a);
+    CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+    CORRADE_VERIFY(b.data() == view.data());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+}
+
 void StringTest::moveConstructLargeAllocatedInit() {
     /* Same as above, for already-large strings it should have no difference */
 
@@ -1559,6 +1697,19 @@ void StringTest::moveConstructLargeAllocatedInit() {
     CORRADE_COMPARE(aData[0], 'B');
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<String>::value);
+}
+
+void StringTest::moveConstructLargeAllocatedInitNullTerminatedGlobalView() {
+    StringView view = "Allocated hello for a verbose world"_s;
+
+    String a = String::nullTerminatedGlobalView(view);
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    /* The Global flag should be preserved */
+    String b{AllocatedInit, Utility::move(a)};
+    CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+    CORRADE_VERIFY(b.data() == view.data());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
 }
 
 void StringTest::moveLargeToLarge() {
@@ -1597,6 +1748,37 @@ void StringTest::moveLargeToLarge() {
     CORRADE_VERIFY(std::is_nothrow_move_assignable<String>::value);
 }
 
+void StringTest::moveLargeToLargeNullTerminatedGlobalView() {
+    StringView view = "Allocated hello for a verbose world"_s;
+    char bData[] = "ALLOCATED HELLO FOR A VERBOSE WORLD!!!";
+
+    {
+        String a = String::nullTerminatedGlobalView(view);
+        CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+        String b{bData, sizeof(bData) - 1, [](char* data, std::size_t){
+            ++data[1];
+        }};
+        CORRADE_VERIFY(!b.isSmall());
+        CORRADE_VERIFY(b.deleter());
+
+        /* The two are simply swapped; the Global flag should be preserved in
+           B */
+        b = Utility::move(a);
+        CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+        CORRADE_VERIFY(b.data() == view.data());
+        CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+        /* No deleter fired yet */
+        CORRADE_COMPARE(bData[1], 'L');
+    }
+
+    /* a is deallocated as usual */
+    CORRADE_COMPARE(bData[1], 'M');
+
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<String>::value);
+}
+
 void StringTest::moveLargeToSmall() {
     char aData[] = "Allocated hello for a verbose world";
 
@@ -1623,6 +1805,22 @@ void StringTest::moveLargeToSmall() {
 
     /* a is deallocated as usual */
     CORRADE_COMPARE(aData[0], 'B');
+}
+
+void StringTest::moveLargeToSmallNullTerminatedGlobalView() {
+    StringView view = "Allocated hello for a verbose world"_s;
+
+    String a = String::nullTerminatedGlobalView(view);
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    String b = "hello";
+    CORRADE_VERIFY(b.isSmall());
+
+    /* The two are simply swapped; the Global flag should be preserved in B */
+    b = Utility::move(a);
+    CORRADE_COMPARE(b, "Allocated hello for a verbose world"_s);
+    CORRADE_VERIFY(b.data() == view.data());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
 }
 
 void StringTest::moveConstructSmall() {
@@ -1707,6 +1905,32 @@ void StringTest::access() {
     CORRADE_COMPARE(a, "Ollocated hell! for a verbose worlt");
 
     const String ca = "Allocated hello for a verbose world";
+    CORRADE_VERIFY(!ca.isSmall());
+    CORRADE_COMPARE(*ca.begin(), 'A');
+    CORRADE_COMPARE(*ca.cbegin(), 'A');
+    CORRADE_COMPARE(ca.front(), 'A');
+    CORRADE_COMPARE(*(ca.end() - 1), 'd');
+    CORRADE_COMPARE(*(ca.cend() - 1), 'd');
+    CORRADE_COMPARE(ca.back(), 'd');
+    CORRADE_COMPARE(ca[14], 'o');
+}
+
+void StringTest::accessNullTerminatedGlobalView() {
+    /* Like access(), but wrapping a view and not modifying any data.
+       Everything should behave the same. */
+
+    String a = String::nullTerminatedGlobalView("Allocated hello for a verbose world"_s);
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(*a.begin(), 'A');
+    CORRADE_COMPARE(*a.cbegin(), 'A');
+    CORRADE_COMPARE(a.front(), 'A');
+    CORRADE_COMPARE(*(a.end() - 1), 'd');
+    CORRADE_COMPARE(*(a.cend() - 1), 'd');
+    CORRADE_COMPARE(a.back(), 'd');
+
+    const String ca = String::nullTerminatedGlobalView("Allocated hello for a verbose world"_s);
+    CORRADE_COMPARE(ca.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
     CORRADE_VERIFY(!ca.isSmall());
     CORRADE_COMPARE(*ca.begin(), 'A');
     CORRADE_COMPARE(*ca.cbegin(), 'A');
