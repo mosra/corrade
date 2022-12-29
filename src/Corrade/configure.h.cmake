@@ -103,6 +103,8 @@
    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65473
    https://github.com/gcc-mirror/gcc/commit/19665740d336d4ee7d0cf92b5b0643fa1d7da14a
    https://en.cppreference.com/w/cpp/header/ciso646 */
+/** @todo this header is REMOVED in C++20 and one is supposed to use <version>
+    instead FFS */
 #include <ciso646>
 #ifdef _LIBCPP_VERSION
 #define CORRADE_TARGET_LIBCXX
