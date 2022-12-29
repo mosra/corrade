@@ -1741,7 +1741,7 @@ void StringTest::moveLargeToLarge() {
         CORRADE_COMPARE(bData[1], 'L');
     }
 
-    /* both is deallocated as usual */
+    /* Both deallocated as usual */
     CORRADE_COMPARE(aData[0], 'B');
     CORRADE_COMPARE(bData[1], 'M');
 
