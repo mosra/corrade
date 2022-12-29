@@ -45,7 +45,10 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class> struct StringConverter;
 
-    enum: std::size_t { SmallStringSize = sizeof(std::size_t)*3 - 1 };
+    enum: std::size_t {
+        SmallStringBit = 0x80,
+        SmallStringSize = sizeof(std::size_t)*3 - 1
+    };
 }
 
 /**
@@ -629,7 +632,9 @@ class CORRADE_UTILITY_EXPORT String {
          * It's not allowed to call @ref deleter() or @ref release() on a SSO
          * instance. See @ref Containers-String-usage-sso for more information.
          */
-        bool isSmall() const { return _small.size & 0x80; }
+        bool isSmall() const {
+            return _small.size & Implementation::SmallStringBit;
+        }
 
         /**
          * @brief String data

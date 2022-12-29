@@ -38,7 +38,6 @@ namespace Corrade { namespace Containers {
 
 namespace {
     enum: std::size_t {
-        SmallSize = 0x80,
         SmallSizeMask = 0xc0,
         LargeSizeMask = SmallSizeMask << (sizeof(std::size_t) - 1)*8
     };
@@ -74,7 +73,7 @@ String String::nullTerminatedGlobalView(AllocatedInitT, StringView view) {
 inline void String::construct(Corrade::NoInitT, const std::size_t size) {
     if(size < Implementation::SmallStringSize) {
         _small.data[size] = '\0';
-        _small.size = size | SmallSize;
+        _small.size = size|Implementation::SmallStringBit;
     } else {
         _large.data = new char[size + 1];
         _large.data[size] = '\0';
@@ -102,13 +101,13 @@ inline void String::construct(const char* const data, const std::size_t size) {
 
 inline void String::destruct() {
     /* If not SSO, delete the data */
-    if(_small.size & 0x80) return;
+    if(_small.size & Implementation::SmallStringBit) return;
     if(_large.deleter) _large.deleter(_large.data, _large.size);
     else delete[] _large.data;
 }
 
 inline Containers::Pair<const char*, std::size_t> String::dataInternal() const {
-    if(_small.size & 0x80)
+    if(_small.size & Implementation::SmallStringBit)
         return {_small.data, _small.size & ~SmallSizeMask};
     return {_large.data, _large.size & ~LargeSizeMask};
 }
@@ -117,7 +116,7 @@ String::String() noexcept {
     /* Create a zero-size small string to fullfil the guarantee of data() being
        always non-null and null-terminated */
     _small.data[0] = '\0';
-    _small.size = SmallSize;
+    _small.size = Implementation::SmallStringBit;
 }
 
 String::String(const StringView view): String{view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
@@ -254,7 +253,7 @@ String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
 
     if(size < Implementation::SmallStringSize) {
         /* Everything already zero-init'd in the constructor init list */
-        _small.size = size | SmallSize;
+        _small.size = size|Implementation::SmallStringBit;
     } else {
         _large.data = new char[size + 1]{};
         _large.size = size;
@@ -355,7 +354,7 @@ String::operator ArrayView<void>() noexcept {
 
 String::operator Array<char>() && {
     Array<char> out;
-    if(_small.size & 0x80) {
+    if(_small.size & Implementation::SmallStringBit) {
         const std::size_t size = _small.size & ~SmallSizeMask;
         /* Allocate the output including a filled null terminator at the end
            ... */
@@ -375,71 +374,82 @@ String::operator Array<char>() && {
        this makes the string switch to SSO, we also clear the deleter this
        way. */
     _small.data[0] = '\0';
-    _small.size = SmallSize;
+    _small.size = Implementation::SmallStringBit;
 
     return out;
 }
 
 String::operator bool() const {
     /* The data pointer is guaranteed to be non-null, so no need to check it */
-    if(_small.size & 0x80) return _small.size & ~SmallSizeMask;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.size & ~SmallSizeMask;
     return _large.size;
 }
 
 const char* String::data() const {
-    if(_small.size & 0x80) return _small.data;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data;
     return _large.data;
 }
 
 char* String::data() {
-    if(_small.size & 0x80) return _small.data;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data;
     return _large.data;
 }
 
 bool String::isEmpty() const {
-    if(_small.size & 0x80) return !(_small.size & ~SmallSizeMask);
+    if(_small.size & Implementation::SmallStringBit)
+        return !(_small.size & ~SmallSizeMask);
     return !_large.size;
 }
 
 auto String::deleter() const -> Deleter {
     /* Unlikely to be called very often, so a non-debug assert is fine */
-    CORRADE_ASSERT(!(_small.size & 0x80),
+    CORRADE_ASSERT(!(_small.size & Implementation::SmallStringBit),
         "Containers::String::deleter(): cannot call on a SSO instance", {});
     return _large.deleter;
 }
 
 std::size_t String::size() const {
-    if(_small.size & 0x80) return _small.size & ~SmallSizeMask;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.size & ~SmallSizeMask;
     return _large.size;
 }
 
 char* String::begin() {
-    if(_small.size & 0x80) return _small.data;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data;
     return _large.data;
 }
 
 const char* String::begin() const {
-    if(_small.size & 0x80) return _small.data;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data;
     return _large.data;
 }
 
 const char* String::cbegin() const {
-    if(_small.size & 0x80) return _small.data;
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data;
     return _large.data;
 }
 
 char* String::end() {
-    if(_small.size & 0x80) return _small.data + (_small.size & ~SmallSizeMask);
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data + (_small.size & ~SmallSizeMask);
     return _large.data + _large.size;
 }
 
 const char* String::end() const {
-    if(_small.size & 0x80) return _small.data + (_small.size & ~SmallSizeMask);
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data + (_small.size & ~SmallSizeMask);
     return _large.data + _large.size;
 }
 
 const char* String::cend() const {
-    if(_small.size & 0x80) return _small.data + (_small.size & ~SmallSizeMask);
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data + (_small.size & ~SmallSizeMask);
     return _large.data + _large.size;
 }
 
@@ -468,7 +478,8 @@ char& String::operator[](const std::size_t i) {
     /* Accessing the null terminator is fine */
     CORRADE_DEBUG_ASSERT(i < size() + 1,
         "Containers::String::operator[](): index" << i << "out of range for" << size() << "null-terminated bytes", _small.data[0]);
-    if(_small.size & 0x80) return _small.data[i];
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data[i];
     return _large.data[i];
 }
 
@@ -476,7 +487,8 @@ char String::operator[](const std::size_t i) const {
     /* Accessing the null terminator is fine */
     CORRADE_DEBUG_ASSERT(i < size() + 1,
         "Containers::String::operator[](): index" << i << "out of range for" << size() << "null-terminated bytes", _small.data[0]);
-    if(_small.size & 0x80) return _small.data[i];
+    if(_small.size & Implementation::SmallStringBit)
+        return _small.data[i];
     return _large.data[i];
 }
 
@@ -846,7 +858,7 @@ bool String::containsAny(const StringView substring) const {
 
 char* String::release() {
     /* Unlikely to be called very often, so a non-debug assert is fine */
-    CORRADE_ASSERT(!(_small.size & 0x80),
+    CORRADE_ASSERT(!(_small.size & Implementation::SmallStringBit),
         "Containers::String::release(): cannot call on a SSO instance", {});
     char* data = _large.data;
 
@@ -854,7 +866,7 @@ char* String::release() {
        always non-null and null-terminated. Since this makes the string switch
        to SSO, we also clear the deleter this way. */
     _small.data[0] = '\0';
-    _small.size = SmallSize;
+    _small.size = Implementation::SmallStringBit;
     return data;
 }
 
