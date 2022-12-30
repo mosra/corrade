@@ -37,9 +37,13 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
-#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/TweakableParser.h"
 #include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* For enable() which used to take a std::string */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace Utility {
 
@@ -288,7 +292,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          * @ref scope() is used for consistent results. Calling the function
          * again after the tweakable was already enabled will cause the
          * instance to reset all previous internal state.
-         * @see @ref isEnabled(), @ref enable(const std::string&, const std::string&),
+         * @see @ref isEnabled(), @ref enable(Containers::StringView, Containers::StringView),
          *      @ref Utility-Tweakable-usage-disabling
          */
         void enable();
@@ -313,7 +317,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          * instance to reset all previous internal state.
          * @see @ref isEnabled(), @ref Utility-Tweakable-usage-disabling
          */
-        void enable(const std::string& prefix, const std::string& replace);
+        void enable(Containers::StringView prefix, Containers::StringView replace);
 
         /**
          * @brief Update the tweakable constant values

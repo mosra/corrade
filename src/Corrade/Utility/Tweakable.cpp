@@ -80,7 +80,7 @@ Tweakable::~Tweakable() {
 
 void Tweakable::enable() { Tweakable::enable({}, {}); }
 
-void Tweakable::enable(const std::string& prefix, const std::string& replace) {
+void Tweakable::enable(const Containers::StringView prefix, const Containers::StringView replace) {
     _data.reset(new Data{prefix, replace});
 }
 
