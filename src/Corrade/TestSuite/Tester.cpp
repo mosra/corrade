@@ -317,7 +317,10 @@ benchmark types:
         return 1;
     }
 
-    Containers::Array<Containers::Pair<std::uint32_t, TestCase>> usedTestCases;
+    /* Contains test case numbers to run. Indexes are 1-based (which is how
+       it's displayed in the output and used in --only / --skip), i.e. test
+       case 5 points to _state->testCases[4]. */
+    Containers::Array<std::uint32_t> usedTestCases;
 
     /* Disable expected failures, if requested */
     _state->expectedFailuresDisabled = args.isSet("no-xfail");
@@ -354,12 +357,12 @@ benchmark types:
         if(!range) return 2;
         for(std::uint32_t index: *range)
             if(_state->testCases[index - 1].test)
-                arrayAppend(usedTestCases, InPlaceInit, index, _state->testCases[index - 1]);
+                arrayAppend(usedTestCases, index);
 
     /* Otherwise extract all (and skip skipped) */
     } else for(std::uint32_t i = 0; i != _state->testCases.size(); ++i) {
         if(!_state->testCases[i].test) continue;
-        arrayAppend(usedTestCases, InPlaceInit, i + 1, _state->testCases[i]);
+        arrayAppend(usedTestCases, i + 1);
     }
 
     const std::size_t repeatAllCount = args.value<std::size_t>("repeat-all");
@@ -418,8 +421,9 @@ benchmark types:
        benchmark results might be skewed. Inspiration taken from:
        https://github.com/google/benchmark/blob/0ae233ab23c560547bf85ce1346580966e799861/src/sysinfo.cc#L209-L224
        I doubt the code there works on macOS, so enabling it for Linux only. */
-    for(const Containers::Pair<std::uint32_t, TestCase>& testCase: usedTestCases) {
-        if(testCase.second().type == TestCaseType::Test) continue;
+    for(const std::uint32_t usedTestCase: usedTestCases) {
+        if(_state->testCases[usedTestCase - 1].type == TestCaseType::Test)
+            continue;
 
         if(_state->verbose && _state->isDebugBuild) {
             Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::Default) << "  INFO" << Debug::resetColor << "Benchmarking a debug build.";
@@ -467,9 +471,11 @@ benchmark types:
     }};
 
     bool abortedOnFail = false;
-    /* Deliberately making a copy of the test case here because we're modifying
-       the benchmark-related state */
-    for(Containers::Pair<std::uint32_t, TestCase> testCase: usedTestCases) {
+    for(const std::uint32_t usedTestCase: usedTestCases) {
+        /* Deliberately making a copy of the test case here because we're
+           modifying the benchmark-related state */
+        TestCase testCase = _state->testCases[usedTestCase - 1];
+
         /* Reset output to stdout for each test case to prevent debug
            output segfaults */
         /** @todo Drop this when Debug::setOutput() is removed */
@@ -478,12 +484,12 @@ benchmark types:
         Utility::Warning resetWarningRedirect{&std::cerr};
 
         /* Select default benchmark */
-        if(testCase.second().type == TestCaseType::DefaultBenchmark)
-            testCase.second().type = defaultBenchmarkType;
+        if(testCase.type == TestCaseType::DefaultBenchmark)
+            testCase.type = defaultBenchmarkType;
 
         /* Select benchmark function */
         BenchmarkUnits benchmarkUnits = BenchmarkUnits::Count;
-        switch(testCase.second().type) {
+        switch(testCase.type) {
             /* LCOV_EXCL_START */
             case TestCaseType::DefaultBenchmark:
                 CORRADE_INTERNAL_ASSERT_UNREACHABLE();
@@ -493,20 +499,20 @@ benchmark types:
                 break;
 
             case TestCaseType::WallTimeBenchmark:
-                testCase.second().benchmarkBegin = &Tester::wallTimeBenchmarkBegin;
-                testCase.second().benchmarkEnd = &Tester::wallTimeBenchmarkEnd;
+                testCase.benchmarkBegin = &Tester::wallTimeBenchmarkBegin;
+                testCase.benchmarkEnd = &Tester::wallTimeBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
             case TestCaseType::CpuTimeBenchmark:
-                testCase.second().benchmarkBegin = &Tester::cpuTimeBenchmarkBegin;
-                testCase.second().benchmarkEnd = &Tester::cpuTimeBenchmarkEnd;
+                testCase.benchmarkBegin = &Tester::cpuTimeBenchmarkBegin;
+                testCase.benchmarkEnd = &Tester::cpuTimeBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
             case TestCaseType::CpuCyclesBenchmark:
-                testCase.second().benchmarkBegin = &Tester::cpuCyclesBenchmarkBegin;
-                testCase.second().benchmarkEnd = &Tester::cpuCyclesBenchmarkEnd;
+                testCase.benchmarkBegin = &Tester::cpuCyclesBenchmarkBegin;
+                testCase.benchmarkEnd = &Tester::cpuCyclesBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Cycles;
                 break;
 
@@ -516,39 +522,39 @@ benchmark types:
             case TestCaseType::CustomInstructionBenchmark:
             case TestCaseType::CustomMemoryBenchmark:
             case TestCaseType::CustomCountBenchmark:
-                benchmarkUnits = BenchmarkUnits(int(testCase.second().type));
+                benchmarkUnits = BenchmarkUnits(int(testCase.type));
                 _state->benchmarkName = "";
                 break;
         }
 
-        _state->testCaseId = testCase.first();
-        _state->testCaseInstanceId = testCase.second().instanceId;
+        _state->testCaseId = usedTestCase;
+        _state->testCaseInstanceId = testCase.instanceId;
         _state->testCaseLabelPrinted = false;
-        if(testCase.second().instanceId == ~std::size_t{})
+        if(testCase.instanceId == ~std::size_t{})
             _state->testCaseDescription = {};
         else
-            _state->testCaseDescription = std::to_string(testCase.second().instanceId);
+            _state->testCaseDescription = std::to_string(testCase.instanceId);
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         _state->testCaseDataLine = 0;
         #endif
 
         /* Final combined repeat count */
-        const std::size_t repeatCount = testCase.second().repeatCount*repeatEveryCount;
+        const std::size_t repeatCount = testCase.repeatCount*repeatEveryCount;
 
         /* Array with benchmark measurements */
-        Containers::Array<std::uint64_t> measurements{testCase.second().type != TestCaseType::Test ? repeatCount : 0};
+        Containers::Array<std::uint64_t> measurements{testCase.type != TestCaseType::Test ? repeatCount : 0};
 
         bool aborted = false, skipped = false;
         for(std::size_t i = 0; i != repeatCount && !aborted; ++i) {
-            if(testCase.second().setup)
-                (this->*testCase.second().setup)();
+            if(testCase.setup)
+                (this->*testCase.setup)();
 
             /* Print the repeat ID only if we are repeating */
             _state->testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
             _state->testCaseLine = 0;
             _state->testCaseName = {};
             _state->testCaseTemplateName = {};
-            _state->testCase = &testCase.second();
+            _state->testCase = &testCase;
             _state->benchmarkBatchSize = 0;
             _state->benchmarkResult = 0;
 
@@ -559,9 +565,9 @@ benchmark types:
                    because that would cause the backtrace to point here and not
                    to the original exception location. */
                 if(args.isSet("no-catch")) {
-                    (this->*testCase.second().test)();
+                    (this->*testCase.test)();
                 } else try {
-                    (this->*testCase.second().test)();
+                    (this->*testCase.test)();
                 } catch(const std::exception& e) {
                     ++errorCount;
                     aborted = true;
@@ -588,10 +594,10 @@ benchmark types:
 
             _state->testCase = nullptr;
 
-            if(testCase.second().teardown)
-                (this->*testCase.second().teardown)();
+            if(testCase.teardown)
+                (this->*testCase.teardown)();
 
-            if(testCase.second().benchmarkEnd)
+            if(testCase.benchmarkEnd)
                 measurements[i] = _state->benchmarkResult;
 
             /* There shouldn't be any stale expected failure after the test
@@ -611,7 +617,7 @@ benchmark types:
             /* A successful test case. Print the OK only if there wasn't some
                other message (INFO, WARN, XFAIL or SAVED) before, as it would
                otherwise make the output confusing ("is it OK or WARN?!") */
-            } else if(testCase.second().type == TestCaseType::Test) {
+            } else if(testCase.type == TestCaseType::Test) {
                 if(!_state->testCaseLabelPrinted) {
                     Debug out{logOutput, _state->useColor};
                     printTestCaseLabel(out, "    OK", Debug::Color::Default, Debug::Color::Default);
@@ -620,7 +626,7 @@ benchmark types:
             /* Benchmark. Completely custom printing. */
             } else {
                 /* All other types are benchmarks */
-                CORRADE_INTERNAL_ASSERT(testCase.second().type != TestCaseType::Test);
+                CORRADE_INTERNAL_ASSERT(testCase.type != TestCaseType::Test);
 
                 Debug out{logOutput, _state->useColor};
 
