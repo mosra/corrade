@@ -730,6 +730,9 @@ namespace Corrade {
     @ref Containers::StringView instead of a @ref std::vector. Because the
     reason for this change was to get rid of @cpp #include <vector> @ce, no
     backwards compatibility is provided.
+-   As part of the ongoing STL usage cleanup,
+    @ref Utility::TweakableParser is now expected to return a
+    @ref Containers::Pair instead of @ref std::pair
 -   With the ongoing process to make the APIs less STL dependent,
     @ref Utility::Unicode::narrow() and @relativeref{Utility::Unicode,widen()}
     variants taking a view or a char pointer now return either a

@@ -35,7 +35,7 @@
 namespace Corrade { namespace Utility {
 
 namespace {
-    std::pair<const char*, int> integerBase(Containers::StringView value) {
+    Containers::Pair<const char*, int> integerBase(Containers::StringView value) {
         using namespace Containers::Literals;
         if(value.hasPrefix("0x"_s) || value.hasPrefix("0X"_s))
             return {value.data() + 2, 16};
@@ -47,10 +47,10 @@ namespace {
     }
 }
 
-std::pair<TweakableState, int> TweakableParser<int>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, int> TweakableParser<int>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const int result = std::strtol(valueBase.first, &end, valueBase.second);
+    const int result = std::strtol(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -65,10 +65,10 @@ std::pair<TweakableState, int> TweakableParser<int>::parse(Containers::StringVie
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned int> TweakableParser<unsigned int>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, unsigned int> TweakableParser<unsigned int>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const unsigned int result = std::strtoul(valueBase.first, &end, valueBase.second);
+    const unsigned int result = std::strtoul(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -89,10 +89,10 @@ std::pair<TweakableState, unsigned int> TweakableParser<unsigned int>::parse(Con
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, long> TweakableParser<long>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, long> TweakableParser<long>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const long result = std::strtol(valueBase.first, &end, valueBase.second);
+    const long result = std::strtol(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -113,10 +113,10 @@ std::pair<TweakableState, long> TweakableParser<long>::parse(Containers::StringV
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const unsigned long result = std::strtoul(valueBase.first, &end, valueBase.second);
+    const unsigned long result = std::strtoul(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -139,10 +139,10 @@ std::pair<TweakableState, unsigned long> TweakableParser<unsigned long>::parse(C
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, long long> TweakableParser<long long>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, long long> TweakableParser<long long>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const long long result = std::strtoll(valueBase.first, &end, valueBase.second);
+    const long long result = std::strtoll(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -165,10 +165,10 @@ std::pair<TweakableState, long long> TweakableParser<long long>::parse(Container
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, unsigned long long> TweakableParser<unsigned long long>::parse(Containers::StringView value) {
-    const std::pair<const char*, int> valueBase = integerBase(value);
+Containers::Pair<TweakableState, unsigned long long> TweakableParser<unsigned long long>::parse(Containers::StringView value) {
+    const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const int result = std::strtoull(valueBase.first, &end, valueBase.second);
+    const int result = std::strtoull(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";
@@ -192,7 +192,7 @@ std::pair<TweakableState, unsigned long long> TweakableParser<unsigned long long
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, float> TweakableParser<float>::parse(Containers::StringView value) {
+Containers::Pair<TweakableState, float> TweakableParser<float>::parse(Containers::StringView value) {
     char* end;
     const float result = std::strtof(value.data(), &end);
 
@@ -215,7 +215,7 @@ std::pair<TweakableState, float> TweakableParser<float>::parse(Containers::Strin
     return {TweakableState::Success, result};
 }
 
-std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::StringView value) {
+Containers::Pair<TweakableState, double> TweakableParser<double>::parse(Containers::StringView value) {
     char* end;
     const double result = std::strtod(value.data(), &end);
 
@@ -233,7 +233,7 @@ std::pair<TweakableState, double> TweakableParser<double>::parse(Containers::Str
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
-std::pair<TweakableState, long double> TweakableParser<long double>::parse(Containers::StringView value) {
+Containers::Pair<TweakableState, long double> TweakableParser<long double>::parse(Containers::StringView value) {
     char* end;
     const long double result = std::strtold(value.data(), &end);
 
@@ -257,7 +257,7 @@ std::pair<TweakableState, long double> TweakableParser<long double>::parse(Conta
 }
 #endif
 
-std::pair<TweakableState, char> TweakableParser<char>::parse(Containers::StringView value) {
+Containers::Pair<TweakableState, char> TweakableParser<char>::parse(Containers::StringView value) {
     if(value.size() < 3 || value.front() != '\'' || value.back() != '\'') {
         Warning{} << "Utility::TweakableParser:" << value << "is not a character literal";
         return {TweakableState::Recompile, {}};
@@ -271,7 +271,7 @@ std::pair<TweakableState, char> TweakableParser<char>::parse(Containers::StringV
     return {TweakableState::Success, value[1]};
 }
 
-std::pair<TweakableState, bool> TweakableParser<bool>::parse(Containers::StringView value) {
+Containers::Pair<TweakableState, bool> TweakableParser<bool>::parse(Containers::StringView value) {
     using namespace Containers::Literals;
 
     if(value == "true"_s)

@@ -36,6 +36,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/TweakableParser.h"
@@ -373,7 +374,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
     private:
         struct Data;
 
-        std::pair<bool, void*> registerVariable(const char* file, int line, std::size_t variable, TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>));
+        Containers::Pair<bool, void*> registerVariable(const char* file, int line, std::size_t variable, TweakableState(*parser)(Containers::StringView, Containers::StaticArrayView<Implementation::TweakableStorageSize, char>));
 
         void scopeInternal(void(*lambda)(void(*)(), void*), void(*userCall)(), void* userData);
 
@@ -419,15 +420,15 @@ namespace Implementation {
         #endif
 
         static TweakableState parse(Containers::StringView value, Containers::StaticArrayView<TweakableStorageSize, char> storage) {
-            std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(value);
-            if(parsed.first != TweakableState::Success)
-                return parsed.first;
+            Containers::Pair<TweakableState, T> parsed = TweakableParser<T>::parse(value);
+            if(parsed.first() != TweakableState::Success)
+                return parsed.first();
 
             T& current = *reinterpret_cast<T*>(storage.data());
-            if(current == parsed.second)
+            if(current == parsed.second())
                 return TweakableState::NoChange;
 
-            current = parsed.second;
+            current = parsed.second();
             return TweakableState::Success;
         }
     };
@@ -440,9 +441,9 @@ template<class T> T Tweakable::operator()(const char* file, int line, int variab
        file/line/counter, parser and getter function pointer. Returns a
        reference to the internal storage, which may not be initialized yet, in
        which case we save the initial value to it. */
-    std::pair<bool, void*> registered = registerVariable(file, line, variable, Implementation::TweakableTraits<T>::parse);
-    if(!registered.first) *static_cast<T*>(registered.second) = value;
-    return *static_cast<T*>(registered.second);
+    Containers::Pair<bool, void*> registered = registerVariable(file, line, variable, Implementation::TweakableTraits<T>::parse);
+    if(!registered.first()) *static_cast<T*>(registered.second()) = value;
+    return *static_cast<T*>(registered.second());
 }
 
 }}

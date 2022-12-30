@@ -284,7 +284,7 @@ template<class T> void TweakableParserTest::integral() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    CORRADE_COMPARE(TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix())), std::make_pair(TweakableState::Success, T(data.result)));
+    CORRADE_COMPARE(TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix())), Containers::pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralUppercase() {
@@ -292,7 +292,7 @@ template<class T> void TweakableParserTest::integralUppercase() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    CORRADE_COMPARE(TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix()))), std::make_pair(TweakableState::Success, T(data.result)));
+    CORRADE_COMPARE(TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix()))), Containers::pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralError() {
@@ -303,7 +303,7 @@ template<class T> void TweakableParserTest::integralError() {
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first;
+    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first();
     CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
@@ -313,9 +313,9 @@ template<class T> void TweakableParserTest::floatingPoint() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix()));
-    CORRADE_COMPARE(parsed.first, TweakableState::Success);
-    CORRADE_COMPARE(parsed.second, T(data.result));
+    Containers::Pair<TweakableState, T> parsed = TweakableParser<T>::parse(format("{}{}", data.data, TypeTraits<T>::suffix()));
+    CORRADE_COMPARE(parsed.first(), TweakableState::Success);
+    CORRADE_COMPARE(parsed.second(), T(data.result));
 }
 
 template<class T> void TweakableParserTest::floatingPointUppercase() {
@@ -323,9 +323,9 @@ template<class T> void TweakableParserTest::floatingPointUppercase() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix())));
-    CORRADE_COMPARE(parsed.first, TweakableState::Success);
-    CORRADE_COMPARE(parsed.second, T(data.result));
+    Containers::Pair<TweakableState, T> parsed = TweakableParser<T>::parse(String::uppercase(format("{}{}", data.data, TypeTraits<T>::suffix())));
+    CORRADE_COMPARE(parsed.first(), TweakableState::Success);
+    CORRADE_COMPARE(parsed.second(), T(data.result));
 }
 
 template<class T> void TweakableParserTest::floatingPointError() {
@@ -336,7 +336,7 @@ template<class T> void TweakableParserTest::floatingPointError() {
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first;
+    TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first();
     CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
@@ -349,7 +349,7 @@ void TweakableParserTest::character() {
     auto parsed = TweakableParser<char>::parse({input.data(), input.size()});
     {
         CORRADE_EXPECT_FAIL_IF(data.expectFail, "Not yet implemented.");
-        CORRADE_COMPARE(parsed, std::make_pair(TweakableState::Success, data.result));
+        CORRADE_COMPARE(parsed, Containers::pair(TweakableState::Success, data.result));
     }
 }
 
@@ -361,7 +361,7 @@ void TweakableParserTest::characterError() {
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<char>::parse({input.data(), input.size()}).first;
+    TweakableState state = TweakableParser<char>::parse({input.data(), input.size()}).first();
     CORRADE_COMPARE(out.str(), data.error);
     CORRADE_COMPARE(state, data.state);
 }
@@ -370,7 +370,7 @@ void TweakableParserTest::boolean() {
     auto&& data = BooleanData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
     std::string input = data.data; /* lazy way to get a length */
-    CORRADE_COMPARE(TweakableParser<bool>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, data.result));
+    CORRADE_COMPARE(TweakableParser<bool>::parse({input.data(), input.size()}), Containers::pair(TweakableState::Success, data.result));
 }
 
 void TweakableParserTest::booleanError() {
@@ -381,7 +381,7 @@ void TweakableParserTest::booleanError() {
     std::ostringstream out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<bool>::parse({input.data(), input.size()}).first;
+    TweakableState state = TweakableParser<bool>::parse({input.data(), input.size()}).first();
     CORRADE_COMPARE(out.str(), data.error);
     CORRADE_COMPARE(state, data.state);
 }
