@@ -186,8 +186,8 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          * Expects that @p i is less than @ref size(). The returned view
          * has @ref StringViewFlag::Global or
          * @ref StringViewFlag::NullTerminated set depending on what the
-         * original string type was --- for example, if was a @ref String or
-         * a @cpp const char* @ce, all items will have
+         * original string instance was --- for example, if was a @ref String
+         * or a @cpp const char* @ce, all items will have
          * @ref StringViewFlag::NullTerminated set.
          */
         StringView operator[](std::size_t i) const;
