@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <climits> /* LONG_MAX */
 #include <sstream>
 
 #include "Corrade/Containers/ArrayView.h"
@@ -43,6 +44,8 @@ struct TweakableParserTest: TestSuite::Tester {
     template<class T> void integral();
     template<class T> void integralUppercase();
     template<class T> void integralError();
+    void integralLimits();
+
     template<class T> void floatingPoint();
     template<class T> void floatingPointUppercase();
     template<class T> void floatingPointError();
@@ -239,6 +242,8 @@ TweakableParserTest::TweakableParserTest() {
         &TweakableParserTest::integralError<unsigned long long>},
         Containers::arraySize(IntegralErrorData));
 
+    addTests({&TweakableParserTest::integralLimits});
+
     addInstancedTests<TweakableParserTest>({
         &TweakableParserTest::floatingPoint<float>,
         &TweakableParserTest::floatingPoint<double>,
@@ -306,6 +311,52 @@ template<class T> void TweakableParserTest::integralError() {
     TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first();
     CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
+}
+
+void TweakableParserTest::integralLimits() {
+    /* Verifying both "full bits" and also a value that needs the whole width,
+       because apparently if 64 "full bits" get parsed into an int and then
+       expanded back to 64bits, you get the correct number. Sigh. */
+
+    #define _c(type, value) CORRADE_COMPARE(TweakableParser<type>::parse(#value), (Containers::Pair<TweakableState, type>{TweakableState::Success, value}));
+    _c(int, -2000000000)
+    /* should be -2147483648, but MSVC refuses to cooperate in that case ...
+       ugh, C(++), why is the minus not part of the literal? */
+    _c(int, -2147483647)
+    _c(int, 2000000000)
+    _c(int, 2147483647)
+    _c(unsigned int, 4000000000u)
+    _c(unsigned int, 4294967295u)
+
+    #if LONG_MAX == 9223372036854775807
+    _c(long, -9000000000000000000l)
+    /* should be -9223372036854775808, but the compiler warns in that case
+       ... ugh, C(++), why is the minus not part of the literal? */
+    _c(long, -9223372036854775807l)
+    _c(long, 9000000000000000000l)
+    _c(long, 9223372036854775807l)
+    _c(unsigned long, 10000000000000000000ul)
+    _c(unsigned long, 18446744073709551615ul)
+    #else
+    _c(long, -2000000000l)
+    /* should be -2147483648, but MSVC refuses to cooperate in that case ...
+       ugh, C(++), why is the minus not part of the literal? */
+    _c(long, -2147483647l)
+    _c(long, 2000000000l)
+    _c(long, 2147483647l)
+    _c(unsigned long, 4000000000ul)
+    _c(unsigned long, 4294967295ul)
+    #endif
+
+    _c(long long, -9000000000000000000ll)
+    /* should be -9223372036854775808, but the compiler warns in that case
+       ... ugh, C(++), why is the minus not part of the literal? */
+    _c(long long, -9223372036854775807ll)
+    _c(long long, 9000000000000000000ll)
+    _c(long long, 9223372036854775807ll)
+    _c(unsigned long long, 10000000000000000000ull)
+    _c(unsigned long long, 18446744073709551615ull)
+    #undef _c
 }
 
 template<class T> void TweakableParserTest::floatingPoint() {

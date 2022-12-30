@@ -348,7 +348,11 @@ const struct {
 } ParseUnsignedIntData[]{
     {"", "357", false, 357},
     {"zero", "0", false, 0},
-    {"max value", "4294967295", false, 4294967295},
+    /* Verifying both "full bits" and also a value that needs the whole width,
+       because apparently if 64 "full bits" get parsed into an int and then
+       expanded back to 64bits, you get the correct number. Sigh. */
+    {"max value, full bit width", "4000000000", false, 4000000000},
+    {"max value, all bits set", "4294967295", false, 4294967295},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
@@ -365,8 +369,13 @@ const struct {
 } ParseIntData[]{
     {"", "357", false, 357},
     {"negative", "-464", false, -464},
-    {"min value", "-2147483648", false, -2147483648},
-    {"max value", "2147483647", false, 2147483647},
+    /* Verifying both "full bits" and also a value that needs the whole width,
+       because apparently if 64 "full bits" get parsed into an int and then
+       expanded back to 64bits, you get the correct number. Sigh. */
+    {"min value, full bit width", "-2000000000", false, -2000000000},
+    {"min value, all bits set", "-2147483648", false, -2147483648},
+    {"max value, full bit width", "2000000000", false, 2000000000},
+    {"max value, all bits set", "2147483647", false, 2147483647},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
        "-0000000000000000000000000000000000000000"
@@ -383,7 +392,11 @@ const struct {
 } ParseUnsignedLongData[]{
     {"", "357", false, 357},
     {"zero", "0", false, 0},
-    {"max 52bit value", "4503599627370495", false, 4503599627370495ull},
+    /* Verifying both "full bits" and also a value that needs the whole width,
+       because apparently if 64 "full bits" get parsed into an int and then
+       expanded back to 64bits, you get the correct number. Sigh. */
+    {"max 52bit value, full bit width", "4000000000000000", false, 4000000000000000ull},
+    {"max 52bit value, all bits set", "4503599627370495", false, 4503599627370495ull},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
@@ -400,8 +413,13 @@ const struct {
 } ParseLongData[]{
     {"", "357", false, 357},
     {"negative", "-464", false, -464},
-    {"min 53bit value", "-4503599627370496", false, -4503599627370496ll},
-    {"max 53bit value", "4503599627370495", false, 4503599627370495ll},
+    /* Verifying both "full bits" and also a value that needs the whole width,
+       because apparently if 64 "full bits" get parsed into an int and then
+       expanded back to 64bits, you get the correct number. Sigh. */
+    {"min 53bit value, full bit width", "-4000000000000000", false, -4000000000000000ll},
+    {"min 53bit value, all bits set", "-4503599627370496", false, -4503599627370496ll},
+    {"max 53bit value, full bit width", "4000000000000000", false, 4000000000000000ll},
+    {"max 53bit value, all bits set", "4503599627370495", false, 4503599627370495ll},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "-0000000000000000000000000000000000000000"
