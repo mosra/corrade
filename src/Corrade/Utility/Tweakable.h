@@ -35,7 +35,6 @@
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
-#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/StlForwardString.h"

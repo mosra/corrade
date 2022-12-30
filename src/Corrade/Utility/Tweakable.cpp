@@ -30,7 +30,7 @@
 #include <set>
 #include <unordered_map>
 
-#include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"

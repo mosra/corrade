@@ -32,6 +32,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/ScopeGuard.h"
