@@ -168,7 +168,7 @@ Containers::Pair<TweakableState, long long> TweakableParser<long long>::parse(Co
 Containers::Pair<TweakableState, unsigned long long> TweakableParser<unsigned long long>::parse(Containers::StringView value) {
     const Containers::Pair<const char*, int> valueBase = integerBase(value);
     char* end;
-    const int result = std::strtoull(valueBase.first(), &end, valueBase.second());
+    const unsigned long long result = std::strtoull(valueBase.first(), &end, valueBase.second());
 
     if(end == value.begin()) {
         Warning{} << "Utility::TweakableParser:" << value << "is not an integer literal";

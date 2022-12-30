@@ -453,6 +453,8 @@ namespace Corrade {
 -   @ref Corrade/Utility/StlForwardTuple.h was fixed to do a full
     @cpp #include <tuple> @ce on libstdc++ before version 7 as there a forward
     declaration is not available
+-   @ref Utility::Tweakable was not correctly parsing @cpp unsigned long long @ce
+    literals, truncating them to 32 bits
 -   Tests ran using CTest under Emscripten used to have
     `--stack-trace-limit=0` set, preventing Node.js from printing a backtrace
     on exception. This was originally needed because historically Emscripten
