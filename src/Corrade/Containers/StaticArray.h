@@ -32,7 +32,7 @@
 
 #include <new>
 #include <type_traits>
-#include <utility> /* std::swap() */
+#include <utility> /* std::swap() */ /** @todo make our own */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"

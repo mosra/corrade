@@ -30,7 +30,7 @@
  * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator, alias @ref Corrade::Containers::StridedArrayView1D, @ref Corrade::Containers::StridedArrayView2D, @ref Corrade::Containers::StridedArrayView3D, @ref Corrade::Containers::StridedArrayView4D
  */
 
-#include <utility> /* std::swap() */
+#include <utility> /* std::swap() */ /** @todo make our own */
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StridedDimensions.h"

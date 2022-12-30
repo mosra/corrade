@@ -30,7 +30,7 @@
  * @brief Class @ref Corrade::Containers::ScopeGuard
  */
 
-#include <utility> /* std::swap */
+#include <utility> /* std::swap */ /** @todo make our own */
 
 #include "Corrade/Tags.h"
 
