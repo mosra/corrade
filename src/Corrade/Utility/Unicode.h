@@ -31,7 +31,7 @@
  */
 
 #include <cstddef>
-#include <utility>
+#include <utility> /* std::pair */
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/visibility.h"
