@@ -753,7 +753,9 @@ void Tester::printFileLineInfo(Debug& out, std::size_t line) {
        are linked in reverse order so we have to reverse the vector before
        printing. */
     if(_state->iterationPrinter) {
-        /** @todo remove std::string once Debug doesn't rely on streams */
+        /** @todo remove std::string once Debug doesn't rely on streams;
+            remove std::vector once we can use StringView::join() or when
+            StringIterable can work with std::string */
         std::vector<std::string> iterations;
         for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_parent) {
             iterations.push_back(iterationPrinter->_data->out.str());
