@@ -577,8 +577,8 @@ void StaticArrayTest::convertViewDerived() {
 
 bool takesAView(Containers::ArrayView<int>) { return true; }
 bool takesAConstView(Containers::ArrayView<const int>) { return true; }
-CORRADE_UNUSED bool takesAView(Containers::ArrayView<std::pair<int, int>>) { return false; }
-CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAView(Containers::ArrayView<float>) { return false; }
+CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const float>) { return false; }
 
 void StaticArrayTest::convertViewOverload() {
     StaticArray a;
@@ -646,8 +646,8 @@ void StaticArrayTest::convertStaticViewDerived() {
 
 bool takesAStaticView(Containers::StaticArrayView<5, int>) { return true; }
 bool takesAStaticConstView(Containers::StaticArrayView<5, const int>) { return true; }
-CORRADE_UNUSED bool takesAStaticView(Containers::StaticArrayView<5, std::pair<int, int>>) { return false; }
-CORRADE_UNUSED bool takesAStaticConstView(Containers::StaticArrayView<5, const std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAStaticView(Containers::StaticArrayView<5, float>) { return false; }
+CORRADE_UNUSED bool takesAStaticConstView(Containers::StaticArrayView<5, const float>) { return false; }
 
 void StaticArrayTest::convertStaticViewOverload() {
     StaticArray a;

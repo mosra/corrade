@@ -518,8 +518,8 @@ void ArrayTest::convertViewDerived() {
 
 bool takesAView(Containers::ArrayView<int>) { return true; }
 bool takesAConstView(Containers::ArrayView<const int>) { return true; }
-CORRADE_UNUSED bool takesAView(Containers::ArrayView<std::pair<int, int>>) { return false; }
-CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAView(Containers::ArrayView<float>) { return false; }
+CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const float>) { return false; }
 
 void ArrayTest::convertViewOverload() {
     Array a(5);
