@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <utility>
-
 #include "Corrade/Containers/PairStl.h"
 #include "Corrade/TestSuite/Tester.h"
 

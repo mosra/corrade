@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <utility>
-
 #include "Corrade/Containers/TripleStl.h"
 #include "Corrade/TestSuite/Tester.h"
 
