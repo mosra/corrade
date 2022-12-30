@@ -32,11 +32,10 @@
  */
 
 #include <initializer_list>
-#include <utility> /* std::pair() */
 
 #include "Corrade/Tags.h"
-#include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/constructHelpers.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
 #include "Corrade/Utility/visibility.h"
 
@@ -155,7 +154,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * @brief Construct using a custom allocation
          *
          * The @p allocator needs to callable or implement a call operator with
-         * a signature of @cpp std::pair<char*, D>(*)(std::size_t, std::size_t) @ce.
+         * a signature of @cpp Containers::Pair<char*, D>(*)(std::size_t, std::size_t) @ce.
          * It gets passed a pair of desired allocation size and alignment of
          * the allocation and should return a pair of an allocated memory
          * pointer and a deleter instance that will be later used to delete the
@@ -267,7 +266,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
         char* release();
 
     private:
-        static std::pair<std::size_t, std::size_t> sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
+        static Containers::Pair<std::size_t, std::size_t> sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded);
 
         void create(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t destructibleItemCount, bool arrayDeleterItemNeeded);
 
@@ -598,9 +597,9 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 };
 
 template<class A> ArrayTuple::ArrayTuple(const ArrayView<const Item>& items, A allocator) {
-    /* The allocator is expected to return std::pair<char*, D>, where the
-       second value is a deleter instance */
-    typedef decltype(allocator(std::size_t{}, std::size_t{}).second) D;
+    /* The allocator is expected to return Containers::Pair<char*, D>, where
+       the second value is a deleter instance */
+    typedef decltype(allocator(std::size_t{}, std::size_t{}).second()) D;
 
     D* deleterDestination = nullptr;
     Item arrayDeleterItem{nullptr, deleterDestination};
@@ -609,13 +608,13 @@ template<class A> ArrayTuple::ArrayTuple(const ArrayView<const Item>& items, A a
        and get a memory pointer and a deleter instance back */
     std::size_t destructibleItemCount;
     bool arrayDeleterItemNeeded;
-    std::pair<std::size_t, std::size_t> sizeAlignment = sizeAlignmentFor(items, arrayDeleterItem, destructibleItemCount, arrayDeleterItemNeeded);
+    const Containers::Pair<std::size_t, std::size_t> sizeAlignment = sizeAlignmentFor(items, arrayDeleterItem, destructibleItemCount, arrayDeleterItemNeeded);
     /* This needs to be const in order to pass const D& to the construct()
        workaround below, which will then trigger correct copy constructor call
        on GCC 4.8. Sigh. */
-    const std::pair<char*, D> allocated = allocator(sizeAlignment.first, sizeAlignment.second);
-    _size = sizeAlignment.first;
-    _data = allocated.first;
+    const Containers::Pair<char*, D> allocated = allocator(sizeAlignment.first(), sizeAlignment.second());
+    _size = sizeAlignment.first();
+    _data = allocated.first();
 
     /* Create the internal state, which, in case the deleter is not default,
        will populate the deleterDestination pointer above. To which we then
@@ -628,7 +627,7 @@ template<class A> ArrayTuple::ArrayTuple(const ArrayView<const Item>& items, A a
        instead of D{allocated.second} in order to avoid various
        compiler-specific issues related to {}, see construct() for details. */
     if(deleterDestination)
-        Implementation::construct(*deleterDestination, allocated.second);
+        Implementation::construct(*deleterDestination, allocated.second());
 }
 
 }}

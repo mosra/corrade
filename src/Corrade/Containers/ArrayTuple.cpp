@@ -158,7 +158,7 @@ ArrayTuple deleter pointer is `nullptr`, which makes the class simply do
 
 */
 
-ArrayTuple::ArrayTuple(const ArrayView<const Item>& items): ArrayTuple{items, [](std::size_t size, std::size_t) -> std::pair<char*, std::nullptr_t> {
+ArrayTuple::ArrayTuple(const ArrayView<const Item>& items): ArrayTuple{items, [](std::size_t size, std::size_t) -> Containers::Pair<char*, std::nullptr_t> {
     /** @todo use the alignment param once we implement aligned alloc */
     return {size ? new char[size] : nullptr, nullptr};
 }} {}
@@ -222,7 +222,7 @@ ArrayTuple::operator Array<char>() && {
     return Array<char>{release(), size, deleter};
 }
 
-std::pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
+Containers::Pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const ArrayView<const Item>& items, const Item& arrayDeleterItem, std::size_t& destructibleItemCount, bool& arrayDeleterItemNeeded) {
     /* Calculate how many items actually need their destructor called. If there
        is a non-trivial destructor but no actual items, we don't need to call
        anything either. */

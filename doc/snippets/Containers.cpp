@@ -587,7 +587,7 @@ Containers::ArrayTuple data{
     {{NoInit, 200*1024*1024, latencies},
      {NoInit, 200*1024*1024, averages}},
     [](std::size_t size, std::size_t)
-        -> std::pair<char*, Utility::Path::MapDeleter>
+        -> Containers::Pair<char*, Utility::Path::MapDeleter>
     {
         Containers::Optional<Containers::Array<char, Utility::Path::MapDeleter>>
             data = Utility::Path::mapWrite("storage.tmp", size);
