@@ -476,13 +476,6 @@ benchmark types:
            modifying the benchmark-related state */
         TestCase testCase = _state->testCases[usedTestCase - 1];
 
-        /* Reset output to stdout for each test case to prevent debug
-           output segfaults */
-        /** @todo Drop this when Debug::setOutput() is removed */
-        Debug resetDebugRedirect{&std::cout};
-        Error resetErrorRedirect{&std::cerr};
-        Utility::Warning resetWarningRedirect{&std::cerr};
-
         /* Select default benchmark */
         if(testCase.type == TestCaseType::DefaultBenchmark)
             testCase.type = defaultBenchmarkType;
