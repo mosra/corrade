@@ -129,17 +129,17 @@ int resourceFinalizer_{0}() {{
     unsigned int filenamesLen = 0, dataLen = 0;
 
     /* Convert data to hexacodes */
-    for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        filenamesLen += it->filename.size();
-        dataLen += it->data.size();
+    for(const FileData& file: files) {
+        filenamesLen += file.filename.size();
+        dataLen += file.data.size();
 
         Utility::formatInto(positions, positions.size(), "    0x{:.8x},0x{:.8x},\n", filenamesLen, dataLen);
 
-        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */\n", it->filename);
-        filenames += hexcode(Containers::StringView{it->filename});
+        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */\n", file.filename);
+        filenames += hexcode(Containers::StringView{file.filename});
 
-        Utility::formatInto(data, data.size(), "\n    /* {} */\n", it->filename);
-        data += hexcode(it->data);
+        Utility::formatInto(data, data.size(), "\n    /* {} */\n", file.filename);
+        data += hexcode(file.data);
     }
 
     /* Remove last comma and newline from the positions and filenames array */
