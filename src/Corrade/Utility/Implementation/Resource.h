@@ -57,7 +57,7 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
     };
     auto positions = Containers::arrayCast<const Position>(Containers::arrayView(positionData, count*2));
     const Position* found = std::lower_bound(positions.begin(), positions.end(), filename,
-        [positions, filenames](const Position& position, const Containers::ArrayView<const char> filename) {
+        [positions, filenames](const Position& position, const Containers::StringView filename) {
             const std::size_t end = position.filename;
             const std::size_t begin = &position == positions ? 0 : (&position - 1)->filename;
             /* Not constructing a temporary StringView here as this shall be
