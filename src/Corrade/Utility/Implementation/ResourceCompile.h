@@ -74,14 +74,19 @@ std::string hexcode(const Containers::ArrayView<const char> data) {
     return out.str();
 }
 
-inline bool lessFilename(const Containers::Pair<Containers::StringView, Containers::Array<char>>& a, const Containers::Pair<Containers::StringView, Containers::Array<char>>& b) {
-    return a.first() < b.first();
+struct FileData {
+    Containers::StringView filename;
+    Containers::Array<char> data;
+};
+
+inline bool lessFilename(const FileData& a, const FileData& b) {
+    return a.filename < b.filename;
 }
 
 /* Compile data resource file. Resource name is the one to use in
    CORRADE_RESOURCE_INITIALIZE(), group name is the one to load the resources
    from. Output is a C++ file with hexadecimal data representation. */
-Containers::String resourceCompile(const Containers::StringView name, const Containers::StringView group, const Containers::ArrayView<const Containers::Pair<Containers::StringView, Containers::Array<char>>> files) {
+Containers::String resourceCompile(const Containers::StringView name, const Containers::StringView group, const Containers::ArrayView<const FileData> files) {
     CORRADE_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename),
         "Utility::Resource::compile(): the file list is not sorted", {});
 
@@ -123,8 +128,8 @@ int resourceFinalizer_{0}() {{
 
     /* Convert data to hexacodes */
     for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        filenamesLen += it->first().size();
-        dataLen += it->second().size();
+        filenamesLen += it->filename.size();
+        dataLen += it->data.size();
 
         if(it != files.begin()) {
             filenames += '\n';
@@ -133,11 +138,11 @@ int resourceFinalizer_{0}() {{
 
         Utility::formatInto(positions, positions.size(), "\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
 
-        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */", it->first());
-        filenames += hexcode(Containers::StringView{it->first()});
+        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */", it->filename);
+        filenames += hexcode(Containers::StringView{it->filename});
 
-        Utility::formatInto(data, data.size(), "\n    /* {} */", it->first());
-        data += hexcode(it->second());
+        Utility::formatInto(data, data.size(), "\n    /* {} */", it->filename);
+        data += hexcode(it->data);
     }
 
     /* Remove last comma from positions and filenames array */
@@ -145,7 +150,7 @@ int resourceFinalizer_{0}() {{
     filenames.resize(filenames.size()-1);
 
     /* Remove last comma from data array only if the last file is not empty */
-    if(!files.back().second().isEmpty())
+    if(!files.back().data.isEmpty())
         data.resize(data.size()-1);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
@@ -220,7 +225,7 @@ Containers::String resourceCompileFrom(const Containers::StringView name, const 
 
     /* Load all files */
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
-    Containers::Array<Containers::Pair<Containers::StringView, Containers::Array<char>>> fileData;
+    Containers::Array<FileData> fileData;
     arrayReserve(fileData, files.size());
     for(const auto file: files) {
         const Containers::StringView filename = file->value<Containers::StringView>("filename");

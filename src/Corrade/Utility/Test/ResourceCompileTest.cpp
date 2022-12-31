@@ -83,7 +83,7 @@ void ResourceCompileTest::compile() {
     Containers::Optional<Containers::Array<char>> predisposition = Path::read(Path::join(RESOURCE_TEST_DIR, "predisposition.bin"));
     CORRADE_VERIFY(consequence);
     CORRADE_VERIFY(predisposition);
-    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
+    const Implementation::FileData input[]{
         {"consequence.bin", *std::move(consequence)},
         {"predisposition.bin", *std::move(predisposition)}
     };
@@ -95,7 +95,7 @@ void ResourceCompileTest::compile() {
 void ResourceCompileTest::compileNotSorted() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
+    const Implementation::FileData input[]{
         {"predisposition.bin", {}},
         {"consequence.bin",{}}
     };
@@ -113,7 +113,7 @@ void ResourceCompileTest::compileNothing() {
 }
 
 void ResourceCompileTest::compileEmptyFile() {
-    const Containers::Pair<Containers::StringView, Containers::Array<char>> input[]{
+    const Implementation::FileData input[]{
         {"empty.bin", {}}
     };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
