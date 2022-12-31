@@ -271,10 +271,8 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
 
     return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
-#include <cstddef>
-
-extern const std::size_t resourceSize_{0} = {1};
-extern const unsigned char resourceData_{0}[]{{{2}
+extern const unsigned int resourceSize_{0} = {1};
+extern const unsigned char resourceData_{0}[] = {{{2}
 }};
 )", name, data->size(), dataHexcode);
 }

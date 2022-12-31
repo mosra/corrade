@@ -66,8 +66,8 @@ By default expects that `input` is a resource configuration file containing a
 input filenames. If `--single` is specified, the `input` file is read and
 directly compiled into a C++ source file, exposing the data under
 @cpp extern const unsigned char resourceData_name[] @ce and
-@cpp extern const std::size_t resourceSize_name @ce symbols, with no dependency
-on @ref Utility::Resource.
+@cpp extern const unsigned int resourceSize_name @ce symbols, with no
+dependency on @ref Utility::Resource or any other header.
 
 Arguments:
 
@@ -99,7 +99,7 @@ group name and zero or more [file] groups with input filenames. If --single
 is specified, the input file is read and directly compiled into a C++ source
 file, exposing the data under `extern const unsigned char resourceData_<name>[]`
 and `extern const std::size_t resourceSize_<name>` symbols, with no dependency
-on Corrade's resource system.)")
+on Corrade's resource system or any other header.)")
         .parse(argc, argv);
 
     /* Remove previous output file. Only if it exists, to not print an error

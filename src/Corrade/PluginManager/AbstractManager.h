@@ -595,7 +595,7 @@ See @ref plugin-management for more information about plugin compilation.
     }                                                                       \
     int pluginImporter_##name();                                            \
     extern const unsigned char resourceData_##name[];                       \
-    extern const std::size_t resourceSize_##name;                           \
+    extern const unsigned int resourceSize_##name;                          \
     int pluginImporter_##name() {                                           \
         staticPlugin_##name.plugin = #name;                                 \
         staticPlugin_##name.interface = interface_;                         \

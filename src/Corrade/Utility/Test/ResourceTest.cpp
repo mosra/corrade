@@ -46,8 +46,8 @@
 
 /* Compiled using corrade_add_resource(... SINGLE), tested with
    single() and singleEmpty() */
-extern const std::size_t resourceSize_ResourceTestSingleData;
-extern const std::size_t resourceSize_ResourceTestSingleEmptyData;
+extern const unsigned int resourceSize_ResourceTestSingleData;
+extern const unsigned int resourceSize_ResourceTestSingleEmptyData;
 extern const unsigned char resourceData_ResourceTestSingleData[];
 extern const unsigned char resourceData_ResourceTestSingleEmptyData[];
 
