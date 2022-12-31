@@ -260,6 +260,15 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
        could special-case this and output a nullptr const char*, but that would
        have a different signature from const char[] and thus could cause
        problems, and would be 4x/8x larger than the single byte. */
+    std::string dataHexcode;
+    if(data->isEmpty()) {
+        dataHexcode = "\n    0x00";
+    } else {
+        dataHexcode = hexcode(*data);
+        /* Remove the last comma */
+        dataHexcode.resize(dataHexcode.size() - 1);
+    }
+
     return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include <cstddef>
@@ -267,7 +276,7 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
 extern const std::size_t resourceSize_{0} = {1};
 extern const unsigned char resourceData_{0}[]{{{2}
 }};
-)", name, data->size(), data->isEmpty() ? "\n    0x00" : hexcode(*data));
+)", name, data->size(), dataHexcode);
 }
 
 }}}}
