@@ -62,6 +62,19 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
             const std::size_t begin = &position == positions ? 0 : (&position - 1)->filename;
             /* Not constructing a temporary StringView here as this shall be
                faster */
+            /** @todo Actually, temporary StringView *could* be faster because
+                it uses the much faster memcmp() internally, while this damn
+                thing is a dumb loop (there go the WILD DREAMS of <algorithm>
+                having specialized variants for certain data types). But to
+                actually beat the STL map, we have to ditch std::lower_bound()
+                because it requires us to do one more comparison at the end to
+                see if the string is indeed equal. Which is completely
+                unnecessary, as that's provided by memcmp() already (and yes,
+                map::at() suffers from the same problem). The rest, according
+                to perf, is strange extra overhead in operator<(), operator!=()
+                on top of the memcmp() call which I can't tell where it comes
+                from and why, and inlining those calls doesn't seem to help
+                that much. */
             return std::lexicographical_compare(filenames + begin, filenames + end,
                 filename.begin(), filename.end());
         });
