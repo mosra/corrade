@@ -61,7 +61,7 @@ std::string hexcode(const Containers::ArrayView<const char> data) {
 
     /* Each row is indented by four spaces and has newline at the end */
     for(std::size_t row = 0; row < data.size(); row += 15) {
-        out << "\n    ";
+        out << "    ";
 
         /* Convert all characters on a row to hex "0xab,0x01,..." */
         for(std::size_t end = Utility::min(row + 15, data.size()), i = row; i != end; ++i) {
@@ -69,6 +69,8 @@ std::string hexcode(const Containers::ArrayView<const char> data) {
                 << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
                 << ",";
         }
+
+        out << "\n";
     }
 
     return out.str();
@@ -131,27 +133,24 @@ int resourceFinalizer_{0}() {{
         filenamesLen += it->filename.size();
         dataLen += it->data.size();
 
-        if(it != files.begin()) {
-            filenames += '\n';
-            data += '\n';
-        }
+        Utility::formatInto(positions, positions.size(), "    0x{:.8x},0x{:.8x},\n", filenamesLen, dataLen);
 
-        Utility::formatInto(positions, positions.size(), "\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
-
-        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */", it->filename);
+        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */\n", it->filename);
         filenames += hexcode(Containers::StringView{it->filename});
 
-        Utility::formatInto(data, data.size(), "\n    /* {} */", it->filename);
+        Utility::formatInto(data, data.size(), "\n    /* {} */\n", it->filename);
         data += hexcode(it->data);
     }
 
-    /* Remove last comma from positions and filenames array */
-    positions.resize(positions.size()-1);
-    filenames.resize(filenames.size()-1);
+    /* Remove last comma and newline from the positions and filenames array */
+    positions.resize(positions.size() - 2);
+    filenames.resize(filenames.size() - 2);
 
-    /* Remove last comma from data array only if the last file is not empty */
+    /* Remove last newline from the data array, remove also the preceding comma
+       if the last file is not empty */
+    data.resize(data.size() - 1);
     if(!files.back().data.isEmpty())
-        data.resize(data.size()-1);
+        data.resize(data.size() - 1);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
@@ -165,7 +164,8 @@ int resourceFinalizer_{0}() {{
 
 namespace {{
 
-const unsigned int resourcePositions[] = {{{0}
+const unsigned int resourcePositions[] = {{
+{0}
 }};
 
 const unsigned char resourceFilenames[] = {{{1}
@@ -262,17 +262,18 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
        problems, and would be 4x/8x larger than the single byte. */
     std::string dataHexcode;
     if(data->isEmpty()) {
-        dataHexcode = "\n    0x00";
+        dataHexcode = "    0x00";
     } else {
         dataHexcode = hexcode(*data);
-        /* Remove the last comma */
-        dataHexcode.resize(dataHexcode.size() - 1);
+        /* Remove the last comma and newline */
+        dataHexcode.resize(dataHexcode.size() - 2);
     }
 
     return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 extern const unsigned int resourceSize_{0} = {1};
-extern const unsigned char resourceData_{0}[] = {{{2}
+extern const unsigned char resourceData_{0}[] = {{
+{2}
 }};
 )", name, data->size(), dataHexcode);
 }
