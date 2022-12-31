@@ -25,7 +25,7 @@
 */
 
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo drop once Arguments is <string>-free */
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Implementation/ResourceCompile.h"
 
@@ -110,16 +110,15 @@ on Corrade's resource system.)")
         return 1;
 
     /* Compile file */
-    const std::string compiled = args.isSet("single") ?
+    const Containers::String compiled = args.isSet("single") ?
         Utility::Implementation::resourceCompileSingle(args.value("name"), args.value("input")) :
         Utility::Implementation::resourceCompileFrom(args.value("name"), args.value("input"));
 
     /* Compilation failed */
-    if(compiled.empty()) return 2;
+    if(!compiled) return 2;
 
     /* Save output */
-    /** @todo drop the StringView cast once resourceCompileFrom() is <string>-free */
-    if(!Utility::Path::write(args.value("output"), Containers::StringView{compiled})) {
+    if(!Utility::Path::write(args.value("output"), compiled)) {
         Utility::Error{} << "Cannot write output file" << '\'' + args.value("output") + '\'';
         return 3;
     }

@@ -37,7 +37,6 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
@@ -55,10 +54,6 @@
 namespace Corrade { namespace Utility { namespace Implementation { namespace {
 
 /** @todo this whole thing needs a serious cleanup and deSTLification */
-
-std::string comment(const Containers::StringView comment) {
-    return Utility::formatString("\n    /* {} */", comment);
-}
 
 std::string hexcode(const Containers::ArrayView<const char> data) {
     std::ostringstream out;
@@ -86,13 +81,13 @@ inline bool lessFilename(const Containers::Pair<Containers::StringView, Containe
 /* Compile data resource file. Resource name is the one to use in
    CORRADE_RESOURCE_INITIALIZE(), group name is the one to load the resources
    from. Output is a C++ file with hexadecimal data representation. */
-std::string resourceCompile(const std::string& name, const std::string& group, const Containers::ArrayView<const Containers::Pair<Containers::StringView, Containers::Array<char>>> files) {
+Containers::String resourceCompile(const Containers::StringView name, const Containers::StringView group, const Containers::ArrayView<const Containers::Pair<Containers::StringView, Containers::Array<char>>> files) {
     CORRADE_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename),
         "Utility::Resource::compile(): the file list is not sorted", {});
 
     /* Special case for empty file list */
     if(files.isEmpty()) {
-        return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+        return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
@@ -136,12 +131,12 @@ int resourceFinalizer_{0}() {{
             data += '\n';
         }
 
-        positions += Utility::formatString("\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
+        Utility::formatInto(positions, positions.size(), "\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
 
-        filenames += comment(it->first());
+        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */", it->first());
         filenames += hexcode(Containers::StringView{it->first()});
 
-        data += comment(it->first());
+        Utility::formatInto(data, data.size(), "\n    /* {} */", it->first());
         data += hexcode(it->second());
     }
 
@@ -157,7 +152,7 @@ int resourceFinalizer_{0}() {{
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC). If we don't have any data, we don't
        create the resourceData array, as zero-length arrays are not allowed. */
-    return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+    return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
@@ -206,7 +201,7 @@ int resourceFinalizer_{4}() {{
     );
 }
 
-std::string resourceCompileFrom(const std::string& name, const std::string& configurationFile) {
+Containers::String resourceCompileFrom(const Containers::StringView name, const Containers::StringView configurationFile) {
     /* Resource file existence */
     if(!Path::exists(configurationFile)) {
         Error() << "    Error: file" << configurationFile << "does not exist";
@@ -221,7 +216,7 @@ std::string resourceCompileFrom(const std::string& name, const std::string& conf
         Error() << "    Error: group name is not specified";
         return {};
     }
-    const std::string group = conf.value("group");
+    const Containers::StringView group = conf.value<Containers::StringView>("group");
 
     /* Load all files */
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
@@ -249,7 +244,7 @@ std::string resourceCompileFrom(const std::string& name, const std::string& conf
     return resourceCompile(name, group, fileData);
 }
 
-std::string resourceCompileSingle(const Containers::StringView name, const Containers::StringView filename) {
+Containers::String resourceCompileSingle(const Containers::StringView name, const Containers::StringView filename) {
     const Containers::Optional<Containers::Array<char>> data = Path::read(filename);
     if(!data) {
         Error() << "    Error: cannot open file" << filename;
@@ -260,7 +255,7 @@ std::string resourceCompileSingle(const Containers::StringView name, const Conta
        could special-case this and output a nullptr const char*, but that would
        have a different signature from const char[] and thus could cause
        problems, and would be 4x/8x larger than the single byte. */
-    return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+    return format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include <cstddef>
 

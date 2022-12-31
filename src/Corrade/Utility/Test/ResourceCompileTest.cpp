@@ -28,6 +28,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Implementation/ResourceCompile.h"
 
 #include "configure.h"
@@ -144,7 +145,7 @@ void ResourceCompileTest::compileFromUtf8Filenames() {
 void ResourceCompileTest::compileFromNonexistentResource() {
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", "nonexistent.conf").empty());
+    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", "nonexistent.conf").isEmpty());
     CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
 }
 
@@ -153,7 +154,7 @@ void ResourceCompileTest::compileFromNonexistentFile() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", conf).empty());
+    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData", conf));
     /* There's an error message from Path::read() before */
     CORRADE_COMPARE_AS(out.str(),
         "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n",
@@ -165,29 +166,29 @@ void ResourceCompileTest::compileFromEmptyGroup() {
     Error redirectError{&out};
 
     /* Empty group name is allowed */
-    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")).empty());
+    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")));
     CORRADE_COMPARE(out.str(), "");
 
     /* Missing group entry is not allowed */
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-no-group.conf")).empty());
+    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
+        Path::join(RESOURCE_TEST_DIR, "resources-no-group.conf")));
     CORRADE_COMPARE(out.str(), "    Error: group name is not specified\n");
 }
 
 void ResourceCompileTest::compileFromEmptyFilename() {
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
+    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")));
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceCompileTest::compileFromEmptyAlias() {
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
+    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
+        Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")));
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
@@ -200,7 +201,7 @@ void ResourceCompileTest::compileSingle() {
 void ResourceCompileTest::compileSingleNonexistentFile() {
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileSingle("ResourceTestData", "/nonexistent.dat").empty());
+    CORRADE_VERIFY(!Implementation::resourceCompileSingle("ResourceTestData", "/nonexistent.dat"));
     /* There's an error message from Path::read() before */
     CORRADE_COMPARE_AS(out.str(),
         "\n    Error: cannot open file /nonexistent.dat\n",
