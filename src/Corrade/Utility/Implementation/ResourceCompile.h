@@ -227,7 +227,7 @@ Containers::String resourceCompileFrom(const Containers::StringView name, const 
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
     Containers::Array<FileData> fileData;
     arrayReserve(fileData, files.size());
-    for(const auto file: files) {
+    for(const ConfigurationGroup* const file: files) {
         const Containers::StringView filename = file->value<Containers::StringView>("filename");
         const Containers::StringView alias = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : filename;
         if(filename.isEmpty() || alias.isEmpty()) {

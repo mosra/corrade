@@ -216,8 +216,8 @@ Containers::StringView Resource::getString(const Containers::StringView filename
 
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
-        std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
-        for(auto file: files) {
+        const std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
+        for(const ConfigurationGroup* const file: files) {
             const Containers::StringView name = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : file->value<Containers::StringView>("filename");
             if(name != filename) continue;
 
