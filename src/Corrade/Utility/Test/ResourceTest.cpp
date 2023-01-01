@@ -528,6 +528,8 @@ void ResourceTest::overrideGroup() {
     /* Two subsequent calls should point to the same location (the file doesn't
     get read again) */
     CORRADE_VERIFY(rs.getString("predisposition.bin").data() == predisposition.data());
+
+    // TODO test both filename= and [file]
 }
 
 void ResourceTest::overrideGroupNonexistent() {
