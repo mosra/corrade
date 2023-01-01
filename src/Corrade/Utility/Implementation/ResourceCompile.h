@@ -111,8 +111,7 @@ Containers::String resourceCompile(const Containers::StringView name, const Cont
        against the filename sorting, meaning each filename would need to store
        offset + size and not just offset, which means extra overhead even if
        nothing actually needs the alignment. */
-    CORRADE_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename),
-        "Utility::Resource::compile(): the file list is not sorted", {});
+    CORRADE_INTERNAL_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename));
 
     /* Special case for empty file list */
     if(files.isEmpty()) {

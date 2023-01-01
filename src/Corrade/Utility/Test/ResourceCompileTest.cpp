@@ -39,7 +39,6 @@ struct ResourceCompileTest: TestSuite::Tester {
     explicit ResourceCompileTest();
 
     void compile();
-    void compileNotSorted();
     void compileNothing();
     void compileEmptyFile();
 
@@ -98,7 +97,6 @@ const struct {
 
 ResourceCompileTest::ResourceCompileTest() {
     addTests({&ResourceCompileTest::compile,
-              &ResourceCompileTest::compileNotSorted,
               &ResourceCompileTest::compileNothing,
               &ResourceCompileTest::compileEmptyFile,
 
@@ -136,20 +134,6 @@ void ResourceCompileTest::compile() {
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
         TestSuite::Compare::StringToFile);
-}
-
-void ResourceCompileTest::compileNotSorted() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    const Implementation::FileData input[]{
-        {"predisposition.bin", {}},
-        {"consequence.bin",{}}
-    };
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    Implementation::resourceCompile("ResourceTestData", "test", input);
-    CORRADE_COMPARE(out.str(), "Utility::Resource::compile(): the file list is not sorted\n");
 }
 
 void ResourceCompileTest::compileNothing() {
