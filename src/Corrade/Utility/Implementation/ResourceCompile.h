@@ -271,6 +271,9 @@ int resourceFinalizer_{5}() {{
 
 Containers::String resourceCompileFrom(const Containers::StringView name, const Containers::StringView configurationFile) {
     /* Resource file existence */
+    /** @todo drop this and leave on the Configuration once it's reworked --
+        i.e., an explicit flag to create it if it doesn't exist or some such,
+        with the default behavior being an error */
     if(!Path::exists(configurationFile)) {
         Error() << "    Error: file" << configurationFile << "does not exist";
         return {};
