@@ -46,15 +46,34 @@ struct ResourceCompileTest: TestSuite::Tester {
     void compileFrom();
     void compileFromNothing();
     void compileFromUtf8Filenames();
-    void compileFromNonexistentResource();
-    void compileFromNonexistentFile();
     void compileFromEmptyGroup();
-    void compileFromEmptyFilename();
-    void compileFromEmptyAlias();
+
+    void compileFromInvalid();
 
     void compileSingle();
     void compileSingleNonexistentFile();
     void compileSingleEmptyFile();
+};
+
+const struct {
+    const char* name;
+    const char* file;
+    /* If the message ends with a \n, it's a suffix, otherwise it's the full
+       message without the Error: prefix and a newline */
+    const char* message;
+} CompileFromInvalidData[]{
+    {"nonexistent resource file", "/nonexistent.conf",
+        "file /nonexistent.conf does not exist"},
+    {"nonexistent file", "resources-nonexistent.conf",
+        /* There's an error message from Path::read() before */
+        "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n"},
+    /* Empty group= option is allowed, tested in compileFromEmptyGroup() */
+    {"empty group", "resources-no-group.conf",
+        "group name is not specified"},
+    {"empty filename", "resources-empty-filename.conf",
+        "filename or alias of file 1 in group name is empty"},
+    {"empty alias", "resources-empty-alias.conf",
+        "filename or alias of file 1 in group name is empty"},
 };
 
 ResourceCompileTest::ResourceCompileTest() {
@@ -66,13 +85,13 @@ ResourceCompileTest::ResourceCompileTest() {
               &ResourceCompileTest::compileFrom,
               &ResourceCompileTest::compileFromNothing,
               &ResourceCompileTest::compileFromUtf8Filenames,
-              &ResourceCompileTest::compileFromNonexistentResource,
-              &ResourceCompileTest::compileFromNonexistentFile,
-              &ResourceCompileTest::compileFromEmptyGroup,
-              &ResourceCompileTest::compileFromEmptyFilename,
-              &ResourceCompileTest::compileFromEmptyAlias,
+              &ResourceCompileTest::compileFromEmptyGroup});
 
-              &ResourceCompileTest::compileSingle,
+
+    addInstancedTests({&ResourceCompileTest::compileFromInvalid},
+        Containers::arraySize(CompileFromInvalidData));
+
+    addTests({&ResourceCompileTest::compileSingle,
               &ResourceCompileTest::compileSingleNonexistentFile,
               &ResourceCompileTest::compileSingleEmptyFile});
 }
@@ -142,54 +161,29 @@ void ResourceCompileTest::compileFromUtf8Filenames() {
         TestSuite::Compare::StringToFile);
 }
 
-void ResourceCompileTest::compileFromNonexistentResource() {
-    std::ostringstream out;
-    Error redirectError{&out};
-    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", "nonexistent.conf").isEmpty());
-    CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
-}
-
-void ResourceCompileTest::compileFromNonexistentFile() {
-    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf");
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData", conf));
-    /* There's an error message from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
-        "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n",
-        TestSuite::Compare::StringHasSuffix);
-}
-
 void ResourceCompileTest::compileFromEmptyGroup() {
+    /* Empty group name is allowed */
     std::ostringstream out;
     Error redirectError{&out};
-
-    /* Empty group name is allowed */
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")));
     CORRADE_COMPARE(out.str(), "");
 
-    /* Missing group entry is not allowed */
-    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-no-group.conf")));
-    CORRADE_COMPARE(out.str(), "    Error: group name is not specified\n");
+    /* Missing group entry is not allowed -- tested in compileFromInvalid()
+       below */
 }
 
-void ResourceCompileTest::compileFromEmptyFilename() {
-    std::ostringstream out;
-    Error redirectError{&out};
-    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")));
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
-}
 
-void ResourceCompileTest::compileFromEmptyAlias() {
+void ResourceCompileTest::compileFromInvalid() {
+    auto&& data = CompileFromInvalidData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!Implementation::resourceCompileFrom("ResourceTestData",
-        Path::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")));
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
+    CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", Utility::Path::join(RESOURCE_TEST_DIR, data.file)).isEmpty());
+    if(Containers::StringView{data.message}.hasSuffix('\n'))
+        CORRADE_COMPARE_AS(out.str(), data.message, TestSuite::Compare::StringHasSuffix);
+    else CORRADE_COMPARE(out.str(), Utility::formatString("    Error: {}\n", data.message));
 }
 
 void ResourceCompileTest::compileSingle() {
