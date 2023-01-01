@@ -319,6 +319,9 @@ corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
 corrade_add_resource(ResourceTestEmptyFileData ResourceTestFiles/resources-empty-file.conf)
 corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resources-nothing.conf)
 corrade_add_resource(ResourceTestSpacesData ResourceTestFiles/resources-spaces.conf)
+corrade_add_resource(ResourceTestNullTerminatedAlignedData ResourceTestFiles/resources-null-terminated-aligned.conf)
+corrade_add_resource(ResourceTestNullTerminatedLastFileData ResourceTestFiles/resources-null-terminated-last-file.conf)
+corrade_add_resource(ResourceTestAlignmentLargerThanDataSizeData ResourceTestFiles/resources-alignment-larger-than-data-size.conf)
 corrade_add_resource(ResourceTestSingleData ResourceTestFiles/consequence.bin SINGLE)
 corrade_add_resource(ResourceTestSingleEmptyData ResourceTestFiles/empty.bin SINGLE)
 corrade_add_test(UtilityResourceTest
@@ -327,10 +330,17 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
     ${ResourceTestSpacesData}
+    ${ResourceTestNullTerminatedAlignedData}
+    ${ResourceTestNullTerminatedLastFileData}
+    ${ResourceTestAlignmentLargerThanDataSizeData}
     ${ResourceTestSingleData}
     ${ResourceTestSingleEmptyData}
     LIBRARIES CorradeTestSuiteTestLib
     FILES
+        ResourceTestFiles/17bytes-33.bin
+        ResourceTestFiles/17bytes-66.bin
+        ResourceTestFiles/55bytes-66.bin
+        ResourceTestFiles/64bytes-33.bin
         ResourceTestFiles/consequence.bin
         # Referenced from resources-overriden.conf
         ResourceTestFiles/consequence2.txt
@@ -363,9 +373,16 @@ target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BIN
 corrade_add_test(UtilityResourceCompileTest
     ResourceCompileTest.cpp
     FILES
+        ResourceTestFiles/17bytes-33.bin
+        ResourceTestFiles/17bytes-66.bin
+        ResourceTestFiles/55bytes-66.bin
+        ResourceTestFiles/64bytes-33.bin
         ResourceTestFiles/compiled.cpp
+        ResourceTestFiles/compiled-alignment-larger-than-data-size.cpp
         ResourceTestFiles/compiled-empty.cpp
         ResourceTestFiles/compiled-nothing.cpp
+        ResourceTestFiles/compiled-null-terminated-aligned.cpp
+        ResourceTestFiles/compiled-null-terminated-last-file.cpp
         ResourceTestFiles/compiled-single.cpp
         ResourceTestFiles/compiled-single-empty.cpp
         ResourceTestFiles/compiled-unicode.cpp
@@ -375,12 +392,21 @@ corrade_add_test(UtilityResourceCompileTest
         ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
         ResourceTestFiles/resources.conf
-        ResourceTestFiles/resources-nothing.conf
+        ResourceTestFiles/resources-alignment-larger-than-data-size.conf
         ResourceTestFiles/resources-empty-alias.conf
         ResourceTestFiles/resources-empty-filename.conf
         ResourceTestFiles/resources-empty-group.conf
         ResourceTestFiles/resources-no-group.conf
-        ResourceTestFiles/resources-nonexistent.conf)
+        ResourceTestFiles/resources-nonexistent.conf
+        ResourceTestFiles/resources-nothing.conf
+        ResourceTestFiles/resources-npot-align.conf
+        ResourceTestFiles/resources-npot-global-align.conf
+        ResourceTestFiles/resources-null-terminated-aligned.conf
+        ResourceTestFiles/resources-null-terminated-last-file.conf
+        ResourceTestFiles/resources-too-large-align.conf
+        ResourceTestFiles/resources-too-large-global-align.conf
+        ResourceTestFiles/resources-zero-align.conf
+        ResourceTestFiles/resources-zero-global-align.conf)
 target_include_directories(UtilityResourceCompileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(UtilityResourceCompileTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 

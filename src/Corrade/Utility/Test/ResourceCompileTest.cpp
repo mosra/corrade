@@ -43,10 +43,18 @@ struct ResourceCompileTest: TestSuite::Tester {
     void compileNothing();
     void compileEmptyFile();
 
+    void compileNullTerminatedAligned();
+    void compileNullTerminatedLastFile();
+    void compileAlignmentLargerThanDataSize();
+
     void compileFrom();
     void compileFromNothing();
     void compileFromUtf8Filenames();
     void compileFromEmptyGroup();
+
+    void compileFromNullTerminatedAligned();
+    void compileFromNullTerminatedLastFile();
+    void compileFromAlignmentLargerThanDataSize();
 
     void compileFromInvalid();
 
@@ -74,6 +82,18 @@ const struct {
         "filename or alias of file 1 in group name is empty"},
     {"empty alias", "resources-empty-alias.conf",
         "filename or alias of file 1 in group name is empty"},
+    {"zero global alignment", "resources-zero-global-align.conf",
+        "alignment in group broken required to be a power-of-two value between 1 and 128, got 0"},
+    {"zero alignment", "resources-zero-align.conf",
+        "alignment of file 1 in group broken required to be a power-of-two value between 1 and 128, got 0"},
+    {"non-power-of-two global alignment", "resources-npot-global-align.conf",
+        "alignment in group broken required to be a power-of-two value between 1 and 128, got 56"},
+    {"non-power-of-two alignment", "resources-npot-align.conf",
+        "alignment of file 2 in group broken required to be a power-of-two value between 1 and 128, got 56"},
+    {"too large global alignment", "resources-too-large-global-align.conf",
+        "alignment in group broken required to be a power-of-two value between 1 and 128, got 256"},
+    {"too large alignment", "resources-too-large-align.conf",
+        "alignment of file 2 in group broken required to be a power-of-two value between 1 and 128, got 256"},
 };
 
 ResourceCompileTest::ResourceCompileTest() {
@@ -82,11 +102,18 @@ ResourceCompileTest::ResourceCompileTest() {
               &ResourceCompileTest::compileNothing,
               &ResourceCompileTest::compileEmptyFile,
 
+              &ResourceCompileTest::compileNullTerminatedAligned,
+              &ResourceCompileTest::compileNullTerminatedLastFile,
+              &ResourceCompileTest::compileAlignmentLargerThanDataSize,
+
               &ResourceCompileTest::compileFrom,
               &ResourceCompileTest::compileFromNothing,
               &ResourceCompileTest::compileFromUtf8Filenames,
-              &ResourceCompileTest::compileFromEmptyGroup});
+              &ResourceCompileTest::compileFromEmptyGroup,
 
+              &ResourceCompileTest::compileFromNullTerminatedAligned,
+              &ResourceCompileTest::compileFromNullTerminatedLastFile,
+              &ResourceCompileTest::compileFromAlignmentLargerThanDataSize});
 
     addInstancedTests({&ResourceCompileTest::compileFromInvalid},
         Containers::arraySize(CompileFromInvalidData));
@@ -103,8 +130,8 @@ void ResourceCompileTest::compile() {
     CORRADE_VERIFY(consequence);
     CORRADE_VERIFY(predisposition);
     const Implementation::FileData input[]{
-        {"consequence.bin", *std::move(consequence)},
-        {"predisposition.bin", *std::move(predisposition)}
+        {"consequence.bin", false, 1, *std::move(consequence)},
+        {"predisposition.bin", false, 1, *std::move(predisposition)}
     };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),
@@ -133,11 +160,130 @@ void ResourceCompileTest::compileNothing() {
 
 void ResourceCompileTest::compileEmptyFile() {
     const Implementation::FileData input[]{
-        {"empty.bin", {}}
+        {"empty.bin", false, 1, {}}
     };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
         TestSuite::Compare::StringToFile);
+}
+
+void ResourceCompileTest::compileNullTerminatedAligned() {
+    /* The same files are used in compileFromNullTerminatedAligned() which
+       should give the same output, and also at build time for ResourceTest,
+       for consistency it's easier to just load them */
+    Containers::Optional<Containers::Array<char>> data17bytes66 = Path::read(Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"));
+    CORRADE_VERIFY(data17bytes66);
+    CORRADE_COMPARE(data17bytes66->size(), 17);
+
+    Containers::Optional<Containers::Array<char>> data17bytes33 = Path::read(Path::join(RESOURCE_TEST_DIR, "17bytes-33.bin"));
+    CORRADE_VERIFY(data17bytes33);
+    CORRADE_COMPARE(data17bytes33->size(), 17);
+
+    Containers::Optional<Containers::Array<char>> data55bytes66 = Path::read(Path::join(RESOURCE_TEST_DIR, "55bytes-66.bin"));
+    CORRADE_VERIFY(data55bytes66);
+    CORRADE_COMPARE(data55bytes66->size(), 55);
+
+    Containers::Optional<Containers::Array<char>> data64bytes33 = Path::read(Path::join(RESOURCE_TEST_DIR, "64bytes-33.bin"));
+    CORRADE_VERIFY(data64bytes33);
+    CORRADE_COMPARE(data64bytes33->size(), 64);
+
+    /* Aliases are numbered in order to guarantee the order, see
+       Implementation/ResourceCompile.h for more details on the data packing
+       options considered. */
+    const Implementation::FileData input[]{
+        /* This one is null-terminated so there should be exactly one byte
+           after */
+        {"0-null-terminated.bin", true, 1,
+            Containers::Array<char>{*data17bytes66, [](char*, std::size_t){}}},
+        /* This one is neither aligned nor null-terminated */
+        {"1.bin", false, 1,
+            Containers::Array<char>{*data17bytes33, [](char*, std::size_t){}}},
+        /* This one is 16-byte aligned so there should be padding before */
+        {"2-align16.bin", false, 16,
+            Containers::Array<char>{*data17bytes66, [](char*, std::size_t){}}},
+        /* An aligned empty file. There's padding before, but no actual
+           content. */
+        {"3-align4-empty.bin", false, 4,
+            {}},
+        /* A null-terminated empty file. A single byte, plus padding for the
+           next which is aligned again. */
+        {"4-null-terminated-empty.bin", true, 1,
+            {}},
+        /* A null-terminated aligned empty file. A single byte. */
+        {"5-null-terminated-align8-empty.bin", true, 8,
+            {}},
+        /* This one is exactly 64 bytes, but because it is null-terminated,
+           the next one has to be padded by another 64 bytes */
+        {"6-null-terminated-align64.bin", true, 64,
+            Containers::Array<char>{*data64bytes33, [](char*, std::size_t){}}},
+        /* This one is 64-byte aligned but smaller than that, which is fine
+           -- the next files will start right after */
+        {"7-align64.bin", false, 64,
+            Containers::Array<char>{*data55bytes66, [](char*, std::size_t){}}},
+        /* A non-null-terminated non-aligned file at the end. There should be
+           no padding after. If any alignment extends beyond the data end,
+           there would be -- that's tested in
+           compileAlignmentLargerThanDataSize() */
+        {"8.bin", false, 1,
+            Containers::Array<char>{*data17bytes33, [](char*, std::size_t){}}}
+    };
+
+    Containers::String out = Implementation::resourceCompile("ResourceTestNullTerminatedAlignedData", "nullTerminatedAligned", input);
+    CORRADE_COMPARE_AS(out,
+        Path::join(RESOURCE_TEST_DIR, "compiled-null-terminated-aligned.cpp"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(out, "alignas(64)", TestSuite::Compare::StringContains);
+}
+
+void ResourceCompileTest::compileNullTerminatedLastFile() {
+    /* The same file is used in compileFromNullTerminatedLastFile() which
+       should give the same output, and also at build time for ResourceTest,
+       for consistency it's easier to just load it */
+    Containers::Optional<Containers::Array<char>> data17bytes66 = Path::read(Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"));
+    CORRADE_VERIFY(data17bytes66);
+    CORRADE_COMPARE(data17bytes66->size(), 17);
+
+    /* There should be exactly one byte after, and no alignment specifier */
+    const Implementation::FileData input[]{
+        {"0-null-terminated.bin", true, 1,
+            Containers::Array<char>{*data17bytes66, [](char*, std::size_t){}}}
+    };
+
+    Containers::String out = Implementation::resourceCompile("ResourceTestNullTerminatedLastFileData", "nullTerminatedLastFile", input);
+    CORRADE_COMPARE_AS(out,
+        Path::join(RESOURCE_TEST_DIR, "compiled-null-terminated-last-file.cpp"),
+        TestSuite::Compare::StringToFile);
+    /* There should be no alignas if it's just null-terminated */
+    CORRADE_COMPARE_AS(out, "alignas", TestSuite::Compare::StringNotContains);
+}
+
+void ResourceCompileTest::compileAlignmentLargerThanDataSize() {
+    /* The same file is used in compileFromNullTerminatedLastFile() which
+       should give the same output, and also at build time for ResourceTest,
+       for consistency it's easier to just load it */
+    Containers::Optional<Containers::Array<char>> data17bytes66 = Path::read(Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"));
+    CORRADE_VERIFY(data17bytes66);
+    CORRADE_COMPARE(data17bytes66->size(), 17);
+
+    Containers::Optional<Containers::Array<char>> data64bytes33 = Path::read(Path::join(RESOURCE_TEST_DIR, "64bytes-33.bin"));
+    CORRADE_VERIFY(data64bytes33);
+    CORRADE_COMPARE(data64bytes33->size(), 64);
+
+    /* There should be 46 padding bytes after the last (empty) file */
+    const Implementation::FileData input[]{
+        {"0-align128.bin", false, 128,
+            Containers::Array<char>{*data17bytes66, [](char*, std::size_t){}}},
+        {"1.bin", false, 1,
+            Containers::Array<char>{*data64bytes33, [](char*, std::size_t){}}},
+        {"2-align2-empty.bin", false, 2,
+            {}},
+    };
+
+    Containers::String out = Implementation::resourceCompile("ResourceTestAlignmentLargerThanDataSizeData", "alignmentLargerThanDataSize", input);
+    CORRADE_COMPARE_AS(out,
+        Path::join(RESOURCE_TEST_DIR, "compiled-alignment-larger-than-data-size.cpp"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(out, "alignas(128)", TestSuite::Compare::StringContains);
 }
 
 void ResourceCompileTest::compileFrom() {
@@ -173,6 +319,30 @@ void ResourceCompileTest::compileFromEmptyGroup() {
        below */
 }
 
+void ResourceCompileTest::compileFromNullTerminatedAligned() {
+    /* There's both global nullTerminated / align options and their local
+       overrides; output same as compileNullTerminatedAligned() */
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-null-terminated-aligned.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestNullTerminatedAlignedData", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled-null-terminated-aligned.cpp"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceCompileTest::compileFromNullTerminatedLastFile() {
+    /* output same as compileFromNullTerminatedLastFile() */
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-null-terminated-last-file.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestNullTerminatedLastFileData", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled-null-terminated-last-file.cpp"),
+        TestSuite::Compare::StringToFile);
+}
+
+void ResourceCompileTest::compileFromAlignmentLargerThanDataSize() {
+    /* output same as compileFromAlignmentLargerThanDataSize() */
+    Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-alignment-larger-than-data-size.conf");
+    CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestAlignmentLargerThanDataSizeData", conf),
+        Path::join(RESOURCE_TEST_DIR, "compiled-alignment-larger-than-data-size.cpp"),
+        TestSuite::Compare::StringToFile);
+}
 
 void ResourceCompileTest::compileFromInvalid() {
     auto&& data = CompileFromInvalidData[testCaseInstanceId()];

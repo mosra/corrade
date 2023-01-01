@@ -155,6 +155,41 @@ This will generate `output.cpp` in current directory, which you then compile
 together with your sources. The first parameter is again a name used for the
 symbols in the generated file.
 
+@subsection Utility-Resource-compilation-null-terminated-align Resource null termination and alignment
+
+By default, resource data are tightly packed right after each other. Use
+@cb{.ini} nullTerminated=true @ce to mark them null-terminated, for example to
+pass strings to C APIs without having to make a null-terminated copy first, or
+to use them with @ref Containers::String::nullTerminatedGlobalView().
+
+The resources are compiled in a @cpp char[] @ce, meaning you can't rely on them
+being aligned in any way by default. Specify an @cb{.ini} align @ce option to
+override this, allowed values are power-of-two values up to 128, with 1 being
+the default.
+
+These options can be specified either globally or for particular
+@cb{.ini} [file] @ce section, which will then override the global setting. For
+example:
+
+@code{.ini}
+group=data
+
+# Files will be null-terminated and unaligned by default
+nullTerminated=true
+
+[file]
+filename=shader.vert
+
+[file]
+filename=shader.frag
+
+# This file is four-byte aligned but doesn't need null termination
+[file]
+filename=shader.spv
+nullTerminated=false
+align=4
+@endcode
+
 @section Utility-Resource-usage Accessing the resources
 
 If you compiled the resources directly into an executable or into a shared
@@ -291,16 +326,20 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get resource data
          *
          * Expects that the group contains given @p filename. If the file is
-         * empty, returns a zero-sized @cpp nullptr @ce view. If the file is
-         * not coming from an
-         * @ref Utility-Resource-usage-override "overriden group", the returned
-         * view can be assumed to have unlimited lifetime, otherwise it's alive
-         * only until the next @ref overrideGroup() call on the same group.
+         * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
+         * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
+         * unless the file is coming from an @ref Utility-Resource-usage-override "overriden group".
+         * no OS-specific treatment of non-null-terminated strings nor any
+         * encoding conversion is done --- this function never allocates.
          *
-         * The @p filename is expected to be in in UTF-8. Unlike with
-         * @ref Path::read(), no OS-specific treatment of non-null terminated
-         * strings nor any encoding conversion is done --- this function never
-         * allocates.
+         * Unless the file is coming from an overriden group, the returned view
+         * can be assumed to have unlimited lifetime, otherwise it's alive
+         * only until the next @ref overrideGroup() call on the same group. The
+         * data pointer is aligned according to the @cb{.ini} align @ce option
+         * if it was set for given file. If the file is coming from an
+         * overriden group however, its alignment isn't respected at the
+         * moment.
+         * @see @ref Utility-Resource-compilation-null-terminated-align
          * @todo when get() is gone and enough time passes, this should be
          *      renamed to get() to be consistent with Path
          */
@@ -311,18 +350,27 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @m_since_latest
          *
          * Expects that the group contains given @p filename. If the file is
-         * empty, returns a zero-sized @cpp nullptr @ce view. If the file is
-         * not coming from an
-         * @ref Utility-Resource-usage-override "overriden group", the returned
-         * string has @ref Containers::StringViewFlag::Global set, otherwise
-         * it's alive only until the next @ref overrideGroup() call on the same
-         * group. The returned string is *not*
-         * @ref Containers::StringViewFlag::NullTerminated.
+         * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
+         * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
+         * unless the file is coming from an @ref Utility-Resource-usage-override "overriden group",
+         * no OS-specific treatment of non-null-terminated filenames nor any
+         * encoding conversion is done --- this function never allocates.
          *
-         * The @p filename is expected to be in in UTF-8. Unlike with
-         * @ref Path::read(), no OS-specific treatment of non-null terminated
-         * strings nor any encoding conversion is done --- this function never
-         * allocates.
+         * The returned string has @ref Containers::StringViewFlag::Global set
+         * unless it's coming from an overriden group, otherwise it's alive
+         * only until the next @ref overrideGroup() call on the same group. The
+         * data pointer is aligned according to the @cb{.ini} align @ce option
+         * if it was set for given file. If the file is coming from an
+         * overriden group however, its alignment isn't respected at the
+         * moment.
+         *
+         * The returned string is @ref Containers::StringViewFlag::NullTerminated
+         * if the @cb{.ini} nullTerminated @ce option was set for given file,
+         * or if it's coming from an overriden group. Otherwise it *may* be
+         * marked as null terminated if there's some padding after in order to
+         * align the next file, but such behavior is specific to the internal
+         * implementation and thus null termination isn't guaranteed.
+         * @see @ref Utility-Resource-compilation-null-terminated-align
          */
         Containers::StringView getString(Containers::StringView filename) const;
 

@@ -33,9 +33,10 @@
 namespace Corrade { namespace Utility { namespace Implementation {
 
 inline Containers::StringView resourceFilenameAt(const unsigned int* const positions, const unsigned char* const filenames, const std::size_t i) {
-    /* Every position pair denotes end offsets of one file, filename is first */
-    const std::size_t begin = i == 0 ? 0 : positions[2*(i - 1)];
-    const std::size_t end = positions[2*i];
+    /* Every position pair denotes end offsets of one file, filename is first
+       and the upper 8 bits are reserved for padding */
+    const std::size_t begin = (i == 0 ? 0 : positions[2*(i - 1)]) & 0x00ffffffu;
+    const std::size_t end = (positions[2*i]) & 0x00ffffffu;
     return {reinterpret_cast<const char*>(filenames) + begin, end - begin, Containers::StringViewFlag::Global};
 }
 
@@ -43,7 +44,12 @@ inline Containers::StringView resourceDataAt(const unsigned int* const positions
     /* Every position pair denotes end offsets of one file, data is second */
     const std::size_t begin = i == 0 ? 0 : positions[2*(i - 1) + 1];
     const std::size_t end = positions[2*i + 1];
-    return {reinterpret_cast<const char*>(data) + begin, end - begin, Containers::StringViewFlag::Global};
+    /* If there's any padding after (contained in the upper 8 bits of
+       filename), the data can be marked as null-terminated. This can be either
+       deliberate (a single null byte added after) or "accidental" due to for
+       example padding for alignment. */
+    const std::size_t padding = (positions[2*i + 0] >> 24 & 0xff);
+    return {reinterpret_cast<const char*>(data) + begin, end - begin - padding, Containers::StringViewFlag::Global|(padding ? Containers::StringViewFlag::NullTerminated : Containers::StringViewFlag{})};
 }
 
 /* Assuming the filenames are sorted, look up a particular filename. Returns
@@ -52,14 +58,15 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
     /* Like std::map, but without crazy allocations using std::lower_bound and
        a std::lexicographical_compare */
     struct Position {
-        unsigned int filename;
+        unsigned int filenamePadding;
         unsigned int data;
     };
     auto positions = Containers::arrayCast<const Position>(Containers::arrayView(positionData, count*2));
     const Position* found = std::lower_bound(positions.begin(), positions.end(), filename,
         [positions, filenames](const Position& position, const Containers::StringView filename) {
-            const std::size_t end = position.filename;
-            const std::size_t begin = &position == positions ? 0 : (&position - 1)->filename;
+            /* The upper 8 bits of filename are reserved for padding */
+            const std::size_t end = position.filenamePadding & 0x00ffffffu;
+            const std::size_t begin = &position == positions ? 0 : (&position - 1)->filenamePadding & 0x00ffffffu;
             /* Not constructing a temporary StringView here as this shall be
                faster */
             /** @todo Actually, temporary StringView *could* be faster because

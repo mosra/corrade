@@ -6,6 +6,9 @@
 
 namespace {
 
+/* Pair `i` is offset of filename `i + 1` in the low 24 bits, padding after
+   data `i` in the upper 8 bits, and a 32bit offset of data `i + 1`. Offset of
+   the first filename and data is implicitly 0. */
 const unsigned int resourcePositions[] = {
     0x00000009,0x00000000
 };

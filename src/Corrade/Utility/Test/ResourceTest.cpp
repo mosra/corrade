@@ -75,6 +75,10 @@ struct ResourceTest: TestSuite::Tester {
     void getNonexistentFile();
     void filenameWithSpaces();
 
+    void nullTerminatedAligned();
+    void nullTerminatedLastFile();
+    void alignmentLargerThanDataSize();
+
     void overrideGroup();
     void overrideGroupNonexistent();
     void overrideGroupDifferent();
@@ -106,6 +110,10 @@ ResourceTest::ResourceTest() {
               &ResourceTest::getNonexistentFile,
               &ResourceTest::filenameWithSpaces,
 
+              &ResourceTest::nullTerminatedAligned,
+              &ResourceTest::nullTerminatedLastFile,
+              &ResourceTest::alignmentLargerThanDataSize,
+
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupNonexistent,
               &ResourceTest::overrideGroupDifferent,
@@ -122,9 +130,9 @@ using namespace Containers::Literals;
 constexpr unsigned int Positions[] {
     3, 6,
     11, 17,
-    20, 21,
-    30, 25,
-    40, 44
+    20 | (1 << 24), 22,
+    30, 26,
+    40, 45
 };
 
 constexpr unsigned char Filenames[] =
@@ -138,9 +146,9 @@ constexpr unsigned char Filenames[] =
 constexpr unsigned char Data[] =
     "Don't."                    // 6    6
     "hello world"               // 11   17
-    "!PNG"                      // 4    21
-    "!PNG"                      // 4    25
-    "GPL?!\n#####\n\nDon't."    // 19   44
+    "!PNG\0"                    // 4    21 + 1 padding
+    "!PnG"                      // 4    26
+    "GPL?!\n#####\n\nDon't."    // 19   45
     ;
 
 void ResourceTest::resourceFilenameAt() {
@@ -152,9 +160,20 @@ void ResourceTest::resourceFilenameAt() {
     CORRADE_COMPARE(toc, "TOC");
     CORRADE_COMPARE(toc.flags(), Containers::StringViewFlag::Global);
 
+    /* Third has a one-byte padding, so second has to account for that and it
+       shouldn't affect third at all */
+    Containers::StringView data = Implementation::resourceFilenameAt(Positions, Filenames, 1);
+    CORRADE_COMPARE(data, "data.txt");
+    CORRADE_COMPARE(data.flags(), Containers::StringViewFlag::Global);
+
     Containers::StringView png = Implementation::resourceFilenameAt(Positions, Filenames, 2);
     CORRADE_COMPARE(png, "image.png");
     CORRADE_COMPARE(png.flags(), Containers::StringViewFlag::Global);
+
+    /* Fourth is a regular case */
+    Containers::StringView png2 = Implementation::resourceFilenameAt(Positions, Filenames, 3);
+    CORRADE_COMPARE(png2, "image2.png");
+    CORRADE_COMPARE(png2.flags(), Containers::StringViewFlag::Global);
 }
 
 void ResourceTest::resourceDataAt() {
@@ -162,8 +181,24 @@ void ResourceTest::resourceDataAt() {
     CORRADE_COMPARE(sizeof(Data) - 1, Positions[4*2 + 1]);
 
     /* First is a special case */
-    CORRADE_COMPARE(Implementation::resourceDataAt(Positions, Data, 0), "Don't."_s);
-    CORRADE_COMPARE(Implementation::resourceDataAt(Positions, Data, 4), "GPL?!\n#####\n\nDon't."_s);
+    Containers::StringView toc = Implementation::resourceDataAt(Positions, Data, 0);
+    CORRADE_COMPARE(toc, "Don't.");
+    CORRADE_COMPARE(toc.flags(), Containers::StringViewFlag::Global);
+
+    /* Third has a one-byte padding, so second has to account for that */
+    Containers::StringView data = Implementation::resourceDataAt(Positions, Data, 1);
+    CORRADE_COMPARE(data, "hello world");
+    CORRADE_COMPARE(data.flags(), Containers::StringViewFlag::Global);
+
+    /* Third should be marked as null-terminated */
+    Containers::StringView png = Implementation::resourceDataAt(Positions, Data, 2);
+    CORRADE_COMPARE(png, "!PNG");
+    CORRADE_COMPARE(png.flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
+
+    /* Fourth is a regular case */
+    Containers::StringView png2 = Implementation::resourceDataAt(Positions, Data, 3);
+    CORRADE_COMPARE(png2, "!PnG");
+    CORRADE_COMPARE(png2.flags(), Containers::StringViewFlag::Global);
 }
 
 void ResourceTest::resourceLookup() {
@@ -176,7 +211,8 @@ void ResourceTest::resourceLookup() {
             TestSuite::Compare::Less);
     }
 
-    /* Those exist */
+    /* Those exist; third has a one-byte padding so it needs to account for
+       that */
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
         "TOC"), 0);
     CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
@@ -340,6 +376,140 @@ void ResourceTest::filenameWithSpaces() {
     CORRADE_COMPARE_AS(rs.getString("predisposition.bin"),
         Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
         TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::nullTerminatedAligned() {
+    Resource rs{"nullTerminatedAligned"};
+
+    {
+        Containers::StringView file = rs.getString("0-null-terminated.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(file[file.size()], '\0');
+    } {
+        Containers::StringView file = rs.getString("1.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "17bytes-33.bin"),
+            TestSuite::Compare::StringToFile);
+        /* There's padding in order to align the next file so it *may* be
+           null terminated as well. Don't rely on it tho. */
+        CORRADE_COMPARE_AS(file.flags(),
+            Containers::StringViewFlag::Global,
+            TestSuite::Compare::GreaterOrEqual);
+    } {
+        Containers::StringView file = rs.getString("2-align16.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"),
+            TestSuite::Compare::StringToFile);
+        /* There's padding in order to align the next file so it *may* be
+           null terminated as well. Don't rely on it tho. */
+        CORRADE_COMPARE_AS(file.flags(),
+            Containers::StringViewFlag::Global,
+            TestSuite::Compare::GreaterOrEqual);
+        CORRADE_COMPARE_AS(file.data(), 16, TestSuite::Compare::Aligned);
+    } {
+        Containers::StringView file = rs.getString("3-align4-empty.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "empty.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::Global);
+        CORRADE_COMPARE_AS(file.data(), 4, TestSuite::Compare::Aligned);
+    } {
+        Containers::StringView file = rs.getString("4-null-terminated-empty.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "empty.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(file[file.size()], '\0');
+    } {
+        Containers::StringView file = rs.getString("5-null-terminated-align8-empty.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "empty.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(file[file.size()], '\0');
+        CORRADE_COMPARE_AS(file.data(), 8, TestSuite::Compare::Aligned);
+    } {
+        Containers::StringView file = rs.getString("6-null-terminated-align64.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "64bytes-33.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(file[file.size()], '\0');
+        CORRADE_COMPARE_AS(file.data(), 64, TestSuite::Compare::Aligned);
+    } {
+        Containers::StringView file = rs.getString("7-align64.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "55bytes-66.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::Global);
+        CORRADE_COMPARE_AS(file.data(), 64, TestSuite::Compare::Aligned);
+    } {
+        Containers::StringView file = rs.getString("8.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "17bytes-33.bin"),
+            TestSuite::Compare::StringToFile);
+        CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::Global);
+    }
+}
+
+void ResourceTest::nullTerminatedLastFile() {
+    Resource rs{"nullTerminatedLastFile"};
+
+    Containers::StringView file = rs.getString("0-null-terminated.bin");
+    CORRADE_COMPARE_AS(file,
+        Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(file.flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+    CORRADE_COMPARE(file[file.size()], '\0');
+}
+
+void ResourceTest::alignmentLargerThanDataSize() {
+    Resource rs{"alignmentLargerThanDataSize"};
+
+    {
+        Containers::StringView file = rs.getString("0-align128.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "17bytes-66.bin"),
+            TestSuite::Compare::StringToFile);
+        /* There's padding in order to satisfy the alignment so it *may* be
+           null terminated as well. Don't rely on it tho. */
+        CORRADE_COMPARE_AS(file.flags(),
+            Containers::StringViewFlag::Global,
+            TestSuite::Compare::GreaterOrEqual);
+        CORRADE_COMPARE_AS(file.data(), 128, TestSuite::Compare::Aligned);
+
+        /* It should be possible to access all 128 bytes without triggering
+           ASan or some page fault. Access the raw data directly because it'd
+           trigger an OOB assertion in operator[] otherwise */
+        CORRADE_COMPARE(file.data()[127], '\0');
+
+    /* The remaining files should still have their data as usual even though
+       overlapping with the first one's alignment */
+    } {
+        Containers::StringView file = rs.getString("1.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "64bytes-33.bin"),
+            TestSuite::Compare::StringToFile);
+        /* There's padding in order to align the next file so it *may* be
+           null terminated as well. Don't rely on it tho. */
+        CORRADE_COMPARE_AS(file.flags(),
+            Containers::StringViewFlag::Global,
+            TestSuite::Compare::GreaterOrEqual);
+    } {
+        Containers::StringView file = rs.getString("2-align2-empty.bin");
+        CORRADE_COMPARE_AS(file,
+            Path::join(RESOURCE_TEST_DIR, "empty.bin"),
+            TestSuite::Compare::StringToFile);
+        /* There's padding in order to satisfy the alignment file so it *may*
+           be null terminated as well. Don't rely on it tho. */
+        CORRADE_COMPARE_AS(file.flags(),
+            Containers::StringViewFlag::Global,
+            TestSuite::Compare::GreaterOrEqual);
+        CORRADE_COMPARE_AS(file.data(), 2, TestSuite::Compare::Aligned);
+    }
 }
 
 void ResourceTest::overrideGroup() {

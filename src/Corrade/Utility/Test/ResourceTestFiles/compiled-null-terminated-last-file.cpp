@@ -10,36 +10,38 @@ namespace {
    data `i` in the upper 8 bits, and a 32bit offset of data `i + 1`. Offset of
    the first filename and data is implicitly 0. */
 const unsigned int resourcePositions[] = {
-    0x0000000c,0x00000008
+    0x01000015,0x00000012
 };
 
 const unsigned char resourceFilenames[] = {
-    /* hýždě.bin */
-    0x68,0xc3,0xbd,0xc5,0xbe,0x64,0xc4,0x9b,0x2e,0x62,0x69,0x6e
+    /* 0-null-terminated.bin */
+    0x30,0x2d,0x6e,0x75,0x6c,0x6c,0x2d,0x74,0x65,0x72,0x6d,0x69,0x6e,0x61,0x74,
+    0x65,0x64,0x2e,0x62,0x69,0x6e
 };
 
 const unsigned char resourceData[] = {
-    /* hýždě.bin */
-    0xd1,0x5e,0xa5,0xed,0xea,0xdd,0x00,0x0d
+    /* 0-null-terminated.bin */
+    0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,
+    0x66,0x66,   0
 };
 
 Corrade::Utility::Implementation::ResourceGroup resource;
 
 }
 
-int resourceInitializer_ResourceTestUtf8Data();
-int resourceInitializer_ResourceTestUtf8Data() {
-    resource.name = "unicode";
+int resourceInitializer_ResourceTestNullTerminatedLastFileData();
+int resourceInitializer_ResourceTestNullTerminatedLastFileData() {
+    resource.name = "nullTerminatedLastFile";
     resource.count = 1;
     resource.positions = resourcePositions;
     resource.filenames = resourceFilenames;
     resource.data = resourceData;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
-} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestUtf8Data)
+} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestNullTerminatedLastFileData)
 
-int resourceFinalizer_ResourceTestUtf8Data();
-int resourceFinalizer_ResourceTestUtf8Data() {
+int resourceFinalizer_ResourceTestNullTerminatedLastFileData();
+int resourceFinalizer_ResourceTestNullTerminatedLastFileData() {
     Corrade::Utility::Resource::unregisterData(resource);
     return 1;
-} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestUtf8Data)
+} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestNullTerminatedLastFileData)
