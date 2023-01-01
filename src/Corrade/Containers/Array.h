@@ -460,6 +460,16 @@ class Array {
         /* GCC <=4.8 breaks on _deleter{} */
         explicit Array(T* data, std::size_t size, D deleter = {}) noexcept: _data{data}, _size{size}, _deleter(deleter) {}
 
+        /**
+         * @brief Wrap an existing array view with an explicit deleter
+         * @m_since_latest
+         *
+         * Convenience overload of @ref Array(T*, std::size_t, D) for cases
+         * where the pointer and size is already wrapped in an @ref ArrayView,
+         * such as when creating non-owned @ref Array instances.
+         */
+        explicit Array(ArrayView<T> view, D deleter) noexcept: Array{view.data(), view.size(), deleter} {}
+
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
 

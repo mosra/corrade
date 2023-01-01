@@ -117,6 +117,7 @@ struct ArrayTest: TestSuite::Tester {
 
     void defaultDeleter();
     void customDeleter();
+    void customDeleterArrayView();
     void customDeleterNullData();
     void customDeleterZeroSize();
     void customDeleterMovedOutInstance();
@@ -187,6 +188,7 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::defaultDeleter,
               &ArrayTest::customDeleter,
+              &ArrayTest::customDeleterArrayView,
               &ArrayTest::customDeleterNullData,
               &ArrayTest::customDeleterZeroSize,
               &ArrayTest::customDeleterMovedOutInstance,
@@ -879,6 +881,26 @@ void ArrayTest::customDeleter() {
 
     {
         Array a{data, 25, [](int* data, std::size_t size) {
+            CORRADE_VERIFY(data);
+            CORRADE_COMPARE(data[0], 1337);
+            CORRADE_COMPARE(size, 25);
+            ++CustomDeleterCallCount;
+        }};
+        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.size(), 25);
+        CORRADE_COMPARE(CustomDeleterCallCount, 0);
+    }
+
+    CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void ArrayTest::customDeleterArrayView() {
+    CustomDeleterCallCount = 0;
+    int data[25]{1337};
+    CORRADE_VERIFY(true); /* to register proper function name */
+
+    {
+        Array a{ArrayView{data, 25}, [](int* data, std::size_t size) {
             CORRADE_VERIFY(data);
             CORRADE_COMPARE(data[0], 1337);
             CORRADE_COMPARE(size, 25);

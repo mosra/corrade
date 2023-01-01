@@ -210,6 +210,9 @@ namespace Corrade {
     @ref Containers::StaticArrayView::front() and
     @ref Containers::StaticArrayView::back() is now @cpp constexpr @ce like all
     other access APIs
+-   A new convenience @ref Containers::Array::Array(ArrayView<T>, D) overload
+    for constructing non-owned @ref Containers::Array instances from existing
+    views
 -   Added @ref Containers::arrayShrink(Array<T>&, DefaultInitT) overload for
     cases where it's not desired to have an @ref Containers::Array with a
     `NoInit` deleter
