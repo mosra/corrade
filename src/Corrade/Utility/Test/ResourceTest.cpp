@@ -520,10 +520,10 @@ void ResourceTest::overrideGroup() {
     Resource rs{"test"};
     CORRADE_COMPARE(out.str(), formatString("Utility::Resource: group 'test' overridden with '{}'\n", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf")));
 
-    /* Overriden files are not marked as global */
+    /* Overriden files are not marked as global but are null-terminated */
     Containers::StringView predisposition = rs.getString("predisposition.bin");
     CORRADE_COMPARE(predisposition, "overridden predisposition\n");
-    CORRADE_COMPARE(predisposition.flags(), Containers::StringViewFlags{});
+    CORRADE_COMPARE(predisposition.flags(), Containers::StringViewFlag::NullTerminated);
 
     /* Two subsequent calls should point to the same location (the file doesn't
     get read again) */
@@ -573,7 +573,8 @@ void ResourceTest::overrideGroupFileFallback() {
     Containers::StringView consequence = rs.getString("consequence.bin");
     CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
 
-    /* Original compiled-in file, global flag */
+    /* Original compiled-in file, global flag (but implicitly not
+       null-terminated) */
     CORRADE_COMPARE_AS(consequence,
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
@@ -594,7 +595,8 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
         "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n",
         TestSuite::Compare::StringHasSuffix);
 
-    /* Original compiled-in file, global flag */
+    /* Original compiled-in file, global flag (but implicitly not
+       null-terminated) */
     CORRADE_COMPARE_AS(consequence,
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);

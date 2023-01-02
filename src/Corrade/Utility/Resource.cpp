@@ -118,7 +118,7 @@ struct Resource::OverrideData {
     const Configuration conf;
     /* Here the key is again pointing to names of existing files, thus no need
        to be allocated */
-    std::map<Containers::StringView, Containers::Array<char>> data;
+    std::map<Containers::StringView, Containers::String> data;
 
     explicit OverrideData(const Containers::StringView filename): conf(filename) {}
 };
@@ -212,7 +212,7 @@ Containers::StringView Resource::getString(const Containers::StringView filename
         /* The file is already loaded */
         auto it = _overrideGroup->data.find(filename);
         if(it != _overrideGroup->data.end())
-            return Containers::ArrayView<const char>{it->second};
+            return it->second;
 
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
@@ -222,7 +222,7 @@ Containers::StringView Resource::getString(const Containers::StringView filename
             if(name != filename) continue;
 
             /* Load the file */
-            Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(Path::split(_overrideGroup->conf.filename()).first(), file->value("filename")));
+            Containers::Optional<Containers::String> data = Path::readString(Path::join(Path::split(_overrideGroup->conf.filename()).first(), file->value("filename")));
             if(!data) {
                 Error{} << "Utility::Resource::get(): cannot open file" << file->value<Containers::StringView>("filename") << "from overridden group";
                 break;
@@ -232,7 +232,7 @@ Containers::StringView Resource::getString(const Containers::StringView filename
                compiled-in resources which is guaranteed to be global to avoid
                allocating a new string */
             it = _overrideGroup->data.emplace(Implementation::resourceFilenameAt(_group->positions, _group->filenames, i), *std::move(data)).first;
-            return Containers::ArrayView<const char>{it->second};
+            return it->second;
         }
 
         /* The file was not found, fallback to compiled-in ones */
