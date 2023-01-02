@@ -221,22 +221,25 @@ linker error. The @cpp main() @ce function is ideal for this, or you can create
 a dedicated function outside a namespace and then call it from within a
 namespace.
 
-@subsection Utility-Resource-usage-override Overriding compiled-in resources
+@section Utility-Resource-override Overriding compiled-in resources
 
 For shorter turnaround times when iterating on compiled-in resources it's
 possible to override them at runtime using @ref overrideGroup(). That way you
 won't need to wait for a recompilation, relink and restart of the application
-when making changes --- instead you tell the application itself to fetch the
-data from the same location the resource compiler would, by pointing it to
-the original `resource.conf` file on disk:
+when making changes --- instead you tell the application to fetch the data at
+runtime from the same location the resource compiler would, by pointing it to
+the original `resources.conf` file on disk.
 
-@snippet Utility.cpp Resource-usage-override
-
-@ref Resource instance created after this point will parse the configuration
-file and fetch the data from there, or fall back to the compiled-in resource on
-error. The files get cached for the lifetime of a particular @ref Resource
-instance, any subsequent changes in files thus get picked up only next time an
+@ref Resource instances created after that point will parse the configuration
+file and fetch the data from there, falling back to the compiled-in resources
+if the files are not found in the override or if there's an error. The files
+get cached for the lifetime of a particular @ref Resource instance, any
+subsequent changes in files thus get picked up only next time a @ref Resource
 instance is created.
+
+@snippet Utility.cpp Resource-override
+
+<b></b>
 
 @m_class{m-note m-success}
 
@@ -282,11 +285,8 @@ class CORRADE_UTILITY_EXPORT Resource {
          *      empty string to discard a previously set override.
          *
          * Overrides compiled-in resources of given group with live data
-         * specified in given configuration file, which is useful during
-         * development and debugging. Subsequently created @ref Resource
-         * instances with the same group will take data from a live filesystem
-         * instead and fallback to compiled-in resources only for files that
-         * are not found in the overriden file.
+         * specified in given configuration file. See
+         * @ref Utility-Resource-override for more information.
          *
          * @attention Unlike all other methods of this class, this one is *not*
          *      thread-safe. See @ref Utility-Resource-multithreading for more
@@ -318,9 +318,9 @@ class CORRADE_UTILITY_EXPORT Resource {
          *
          * Note that the list contains only the compiled-in files, no
          * additional filenames supplied by an
-         * @ref Utility-Resource-usage-override "overriden group" are included.
-         * This is done to avoid overrides causing unexpected behavior in code
-         * that assumes a fixed set of files.
+         * @ref Utility-Resource-override "overriden group" are included. This
+         * is done to avoid overrides causing unexpected behavior in code that
+         * assumes a fixed set of files.
          */
         Containers::StringIterable list() const;
 
@@ -330,7 +330,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Expects that the group contains given @p filename. If the file is
          * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
          * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
-         * unless the file is coming from an @ref Utility-Resource-usage-override "overriden group".
+         * unless the file is coming from an @ref Utility-Resource-override "overriden group".
          * no OS-specific treatment of non-null-terminated strings nor any
          * encoding conversion is done --- this function never allocates.
          *
@@ -354,7 +354,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Expects that the group contains given @p filename. If the file is
          * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
          * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
-         * unless the file is coming from an @ref Utility-Resource-usage-override "overriden group",
+         * unless the file is coming from an @ref Utility-Resource-override "overriden group",
          * no OS-specific treatment of non-null-terminated filenames nor any
          * encoding conversion is done --- this function never allocates.
          *
@@ -472,7 +472,7 @@ struct ResourceGroup {
     const unsigned char* filenames;
     const unsigned char* data;
     /* This field shouldn't be written to by anything else than
-       resourceInitializer() / resourceFinalizer(). It's zero-initilized by
+       resourceInitializer() / resourceFinalizer(). It's zero-initialized by
        default and those use it to avoid inserting a single item to the linked
        list more than once. */
     ResourceGroup* next;

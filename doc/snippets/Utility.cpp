@@ -1094,13 +1094,21 @@ int main(int argc, char** argv) {
 }
 
 {
-/* [Resource-usage-override] */
+/* [Resource-override] */
 Utility::Resource::overrideGroup("game-data", Utility::Path::join(
     /* Assuming resources.conf is next to this C++ source file */
     Utility::Path::split(Utility::Path::fromNativeSeparators(__FILE__)).first(),
     "resources.conf"
 ));
-/* [Resource-usage-override] */
+
+DOXYGEN_ELLIPSIS()
+
+Utility::Resource rs{"game-data"};
+
+/* This now loads license.txt from a file instead */
+Containers::StringView licenseText = rs.getString("license.txt");
+/* [Resource-override] */
+static_cast<void>(licenseText);
 }
 
 {
