@@ -248,9 +248,11 @@ instance is created.
 
 Resource registration (either automatic or using
 @ref CORRADE_RESOURCE_INITIALIZE()) is a simple operation without any heap
-access or other operations that could potentially fail. When using only the
-@ref hasGroup() and @ref getRaw() APIs with compile-time string literals, no
-memory allocation or heap access is involved either.
+access or other operations that could potentially fail. With the exception of
+@ref overrideGroup(), no memory allocation or heap access is involved when
+constructing a @ref Resource instance or calling any of its APIs. If
+@ref overrideGroup() is used, @ref getRaw() and @ref getString() accesses the
+filesystem and allocates.
 
 The group lookup during construction and @ref hasGroup() is done with a
 @f$ \mathcal{O}(n) @f$ complexity as the resource groups register themselves
@@ -320,7 +322,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * This is done to avoid overrides causing unexpected behavior in code
          * that assumes a fixed set of files.
          */
-        Containers::Array<Containers::StringView> list() const;
+        Containers::StringIterable list() const;
 
         /**
          * @brief Get resource data

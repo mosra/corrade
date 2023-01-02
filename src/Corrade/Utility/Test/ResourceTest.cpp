@@ -27,9 +27,9 @@
 #include <map>
 #include <sstream>
 
-#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -292,9 +292,9 @@ void ResourceTest::nonexistentGroup() {
 
 void ResourceTest::list() {
     Resource rs{"test"};
-    Containers::Array<Containers::StringView> list = rs.list();
+    Containers::StringIterable list = rs.list();
     CORRADE_COMPARE_AS(list,
-        Containers::arrayView({"consequence.bin"_s, "predisposition.bin"_s}),
+        (Containers::StringIterable{"consequence.bin", "predisposition.bin"}),
         TestSuite::Compare::Container);
     CORRADE_COMPARE(list[0].flags(), Containers::StringViewFlag::Global);
     CORRADE_COMPARE(list[1].flags(), Containers::StringViewFlag::Global);

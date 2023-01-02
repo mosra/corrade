@@ -28,9 +28,10 @@
 
 #include <map> /* overrideGroups :( */
 
-#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
@@ -181,13 +182,12 @@ Resource::~Resource() {
     delete _overrideGroup;
 }
 
-Containers::Array<Containers::StringView> Resource::list() const {
+Containers::StringIterable Resource::list() const {
     CORRADE_INTERNAL_ASSERT(_group);
 
-    Containers::Array<Containers::StringView> out{NoInit, _group->count};
-    for(std::size_t i = 0; i != _group->count; ++i)
-        new(&out[i]) Containers::StringView{Implementation::resourceFilenameAt(_group->positions, _group->filenames, i)};
-    return out;
+    return Containers::StringIterable{_group->filenames, _group->positions, _group->count, 0, [](const void* const data, const void* const context, std::ptrdiff_t, const std::size_t i) {
+        return Implementation::resourceFilenameAt(static_cast<const unsigned int*>(context), static_cast<const unsigned char*>(data), i);
+    }};
 }
 
 Containers::ArrayView<const char> Resource::getRaw(const Containers::StringView filename) const {
