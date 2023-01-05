@@ -95,12 +95,9 @@ namespace Test { namespace {
 struct ArrayViewTest: TestSuite::Tester {
     explicit ArrayViewTest();
 
-    void constructEmpty();
-    void constructEmptyVoid();
-    void constructEmptyConstVoid();
-    void constructNullptr();
-    void constructNullptrVoid();
-    void constructNullptrConstVoid();
+    void constructDefault();
+    void constructDefaultVoid();
+    void constructDefaultConstVoid();
     void constructNullptrSize();
     void construct();
     void constructVoid();
@@ -154,12 +151,9 @@ typedef Containers::ArrayView<void> VoidArrayView;
 typedef Containers::ArrayView<const void> ConstVoidArrayView;
 
 ArrayViewTest::ArrayViewTest() {
-    addTests({&ArrayViewTest::constructEmpty,
-              &ArrayViewTest::constructEmptyVoid,
-              &ArrayViewTest::constructEmptyConstVoid,
-              &ArrayViewTest::constructNullptr,
-              &ArrayViewTest::constructNullptrVoid,
-              &ArrayViewTest::constructNullptrConstVoid,
+    addTests({&ArrayViewTest::constructDefault,
+              &ArrayViewTest::constructDefaultVoid,
+              &ArrayViewTest::constructDefaultConstVoid,
               &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::construct,
               &ArrayViewTest::constructVoid,
@@ -207,76 +201,82 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::size});
 }
 
-void ArrayViewTest::constructEmpty() {
+void ArrayViewTest::constructDefault() {
     ArrayView a;
+    ArrayView b = nullptr;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(b == nullptr);
     CORRADE_VERIFY(a.isEmpty());
+    CORRADE_VERIFY(b.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(b.size(), 0);
 
     constexpr ArrayView ca;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
+    constexpr ArrayView cb = nullptr;
+    constexpr void* dataA = ca.data();
+    constexpr void* dataB = cb.data();
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    CORRADE_VERIFY(dataA == nullptr);
+    CORRADE_VERIFY(dataB == nullptr);
+    CORRADE_VERIFY(emptyA);
+    CORRADE_VERIFY(emptyB);
+    CORRADE_COMPARE(sizeA, 0);
+    CORRADE_COMPARE(sizeB, 0);
 }
 
-void ArrayViewTest::constructEmptyVoid() {
+void ArrayViewTest::constructDefaultVoid() {
     VoidArrayView a;
+    VoidArrayView b = nullptr;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(b == nullptr);
     CORRADE_VERIFY(a.isEmpty());
+    CORRADE_VERIFY(b.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(b.size(), 0);
 
     constexpr VoidArrayView ca;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
+    constexpr VoidArrayView cb = nullptr;
+    constexpr void* dataA = ca.data();
+    constexpr void* dataB = cb.data();
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    CORRADE_VERIFY(dataA == nullptr);
+    CORRADE_VERIFY(dataB == nullptr);
+    CORRADE_VERIFY(emptyA);
+    CORRADE_VERIFY(emptyB);
+    CORRADE_COMPARE(sizeA, 0);
+    CORRADE_COMPARE(sizeB, 0);
 }
 
-void ArrayViewTest::constructEmptyConstVoid() {
+void ArrayViewTest::constructDefaultConstVoid() {
     ConstVoidArrayView a;
+    ConstVoidArrayView b = nullptr;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(b == nullptr);
     CORRADE_VERIFY(a.isEmpty());
+    CORRADE_VERIFY(b.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(b.size(), 0);
 
     constexpr ConstVoidArrayView ca;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
-}
-
-void ArrayViewTest::constructNullptr() {
-    ArrayView a = nullptr;
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.size(), 0);
-
-    constexpr ArrayView ca = nullptr;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
-}
-
-void ArrayViewTest::constructNullptrVoid() {
-    VoidArrayView a = nullptr;
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.size(), 0);
-
-    constexpr VoidArrayView ca = nullptr;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
-}
-
-void ArrayViewTest::constructNullptrConstVoid() {
-    ConstVoidArrayView a = nullptr;
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.size(), 0);
-
-    constexpr ConstVoidArrayView ca = nullptr;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 0);
+    constexpr ConstVoidArrayView cb = nullptr;
+    constexpr const void* dataA = ca.data();
+    constexpr const void* dataB = cb.data();
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    CORRADE_VERIFY(dataA == nullptr);
+    CORRADE_VERIFY(dataB == nullptr);
+    CORRADE_VERIFY(emptyA);
+    CORRADE_VERIFY(emptyB);
+    CORRADE_COMPARE(sizeA, 0);
+    CORRADE_COMPARE(sizeB, 0);
 }
 
 void ArrayViewTest::constructNullptrSize() {

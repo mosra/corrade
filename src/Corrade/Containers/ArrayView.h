@@ -262,16 +262,13 @@ template<class T> class ArrayView {
     public:
         typedef T Type;     /**< @brief Element type */
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
-
         /**
          * @brief Default constructor
          *
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
          * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
          * @brief Construct a view on an array with explicit length
@@ -656,16 +653,13 @@ template<> class ArrayView<void> {
     public:
         typedef void Type;      /**< @brief Element type */
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
-
         /**
          * @brief Default constructor
          *
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
          * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
          * @brief Construct a view on an array with explicit length
@@ -786,16 +780,13 @@ template<> class ArrayView<const void> {
     public:
         typedef const void Type;     /**< @brief Element type */
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
-
         /**
          * @brief Default constructor
          *
-         * Creates zero-sized array. Move array with nonzero size onto the
-         * instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
+         * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
          * @brief Construct a view on an array of explicit length
@@ -1070,16 +1061,13 @@ template<std::size_t size_, class T> class StaticArrayView {
             Size = size_    /**< Array view size */
         };
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ StaticArrayView(std::nullptr_t) noexcept: _data(nullptr) {}
-
         /**
          * @brief Default constructor
          *
          * Creates a @cpp nullptr @ce view. Copy a non-empty @ref StaticArray
          * or @ref StaticArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ StaticArrayView() noexcept: _data(nullptr) {}
+        constexpr /*implicit*/ StaticArrayView(std::nullptr_t = nullptr) noexcept: _data{} {}
 
         /**
          * @brief Construct a static view on an array

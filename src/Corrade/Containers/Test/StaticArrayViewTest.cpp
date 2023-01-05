@@ -83,7 +83,6 @@ struct StaticArrayViewTest: TestSuite::Tester {
     explicit StaticArrayViewTest();
 
     void constructDefault();
-    void constructNullptr();
     void construct();
     void constructFixedSize();
     void constructDerived();
@@ -118,7 +117,6 @@ typedef Containers::ArrayView<const void> ConstVoidArrayView;
 
 StaticArrayViewTest::StaticArrayViewTest() {
     addTests({&StaticArrayViewTest::constructDefault,
-              &StaticArrayViewTest::constructNullptr,
               &StaticArrayViewTest::construct,
               &StaticArrayViewTest::constructFixedSize,
               &StaticArrayViewTest::constructDerived,
@@ -146,24 +144,32 @@ StaticArrayViewTest::StaticArrayViewTest() {
 
 void StaticArrayViewTest::constructDefault() {
     StaticArrayView<5> a;
+    StaticArrayView<5> b = nullptr;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(b == nullptr);
     CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(a.size(), StaticArrayView<5>::Size);
+    CORRADE_COMPARE(b.size(), StaticArrayView<5>::Size);
     CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(b.size(), 5);
 
     constexpr StaticArrayView<5> ca;
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(!ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), StaticArrayView<5>::Size);
-    CORRADE_COMPARE(ca.size(), 5);
-}
-
-void StaticArrayViewTest::constructNullptr() {
-    const StaticArrayView<5> a = nullptr;
-    CORRADE_VERIFY(a == nullptr);
-
-    constexpr StaticArrayView<5> ca = nullptr;
-    CORRADE_VERIFY(ca == nullptr);
+    constexpr StaticArrayView<5> cb = nullptr;
+    constexpr void* dataA = ca.data();
+    constexpr void* dataB = cb.data();
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    CORRADE_VERIFY(dataA == nullptr);
+    CORRADE_VERIFY(dataB == nullptr);
+    CORRADE_VERIFY(!emptyA);
+    CORRADE_VERIFY(!emptyB);
+    CORRADE_COMPARE(sizeA, StaticArrayView<5>::Size);
+    CORRADE_COMPARE(sizeB, StaticArrayView<5>::Size);
+    CORRADE_COMPARE(sizeA, 5);
+    CORRADE_COMPARE(sizeB, 5);
 }
 
 /* Needs to be here in order to use it in constexpr */

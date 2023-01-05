@@ -116,7 +116,6 @@ struct StringViewTest: TestSuite::Tester {
     void constructPointerNullSize();
     void constructPointerFlags();
     void constructEmpty();
-    void constructNullptr();
     void constructFromMutable();
     void constructCopy();
     void constructLiteral();
@@ -257,7 +256,6 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructPointerNullSize,
               &StringViewTest::constructPointerFlags,
               &StringViewTest::constructEmpty,
-              &StringViewTest::constructNullptr,
               &StringViewTest::constructFromMutable,
               &StringViewTest::constructCopy,
               &StringViewTest::constructLiteral,
@@ -384,28 +382,45 @@ void StringViewTest::restoreImplementations() {
 template<class T> void StringViewTest::constructDefault() {
     setTestCaseTemplateName(NameFor<T>::name());
 
-    const BasicStringView<T> view;
-    CORRADE_VERIFY(!view);
-    CORRADE_VERIFY(view.isEmpty());
-    CORRADE_COMPARE(view.size(), 0);
-    CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
-    CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
+    const BasicStringView<T> a;
+    const BasicStringView<T> b = nullptr;
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!b);
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_VERIFY(b.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(a.flags(), StringViewFlag::Global);
+    CORRADE_COMPARE(b.flags(), StringViewFlag::Global);
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
+    CORRADE_COMPARE(static_cast<const void*>(b.data()), nullptr);
 
     CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicStringView<T>>::value);
 }
 
 void StringViewTest::constructDefaultConstexpr() {
-    constexpr StringView view;
-    constexpr bool boolConversion = !!view;
-    constexpr bool empty = view.isEmpty();
-    constexpr std::size_t size = view.size();
-    constexpr StringViewFlags flags = view.flags();
-    constexpr const void* data = view.data();
-    CORRADE_VERIFY(!boolConversion);
-    CORRADE_VERIFY(empty);
-    CORRADE_COMPARE(size, 0);
-    CORRADE_COMPARE(flags, StringViewFlag::Global);
-    CORRADE_COMPARE(data, nullptr);
+    constexpr StringView ca;
+    constexpr StringView cb = nullptr;
+    constexpr bool boolConversionA = !!ca;
+    constexpr bool boolConversionB = !!cb;
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    constexpr StringViewFlags flagsA = ca.flags();
+    constexpr StringViewFlags flagsB = cb.flags();
+    constexpr const void* dataA = ca.data();
+    constexpr const void* dataB = cb.data();
+    CORRADE_VERIFY(!boolConversionA);
+    CORRADE_VERIFY(!boolConversionB);
+    CORRADE_VERIFY(emptyA);
+    CORRADE_VERIFY(emptyB);
+    CORRADE_COMPARE(sizeA, 0);
+    CORRADE_COMPARE(sizeB, 0);
+    CORRADE_COMPARE(flagsA, StringViewFlag::Global);
+    CORRADE_COMPARE(flagsB, StringViewFlag::Global);
+    CORRADE_COMPARE(dataA, nullptr);
+    CORRADE_COMPARE(dataB, nullptr);
 }
 
 template<class T> void StringViewTest::construct() {
@@ -535,24 +550,6 @@ void StringViewTest::constructEmpty() {
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated);
     CORRADE_VERIFY(view.data());
     CORRADE_COMPARE(view.data()[0], '\0');
-}
-
-void StringViewTest::constructNullptr() {
-    /* It's the default constructor, just with the default argument explicit */
-
-    StringView view = nullptr;
-    CORRADE_VERIFY(!view);
-    CORRADE_VERIFY(view.isEmpty());
-    CORRADE_COMPARE(view.size(), 0);
-    CORRADE_COMPARE(view.flags(), StringViewFlag::Global);
-    CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
-
-    constexpr StringView cview = nullptr;
-    CORRADE_VERIFY(!cview);
-    CORRADE_VERIFY(cview.isEmpty());
-    CORRADE_COMPARE(cview.size(), 0);
-    CORRADE_COMPARE(cview.flags(), StringViewFlag::Global);
-    CORRADE_COMPARE(static_cast<const void*>(cview.data()), nullptr);
 }
 
 void StringViewTest::constructFromMutable() {

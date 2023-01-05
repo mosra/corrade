@@ -103,7 +103,13 @@ overloads are provided as byte-level slicing would be too coarse.
 /* All member functions are const because the view doesn't own the data */
 template<class T> class BasicBitArrayView {
     public:
-        /** @brief Default constructor */
+        /**
+         * @brief Default constructor
+         *
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty
+         * @ref BitArray or @ref BasicBitArrayView "BitArrayView" onto the
+         * instance to make it useful.
+         */
         constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{} {}
 
         /**

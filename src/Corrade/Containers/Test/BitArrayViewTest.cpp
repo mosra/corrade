@@ -87,25 +87,39 @@ template<> struct NameFor<char> {
 template<class T> void BitArrayViewTest::constructDefault() {
     setTestCaseTemplateName(NameFor<T>::name());
 
-    const BasicBitArrayView<T> view;
-    CORRADE_VERIFY(view.isEmpty());
-    CORRADE_COMPARE(view.offset(), 0);
-    CORRADE_COMPARE(view.size(), 0);
-    CORRADE_COMPARE(static_cast<const void*>(view.data()), nullptr);
+    const BasicBitArrayView<T> a;
+    const BasicBitArrayView<T> b = nullptr;
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_VERIFY(b.isEmpty());
+    CORRADE_COMPARE(a.offset(), 0);
+    CORRADE_COMPARE(b.offset(), 0);
+    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
+    CORRADE_COMPARE(static_cast<const void*>(b.data()), nullptr);
 
     CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicBitArrayView<T>>::value);
 }
 
 void BitArrayViewTest::constructDefaultConstexpr() {
-    constexpr BitArrayView view;
-    constexpr bool empty = view.isEmpty();
-    constexpr std::size_t offset = view.offset();
-    constexpr std::size_t size = view.size();
-    constexpr const void* data = view.data();
-    CORRADE_VERIFY(empty);
-    CORRADE_COMPARE(offset, 0);
-    CORRADE_COMPARE(size, 0);
-    CORRADE_COMPARE(data, nullptr);
+    constexpr BitArrayView ca;
+    constexpr BitArrayView cb = nullptr;
+    constexpr bool emptyA = ca.isEmpty();
+    constexpr bool emptyB = cb.isEmpty();
+    constexpr std::size_t offsetA = ca.offset();
+    constexpr std::size_t offsetB = cb.offset();
+    constexpr std::size_t sizeA = ca.size();
+    constexpr std::size_t sizeB = cb.size();
+    constexpr const void* dataA = ca.data();
+    constexpr const void* dataB = cb.data();
+    CORRADE_VERIFY(emptyA);
+    CORRADE_VERIFY(emptyB);
+    CORRADE_COMPARE(offsetA, 0);
+    CORRADE_COMPARE(offsetB, 0);
+    CORRADE_COMPARE(sizeA, 0);
+    CORRADE_COMPARE(sizeB, 0);
+    CORRADE_COMPARE(dataA, nullptr);
+    CORRADE_COMPARE(dataB, nullptr);
 }
 
 template<class T> void BitArrayViewTest::construct() {

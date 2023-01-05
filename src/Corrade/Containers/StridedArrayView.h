@@ -304,16 +304,14 @@ template<unsigned dimensions, class T> class StridedArrayView {
             Dimensions = dimensions
         };
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
-
         /**
          * @brief Default constructor
          *
-         * Creates an empty view. Copy a non-empty @ref Array, @ref ArrayView
-         * or @ref StridedArrayView onto the instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array,
+         * @ref ArrayView or @ref StridedArrayView onto the instance to make it
+         * useful.
          */
-        constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{}, _stride{} {}
 
         /**
          * @brief Construct a view with explicit size and stride
