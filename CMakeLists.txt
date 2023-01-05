@@ -195,7 +195,13 @@ endif()
 # getauxval() ourselves because it's too early at that point, which makes it
 # pretty useless. Plus it also needs a certain binutils version and a capable
 # compiler, so it's easiest to just verify the whole thing.
-if(CORRADE_TARGET_UNIX)
+#
+# The feature is supported on ELF platforms only, so general Linux/BSD but not
+# Apple. TODO: however, without the NOT CORRADE_TARGET_APPLE, in some strange
+# cases this seems to pass for iOS builds in a superproject setup (maybe a
+# different compiler gets used for try_compile()?), figure out why:
+# https://gist.github.com/hsdk123/3a5bde381e79327f754e35a82e12702a
+if(CORRADE_TARGET_UNIX AND NOT CORRADE_TARGET_APPLE)
     include(CheckCXXSourceCompiles)
     check_cxx_source_compiles("\
 int fooImplementation() { return 42; }
