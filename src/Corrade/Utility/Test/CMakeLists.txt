@@ -349,7 +349,6 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin
         ResourceTestFiles/hýždě.bin
-        ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
         # Referenced from resources-overriden.conf
         ResourceTestFiles/predisposition2.txt
