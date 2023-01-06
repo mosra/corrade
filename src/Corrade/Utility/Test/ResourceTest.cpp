@@ -73,6 +73,7 @@ struct ResourceTest: TestSuite::Tester {
     void getEmptyFileRaw();
     void getEmptyFileString();
     void getNonexistentFile();
+    void getUtf8Filename();
     void filenameWithSpaces();
 
     void nullTerminatedAligned();
@@ -108,6 +109,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::getEmptyFileRaw,
               &ResourceTest::getEmptyFileString,
               &ResourceTest::getNonexistentFile,
+              &ResourceTest::getUtf8Filename,
               &ResourceTest::filenameWithSpaces,
 
               &ResourceTest::nullTerminatedAligned,
@@ -365,6 +367,14 @@ void ResourceTest::getNonexistentFile() {
     CORRADE_COMPARE(out.str(),
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n"
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
+}
+
+void ResourceTest::getUtf8Filename() {
+    Resource rs{"unicode"};
+
+    CORRADE_COMPARE_AS(rs.getString("hýždě.bin"),
+        Path::join(RESOURCE_TEST_DIR, "hýždě.bin"),
+        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::filenameWithSpaces() {
