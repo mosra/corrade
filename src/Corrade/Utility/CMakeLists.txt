@@ -309,6 +309,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         add_executable(corrade-rc rc.cpp)
         target_link_libraries(corrade-rc PRIVATE CorradeUtility)
     endif()
+    target_link_libraries(corrade-rc PRIVATE CorradeMain)
     # Path::libraryLocation() needs this
     if(CORRADE_TARGET_UNIX)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
