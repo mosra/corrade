@@ -37,7 +37,23 @@
 
 #define _ CORRADE_TWEAKABLE
 
-namespace Corrade { namespace Utility { namespace Test { namespace {
+namespace Corrade { namespace Utility {
+
+/* Used in parseCustomDifferentReturnType() */
+struct Foo {
+    Foo(unsigned value): value{value} {}
+    operator unsigned() const { return value; }
+    unsigned value;
+};
+
+template<> struct TweakableParser<Foo> {
+    /* Doesn't return Containers::Pair<TweakableState, Foo> */
+    static Containers::Pair<TweakableState, unsigned> parse(Containers::StringView) {
+        return {TweakableState::Success, 35u};
+    }
+};
+
+namespace Test { namespace {
 
 struct TweakableTest: TestSuite::Tester {
     explicit TweakableTest();
@@ -53,6 +69,8 @@ struct TweakableTest: TestSuite::Tester {
 
     void parseSpecials();
     void parseSpecialsError();
+
+    void parseCustomDifferentReturnType();
 
     void benchmarkBase();
     void benchmarkDisabled();
@@ -203,6 +221,8 @@ TweakableTest::TweakableTest() {
 
     addInstancedTests({&TweakableTest::parseSpecialsError},
         Containers::arraySize(ParseSpecialsErrorData));
+
+    addTests({&TweakableTest::parseCustomDifferentReturnType});
 
     addBenchmarks({&TweakableTest::benchmarkBase,
                    &TweakableTest::benchmarkDisabled,
@@ -382,6 +402,27 @@ void TweakableTest::parseSpecialsError() {
         CORRADE_COMPARE(out.str(), data.error);
         CORRADE_COMPARE(state, TweakableState::Error);
     }
+}
+
+void TweakableTest::parseCustomDifferentReturnType() {
+    /* This is a minimal repro case for Magnum's angle parsers, where a parser
+       for Unit<Deg, Float> is derived from a parser for Deg and parse()
+       returns the Deg type, not Unit<Deg, Float>. As the type is implicitly
+       convertible (but the wrapping Containers::Pair isn't), this should still
+       compile fine. */
+
+    std::vector<Implementation::TweakableVariable> variables{1};
+    variables[0].line = 1;
+    variables[0].parser = Implementation::TweakableTraits<Foo>::parse;
+
+    {
+        std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
+        Debug redirectOutput{nullptr};
+        Warning redirectWarning{nullptr};
+        TweakableState state = Implementation::parseTweakables("_", "a.cpp", "_()", variables, scopes);
+        CORRADE_COMPARE(state, TweakableState::Success);
+    }
+    CORRADE_COMPARE(*reinterpret_cast<unsigned*>(variables[0].storage), 35);
 }
 
 void TweakableTest::benchmarkBase() {
