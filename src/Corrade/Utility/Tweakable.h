@@ -423,7 +423,12 @@ namespace Implementation {
         #endif
 
         static TweakableState parse(Containers::StringView value, Containers::StaticArrayView<TweakableStorageSize, char> storage) {
-            Containers::Pair<TweakableState, T> parsed = TweakableParser<T>::parse(value);
+            /* The function might not return exactly
+               Containers::Pair<TweakableState, T> but something else with the
+               second type implicitly convertible to T, so we're using auto.
+               See TweakableTest::parseCustomDifferentReturnType() for a repro
+               case. */
+            const auto parsed = TweakableParser<T>::parse(value);
             if(parsed.first() != TweakableState::Success)
                 return parsed.first();
 
