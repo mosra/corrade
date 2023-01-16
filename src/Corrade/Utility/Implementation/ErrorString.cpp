@@ -60,7 +60,9 @@ void printErrnoErrorString(Debug& debug, const int error) {
        idea. The POSIX variant returns int(0) on success, while the GNU variant
        may return a pointer to a statically allocated string instead of filling
        the buffer. Sigh. */
-    #if ((_POSIX_C_SOURCE >= 200112L) && !_GNU_SOURCE) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_APPLE)
+    /** @todo might want to add CORRADE_TARGET_BSD covering all three variants,
+        there's no overarching BSD define present on all BSDs :( */
+    #if ((_POSIX_C_SOURCE >= 200112L) && !_GNU_SOURCE) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_APPLE) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     char string[256];
     CORRADE_INTERNAL_ASSERT_OUTPUT(strerror_r(error, string, Containers::arraySize(string)) == 0);
     #else

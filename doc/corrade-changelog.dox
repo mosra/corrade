@@ -303,7 +303,8 @@ namespace Corrade {
     you include @ref Corrade/Utility/DebugStlStringView.h
 -   Improved error handling in @ref Utility::Path APIs where all APIs now
     consistently print an error code and message coming from the system on
-    failure instead of a generic message or nothing at all
+    failure instead of a generic message or nothing at all. See also
+    [mosra/corrade#164](https://github.com/mosra/corrade/issues/164).
 -   @ref Utility::Path::isDirectory() now follows symlinks on Unix platforms
 -   @ref Utility::Path::ListFlag::SkipFiles and
     @ref Utility::Path::ListFlag::SkipDirectories passed to
