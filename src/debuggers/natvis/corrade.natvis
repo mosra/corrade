@@ -158,9 +158,9 @@
   </Type>
   <!-- Containers::String -->
   <Type Name="Corrade::Containers::String">
-    <Intrinsic Name="isSmall" Expression="(_small.size &amp; 0x80) != 0"/>
+    <Intrinsic Name="isSmall" Expression="(_small.size &amp; Implementation::SmallStringBit) != 0"/>
     <Intrinsic Name="data" Expression="isSmall() ? _small.data : _large.data"/>
-    <Intrinsic Name="size" Expression="isSmall() ? _small.size &amp; ~0x80 : _large.size"/>
+    <Intrinsic Name="size" Expression="isSmall() ? _small.size &amp; ~Implementation::SmallStringBit : _large.size"/>
     <!-- String is null-terminated, but can include null-characters before the end, so use explicit size -->
     <!-- Display as UTF-8 -->
     <DisplayString>{data(),[size()]s8}</DisplayString>
