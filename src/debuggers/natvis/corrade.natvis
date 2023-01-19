@@ -172,6 +172,7 @@
       <Synthetic Name="[deleter]" ExcludeView="simple" Condition="!isSmall() &amp;&amp; _large.deleter == nullptr">
         <DisplayString>operator delete[]</DisplayString>
       </Synthetic>
+      <Item Name="[small]" ExcludeView="simple">isSmall()</Item>
       <ArrayItems>
         <Size>size()</Size>
         <ValuePointer>data()</ValuePointer>
