@@ -820,7 +820,23 @@ void ArrayViewTest::access() {
     constexpr ConstArrayView cb = OneToSeven;
 
     constexpr const int* data = cb.data();
-    CORRADE_VERIFY(data == OneToSeven);
+    {
+        /* FFS, there's still no common way to detect whether a sanitizer is
+           enabled?! Former is Clang only, latter is GCC-only. */
+        #ifdef __has_feature
+        #if __has_feature(address_sanitizer)
+        #define _CORRADE_ASAN_ENABLED
+        #endif
+        #elif defined(__SANITIZE_ADDRESS__)
+        #define _CORRADE_ASAN_ENABLED
+        #endif
+        /* Fixed on Clang 15 again. Apple Clang 14 is the same as Clang 14, no
+           need to special-case that (unbelievable!). */
+        #if defined(CORRADE_TARGET_CLANG) && defined(_CORRADE_ASAN_ENABLED) && __clang_major__ == 14
+        CORRADE_EXPECT_FAIL("Clang 14 with AddressSanitizer enabled seems to make a copy of the referenced array in this case, but not in case of begin() and end() below.");
+        #endif
+        CORRADE_VERIFY(data == OneToSeven);
+    }
 
     constexpr std::size_t size = cb.size();
     CORRADE_COMPARE(size, 7);
