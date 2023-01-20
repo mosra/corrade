@@ -570,23 +570,63 @@ void CpuTest::featuresOperatorInverse() {
 
 void CpuTest::featuresCompare() {
     #ifdef CORRADE_TARGET_X86
+    /* For every comparison operator there's four variants:
+        - taking Features, Features
+        - taking T, T
+        - taking Features, T
+        - taking T, Features
+       And each variant is tested that:
+        - it returns true when it should
+        - it returns false when it should
+       Which is 8 variants, plus additionally the <= and >= operators also
+       verify that < / > isn't used internally by accident by comparing with
+       itself (4 more variants for each). */
     Cpu::Features features = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
+    Cpu::Features otherFeatures = Cpu::Sse41|Cpu::Sse2;
+
     CORRADE_VERIFY(features == features);
-    CORRADE_VERIFY(!(features != features));
+    CORRADE_VERIFY(!(features == otherFeatures));
     CORRADE_VERIFY(Cpu::Sse3 == Cpu::Sse3);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Sse3} == Cpu::Sse3);
+    CORRADE_VERIFY(Cpu::Sse3 == Cpu::Features{Cpu::Sse3});
+    CORRADE_VERIFY(!(Cpu::Sse3 == Cpu::Sse41));
+    CORRADE_VERIFY(!(Cpu::Features{Cpu::Sse3} == Cpu::Sse41));
+    CORRADE_VERIFY(!(Cpu::Sse3 == Cpu::Features{Cpu::Sse41}));
+
+    CORRADE_VERIFY(features != otherFeatures);
+    CORRADE_VERIFY(!(features != features));
     CORRADE_VERIFY(Cpu::Sse3 != Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Sse3} != Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Sse3 != Cpu::Features{Cpu::Sse41});
+    CORRADE_VERIFY(!(Cpu::Sse3 != Cpu::Sse3));
+    CORRADE_VERIFY(!(Cpu::Features{Cpu::Sse3} != Cpu::Sse3));
+    CORRADE_VERIFY(!(Cpu::Sse3 != Cpu::Features{Cpu::Sse3}));
 
-    CORRADE_VERIFY(Cpu::Scalar <= Cpu::Sse41);
-    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Scalar);
-    CORRADE_VERIFY(Cpu::Sse41 <= Cpu::Sse41);
-    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Sse41);
-    CORRADE_VERIFY(Cpu::Sse41 <= features);
-    CORRADE_VERIFY(features >= Cpu::Sse41);
     CORRADE_VERIFY(features <= features);
-    CORRADE_VERIFY(features >= features);
+    CORRADE_VERIFY(otherFeatures <= features);
+    CORRADE_VERIFY(!(features <= otherFeatures));
+    CORRADE_VERIFY(Cpu::Sse41 <= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Sse41} <= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Sse41 <= Cpu::Features{Cpu::Sse41});
+    CORRADE_VERIFY(Cpu::Scalar <= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Scalar} <= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Scalar <= Cpu::Features{Cpu::Sse41});
+    CORRADE_VERIFY(!(Cpu::Sse41 <= Cpu::Scalar));
+    CORRADE_VERIFY(!(Cpu::Features{Cpu::Sse41} <= Cpu::Scalar));
+    CORRADE_VERIFY(!(Cpu::Sse41 <= Cpu::Features{Cpu::Scalar}));
 
-    CORRADE_VERIFY(features <= (Cpu::Sse41|Cpu::Sse2|Cpu::Sse3|Cpu::Ssse3));
-    CORRADE_VERIFY(!(features >= (Cpu::Sse41|Cpu::Sse2|Cpu::Sse3|Cpu::Ssse3)));
+    CORRADE_VERIFY(features >= features);
+    CORRADE_VERIFY(features >= otherFeatures);
+    CORRADE_VERIFY(!(otherFeatures >= features));
+    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Sse41} >= Cpu::Sse41);
+    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Features{Cpu::Sse41});
+    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Scalar);
+    CORRADE_VERIFY(Cpu::Features{Cpu::Sse41} >= Cpu::Scalar);
+    CORRADE_VERIFY(Cpu::Sse41 >= Cpu::Features{Cpu::Scalar});
+    CORRADE_VERIFY(!(Cpu::Scalar >= Cpu::Sse41));
+    CORRADE_VERIFY(!(Cpu::Features{Cpu::Scalar} >= Cpu::Sse41));
+    CORRADE_VERIFY(!(Cpu::Scalar >= Cpu::Features{Cpu::Sse41}));
 
     constexpr Cpu::Features cFeatures = Cpu::Sse41|Cpu::Sse2|Cpu::Sse3;
     constexpr bool cFeaturesEqual = cFeatures == cFeatures;
