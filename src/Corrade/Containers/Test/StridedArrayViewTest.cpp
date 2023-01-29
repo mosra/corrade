@@ -88,13 +88,13 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructDefault();
     void constructDefaultVoid();
     void constructDefaultConstVoid();
-    void constructNullptrSize();
     void construct();
     void constructVoid();
     void constructConstVoid();
     void constructVoidFrom();
     void constructConstVoidFrom();
     void constructArray();
+    void constructNullptrSize();
     void constructZeroStride();
     void constructNegativeStride();
     void constructSizeStride();
@@ -123,12 +123,12 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DDefault();
     void construct3DDefaultVoid();
     void construct3DDefaultConstVoid();
-    void construct3DNullptrSize();
     void construct3D();
     void construct3DVoid();
     void construct3DConstVoid();
     void construct3DVoidFrom();
     void construct3DConstVoidFrom();
+    void construct3DNullptrSize();
     void construct3DZeroStride();
     void construct3DNegativeStride();
     void construct3DPackedSizeStride();
@@ -169,8 +169,6 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void convert3DVoidFromExternalView();
     void convert3DConstVoidFromExternalView();
     void convert3DConstVoidFromConstExternalView();
-
-    void emptyCheck();
 
     void asContiguous();
     void asContiguousNonContiguous();
@@ -284,13 +282,13 @@ StridedArrayViewTest::StridedArrayViewTest() {
     addTests({&StridedArrayViewTest::constructDefault,
               &StridedArrayViewTest::constructDefaultVoid,
               &StridedArrayViewTest::constructDefaultConstVoid,
-              &StridedArrayViewTest::constructNullptrSize,
               &StridedArrayViewTest::construct,
               &StridedArrayViewTest::constructVoid,
               &StridedArrayViewTest::constructConstVoid,
               &StridedArrayViewTest::constructVoidFrom,
               &StridedArrayViewTest::constructConstVoidFrom,
               &StridedArrayViewTest::constructArray,
+              &StridedArrayViewTest::constructNullptrSize,
               &StridedArrayViewTest::constructZeroStride,
               &StridedArrayViewTest::constructNegativeStride,
               &StridedArrayViewTest::constructSizeStride,
@@ -319,12 +317,12 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DDefault,
               &StridedArrayViewTest::construct3DDefaultVoid,
               &StridedArrayViewTest::construct3DDefaultConstVoid,
-              &StridedArrayViewTest::construct3DNullptrSize,
               &StridedArrayViewTest::construct3D,
               &StridedArrayViewTest::construct3DVoid,
               &StridedArrayViewTest::construct3DConstVoid,
               &StridedArrayViewTest::construct3DVoidFrom,
               &StridedArrayViewTest::construct3DConstVoidFrom,
+              &StridedArrayViewTest::construct3DNullptrSize,
               &StridedArrayViewTest::construct3DZeroStride,
               &StridedArrayViewTest::construct3DNegativeStride,
               &StridedArrayViewTest::construct3DPackedSizeStride,
@@ -363,8 +361,6 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::convert3DVoidFromExternalView,
               &StridedArrayViewTest::convert3DConstVoidFromExternalView,
               &StridedArrayViewTest::convert3DConstVoidFromConstExternalView,
-
-              &StridedArrayViewTest::emptyCheck,
 
               &StridedArrayViewTest::asContiguous,
               &StridedArrayViewTest::asContiguousNonContiguous,
@@ -528,20 +524,6 @@ void StridedArrayViewTest::constructDefaultConstVoid() {
     CORRADE_COMPARE(cb.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
     CORRADE_COMPARE(cb.stride(), 0);
-}
-
-void StridedArrayViewTest::constructNullptrSize() {
-    /* This should be allowed for e.g. passing a desired layout to a function
-       that allocates the memory later */
-    StridedArrayView1Di a({nullptr, 40}, nullptr, 5, 8);
-    CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_COMPARE(a.size(), 5);
-    CORRADE_COMPARE(a.stride(), 8);
-
-    constexpr StridedArrayView1Di ca({nullptr, 40}, nullptr, 5, 8);
-    CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_COMPARE(ca.size(), 5);
-    CORRADE_COMPARE(ca.stride(), 8);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -719,6 +701,23 @@ void StridedArrayViewTest::constructArray() {
     CORRADE_COMPARE(cc.stride(), 8);
     CORRADE_COMPARE(cc[2], 7853268);
     CORRADE_COMPARE(cc[4], 234810);
+}
+
+void StridedArrayViewTest::constructNullptrSize() {
+    /* This should be allowed for e.g. passing a desired layout to a function
+       that allocates the memory later */
+
+    StridedArrayView1Di a{{nullptr, 40}, nullptr, 5, 8};
+    CORRADE_VERIFY(a.data() == nullptr);
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(a.stride(), 8);
+
+    constexpr StridedArrayView1Di ca{{nullptr, 40}, nullptr, 5, 8};
+    CORRADE_VERIFY(ca.data() == nullptr);
+    CORRADE_VERIFY(!ca.isEmpty());
+    CORRADE_COMPARE(ca.size(), 5);
+    CORRADE_COMPARE(ca.stride(), 8);
 }
 
 void StridedArrayViewTest::constructZeroStride() {
@@ -1382,19 +1381,6 @@ void StridedArrayViewTest::construct3DDefaultConstVoid() {
     CORRADE_COMPARE(strideB, (Stride3D{0, 0, 0}));
 }
 
-void StridedArrayViewTest::construct3DNullptrSize() {
-    /* This should be allowed for e.g. just allocating memory in
-       Magnum::Buffer::setData() without passing any actual data */
-    StridedArrayView3Di a{{nullptr, 20}, {5, 7, 3}, {16, 8, 1}};
-    CORRADE_VERIFY(a.data() == nullptr);
-    CORRADE_COMPARE(a.size(), (Size3D{5, 7, 3}));
-    CORRADE_COMPARE(a.stride(), (Stride3D{16, 8, 1}));
-
-    constexpr StridedArrayView3Di ca{{nullptr, 20}, {5, 7, 3}, {16, 8, 1}};
-    CORRADE_VERIFY(ca.data() == nullptr);
-    CORRADE_COMPARE(ca.size(), (Size3D{5, 7, 3}));
-    CORRADE_COMPARE(ca.stride(), (Stride3D{16, 8, 1}));
-}
 
 /* Needs to be here in order to use it in constexpr */
 constexpr const struct Plane {
@@ -1499,6 +1485,23 @@ void StridedArrayViewTest::construct3DConstVoidFrom() {
     CORRADE_VERIFY(ccbv.data() == Cube);
     CORRADE_COMPARE(ccbv.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(ccbv.stride(), (Stride3D{48, 24, 8}));
+}
+
+void StridedArrayViewTest::construct3DNullptrSize() {
+    /* This should be allowed for e.g. just allocating memory in
+       Magnum::Buffer::setData() without passing any actual data */
+
+    StridedArrayView3Di a{{nullptr, 20}, {5, 7, 3}, {16, 8, 1}};
+    CORRADE_VERIFY(a.data() == nullptr);
+    CORRADE_COMPARE(a.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(a.size(), (Size3D{5, 7, 3}));
+    CORRADE_COMPARE(a.stride(), (Stride3D{16, 8, 1}));
+
+    constexpr StridedArrayView3Di ca{{nullptr, 20}, {5, 7, 3}, {16, 8, 1}};
+    CORRADE_VERIFY(ca.data() == nullptr);
+    CORRADE_COMPARE(ca.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
+    CORRADE_COMPARE(ca.size(), (Size3D{5, 7, 3}));
+    CORRADE_COMPARE(ca.stride(), (Stride3D{16, 8, 1}));
 }
 
 void StridedArrayViewTest::construct3DZeroStride() {
@@ -2004,27 +2007,6 @@ void StridedArrayViewTest::convert3DConstVoidFromConstExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
     CORRADE_VERIFY(std::is_convertible<ConstIntView, ConstVoidStridedArrayView1D>::value);
     CORRADE_VERIFY(!std::is_convertible<ConstIntView, ConstVoidStridedArrayView3D>::value);
-}
-
-void StridedArrayViewTest::emptyCheck() {
-    StridedArrayView1Di a;
-    CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.isEmpty());
-
-    constexpr StridedArrayView1Di ca;
-    CORRADE_VERIFY(!ca);
-    constexpr bool caEmpty = ca.isEmpty();
-    CORRADE_VERIFY(caEmpty);
-
-    int b[5];
-    StridedArrayView1Di c = {b, 5, 4};
-    CORRADE_VERIFY(c);
-    CORRADE_VERIFY(!c.isEmpty());
-
-    constexpr ConstStridedArrayView1Di cb = {Array10, 10, 4};
-    CORRADE_VERIFY(cb);
-    constexpr bool cbEmpty = cb.isEmpty();
-    CORRADE_VERIFY(!cbEmpty);
 }
 
 void StridedArrayViewTest::asContiguous() {

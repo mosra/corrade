@@ -98,13 +98,13 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructDefault();
     void constructDefaultVoid();
     void constructDefaultConstVoid();
-    void constructNullptrSize();
     void construct();
     void constructVoid();
     void constructConstVoid();
     void constructVoidFrom();
     void constructConstVoidFrom();
     void constructConstVoidFromVoid();
+    void constructNullptrSize();
     void constructFixedSize();
     void constructFixedSizeVoid();
     void constructFixedSizeConstVoid();
@@ -125,7 +125,6 @@ struct ArrayViewTest: TestSuite::Tester {
     void convertConstVoidFromExternalView();
     void convertConstVoidFromConstExternalView();
 
-    void emptyCheck();
     void access();
     void accessConst();
     void accessVoid();
@@ -154,13 +153,13 @@ ArrayViewTest::ArrayViewTest() {
     addTests({&ArrayViewTest::constructDefault,
               &ArrayViewTest::constructDefaultVoid,
               &ArrayViewTest::constructDefaultConstVoid,
-              &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::construct,
               &ArrayViewTest::constructVoid,
               &ArrayViewTest::constructConstVoid,
               &ArrayViewTest::constructVoidFrom,
               &ArrayViewTest::constructConstVoidFrom,
               &ArrayViewTest::constructConstVoidFromVoid,
+              &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::constructFixedSize,
               &ArrayViewTest::constructFixedSizeVoid,
               &ArrayViewTest::constructFixedSizeConstVoid,
@@ -181,7 +180,6 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::convertConstVoidFromExternalView,
               &ArrayViewTest::convertConstVoidFromConstExternalView,
 
-              &ArrayViewTest::emptyCheck,
               &ArrayViewTest::access,
               &ArrayViewTest::accessConst,
               &ArrayViewTest::accessVoid,
@@ -279,20 +277,6 @@ void ArrayViewTest::constructDefaultConstVoid() {
     CORRADE_COMPARE(sizeB, 0);
 }
 
-void ArrayViewTest::constructNullptrSize() {
-    /* This should be allowed for e.g. just allocating memory in
-       Magnum::GL::Buffer::setData() without passing any actual data */
-    ArrayView a{nullptr, 5};
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.size(), 5);
-
-    constexpr ArrayView ca{nullptr, 5};
-    CORRADE_VERIFY(ca == nullptr);
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(ca.size(), 5);
-}
-
 /* Needs to be here in order to use it in constexpr */
 constexpr int Array30[30]{};
 
@@ -302,6 +286,7 @@ void ArrayViewTest::construct() {
     {
         ArrayView b = {a, 20};
         CORRADE_VERIFY(b == a);
+        CORRADE_VERIFY(!b.isEmpty());
         CORRADE_COMPARE(b.size(), 20);
     } {
         auto b = arrayView(a, 20);
@@ -317,8 +302,12 @@ void ArrayViewTest::construct() {
 
     {
         constexpr ConstArrayView b = {Array30, 20};
-        CORRADE_VERIFY(b == Array30);
-        CORRADE_COMPARE(b.size(), 20);
+        constexpr const void* data = b.data();
+        constexpr bool empty = b.isEmpty();
+        constexpr std::size_t size = b.size();
+        CORRADE_COMPARE(data, Array30);
+        CORRADE_VERIFY(!empty);
+        CORRADE_COMPARE(size, 20);
     } {
         constexpr auto b = arrayView(Array30, 20);
         CORRADE_VERIFY(std::is_same<decltype(b), const ConstArrayView>::value);
@@ -362,9 +351,12 @@ void ArrayViewTest::constructConstVoid() {
     CORRADE_COMPARE(d.size(), 100);
 
     constexpr ConstVoidArrayView cd{Array30, 25};
-    CORRADE_VERIFY(cd == Array30);
-    CORRADE_VERIFY(!cd.isEmpty());
-    CORRADE_COMPARE(cd.size(), 100);
+    constexpr const void* data = cd.data();
+    constexpr bool empty = cd.isEmpty();
+    constexpr std::size_t size = cd.size();
+    CORRADE_COMPARE(data, Array30);
+    CORRADE_VERIFY(!empty);
+    CORRADE_COMPARE(size, 100);
 }
 
 void ArrayViewTest::constructVoidFrom() {
@@ -403,6 +395,21 @@ void ArrayViewTest::constructConstVoidFromVoid() {
     CORRADE_VERIFY(cc == b);
     CORRADE_COMPARE(c.size(), 13*sizeof(int));
     CORRADE_COMPARE(cc.size(), 13*sizeof(int));
+}
+
+void ArrayViewTest::constructNullptrSize() {
+    /* This should be allowed for e.g. just allocating memory in
+       Magnum::GL::Buffer::setData() without passing any actual data */
+
+    ArrayView a{nullptr, 5};
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 5);
+
+    constexpr ArrayView ca{nullptr, 5};
+    CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(ca.size(), 5);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -772,27 +779,6 @@ void ArrayViewTest::convertConstVoidFromConstExternalView() {
     ConstVoidArrayView b = a;
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5*4);
-}
-
-void ArrayViewTest::emptyCheck() {
-    ArrayView a;
-    CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.isEmpty());
-
-    constexpr ConstArrayView ca;
-    CORRADE_VERIFY(!ca);
-    constexpr bool caEmpty = ca.isEmpty();
-    CORRADE_VERIFY(caEmpty);
-
-    int b[5];
-    ArrayView c = {b, 5};
-    CORRADE_VERIFY(c);
-    CORRADE_VERIFY(!c.isEmpty());
-
-    constexpr ConstArrayView cc = {Array13, 5};
-    CORRADE_VERIFY(cc);
-    constexpr bool ccEmpty = cc.isEmpty();
-    CORRADE_VERIFY(!ccEmpty);
 }
 
 /* Needs to be here in order to use it in constexpr */

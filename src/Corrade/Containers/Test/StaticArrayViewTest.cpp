@@ -84,6 +84,8 @@ struct StaticArrayViewTest: TestSuite::Tester {
 
     void constructDefault();
     void construct();
+    /* No constructNullptrSize() equivalent as that's equivalent to the case
+       tested in constructDefault() */
     void constructFixedSize();
     void constructDerived();
     void constructCopy();

@@ -101,7 +101,6 @@ struct ArrayTest: TestSuite::Tester {
     void convertToExternalView();
     void convertToConstExternalView();
 
-    void emptyCheck();
     void access();
     void accessConst();
     void accessInvalid();
@@ -173,7 +172,6 @@ ArrayTest::ArrayTest() {
               &ArrayTest::convertToExternalView,
               &ArrayTest::convertToConstExternalView,
 
-              &ArrayTest::emptyCheck,
               &ArrayTest::access,
               &ArrayTest::accessConst,
               &ArrayTest::accessInvalid,
@@ -210,6 +208,7 @@ ArrayTest::ArrayTest() {
 void ArrayTest::constructEmpty() {
     const Array a;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 
     /* Zero-length should not call new */
@@ -220,9 +219,10 @@ void ArrayTest::constructEmpty() {
 }
 
 void ArrayTest::constructNullptr() {
-    const Array c(nullptr);
-    CORRADE_VERIFY(c == nullptr);
-    CORRADE_COMPARE(c.size(), 0);
+    const Array a{nullptr};
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.isEmpty());
+    CORRADE_COMPARE(a.size(), 0);
 
     /* Implicit construction from nullptr should be allowed */
     CORRADE_VERIFY(std::is_convertible<std::nullptr_t, Array>::value);
@@ -231,6 +231,7 @@ void ArrayTest::constructNullptr() {
 void ArrayTest::construct() {
     const Array a(5);
     CORRADE_VERIFY(a != nullptr);
+    CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
 
     /* Values should be zero-initialized (same as ValueInit) */
@@ -247,6 +248,7 @@ void ArrayTest::construct() {
 void ArrayTest::constructZeroSize() {
     Array a{0};
     CORRADE_VERIFY(!a.data());
+    CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
 }
 
@@ -254,6 +256,7 @@ void ArrayTest::constructFromExisting() {
     int* a = new int[25];
     Array b{a, 25};
     CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 }
 
@@ -579,16 +582,6 @@ void ArrayTest::convertToConstExternalView() {
     /* Conversion to a different type is not allowed */
     CORRADE_VERIFY(std::is_convertible<const Containers::Array<int>, ConstIntView>::value);
     CORRADE_VERIFY(!std::is_convertible<const Containers::Array<float>, ConstIntView>::value);
-}
-
-void ArrayTest::emptyCheck() {
-    Array a;
-    CORRADE_VERIFY(!a);
-    CORRADE_VERIFY(a.isEmpty());
-
-    Array b(5);
-    CORRADE_VERIFY(b);
-    CORRADE_VERIFY(!b.isEmpty());
 }
 
 void ArrayTest::access() {

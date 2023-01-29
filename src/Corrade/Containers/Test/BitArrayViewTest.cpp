@@ -39,6 +39,7 @@ struct BitArrayViewTest: TestSuite::Tester {
     void constructDefaultConstexpr();
     template<class T> void construct();
     void constructConstexpr();
+    void constructNullptrSize();
     void constructFromMutable();
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
@@ -61,6 +62,7 @@ BitArrayViewTest::BitArrayViewTest() {
               &BitArrayViewTest::construct<const char>,
               &BitArrayViewTest::construct<char>,
               &BitArrayViewTest::constructConstexpr,
+              &BitArrayViewTest::constructNullptrSize,
               &BitArrayViewTest::constructFromMutable,
               &BitArrayViewTest::constructOffsetTooLarge,
               &BitArrayViewTest::constructSizeTooLarge,
@@ -156,6 +158,21 @@ void BitArrayViewTest::constructConstexpr() {
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 47);
     CORRADE_COMPARE(data, &Data);
+}
+
+void BitArrayViewTest::constructNullptrSize() {
+    /* This should be allowed for e.g. passing a desired layout to a function
+       that allocates the memory later */
+
+    BitArrayView a{static_cast<const char*>(nullptr), 5, 24};
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(a.size(), 24);
+
+    constexpr BitArrayView ca{static_cast<const char*>(nullptr), 5, 24};
+    CORRADE_COMPARE(ca.data(), nullptr);
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(ca.size(), 24);
 }
 
 void BitArrayViewTest::constructFromMutable() {
