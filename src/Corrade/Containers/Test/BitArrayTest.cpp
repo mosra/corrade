@@ -55,7 +55,8 @@ struct BitArrayTest: TestSuite::Tester {
     void convertMutableView();
 
     void access();
-    void accessMutable();
+    void accessMutableSet();
+    void accessMutableReset();
     void accessInvalid();
 
     template<class T> void slice();
@@ -77,6 +78,48 @@ const struct {
 } ConstructDirectInitData[]{
     {"true", true},
     {"false", false}
+};
+
+/* Same as in BitArrayViewTest */
+const struct {
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    std::size_t offset;
+    std::size_t bit;
+    std::uint32_t valueSet;
+    std::uint32_t expectedSet;
+    std::uint32_t valueReset;
+    std::uint32_t expectedReset;
+} AccessMutableData[]{
+    {"no-op", 0, 6,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, offset", 5, 1,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, overflow", 0, 13,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, offset, overflow", 6, 7,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"single bit", 0, 5,
+        0x00000000u, 0x00000020u,
+        0xffffffffu, 0xffffffdfu},
+    {"single bit, offset", 3, 2,
+        0x00000000u, 0x00000020u,
+        0xffffffffu, 0xffffffdfu},
+    {"single bit, overflow", 0, 21,
+        0x00000000u, 0x00200000u,
+        0xffffffffu, 0xffdfffffu},
+    {"single bit, offset, overflow", 6, 15,
+        0x00000000u, 0x00200000u,
+        0xffffffffu, 0xffdfffffu},
+    {"bit pattern", 0, 11,
+        0x01234567u, 0x01234d67u,
+        0x89abcdefu, 0x89abc5efu},
+    {"bit pattern, offset", 4, 7,
+        0x01234567u, 0x01234d67u,
+        0x89abcdefu, 0x89abc5efu},
 };
 
 BitArrayTest::BitArrayTest() {
@@ -101,9 +144,13 @@ BitArrayTest::BitArrayTest() {
               &BitArrayTest::convertView,
               &BitArrayTest::convertMutableView,
 
-              &BitArrayTest::access,
-              &BitArrayTest::accessMutable,
-              &BitArrayTest::accessInvalid,
+              &BitArrayTest::access});
+
+    addInstancedTests({&BitArrayTest::accessMutableSet,
+                       &BitArrayTest::accessMutableReset},
+        Containers::arraySize(AccessMutableData));
+
+    addTests({&BitArrayTest::accessInvalid,
 
               &BitArrayTest::slice<const BitArray>,
               &BitArrayTest::slice<BitArray>,
@@ -323,9 +370,11 @@ void BitArrayTest::convertView() {
     CORRADE_COMPARE(cb.offset(), 7);
     CORRADE_COMPARE(cb.size(), 31);
 
-    /* It shouldn't be possible to create a mutable view from a const BitArray */
-    CORRADE_VERIFY(std::is_convertible<const BitArray, BitArrayView>::value);
-    CORRADE_VERIFY(!std::is_convertible<const BitArray, MutableBitArrayView>::value);
+    /* It shouldn't be possible to create a mutable view from a const BitArray.
+       Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<BitArrayView, const BitArray>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableBitArrayView, const BitArray>::value);
 }
 
 void BitArrayTest::convertMutableView() {
@@ -347,50 +396,55 @@ void BitArrayTest::access() {
     /* Mostly the same as BitArrayViewTest::access(), except that it's a
        non-owning BitArray */
 
-    /* Alone, bit 15 is in byte 1 and bit 4 in byte 0, but together it's
-       in byte 2 instead of byte 1 + 0 */
-    std::uint64_t data = ((1ull << 37) | (1ull << 15)) << 4;
-    const BitArray array{&data, 4, 60, [](char*, std::size_t) {}};
+    /* 0b0101'0101'0011'0011'0000'1111 << 5 */
+    char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
+    const BitArray a{data, 5, 24, [](char*, std::size_t) {}};
 
-    CORRADE_VERIFY(!array[14]);
-    CORRADE_VERIFY(array[15]);
-    CORRADE_VERIFY(!array[16]);
+    for(std::size_t i: {0, 1, 2, 3, 8, 9, 12, 13, 16, 18, 20, 22}) {
+        CORRADE_ITERATION(i);
+        CORRADE_VERIFY(a[i]);
+    }
 
-    CORRADE_VERIFY(!array[36]);
-    CORRADE_VERIFY(array[37]);
-    CORRADE_VERIFY(!array[38]);
+    for(std::size_t i: {4, 5, 6, 7, 10, 11, 14, 15, 17, 19, 21, 23}) {
+        CORRADE_ITERATION(i);
+        CORRADE_VERIFY(!a[i]);
+    }
 }
 
-void BitArrayTest::accessMutable() {
-    /* Mostly the same as BitArrayViewTest::accessMutable(), except that it's a
-       non-owning BitArray */
+void BitArrayTest::accessMutableSet() {
+    auto&& data = AccessMutableData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    std::uint64_t data = ((1ull << 36) | (1ull << 37) | (1ull << 38) | (1ull << 39) | (1ull << 40)) << 4;
-    BitArray array{&data, 4, 53, [](char*, std::size_t) {}};
+    /* Same as in BitArrayView -- the implementation deliberately doesn't
+       delegate to it so it has to be tested fully */
 
-    CORRADE_VERIFY(!array[15]);
-    array.set(15);
-    CORRADE_VERIFY(!array[14]);
-    CORRADE_VERIFY(array[15]);
-    CORRADE_VERIFY(!array[16]);
+    std::uint32_t valueA[]{data.valueSet};
+    std::uint32_t valueB[]{data.valueSet};
+    BitArray a{reinterpret_cast<char*>(valueA), data.offset, 24, [](char*, std::size_t) {}};
+    BitArray b{reinterpret_cast<char*>(valueB), data.offset, 24, [](char*, std::size_t) {}};
 
-    CORRADE_VERIFY(array[37]);
-    array.reset(37);
-    CORRADE_VERIFY(array[36]);
-    CORRADE_VERIFY(!array[37]);
-    CORRADE_VERIFY(array[38]);
+    a.set(data.bit);
+    b.set(data.bit, true);
+    CORRADE_COMPARE(valueA[0], data.expectedSet);
+    CORRADE_COMPARE(valueB[0], data.expectedSet);
+}
 
-    CORRADE_VERIFY(!array[17]);
-    array.set(17, true);
-    CORRADE_VERIFY(!array[16]);
-    CORRADE_VERIFY(array[17]);
-    CORRADE_VERIFY(!array[18]);
+void BitArrayTest::accessMutableReset() {
+    auto&& data = AccessMutableData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(array[39]);
-    array.set(39, false);
-    CORRADE_VERIFY(array[38]);
-    CORRADE_VERIFY(!array[39]);
-    CORRADE_VERIFY(array[40]);
+    /* Same as in BitArrayView -- the implementation deliberately doesn't
+       delegate to it so it has to be tested fully */
+
+    std::uint32_t valueA[]{data.valueReset};
+    std::uint32_t valueB[]{data.valueReset};
+    BitArray a{reinterpret_cast<char*>(valueA), data.offset, 24, [](char*, std::size_t) {}};
+    BitArray b{reinterpret_cast<char*>(valueB), data.offset, 24, [](char*, std::size_t) {}};
+
+    a.reset(data.bit);
+    b.set(data.bit, false);
+    CORRADE_COMPARE(valueA[0], data.expectedReset);
+    CORRADE_COMPARE(valueB[0], data.expectedReset);
 }
 
 void BitArrayTest::accessInvalid() {
@@ -564,12 +618,11 @@ void BitArrayTest::customDeleterMovedOutInstance() {
 void BitArrayTest::debug() {
     /* Delegates to BitArrayView, so it's the same output as in
        BitArrayViewTest::debug() */
+    char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
 
     std::ostringstream out;
-    /* 0b111'1100'1100'1111'0000'0101'0101 << 7 */
-    std::uint64_t data = 0x7ccf055ull << 7;
-    Debug{&out} << BitArray{&data, 7, 27, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), "{10101010, 00001111, 00110011, 111}\n");
+    Debug{&out} << BitArray{data, 5, 19, [](char*, std::size_t) {}};
+    CORRADE_COMPARE(out.str(), "{11110000, 11001100, 101}\n");
 }
 
 }}}}

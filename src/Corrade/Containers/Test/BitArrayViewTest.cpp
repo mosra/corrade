@@ -28,6 +28,7 @@
 
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -36,17 +37,21 @@ struct BitArrayViewTest: TestSuite::Tester {
     explicit BitArrayViewTest();
 
     template<class T> void constructDefault();
-    void constructDefaultConstexpr();
-    template<class T> void construct();
-    void constructConstexpr();
+    template<class T> void constructPointerSize();
+    template<class T> void constructPointerSizeChar();
+    void constructPointerSizeCharConstexpr();
+    void constructPointerSizeNullptr();
     void constructNullptrSize();
-    void constructFromMutable();
+
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
+
+    void constructFromMutable();
     void constructCopy();
 
     void access();
-    void accessMutable();
+    void accessMutableSet();
+    void accessMutableReset();
     void accessInvalid();
 
     void slice();
@@ -55,22 +60,71 @@ struct BitArrayViewTest: TestSuite::Tester {
     void debug();
 };
 
+const struct {
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    std::size_t offset;
+    std::size_t bit;
+    std::uint32_t valueSet;
+    std::uint32_t expectedSet;
+    std::uint32_t valueReset;
+    std::uint32_t expectedReset;
+} AccessMutableData[]{
+    {"no-op", 0, 6,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, offset", 5, 1,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, overflow", 0, 13,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"no-op, offset, overflow", 6, 7,
+        0xffffffffu, 0xffffffffu,
+        0x00000000u, 0x00000000u},
+    {"single bit", 0, 5,
+        0x00000000u, 0x00000020u,
+        0xffffffffu, 0xffffffdfu},
+    {"single bit, offset", 3, 2,
+        0x00000000u, 0x00000020u,
+        0xffffffffu, 0xffffffdfu},
+    {"single bit, overflow", 0, 21,
+        0x00000000u, 0x00200000u,
+        0xffffffffu, 0xffdfffffu},
+    {"single bit, offset, overflow", 6, 15,
+        0x00000000u, 0x00200000u,
+        0xffffffffu, 0xffdfffffu},
+    {"bit pattern", 0, 11,
+        0x01234567u, 0x01234d67u,
+        0x89abcdefu, 0x89abc5efu},
+    {"bit pattern, offset", 4, 7,
+        0x01234567u, 0x01234d67u,
+        0x89abcdefu, 0x89abc5efu},
+};
+
 BitArrayViewTest::BitArrayViewTest() {
     addTests({&BitArrayViewTest::constructDefault<const char>,
               &BitArrayViewTest::constructDefault<char>,
-              &BitArrayViewTest::constructDefaultConstexpr,
-              &BitArrayViewTest::construct<const char>,
-              &BitArrayViewTest::construct<char>,
-              &BitArrayViewTest::constructConstexpr,
+              &BitArrayViewTest::constructPointerSize<const char>,
+              &BitArrayViewTest::constructPointerSize<char>,
+              &BitArrayViewTest::constructPointerSizeChar<const char>,
+              &BitArrayViewTest::constructPointerSizeChar<char>,
+              &BitArrayViewTest::constructPointerSizeCharConstexpr,
+              &BitArrayViewTest::constructPointerSizeNullptr,
               &BitArrayViewTest::constructNullptrSize,
-              &BitArrayViewTest::constructFromMutable,
+
               &BitArrayViewTest::constructOffsetTooLarge,
               &BitArrayViewTest::constructSizeTooLarge,
+
+              &BitArrayViewTest::constructFromMutable,
               &BitArrayViewTest::constructCopy,
 
-              &BitArrayViewTest::access,
-              &BitArrayViewTest::accessMutable,
-              &BitArrayViewTest::accessInvalid,
+              &BitArrayViewTest::access});
+
+    addInstancedTests({&BitArrayViewTest::accessMutableSet,
+                       &BitArrayViewTest::accessMutableReset},
+        Containers::arraySize(AccessMutableData));
+
+    addTests({&BitArrayViewTest::accessInvalid,
 
               &BitArrayViewTest::slice,
               &BitArrayViewTest::sliceInvalid,
@@ -100,12 +154,8 @@ template<class T> void BitArrayViewTest::constructDefault() {
     CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
     CORRADE_COMPARE(static_cast<const void*>(b.data()), nullptr);
 
-    CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicBitArrayView<T>>::value);
-}
-
-void BitArrayViewTest::constructDefaultConstexpr() {
-    constexpr BitArrayView ca;
-    constexpr BitArrayView cb = nullptr;
+    constexpr BasicBitArrayView<T> ca;
+    constexpr BasicBitArrayView<T> cb = nullptr;
     constexpr bool emptyA = ca.isEmpty();
     constexpr bool emptyB = cb.isEmpty();
     constexpr std::size_t offsetA = ca.offset();
@@ -122,74 +172,86 @@ void BitArrayViewTest::constructDefaultConstexpr() {
     CORRADE_COMPARE(sizeB, 0);
     CORRADE_COMPARE(dataA, nullptr);
     CORRADE_COMPARE(dataB, nullptr);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicBitArrayView<T>>::value);
 }
 
-template<class T> void BitArrayViewTest::construct() {
+template<class T> void BitArrayViewTest::constructPointerSize() {
     setTestCaseTemplateName(NameFor<T>::name());
 
-    std::uint64_t data = 0x0fffff700u;
-    const BasicBitArrayView<T> view{&data, 5, 47};
-    CORRADE_VERIFY(!view.isEmpty());
-    CORRADE_COMPARE(view.offset(), 5);
-    CORRADE_COMPARE(view.size(), 47);
-    CORRADE_COMPARE(static_cast<const void*>(view.data()), &data);
+    std::uint32_t data[1];
+    const BasicBitArrayView<T> a{data, 5, 24};
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(a.size(), 24);
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), &data);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, typename BasicBitArrayView<T>::ErasedType*, std::size_t, std::size_t>::value);
+}
+
+template<class T> void BitArrayViewTest::constructPointerSizeChar() {
+    setTestCaseTemplateName(NameFor<T>::name());
+
+    char data[4];
+    const BasicBitArrayView<T> a{data, 5, 24};
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(a.size(), 24);
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), &data);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, T*, std::size_t, std::size_t>::value);
 }
 
-constexpr char Data[8]{
-    0,
-    0,
-    1 << 3, /* bit 15 << 4 */
-    0,
-    0,
-    1 << 1, /* bit 37 << 4 */
-    0,
-    0
-};
+constexpr const char FourChars[4]{};
 
-void BitArrayViewTest::constructConstexpr() {
-    constexpr BitArrayView view{Data, 5, 47};
-    constexpr bool empty = view.isEmpty();
-    constexpr std::size_t offset = view.offset();
-    constexpr std::size_t size = view.size();
-    constexpr const void* data = view.data();
+void BitArrayViewTest::constructPointerSizeCharConstexpr() {
+    constexpr BitArrayView ca{FourChars, 5, 24};
+    constexpr bool empty = ca.isEmpty();
+    constexpr std::size_t offset = ca.offset();
+    constexpr std::size_t size = ca.size();
+    constexpr const void* data = ca.data();
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(offset, 5);
-    CORRADE_COMPARE(size, 47);
-    CORRADE_COMPARE(data, &Data);
+    CORRADE_COMPARE(size, 24);
+    CORRADE_COMPARE(data, &FourChars);
+}
+
+void BitArrayViewTest::constructPointerSizeNullptr() {
+    /* An explicit overload to avoid ambiguity between the char* and void*
+       constructor when passing std::nullptr_t */
+
+    BitArrayView a{nullptr, 5, 24};
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.size(), 24);
+
+    constexpr BitArrayView ca{nullptr, 5, 24};
+    CORRADE_COMPARE(static_cast<const void*>(ca.data()), nullptr);
+    CORRADE_COMPARE(ca.offset(), 5);
+    CORRADE_VERIFY(!ca.isEmpty());
+    CORRADE_COMPARE(ca.size(), 24);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BitArrayView, std::nullptr_t, std::size_t, std::size_t>::value);
 }
 
 void BitArrayViewTest::constructNullptrSize() {
     /* This should be allowed for e.g. passing a desired layout to a function
-       that allocates the memory later */
+       that allocates the memory later. Explicitly casting to not pick the
+       std::nullptr_t overload that's tested in
+       constructPointerSizeNullptr(). */
 
     BitArrayView a{static_cast<const char*>(nullptr), 5, 24};
-    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
     CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 24);
 
     constexpr BitArrayView ca{static_cast<const char*>(nullptr), 5, 24};
-    CORRADE_COMPARE(ca.data(), nullptr);
-    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(static_cast<const void*>(ca.data()), nullptr);
+    CORRADE_COMPARE(ca.offset(), 5);
+    CORRADE_VERIFY(!ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 24);
-}
-
-void BitArrayViewTest::constructFromMutable() {
-    std::uint64_t data = 0x0fffff700u;
-    const MutableBitArrayView a{&data, 5, 47};
-    const BitArrayView b = a;
-
-    CORRADE_VERIFY(!b.isEmpty());
-    CORRADE_COMPARE(b.offset(), 5);
-    CORRADE_COMPARE(b.size(), 47);
-    CORRADE_COMPARE(static_cast<const void*>(b.data()), &data);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BitArrayView, MutableBitArrayView>::value);
-
-    /* It shouldn't be possible the other way around */
-    CORRADE_VERIFY(std::is_convertible<MutableBitArrayView, BitArrayView>::value);
-    CORRADE_VERIFY(!std::is_convertible<BitArrayView, MutableBitArrayView>::value);
 }
 
 void BitArrayViewTest::constructOffsetTooLarge() {
@@ -214,10 +276,27 @@ void BitArrayViewTest::constructSizeTooLarge() {
     #endif
 }
 
-void BitArrayViewTest::constructCopy() {
-    std::uint64_t data = 0x0fffff700u;
+void BitArrayViewTest::constructFromMutable() {
+    std::uint64_t data[1]{};
+    const MutableBitArrayView a{data, 5, 47};
+    const BitArrayView b = a;
 
-    BitArrayView a{&data, 5, 47};
+    CORRADE_VERIFY(!b.isEmpty());
+    CORRADE_COMPARE(b.offset(), 5);
+    CORRADE_COMPARE(b.size(), 47);
+    CORRADE_COMPARE(static_cast<const void*>(b.data()), &data);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BitArrayView, MutableBitArrayView>::value);
+
+    /* It shouldn't be possible the other way around. Not using is_convertible
+       to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<BitArrayView, MutableBitArrayView>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableBitArrayView, BitArrayView>::value);
+}
+
+void BitArrayViewTest::constructCopy() {
+    std::uint64_t data[1]{};
+    BitArrayView a{data, 5, 47};
 
     BitArrayView b = a;
     CORRADE_COMPARE(b.offset(), 5);
@@ -240,64 +319,66 @@ void BitArrayViewTest::constructCopy() {
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<BitArrayView>::value);
 }
 
+/* 0b0101'0101'0011'0011'0000'1111'0000'0000 << 5 */
+constexpr char DataPadded[]{'\x00', '\xe0', '\x61', '\xa6', '\x0a'};
+
 void BitArrayViewTest::access() {
-    /* Alone, bit 15 is in byte 1 and bit 4 in byte 0, but together it's
-       in byte 2 instead of byte 1 + 0 */
-    const std::uint64_t data = ((1ull << 37) | (1ull << 15)) << 4;
+    const BitArrayView a{DataPadded + 1, 5, 24};
 
-    const BitArrayView view{&data, 4, 60};
-    CORRADE_VERIFY(!view[14]);
-    CORRADE_VERIFY(view[15]);
-    CORRADE_VERIFY(!view[16]);
+    for(std::size_t i: {0, 1, 2, 3, 8, 9, 12, 13, 16, 18, 20, 22}) {
+        CORRADE_ITERATION(i);
+        CORRADE_VERIFY(a[i]);
+    }
 
-    CORRADE_VERIFY(!view[36]);
-    CORRADE_VERIFY(view[37]);
-    CORRADE_VERIFY(!view[38]);
+    for(std::size_t i: {4, 5, 6, 7, 10, 11, 14, 15, 17, 19, 21, 23}) {
+        CORRADE_ITERATION(i);
+        CORRADE_VERIFY(!a[i]);
+    }
 
-    constexpr BitArrayView cview{Data, 4, 60};
-    CORRADE_VERIFY(!cview[14]);
-    CORRADE_VERIFY(cview[15]);
-    CORRADE_VERIFY(!cview[16]);
-
-    CORRADE_VERIFY(!cview[36]);
-    CORRADE_VERIFY(cview[37]);
-    CORRADE_VERIFY(!cview[38]);
+    constexpr BitArrayView ca{DataPadded + 1, 5, 24};
+    constexpr bool ca15 = ca[15];
+    constexpr bool ca16 = ca[16];
+    constexpr bool ca17 = ca[17];
+    CORRADE_VERIFY(!ca15);
+    CORRADE_VERIFY(ca16);
+    CORRADE_VERIFY(!ca17);
 }
 
-void BitArrayViewTest::accessMutable() {
-    std::uint64_t data = ((1ull << 36) | (1ull << 37) | (1ull << 38) | (1ull << 39) | (1ull << 40)) << 4;
-    MutableBitArrayView view{&data, 4, 53};
+void BitArrayViewTest::accessMutableSet() {
+    auto&& data = AccessMutableData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(!view[15]);
-    view.set(15);
-    CORRADE_VERIFY(!view[14]);
-    CORRADE_VERIFY(view[15]);
-    CORRADE_VERIFY(!view[16]);
+    std::uint32_t valueA[]{0, data.valueSet};
+    std::uint32_t valueB[]{0, data.valueSet};
+    const MutableBitArrayView a{valueA + 1, data.offset, 24};
+    const MutableBitArrayView b{valueB + 1, data.offset, 24};
 
-    CORRADE_VERIFY(view[37]);
-    view.reset(37);
-    CORRADE_VERIFY(view[36]);
-    CORRADE_VERIFY(!view[37]);
-    CORRADE_VERIFY(view[38]);
+    a.set(data.bit);
+    b.set(data.bit, true);
+    CORRADE_COMPARE(valueA[1], data.expectedSet);
+    CORRADE_COMPARE(valueB[1], data.expectedSet);
+}
 
-    CORRADE_VERIFY(!view[17]);
-    view.set(17, true);
-    CORRADE_VERIFY(!view[16]);
-    CORRADE_VERIFY(view[17]);
-    CORRADE_VERIFY(!view[18]);
+void BitArrayViewTest::accessMutableReset() {
+    auto&& data = AccessMutableData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(view[39]);
-    view.set(39, false);
-    CORRADE_VERIFY(view[38]);
-    CORRADE_VERIFY(!view[39]);
-    CORRADE_VERIFY(view[40]);
+    std::uint32_t valueA[]{0, data.valueReset};
+    std::uint32_t valueB[]{0, data.valueReset};
+    const MutableBitArrayView a{valueA + 1, data.offset, 24};
+    const MutableBitArrayView b{valueB + 1, data.offset, 24};
+
+    a.reset(data.bit);
+    b.set(data.bit, false);
+    CORRADE_COMPARE(valueA[1], data.expectedReset);
+    CORRADE_COMPARE(valueB[1], data.expectedReset);
 }
 
 void BitArrayViewTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::uint64_t data;
-    MutableBitArrayView view{&data, 4, 53};
+    std::uint64_t data[1]{};
+    MutableBitArrayView view{data, 4, 53};
 
     std::stringstream out;
     Error redirectError{&out};
@@ -312,9 +393,11 @@ void BitArrayViewTest::accessInvalid() {
         "Containers::BitArrayView::set(): index 53 out of range for 53 bits\n");
 }
 
+constexpr char Data64[8]{};
+
 void BitArrayViewTest::slice() {
-    const std::uint64_t data{};
-    BitArrayView view{&data, 6, 53};
+    const std::uint64_t data64[1]{};
+    BitArrayView view{data64, 6, 53};
 
     /* There isn't really any value to easily compare to, so go the hard way
        and compare pointers, offsets and sizes */
@@ -345,7 +428,7 @@ void BitArrayViewTest::slice() {
         CORRADE_COMPARE(slice.size(), 41);
     }
 
-    constexpr BitArrayView cview{Data, 6, 53};
+    constexpr BitArrayView cview{Data64, 6, 53};
     {
         constexpr BitArrayView slice = cview.slice(29, 47);
         CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data() + 4);
@@ -377,8 +460,8 @@ void BitArrayViewTest::slice() {
 void BitArrayViewTest::sliceInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    const std::uint64_t data{};
-    BitArrayView view{&data, 6, 53};
+    const std::uint64_t data[1]{};
+    BitArrayView view{data, 6, 53};
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -391,11 +474,11 @@ void BitArrayViewTest::sliceInvalid() {
 
 void BitArrayViewTest::debug() {
     std::ostringstream out;
-    /* 0b111'1100'1100'1111'0000'0101'0101 << 7, which is
-       {0b10000000, 0b00101010, 0b01111000, 0b11100110, 0b11} */
-    const std::uint8_t data[]{0x80, 0x2a, 0x78, 0xe6, 0x03};
-    Debug{&out} << BitArrayView{&data, 7, 27};
-    CORRADE_COMPARE(out.str(), "{10101010, 00001111, 00110011, 111}\n");
+    Debug{&out} << BitArrayView{DataPadded + 1, 5, 24};
+    Debug{&out} << BitArrayView{DataPadded + 1, 5, 19};
+    CORRADE_COMPARE(out.str(),
+        "{11110000, 11001100, 10101010}\n"
+        "{11110000, 11001100, 101}\n");
 }
 
 }}}}
