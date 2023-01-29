@@ -203,11 +203,10 @@ template<class T> class BasicBitArrayView {
          * @ref MutableBitArrayView.
          * @see @ref operator[]()
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        void set(std::size_t i) const;
-        #else
-        template<class U = T> typename std::enable_if<!std::is_const<U>::value>::type set(std::size_t i) const;
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
+        void set(std::size_t i) const;
 
         /**
          * @brief Reset a bit at given position
@@ -216,11 +215,10 @@ template<class T> class BasicBitArrayView {
          * @ref MutableBitArrayView.
          * @see @ref operator[]()
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        void reset(std::size_t i) const;
-        #else
-        template<class U = T> typename std::enable_if<!std::is_const<U>::value>::type reset(std::size_t i) const;
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
+        void reset(std::size_t i) const;
 
         /**
          * @brief Set or reset a bit at given position
@@ -231,11 +229,10 @@ template<class T> class BasicBitArrayView {
          * @ref reset(std::size_t) const is a simpler operation.
          * @see @ref operator[]()
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        void set(std::size_t i, bool value) const;
-        #else
-        template<class U = T> typename std::enable_if<!std::is_const<U>::value>::type set(std::size_t i, bool value) const;
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
+        void set(std::size_t i, bool value) const;
 
         /**
          * @brief View slice
@@ -379,19 +376,19 @@ template<class T> constexpr bool BasicBitArrayView<T>::operator[](std::size_t i)
         _data[((_sizeOffset & 0x07) + i) >> 3] & (1 << ((_sizeOffset + i) & 0x7));
 }
 
-template<class T> template<class U> inline typename std::enable_if<!std::is_const<U>::value>::type BasicBitArrayView<T>::set(std::size_t i) const {
+template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     _data[((_sizeOffset & 0x07) + i) >> 3] |= (1 << ((_sizeOffset + i) & 0x07));
 }
 
-template<class T> template<class U> inline typename std::enable_if<!std::is_const<U>::value>::type BasicBitArrayView<T>::reset(std::size_t i) const {
+template<class T> template<class U, class> inline void BasicBitArrayView<T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     _data[((_sizeOffset & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
 }
 
-template<class T> template<class U> inline typename std::enable_if<!std::is_const<U>::value>::type BasicBitArrayView<T>::set(std::size_t i, bool value) const {
+template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
