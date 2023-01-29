@@ -106,6 +106,14 @@ overloads are provided as byte-level slicing would be too coarse.
 template<class T> class BasicBitArrayView {
     public:
         /**
+         * @brief Erased type
+         *
+         * Either a @cpp const void @ce for a @ref BitArrayView or a
+         * @cpp void @ce for a @ref MutableBitArrayView.
+         */
+        typedef typename std::conditional<std::is_const<T>::value, const void, void>::type ErasedType;
+
+        /**
          * @brief Default constructor
          *
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty
@@ -125,12 +133,12 @@ template<class T> class BasicBitArrayView {
          * @ref BasicBitArrayView(T*, std::size_t, std::size_t) in a
          * @cpp constexpr @ce context instead.
          */
-        /*implicit*/ BasicBitArrayView(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView<T>{static_cast<T*>(data), offset, size} {}
+        /*implicit*/ BasicBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView<T>{static_cast<T*>(data), offset, size} {}
 
         /**
          * @brief Constexpr constructor
          *
-         * A variant of @ref BasicBitArrayView(typename std::conditional<std::is_const<T>::value, const void, void>::type*, std::size_t, std::size_t)
+         * A variant of @ref BasicBitArrayView(ErasedType*, std::size_t, std::size_t)
          * usable in a @cpp constexpr @ce context --- in order to satisfy the
          * restrictions, the @p data parameter has to be (@cpp const @ce)
          * @cpp char* @ce.
