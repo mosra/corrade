@@ -327,6 +327,7 @@ typedef BasicBitArrayView<char> MutableBitArrayView;
 
 /**
 @debugoperator{BasicBitArrayView}
+@m_since_latest
 
 Prints the value as @cb{.shell-session} {a, b, …} @ce, with each element being
 the next 8 bits from the array. To have a monotonic order, the first character

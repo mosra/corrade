@@ -378,6 +378,7 @@ class CORRADE_UTILITY_EXPORT BitArray {
 
 /**
 @debugoperator{BitArray}
+@m_since_latest
 
 Equivalent to @ref BitArrayView::operator<<(Utility::Debug&, BitArrayView) "operator<<(Utility::Debug&, BitArrayView)",
 see its documentation for more information.
