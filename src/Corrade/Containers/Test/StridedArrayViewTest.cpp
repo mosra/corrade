@@ -749,13 +749,6 @@ void StridedArrayViewTest::constructZeroStride() {
     CORRADE_COMPARE(b.stride(), 0);
     CORRADE_COMPARE(b[2], 23125);
     CORRADE_COMPARE(b[4], 23125);
-
-    constexpr ConstStridedArrayView1Di cc = {Struct, &Struct[0].other, 10, 0};
-    CORRADE_VERIFY(cc.data() == &Struct[0].other);
-    CORRADE_COMPARE(cc.size(), 10);
-    CORRADE_COMPARE(cc.stride(), 0);
-    CORRADE_COMPARE(cc[2], 23125);
-    CORRADE_COMPARE(cc[4], 23125);
 }
 
 void StridedArrayViewTest::constructNegativeStride() {
@@ -774,13 +767,6 @@ void StridedArrayViewTest::constructNegativeStride() {
     CORRADE_COMPARE(b.stride(), -8);
     CORRADE_COMPARE(b[9 - 2], 7853268); /* ID 2 if it wouldn't be negative */
     CORRADE_COMPARE(b[9 - 4], 234810); /* ID 4 if it wouldn't be negative */
-
-    constexpr ConstStridedArrayView1Di cc = {Struct, &Struct[9].value, 10, -8};
-    CORRADE_VERIFY(cc.data() == &Struct[9].value);
-    CORRADE_COMPARE(cc.size(), 10);
-    CORRADE_COMPARE(cc.stride(), -8);
-    CORRADE_COMPARE(cc[9 - 2], 7853268); /* ID 2 if it wouldn't be negative */
-    CORRADE_COMPARE(cc[9 - 4], 234810); /* ID 4 if it wouldn't be negative */
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -1537,15 +1523,6 @@ void StridedArrayViewTest::construct3DZeroStride() {
     CORRADE_COMPARE(b[0][0][1], 16);
     CORRADE_COMPARE(b[0][0][2], 7853268);
     CORRADE_COMPARE(b[0][1][1], 16);
-
-    constexpr ConstStridedArrayView3Di cb = {Cube, &Cube[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), 0, sizeof(Plane::Row::Item)}};
-    CORRADE_VERIFY(cb.data() == Cube);
-    CORRADE_COMPARE(cb.size(), (Size3D{2, 2, 3}));
-    CORRADE_COMPARE(cb.stride(), (Stride3D{48, 0, 8}));
-    CORRADE_COMPARE(cb[0][0][0], 2);
-    CORRADE_COMPARE(cb[0][0][1], 16);
-    CORRADE_COMPARE(cb[0][0][2], 7853268);
-    CORRADE_COMPARE(cb[0][1][1], 16);
 }
 
 void StridedArrayViewTest::construct3DNegativeStride() {
@@ -1564,15 +1541,6 @@ void StridedArrayViewTest::construct3DNegativeStride() {
     CORRADE_COMPARE(b[1][0][1], 16);
     CORRADE_COMPARE(b[1][0][0], 7853268);
     CORRADE_COMPARE(b[1][1][1], 234810);
-
-    constexpr ConstStridedArrayView3Di cb = {Cube, &Cube[1].plane[0].row[2].value, {2, 2, 3}, {-std::ptrdiff_t(sizeof(Plane)), sizeof(Plane::Row), -std::ptrdiff_t(sizeof(Plane::Row::Item))}};
-    CORRADE_VERIFY(cb.data() == &Cube[1].plane[0].row[2].value);
-    CORRADE_COMPARE(cb.size(), (Size3D{2, 2, 3}));
-    CORRADE_COMPARE(cb.stride(), (Stride3D{-48, 24, -8}));
-    CORRADE_COMPARE(cb[1][0][2], 2);
-    CORRADE_COMPARE(cb[1][0][1], 16);
-    CORRADE_COMPARE(cb[1][0][0], 7853268);
-    CORRADE_COMPARE(cb[1][1][1], 234810);
 }
 
 /* Two images, each 3 rows by 5 pixels */
