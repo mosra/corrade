@@ -1256,17 +1256,19 @@ void StridedArrayViewTest::constructStaticViewConstVoid() {
 
 void StridedArrayViewTest::constructCopy() {
     int data[30];
-    StridedArrayView1Di a{data, 20};
+    StridedArrayView1Di a{data, 15, 8};
 
     StridedArrayView1Di b = a;
     CORRADE_COMPARE(b.data(), &data[0]);
-    CORRADE_COMPARE(b.size(), 20);
+    CORRADE_COMPARE(b.size(), 15);
+    CORRADE_COMPARE(b.stride(), 8);
 
     int data2[3];
     StridedArrayView1Di c{data2};
     c = b;
     CORRADE_COMPARE(c.data(), &data[0]);
-    CORRADE_COMPARE(c.size(), 20);
+    CORRADE_COMPARE(c.size(), 15);
+    CORRADE_COMPARE(c.stride(), 8);
 
     CORRADE_VERIFY(std::is_copy_constructible<StridedArrayView1Di>::value);
     CORRADE_VERIFY(std::is_copy_assignable<StridedArrayView1Di>::value);
@@ -1282,6 +1284,7 @@ void StridedArrayViewTest::constructInitializerList() {
     std::initializer_list<int> a = {3, 5, 7};
     ConstStridedArrayView1Di b = stridedArrayView(a);
     CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b.stride(), 4);
     CORRADE_COMPARE(b.back(), 7);
 
     /* R-value init list should work too */
