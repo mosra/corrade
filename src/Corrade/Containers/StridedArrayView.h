@@ -327,21 +327,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * conditions, so be extra careful when specifying these.
          * @see @ref stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType>, T*, std::size_t, std::ptrdiff_t)
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
-            /* A strided array view is usually not created from scratch in
-               tight loops (except for slicing) and should be as checked as
-               possible, so it's not a debug assert */
-            /** @todo can't compare void pointers to check if member is in data,
-                    it's not constexpr :( */
-            /* If any size is zero, data can be zero-sized too. If the largest
-               stride is zero, `data` can have *any* size and it could be okay,
-               can't reliably test that */
-            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
-            #ifdef CORRADE_NO_ASSERT
-            , static_cast<void>(data)
-            #endif
-            , member)}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<ErasedType> data, T* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept;
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -1051,21 +1037,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
-            /* A strided array view is usually not created from scratch in
-               tight loops (except for slicing) and should be as checked as
-               possible, so it's not a debug assert */
-            /** @todo can't compare void pointers to check if member is in data,
-                    it's not constexpr :( */
-            /* If any size is zero, data can be zero-sized too. If the largest
-               stride is zero, `data` can have *any* size and it could be okay,
-               can't reliably test that */
-            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
-            #ifdef CORRADE_NO_ASSERT
-            , static_cast<void>(data)
-            #endif
-            , member)}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<void> data, void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept;
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -1308,21 +1280,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
          */
-        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
-            /* A strided array view is usually not created from scratch in
-               tight loops (except for slicing) and should be as checked as
-               possible, so it's not a debug assert */
-            /** @todo can't compare void pointers to check if member is in data,
-                    it's not constexpr :( */
-            /* If any size is zero, data can be zero-sized too. If the largest
-               stride is zero, `data` can have *any* size and it could be okay,
-               can't reliably test that */
-            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
-                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride)
-            #ifdef CORRADE_NO_ASSERT
-            , static_cast<void>(data)
-            #endif
-            , member)}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept;
 
         /* size-only constructor not provided for void overloads as there's
            little chance one would want an implicit stride of 1 */
@@ -2013,6 +1971,54 @@ template<unsigned dimensions, class T> class StridedIterator {
 template<unsigned dimensions, class T> inline StridedIterator<dimensions, T> operator+(std::ptrdiff_t i, StridedIterator<dimensions, T> it) {
     return it + i;
 }
+
+template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>::StridedArrayView(ArrayView<ErasedType> data, T* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
+    /* A strided array view is usually not created from scratch in tight loops
+       (except for slicing) and should be as checked as possible, so it's not a
+       debug assert */
+    /** @todo can't compare void pointers to check if member is in data, it's
+        not constexpr :( */
+    /* If any size is zero, data can be zero-sized too. If the largest stride
+       is zero, `data` can have *any* size and it could be okay, can't reliably
+       test that */
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+        "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(data),
+    #endif
+    member)}, _size{size}, _stride{stride} {}
+
+template<unsigned dimensions> constexpr StridedArrayView<dimensions, void>::StridedArrayView(ArrayView<void> data, void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
+    /* A strided array view is usually not created from scratch in tight loops
+       (except for slicing) and should be as checked as possible, so it's not a
+       debug assert */
+    /** @todo can't compare void pointers to check if member is in data,
+        it's not constexpr :( */
+    /* If any size is zero, data can be zero-sized too. If the largest stride
+       is zero, `data` can have *any* size and it could be okay, can't reliably
+       test that */
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+        "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(data),
+    #endif
+    member)}, _size{size}, _stride{stride} {}
+
+template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>::StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
+    /* A strided array view is usually not created from scratch in tight loops
+       (except for slicing) and should be as checked as possible, so it's not a
+       debug assert */
+    /** @todo can't compare void pointers to check if member is in data, it's
+        not constexpr :( */
+    /* If any size is zero, data can be zero-sized too. If the largest stride
+       is zero, `data` can have *any* size and it could be okay, can't reliably
+       test that */
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+        "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(data),
+    #endif
+    member)}, _size{size}, _stride{stride} {}
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool StridedArrayView<dimensions, T>::isContiguous() const {
     static_assert(dimension < dimensions, "dimension out of bounds");
