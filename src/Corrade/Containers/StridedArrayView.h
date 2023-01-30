@@ -949,7 +949,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
-           getting matched when pass */
+           getting matched when passing a pointer instead of a view to the
+           constructor. */
         constexpr /*implicit*/ StridedArrayView(const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride, ErasedType* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> isEmptyInternal(Implementation::Sequence<sequence...>) const {
