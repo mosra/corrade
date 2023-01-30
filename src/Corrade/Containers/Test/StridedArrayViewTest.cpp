@@ -97,19 +97,23 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructNullptrSize();
     void constructZeroStride();
     void constructNegativeStride();
+
     void constructSizeStride();
     void constructSizeStrideVoid();
     void constructSizeStrideConstVoid();
     void constructSizeStrideArray();
+
     void constructInvalid();
     void constructInvalidVoid();
     void constructInvalidConstVoid();
+
     void constructPointerSize();
     void constructPointerSizeVoid();
     void constructPointerSizeConstVoid();
     void constructFixedSize();
     void constructFixedSizeVoid();
     void constructFixedSizeConstVoid();
+
     void constructDerived();
     void constructView();
     void constructViewVoid();
@@ -131,21 +135,26 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DNullptrSize();
     void construct3DZeroStride();
     void construct3DNegativeStride();
+
     void construct3DPackedSizeStride();
     void construct3DPackedSizeStrideVoid();
     void construct3DPackedSizeStrideConstVoid();
     void construct3DPackedSizeOnly();
     /* size-only constructor not provided for void overloads as there's little
        chance one would want an implicit stride of 1 */
+
     void construct3DOneSizeZero();
     void construct3DOneSizeZeroVoid();
     void construct3DOneSizeZeroConstVoid();
+
     void construct3DInvalid();
     void construct3DInvalidVoid();
     void construct3DInvalidConstVoid();
+
     void construct3DFixedSize();
     void construct3DFixedSizeVoid();
     void construct3DFixedSizeConstVoid();
+
     void construct3DDerived();
     void construct3DView();
     void construct3DViewVoid();
@@ -291,19 +300,23 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructNullptrSize,
               &StridedArrayViewTest::constructZeroStride,
               &StridedArrayViewTest::constructNegativeStride,
+
               &StridedArrayViewTest::constructSizeStride,
               &StridedArrayViewTest::constructSizeStrideVoid,
               &StridedArrayViewTest::constructSizeStrideConstVoid,
               &StridedArrayViewTest::constructSizeStrideArray,
+
               &StridedArrayViewTest::constructInvalid,
               &StridedArrayViewTest::constructInvalidVoid,
               &StridedArrayViewTest::constructInvalidConstVoid,
+
               &StridedArrayViewTest::constructPointerSize,
               &StridedArrayViewTest::constructPointerSizeVoid,
               &StridedArrayViewTest::constructPointerSizeConstVoid,
               &StridedArrayViewTest::constructFixedSize,
               &StridedArrayViewTest::constructFixedSizeVoid,
               &StridedArrayViewTest::constructFixedSizeConstVoid,
+
               &StridedArrayViewTest::constructDerived,
               &StridedArrayViewTest::constructView,
               &StridedArrayViewTest::constructViewVoid,
@@ -325,19 +338,23 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DNullptrSize,
               &StridedArrayViewTest::construct3DZeroStride,
               &StridedArrayViewTest::construct3DNegativeStride,
+
               &StridedArrayViewTest::construct3DPackedSizeStride,
               &StridedArrayViewTest::construct3DPackedSizeStrideVoid,
               &StridedArrayViewTest::construct3DPackedSizeStrideConstVoid,
               &StridedArrayViewTest::construct3DPackedSizeOnly,
+
               &StridedArrayViewTest::construct3DOneSizeZero,
               &StridedArrayViewTest::construct3DOneSizeZeroVoid,
               &StridedArrayViewTest::construct3DOneSizeZeroConstVoid,
               &StridedArrayViewTest::construct3DInvalid,
               &StridedArrayViewTest::construct3DInvalidVoid,
               &StridedArrayViewTest::construct3DInvalidConstVoid,
+
               &StridedArrayViewTest::construct3DFixedSize,
               &StridedArrayViewTest::construct3DFixedSizeVoid,
               &StridedArrayViewTest::construct3DFixedSizeConstVoid,
+
               &StridedArrayViewTest::construct3DDerived,
               &StridedArrayViewTest::construct3DView,
               &StridedArrayViewTest::construct3DViewVoid,
@@ -1635,9 +1652,6 @@ void StridedArrayViewTest::construct3DPackedSizeOnly() {
     CORRADE_COMPARE(ca[1][1][2], 22);
     CORRADE_COMPARE(ca[0][2][3], 13);
 }
-
-/* size-only constructor not provided for void overloads as there's little
-   chance one would want an implicit stride of 1 */
 
 void StridedArrayViewTest::construct3DOneSizeZero() {
     std::ostringstream out;
