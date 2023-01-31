@@ -3371,7 +3371,7 @@ void StridedArrayViewTest::everyInvalid() {
     Error redirectError{&out};
 
     StridedArrayView1Di{}.every(0);
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): step in dimension 0 is zero\n");
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): expected a non-zero step, got {0}\n");
 }
 
 void StridedArrayViewTest::every2D() {
@@ -3415,7 +3415,7 @@ void StridedArrayViewTest::every2DInvalid() {
     Error redirectError{&out};
 
     StridedArrayView2Di{}.every({3, 0});
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): step in dimension 1 is zero\n");
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): expected a non-zero step, got {3, 0}\n");
 }
 
 void StridedArrayViewTest::every2DFirstDimension() {

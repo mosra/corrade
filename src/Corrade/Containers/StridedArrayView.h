@@ -42,11 +42,11 @@ namespace Implementation {
     /* Used in the assertion that data array is large enough. If any size
        element is zero, the data can be zero-sized as well. Otherwise we have
        to compare against max stride. */
-    template<unsigned dimensions> constexpr bool isAnySizeZero(const Size<dimensions>&, Sequence<>) {
+    template<unsigned dimensions, class T> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>&, Sequence<>) {
         return false;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr bool isAnySizeZero(const Size<dimensions>& size, Sequence<first, next...>) {
-        return !size[first] || isAnySizeZero(size, Sequence<next...>{});
+    template<unsigned dimensions, class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>& size, Sequence<first, next...>) {
+        return !size[first] || isAnyDimensionZero(size, Sequence<next...>{});
     }
     template<unsigned dimensions> constexpr std::size_t largestStride(const Size<dimensions>&, const Stride<dimensions>&, Sequence<>) {
         return 0;
@@ -1981,7 +1981,7 @@ template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>
     /* If any size is zero, data can be zero-sized too. If the largest stride
        is zero, `data` can have *any* size and it could be okay, can't reliably
        test that */
-    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnyDimensionZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
         "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
     #ifdef CORRADE_NO_ASSERT
     static_cast<void>(data),
@@ -1997,7 +1997,7 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, void>::Stri
     /* If any size is zero, data can be zero-sized too. If the largest stride
        is zero, `data` can have *any* size and it could be okay, can't reliably
        test that */
-    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnyDimensionZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
         "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
     #ifdef CORRADE_NO_ASSERT
     static_cast<void>(data),
@@ -2013,7 +2013,7 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     /* If any size is zero, data can be zero-sized too. If the largest stride
        is zero, `data` can have *any* size and it could be okay, can't reliably
        test that */
-    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+    CORRADE_CONSTEXPR_ASSERT(Implementation::isAnyDimensionZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
         "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
     #ifdef CORRADE_NO_ASSERT
     static_cast<void>(data),
@@ -2232,15 +2232,16 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const Containers::Stride<dimensions>& step) const {
+    /* Unlike plain slice(begin, end), complex slicing is usually not called in
+       tight loops and should be as checked as possible, so it's not a debug
+       assert */
+    CORRADE_ASSERT(!Implementation::isAnyDimensionZero(step, typename Implementation::GenerateSequence<dimensions>::Type{}),
+        "Containers::StridedArrayView::every(): expected a non-zero step, got" << step, {});
+
     ErasedType* data = _data;
     Containers::Size<dimensions> size = _size;
     Containers::Stride<dimensions> stride = _stride;
     for(std::size_t dimension = 0; dimension != dimensions; ++dimension) {
-        /* Unlike plain slice(begin, end), complex slicing is usually not
-           called in tight loops and should be as checked as possible, so it's
-           not a debug assert */
-        CORRADE_ASSERT(step[dimension], "Containers::StridedArrayView::every(): step in dimension" << dimension << "is zero", {});
-
         /* If step is negative, adjust also data pointer */
         std::size_t divisor;
         if(step[dimension] < 0) {
