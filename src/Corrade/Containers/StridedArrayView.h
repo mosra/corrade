@@ -612,6 +612,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * dimensions is set to @cpp 1 @ce and and stride to size of @ref Type.
          * @see @ref sliceSize(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const,
          *      @ref slice(std::size_t, std::size_t) const, @ref slice() const
+         * @todo deprecate the dimension changing to avoid having too many ways
+         *      to do the same, suggest operator[] and the constructor from
+         *      smaller dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const;
 
@@ -639,6 +642,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @cpp begin[i] + size[i] @ce for all dimensions.
          * @see @ref sliceSize(std::size_t, std::size_t) const,
          *      @ref slice(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const
+         * @todo deprecate the dimension changing to avoid having too many ways
+         *      to do the same, suggest operator[] and the constructor from
+         *      smaller dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> sliceSize(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& size) const;
 
@@ -648,6 +654,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Equivalent to @cpp data.slice<newDimensions>({}, data.size()) @ce.
          * @see @ref slice(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const,
          *      @ref sliceSize(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const
+         * @todo deprecate, suggest operator[] and the constructor from smaller
+         *      dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> slice() const {
             return slice<newDimensions>({}, _size);
@@ -746,6 +754,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref exceptPrefix(const Containers::Size<dimensions>&) const,
          *      @ref prefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes size and not begin
+         * @todo deprecate the dimension changing to avoid having too many ways
+         *      to do the same, suggest operator[] and the constructor from
+         *      smaller dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> prefix(const Containers::Size<dimensions>& size) const {
             return slice<newDimensions>({}, size);
@@ -791,6 +802,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref prefix(const Containers::Size<dimensions>&) const,
          *      @ref exceptSuffix(const Containers::Size<dimensions>&) const,
          *      @ref exceptSuffix(std::size_t) const
+         * @todo deprecate the dimension changing to avoid having too many ways
+         *      to do the same, suggest operator[] and the constructor from
+         *      smaller dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptPrefix(const Containers::Size<dimensions>& size) const {
             return slice<newDimensions>(size, _size);
@@ -842,6 +856,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *      @ref sliceSize(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const,
          *      @ref exceptPrefix(std::size_t) const
          * @todoc link to suffix(const Size&) once it takes size and not begin
+         * @todo deprecate the dimension changing to avoid having too many ways
+         *      to do the same, suggest operator[] and the constructor from
+         *      smaller dimension count instead
          */
         template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> exceptSuffix(const Containers::Size<dimensions>& size) const;
 
@@ -865,6 +882,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * multi-dimensional views affects just the top-level dimension, use
          * @ref every(const Containers::Stride<dimensions>&) const to pick in
          * all dimensions.
+         * @todo deprecate the negative values to avoid having too many ways to
+         *      do the same, suggest flipped() instead
          */
         StridedArrayView<dimensions, T> every(std::ptrdiff_t skip) const;
 
@@ -875,6 +894,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Multiplies @ref stride() with @p skip and adjusts @ref size()
          * accordingly. Negative @p skip is equivalent to first calling
          * @ref flipped() and then this function with a positive value.
+         * @todo deprecate the negative values to avoid having too many ways to
+         *      do the same, suggest flipped() instead
          */
         StridedArrayView<dimensions, T> every(const Containers::Stride<dimensions>& skip) const;
 
@@ -1779,6 +1800,9 @@ Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/c
 negative and zero strides as well, however note that no type compatibility
 checks can be done for zero strides, so be extra careful in that case.
 @see @ref StridedArrayView::isContiguous()
+@todo deprecate the dimension changing functionality in favor of new
+    arrayCastFlatten<dimensions, T>() / arrayCastInflate<dimensions, T>() APIs
+    that do just one thing and not all three
 */
 template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
@@ -1810,6 +1834,8 @@ and @cpp sizeof(U) @ce is not larger than any
 @ref StridedArrayView::stride() "stride()" of the original array. Works with
 negative and zero strides as well, however note that no type compatibility
 checks can be done for zero strides, so be extra careful in that case.
+@todo deprecate/rename to arrayCastInflate<dimensions, T>() to avoid confusion
+    with other casting APIs
 */
 template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view, std::size_t lastDimensionSize) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
