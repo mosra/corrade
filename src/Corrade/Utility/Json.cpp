@@ -37,6 +37,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Unicode.h"
@@ -1813,13 +1814,13 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken& 
     return Containers::StringView{*token._parsedString};
 }
 
-Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBoolArray(const JsonToken& token, const std::size_t expectedSize) {
+Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
-        "Utility::Json::parseBoolArray(): token not owned by the instance", {});
+        "Utility::Json::parseBitArray(): token not owned by the instance", {});
 
     if(token.type() != JsonToken::Type::Array) {
         Error err;
-        err << "Utility::Json::parseBoolArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseBitArray(): expected an array, got" << token.type() << "at";
         printFilePosition(err, _state->string.prefix(token._data));
         return {};
     }
@@ -1838,12 +1839,12 @@ Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBool
     for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
         if(i->type() != JsonToken::Type::Bool) {
             Error err;
-            err << "Utility::Json::parseBoolArray(): expected a bool, got" << i->type() << "at";
+            err << "Utility::Json::parseBitArray(): expected a bool, got" << i->type() << "at";
             printFilePosition(err, _state->string.prefix(i->_data));
             return {};
         }
 
-        if(!parseBoolInternal("Utility::Json::parseBoolArray():", const_cast<JsonToken&>(*i)))
+        if(!parseBoolInternal("Utility::Json::parseBitArray():", const_cast<JsonToken&>(*i)))
             return {};
     }
 
@@ -1851,13 +1852,24 @@ Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBool
        include also nested tokens and the message would be confusing */
     if(expectedSize && size != expectedSize) {
         Error err;
-        err << "Utility::Json::parseBoolArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        err << "Utility::Json::parseBitArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
         printFilePosition(err, _state->string.prefix(token._data));
         return {};
     }
 
-    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedBool);
+    return Containers::stridedArrayView(&token + 1, size).slice(&JsonToken::_parsedBool).sliceBit(0);
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+Containers::Optional<Containers::StridedArrayView1D<const bool>> Json::parseBoolArray(const JsonToken& token, const std::size_t expectedSize) {
+    /* It's easier to just create the view anew than try to inflate it from the
+       returned one */
+    if(const Containers::Optional<Containers::StridedBitArrayView1D> parsed = parseBitArray(token, expectedSize))
+        return Containers::stridedArrayView(&token + 1, parsed->size()).slice(&JsonToken::_parsedBool);
+
+    return {};
+}
+#endif
 
 Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDoubleArray(const JsonToken& token, const std::size_t expectedSize) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
@@ -2327,9 +2339,9 @@ Containers::StringView JsonToken::asString() const {
     return *_parsedString;
 }
 
-Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray(const std::size_t expectedSize) const {
+Containers::StridedBitArrayView1D JsonToken::asBitArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
-        "Utility::JsonToken::asBoolArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
+        "Utility::JsonToken::asBitArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
 
     const std::size_t size =
         #ifndef CORRADE_TARGET_32BIT
@@ -2344,17 +2356,26 @@ Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray(const std::siz
        encountered, the type() check fails. */
     for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
         CORRADE_ASSERT(i->type() == Type::Bool && i->isParsed(),
-            "Utility::JsonToken::asBoolArray(): token" << i - this - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+            "Utility::JsonToken::asBitArray(): token" << i - this - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
-        "Utility::JsonToken::asBoolArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+        "Utility::JsonToken::asBitArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
     #else
     static_cast<void>(expectedSize);
     #endif
 
-    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedBool);
+    return Containers::stridedArrayView(this + 1, size).slice(&JsonToken::_parsedBool).sliceBit(0);
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+Containers::StridedArrayView1D<const bool> JsonToken::asBoolArray(const std::size_t expectedSize) const {
+    /* It's easier to just create the view anew than try to inflate it from the
+       returned one */
+    const Containers::StridedBitArrayView1D out = asBitArray(expectedSize);
+    return Containers::stridedArrayView(this + 1, out.size()).slice(&JsonToken::_parsedBool);
+}
+#endif
 
 Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray(const std::size_t expectedSize) const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),

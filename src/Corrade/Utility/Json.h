@@ -860,7 +860,7 @@ class CORRADE_UTILITY_EXPORT Json {
         Containers::Optional<Containers::StringView> parseString(const JsonToken& token);
 
         /**
-         * @brief Check and parse a boolean array
+         * @brief Check and parse a bit array
          *
          * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
          * just @ref JsonToken::Type::Bool tokens, the tokens are not valid
@@ -872,9 +872,17 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref Json::Option::ParseLiterals, @ref parseLiterals(),
-         *      @ref parseBool(), @ref JsonToken::asBoolArray()
+         *      @ref parseBool(), @ref JsonToken::asBitArray()
          */
-        Containers::Optional<Containers::StridedArrayView1D<const bool>> parseBoolArray(const JsonToken& token, std::size_t expectedSize = 0);
+        Containers::Optional<Containers::StridedBitArrayView1D> parseBitArray(const JsonToken& token, std::size_t expectedSize = 0);
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Check and parse a boolean array
+         * @m_deprecated_since_latest Use @ref parseBitArray() instead.
+         */
+        CORRADE_DEPRECATED("use parseBitArray() instead") Containers::Optional<Containers::StridedArrayView1D<const bool>> parseBoolArray(const JsonToken& token, std::size_t expectedSize = 0);
+        #endif
 
         /**
          * @brief Check and parse a 64-bit floating-point array
@@ -1613,7 +1621,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the token is @ref Type::Bool and @ref isParsed() is
          * set. If not, use @ref Json::parseBool() instead.
          * @see @ref Json::Option::ParseLiterals, @ref Json::parseLiterals(),
-         *      @ref asBoolArray()
+         *      @ref asBitArray()
          */
         bool asBool() const;
 
@@ -1707,8 +1715,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * Expects that the token is a @ref Type::Array consisting of just
          * @ref Type::Bool tokens and exactly @p expectedSize elements if it's
          * not @cpp 0 @ce, already parsed. If not, use
-         * @ref Json::parseBoolArray() instead. The returned view points to
-         * data owned by the originating @ref Json instance.
+         * @ref Json::parseBitArray() instead. The returned view points to data
+         * owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1721,7 +1729,15 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * build.
          * @see @ref type(), @ref asBool()
          */
-        Containers::StridedArrayView1D<const bool> asBoolArray(std::size_t expectedSize = 0) const;
+        Containers::StridedBitArrayView1D asBitArray(std::size_t expectedSize = 0) const;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Get a parsed boolean array
+         * @m_deprecated_since_latest Use @ref asBitArray() instead.
+         */
+        CORRADE_DEPRECATED("use asBitArray() instead") Containers::StridedArrayView1D<const bool> asBoolArray(std::size_t expectedSize = 0) const;
+        #endif
 
         /**
          * @brief Get a parsed 64-bit floating-point array

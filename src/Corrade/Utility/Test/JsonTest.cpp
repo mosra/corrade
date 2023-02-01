@@ -31,6 +31,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -81,7 +82,10 @@ struct JsonTest: TestSuite::Tester {
         void parseSubtree();
 
         void parseEmptyObjectOrArray();
-        void parseBoolArray();
+        void parseBitArray();
+        #ifdef CORRADE_BUILD_DEPRECATED
+        void parseBoolArrayDeprecated();
+        #endif
         void parseDoubleArray();
         void parseFloatArray();
         void parseUnsignedIntArray();
@@ -125,10 +129,13 @@ struct JsonTest: TestSuite::Tester {
         void findArrayIndexNotArray();
         void findArrayIndexNotParsed();
 
-        void asBoolArray();
-        void asBoolArrayNotAllSame();
-        void asBoolArrayNotAllParsed();
-        void asBoolArrayUnexpectedSize();
+        void asBitArray();
+        #ifdef CORRADE_BUILD_DEPRECATED
+        void asBoolArrayDeprecated();
+        #endif
+        void asBitArrayNotAllSame();
+        void asBitArrayNotAllParsed();
+        void asBitArrayUnexpectedSize();
         void asDoubleArray();
         void asDoubleArrayNotAllSame();
         void asDoubleArrayUnexpectedSize();
@@ -584,9 +591,17 @@ const struct {
         return out && out->begin() == out->end() ? Containers::optional(std::size_t{}) : Containers::NullOpt;
     }},
     {"bool array", "[]", [](Json& json) {
-        const auto out = json.parseBoolArray(json.root());
+        const auto out = json.parseBitArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
     }},
+    #ifdef CORRADE_BUILD_DEPRECATED
+    {"bool array, deprecated", "[]", [](Json& json) {
+        CORRADE_IGNORE_DEPRECATED_PUSH
+        const auto out = json.parseBoolArray(json.root());
+        CORRADE_IGNORE_DEPRECATED_POP
+        return out ? Containers::optional(out->size()) : Containers::NullOpt;
+    }},
+    #endif
     {"double array", "[]", [](Json& json) {
         const auto out = json.parseDoubleArray(json.root());
         return out ? Containers::optional(out->size()) : Containers::NullOpt;
@@ -975,27 +990,37 @@ const struct {
 };
 
 const struct {
-    const char* name;
+    TestSuite::TestCaseDescriptionSourceLocation name;
     bool(*function)(Json&);
     const char* json;
     const char* message;
 } ParseArrayErrorData[]{
-    {"bool",
-        [](Json& json) { return !!json.parseBoolArray(json.root()); },
+    {"bit",
+        [](Json& json) { return !!json.parseBitArray(json.root()); },
         "[true,\n   fail, false]",
-        "parseBoolArray(): invalid bool literal fail"},
-    {"bool but an object inside",
-        [](Json& json) { return !!json.parseBoolArray(json.root()); },
+        "parseBitArray(): invalid bool literal fail"},
+    #ifdef CORRADE_BUILD_DEPRECATED
+    {"bool, deprecated",
+        [](Json& json) {
+            CORRADE_IGNORE_DEPRECATED_PUSH
+            return !!json.parseBoolArray(json.root());
+            CORRADE_IGNORE_DEPRECATED_POP
+        },
+        "[true,\n   fail, false]",
+        "parseBitArray(): invalid bool literal fail"},
+    #endif
+    {"bit but an object inside",
+        [](Json& json) { return !!json.parseBitArray(json.root()); },
         "[true, false,\n   {}, true]\n",
-        "parseBoolArray(): expected a bool, got Utility::JsonToken::Type::Object"},
-    {"bool but an object",
-        [](Json& json) { return !!json.parseBoolArray(json.root()); },
+        "parseBitArray(): expected a bool, got Utility::JsonToken::Type::Object"},
+    {"bit but an object",
+        [](Json& json) { return !!json.parseBitArray(json.root()); },
         "\n   {}",
-        "parseBoolArray(): expected an array, got Utility::JsonToken::Type::Object"},
-    {"bool but unexpected size",
-        [](Json& json) { return !!json.parseBoolArray(json.root(), 4); },
+        "parseBitArray(): expected an array, got Utility::JsonToken::Type::Object"},
+    {"bit but unexpected size",
+        [](Json& json) { return !!json.parseBitArray(json.root(), 4); },
         "\n   [true, false, true]",
-        "parseBoolArray(): expected a 4-element array, got 3"},
+        "parseBitArray(): expected a 4-element array, got 3"},
     {"double",
         [](Json& json) { return !!json.parseDoubleArray(json.root()); },
         "[5.3,\n   3.f, 4]",
@@ -1196,7 +1221,10 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::parseEmptyObjectOrArray},
         Containers::arraySize(EmptyObjectOrArrayData));
 
-    addTests({&JsonTest::parseBoolArray,
+    addTests({&JsonTest::parseBitArray,
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &JsonTest::parseBoolArrayDeprecated,
+              #endif
               &JsonTest::parseDoubleArray,
               &JsonTest::parseFloatArray,
               &JsonTest::parseUnsignedIntArray,
@@ -1249,10 +1277,13 @@ JsonTest::JsonTest() {
               &JsonTest::findArrayIndexNotArray,
               &JsonTest::findArrayIndexNotParsed,
 
-              &JsonTest::asBoolArray,
-              &JsonTest::asBoolArrayNotAllSame,
-              &JsonTest::asBoolArrayNotAllParsed,
-              &JsonTest::asBoolArrayUnexpectedSize,
+              &JsonTest::asBitArray,
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &JsonTest::asBoolArrayDeprecated,
+              #endif
+              &JsonTest::asBitArrayNotAllSame,
+              &JsonTest::asBitArrayNotAllParsed,
+              &JsonTest::asBitArrayUnexpectedSize,
               &JsonTest::asDoubleArray,
               &JsonTest::asDoubleArrayNotAllSame,
               &JsonTest::asDoubleArrayUnexpectedSize,
@@ -2412,7 +2443,7 @@ void JsonTest::parseEmptyObjectOrArray() {
     CORRADE_VERIFY(json->root().isParsed());
 }
 
-void JsonTest::parseBoolArray() {
+void JsonTest::parseBitArray() {
     Containers::String jsonData = "[true, false, true, false]";
     Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
     CORRADE_VERIFY(json);
@@ -2422,7 +2453,38 @@ void JsonTest::parseBoolArray() {
     for(std::size_t iteration: {0, 1}) {
         CORRADE_ITERATION(iteration);
 
+        Containers::Optional<Containers::StridedBitArrayView1D> out = json->parseBitArray(json->root());
+        CORRADE_VERIFY(out);
+        CORRADE_COMPARE_AS(*out, Containers::stridedArrayView({
+            true, false, true, false
+        }).sliceBit(0), TestSuite::Compare::Container);
+
+        CORRADE_VERIFY(json->root().isParsed());
+        for(JsonArrayItem i: json->root().asArray()) {
+            CORRADE_ITERATION(i.index());
+            CORRADE_VERIFY(i.value().isParsed());
+        }
+
+        /* Corrupt the original string. Next time it should use the cached
+           values. */
+        jsonData[jsonData.size() - 2] = 'x';
+    }
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+void JsonTest::parseBoolArrayDeprecated() {
+    Containers::String jsonData = "[true, false, true, false]";
+    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    CORRADE_VERIFY(json);
+
+    /* Calling the parse function several times should have the same observed
+       behavior, internally it should just skip parsing */
+    for(std::size_t iteration: {0, 1}) {
+        CORRADE_ITERATION(iteration);
+
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Containers::Optional<Containers::StridedArrayView1D<const bool>> out = json->parseBoolArray(json->root());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(out);
         CORRADE_COMPARE_AS(*out, Containers::arrayView({
             true, false, true, false
@@ -2439,6 +2501,7 @@ void JsonTest::parseBoolArray() {
         jsonData[jsonData.size() - 2] = 'x';
     }
 }
+#endif
 
 void JsonTest::parseDoubleArray() {
     Containers::String jsonData = "[35.7, -42.4, 0, 1e5]";
@@ -2983,7 +3046,7 @@ void JsonTest::parseTokenNotOwned() {
     json->parseSize(token);
     json->parseString(token);
 
-    json->parseBoolArray(token);
+    json->parseBitArray(token);
     json->parseDoubleArray(token);
     json->parseFloatArray(token);
     json->parseUnsignedIntArray(token);
@@ -3020,7 +3083,7 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseSize(): token not owned by the instance\n"
         "Utility::Json::parseString(): token not owned by the instance\n"
 
-        "Utility::Json::parseBoolArray(): token not owned by the instance\n"
+        "Utility::Json::parseBitArray(): token not owned by the instance\n"
         "Utility::Json::parseDoubleArray(): token not owned by the instance\n"
         "Utility::Json::parseFloatArray(): token not owned by the instance\n"
         "Utility::Json::parseUnsignedIntArray(): token not owned by the instance\n"
@@ -3342,19 +3405,35 @@ void JsonTest::findArrayIndexNotParsed() {
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n");
 }
 
-void JsonTest::asBoolArray() {
+void JsonTest::asBitArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         true, false, true
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
+    Containers::StridedBitArrayView1D out = json->root().asBitArray();
+    CORRADE_COMPARE_AS(out,
+        Containers::stridedArrayView({true, false, true}).sliceBit(0),
+        TestSuite::Compare::Container);
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+void JsonTest::asBoolArrayDeprecated() {
+    Containers::Optional<Json> json = Json::fromString(R"([
+        true, false, true
+    ])", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+
+    CORRADE_IGNORE_DEPRECATED_PUSH
     Containers::StridedArrayView1D<const bool> out = json->root().asBoolArray();
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE_AS(out,
         Containers::arrayView({true, false, true}),
         TestSuite::Compare::Container);
 }
+#endif
 
-void JsonTest::asBoolArrayNotAllSame() {
+void JsonTest::asBitArrayNotAllSame() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
@@ -3364,12 +3443,12 @@ void JsonTest::asBoolArrayNotAllSame() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json->root().asBoolArray();
+    json->root().asBitArray();
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::asBoolArray(): token 2 is a parsed Utility::JsonToken::Type::Number\n");
+        "Utility::JsonToken::asBitArray(): token 2 is a parsed Utility::JsonToken::Type::Number\n");
 }
 
-void JsonTest::asBoolArrayNotAllParsed() {
+void JsonTest::asBitArrayNotAllParsed() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
@@ -3382,12 +3461,12 @@ void JsonTest::asBoolArrayNotAllParsed() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json->root().asBoolArray();
+    json->root().asBitArray();
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::asBoolArray(): token 2 is an unparsed Utility::JsonToken::Type::Bool\n");
+        "Utility::JsonToken::asBitArray(): token 2 is an unparsed Utility::JsonToken::Type::Bool\n");
 }
 
-void JsonTest::asBoolArrayUnexpectedSize() {
+void JsonTest::asBitArrayUnexpectedSize() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString(R"([
@@ -3397,9 +3476,9 @@ void JsonTest::asBoolArrayUnexpectedSize() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json->root().asBoolArray(4);
+    json->root().asBitArray(4);
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::asBoolArray(): expected a 4-element array, got 3\n");
+        "Utility::JsonToken::asBitArray(): expected a 4-element array, got 3\n");
 }
 
 void JsonTest::asDoubleArray() {
@@ -3742,7 +3821,7 @@ void JsonTest::asTypeArrayNotArray() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json->root().asBoolArray();
+    json->root().asBitArray();
     json->root().asDoubleArray();
     json->root().asFloatArray();
     json->root().asUnsignedIntArray();
@@ -3751,7 +3830,7 @@ void JsonTest::asTypeArrayNotArray() {
     json->root().asLongArray();
     json->root().asSizeArray();
     const char* expected =
-        "Utility::JsonToken::asBoolArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asBitArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asDoubleArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asFloatArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         "Utility::JsonToken::asUnsignedIntArray(): token is a parsed Utility::JsonToken::Type::Object\n"
@@ -3775,7 +3854,7 @@ void JsonTest::asTypeArrayNotParsed() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    json->root().asBoolArray();
+    json->root().asBitArray();
     json->root().asDoubleArray();
     json->root().asFloatArray();
     json->root().asUnsignedIntArray();
@@ -3784,7 +3863,7 @@ void JsonTest::asTypeArrayNotParsed() {
     json->root().asLongArray();
     json->root().asSizeArray();
     const char* expected =
-        "Utility::JsonToken::asBoolArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asBitArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         "Utility::JsonToken::asDoubleArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         "Utility::JsonToken::asFloatArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         "Utility::JsonToken::asUnsignedIntArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
