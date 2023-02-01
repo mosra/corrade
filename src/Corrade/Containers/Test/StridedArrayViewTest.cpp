@@ -103,16 +103,16 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructSizeStrideConstVoid();
     void constructSizeStrideArray();
 
-    void constructInvalid();
-    void constructInvalidVoid();
-    void constructInvalidConstVoid();
-
     void constructPointerSize();
     void constructPointerSizeVoid();
     void constructPointerSizeConstVoid();
     void constructFixedSize();
     void constructFixedSizeVoid();
     void constructFixedSizeConstVoid();
+
+    void constructViewTooSmall();
+    void constructViewTooSmallVoid();
+    void constructViewTooSmallConstVoid();
 
     void constructDerived();
     void constructView();
@@ -147,13 +147,13 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DOneSizeZeroVoid();
     void construct3DOneSizeZeroConstVoid();
 
-    void construct3DInvalid();
-    void construct3DInvalidVoid();
-    void construct3DInvalidConstVoid();
-
     void construct3DFixedSize();
     void construct3DFixedSizeVoid();
     void construct3DFixedSizeConstVoid();
+
+    void construct3DViewTooSmall();
+    void construct3DViewTooSmallVoid();
+    void construct3DViewTooSmallConstVoid();
 
     void construct3DDerived();
     void construct3DView();
@@ -306,16 +306,16 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructSizeStrideConstVoid,
               &StridedArrayViewTest::constructSizeStrideArray,
 
-              &StridedArrayViewTest::constructInvalid,
-              &StridedArrayViewTest::constructInvalidVoid,
-              &StridedArrayViewTest::constructInvalidConstVoid,
-
               &StridedArrayViewTest::constructPointerSize,
               &StridedArrayViewTest::constructPointerSizeVoid,
               &StridedArrayViewTest::constructPointerSizeConstVoid,
               &StridedArrayViewTest::constructFixedSize,
               &StridedArrayViewTest::constructFixedSizeVoid,
               &StridedArrayViewTest::constructFixedSizeConstVoid,
+
+              &StridedArrayViewTest::constructViewTooSmall,
+              &StridedArrayViewTest::constructViewTooSmallVoid,
+              &StridedArrayViewTest::constructViewTooSmallConstVoid,
 
               &StridedArrayViewTest::constructDerived,
               &StridedArrayViewTest::constructView,
@@ -347,13 +347,14 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DOneSizeZero,
               &StridedArrayViewTest::construct3DOneSizeZeroVoid,
               &StridedArrayViewTest::construct3DOneSizeZeroConstVoid,
-              &StridedArrayViewTest::construct3DInvalid,
-              &StridedArrayViewTest::construct3DInvalidVoid,
-              &StridedArrayViewTest::construct3DInvalidConstVoid,
 
               &StridedArrayViewTest::construct3DFixedSize,
               &StridedArrayViewTest::construct3DFixedSizeVoid,
               &StridedArrayViewTest::construct3DFixedSizeConstVoid,
+
+              &StridedArrayViewTest::construct3DViewTooSmall,
+              &StridedArrayViewTest::construct3DViewTooSmallVoid,
+              &StridedArrayViewTest::construct3DViewTooSmallConstVoid,
 
               &StridedArrayViewTest::construct3DDerived,
               &StridedArrayViewTest::construct3DView,
@@ -903,57 +904,6 @@ void StridedArrayViewTest::constructSizeStrideArray() {
     CORRADE_COMPARE(cc[4], 234810);
 }
 
-void StridedArrayViewTest::constructInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    struct {
-        int value;
-        int other;
-    } a[10]{};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    StridedArrayView1Di{a, &a[0].value, 10, 9};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
-}
-
-void StridedArrayViewTest::constructInvalidVoid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    struct {
-        int value;
-        int other;
-    } a[10]{};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    VoidStridedArrayView1D{a, &a[0].value, 10, 9};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
-}
-
-void StridedArrayViewTest::constructInvalidConstVoid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    const struct {
-        int value;
-        int other;
-    } a[10]{};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    ConstVoidStridedArrayView1D{a, &a[0].value, 10, 9};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
-}
-
 /* Needs to be here in order to use it in constexpr */
 constexpr const int Array10[10]{ 2, 16, 7853268, -100, 234810, 0, 0, 0, 0, 0 };
 
@@ -1093,6 +1043,57 @@ void StridedArrayViewTest::constructFixedSizeConstVoid() {
     CORRADE_COMPARE(cb.stride(), 4);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, const int[3]>::value);
+}
+
+void StridedArrayViewTest::constructViewTooSmall() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    struct {
+        int value;
+        int other;
+    } a[10]{};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    StridedArrayView1Di{a, &a[0].value, 10, 9};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
+}
+
+void StridedArrayViewTest::constructViewTooSmallVoid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    struct {
+        int value;
+        int other;
+    } a[10]{};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    VoidStridedArrayView1D{a, &a[0].value, 10, 9};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
+}
+
+void StridedArrayViewTest::constructViewTooSmallConstVoid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    const struct {
+        int value;
+        int other;
+    } a[10]{};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    ConstVoidStridedArrayView1D{a, &a[0].value, 10, 9};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -1732,48 +1733,6 @@ void StridedArrayViewTest::construct3DOneSizeZeroConstVoid() {
     CORRADE_COMPARE(a.data(), &data[0]);
 }
 
-void StridedArrayViewTest::construct3DInvalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Plane a[2];
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    StridedArrayView3Di{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
-}
-
-void StridedArrayViewTest::construct3DInvalidVoid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Plane a[2];
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    VoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
-}
-
-void StridedArrayViewTest::construct3DInvalidConstVoid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    const Plane a[2]{};
-
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    ConstVoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
-
-    CORRADE_COMPARE(out.str(),
-        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
-}
-
 void StridedArrayViewTest::construct3DFixedSize() {
     CORRADE_VERIFY(std::is_convertible<int(&)[10], StridedArrayView1Di>::value);
     CORRADE_VERIFY(!std::is_convertible<int(&)[10], StridedArrayView3Di>::value);
@@ -1787,6 +1746,48 @@ void StridedArrayViewTest::construct3DFixedSizeVoid() {
 void StridedArrayViewTest::construct3DFixedSizeConstVoid() {
     CORRADE_VERIFY(std::is_convertible<int(&)[10], ConstVoidStridedArrayView1D>::value);
     CORRADE_VERIFY(!std::is_convertible<int(&)[10], ConstVoidStridedArrayView3D>::value);
+}
+
+void StridedArrayViewTest::construct3DViewTooSmall() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Plane a[2];
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    StridedArrayView3Di{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
+}
+
+void StridedArrayViewTest::construct3DViewTooSmallVoid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Plane a[2];
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    VoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
+}
+
+void StridedArrayViewTest::construct3DViewTooSmallConstVoid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    const Plane a[2]{};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    ConstVoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
+
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
 }
 
 void StridedArrayViewTest::construct3DDerived() {
