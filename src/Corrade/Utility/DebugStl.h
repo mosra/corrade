@@ -129,6 +129,11 @@ namespace Implementation {
 
 /* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
 struct DebugOstreamFallback {
+    /** @todo without an explicit operator<<() for MutableBitArrayView,
+        printing it causes an ambiguous overload between this and BitArrayView
+        debug operator, adding
+            class = decltype(std::declval<std::ostream&>() << std::declval<const T&>())
+        fixes it on GCC but causes an infinite SFINAE recursion on Clang */
     template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
 
     void apply(std::ostream& s) const {

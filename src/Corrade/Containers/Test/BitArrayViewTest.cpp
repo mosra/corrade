@@ -473,10 +473,16 @@ void BitArrayViewTest::sliceInvalid() {
 }
 
 void BitArrayViewTest::debug() {
+    /* 0b0101'0101'0011'0011'0000'1111 << 5, printed in reverse (first bit
+       first), smaller sizes should cut away the last bits */
+    char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
+
     std::ostringstream out;
     Debug{&out} << BitArrayView{DataPadded + 1, 5, 24};
+    Debug{&out} << MutableBitArrayView{data, 5, 24};
     Debug{&out} << BitArrayView{DataPadded + 1, 5, 19};
     CORRADE_COMPARE(out.str(),
+        "{11110000, 11001100, 10101010}\n"
         "{11110000, 11001100, 10101010}\n"
         "{11110000, 11001100, 101}\n");
 }

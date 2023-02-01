@@ -363,6 +363,16 @@ a Little-Endian machine:
 */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, BitArrayView value);
 
+/**
+ * @debugoperator{BasicBitArrayView}
+ * @m_since_latest
+ */
+/* Has to be present otherwise printing MutableBitArrayView is ambiguous with
+   DebugOstreamFallback (!!), see its documentation for details */
+inline Utility::Debug& operator<<(Utility::Debug& debug, MutableBitArrayView value) {
+    return debug << BitArrayView{value};
+}
+
 template<class T> constexpr BasicBitArrayView<T>::BasicBitArrayView(T* const data, const std::size_t offset, const std::size_t size) noexcept: _data{data}, _sizeOffset{
     (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset < 8,
         "Containers::BitArrayView: offset expected to be smaller than 8 bits, got" << offset),
