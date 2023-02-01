@@ -34,8 +34,8 @@ using namespace Corrade;
 int main() {
 {
 /* [BitArrayView-operator<<] */
-const std::uint8_t data[]{0b10000000, 0b00101010, 0b01111000, 0b11100110, 0b11};
-Utility::Debug{} << Containers::BitArrayView{data, 7, 27};
+const std::uint64_t data[]{0b00'0101'0101'0011'0011'0000'1111 << 5};
+Utility::Debug{} << Containers::BitArrayView{data, 5, 26};
 /* [BitArrayView-operator<<] */
 }
 

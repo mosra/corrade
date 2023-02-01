@@ -341,9 +341,9 @@ the next 8 bits from the array. To have a monotonic order, the first character
 in each element is the first bit in the 8-bit group --- i.e., the order is
 reversed compared to binary literals.
 
-For example, the following corresponds to a 64-bit value of
-@cpp 0b111'11001100'11110000'01010101 << 7 @ce stored as Little-Endian, and
-printing a view on it will show it in reverse order:
+For example, the following 64-bit number, shifted by 5 bits (and
+correspondingly the view created with a 5-bit offset), will print like this on
+a Little-Endian machine:
 
 @m_class{m-code-figure}
 
@@ -356,7 +356,7 @@ printing a view on it will show it in reverse order:
 @m_class{m-nopad}
 
 @code{.shell-session}
-{10101010, 00001111, 00110011, 111}
+{11110000, 11001100, 10101010, 00}
 @endcode
 
 @endparblock
