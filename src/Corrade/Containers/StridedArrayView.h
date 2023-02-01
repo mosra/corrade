@@ -2243,20 +2243,20 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
         "Containers::StridedArrayView::every(): expected a non-zero step, got" << step, {});
 
     ErasedType* data = _data;
-    Containers::Size<dimensions> size = _size;
+    Containers::Size<dimensions> size{Corrade::NoInit};
     Containers::Stride<dimensions> stride = _stride;
     for(std::size_t dimension = 0; dimension != dimensions; ++dimension) {
         /* If step is negative, adjust also data pointer */
         std::size_t divisor;
-        if(step[dimension] < 0) {
+        if(step._data[dimension] < 0) {
             data = static_cast<ArithmeticType*>(data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
-            divisor = -step[dimension];
-        } else divisor = step[dimension];
+            divisor = -step._data[dimension];
+        } else divisor = step._data[dimension];
 
         /* Taking every 5th element of a 6-element array should result in 2
            elements */
-        size[dimension] = (size[dimension] + divisor - 1)/divisor;
-        stride[dimension] *= step[dimension];
+        size._data[dimension] = (_size._data[dimension] + divisor - 1)/divisor;
+        stride._data[dimension] *= step._data[dimension];
     }
 
     return StridedArrayView<dimensions, T>{size, stride, data};
