@@ -39,6 +39,7 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Unicode.h"
 
@@ -2158,6 +2159,54 @@ Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> Json::pa
     return Containers::arrayCast<const std::size_t>(*out);
 }
 
+Containers::Optional<Containers::StringIterable> Json::parseStringArray(const JsonToken& token, const std::size_t expectedSize) {
+    CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),
+        "Utility::Json::parseStringArray(): token not owned by the instance", {});
+
+    if(token.type() != JsonToken::Type::Array) {
+        Error err;
+        err << "Utility::Json::parseStringArray(): expected an array, got" << token.type() << "at";
+        printFilePosition(err, _state->string.prefix(token._data));
+        return {};
+    }
+
+    parseObjectArrayInternal(const_cast<JsonToken&>(token));
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        token._childCount
+        #else
+        token._childCountFlagsTypeNan & JsonToken::ChildCountMask
+        #endif
+        ;
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = &token + 1, *end = &token + 1 + size; i != end; ++i) {
+        if(i->type() != JsonToken::Type::String) {
+            Error err;
+            err << "Utility::Json::parseStringArray(): expected a string, got" << i->type() << "at";
+            printFilePosition(err, _state->string.prefix(i->_data));
+            return {};
+        }
+
+        if(!parseStringInternal("Utility::Json::parseStringArray():", const_cast<JsonToken&>(*i)))
+            return {};
+    }
+
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    if(expectedSize && size != expectedSize) {
+        Error err;
+        err << "Utility::Json::parseStringArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
+        printFilePosition(err, _state->string.prefix(token._data));
+        return {};
+    }
+
+    return Containers::StringIterable{&token + 1, nullptr, size, sizeof(JsonToken), [](const void* data, const void*, std::ptrdiff_t, std::size_t) {
+        return static_cast<const JsonToken*>(data)->asString();
+    }};
+}
+
 Containers::StringView JsonToken::data() const {
     /* This could technically be made to preserve the Global flag, but on 32bit
        it would mean it'd have to be stored in two places -- either in the NaN
@@ -2559,6 +2608,37 @@ Containers::StridedArrayView1D<const std::size_t> JsonToken::asSizeArray(const s
         asUnsignedIntArray(expectedSize)
         #endif
     );
+}
+
+Containers::StringIterable JsonToken::asStringArray(const std::size_t expectedSize) const {
+    CORRADE_ASSERT(type() == Type::Array && isParsed(),
+        "Utility::JsonToken::asStringArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
+
+    const std::size_t size =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        _childCountFlagsTypeNan & ChildCountMask
+        #endif
+        ;
+    #ifndef CORRADE_NO_ASSERT
+    /* As this is expected to be a value array, we go by simple incrementing
+       instead of with i->next(). If a nested object or array would be
+       encountered, the type() check fails. */
+    for(const JsonToken *i = this + 1, *end = this + 1 + size; i != end; ++i)
+        CORRADE_ASSERT(i->type() == Type::String && i->isParsed(),
+            "Utility::JsonToken::asStringArray(): token" << i - this - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+    /* Needs to be after the type-checking loop, otherwise the child count may
+       include also nested tokens and the message would be confusing */
+    CORRADE_ASSERT(!expectedSize || size == expectedSize,
+        "Utility::JsonToken::asStringArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size, {});
+    #else
+    static_cast<void>(expectedSize);
+    #endif
+
+    return Containers::StringIterable{this + 1, nullptr, size, sizeof(JsonToken), [](const void* data, const void*, std::ptrdiff_t, std::size_t) {
+        return static_cast<const JsonToken*>(data)->asString();
+    }};
 }
 
 Containers::StringView JsonObjectItem::key() const {

@@ -169,11 +169,11 @@ is @ref JsonToken::firstChild()) or array value.
 
 @snippet Utility.cpp Json-usage-iteration-values
 
-@subsection Utility-Json-usage-direct-array-access Direct access to numeric arrays
+@subsection Utility-Json-usage-direct-array-access Direct access to arrays
 
-Besides high-level array iteration, there's also a set of function for
-accessing homogeneous numeric arrays. Coming back to the glTF format, for
-example a node translation vector and child indices:
+Besides high-level array iteration, there's also a set of functions for
+accessing homogeneous arrays. Coming back to the glTF format, for example a
+node translation vector and child indices:
 
 @code{.json}
 {
@@ -185,13 +185,19 @@ example a node translation vector and child indices:
 We'll check, parse and access the first property with @ref parseFloatArray()
 and the other with @ref parseUnsignedIntArray() --- those will check that it's
 indeed an array and that it contains either all floats or all unsigned
-integers. If everything passes, we get back a strided array view, pointing to
-parsed data stored inside the token elements, or we get an error message and
-@ref Containers::NullOpt if not. A view to the parsed array can be also
-retrieved later using @ref JsonToken::asFloatArray() and others, assuming the
-parsed type matches.
+integers. If everything passes, we get back a @ref Containers::StridedArrayView,
+pointing to parsed data stored inside the token elements, or we get an error
+message and @ref Containers::NullOpt if not. A view to the parsed array can be
+also retrieved later using @ref JsonToken::asFloatArray() and others, assuming
+the parsed type matches.
 
 @snippet Utility.cpp Json-usage-direct-array-access
+
+This feature isn't limited to just numeric arrays --- for booleans there's
+@ref parseBitArray() returning a @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView1D"
+and for strings there's @ref parseStringArray() returning a
+@ref Containers::StringIterable. Both again point to data stored elsewhere
+without unnecessary copies.
 
 @section Utility-Json-tokenization Tokenization and parsing process
 
@@ -720,7 +726,7 @@ class CORRADE_UTILITY_EXPORT Json {
          *      @ref parseDoubleArray(), @ref parseFloatArray(),
          *      @ref parseUnsignedIntArray(), @ref parseIntArray(),
          *      @ref parseUnsignedLongArray(), @ref parseLongArray(),
-         *      @ref parseSizeArray()
+         *      @ref parseSizeArray(), @ref parseStringArray()
          */
         Containers::Optional<JsonArrayView> parseArray(const JsonToken& token);
 
@@ -861,7 +867,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * didn't contain any escape sequences, the returned view has
          * @ref Containers::StringViewFlag::Global set. If not, the view points
          * to data owned by this instance.
-         * @see @ref JsonToken::asString()
+         * @see @ref JsonToken::asString(), @ref parseStringArray()
          */
         Containers::Optional<Containers::StringView> parseString(const JsonToken& token);
 
@@ -1023,6 +1029,26 @@ class CORRADE_UTILITY_EXPORT Json {
          *      @ref JsonToken::asSizeArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> parseSizeArray(const JsonToken& token, std::size_t expectedSize = 0);
+
+        /**
+         * @brief Check and parse a string array
+         *
+         * If @p token is not a @ref JsonToken::Type::Array, doesn't contain
+         * just @ref JsonToken::Type::String tokens, the tokens are not valid
+         * numeric values, or @p expectedSize is not @cpp 0 @ce and the array
+         * has different size, prints a message to @ref Error and returns
+         * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
+         * set for the array and all tokens inside, returns the cached values,
+         * otherwise caches the parsed results. Expects that @p token
+         * references a token owned by this instance. If @ref fromString() was
+         * called with a global literal and the string didn't contain any
+         * escape sequences, the returned views have
+         * @ref Containers::StringViewFlag::Global set. If not, the views point
+         * to data owned by this instance.
+         * @see @ref Json::Option::ParseStrings, @ref parseStrings(),
+         *      @ref parseString(), @ref JsonToken::asStringArray()
+         */
+        Containers::Optional<Containers::StringIterable> parseStringArray(const JsonToken& token, std::size_t expectedSize = 0);
 
     private:
         struct State;
@@ -1550,7 +1576,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref asBitArray(), @ref asDoubleArray(), @ref asFloatArray(),
          *      @ref asUnsignedIntArray(), @ref asIntArray(),
          *      @ref asUnsignedLongArray(), @ref asLongArray(),
-         *      @ref asSizeArray()
+         *      @ref asSizeArray(), @ref asStringArray()
          */
         JsonArrayView asArray() const;
 
@@ -1909,6 +1935,31 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref type(), @ref parsedType(), @ref asSize(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::size_t> asSizeArray(std::size_t expectedSize = 0) const;
+
+        /**
+         * @brief Get a parsed string array
+         *
+         * Expects that the token is a @ref Type::Array consisting of just
+         * @ref Type::String tokens and exactly @p expectedSize elements if
+         * it's not @cpp 0 @ce, already parsed. If not, use
+         * @ref Json::parseStringArray() instead. If @ref Json::fromString()
+         * was called with a global literal and the strings didn't contain any
+         * escape sequences, the returned views have
+         * @ref Containers::StringViewFlag::Global set. If not, the views point
+         * to data owned by the originating @ref Json instance.
+         *
+         * @m_class{m-note m-warning}
+         *
+         * @par
+         *      The behavior is undefined if the function is called on a
+         *      @ref JsonToken that has been copied out of the originating
+         *      @ref Json instance.
+         *
+         * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
+         * build.
+         * @see @ref type(), @ref asString(), @ref asArray()
+         */
+        Containers::StringIterable asStringArray(std::size_t expectedSize = 0) const;
 
     private:
         friend Json;
