@@ -720,7 +720,9 @@ void StridedArrayViewTest::constructConstVoidFrom() {
 }
 
 void StridedArrayViewTest::constructArray() {
-    /* Compared to construct(), size and stride is wrapped in {} */
+    /* Compared to construct(), size and stride is wrapped in {}. Just to
+       verify that this doesn't cause a compilation error, it isn't any special
+       overload. */
 
     struct {
         int value;
@@ -764,6 +766,9 @@ void StridedArrayViewTest::constructNullptrSize() {
 }
 
 void StridedArrayViewTest::constructZeroStride() {
+    /* Just verify that this doesn't assert, correctness of the actual access
+       APIs is verified in accessZeroStride(). */
+
     struct {
         int value;
         int other;
@@ -778,6 +783,9 @@ void StridedArrayViewTest::constructZeroStride() {
 }
 
 void StridedArrayViewTest::constructNegativeStride() {
+    /* Just verify that this doesn't assert, correctness of the actual access
+       APIs is verified in accessNegativeStride(). */
+
     struct {
         int value;
         int other;
@@ -889,7 +897,9 @@ void StridedArrayViewTest::constructSizeStrideConstVoid() {
 }
 
 void StridedArrayViewTest::constructSizeStrideArray() {
-    /* Compared to constructSizeStride(), size and stride is wrapped in {} */
+    /* Compared to constructSizeStride(), size and stride is wrapped in {}.
+       Just to verify that this doesn't cause a compilation error, it isn't
+       any special overload. */
 
     int a[10*2]{
         2, 23125, 16, 1, 7853268, -2, -100, 5, 234810, 1,

@@ -73,9 +73,11 @@ namespace Implementation {
 @brief Array view
 
 A non-owning wrapper around a sized continuous range of data, similar to a
-dynamic @ref std::span from C++2a. For a variant with compile-time size
+dynamic @ref std::span from C++20. For a variant with compile-time size
 information see @ref StaticArrayView, for sparse and multi-dimensional views
-see @ref StridedArrayView. An owning version of this container is an @ref Array.
+see @ref StridedArrayView, for efficient bit manipulation see
+@ref BasicBitArrayView "BitArrayView". An owning version of this container is
+an @ref Array.
 
 @section Containers-ArrayView-usage Usage
 

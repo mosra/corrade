@@ -137,7 +137,7 @@ namespace Implementation {
 
 Immutable wrapper around continuous sparse range of data, useful for easy
 iteration over interleaved arrays and for describing multi-dimensional data.
-Usage example:
+A multi-dimensional counterpart to an @ref ArrayView. Usage example:
 
 @snippet Containers.cpp StridedArrayView-usage
 
@@ -265,8 +265,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Element type
          *
-         * For @ref StridedArrayView1D equivalent to a reference to @ref Type,
-         * for higher dimensions a strided view of one dimension less.
+         * For @ref StridedArrayView1D is equivalent to a reference to
+         * @ref Type, for higher dimensions to a strided view of one dimension
+         * less.
          */
         typedef typename std::conditional<dimensions == 1, T&, StridedArrayView<dimensions - 1, T>>::type ElementType;
 
@@ -321,7 +322,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @param stride    Data stride
          *
          * The @p data view is used only for a bounds check --- expects that
-         * @p data size is enough for @p size and @p stride in the largest
+         * @p data is large enough for @p size and @p stride in the largest
          * dimension if the stride is either positive or negative. Zero strides
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
@@ -334,8 +335,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @m_since{2019,10}
          *
          * Equivalent to calling @ref StridedArrayView(ArrayView<ErasedType>, T*, const Containers::Size<dimensions>&, const Containers::Stride<dimensions>&)
-         * with @p data as the first parameter and @cpp data.data() @ce as the
-         * second parameter.
+         * with @cpp data.data() @ce as the @p member parameter.
          * @see @ref stridedArrayView(ArrayView<T>, std::size_t, std::ptrdiff_t)
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
@@ -347,7 +347,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Assuming @p data is contiguous, stride is calculated implicitly
          * from @p size --- stride of a dimension is stride of the next
          * dimension times next dimension size, while last dimension stride is
-         * implicitly @cpp sizeof(T) @ce. In an one-dimensional case you
+         * implicitly @cpp sizeof(T) @ce. In a one-dimensional case you
          * probably want to use @ref StridedArrayView(ArrayView<U>) instead.
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
@@ -535,10 +535,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *
          * Assuming the view is contiguous, calling this function with
          * @p dimension equal to @ref Dimensions minus one will return the same
-         * view; calling it with @cpp 0 @ce will return an one-dimensional
-         * @ref StridedArrayView with stride equal to @cpp sizeof(T) @ce; while
-         * the non-templated @ref asContiguous() will return an @ref ArrayView
-         * (where the stride is implicitly defined as @cpp sizeof(T) @ce).
+         * view; calling it with @cpp 0 @ce will return a
+         * @ref StridedArrayView1D with stride equal to @cpp sizeof(T) @ce;
+         * while the non-templated @ref asContiguous() will return an
+         * @ref ArrayView (where the stride is implicitly defined as
+         * @cpp sizeof(T) @ce).
          */
         template<unsigned dimension> StridedArrayView<dimension + 1, T> asContiguous() const;
 
@@ -861,7 +862,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Multiplies @ref stride() with @p skip and adjusts @ref size()
          * accordingly. Negative @p skip is equivalent to first calling
          * @ref flipped() and then this function with a positive value. On
-         * multi-dimensional views affects just the top-level dimension.
+         * multi-dimensional views affects just the top-level dimension, use
+         * @ref every(const Containers::Stride<dimensions>&) const to pick in
+         * all dimensions.
          */
         StridedArrayView<dimensions, T> every(std::ptrdiff_t skip) const;
 
@@ -912,6 +915,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         template<unsigned dimension> StridedArrayView<dimensions, T> broadcasted(std::size_t size) const;
 
     private:
+        /* Needed for type and mutable/immutable conversion */
         template<unsigned, class> friend class StridedArrayView;
 
         typedef typename std::conditional<std::is_const<T>::value, const char, char>::type ArithmeticType;
@@ -1974,8 +1978,8 @@ template<unsigned dimensions, class T> inline StridedIterator<dimensions, T> ope
 
 template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>::StridedArrayView(ArrayView<ErasedType> data, T* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
     /* A strided array view is usually not created from scratch in tight loops
-       (except for slicing) and should be as checked as possible, so it's not a
-       debug assert */
+       (except for slicing, which uses a different constructor) and should be
+       as checked as possible, so it's not a debug assert */
     /** @todo can't compare void pointers to check if member is in data, it's
         not constexpr :( */
     /* If any size is zero, data can be zero-sized too. If the largest stride
@@ -1990,8 +1994,8 @@ template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>
 
 template<unsigned dimensions> constexpr StridedArrayView<dimensions, void>::StridedArrayView(ArrayView<void> data, void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
     /* A strided array view is usually not created from scratch in tight loops
-       (except for slicing) and should be as checked as possible, so it's not a
-       debug assert */
+       (except for slicing, which uses a different constructor) and should be
+       as checked as possible, so it's not a debug assert */
     /** @todo can't compare void pointers to check if member is in data,
         it's not constexpr :( */
     /* If any size is zero, data can be zero-sized too. If the largest stride
@@ -2006,8 +2010,8 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, void>::Stri
 
 template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>::StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
     /* A strided array view is usually not created from scratch in tight loops
-       (except for slicing) and should be as checked as possible, so it's not a
-       debug assert */
+       (except for slicing, which uses a different constructor) and should be
+       as checked as possible, so it's not a debug assert */
     /** @todo can't compare void pointers to check if member is in data, it's
         not constexpr :( */
     /* If any size is zero, data can be zero-sized too. If the largest stride

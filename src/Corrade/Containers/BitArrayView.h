@@ -62,15 +62,17 @@ namespace Implementation {
 
 @m_keywords{BitArrayView MutableBitArrayView}
 
-A view over an arbitrary range of bits, including sub-byte offsets. An owning
-version of this containers is a @ref BitArray.
+A view over an arbitrary range of bits, including sub-byte offsets --- a
+bit-sized variant of an @ref ArrayView. An owning version of this container is
+a @ref BitArray.
 
 @section Containers-BasicBitArrayView-usage Usage
 
-The class is implicitly convertible from @ref BitArray instances, it's also
-possible to implicitly create a @cpp const @ce view on a mutable array. Besides
-that, a view can be created manually by specifying a pointer, initial bit
-offset and bit count:
+The class is meant to be used through either the @ref BitArrayView or
+@ref MutableBitArrayView typedefs. The class is implicitly convertible from
+@ref BitArray instances, it's also possible to implicitly create a
+@cpp const @ce view on a mutable array. Besides that, a view can be created
+manually by specifying a pointer, initial bit offset and bit count:
 
 @snippet Containers.cpp BitArrayView-usage
 
@@ -154,12 +156,12 @@ template<class T> class BasicBitArrayView {
         constexpr T* data() const { return _data; }
 
         /**
-         * @brief Offset in the first byte
+         * @brief Bit offset
          *
-         * The returned value is always less than 8, and is non-zero only if
-         * the array was created with a non-zero @p offset passed to the
-         * @ref BasicBitArrayView(typename std::conditional<std::is_const<T>::value, const void, void>::type*, std::size_t, std::size_t)
-         * constructor.
+         * Added to the pointer returned by @ref data() to get location of the
+         * first bit. The returned value is always less than 8 and is non-zero
+         * if the view was originally constructed with a non-zero offset or if
+         * it's a result of slicing that wasn't on a byte boundary.
          */
         constexpr std::size_t offset() const { return _sizeOffset & 0x07; }
 
@@ -180,9 +182,9 @@ template<class T> class BasicBitArrayView {
         /**
          * @brief Bit at given position
          *
-         * Expects that @p i is less than @ref size(). Use
-         * @ref set(std::size_t) const, @ref reset(std::size_t) const or
-         * @ref set(std::size_t, bool) const to set a bit value.
+         * Expects that @p i is less than @ref size(). Setting bit values is
+         * only possible on mutable views with @ref set(std::size_t) const,
+         * @ref reset(std::size_t) const or @ref set(std::size_t, bool) const.
          */
         constexpr bool operator[](std::size_t i) const;
 
