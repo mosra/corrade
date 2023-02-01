@@ -3348,9 +3348,8 @@ void JsonTest::asBoolArray() {
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Containers::StridedArrayView1D<const bool>> out = json->root().asBoolArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const bool> out = json->root().asBoolArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView({true, false, true}),
         TestSuite::Compare::Container);
 }
@@ -3410,9 +3409,8 @@ void JsonTest::asDoubleArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseDoubles(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const double>> out = json->root().asDoubleArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const double> out = json->root().asDoubleArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView({35.5, -17.25, 0.25}),
         TestSuite::Compare::Container);
 }
@@ -3457,9 +3455,8 @@ void JsonTest::asFloatArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseFloats(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const float>> out = json->root().asFloatArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const float> out = json->root().asFloatArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView({35.5f, -17.25f, 0.25f}),
         TestSuite::Compare::Container);
 }
@@ -3504,9 +3501,8 @@ void JsonTest::asUnsignedIntArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = json->root().asUnsignedIntArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const std::uint32_t> out = json->root().asUnsignedIntArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView<std::uint32_t>({35, 17, 25}),
         TestSuite::Compare::Container);
 }
@@ -3551,9 +3547,8 @@ void JsonTest::asIntArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseInts(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> out = json->root().asIntArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const std::int32_t> out = json->root().asIntArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView<std::int32_t>({35, -17, 25}),
         TestSuite::Compare::Container);
 }
@@ -3598,9 +3593,8 @@ void JsonTest::asUnsignedLongArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> out = json->root().asUnsignedLongArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const std::uint64_t> out = json->root().asUnsignedLongArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView<std::uint64_t>({35, 17, 25}),
         TestSuite::Compare::Container);
 }
@@ -3645,9 +3639,8 @@ void JsonTest::asLongArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseLongs(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> out = json->root().asLongArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const std::int64_t> out = json->root().asLongArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView<std::int64_t>({35, -17, 25}),
         TestSuite::Compare::Container);
 }
@@ -3692,9 +3685,8 @@ void JsonTest::asSizeArray() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseSizes(json->root()));
 
-    Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> out = json->root().asSizeArray();
-    CORRADE_VERIFY(out);
-    CORRADE_COMPARE_AS(*out,
+    Containers::StridedArrayView1D<const std::size_t> out = json->root().asSizeArray();
+    CORRADE_COMPARE_AS(out,
         Containers::arrayView<std::size_t>({35, 17, 25}),
         TestSuite::Compare::Container);
 }
