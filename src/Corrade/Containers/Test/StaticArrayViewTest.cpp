@@ -172,6 +172,8 @@ void StaticArrayViewTest::constructDefault() {
     CORRADE_COMPARE(sizeB, StaticArrayView<5>::Size);
     CORRADE_COMPARE(sizeA, 5);
     CORRADE_COMPARE(sizeB, 5);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<StaticArrayView<5>>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -206,6 +208,7 @@ void StaticArrayViewTest::construct() {
         CORRADE_VERIFY(c == Array30);
     }
 
+    CORRADE_VERIFY(std::is_nothrow_constructible<StaticArrayView<5>, int*>::value);
     /* Implicit construction from pointer should not be allowed */
     CORRADE_VERIFY(!std::is_convertible<int*, StaticArrayView<5>>::value);
 }
@@ -233,6 +236,8 @@ void StaticArrayViewTest::constructFixedSize() {
         CORRADE_VERIFY(std::is_same<decltype(b), const ConstStaticArrayView<13>>::value);
         CORRADE_VERIFY(b == Array13);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StaticArrayView<15>, int[15]>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -274,6 +279,9 @@ void StaticArrayViewTest::constructDerived() {
 
     CORRADE_VERIFY(ca == &DerivedArray[0]);
     CORRADE_VERIFY(cav == &DerivedArray[0]);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StaticArrayView<5, Base>, Derived[5]>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StaticArrayView<5, Base>, Containers::StaticArrayView<5, Derived>>::value);
 }
 
 void StaticArrayViewTest::constructCopy() {

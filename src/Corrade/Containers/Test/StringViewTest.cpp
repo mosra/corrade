@@ -520,6 +520,8 @@ void StringViewTest::constructPointerFlags() {
     CORRADE_COMPARE(view.size(), 5); /* stops at the first null terminator */
     CORRADE_COMPARE(view.flags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
     CORRADE_COMPARE(static_cast<const void*>(view.data()), &string[0]);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StringView, char*, StringViewFlags>::value);
 }
 
 void StringViewTest::constructEmpty() {

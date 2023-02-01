@@ -223,6 +223,8 @@ void ArrayViewTest::constructDefault() {
     CORRADE_VERIFY(emptyB);
     CORRADE_COMPARE(sizeA, 0);
     CORRADE_COMPARE(sizeB, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<ArrayView>::value);
 }
 
 void ArrayViewTest::constructDefaultVoid() {
@@ -249,6 +251,8 @@ void ArrayViewTest::constructDefaultVoid() {
     CORRADE_VERIFY(emptyB);
     CORRADE_COMPARE(sizeA, 0);
     CORRADE_COMPARE(sizeB, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<VoidArrayView>::value);
 }
 
 void ArrayViewTest::constructDefaultConstVoid() {
@@ -275,6 +279,8 @@ void ArrayViewTest::constructDefaultConstVoid() {
     CORRADE_VERIFY(emptyB);
     CORRADE_COMPARE(sizeA, 0);
     CORRADE_COMPARE(sizeB, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<ConstVoidArrayView>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -319,6 +325,8 @@ void ArrayViewTest::construct() {
         CORRADE_VERIFY(c == Array30);
         CORRADE_COMPARE(c.size(), 20);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ArrayView, int*, std::size_t>::value);
 }
 
 void ArrayViewTest::constructVoid() {
@@ -335,6 +343,8 @@ void ArrayViewTest::constructVoid() {
     CORRADE_COMPARE(d.size(), 100);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidArrayView, int*, std::size_t>::value);
 }
 
 void ArrayViewTest::constructConstVoid() {
@@ -357,6 +367,8 @@ void ArrayViewTest::constructConstVoid() {
     CORRADE_COMPARE(data, Array30);
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(size, 100);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, int*, std::size_t>::value);
 }
 
 void ArrayViewTest::constructVoidFrom() {
@@ -367,6 +379,8 @@ void ArrayViewTest::constructVoidFrom() {
     CORRADE_COMPARE(c.size(), 13*sizeof(int));
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidArrayView, ArrayView>::value);
 }
 
 void ArrayViewTest::constructConstVoidFrom() {
@@ -384,6 +398,9 @@ void ArrayViewTest::constructConstVoidFrom() {
     constexpr ConstVoidArrayView ccc = ccb;
     CORRADE_VERIFY(ccc == Array30);
     CORRADE_COMPARE(ccc.size(), 30*sizeof(int));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, ArrayView>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, ConstArrayView>::value);
 }
 
 void ArrayViewTest::constructConstVoidFromVoid() {
@@ -395,6 +412,8 @@ void ArrayViewTest::constructConstVoidFromVoid() {
     CORRADE_VERIFY(cc == b);
     CORRADE_COMPARE(c.size(), 13*sizeof(int));
     CORRADE_COMPARE(cc.size(), 13*sizeof(int));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, VoidArrayView>::value);
 }
 
 void ArrayViewTest::constructNullptrSize() {
@@ -440,6 +459,7 @@ void ArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(b.size(), 13);
     }
 
+    CORRADE_VERIFY(std::is_nothrow_constructible<ArrayView, int(&)[10]>::value);
     /* Implicit construction from pointer should not be allowed */
     CORRADE_VERIFY(!std::is_convertible<int*, ArrayView>::value);
 }
@@ -452,6 +472,8 @@ void ArrayViewTest::constructFixedSizeVoid() {
     CORRADE_COMPARE(b.size(), 13*sizeof(int));
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidArrayView, int(&)[10]>::value);
 }
 
 void ArrayViewTest::constructFixedSizeConstVoid() {
@@ -465,6 +487,8 @@ void ArrayViewTest::constructFixedSizeConstVoid() {
     CORRADE_VERIFY(cb == Array30);
     CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 30*sizeof(int));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, int(&)[10]>::value);
 }
 
 void ArrayViewTest::constructFromStatic() {
@@ -493,6 +517,8 @@ void ArrayViewTest::constructFromStatic() {
         CORRADE_VERIFY(b == cav);
         CORRADE_COMPARE(b.size(), 13);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ArrayView, StaticArrayView<10, int>>::value);
 }
 
 void ArrayViewTest::constructFromStaticVoid() {
@@ -503,6 +529,8 @@ void ArrayViewTest::constructFromStaticVoid() {
     CORRADE_COMPARE(c.size(), 13*sizeof(int));
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidArrayView, StaticArrayView<10, int>>::value);
 }
 
 void ArrayViewTest::constructFromStaticConstVoid() {
@@ -520,6 +548,9 @@ void ArrayViewTest::constructFromStaticConstVoid() {
     constexpr ConstVoidArrayView ccc = ccb;
     CORRADE_VERIFY(ccc == Array13);
     CORRADE_COMPARE(ccc.size(), 13*sizeof(int));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, StaticArrayView<10, int>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidArrayView, StaticArrayView<10, const int>>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -567,6 +598,9 @@ void ArrayViewTest::constructDerived() {
     CORRADE_VERIFY(cav == &DerivedArray[0]);
     CORRADE_COMPARE(ca.size(), 5);
     CORRADE_COMPARE(cav.size(), 5);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::ArrayView<Base>, Derived(&)[5]>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::ArrayView<Base>, Containers::ArrayView<Derived>>::value);
 }
 
 void ArrayViewTest::constructCopy() {

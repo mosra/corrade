@@ -493,6 +493,8 @@ void StridedArrayViewTest::constructDefault() {
     CORRADE_COMPARE(sizeB, 0);
     CORRADE_COMPARE(strideA, 0);
     CORRADE_COMPARE(strideB, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<StridedArrayView1Di>::value);
 }
 
 void StridedArrayViewTest::constructDefaultVoid() {
@@ -517,6 +519,8 @@ void StridedArrayViewTest::constructDefaultVoid() {
     CORRADE_COMPARE(cb.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
     CORRADE_COMPARE(cb.stride(), 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<VoidStridedArrayView1D>::value);
 }
 
 void StridedArrayViewTest::constructDefaultConstVoid() {
@@ -541,6 +545,8 @@ void StridedArrayViewTest::constructDefaultConstVoid() {
     CORRADE_COMPARE(cb.size(), 0);
     CORRADE_COMPARE(ca.stride(), 0);
     CORRADE_COMPARE(cb.stride(), 0);
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<ConstVoidStridedArrayView1D>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -618,6 +624,8 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cc2[2], 7853268);
         CORRADE_COMPARE(cc2[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, ArrayView<int>, int*, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructVoid() {
@@ -633,6 +641,8 @@ void StridedArrayViewTest::constructVoid() {
     CORRADE_COMPARE(b.stride(), 8);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, ArrayView<int>, int*, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructConstVoid() {
@@ -652,6 +662,8 @@ void StridedArrayViewTest::constructConstVoid() {
     CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 8);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, ArrayView<int>, int*, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructVoidFrom() {
@@ -667,6 +679,8 @@ void StridedArrayViewTest::constructVoidFrom() {
     CORRADE_COMPARE(bv.stride(), 8);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, StridedArrayView1Di>::value);
 }
 
 void StridedArrayViewTest::constructConstVoidFrom() {
@@ -691,6 +705,9 @@ void StridedArrayViewTest::constructConstVoidFrom() {
     CORRADE_VERIFY(ccbv.data() == Struct);
     CORRADE_COMPARE(ccbv.size(), 10);
     CORRADE_COMPARE(ccbv.stride(), 8);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, ConstStridedArrayView1Di>::value);
 }
 
 void StridedArrayViewTest::constructArray() {
@@ -822,6 +839,8 @@ void StridedArrayViewTest::constructSizeStride() {
         CORRADE_COMPARE(cc[2], 7853268);
         CORRADE_COMPARE(cc[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, ArrayView<int>, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructSizeStrideVoid() {
@@ -836,6 +855,8 @@ void StridedArrayViewTest::constructSizeStrideVoid() {
     CORRADE_COMPARE(b.stride(), 8);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, ArrayView<int>, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructSizeStrideConstVoid() {
@@ -854,6 +875,8 @@ void StridedArrayViewTest::constructSizeStrideConstVoid() {
     CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 8);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, ArrayView<int>, std::size_t, std::ptrdiff_t>::value);
 }
 
 void StridedArrayViewTest::constructSizeStrideArray() {
@@ -970,6 +993,8 @@ void StridedArrayViewTest::constructPointerSize() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, int*, std::size_t>::value);
 }
 
 void StridedArrayViewTest::constructPointerSizeVoid() {
@@ -981,6 +1006,8 @@ void StridedArrayViewTest::constructPointerSizeVoid() {
     CORRADE_COMPARE(b.stride(), 4);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, int*, std::size_t>::value);
 }
 
 void StridedArrayViewTest::constructPointerSizeConstVoid() {
@@ -995,6 +1022,8 @@ void StridedArrayViewTest::constructPointerSizeConstVoid() {
     CORRADE_VERIFY(cb.data() == Array10);
     CORRADE_COMPARE(cb.size(), 6);
     CORRADE_COMPARE(cb.stride(), 4);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, const int*, std::size_t>::value);
 }
 
 void StridedArrayViewTest::constructFixedSize() {
@@ -1033,6 +1062,8 @@ void StridedArrayViewTest::constructFixedSize() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, int(&)[3]>::value);
 }
 
 void StridedArrayViewTest::constructFixedSizeVoid() {
@@ -1044,6 +1075,8 @@ void StridedArrayViewTest::constructFixedSizeVoid() {
     CORRADE_COMPARE(b.stride(), 4);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, int(&)[3]>::value);
 }
 
 void StridedArrayViewTest::constructFixedSizeConstVoid() {
@@ -1058,6 +1091,8 @@ void StridedArrayViewTest::constructFixedSizeConstVoid() {
     CORRADE_VERIFY(cb.data() == Array10);
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 4);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, const int[3]>::value);
 }
 
 /* Needs to be here in order to use it in constexpr */
@@ -1109,6 +1144,9 @@ void StridedArrayViewTest::constructDerived() {
     CORRADE_COMPARE(ca.stride(), 2);
     CORRADE_COMPARE(cav.size(), 5);
     CORRADE_COMPARE(cav.stride(), 2);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StridedArrayView1D<Base>, Derived(&)[5]>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StridedArrayView1D<Base>, Containers::StridedArrayView1D<Derived>>::value);
 }
 
 void StridedArrayViewTest::constructView() {
@@ -1150,6 +1188,8 @@ void StridedArrayViewTest::constructView() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, ArrayView<int>>::value);
 }
 
 void StridedArrayViewTest::constructViewVoid() {
@@ -1162,6 +1202,8 @@ void StridedArrayViewTest::constructViewVoid() {
     CORRADE_COMPARE(b.stride(), 4);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, ArrayView<int>>::value);
 }
 
 void StridedArrayViewTest::constructViewConstVoid() {
@@ -1178,6 +1220,8 @@ void StridedArrayViewTest::constructViewConstVoid() {
     CORRADE_VERIFY(cb.data() == Array10);
     CORRADE_COMPARE(cb.size(), 10);
     CORRADE_COMPARE(cb.stride(), 4);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, ArrayView<const int>>::value);
 }
 
 void StridedArrayViewTest::constructStaticView() {
@@ -1219,6 +1263,8 @@ void StridedArrayViewTest::constructStaticView() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
     }
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView1Di, StaticArrayView<10, int>>::value);
 }
 
 void StridedArrayViewTest::constructStaticViewVoid() {
@@ -1231,6 +1277,8 @@ void StridedArrayViewTest::constructStaticViewVoid() {
     CORRADE_COMPARE(b.stride(), 4);
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView1D, StaticArrayView<10, int>>::value);
 }
 
 void StridedArrayViewTest::constructStaticViewConstVoid() {
@@ -1252,6 +1300,9 @@ void StridedArrayViewTest::constructStaticViewConstVoid() {
     CORRADE_VERIFY(ccc.data() == Array10);
     CORRADE_COMPARE(ccc.size(), 10);
     CORRADE_COMPARE(ccc.stride(), 4);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, StaticArrayView<10, int>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView1D, StaticArrayView<10, const int>>::value);
 }
 
 void StridedArrayViewTest::constructCopy() {
@@ -1321,6 +1372,8 @@ void StridedArrayViewTest::construct3DDefault() {
     CORRADE_COMPARE(sizeB, (Size3D{0, 0, 0}));
     CORRADE_COMPARE(strideA, (Stride3D{0, 0, 0}));
     CORRADE_COMPARE(strideB, (Stride3D{0, 0, 0}));
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DDefaultVoid() {
@@ -1353,6 +1406,8 @@ void StridedArrayViewTest::construct3DDefaultVoid() {
     CORRADE_COMPARE(sizeB, (Size3D{0, 0, 0}));
     CORRADE_COMPARE(strideA, (Stride3D{0, 0, 0}));
     CORRADE_COMPARE(strideB, (Stride3D{0, 0, 0}));
+
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<VoidStridedArrayView3D>::value);
 }
 
 void StridedArrayViewTest::construct3DDefaultConstVoid() {
@@ -1385,8 +1440,9 @@ void StridedArrayViewTest::construct3DDefaultConstVoid() {
     CORRADE_COMPARE(sizeB, (Size3D{0, 0, 0}));
     CORRADE_COMPARE(strideA, (Stride3D{0, 0, 0}));
     CORRADE_COMPARE(strideB, (Stride3D{0, 0, 0}));
-}
 
+    CORRADE_VERIFY(std::is_nothrow_default_constructible<ConstVoidStridedArrayView1D>::value);
+}
 
 /* Needs to be here in order to use it in constexpr */
 constexpr const struct Plane {
@@ -1430,6 +1486,8 @@ void StridedArrayViewTest::construct3D() {
     CORRADE_COMPARE(cb[0][0][1], 16);
     CORRADE_COMPARE(cb[0][0][2], 7853268);
     CORRADE_COMPARE(cb[0][1][1], 234810);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, ArrayView<int>, int*, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DVoid() {
@@ -1442,6 +1500,8 @@ void StridedArrayViewTest::construct3DVoid() {
     CORRADE_COMPARE(b.stride(), (Stride3D{48, 24, 8}));
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView3D, ArrayView<int>, int*, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DConstVoid() {
@@ -1458,6 +1518,8 @@ void StridedArrayViewTest::construct3DConstVoid() {
     CORRADE_COMPARE(cb.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(cb.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(cb.stride(), (Stride3D{48, 24, 8}));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView3D, ArrayView<int>, int*, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DVoidFrom() {
@@ -1470,6 +1532,8 @@ void StridedArrayViewTest::construct3DVoidFrom() {
     CORRADE_COMPARE(bv.stride(), (Stride3D{48, 24, 8}));
 
     /** @todo constexpr but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView3D, StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DConstVoidFrom() {
@@ -1491,6 +1555,9 @@ void StridedArrayViewTest::construct3DConstVoidFrom() {
     CORRADE_VERIFY(ccbv.data() == Cube);
     CORRADE_COMPARE(ccbv.size(), (Size3D{2, 2, 3}));
     CORRADE_COMPARE(ccbv.stride(), (Stride3D{48, 24, 8}));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView3D, StridedArrayView3Di>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView3D, ConstStridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::construct3DNullptrSize() {
@@ -1571,6 +1638,8 @@ void StridedArrayViewTest::construct3DPackedSizeStride() {
     CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
     CORRADE_COMPARE(ca[1][1][2], 22);
     CORRADE_COMPARE(ca[0][2][3], 13);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, ArrayView<int>, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DPackedSizeStrideVoid() {
@@ -1592,6 +1661,8 @@ void StridedArrayViewTest::construct3DPackedSizeStrideVoid() {
     CORRADE_COMPARE(a.stride(), (Stride3D{3*5*4, 5*4, 4}));
 
     /** @todo constexpr void but not const? c++14? */
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<VoidStridedArrayView3D, ArrayView<int>, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DPackedSizeStrideConstVoid() {
@@ -1605,6 +1676,8 @@ void StridedArrayViewTest::construct3DPackedSizeStrideConstVoid() {
     CORRADE_VERIFY(ca.data() == PackedData);
     CORRADE_COMPARE(ca.size(), (Size3D{2, 3, 5}));
     CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstVoidStridedArrayView3D, ArrayView<int>, Size3D, Stride3D>::value);
 }
 
 void StridedArrayViewTest::construct3DPackedSizeOnly() {
@@ -1622,6 +1695,8 @@ void StridedArrayViewTest::construct3DPackedSizeOnly() {
     CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
     CORRADE_COMPARE(ca[1][1][2], 22);
     CORRADE_COMPARE(ca[0][2][3], 13);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, ArrayView<int>, Size3D>::value);
 }
 
 void StridedArrayViewTest::construct3DOneSizeZero() {
@@ -1753,6 +1828,8 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(ca.stride(), (Stride2D{2, 2}));
     CORRADE_COMPARE(cav.size(), (Size2D{5, 1}));
     CORRADE_COMPARE(cav.stride(), (Stride2D{2, 2}));
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StridedArrayView3D<Base>, Containers::StridedArrayView3D<Derived>>::value);
 }
 
 void StridedArrayViewTest::construct3DView() {
