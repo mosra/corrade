@@ -222,7 +222,15 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * in a @cpp constexpr @ce context instead.
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        template<unsigned d = dimensions
+            #ifndef CORRADE_MSVC_COMPATIBILITY
+            /* This makes MSVC without /permissive- fail to match the
+               constructor. It's present just to avoid having this overload
+               present in multi-dimensional cases, without it it will fail to
+               compile somewhere deeper, causing an uglier error message. */
+            , class = typename std::enable_if<d == 1>::type
+            #endif
+        >
         #endif
         /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept
             #ifndef CORRADE_MSVC_COMPATIBILITY
@@ -244,13 +252,31 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @cpp char* @ce.
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        template<unsigned d = dimensions
+            #ifndef CORRADE_MSVC_COMPATIBILITY
+            /* This makes MSVC without /permissive- fail to match the
+               constructor with "could not deduce template argument for
+               '<unnamed-symbol>'". It's present just to avoid having this
+               overload picked in multi-dimensional cases, without it it will
+               fail to compile somewhere deeper with an uglier error. */
+            , class = typename std::enable_if<d == 1>::type
+            #endif
+        >
         #endif
         constexpr /*implicit*/ BasicStridedBitArrayView(T* data, std::size_t offset, std::size_t size) noexcept;
 
         /** @overload */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        template<unsigned d = dimensions
+            #ifndef CORRADE_MSVC_COMPATIBILITY
+            /* This makes MSVC without /permissive- fail to match the
+               constructor with "could not deduce template argument for
+               '<unnamed-symbol>'". It's present just to avoid having this
+               overload picked in multi-dimensional cases, without it it will
+               fail to compile somewhere deeper with an uglier error. */
+            , class = typename std::enable_if<d == 1>::type
+            #endif
+        >
         #endif
         constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t, std::size_t offset, std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(nullptr), offset, size} {}
 
@@ -853,7 +879,11 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
         Implementation::sizeWithOffset(size, offset, typename Implementation::GenerateSequence<dimensions>::Type{}))},
     _stride{stride} {}
 
-template<unsigned dimensions, class T> template<unsigned, class> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(T* data, std::size_t offset, const std::size_t size) noexcept:
+template<unsigned dimensions, class T> template<unsigned
+    #ifndef CORRADE_MSVC_COMPATIBILITY
+    , class /* See the declaration for details */
+    #endif
+> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(T* data, std::size_t offset, const std::size_t size) noexcept:
     _data{data},
     _sizeOffset{
         (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset < 8,
@@ -864,7 +894,7 @@ template<unsigned dimensions, class T> template<unsigned, class> constexpr Basic
     _stride{1} {}
 
 #ifdef CORRADE_MSVC_COMPATIBILITY /* See the declaration for details */
-template<unsigned dimensions, class T> template<unsigned, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
+template<unsigned dimensions, class T> template<unsigned> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
 #endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool BasicStridedBitArrayView<dimensions, T>::isContiguous() const {
