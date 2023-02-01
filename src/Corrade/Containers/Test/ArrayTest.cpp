@@ -219,13 +219,19 @@ void ArrayTest::constructEmpty() {
 }
 
 void ArrayTest::constructNullptr() {
+    /* GCC 4.8 tries to use the deleted Array copy constructor with = nullptr,
+       probably due to the workaround to avoid Array{0} being ambiguous between
+       a std::size_t and a nullptr constructor */
+    /** @todo drop this once the single-argument size constructor is
+        deprecated in favor of explicit DefaultInit / ValueInit */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
     const Array a{nullptr};
+    #else
+    const Array a = nullptr;
+    #endif
     CORRADE_VERIFY(a == nullptr);
     CORRADE_VERIFY(a.isEmpty());
     CORRADE_COMPARE(a.size(), 0);
-
-    /* Implicit construction from nullptr should be allowed */
-    CORRADE_VERIFY(std::is_convertible<std::nullptr_t, Array>::value);
 }
 
 void ArrayTest::construct() {
