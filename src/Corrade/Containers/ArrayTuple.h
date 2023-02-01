@@ -325,7 +325,8 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         /** @overload */
         /* Somehow the any-dimension overload below doesn't accept a single
            number for the size and it needs to be wrapped in {}s, so I'm
-           keeping this overload also */
+           keeping this overload also. Also can't just create a Size1D here
+           and delegate because that would need StridedDimensions included. */
         template<class T> /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::ValueInit, size, Implementation::dataRef(outputView)} {
             /* Populate size of the output view. Pointer gets updated inside
                create(). */
@@ -413,7 +414,8 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         /** @overload */
         /* Somehow the any-dimension overload below doesn't accept a single
            number for the size and it needs to be wrapped in {}s, so I'm
-           keeping this overload also */
+           keeping this overload also. Also can't just create a Size1D here
+           and delegate because that would need StridedDimensions included. */
         template<class T> /*implicit*/ Item(Corrade::NoInitT, std::size_t size, StridedArrayView1D<T>& outputView): Item{Corrade::NoInit, size, Implementation::dataRef(outputView)} {
             /* Populate size of the output view. Pointer gets updated inside
                create(). */
