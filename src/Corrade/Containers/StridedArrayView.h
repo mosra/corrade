@@ -2074,7 +2074,7 @@ namespace Implementation {
     };
     template<class T> struct StridedElement<1, T> {
         static T& get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size1D&, const Stride1D& stride, std::size_t i) {
-            return *(reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]));
+            return *reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]);
         }
     };
 }
@@ -2270,7 +2270,7 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
     Containers::Stride<dimensions> stride = _stride;
     std::swap(size._data[dimensionA], size._data[dimensionB]);
     std::swap(stride._data[dimensionA], stride._data[dimensionB]);
-    return StridedArrayView{size, stride, _data};
+    return StridedArrayView<dimensions, T>{size, stride, _data};
 }
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::flipped() const {
@@ -2279,7 +2279,7 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
     ErasedType* data = static_cast<ArithmeticType*>(_data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
     Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] *= -1;
-    return StridedArrayView{_size, stride, data};
+    return StridedArrayView<dimensions, T>{_size, stride, data};
 }
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::broadcasted(std::size_t size) const {
@@ -2294,7 +2294,7 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
     size_._data[dimension] = size;
     Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] = 0;
-    return StridedArrayView{size_, stride, _data};
+    return StridedArrayView<dimensions, T>{size_, stride, _data};
 }
 
 }}
