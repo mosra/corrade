@@ -196,15 +196,15 @@ void ArrayTupleTest::constructEmptyArrays() {
         CORRADE_COMPARE(ints.size(), 0);
         CORRADE_VERIFY(!ints.data());
 
-        /* last dimension stride is always set for strided views */
+        /* Last dimension stride is always set for strided views */
         CORRADE_COMPARE(strided.size(), 0);
-        CORRADE_VERIFY(!strided.data());
         CORRADE_COMPARE(strided.stride(), 8);
+        CORRADE_VERIFY(!strided.data());
         CORRADE_COMPARE(strided3D.size(), (Size3D{0, 0, 0}));
         CORRADE_COMPARE(strided3D.stride(),  (Stride3D{0, 0, 4}));
         CORRADE_VERIFY(!strided3D.data());
 
-        /* second dimension size and stride is always set for erased views */
+        /* Second dimension size and stride is always set for erased views */
         CORRADE_COMPARE(stridedErased.size(), (Size2D{0, 4}));
         CORRADE_COMPARE(stridedErased.stride(),  (Stride2D{4, 1}));
         CORRADE_VERIFY(!stridedErased.data());
@@ -456,6 +456,7 @@ void ArrayTupleTest::constructNoInit() {
         CORRADE_COMPARE((bits.size() + 7)/8, 2);
         CORRADE_COMPARE((initializedBits.size() + 7)/8, 2);
         for(std::size_t i = 0; i != 2; ++i) {
+            CORRADE_ITERATION(i);
             CORRADE_COMPARE(bits.data()[i], '\xce');
             CORRADE_COMPARE(initializedBits.data()[i], 0);
         }
