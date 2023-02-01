@@ -231,15 +231,19 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void every();
     void everyNegative();
+    void everyNegativeZeroSize();
     void everyInvalid();
     void every2D();
     void every2DNegative();
+    void every2DNegativeZeroSize();
     void every2DInvalid();
     void every2DFirstDimension();
 
     void transposed();
     void flipped();
+    void flippedZeroSize();
     void flipped3D();
+    void flipped3DZeroSize();
     void broadcasted();
     void broadcasted3D();
     void broadcastedInvalid();
@@ -434,15 +438,19 @@ StridedArrayViewTest::StridedArrayViewTest() {
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
+              &StridedArrayViewTest::everyNegativeZeroSize,
               &StridedArrayViewTest::everyInvalid,
               &StridedArrayViewTest::every2D,
               &StridedArrayViewTest::every2DNegative,
+              &StridedArrayViewTest::every2DNegativeZeroSize,
               &StridedArrayViewTest::every2DInvalid,
               &StridedArrayViewTest::every2DFirstDimension,
 
               &StridedArrayViewTest::transposed,
               &StridedArrayViewTest::flipped,
+              &StridedArrayViewTest::flippedZeroSize,
               &StridedArrayViewTest::flipped3D,
+              &StridedArrayViewTest::flipped3DZeroSize,
               &StridedArrayViewTest::broadcasted,
               &StridedArrayViewTest::broadcasted3D,
               &StridedArrayViewTest::broadcastedInvalid,
@@ -3442,6 +3450,18 @@ void StridedArrayViewTest::everyNegative() {
     CORRADE_COMPARE(e[0], 7);
 }
 
+void StridedArrayViewTest::everyNegativeZeroSize() {
+    int data[1]{};
+    StridedArrayView1Di a{data, 0, 8};
+
+    /* Should not result in any difference in the data pointer -- especially
+       not any overflowing values */
+    StridedArrayView1Di b = a.every(-1);
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(b.stride(), -8);
+}
+
 void StridedArrayViewTest::everyInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -3484,6 +3504,20 @@ void StridedArrayViewTest::every2DNegative() {
     CORRADE_COMPARE(b[1][0], 7);
     CORRADE_COMPARE(b[1][1], 4);
     CORRADE_COMPARE(b[1][2], 1);
+}
+
+void StridedArrayViewTest::every2DNegativeZeroSize() {
+    /* Same as every2DNegative() above, except that the second dimension size
+       is 0 */
+    int data[1]{};
+    StridedArrayView2Di a{data, {3, 0}, {32, 4}};
+
+    /* Should not result in any difference in the data pointer -- especially
+       not any overflowing values */
+    StridedArrayView2Di b = a.every({2, -3});
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), (Size2D{2, 0}));
+    CORRADE_COMPARE(b.stride(), (Stride2D{64, -12}));
 }
 
 void StridedArrayViewTest::every2DInvalid() {
@@ -3561,6 +3595,18 @@ void StridedArrayViewTest::flipped() {
     CORRADE_VERIFY(a.flipped<0>().flipped<0>().data() == data);
 }
 
+void StridedArrayViewTest::flippedZeroSize() {
+    int data[1]{};
+    StridedArrayView1Di a{data, 0, 8};
+
+    /* Should not result in any difference in the data pointer -- especially
+       not any overflowing values */
+    StridedArrayView1Di b = a.flipped<0>();
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(b.stride(), -8);
+}
+
 void StridedArrayViewTest::flipped3D() {
     struct {
         int value;
@@ -3584,6 +3630,19 @@ void StridedArrayViewTest::flipped3D() {
     CORRADE_COMPARE(b[1][0][1], 21);
     CORRADE_COMPARE(b[1][1][1], 17);
     CORRADE_COMPARE(b[1][2][1], 13);
+}
+
+void StridedArrayViewTest::flipped3DZeroSize() {
+    /* Same as flipped3D() above, except that the second dimension size is 0 */
+    int data[1]{};
+    StridedArrayView3Di a{data, {2, 0, 4}, {96, 32, 8}};
+
+    /* Should not result in any difference in the data pointer -- especially
+       not any overflowing values */
+    StridedArrayView3Di b = a.flipped<1>();
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 0, 4}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{96, -32, 8}));
 }
 
 void StridedArrayViewTest::broadcasted() {
