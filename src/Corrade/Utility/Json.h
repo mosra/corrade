@@ -716,7 +716,11 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::isParsed() is already set on the array, returns the
          * array view directly, otherwise marks it as parsed first. Expects
          * that @p token references a token owned by this instance.
-         * @see @ref JsonToken::asArray()
+         * @see @ref JsonToken::asArray(), @ref parseBitArray(),
+         *      @ref parseDoubleArray(), @ref parseFloatArray(),
+         *      @ref parseUnsignedIntArray(), @ref parseIntArray(),
+         *      @ref parseUnsignedLongArray(), @ref parseLongArray(),
+         *      @ref parseSizeArray()
          */
         Containers::Optional<JsonArrayView> parseArray(const JsonToken& token);
 
@@ -740,7 +744,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref Containers::NullOpt. If @ref JsonToken::isParsed() is already
          * set, returns the cached value, otherwise caches the parsed result.
          * Expects that @p token references a token owned by this instance.
-         * @see @ref JsonToken::asBool()
+         * @see @ref JsonToken::asBool(), @ref parseBoolArray()
          */
         Containers::Optional<bool> parseBool(const JsonToken& token);
 
@@ -753,7 +757,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::Double, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asDouble()
+         * @see @ref JsonToken::asDouble(), @ref parseDoubleArray()
          */
         Containers::Optional<double> parseDouble(const JsonToken& token);
 
@@ -768,7 +772,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::Float, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asFloat()
+         * @see @ref JsonToken::asFloat(), @ref parseFloatArray()
          */
         Containers::Optional<float> parseFloat(const JsonToken& token);
 
@@ -782,7 +786,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * already parsed as @ref JsonToken::ParsedType::UnsignedInt, returns
          * the cached value, otherwise caches the parsed result. Expects that
          * @p token references a token owned by this instance.
-         * @see @ref JsonToken::asUnsignedInt(), @ref parseSize()
+         * @see @ref JsonToken::asUnsignedInt(), @ref parseSize(),
+         *      @ref parseUnsignedIntArray()
          */
         Containers::Optional<std::uint32_t> parseUnsignedInt(const JsonToken& token);
 
@@ -796,7 +801,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::Int, returns the cached value, otherwise
          * caches the parsed result. Expects that @p token references a token
          * owned by this instance.
-         * @see @ref JsonToken::asInt()
+         * @see @ref JsonToken::asInt(), @ref parseIntArray()
          */
         Containers::Optional<std::int32_t> parseInt(const JsonToken& token);
 
@@ -811,7 +816,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::UnsignedLong, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asUnsignedLong(), @ref parseSize()
+         * @see @ref JsonToken::asUnsignedLong(), @ref parseSize(),
+         *      @ref parseUnsignedLongArray()
          */
         Containers::Optional<std::uint64_t> parseUnsignedLong(const JsonToken& token);
 
@@ -826,7 +832,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * @ref JsonToken::ParsedType::Long, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asLong()
+         * @see @ref JsonToken::asLong(), @ref parseLongArray()
          */
         Containers::Optional<std::int64_t> parseLong(const JsonToken& token);
 
@@ -839,7 +845,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * as @ref JsonToken::ParsedType::Size, returns the cached value,
          * otherwise caches the parsed result. Expects that @p token references
          * a token owned by this instance.
-         * @see @ref JsonToken::asSize()
+         * @see @ref JsonToken::asSize(), @ref parseSizeArray()
          */
         Containers::Optional<std::size_t> parseSize(const JsonToken& token);
 
@@ -872,7 +878,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref Json::Option::ParseLiterals, @ref parseLiterals(),
-         *      @ref parseBool(), @ref JsonToken::asBitArray()
+         *      @ref parseBool(), @ref parseArray(),
+         *      @ref JsonToken::asBitArray()
          */
         Containers::Optional<Containers::StridedBitArrayView1D> parseBitArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -898,7 +905,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref Json::Option::ParseDoubles, @ref parseDoubles(),
-         *      @ref parseDouble(), @ref JsonToken::asDoubleArray()
+         *      @ref parseDouble(), @ref parseArray(),
+         *      @ref JsonToken::asDoubleArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const double>> parseDoubleArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -919,7 +927,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref Json::Option::ParseFloats, @ref parseFloats(),
-         *      @ref parseFloat(), @ref JsonToken::asFloatArray()
+         *      @ref parseFloat(), @ref parseArray(),
+         *      @ref JsonToken::asFloatArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const float>> parseFloatArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -939,7 +948,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref parseUnsignedInts(), @ref parseUnsignedInt(),
-         *      @ref JsonToken::asUnsignedIntArray(), @ref parseSizeArray()
+         *      @ref parseSizeArray(), @ref parseArray(),
+         *      @ref JsonToken::asUnsignedIntArray(),
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> parseUnsignedIntArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -957,7 +967,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
-         * @see @ref parseInts(), @ref parseInt(), @ref JsonToken::asIntArray()
+         * @see @ref parseInts(), @ref parseInt(), @ref parseArray(),
+         *      @ref JsonToken::asIntArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> parseIntArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -977,7 +988,8 @@ class CORRADE_UTILITY_EXPORT Json {
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
          * @see @ref parseUnsignedLongs(), @ref parseUnsignedLong(),
-         *      @ref JsonToken::asUnsignedLongArray(), @ref parseSizeArray()
+         *      @ref parseSizeArray(), @ref parseArray(),
+         *      @ref JsonToken::asUnsignedLongArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> parseUnsignedLongArray(const JsonToken& token, std::size_t expectedSize = 0);
 
@@ -996,7 +1008,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * otherwise caches the parsed results. Expects that @p token
          * references a token owned by this instance, the returned view points
          * to data owned by this instance.
-         * @see @ref parseLongs(), @ref parseLong(),
+         * @see @ref parseLongs(), @ref parseLong(), @ref parseArray(),
          *      @ref JsonToken::asLongArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> parseLongArray(const JsonToken& token, std::size_t expectedSize = 0);
@@ -1007,7 +1019,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * Convenience function that calls into @ref parseUnsignedIntArray() on
          * @ref CORRADE_TARGET_32BIT "32-bit targets" and into
          * @ref parseUnsignedLongArray() on 64-bit.
-         * @see @ref parseSizes(), @ref parseSize(),
+         * @see @ref parseSizes(), @ref parseSize(), @ref parseArray(),
          *      @ref JsonToken::asSizeArray()
          */
         Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> parseSizeArray(const JsonToken& token, std::size_t expectedSize = 0);
@@ -1534,7 +1546,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref Json instance.
          *
          * @see @ref type(), @ref Json::Option::ParseLiterals,
-         *      @ref Json::parseLiterals(), @ref Json::parseArray()
+         *      @ref Json::parseLiterals(), @ref Json::parseArray(),
+         *      @ref asBitArray(), @ref asDoubleArray(), @ref asFloatArray(),
+         *      @ref asUnsignedIntArray(), @ref asIntArray(),
+         *      @ref asUnsignedLongArray(), @ref asLongArray(),
+         *      @ref asSizeArray()
          */
         JsonArrayView asArray() const;
 
@@ -1691,6 +1707,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the value is already parsed as a
          * @ref ParsedType::Size. If not, use @ref Json::parseSize() instead.
+         * @see @ref Json::parseSizes(), @ref asSizeArray()
          */
         std::size_t asSize() const;
 
@@ -1727,7 +1744,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref asBool()
+         * @see @ref type(), @ref asBool(), @ref asArray()
          */
         Containers::StridedBitArrayView1D asBitArray(std::size_t expectedSize = 0) const;
 
@@ -1757,7 +1774,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref parsedType(), @ref asDouble()
+         * @see @ref type(), @ref parsedType(), @ref asDouble(), @ref asArray()
          */
         Containers::StridedArrayView1D<const double> asDoubleArray(std::size_t expectedSize = 0) const;
 
@@ -1779,7 +1796,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref parsedType(), @ref asFloat()
+         * @see @ref type(), @ref parsedType(), @ref asFloat(), @ref asArray()
          */
         Containers::StridedArrayView1D<const float> asFloatArray(std::size_t expectedSize = 0) const;
 
@@ -1802,7 +1819,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
          * @see @ref type(), @ref parsedType(), @ref asUnsignedInt(),
-         *      @ref asSizeArray()
+         *      @ref asSizeArray(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::uint32_t> asUnsignedIntArray(std::size_t expectedSize = 0) const;
 
@@ -1824,7 +1841,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref parsedType(), @ref asInt()
+         * @see @ref type(), @ref parsedType(), @ref asInt(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::int32_t> asIntArray(std::size_t expectedSize = 0) const;
 
@@ -1847,7 +1864,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
          * @see @ref type(), @ref parsedType(), @ref asUnsignedLong(),
-         *      @ref asSizeArray()
+         *      @ref asSizeArray(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::uint64_t> asUnsignedLongArray(std::size_t expectedSize = 0) const;
 
@@ -1869,7 +1886,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref parsedType(), @ref asLong()
+         * @see @ref type(), @ref parsedType(), @ref asLong(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::int64_t> asLongArray(std::size_t expectedSize = 0) const;
 
@@ -1889,7 +1906,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * The @p expectedSize parameter is ignored on a @ref CORRADE_NO_ASSERT
          * build.
-         * @see @ref type(), @ref parsedType(), @ref asSize()
+         * @see @ref type(), @ref parsedType(), @ref asSize(), @ref asArray()
          */
         Containers::StridedArrayView1D<const std::size_t> asSizeArray(std::size_t expectedSize = 0) const;
 
