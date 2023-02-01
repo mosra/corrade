@@ -85,6 +85,7 @@ corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
 corrade_add_test(ContainersStaticArrayViewStlTest StaticArrayViewStlTest.cpp)
 corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
 corrade_add_test(ContainersStridedArrayViewStlTest StridedArrayViewStlTest.cpp)
+corrade_add_test(ContainersStridedBitArrayViewTest StridedBitArrayViewTest.cpp)
 corrade_add_test(ContainersStridedDimensionsTest StridedDimensionsTest.cpp)
 corrade_add_test(ContainersStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersStringIterableTest StringIterableTest.cpp LIBRARIES CorradeTestSuiteTestLib)
@@ -114,6 +115,7 @@ set_property(TARGET
     ContainersPointerTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest
+    ContainersStridedBitArrayViewTest
     ContainersStridedDimensionsTest
     ContainersStringTest
     ContainersStringViewTest

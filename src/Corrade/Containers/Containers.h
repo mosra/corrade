@@ -78,6 +78,18 @@ template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
 template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 
+template<unsigned, class> class BasicStridedBitArrayView;
+template<unsigned dimensions> using StridedBitArrayView = BasicStridedBitArrayView<dimensions, const char>;
+typedef StridedBitArrayView<1> StridedBitArrayView1D;
+typedef StridedBitArrayView<2> StridedBitArrayView2D;
+typedef StridedBitArrayView<3> StridedBitArrayView3D;
+typedef StridedBitArrayView<4> StridedBitArrayView4D;
+template<unsigned dimensions> using MutableStridedBitArrayView = BasicStridedBitArrayView<dimensions, char>;
+typedef MutableStridedBitArrayView<1> MutableStridedBitArrayView1D;
+typedef MutableStridedBitArrayView<2> MutableStridedBitArrayView2D;
+typedef MutableStridedBitArrayView<3> MutableStridedBitArrayView3D;
+typedef MutableStridedBitArrayView<4> MutableStridedBitArrayView4D;
+
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
 
 template<class> class Iterable;

@@ -26,7 +26,7 @@
 
 #include <cstdint>
 
-#include "Corrade/Containers/BitArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Utility/Debug.h"
 
 using namespace Corrade;
@@ -37,6 +37,40 @@ int main() {
 const std::uint64_t data[]{0b00'0101'0101'0011'0011'0000'1111 << 5};
 Utility::Debug{} << Containers::BitArrayView{data, 5, 26};
 /* [BitArrayView-operator<<] */
+}
+
+{
+/* [StridedBitArrayView-usage] */
+const char data[]{0b1111, 0b1100, 0b0011, 0b0000};
+Containers::BitArrayView bits{data, 0, 32};
+
+/* 1, 0, 1, 0 */
+Containers::StridedBitArrayView1D a{bits, 4, 8};
+/* [StridedBitArrayView-usage] */
+}
+
+{
+/* [StridedBitArrayView-usage-reshape] */
+const std::uint8_t data[]{
+    0b0000'0000,
+    0b0011'1100,
+    0b0011'1100,
+    0b0000'0000,
+};
+Containers::BitArrayView bits{data, 0, 32};
+
+/* square[1][3] to square[2][5] is all 1s */
+Containers::StridedBitArrayView2D a{bits, {4, 8}, {8, 1}};
+Containers::StridedBitArrayView2D b{bits, {4, 8}};
+/* [StridedBitArrayView-usage-reshape] */
+}
+
+{
+/* [StridedBitArrayView-operator<<] */
+const std::uint64_t data[]{0b0101'0101'0011'0011'0000'1111 << 5};
+Containers::BitArrayView a{data, 5, 24};
+Utility::Debug{} << Containers::StridedBitArrayView2D{a, {3, 8}};
+/* [StridedBitArrayView-operator<<] */
 }
 
 }

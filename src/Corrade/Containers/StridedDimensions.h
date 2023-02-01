@@ -35,25 +35,81 @@
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/sequenceHelpers.h"
 #include "Corrade/Utility/DebugAssert.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
     template<unsigned, class, class> struct StridedDimensionsConverter;
-    /* Used by StridedArrayView, needed here to friend them */
+    /* Used by StridedArrayView and StridedBitArrayView, needed here to friend
+       them */
     template<unsigned, class> struct StridedElement;
+    template<unsigned, class> struct StridedBitElement;
     template<int> struct ArrayCastFlattenOrInflate;
+
+    #ifndef CORRADE_NO_ASSERT
+    /* Used by both StridedArrayView and StridedBitArrayView in assertions
+       that data array is large enough. If any size element is zero, the data
+       can be zero-sized as well. Otherwise we have to compare against max
+       stride. */
+    template<unsigned dimensions, class T> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>&, Sequence<>) {
+        return false;
+    }
+    template<unsigned dimensions, class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>& size, Sequence<first, next...>) {
+        return !size[first] || isAnyDimensionZero(size, Sequence<next...>{});
+    }
+    template<unsigned dimensions> constexpr std::size_t largestStride(const Size<dimensions>&, const Stride<dimensions>&, Sequence<>) {
+        return 0;
+    }
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const Size<dimensions>& size, const Stride<dimensions>& stride, Sequence<first, next...>) {
+        return Utility::max(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
+            largestStride(size, stride, Sequence<next...>{}));
+    }
+    #endif
+
+    /* Calculates StridedArrayView / StridedBitArrayView stride when just size
+       is passed. In case of the bit view it's counting bits instead of bytes
+       but it's the same algorithm. */
+    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>&, std::size_t, Sequence<>) {
+        return 1;
+    }
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>& size, std::size_t index, Sequence<first, next...>) {
+        /* GCC since version 10.2 complains that
+            warning: comparison of unsigned expression in ‘< 0’ is always false [-Wtype-limits]
+           and there's no way to silence that except for a pragma (doing things
+           like `first && first > index` doesn't change anything). There was
+           nothing in the 10.2 changelog mentioning this and the only vaguely
+           relevant bug is https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95148
+           (which complains about the inability to circumvent this, but not
+           about the stupidity of this warning being trigerred in a template
+           code).
+
+           Also explicitly check we're not on Clang because certain Clang-based
+           IDEs inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does. */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wtype-limits"
+        #endif
+        return (first > index ? size[first] : 1)*strideForSizeInternal(size, index, Sequence<next...>{});
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 1002
+        #pragma GCC diagnostic pop
+        #endif
+    }
+    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const Size<dimensions>& size, std::size_t typeSize, Sequence<index...>) {
+        return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
+    }
 }
 
 /**
-@brief Multi-dimensional size and stride for @ref StridedArrayView
+@brief Multi-dimensional size and stride for @ref StridedArrayView and @ref StridedBitArrayView
 @m_since{2019,10}
 
 Main property compared to a plain C array of value is convertibility from/to
 @ref StaticArrayView, implicit conversion from/to a scalar type in the
 one-dimensional case and element-wise equality comparison. See
-@ref StridedArrayView for actual usage examples.
+@ref StridedArrayView and @ref StridedBitArrayView for actual usage examples.
 @see @ref Size, @ref Size1D, @ref Size2D, @ref Size3D, @ref Size4D,
     @ref Stride, @ref Stride1D, @ref Stride2D, @ref Stride3D, @ref Stride4D
 */
@@ -151,9 +207,11 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
     private:
         template<unsigned, class> friend class StridedArrayView;
+        template<unsigned, class> friend class BasicStridedBitArrayView;
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedElement;
+        template<unsigned, class> friend struct Implementation::StridedBitElement;
         template<int> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_, class T_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, T_>&);
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);

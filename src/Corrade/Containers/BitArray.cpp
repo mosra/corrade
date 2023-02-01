@@ -28,7 +28,7 @@
 
 #include <cstring>
 
-#include "Corrade/Containers/BitArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 
@@ -165,6 +165,18 @@ Utility::Debug& operator<<(Utility::Debug& debug, BitArrayView value) {
         debug << (*data & mask ? "1" : "0") << Utility::Debug::nospace;
 
         mask <<= 1;
+    }
+
+    return debug << "}";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const StridedBitArrayView1D& value) {
+    debug << "{" << Utility::Debug::nospace;
+
+    for(std::size_t i = 0, iMax = value.size(); i != iMax; ++i) {
+        if(i && i % 8 == 0) debug << ",";
+
+        debug << (value[i] ? "1" : "0") << Utility::Debug::nospace;
     }
 
     return debug << "}";

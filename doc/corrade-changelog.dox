@@ -76,8 +76,10 @@ namespace Corrade {
     [mosra/corrade#117](https://github.com/mosra/corrade/pull/117).
 -   New @ref Containers::BigEnumSet class for storing enum sets with more than
     64 values
--   New @ref Containers::BitArray and @ref Containers::BitArrayView classes for
-    owning and non-owning containers of bits
+-   New @ref Containers::BitArray,
+    @ref Containers::BasicBitArrayView "Containers::BitArrayView" and
+    @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView"
+    classes for owning and non-owning containers of bits
 -   New @ref Containers::Iterable helper to provide an indirection for
     iterating over both containers of values and containers of references in
     a single code path, and a @ref Containers::StringIterable doing the same

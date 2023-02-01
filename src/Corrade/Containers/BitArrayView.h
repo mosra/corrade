@@ -63,8 +63,9 @@ namespace Implementation {
 @m_keywords{BitArrayView MutableBitArrayView}
 
 A view over an arbitrary range of bits, including sub-byte offsets --- a
-bit-sized variant of an @ref ArrayView. An owning version of this container is
-a @ref BitArray.
+bit-sized variant of an @ref ArrayView. For sparse and multi-dimensional views
+see @ref BasicStridedBitArrayView "StridedBitArrayView". An owning version of
+this container is a @ref BitArray.
 
 @section Containers-BasicBitArrayView-usage Usage
 
@@ -368,7 +369,9 @@ CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, BitArra
  * @m_since_latest
  */
 /* Has to be present otherwise printing MutableBitArrayView is ambiguous with
-   DebugOstreamFallback (!!), see its documentation for details */
+   DebugOstreamFallback (!!), see its documentation for details. It also has
+   to be present to avoid ambiguity with StridedBitArrayView1D, which it is
+   implicitly convertible to. */
 inline Utility::Debug& operator<<(Utility::Debug& debug, MutableBitArrayView value) {
     return debug << BitArrayView{value};
 }
