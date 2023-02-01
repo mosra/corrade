@@ -430,8 +430,14 @@ template<class T> void StridedBitArrayViewTest::constructDefault() {
     constexpr BasicStridedBitArrayView<1, T> cb = nullptr;
     constexpr const void* dataA = ca.data();
     constexpr const void* dataB = cb.data();
-    constexpr bool emptyA = ca.isEmpty();
-    constexpr bool emptyB = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    bool emptyA = ca.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    bool emptyB = cb.isEmpty();
     constexpr std::size_t offsetA = ca.offset();
     constexpr std::size_t offsetB = cb.offset();
     constexpr std::size_t sizeA = ca.size();
@@ -486,12 +492,30 @@ constexpr char FiveChars[5]{};
 
 void StridedBitArrayViewTest::constructCharConstexpr() {
     constexpr BitArrayView ca{FiveChars, 3, 26};
-    constexpr StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, 7, 3};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr bool empty = cb.isEmpty();
-    constexpr std::size_t size = cb.size();
-    constexpr std::ptrdiff_t stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, 7, 3};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    bool empty = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::ptrdiff_t stride = cb.stride();
     CORRADE_COMPARE(data, FiveChars + 1);
     CORRADE_COMPARE(offset, 5);
     CORRADE_VERIFY(!empty);
@@ -534,7 +558,10 @@ void StridedBitArrayViewTest::constructArray() {
     CORRADE_COMPARE(b.stride(), 3);
 
     constexpr BitArrayView ca{FiveChars, 3, 26};
-    constexpr StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, {7}, {3}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, {7}, {3}};
     CORRADE_COMPARE(cb.data(), FiveChars + 1);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_COMPARE(cb.size(), 7);
@@ -605,11 +632,26 @@ constexpr char FourBytes[4]{};
 
 void StridedBitArrayViewTest::constructSizeStrideConstexpr() {
     constexpr BitArrayView ca{FourBytes, 5, 24};
-    constexpr StridedBitArrayView1D cb = {ca, 7, 3};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr std::size_t size = cb.size();
-    constexpr std::ptrdiff_t stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, 7, 3};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::ptrdiff_t stride = cb.stride();
     CORRADE_COMPARE(data, FourBytes);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 7);
@@ -631,7 +673,10 @@ void StridedBitArrayViewTest::constructSizeStrideArray() {
     CORRADE_COMPARE(b.stride(), 3);
 
     constexpr BitArrayView ca{FourBytes, 5, 24};
-    constexpr StridedBitArrayView1D cb = {ca, {7}, {3}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, {7}, {3}};
     CORRADE_COMPARE(cb.data(), FourBytes);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_VERIFY(!cb.isEmpty());
@@ -655,11 +700,26 @@ template<class T> void StridedBitArrayViewTest::constructSizeOnly() {
 
 void StridedBitArrayViewTest::constructSizeOnlyConstexpr() {
     constexpr BitArrayView ca{FourBytes, 5, 24};
-    constexpr StridedBitArrayView1D cb = {ca, 7};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr std::size_t size = cb.size();
-    constexpr std::ptrdiff_t stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, 7};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::ptrdiff_t stride = cb.stride();
     CORRADE_COMPARE(data, FourBytes);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 7);
@@ -681,7 +741,10 @@ void StridedBitArrayViewTest::constructSizeOnlyArray() {
     CORRADE_COMPARE(b.stride(), 1);
 
     constexpr BitArrayView ca{FourBytes, 5, 24};
-    constexpr StridedBitArrayView1D cb = {ca, {7}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, {7}};
     CORRADE_COMPARE(cb.data(), FourBytes);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_VERIFY(!cb.isEmpty());
@@ -924,12 +987,24 @@ template<class T> void StridedBitArrayViewTest::construct3DDefault() {
     constexpr BasicStridedBitArrayView<3, T> cb = nullptr;
     constexpr const void* dataA = ca.data();
     constexpr const void* dataB = cb.data();
-    constexpr StridedDimensions<3, bool> emptyA = ca.isEmpty();
-    constexpr StridedDimensions<3, bool> emptyB = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedDimensions<3, bool> emptyA = ca.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedDimensions<3, bool> emptyB = cb.isEmpty();
     constexpr std::size_t offsetA = ca.offset();
     constexpr std::size_t offsetB = cb.offset();
-    constexpr Size3D sizeA = ca.size();
-    constexpr Size3D sizeB = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Size3D sizeA = ca.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Size3D sizeB = cb.size();
     constexpr Stride3D strideA = ca.stride();
     constexpr Stride3D strideB = cb.stride();
     CORRADE_COMPARE(dataA, nullptr);
@@ -982,12 +1057,30 @@ constexpr char ThirtyChars[30]{};
 
 void StridedBitArrayViewTest::construct3DCharConstexpr() {
     constexpr BitArrayView ca{ThirtyChars, 5, 30*8 - 5};
-    constexpr StridedBitArrayView3D cb{ca, ThirtyChars + 1, 7, {3, 4, 5}, {55, 11, 2}};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr StridedDimensions<3, bool> empty = cb.isEmpty();
-    constexpr Size3D size = cb.size();
-    constexpr Stride3D stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView3D cb{ca, ThirtyChars + 1, 7, {3, 4, 5}, {55, 11, 2}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedDimensions<3, bool> empty = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Size3D size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Stride3D stride = cb.stride();
     CORRADE_COMPARE(data, ThirtyChars + 1);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
@@ -1079,12 +1172,30 @@ template<class T> void StridedBitArrayViewTest::construct3DSizeStride() {
 
 void StridedBitArrayViewTest::construct3DSizeStrideConstexpr() {
     constexpr BitArrayView ca{ThirtyChars, 7, 30*8 - 7};
-    constexpr StridedBitArrayView3D cb{ca, {3, 4, 5}, {55, 11, 2}};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr StridedDimensions<3, bool> empty = cb.isEmpty();
-    constexpr Size3D size = cb.size();
-    constexpr Stride3D stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView3D cb{ca, {3, 4, 5}, {55, 11, 2}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedDimensions<3, bool> empty = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Size3D size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Stride3D stride = cb.stride();
     CORRADE_COMPARE(data, ThirtyChars);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
@@ -1109,12 +1220,30 @@ template<class T> void StridedBitArrayViewTest::construct3DSizeOnly() {
 
 void StridedBitArrayViewTest::construct3DSizeOnlyConstexpr() {
     constexpr BitArrayView ca{ThirtyChars, 7, 30*8 - 7};
-    constexpr StridedBitArrayView3D cb{ca, {3, 4, 5}};
-    constexpr const void* data = cb.data();
-    constexpr std::size_t offset = cb.offset();
-    constexpr StridedDimensions<3, bool> empty = cb.isEmpty();
-    constexpr Size3D size = cb.size();
-    constexpr Stride3D stride = cb.stride();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView3D cb{ca, {3, 4, 5}};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    const void* data = cb.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t offset = cb.offset();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedDimensions<3, bool> empty = cb.isEmpty();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Size3D size = cb.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    Stride3D stride = cb.stride();
     CORRADE_COMPARE(data, ThirtyChars);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
