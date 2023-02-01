@@ -240,11 +240,15 @@ void ReferenceTest::convert() {
     IntRef cd = cc;
     CORRADE_COMPARE(*cd.a, 3);
 
-    /* Conversion from a different type is not allowed */
+    /* Conversion from a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Reference<const int>, IntRef>::value);
+    CORRADE_VERIFY(!std::is_constructible<Reference<const float>, IntRef>::value);
+    /** @todo For some reason I can't use is_constructible here because it
+       doesn't consider conversion operators in this case. In others (such as
+       with ArrayView) it does, why? */
     CORRADE_VERIFY(std::is_convertible<Reference<const int>, IntRef>::value);
     CORRADE_VERIFY(!std::is_convertible<Reference<const float>, IntRef>::value);
-    CORRADE_VERIFY(std::is_convertible<IntRef, Reference<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntRef, Reference<const float>>::value);
 }
 
 void ReferenceTest::convertToReference() {

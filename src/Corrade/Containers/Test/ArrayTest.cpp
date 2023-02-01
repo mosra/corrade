@@ -442,20 +442,22 @@ void ArrayTest::convertPointer() {
     const int* f = e + 2;
     CORRADE_COMPARE(f, &e[2]);
 
-    /* Verify that we can't convert rvalues */
-    CORRADE_VERIFY(std::is_convertible<Array&, int*>::value);
-    CORRADE_VERIFY(std::is_convertible<const Array&, const int*>::value);
-    CORRADE_VERIFY(!std::is_convertible<Array, int*>::value);
-    CORRADE_VERIFY(!std::is_convertible<Array&&, int*>::value);
+    /* Verify that we can't convert rvalues. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<int*, Array&>::value);
+    CORRADE_VERIFY(std::is_constructible<const int*, const Array&>::value);
+    CORRADE_VERIFY(!std::is_constructible<int*, Array>::value);
+    CORRADE_VERIFY(!std::is_constructible<int*, Array&&>::value);
 
     /* Deleting const&& overload and leaving only const& one will not, in fact,
        disable conversion of const Array&& to pointer, but rather make the
        conversion ambiguous, which is not what we want, as it breaks e.g.
-       rvalueArrayAccess() test. */
+       rvalueArrayAccess() test. Not using is_convertible to catch also
+       accidental explicit conversions. */
     {
         CORRADE_EXPECT_FAIL("I don't know how to properly disable conversion of const Array&& to pointer.");
-        CORRADE_VERIFY(!std::is_convertible<const Array, const int*>::value);
-        CORRADE_VERIFY(!std::is_convertible<const Array&&, const int*>::value);
+        CORRADE_VERIFY(!std::is_constructible<const int*, const Array>::value);
+        CORRADE_VERIFY(!std::is_constructible<const int*, const Array&&>::value);
     }
 }
 
@@ -565,11 +567,12 @@ void ArrayTest::convertToExternalView() {
     CORRADE_COMPARE(cb.data, a);
     CORRADE_COMPARE(cb.size, a.size());
 
-    /* Conversion to a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<Containers::Array<int>, IntView>::value);
-    CORRADE_VERIFY(std::is_convertible<Containers::Array<int>, ConstIntView>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::Array<float>, IntView>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::Array<float>, ConstIntView>::value);
+    /* Conversion to a different type is not allowed. Not using is_convertible
+       to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<IntView, Containers::Array<int>>::value);
+    CORRADE_VERIFY(std::is_constructible<ConstIntView, Containers::Array<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<IntView, Containers::Array<float>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstIntView, Containers::Array<float>>::value);
 }
 
 void ArrayTest::convertToConstExternalView() {
@@ -579,9 +582,10 @@ void ArrayTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.data, a);
     CORRADE_COMPARE(b.size, a.size());
 
-    /* Conversion to a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<const Containers::Array<int>, ConstIntView>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Containers::Array<float>, ConstIntView>::value);
+    /* Conversion to a different type is not allowed. Not using is_convertible
+       to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstIntView, const Containers::Array<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstIntView, const Containers::Array<float>>::value);
 }
 
 void ArrayTest::access() {

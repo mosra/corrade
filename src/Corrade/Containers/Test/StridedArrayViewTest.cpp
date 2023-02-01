@@ -1742,18 +1742,21 @@ void StridedArrayViewTest::construct3DOneSizeZeroConstVoid() {
 }
 
 void StridedArrayViewTest::construct3DFixedSize() {
-    CORRADE_VERIFY(std::is_convertible<int(&)[10], StridedArrayView1Di>::value);
-    CORRADE_VERIFY(!std::is_convertible<int(&)[10], StridedArrayView3Di>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<StridedArrayView1Di, int(&)[10]>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, int(&)[10]>::value);
 }
 
 void StridedArrayViewTest::construct3DFixedSizeVoid() {
-    CORRADE_VERIFY(std::is_convertible<int(&)[10], VoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<int(&)[10], VoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<VoidStridedArrayView1D, int(&)[10]>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidStridedArrayView3D, int(&)[10]>::value);
 }
 
 void StridedArrayViewTest::construct3DFixedSizeConstVoid() {
-    CORRADE_VERIFY(std::is_convertible<int(&)[10], ConstVoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<int(&)[10], ConstVoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, int(&)[10]>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstVoidStridedArrayView3D, int(&)[10]>::value);
 }
 
 void StridedArrayViewTest::construct3DViewTooSmall() {
@@ -1842,33 +1845,39 @@ void StridedArrayViewTest::construct3DDerived() {
 }
 
 void StridedArrayViewTest::construct3DView() {
-    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, StridedArrayView1Di>::value);
-    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, StridedArrayView3Di>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<StridedArrayView1Di, ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, ArrayView<int>>::value);
 }
 
 void StridedArrayViewTest::construct3DViewVoid() {
-    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, VoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, VoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<VoidStridedArrayView1D, ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidStridedArrayView3D, ArrayView<int>>::value);
 }
 
 void StridedArrayViewTest::construct3DViewConstVoid() {
-    CORRADE_VERIFY(std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<ArrayView<int>, ConstVoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstVoidStridedArrayView3D, ArrayView<int>>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticView() {
-    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, StridedArrayView1Di>::value);
-    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, StridedArrayView3Di>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<StridedArrayView1Di, StaticArrayView<10, int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, StaticArrayView<10, int>>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticViewVoid() {
-    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, VoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<VoidStridedArrayView1D, StaticArrayView<10, int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidStridedArrayView3D, StaticArrayView<10, int>>::value);
 }
 
 void StridedArrayViewTest::construct3DStaticViewConstVoid() {
-    CORRADE_VERIFY(std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<StaticArrayView<10, int>, ConstVoidStridedArrayView3D>::value);
+    /* Not using is_convertible to catch also accidental explicit conversions */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, StaticArrayView<10, int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstVoidStridedArrayView3D, StaticArrayView<10, int>>::value);
 }
 
 void StridedArrayViewTest::convertBool() {
@@ -1947,9 +1956,10 @@ void StridedArrayViewTest::convertFromExternalView() {
         CORRADE_COMPARE(cb.size(), 10);
     }
 
-    /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, Containers::StridedArrayView1D<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::StridedArrayView1D<float>>::value);
+    /* Conversion from a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StridedArrayView1D<int>, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StridedArrayView1D<float>, IntView>::value);
 }
 
 void StridedArrayViewTest::convertConstFromExternalView() {
@@ -1962,9 +1972,10 @@ void StridedArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5);
 
-    /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, Containers::StridedArrayView1D<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::StridedArrayView1D<const float>>::value);
+    /* Conversion from a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StridedArrayView1D<const int>, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StridedArrayView1D<const float>, IntView>::value);
 }
 
 void StridedArrayViewTest::convertVoidFromExternalView() {
@@ -2051,33 +2062,38 @@ void StridedArrayViewTest::convert3DConst() {
 }
 
 void StridedArrayViewTest::convert3DFromExternalView() {
-    /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, StridedArrayView1Di>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, StridedArrayView3Di>::value);
+    /* Conversion to a multi-dimensional type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StridedArrayView1Di, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, IntView>::value);
 }
 
 void StridedArrayViewTest::convert3DConstFromExternalView() {
-    /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, ConstStridedArrayView1Di>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, ConstStridedArrayView3Di>::value);
+    /* Conversion to a multi-dimensional type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstStridedArrayView1Di, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstStridedArrayView3Di, IntView>::value);
 }
 
 void StridedArrayViewTest::convert3DVoidFromExternalView() {
-    /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, VoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, VoidStridedArrayView3D>::value);
+    /* Conversion to a multi-dimensional type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<VoidStridedArrayView1D, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidStridedArrayView3D, IntView>::value);
 }
 
 void StridedArrayViewTest::convert3DConstVoidFromExternalView() {
-    /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, ConstVoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, ConstVoidStridedArrayView3D>::value);
+    /* Conversion to a multi-dimensional type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstVoidStridedArrayView3D, IntView>::value);
 }
 
 void StridedArrayViewTest::convert3DConstVoidFromConstExternalView() {
-    /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<ConstIntView, ConstVoidStridedArrayView1D>::value);
-    CORRADE_VERIFY(!std::is_convertible<ConstIntView, ConstVoidStridedArrayView3D>::value);
+    /* Conversion to a multi-dimensional type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstVoidStridedArrayView3D, ConstIntView>::value);
 }
 
 void StridedArrayViewTest::asContiguous() {

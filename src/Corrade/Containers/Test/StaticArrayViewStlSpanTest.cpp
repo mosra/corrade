@@ -69,8 +69,10 @@ void StaticArrayViewStlSpanTest::convertFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    CORRADE_VERIFY(std::is_convertible<std::span<float, 3>, StaticArrayView<3, float>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<float>, StaticArrayView<3, float>>::value);
+    /* Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, float>, std::span<float, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, float>, std::span<float>>::value);
     #endif
 }
 
@@ -102,9 +104,10 @@ void StaticArrayViewStlSpanTest::convertToSpan() {
     CORRADE_COMPARE(cb[0], 42.0f);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different type is correctly not allowed */
-    CORRADE_VERIFY(std::is_convertible<const Containers::StaticArrayView<5, int>&, std::span<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Containers::StaticArrayView<5, int>&, std::span<float>>::value);
+       that conversion to a different type is correctly not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<std::span<int>, const Containers::StaticArrayView<5, int>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::span<float>, const Containers::StaticArrayView<5, int>&>::value);
     #endif
 }
 
@@ -116,8 +119,10 @@ void StaticArrayViewStlSpanTest::convertConstFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    CORRADE_VERIFY(std::is_convertible<std::span<float, 3>, StaticArrayView<3, const float>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<float>, StaticArrayView<3, const float>>::value);
+    /* Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, const float>, std::span<float, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, const float>, std::span<float>>::value);
     #endif
 }
 
@@ -136,9 +141,10 @@ void StaticArrayViewStlSpanTest::convertToConstSpan() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different type is correctly not allowed */
-    CORRADE_VERIFY(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const float>>::value);
+       that conversion to a different type is correctly not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<std::span<const int>, Containers::StaticArrayView<5, int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::span<const float>, Containers::StaticArrayView<5, int>>::value);
     #endif
 }
 
@@ -185,13 +191,16 @@ void StaticArrayViewStlSpanTest::convertSpanSized() {
     CORRADE_COMPARE(cd.data(), +Data);
     CORRADE_COMPARE(cd[0], 42.0f);
 
-    /* Conversion from a different size/type not allowed */
-    CORRADE_VERIFY(std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<5, int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<6, int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<5, float>>::value);
+    /* Conversion from a different size/type not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, int>, std::span<int, 5>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<6, int>, std::span<int, 5>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, float>, std::span<int, 5>>::value);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different size or type is correctly not allowed */
+       that implicit conversion to a different size or type is correctly not
+       allowed. Explicit conversion is allowed however, so is_constructible
+       would pass here. */
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<int, 5>>::value);
     {
         #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
@@ -220,10 +229,11 @@ void StaticArrayViewStlSpanTest::convertConstFromSpanSized() {
     CORRADE_COMPARE(b.data(), +data);
     CORRADE_COMPARE(b[0], 42.0f);
 
-    /* Conversion from a different size/type not allowed */
-    CORRADE_VERIFY(std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<5, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<6, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<5, const float>>::value);
+    /* Conversion from a different size/type not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, const int>, std::span<int, 5>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<6, const int>, std::span<int, 5>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, const float>, std::span<int, 5>>::value);
     #endif
 }
 
@@ -245,7 +255,9 @@ void StaticArrayViewStlSpanTest::convertToConstSpanSized() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different size or type is not allowed */
+       that implicit conversion to a different size or type is correctly not
+       allowed. Explicit conversion is allowed however, so is_constructible
+       would pass here. */
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const int, 5>>::value);
     {
         #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000

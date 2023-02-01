@@ -1086,9 +1086,11 @@ void StringTest::convertStringView() {
     CORRADE_COMPARE(aView2.size(), a.size());
     CORRADE_COMPARE(static_cast<const void*>(aView2.data()), a.data());
 
-    /* It shouldn't be possible to create a mutable view from a const String */
-    CORRADE_VERIFY(std::is_convertible<const String, StringView>::value);
-    CORRADE_VERIFY(!std::is_convertible<const String, MutableStringView>::value);
+    /* It shouldn't be possible to create a mutable view from a const String.
+       Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<StringView, const String>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableStringView, const String>::value);
 }
 
 void StringTest::convertStringViewSmall() {
@@ -1206,11 +1208,13 @@ void StringTest::convertArrayView() {
     CORRADE_COMPARE(aVoidView.size(), a.size());
     CORRADE_COMPARE(aVoidView.data(), a.data());
 
-    /* It shouldn't be possible to create a mutable view from a const String */
-    CORRADE_VERIFY(std::is_convertible<const String, ArrayView<const char>>::value);
-    CORRADE_VERIFY(std::is_convertible<const String, ArrayView<const void>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const String, ArrayView<char>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const String, ArrayView<void>>::value);
+    /* It shouldn't be possible to create a mutable view from a const String.
+       Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<ArrayView<const char>, const String>::value);
+    CORRADE_VERIFY(std::is_constructible<ArrayView<const void>, const String>::value);
+    CORRADE_VERIFY(!std::is_constructible<ArrayView<char>, const String>::value);
+    CORRADE_VERIFY(!std::is_constructible<ArrayView<void>, const String>::value);
 }
 
 void StringTest::convertArrayViewSmall() {

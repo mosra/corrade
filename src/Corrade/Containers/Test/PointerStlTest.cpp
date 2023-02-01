@@ -60,11 +60,12 @@ void PointerStlTest::convert() {
     CORRADE_VERIFY(d);
     CORRADE_COMPARE(*d, 17);
 
-    /* Non-move conversion is not allowed */
-    CORRADE_VERIFY(std::is_convertible<std::unique_ptr<int>&&, Pointer<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const std::unique_ptr<int>&, Pointer<int>>::value);
-    CORRADE_VERIFY(std::is_convertible<Pointer<int>&&, std::unique_ptr<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Pointer<int>&, std::unique_ptr<int>>::value);
+    /* Non-move conversion is not allowed. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Pointer<int>, std::unique_ptr<int>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<int>, const std::unique_ptr<int>&>::value);
+    CORRADE_VERIFY(std::is_constructible<std::unique_ptr<int>, Pointer<int>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::unique_ptr<int>, const Pointer<int>&>::value);
 }
 
 }}}}

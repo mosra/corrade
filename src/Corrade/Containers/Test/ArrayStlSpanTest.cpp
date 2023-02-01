@@ -66,9 +66,10 @@ void ArrayStlSpanTest::toSpan() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different type is correctly not allowed */
-    CORRADE_VERIFY(std::is_convertible<Containers::Array<int>&, std::span<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::Array<int>&, std::span<float>>::value);
+       that conversion to a different type is correctly not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<std::span<int>, Containers::Array<int>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::span<float>, Containers::Array<int>&>::value);
     #endif
 }
 
@@ -96,11 +97,12 @@ void ArrayStlSpanTest::toSpanConst() {
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different type is correctly not allowed */
-    CORRADE_VERIFY(std::is_convertible<Containers::Array<int>&, std::span<const int>>::value);
-    CORRADE_VERIFY(std::is_convertible<const Containers::Array<int>&, std::span<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::Array<int>&, std::span<const float>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Containers::Array<int>&, std::span<const float>>::value);
+       that conversion to a different type is correctly not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<std::span<const int>, Containers::Array<int>&>::value);
+    CORRADE_VERIFY(std::is_constructible<std::span<const int>, const Containers::Array<int>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::span<const float>, Containers::Array<int>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::span<const float>, const Containers::Array<int>&>::value);
     #endif
 }
 
@@ -121,7 +123,9 @@ void ArrayStlSpanTest::toSpanSized() {
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different size or type is correctly not allowed */
+       that implicit conversion to a different size or type is correctly not
+       allowed. Explicit conversion is allowed however, so is_constructible
+       would pass here. */
     CORRADE_VERIFY(std::is_convertible<Array<float>&, std::span<float>>::value);
     {
         #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
@@ -137,7 +141,9 @@ void ArrayStlSpanTest::toSpanSizedConst() {
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
     /* Because we're using builtin std::span conversion constructor here, check
-       that conversion to a different size or type is correctly not allowed */
+       that implicit conversion to a different size or type is correctly not
+       allowed. Explicit conversion is allowed however, so is_constructible
+       would pass here. */
     CORRADE_VERIFY(std::is_convertible<Array<float>&, std::span<const float>>::value);
     CORRADE_VERIFY(std::is_convertible<const Array<float>&, std::span<const float>>::value);
     {

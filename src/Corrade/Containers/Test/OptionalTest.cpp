@@ -666,6 +666,7 @@ void OptionalTest::boolConversion() {
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!!b);
 
+    /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Optional<int>, int>::value);
     CORRADE_VERIFY(!std::is_convertible<Optional<int>, bool>::value);
 }

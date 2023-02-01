@@ -745,11 +745,12 @@ void ArrayViewTest::convertExternalView() {
     CORRADE_COMPARE(cd.data(), Array13);
     CORRADE_COMPARE(cd.size(), 13);
 
-    /* Conversion from/to a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<ConstIntView, Containers::ArrayView<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<ConstIntView, Containers::ArrayView<const float>>::value);
-    CORRADE_VERIFY(std::is_convertible<Containers::ArrayView<const int>, ConstIntView>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::ArrayView<const float>, ConstIntView>::value);
+    /* Conversion from/to a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::ArrayView<const int>, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::ArrayView<const float>, ConstIntView>::value);
+    CORRADE_VERIFY(std::is_constructible<ConstIntView, Containers::ArrayView<const int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstIntView, Containers::ArrayView<const float>>::value);
 }
 
 void ArrayViewTest::convertConstFromExternalView() {
@@ -762,9 +763,10 @@ void ArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5);
 
-    /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView, Containers::ArrayView<const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView, Containers::ArrayView<const float>>::value);
+    /* Conversion from a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::ArrayView<const int>, IntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::ArrayView<const float>, IntView>::value);
 }
 
 void ArrayViewTest::convertToConstExternalView() {
@@ -777,9 +779,10 @@ void ArrayViewTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.data, data);
     CORRADE_COMPARE(b.size, 5);
 
-    /* Conversion to a different type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<Containers::ArrayView<int>, ConstIntView>::value);
-    CORRADE_VERIFY(!std::is_convertible<Containers::ArrayView<float>, ConstIntView>::value);
+    /* Conversion to a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstIntView, Containers::ArrayView<int>>::value);
+    CORRADE_VERIFY(!std::is_constructible<ConstIntView, Containers::ArrayView<float>>::value);
 }
 
 void ArrayViewTest::convertVoidFromExternalView() {

@@ -378,17 +378,19 @@ void PointerTest::convert() {
     CORRADE_VERIFY(d);
     CORRADE_COMPARE(*d, 72);
 
-    /* Conversion from a different type is not allowed */
+    /* Conversion from a different type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
     CORRADE_VERIFY(std::is_constructible<Pointer<int>, IntPtr>::value);
     CORRADE_VERIFY(!std::is_constructible<Pointer<float>, IntPtr>::value);
     CORRADE_VERIFY(std::is_constructible<IntPtr, Pointer<int>>::value);
     CORRADE_VERIFY(!std::is_constructible<IntPtr, Pointer<float>>::value);
 
-    /* Non-move conversion is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntPtr&&, Pointer<int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<const IntPtr&, Pointer<int>>::value);
-    CORRADE_VERIFY(std::is_convertible<Pointer<int>&&, IntPtr>::value);
-    CORRADE_VERIFY(!std::is_convertible<const Pointer<int>&, IntPtr>::value);
+    /* Non-move conversion is not allowed. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Pointer<int>, IntPtr&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<int>, const IntPtr&>::value);
+    CORRADE_VERIFY(std::is_constructible<IntPtr, Pointer<int>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<IntPtr, const Pointer<int>&>::value);
 }
 
 void PointerTest::boolConversion() {
@@ -399,6 +401,7 @@ void PointerTest::boolConversion() {
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!!b);
 
+    /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Pointer<int>, int>::value);
     CORRADE_VERIFY(!std::is_convertible<Pointer<int>, bool>::value);
 }

@@ -222,8 +222,10 @@ void StridedDimensionsTest::convertScalar() {
 }
 
 void StridedDimensionsTest::convertScalar3D() {
-    CORRADE_VERIFY(std::is_convertible<Size1D, std::size_t>::value);
-    CORRADE_VERIFY(!std::is_convertible<Size3D, std::size_t>::value);
+    /* Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<std::size_t, Size1D>::value);
+    CORRADE_VERIFY(!std::is_constructible<std::size_t, Size3D>::value);
 }
 
 constexpr Size2D Sizes{34, 67};

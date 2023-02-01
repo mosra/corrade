@@ -137,9 +137,10 @@ void StringStlViewTest::convertViewFromStlStringViewEmpty() {
 }
 
 void StringStlViewTest::convertMutableViewFromStlStringView() {
-    /* A string_view should never be convertible to a mutable view */
-    CORRADE_VERIFY(std::is_convertible<std::string_view, StringView>::value);
-    CORRADE_VERIFY(!std::is_convertible<std::string_view, MutableStringView>::value);
+    /* A string_view should never be convertible to a mutable view. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StringView, std::string_view>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableStringView, std::string_view>::value);
 }
 
 }}}}

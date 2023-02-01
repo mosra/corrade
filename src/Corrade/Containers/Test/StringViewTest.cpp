@@ -490,17 +490,18 @@ template<class T, class From> void StringViewTest::constructCharArray() {
 
 void StringViewTest::constructCharPointerArrayDisallowed() {
     /* To verify the crazy ambiguity-preventing SFINAE doesn't accidentally
-       allow creating a MutableStringView from a const pointer */
+       allow creating a MutableStringView from a const pointer. Not using
+       is_convertible to catch also accidental explicit conversions. */
 
-    CORRADE_VERIFY(std::is_convertible<char*, StringView>::value);
-    CORRADE_VERIFY(std::is_convertible<char*, MutableStringView>::value);
-    CORRADE_VERIFY(std::is_convertible<const char*, StringView>::value);
-    CORRADE_VERIFY(!std::is_convertible<const char*, MutableStringView>::value);
+    CORRADE_VERIFY(std::is_constructible<StringView, char*>::value);
+    CORRADE_VERIFY(std::is_constructible<MutableStringView, char*>::value);
+    CORRADE_VERIFY(std::is_constructible<StringView, const char*>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableStringView, const char*>::value);
 
-    CORRADE_VERIFY(std::is_convertible<char[], StringView>::value);
-    CORRADE_VERIFY(std::is_convertible<char[], MutableStringView>::value);
-    CORRADE_VERIFY(std::is_convertible<const char[], StringView>::value);
-    CORRADE_VERIFY(!std::is_convertible<const char[], MutableStringView>::value);
+    CORRADE_VERIFY(std::is_constructible<StringView, char[]>::value);
+    CORRADE_VERIFY(std::is_constructible<MutableStringView, char[]>::value);
+    CORRADE_VERIFY(std::is_constructible<StringView, const char[]>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableStringView, const char[]>::value);
 }
 
 void StringViewTest::constructPointerNull() {
@@ -569,9 +570,10 @@ void StringViewTest::constructFromMutable() {
 
     CORRADE_VERIFY(std::is_nothrow_constructible<StringView, MutableStringView>::value);
 
-    /* It shouldn't be possible the other way around */
-    CORRADE_VERIFY(std::is_convertible<MutableStringView, StringView>::value);
-    CORRADE_VERIFY(!std::is_convertible<StringView, MutableStringView>::value);
+    /* It shouldn't be possible the other way around. Not using is_convertible
+       to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StringView, MutableStringView>::value);
+    CORRADE_VERIFY(!std::is_constructible<MutableStringView, StringView>::value);
 }
 
 void StringViewTest::constructCopy() {

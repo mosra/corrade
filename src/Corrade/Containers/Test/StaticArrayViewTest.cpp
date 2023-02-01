@@ -384,10 +384,14 @@ void StaticArrayViewTest::convertExternalView() {
     CORRADE_COMPARE(cd.data(), Array13);
     CORRADE_COMPARE(cd.size(), 5);
 
-    /* Conversion to a different size or type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<ConstIntView5, Containers::StaticArrayView<5, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<ConstIntView5, Containers::StaticArrayView<6, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<ConstIntView5, Containers::StaticArrayView<5, const float>>::value);
+    /* Conversion to a different size or type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, const int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<6, const int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, const float>, ConstIntView5>::value);
+    /** @todo For some reason I can't use is_constructible here because it
+       doesn't consider conversion operators in this case. In others (such as
+       with ArrayView) it does, why? */
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArrayView<5, const int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<Containers::StaticArrayView<6, const int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<Containers::StaticArrayView<5, const float>, ConstIntView5>::value);
@@ -402,10 +406,11 @@ void StaticArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5);
 
-    /* Conversion from a different size or type is not allowed */
-    CORRADE_VERIFY(std::is_convertible<IntView5, Containers::StaticArrayView<5, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView5, Containers::StaticArrayView<6, const int>>::value);
-    CORRADE_VERIFY(!std::is_convertible<IntView5, Containers::StaticArrayView<5, const float>>::value);
+    /* Conversion from a different size or type is not allowed. Not using
+       is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, const int>, IntView5>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<6, const int>, IntView5>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, const float>, IntView5>::value);
 }
 
 void StaticArrayViewTest::convertToConstExternalView() {
@@ -418,6 +423,9 @@ void StaticArrayViewTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.data, data);
 
     /* Conversion to a different size or type is not allowed */
+    /** @todo For some reason I can't use is_constructible here because it
+       doesn't consider conversion operators in this case. In others (such as
+       with ArrayView) it does, why? */
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArrayView<5, int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<Containers::StaticArrayView<6, int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<Containers::StaticArrayView<5, float>, ConstIntView5>::value);

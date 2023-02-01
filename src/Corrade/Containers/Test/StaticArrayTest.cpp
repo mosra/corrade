@@ -504,20 +504,22 @@ void StaticArrayTest::convertPointer() {
     const int* f = e + 2;
     CORRADE_COMPARE(f, &e[2]);
 
-    /* Verify that we can't convert rvalues */
-    CORRADE_VERIFY(std::is_convertible<StaticArray&, int*>::value);
-    CORRADE_VERIFY(std::is_convertible<const StaticArray&, const int*>::value);
-    CORRADE_VERIFY(!std::is_convertible<StaticArray, int*>::value);
-    CORRADE_VERIFY(!std::is_convertible<StaticArray&&, int*>::value);
+    /* Verify that we can't convert rvalues. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<int*, StaticArray&>::value);
+    CORRADE_VERIFY(std::is_constructible<const int*, const StaticArray&>::value);
+    CORRADE_VERIFY(!std::is_constructible<int*, StaticArray>::value);
+    CORRADE_VERIFY(!std::is_constructible<int*, StaticArray&&>::value);
 
     /* Deleting const&& overload and leaving only const& one will not, in fact,
        disable conversion of const Array&& to pointer, but rather make the
        conversion ambiguous, which is not what we want, as it breaks e.g.
-       rvalueArrayAccess() test. */
+       rvalueArrayAccess() test. Not using is_convertible to catch also
+       accidental explicit conversions. */
     {
         CORRADE_EXPECT_FAIL("I don't know how to properly disable conversion of const Array&& to pointer.");
-        CORRADE_VERIFY(!std::is_convertible<const StaticArray, const int*>::value);
-        CORRADE_VERIFY(!std::is_convertible<const StaticArray&&, const int*>::value);
+        CORRADE_VERIFY(!std::is_constructible<const int*, const StaticArray>::value);
+        CORRADE_VERIFY(!std::is_constructible<const int*, const StaticArray&&>::value);
     }
 }
 
@@ -687,6 +689,9 @@ void StaticArrayTest::convertToExternalView() {
     CORRADE_COMPARE(cb.data, a.data());
 
     /* Conversion to a different size or type is not allowed */
+    /** @todo For some reason I can't use is_constructible here because it
+       doesn't consider conversion operators in this case. In others (such as
+       with ArrayView) it does, why? */
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArray<5, int>, IntView5>::value);
     CORRADE_VERIFY(std::is_convertible<Containers::StaticArray<5, int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<Containers::StaticArray<6, int>, IntView5>::value);
@@ -702,6 +707,9 @@ void StaticArrayTest::convertToConstExternalView() {
     CORRADE_COMPARE(b.data, a.data());
 
     /* Conversion to a different size or type is not allowed */
+    /** @todo For some reason I can't use is_constructible here because it
+       doesn't consider conversion operators in this case. In others (such as
+       with ArrayView) it does, why? */
     CORRADE_VERIFY(std::is_convertible<const Containers::StaticArray<5, int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<const Containers::StaticArray<6, int>, ConstIntView5>::value);
     CORRADE_VERIFY(!std::is_convertible<const Containers::StaticArray<5, float>, ConstIntView5>::value);

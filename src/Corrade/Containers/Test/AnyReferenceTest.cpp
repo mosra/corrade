@@ -218,9 +218,10 @@ void AnyReferenceTest::convertToReference() {
     CORRADE_COMPARE(ccr, 32);
 
     /* Implicit conversion to a r-value reference is not allowed to prevent
-       accidents */
-    CORRADE_VERIFY(std::is_convertible<AnyReference<int>&&, int&>::value);
-    CORRADE_VERIFY(!std::is_convertible<AnyReference<int>&&, int&&>::value);
+       accidents. Not using is_convertible to catch also accidental explicit
+       conversions. */
+    CORRADE_VERIFY(std::is_constructible<int&, AnyReference<int>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<int&&, AnyReference<int>&&>::value);
 }
 
 void AnyReferenceTest::convertToConst() {
