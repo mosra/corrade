@@ -212,7 +212,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Underlying type
          *
-         * Underlying data type. See also @ref ElementType and @ref ErasedType.
+         * Underlying data type. See also @ref ElementType, @ref ErasedType and
+         * @ref ArithmeticType.
          */
         typedef T Type;
 
@@ -229,9 +230,18 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Erased type
          *
          * Either @cpp void @ce or @cpp const void @ce based on constness
-         * of @ref Type.
+         * of @ref Type. See also @ref ArithmeticType.
          */
         typedef typename std::conditional<std::is_const<T>::value, const void, void>::type ErasedType;
+
+        /**
+         * @brief Arithmetic type
+         *
+         * Unlike @ref ErasedType can be used for pointer value calculations.
+         * Either @cpp char @ce or @cpp const char @ce based on constness
+         * of @ref Type.
+         */
+        typedef typename std::conditional<std::is_const<T>::value, const char, char>::type ArithmeticType;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -892,8 +902,6 @@ template<unsigned dimensions, class T> class StridedArrayView {
     private:
         /* Needed for type and mutable/immutable conversion */
         template<unsigned, class> friend class StridedArrayView;
-
-        typedef typename std::conditional<std::is_const<T>::value, const char, char>::type ArithmeticType;
 
         /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
