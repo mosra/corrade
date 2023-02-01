@@ -79,7 +79,9 @@ namespace Corrade {
 -   New @ref Containers::BitArray,
     @ref Containers::BasicBitArrayView "Containers::BitArrayView" and
     @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView"
-    classes for owning and non-owning containers of bits
+    classes for owning and non-owning containers of bits, and a new
+    @ref Containers::StridedArrayView::sliceBit() helper for easily creating
+    bit views on complex data
 -   New @ref Containers::Iterable helper to provide an indirection for
     iterating over both containers of values and containers of references in
     a single code path, and a @ref Containers::StringIterable doing the same

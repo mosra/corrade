@@ -24,9 +24,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Included as first to check that we *really* don't need the
+   StridedBitArrayView header for anything -- the sliceBit() API shouldn't
+   cause a compilation failure without it included. */
+#include "Corrade/Containers/StridedArrayView.h"
+
 #include <sstream>
 
-#include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -228,6 +233,10 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceRvalueOverloadedMemberFunctionPointer();
     void sliceMemberFunctionPointerEmptyView();
     void sliceMemberFunctionPointerReturningOffsetOutOfBounds();
+
+    void sliceBit();
+    void sliceBitIndexTooLarge();
+    void sliceBitSizeTooLarge();
 
     void every();
     void everyNegative();
@@ -435,6 +444,10 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds,
+
+              &StridedArrayViewTest::sliceBit,
+              &StridedArrayViewTest::sliceBitIndexTooLarge,
+              &StridedArrayViewTest::sliceBitSizeTooLarge,
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
@@ -3423,6 +3436,64 @@ void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds(
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::slice(): member function slice returned offset 4 for a 4-byte type\n"
         "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n");
+}
+
+void StridedArrayViewTest::sliceBit() {
+    const bool bools[]{true, false, true};
+    Containers::StridedArrayView1D<const bool> boolsView = bools;
+    StridedBitArrayView1D bits = boolsView.sliceBit(0);
+    CORRADE_COMPARE(bits.data(), bools);
+    CORRADE_COMPARE(bits.offset(), 0);
+    CORRADE_COMPARE(bits.size(), 3);
+    CORRADE_COMPARE(bits.stride(), 8);
+    CORRADE_VERIFY( bits[0]);
+    CORRADE_VERIFY(!bits[1]);
+    CORRADE_VERIFY( bits[2]);
+
+    /* More dimensions, mutable */
+    float floats[]{
+        0.0f, -13.0f, 2.0f,
+        -0.1f, 1.0f, -0.0f
+    };
+    Containers::StridedArrayView2D<float> floatsView{floats, {2, 3}};
+    /** @todo possibly should be bit 7 on BE instead? */
+    StridedBitArrayView2D signs = floatsView.sliceBit(31);
+    CORRADE_COMPARE(signs.data(), reinterpret_cast<char*>(floats) + 3);
+    CORRADE_COMPARE(signs.offset(), 7);
+    CORRADE_COMPARE(signs.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(signs.stride(), (Stride2D{12*8, 4*8}));
+    CORRADE_VERIFY(!signs[0][0]);
+    CORRADE_VERIFY( signs[0][1]);
+    CORRADE_VERIFY(!signs[0][2]);
+    CORRADE_VERIFY( signs[1][0]);
+    CORRADE_VERIFY(!signs[1][1]);
+    CORRADE_VERIFY( signs[1][2]);
+}
+
+void StridedArrayViewTest::sliceBitIndexTooLarge() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::StridedArrayView3D<float> view;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    view.sliceBit(32);
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): index 32 out of range for a 32-bit type\n");
+}
+
+void StridedArrayViewTest::sliceBitSizeTooLarge() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    Containers::StridedArrayView3D<bool> view{nullptr, {1, std::size_t{1} << (sizeof(std::size_t)*8 - 3), 1}, {0, 0, 0}};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    view.sliceBit(0);
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
+    #else
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
+    #endif
 }
 
 void StridedArrayViewTest::every() {

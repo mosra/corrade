@@ -694,6 +694,28 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #endif
 
         /**
+         * @brief Slice to a bit
+         * @m_since_latest
+         *
+         * Returns a bit view on a particular bit of the underlying type. The
+         * @p index is expected to be less than size of the type in bits, i.e.
+         * @cpp sizeof(T)*8 @ce. Additionally, due to restrictions of the
+         * @ref BasicBitArrayView "BitArrayView" family of APIs, on 32-bit
+         * systems the input size has to be less than 512M elements in all
+         * dimensions.
+         *
+         * The returned view has the same size as the original, stride is
+         * converted from bytes to bits, and its
+         * @ref BasicStridedBitArrayView::data() and
+         * @relativeref{BasicStridedBitArrayView,offset()} is derived from
+         * @ref data() based on @p index. Example usage --- converting a
+         * @cpp bool @ce view to a @link StridedBitArrayView2D @endlink:
+         *
+         * @snippet Containers.cpp StridedArrayView-slice-bit
+         */
+        BasicStridedBitArrayView<dimensions, ArithmeticType> sliceBit(std::size_t index) const;
+
+        /**
          * @brief View on the first @p size items in the first dimension
          *
          * Equivalent to @cpp data.slice(0, size) @ce. On multi-dimensional
@@ -2201,6 +2223,38 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     };
 }
 #endif
+
+template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::sliceBit(const std::size_t index) const -> BasicStridedBitArrayView<dimensions, ArithmeticType> {
+    /* Unlike plain slice(begin, end), complex member slicing is usually not
+       called in tight loops and should be as checked as possible, so it's not
+       a debug assert */
+    CORRADE_ASSERT(index < sizeof(T)*8,
+        "Containers::StridedArrayView::sliceBit(): index" << index << "out of range for a" << sizeof(T)*8 << Utility::Debug::nospace << "-bit type", {});
+
+    /* Put the size in the upper bits, convert the stride from bytes to bits
+       (which, well, is the same operation, HA) */
+    Containers::Size<dimensions> sizeOffset{Corrade::NoInit};
+    Containers::Stride<dimensions> stride{Corrade::NoInit};
+    for(std::size_t i = 0; i != dimensions; ++i) {
+        /* All asserts related to BitArray size limits are debug so make this
+           one debug as well */
+        CORRADE_DEBUG_ASSERT(_size._data[i] < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
+            "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << _size, {});
+        sizeOffset._data[i] = _size._data[i] << 3;
+        stride._data[i] = _stride._data[i] << 3;
+    }
+
+    /* Data pointer is whole bytes */
+    ArithmeticType* const data = static_cast<ArithmeticType*>(_data) + (index >> 3);
+
+    /* Offset is the remaining bits in the last byte */
+    sizeOffset._data[0] |= index & 0x07;
+
+    /* Using a (friended) private constructor as that's significantly easier
+       than going through the public constructors that require a sized
+       contiguous view for safety. */
+    return BasicStridedBitArrayView<dimensions, ArithmeticType>{sizeOffset, stride, data};
+}
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::sliceSize(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& size) const {
     Containers::Size<dimensions> end{Corrade::NoInit};

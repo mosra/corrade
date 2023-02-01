@@ -47,6 +47,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringView.h"
@@ -1112,6 +1113,21 @@ Containers::StridedArrayView1D<Color3> colors;
 Containers::StridedArrayView1D<float> greens = colors.slice(&Color3::g);
 /* [StridedArrayView-slice-member-function] */
 static_cast<void>(greens);
+}
+
+{
+/* [StridedArrayView-slice-bit] */
+const bool data[]{
+    true, false, true,
+    false, true, false
+};
+Containers::StridedArrayView2D<const bool> bools{data, {3, 2}};
+
+/* 1, 0, 1
+   0, 1, 0 */
+Containers::StridedBitArrayView2D bits = bools.sliceBit(0);
+/* [StridedArrayView-slice-bit] */
+static_cast<void>(bits);
 }
 
 {

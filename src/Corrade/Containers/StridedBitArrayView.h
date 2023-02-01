@@ -674,6 +674,8 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedBitElement;
+        /* Used by StridedArrayView::sliceBit() */
+        template<unsigned, class> friend class StridedArrayView;
 
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
