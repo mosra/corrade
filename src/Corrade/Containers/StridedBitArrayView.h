@@ -224,7 +224,16 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
         #endif
-        /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
+        /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept
+            #ifndef CORRADE_MSVC_COMPATIBILITY
+            /* This has to be defined after the (T*, std::size_t, size_t)
+               overload below as otherwise MSVC without /permissive- thinks
+               the constructor delegates to itself because it evaluates the
+               template before having parsed the whole class definition. */
+            : BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
+            #else
+            ;
+            #endif
 
         /**
          * @brief Construct a constexpr view on an array with explicit length
@@ -853,6 +862,10 @@ template<unsigned dimensions, class T> template<unsigned, class> constexpr Basic
             "Containers::StridedBitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
         size << 3 | offset)},
     _stride{1} {}
+
+#ifdef CORRADE_MSVC_COMPATIBILITY /* See the declaration for details */
+template<unsigned dimensions, class T> template<unsigned, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
+#endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool BasicStridedBitArrayView<dimensions, T>::isContiguous() const {
     static_assert(dimension < dimensions, "dimension out of bounds");
