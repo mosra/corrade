@@ -31,6 +31,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/StringView.h"
 
 namespace Corrade { namespace Containers {
@@ -385,11 +386,15 @@ ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableBitAr
     outputView = {nullptr, 0, size};
 }
 
+ArrayTuple::Item::Item(Corrade::ValueInitT, std::size_t size, MutableStridedBitArrayView1D& outputView): Item{Corrade::ValueInit, Size1D{size}, outputView} {}
+
 ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableBitArrayView& outputView): Item{Corrade::NoInit, (size + 7)/8, Implementation::dataRef(outputView)} {
     /* Populate size of the output view. Pointer gets updated inside
        create(). */
     outputView = {nullptr, 0, size};
 }
+
+ArrayTuple::Item::Item(Corrade::NoInitT, std::size_t size, MutableStridedBitArrayView1D& outputView): Item{Corrade::NoInit, Size1D{size}, outputView} {}
 
 ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableStringView& outputView, StringViewFlags flags): Item{Corrade::ValueInit, (size + (flags & StringViewFlag::NullTerminated ? 1 : 0)), Implementation::dataRef(outputView)} {
     CORRADE_ASSERT(!(flags & ~StringViewFlag::NullTerminated),

@@ -34,6 +34,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -168,6 +169,8 @@ void ArrayTupleTest::constructEmptyArrays() {
         StridedArrayView3D<float> strided3D{ArrayView<float>{reinterpret_cast<float*>(1337), 24}, {2, 3, 4}};
         StridedArrayView2D<char> stridedErased{ArrayView<char>{reinterpret_cast<char*>(1337), 3}, {1, 3}};
         MutableBitArrayView bits{reinterpret_cast<char*>(1337), 7, 53};
+        MutableStridedBitArrayView1D bitsStrided{MutableBitArrayView{reinterpret_cast<char*>(1337), 7, 53}};
+        MutableStridedBitArrayView3D bitsStrided3D{MutableBitArrayView{reinterpret_cast<char*>(1337), 7, 53}, {2, 7, 3}};
         MutableStringView string{reinterpret_cast<char*>(1337), 3, StringViewFlag::Global};
         ArrayTuple data{
             {0, chars},
@@ -177,6 +180,8 @@ void ArrayTupleTest::constructEmptyArrays() {
             {{0, 0, 0}, strided3D},
             {Corrade::NoInit, 0, 4, 2, stridedErased},
             {0, bits},
+            {0, bitsStrided},
+            {{0, 0, 0}, bitsStrided3D},
             {0, string},
         };
 
@@ -213,6 +218,17 @@ void ArrayTupleTest::constructEmptyArrays() {
         CORRADE_COMPARE(bits.offset(), 0);
         CORRADE_COMPARE(bits.size(), 0);
         CORRADE_VERIFY(!bits.data());
+
+        /* Bit array pointer and both size and offset should be reset, last
+           dimension stride is always set for strided bit views */
+        CORRADE_COMPARE(bitsStrided.offset(), 0);
+        CORRADE_COMPARE(bitsStrided.size(), 0);
+        CORRADE_COMPARE(bitsStrided.stride(), 1);
+        CORRADE_VERIFY(!bitsStrided.data());
+        CORRADE_COMPARE(bitsStrided3D.offset(), 0);
+        CORRADE_COMPARE(bitsStrided3D.size(), (Size3D{0, 0, 0}));
+        CORRADE_COMPARE(bitsStrided3D.stride(),  (Stride3D{0, 0, 1}));
+        CORRADE_VERIFY(!bitsStrided3D.data());
 
         /* String pointer, size and flags should be reset */
         CORRADE_COMPARE(string.size(), 0);
@@ -255,6 +271,8 @@ void ArrayTupleTest::construct() {
         StridedArrayView3D<float> strided3D;
         StridedArrayView2D<char> stridedErased;
         MutableBitArrayView bits;
+        MutableStridedBitArrayView1D bitsStrided;
+        MutableStridedBitArrayView3D bitsStrided3D;
         MutableStringView stringNullTerminated;
         MutableStringView string;
         ArrayTuple data{
@@ -267,6 +285,8 @@ void ArrayTupleTest::construct() {
             /* There's no ValueInit alternative for the type-erased variant */
             {Corrade::NoInit, 3, 4, 16, stridedErased},
             {27, bits},
+            {4, bitsStrided},
+            {{3, 4, 5}, bitsStrided3D},
             {12, stringNullTerminated, StringViewFlag::NullTerminated},
             {7, string},
         };
@@ -286,7 +306,10 @@ void ArrayTupleTest::construct() {
                                        higher padding */
                 8 +                 /* padding to align the next to 16 again */
             3*4 +                   /* 12 bytes, but aligned to 16 */
-            4 +                     /* 27 bits, padded to four bytes */
+            4 +                     /* 27 bits, padded to 32 so four bytes */
+            1 +                     /* 4 bits, padded to 8 so one byte */
+            8 +                     /* 3*4*5 = 60 bits, padded together (not
+                                       individually) to 64 so 8 bytes */
             12 + 1 +                /* 12 chars + '\0' */
             7                       /* 7 chars */
         );
@@ -307,6 +330,12 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(stridedErased.stride(),  (Stride2D{4, 1}));
         CORRADE_COMPARE(bits.offset(), 0);
         CORRADE_COMPARE(bits.size(), 27);
+        CORRADE_COMPARE(bitsStrided.offset(), 0);
+        CORRADE_COMPARE(bitsStrided.size(), 4);
+        CORRADE_COMPARE(bitsStrided.stride(), 1);
+        CORRADE_COMPARE(bitsStrided3D.offset(), 0);
+        CORRADE_COMPARE(bitsStrided3D.size(), (Size3D{3, 4, 5}));
+        CORRADE_COMPARE(bitsStrided3D.stride(),  (Stride3D{20, 5, 1}));
         CORRADE_COMPARE(stringNullTerminated.size(), 12);
         CORRADE_COMPARE(stringNullTerminated.flags(), StringViewFlag::NullTerminated);
         CORRADE_COMPARE(stringNullTerminated[stringNullTerminated.size()], '\0');
@@ -335,13 +364,22 @@ void ArrayTupleTest::construct() {
         CORRADE_COMPARE(bits.data(), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
                 (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4);
+        CORRADE_COMPARE(bitsStrided.data(), data.data() +
+            sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 +
+                    4);
+        CORRADE_COMPARE(bitsStrided3D.data(), data.data() +
+            sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 +
+                    4 + 1);
         CORRADE_COMPARE(stringNullTerminated.data(), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
-                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 + 4);
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 +
+                    4 + 1 + 8);
         CORRADE_COMPARE(string.data(), data.data() +
             sizeof(void*) + 3*(4*sizeof(void*)) + 17 + 4 + 3 + 7*4 +
-                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 + 4 +
-                    12 + 1);
+                (sizeof(void*) == 4 ? 8 : 4) + 3*16 + 5*8 + 8*4 + 8 + 3*4 +
+                    4 + 1 + 8 + 12 + 1);
 
         /* Check that trivial types are zero-init'd and nontrivial had their
            constructor called */
@@ -362,6 +400,12 @@ void ArrayTupleTest::construct() {
         }
         for(std::size_t i = 0; i != bits.size(); ++i)
             CORRADE_VERIFY(!bits[i]);
+        for(std::size_t i = 0; i != bitsStrided.size(); ++i)
+            CORRADE_VERIFY(!bitsStrided[i]);
+        for(std::size_t i = 0; i != bitsStrided3D.size()[0]; ++i)
+            for(std::size_t j = 0; j != bitsStrided3D.size()[1]; ++j)
+                for(std::size_t k = 0; k != bitsStrided3D.size()[2]; ++k)
+                    CORRADE_VERIFY(!bitsStrided3D[i][j][k]);
         for(char i: stringNullTerminated) CORRADE_COMPARE(i, 0);
         for(char i: string) CORRADE_COMPARE(i, 0);
     }
@@ -377,7 +421,7 @@ void ArrayTupleTest::constructNoInit() {
     NonCopyable::constructed = 0;
     NonCopyable::destructed = 0;
 
-    char storage[325];
+    char storage[357];
     for(char& i: storage) i = '\xce';
 
     CORRADE_VERIFY(true); /* to capture correct function name */
@@ -394,6 +438,10 @@ void ArrayTupleTest::constructNoInit() {
         StridedArrayView2D<char> stridedErased;
         MutableBitArrayView bits;
         MutableBitArrayView initializedBits;
+        MutableStridedBitArrayView1D bitsStrided;
+        MutableStridedBitArrayView1D initializedBitsStrided;
+        MutableStridedBitArrayView3D bitsStrided3D;
+        MutableStridedBitArrayView3D initializedBitsStrided3D;
         MutableStringView stringNullTerminated;
         MutableStringView initializedStringNullTerminated;
         MutableStringView string;
@@ -411,6 +459,10 @@ void ArrayTupleTest::constructNoInit() {
              /* There's no ValueInit alternative for the type-erased variant */
              {Corrade::NoInit, 13, bits},
              {Corrade::ValueInit, 14, initializedBits},
+             {Corrade::NoInit, 9, bitsStrided},
+             {Corrade::ValueInit, 9, initializedBitsStrided},
+             {Corrade::NoInit, {3, 5, 7}, bitsStrided3D},
+             {Corrade::ValueInit, {3, 5, 7}, initializedBitsStrided3D},
              {Corrade::NoInit, 11, stringNullTerminated, StringViewFlag::NullTerminated},
              {Corrade::ValueInit, 9, initializedStringNullTerminated, StringViewFlag::NullTerminated},
              {Corrade::NoInit, 10, string},
@@ -459,6 +511,20 @@ void ArrayTupleTest::constructNoInit() {
             CORRADE_ITERATION(i);
             CORRADE_COMPARE(bits.data()[i], '\xce');
             CORRADE_COMPARE(initializedBits.data()[i], 0);
+        }
+        CORRADE_COMPARE((bitsStrided.size() + 7)/8, 2);
+        CORRADE_COMPARE((initializedBitsStrided.size() + 7)/8, 2);
+        for(std::size_t i = 0; i != 2; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(static_cast<char*>(bitsStrided.data())[i], '\xce');
+            CORRADE_COMPARE(static_cast<char*>(initializedBitsStrided.data())[i], 0);
+        }
+        CORRADE_COMPARE((Implementation::sizeProduct(bitsStrided3D.size()) + 7)/8, 14);
+        CORRADE_COMPARE((Implementation::sizeProduct(initializedBitsStrided3D.size()) + 7)/8, 14);
+        for(std::size_t i = 0; i != 14; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(static_cast<char*>(bitsStrided3D.data())[i], '\xce');
+            CORRADE_COMPARE(static_cast<char*>(initializedBitsStrided3D.data())[i], 0);
         }
         for(char i: stringNullTerminated)
             CORRADE_COMPARE(i, '\xce');

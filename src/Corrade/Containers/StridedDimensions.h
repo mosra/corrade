@@ -48,6 +48,15 @@ namespace Implementation {
     template<unsigned, class> struct StridedBitElement;
     template<int> struct ArrayCastFlattenOrInflate;
 
+    /* So ArrayTuple can know the total size without having to include this
+       header. It needs it for both StridedArrayView and StridedBitArrayView so
+       it's defined here. */
+    template<unsigned dimensions> std::size_t sizeProduct(const Size<dimensions>& size) {
+        std::size_t out = 1;
+        for(std::size_t i = 0; i != dimensions; ++i)
+            out *= size[i];
+        return out;
+    }
     #ifndef CORRADE_NO_ASSERT
     /* Used by both StridedArrayView and StridedBitArrayView in assertions
        that data array is large enough. If any size element is zero, the data

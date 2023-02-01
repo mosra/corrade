@@ -48,6 +48,9 @@ template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list);
 namespace Implementation {
     template<class T> T*& dataRef(Containers::ArrayView<T>&);
     template<unsigned dimensions, class T> T*& dataRef(Containers::StridedArrayView<dimensions, T>&);
+    template<unsigned dimensions, class T> T*& dataRef(Containers::BasicStridedBitArrayView<dimensions, T>&);
+    /* Defined in StridedDimensions.h as it's common for both StridedArrayView
+       and StridedBitArrayView */
     template<unsigned dimensions> std::size_t sizeProduct(const Size<dimensions>&);
 }
 #endif
@@ -93,8 +96,9 @@ in the `info` structure, so the views aren't needed after anymore.
     together with a @ref Utility::allocateAligned() instead.
 
 Besides @ref ArrayView, the output view can also be a (multi-dimensional)
-@ref StridedArrayView, a @ref BasicBitArrayView "MutableBitArrayView" or a
-@ref BasicStringView "MutableStringView". See constructor overloads of the
+@ref StridedArrayView, a @ref BasicBitArrayView "MutableBitArrayView",
+a (multi-dimensional) @ref BasicStridedBitArrayView "MutableStridedBitArrayView"
+or a @ref BasicStringView "MutableStringView". See constructor overloads of the
 @ref Item class for reference.
 
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
@@ -349,6 +353,21 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
          */
         /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableBitArrayView& outputView);
 
+        /** @overload */
+        /* Somehow the any-dimension overload below doesn't accept a single
+           number for the size and it needs to be wrapped in {}s, so I'm
+           keeping this overload also. Fortunately compared to the others it
+           isn't templated and thus can delegate to the below one in the source
+           file. */
+        /*implicit*/ Item(Corrade::ValueInitT, std::size_t size, MutableStridedBitArrayView1D& outputView);
+
+        /** @overload */
+        template<unsigned dimensions> /*implicit*/ Item(Corrade::ValueInitT, const Size<dimensions>& size, MutableStridedBitArrayView<dimensions>& outputView): Item{Corrade::ValueInit, (Implementation::sizeProduct(size) + 7)/8, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {{nullptr, 0, Implementation::sizeProduct(size)}, size};
+        }
+
         /**
          * @brief Construct a view with value-initialized elements
          * @param[in] size          Desired view size
@@ -383,6 +402,12 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
 
         /** @overload */
         /*implicit*/ Item(std::size_t size, MutableBitArrayView& outputView): Item{Corrade::ValueInit, size, outputView} {}
+
+        /** @overload */
+        /*implicit*/ Item(std::size_t size, MutableStridedBitArrayView1D& outputView): Item{Corrade::ValueInit, size, outputView} {}
+
+        /** @overload */
+        template<unsigned dimensions> /*implicit*/ Item(const Size<dimensions>& size, MutableStridedBitArrayView<dimensions>& outputView): Item{Corrade::ValueInit, size, outputView} {}
 
         /** @overload */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -437,6 +462,21 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
          * Useful if you will be overwriting all elements later anyway.
          */
         /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableBitArrayView& outputView);
+
+        /** @overload */
+        /* Somehow the any-dimension overload below doesn't accept a single
+           number for the size and it needs to be wrapped in {}s, so I'm
+           keeping this overload also. Fortunately compared to the others it
+           isn't templated and thus can delegate to the below one in the source
+           file. */
+        /*implicit*/ Item(Corrade::NoInitT, std::size_t size, MutableStridedBitArrayView1D& outputView);
+
+        /** @overload */
+        template<unsigned dimensions> /*implicit*/ Item(Corrade::NoInitT, const Size<dimensions>& size, MutableStridedBitArrayView<dimensions>& outputView): Item{Corrade::NoInit, (Implementation::sizeProduct(size) + 7)/8, Implementation::dataRef(outputView)} {
+            /* Populate size of the output view. Pointer gets updated inside
+               create(). */
+            outputView = {{nullptr, 0, Implementation::sizeProduct(size)}, size};
+        }
 
         /**
          * @brief Construct a view without initializing its contents

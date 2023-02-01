@@ -39,6 +39,18 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
+    /* So ArrayTuple can update the data pointer */
+    template<unsigned dimensions, class T>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* warns that "the inline specifier cannot be used when a friend
+           declaration refers to a specialization of a function template" due
+           to friend dataRef<>() being used below. AMAZING */
+        inline
+        #endif
+    T*& dataRef(BasicStridedBitArrayView<dimensions, T>& view) {
+        return view._data;
+    }
+
     #ifndef CORRADE_NO_DEBUG_ASSERT
     template<unsigned dimensions> constexpr bool isSizeSmallEnoughForBitArrayView(const Size<dimensions>&, Sequence<>) {
         return true;
@@ -676,6 +688,8 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         template<unsigned, class> friend struct Implementation::StridedBitElement;
         /* Used by StridedArrayView::sliceBit() */
         template<unsigned, class> friend class StridedArrayView;
+        /* So ArrayTuple can update the data pointer */
+        friend T*& Implementation::dataRef<>(BasicStridedBitArrayView<dimensions, T>&);
 
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
