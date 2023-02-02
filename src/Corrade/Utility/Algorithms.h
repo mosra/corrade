@@ -250,7 +250,9 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
         "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
     for(std::size_t i = 0, max = src.size()[0]; i != max; ++i)
-        copy(src[i], dst[i]);
+        /* Explicitly pick the final overload to avoid having to go through the
+           copy(From&&, To&&) proxy again */
+        static_cast<void(*)(const Containers::StridedArrayView<dimensions - 1, const char>&, const Containers::StridedArrayView<dimensions - 1, char>&)>(copy)(src[i], dst[i]);
 }
 
 template<unsigned dimensions, class T> void copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>& dst) {
@@ -262,12 +264,18 @@ template<unsigned dimensions, class T> void copy(const Containers::StridedArrayV
         #endif
         , "types must be trivially copyable");
 
-    /* The arrayCast() has a full assertions as well -- the expectation here is
+    /* Cast the views to char and pass them as const& to avoid having to go
+       through the copy(From&&, To&&) proxy again. Can't do a static_cast like
+       elsewhere as there's an ambiguity between copy<dimensions>() and copy()
+       that's explicitly stamped out for 1D, 2D, 3D and 4D.
+
+       The arrayCast() has full assertions as well -- the expectation here is
        that the StridedArrayView variants are called on large chunks of data
        where the assert overhead doesn't matter that much compared to the
        safety gains. */
-    return copy(Containers::arrayCast<dimensions + 1, const char>(src),
-                Containers::arrayCast<dimensions + 1, char>(dst));
+    const Containers::StridedArrayView<dimensions + 1, const char> srcChar = Containers::arrayCast<dimensions + 1, const char>(src);
+    const Containers::StridedArrayView<dimensions + 1, char> dstChar = Containers::arrayCast<dimensions + 1, char>(dst);
+    return copy(srcChar, dstChar);
 }
 
 namespace Implementation {

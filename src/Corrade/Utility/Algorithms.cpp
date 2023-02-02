@@ -66,8 +66,11 @@ void copy(const Containers::StridedArrayView1D<const char>& src, const Container
     CORRADE_ASSERT(src.size() == dst.size(),
         "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    return copy(Containers::StridedArrayView4D<const char>{src},
-                Containers::StridedArrayView4D<char>{dst});
+    /* Expand the views to 4D and explicitly pick the final overload to avoid
+       having to go through the copy(From&&, To&&) proxy again */
+    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
@@ -78,8 +81,11 @@ void copy(const Containers::StridedArrayView2D<const char>& src, const Container
     CORRADE_ASSERT(src.size() == dst.size(),
         "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    return copy(Containers::StridedArrayView4D<const char>{src},
-                Containers::StridedArrayView4D<char>{dst});
+    /* Expand the views to 4D and explicitly pick the final overload to avoid
+       having to go through the copy(From&&, To&&) proxy again */
+    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
@@ -90,8 +96,11 @@ void copy(const Containers::StridedArrayView3D<const char>& src, const Container
     CORRADE_ASSERT(src.size() == dst.size(),
         "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    return copy(Containers::StridedArrayView4D<const char>{src},
-                Containers::StridedArrayView4D<char>{dst});
+    /* Expand the views to 4D and explicitly pick the final overload to avoid
+       having to go through the copy(From&&, To&&) proxy again */
+    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
