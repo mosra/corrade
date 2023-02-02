@@ -61,17 +61,20 @@ namespace Implementation {
     /* Used by both StridedArrayView and StridedBitArrayView in assertions
        that data array is large enough. If any size element is zero, the data
        can be zero-sized as well. Otherwise we have to compare against max
-       stride. */
-    template<unsigned dimensions, class T> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>&, Sequence<>) {
+       stride.
+
+       To avoid unnecessary overhead in debug builds, these take raw pointers
+       instead of a Size<dimensions> / Stride<dimensions>. */
+    template<class T> constexpr bool isAnyDimensionZero(const T*, Sequence<>) {
         return false;
     }
-    template<unsigned dimensions, class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const StridedDimensions<dimensions, T>& size, Sequence<first, next...>) {
+    template<class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const T* const size, Sequence<first, next...>) {
         return !size[first] || isAnyDimensionZero(size, Sequence<next...>{});
     }
-    template<unsigned dimensions> constexpr std::size_t largestStride(const Size<dimensions>&, const Stride<dimensions>&, Sequence<>) {
+    constexpr std::size_t largestStride(const std::size_t*, const std::ptrdiff_t*, Sequence<>) {
         return 0;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const Size<dimensions>& size, const Stride<dimensions>& stride, Sequence<first, next...>) {
+    template<std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const std::size_t* const size, const std::ptrdiff_t* const stride, Sequence<first, next...>) {
         return Utility::max(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
     }
@@ -79,11 +82,14 @@ namespace Implementation {
 
     /* Calculates StridedArrayView / StridedBitArrayView stride when just size
        is passed. In case of the bit view it's counting bits instead of bytes
-       but it's the same algorithm. */
-    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>&, std::size_t, Sequence<>) {
+       but it's the same algorithm.
+
+       To avoid unnecessary overhead in debug builds, these take raw pointers
+       instead of a Size<dimensions> / Stride<dimensions>. */
+    constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t*, std::size_t, Sequence<>) {
         return 1;
     }
-    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const Size<dimensions>& size, std::size_t index, Sequence<first, next...>) {
+    template<std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t* const size, std::size_t index, Sequence<first, next...>) {
         /* GCC since version 10.2 complains that
             warning: comparison of unsigned expression in ‘< 0’ is always false [-Wtype-limits]
            and there's no way to silence that except for a pragma (doing things
@@ -106,7 +112,7 @@ namespace Implementation {
         #pragma GCC diagnostic pop
         #endif
     }
-    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const Size<dimensions>& size, std::size_t typeSize, Sequence<index...>) {
+    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const std::size_t* const size, std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
 }

@@ -225,7 +225,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * implicitly 1 bit. In a one-dimensional case you probably want to use
          * @ref BasicStridedBitArrayView(BasicBitArrayView<U>) instead.
          */
-        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, const Size<dimensions>& size) noexcept: BasicStridedBitArrayView{data, data.data(), data.offset(), size, Implementation::strideForSize(size, 1, typename Implementation::GenerateSequence<dimensions>::Type{})} {}
+        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, const Size<dimensions>& size) noexcept: BasicStridedBitArrayView{data, data.data(), data.offset(), size, Implementation::strideForSize<dimensions>(size._data, 1, typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
          * @brief Construct a view on an array with explicit length
@@ -897,7 +897,7 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
            If any size is zero, data can be zero-sized too. If the largest
            stride is zero, `data` can have *any* size and it could be okay,
            can't reliably test that. */
-        CORRADE_CONSTEXPR_ASSERT(Implementation::isAnyDimensionZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+        CORRADE_CONSTEXPR_ASSERT(Implementation::isAnyDimensionZero(size._data, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size._data, stride._data, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
             "Containers::StridedBitArrayView: data size" << data.size() << "is not enough for" << size << "bits of stride" << stride),
         /** @todo unlike in StridedArrayView we *could* also check if "end" is
             contained in data, however one still can't perform arithmetic on a
@@ -1138,7 +1138,7 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
     /* Unlike plain slice(begin, end), complex slicing is usually not called in
        tight loops and should be as checked as possible, so it's not a debug
        assert */
-    CORRADE_ASSERT(!Implementation::isAnyDimensionZero(step, typename Implementation::GenerateSequence<dimensions>::Type{}),
+    CORRADE_ASSERT(!Implementation::isAnyDimensionZero(step._data, typename Implementation::GenerateSequence<dimensions>::Type{}),
         "Containers::StridedBitArrayView::every(): expected a non-zero step, got" << step, {});
 
     Size<dimensions> sizeOffset{Corrade::NoInit};
