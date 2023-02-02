@@ -59,83 +59,39 @@ void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayV
 }
 
 void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {
-    const std::size_t srcSize = src.size();
-    #ifndef CORRADE_NO_ASSERT
-    const std::size_t dstSize = dst.size();
-    #endif
     /* Compared to the contiguous ArrayView copy() this has a full assertion,
        as the expectation is that it's called on large chunks of data where the
        assert overhead doesn't matter that much compared to the safety
        gains. */
-    CORRADE_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
+    CORRADE_ASSERT(src.size() == dst.size(),
+        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    const std::ptrdiff_t srcStride = src.stride();
-    const std::ptrdiff_t dstStride = dst.stride();
-    /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
-       for the size assert anyway */
-    return copy(Containers::StridedArrayView4D<const char>{
-            {static_cast<const char*>(src.data()), ~std::size_t{}},
-            {1, 1, 1, srcSize},
-            {srcStride, srcStride, srcStride, srcStride}},
-        Containers::StridedArrayView4D<char>{
-            {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, 1, 1, srcSize},
-            {dstStride, dstStride, dstStride, dstStride}});
+    return copy(Containers::StridedArrayView4D<const char>{src},
+                Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
-    const Containers::Size2D srcSize = src.size();
-    #ifndef CORRADE_NO_ASSERT
-    const Containers::Size2D dstSize = dst.size();
-    #endif
     /* Compared to the contiguous ArrayView copy() this has a full assertion,
        as the expectation is that it's called on large chunks of data where the
        assert overhead doesn't matter that much compared to the safety
        gains. */
-    CORRADE_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
+    CORRADE_ASSERT(src.size() == dst.size(),
+        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    const std::size_t* const size = srcSize.begin();
-    const std::ptrdiff_t* const srcStride = src.stride().begin();
-    const std::ptrdiff_t* const dstStride = dst.stride().begin();
-    /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
-       for the size assert anyway */
-    return copy(Containers::StridedArrayView4D<const char>{
-            {static_cast<const char*>(src.data()), ~std::size_t{}},
-            {1, 1, size[0], size[1]},
-            {srcStride[0], srcStride[0], srcStride[0], srcStride[1]}},
-        Containers::StridedArrayView4D<char>{
-            {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, 1, size[0], size[1]},
-            {dstStride[0], dstStride[0], dstStride[0], dstStride[1]}});
+    return copy(Containers::StridedArrayView4D<const char>{src},
+                Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
-    const Containers::Size3D srcSize = src.size();
-    #ifndef CORRADE_NO_ASSERT
-    const Containers::Size3D dstSize = dst.size();
-    #endif
     /* Compared to the contiguous ArrayView copy() this has a full assertion,
        as the expectation is that it's called on large chunks of data where the
        assert overhead doesn't matter that much compared to the safety
        gains. */
-    CORRADE_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
+    CORRADE_ASSERT(src.size() == dst.size(),
+        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
-    const std::size_t* const size = srcSize.begin();
-    const std::ptrdiff_t* const srcStride = src.stride().begin();
-    const std::ptrdiff_t* const dstStride = dst.stride().begin();
-    /* Using ~std::size_t{} for arrayview size as a shortcut -- there it's just
-       for the size assert anyway */
-    return copy(Containers::StridedArrayView4D<const char>{
-            {static_cast<const char*>(src.data()), ~std::size_t{}},
-            {1, size[0], size[1], size[2]},
-            {srcStride[0], srcStride[0], srcStride[1], srcStride[2]}},
-        Containers::StridedArrayView4D<char>{
-            {static_cast<char*>(dst.data()), ~std::size_t{}},
-            {1, size[0], size[1], size[2]},
-            {dstStride[0], dstStride[0], dstStride[1], dstStride[2]}});
+    return copy(Containers::StridedArrayView4D<const char>{src},
+                Containers::StridedArrayView4D<char>{dst});
 }
 
 void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
