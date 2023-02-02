@@ -131,6 +131,10 @@ struct JsonTest: TestSuite::Tester {
         void findArrayIndexNotArray();
         void findArrayIndexNotParsed();
 
+        void asTypeWrongType();
+        void asTypeNotParsed();
+        void asTypeWrongParsedType();
+
         void asBitArray();
         #ifdef CORRADE_BUILD_DEPRECATED
         void asBoolArrayDeprecated();
@@ -177,10 +181,6 @@ struct JsonTest: TestSuite::Tester {
         void fromFileError();
         void fromFileParseOptionError();
         void fromFileParseError();
-
-        void asTypeWrongType();
-        void asTypeNotParsed();
-        void asTypeWrongParsedType();
 
         #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
         void tokenConstructCopy();
@@ -1314,6 +1314,10 @@ JsonTest::JsonTest() {
               &JsonTest::findArrayIndexNotArray,
               &JsonTest::findArrayIndexNotParsed,
 
+              &JsonTest::asTypeWrongType,
+              &JsonTest::asTypeNotParsed,
+              &JsonTest::asTypeWrongParsedType,
+
               &JsonTest::asBitArray,
               #ifdef CORRADE_BUILD_DEPRECATED
               &JsonTest::asBoolArrayDeprecated,
@@ -1363,10 +1367,6 @@ JsonTest::JsonTest() {
               &JsonTest::fromFileError,
               &JsonTest::fromFileParseOptionError,
               &JsonTest::fromFileParseError,
-
-              &JsonTest::asTypeWrongType,
-              &JsonTest::asTypeNotParsed,
-              &JsonTest::asTypeWrongParsedType,
 
               #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
               &JsonTest::tokenConstructCopy,
@@ -3491,6 +3491,116 @@ void JsonTest::findArrayIndexNotParsed() {
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n");
 }
 
+void JsonTest::asTypeWrongType() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString("[{}]", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->tokens()[0].asObject();
+    json->tokens()[1].asArray();
+    json->tokens()[1].asNull();
+    json->tokens()[1].asBool();
+    json->tokens()[1].asDouble();
+    json->tokens()[1].asFloat();
+    json->tokens()[1].asUnsignedInt();
+    json->tokens()[1].asInt();
+    json->tokens()[1].asUnsignedLong();
+    json->tokens()[1].asLong();
+    json->tokens()[1].asSize();
+    json->tokens()[1].asString();
+    const char* expected =
+        "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asNull(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asBool(): token is a parsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
+        "Utility::JsonToken::asString(): token is a parsed Utility::JsonToken::Type::Object\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void JsonTest::asTypeNotParsed() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        nOOO, fALSE, -yey, "\uhh", {}
+    ])");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->tokens()[5].asObject();
+    json->tokens()[0].asArray();
+    json->tokens()[1].asNull();
+    json->tokens()[2].asBool();
+    json->tokens()[3].asDouble();
+    json->tokens()[3].asFloat();
+    json->tokens()[3].asUnsignedInt();
+    json->tokens()[3].asInt();
+    json->tokens()[3].asUnsignedLong();
+    json->tokens()[3].asLong();
+    json->tokens()[3].asSize();
+    json->tokens()[4].asString();
+    const char* expected =
+        "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n"
+        "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
+        "Utility::JsonToken::asNull(): token is an unparsed Utility::JsonToken::Type::Null\n"
+        "Utility::JsonToken::asBool(): token is an unparsed Utility::JsonToken::Type::Bool\n"
+        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
+        "Utility::JsonToken::asString(): token is an unparsed Utility::JsonToken::Type::String\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void JsonTest::asTypeWrongParsedType() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString(R"([
+        35.7, -35.7, 25, -17
+    ])");
+    CORRADE_VERIFY(json);
+    CORRADE_COMPARE(json->tokens().size(), 5);
+
+    json->parseDoubles(json->tokens()[1]);
+    json->parseFloats(json->tokens()[2]);
+    json->parseUnsignedInts(json->tokens()[3]);
+    json->parseInts(json->tokens()[4]);
+
+    /* Deliberately trying to get doubles as floats or ints as longs. Currently
+       that fails but might be deemed too restrictive in future and relaxed. */
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->tokens()[2].asDouble();
+    json->tokens()[1].asFloat();
+    json->tokens()[4].asUnsignedInt();
+    json->tokens()[3].asInt();
+    json->tokens()[3].asUnsignedLong();
+    json->tokens()[4].asLong();
+    json->tokens()[4].asSize();
+    const char* expected =
+        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Float\n"
+        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Double\n"
+        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
+        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
+        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
+        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
+        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
 void JsonTest::asBitArray() {
     Containers::Optional<Json> json = Json::fromString(R"([
         true, false, true
@@ -4166,116 +4276,6 @@ void JsonTest::fromFileParseError() {
     CORRADE_COMPARE(out.str(), formatString(
         "Utility::Json::parseDoubles(): invalid floating-point literal -haha at {0}:2:5\n"
         "Utility::Json::parseDouble(): invalid floating-point literal -haha at {0}:2:5\n", filename));
-}
-
-void JsonTest::asTypeWrongType() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Containers::Optional<Json> json = Json::fromString("[{}]", Json::Option::ParseLiterals);
-    CORRADE_VERIFY(json);
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    json->tokens()[0].asObject();
-    json->tokens()[1].asArray();
-    json->tokens()[1].asNull();
-    json->tokens()[1].asBool();
-    json->tokens()[1].asDouble();
-    json->tokens()[1].asFloat();
-    json->tokens()[1].asUnsignedInt();
-    json->tokens()[1].asInt();
-    json->tokens()[1].asUnsignedLong();
-    json->tokens()[1].asLong();
-    json->tokens()[1].asSize();
-    json->tokens()[1].asString();
-    const char* expected =
-        "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n"
-        "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asNull(): token is a parsed Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asBool(): token is a parsed Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
-        "Utility::JsonToken::asString(): token is a parsed Utility::JsonToken::Type::Object\n";
-    CORRADE_COMPARE(out.str(), expected);
-}
-
-void JsonTest::asTypeNotParsed() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Containers::Optional<Json> json = Json::fromString(R"([
-        nOOO, fALSE, -yey, "\uhh", {}
-    ])");
-    CORRADE_VERIFY(json);
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    json->tokens()[5].asObject();
-    json->tokens()[0].asArray();
-    json->tokens()[1].asNull();
-    json->tokens()[2].asBool();
-    json->tokens()[3].asDouble();
-    json->tokens()[3].asFloat();
-    json->tokens()[3].asUnsignedInt();
-    json->tokens()[3].asInt();
-    json->tokens()[3].asUnsignedLong();
-    json->tokens()[3].asLong();
-    json->tokens()[3].asSize();
-    json->tokens()[4].asString();
-    const char* expected =
-        "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n"
-        "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
-        "Utility::JsonToken::asNull(): token is an unparsed Utility::JsonToken::Type::Null\n"
-        "Utility::JsonToken::asBool(): token is an unparsed Utility::JsonToken::Type::Bool\n"
-        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
-        "Utility::JsonToken::asString(): token is an unparsed Utility::JsonToken::Type::String\n";
-    CORRADE_COMPARE(out.str(), expected);
-}
-
-void JsonTest::asTypeWrongParsedType() {
-    CORRADE_SKIP_IF_NO_ASSERT();
-
-    Containers::Optional<Json> json = Json::fromString(R"([
-        35.7, -35.7, 25, -17
-    ])");
-    CORRADE_VERIFY(json);
-    CORRADE_COMPARE(json->tokens().size(), 5);
-
-    json->parseDoubles(json->tokens()[1]);
-    json->parseFloats(json->tokens()[2]);
-    json->parseUnsignedInts(json->tokens()[3]);
-    json->parseInts(json->tokens()[4]);
-
-    /* Deliberately trying to get doubles as floats or ints as longs. Currently
-       that fails but might be deemed too restrictive in future and relaxed. */
-    std::ostringstream out;
-    Error redirectError{&out};
-    json->tokens()[2].asDouble();
-    json->tokens()[1].asFloat();
-    json->tokens()[4].asUnsignedInt();
-    json->tokens()[3].asInt();
-    json->tokens()[3].asUnsignedLong();
-    json->tokens()[4].asLong();
-    json->tokens()[4].asSize();
-    const char* expected =
-        "Utility::JsonToken::asDouble(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Float\n"
-        "Utility::JsonToken::asFloat(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Double\n"
-        "Utility::JsonToken::asUnsignedInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
-        "Utility::JsonToken::asInt(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
-        "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
-        "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
-        "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n";
-    CORRADE_COMPARE(out.str(), expected);
 }
 
 #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
