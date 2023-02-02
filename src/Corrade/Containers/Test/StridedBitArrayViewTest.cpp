@@ -93,6 +93,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     /* No construct3DBeginTooSmall(), it's no different from the 1D case */
 
     void construct3DFromView();
+    void construct3DFromLessDimensions();
 
     void asContiguous();
     void asContiguousNonContiguous();
@@ -344,6 +345,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::construct3DViewTooSmall,
 
               &StridedBitArrayViewTest::construct3DFromView,
+              &StridedBitArrayViewTest::construct3DFromLessDimensions,
 
               &StridedBitArrayViewTest::asContiguous,
               &StridedBitArrayViewTest::asContiguousNonContiguous,
@@ -1294,6 +1296,38 @@ void StridedBitArrayViewTest::construct3DFromView() {
     /* Not using is_convertible to catch also accidental explicit conversions */
     CORRADE_VERIFY(std::is_constructible<StridedBitArrayView1D, BitArrayView>::value);
     CORRADE_VERIFY(!std::is_constructible<StridedBitArrayView3D, BitArrayView>::value);
+}
+
+void StridedBitArrayViewTest::construct3DFromLessDimensions() {
+    /* 0b10
+         01
+         10'0000'0000 << 2 */
+    char data[]{'\x00', '\x98'};
+    StridedBitArrayView1D a{data + 1, 2, 6};
+    StridedBitArrayView2D b{{data + 1, 2, 6}, {3, 2}};
+
+    StridedBitArrayView3D a3 = a;
+    CORRADE_COMPARE(a3.data(), data + 1);
+    CORRADE_COMPARE(a3.offset(), 2);
+    CORRADE_COMPARE(a3.size(), (Size3D{1, 1, 6}));
+    CORRADE_COMPARE(a3.stride(), (Stride3D{6, 6, 1}));
+    CORRADE_VERIFY(!a3[0][0][0]);
+    CORRADE_VERIFY( a3[0][0][1]);
+    CORRADE_VERIFY(!a3[0][0][3]);
+
+    StridedBitArrayView3D b3 = b;
+    CORRADE_COMPARE(b3.data(), data + 1);
+    CORRADE_COMPARE(b3.offset(), 2);
+    CORRADE_COMPARE(b3.size(), (Size3D{1, 3, 2}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{6, 2, 1}));
+    CORRADE_VERIFY( b3[0][0][1]);
+    CORRADE_VERIFY( b3[0][1][0]);
+    CORRADE_VERIFY(!b3[0][1][1]);
+    CORRADE_VERIFY(!b3[0][2][0]);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedBitArrayView3D, StridedBitArrayView2D>::value);
+    /* Construction the other way shouldn't be possible */
+    CORRADE_VERIFY(!std::is_constructible<StridedBitArrayView2D, StridedBitArrayView3D>::value);
 }
 
 void StridedBitArrayViewTest::asContiguous() {

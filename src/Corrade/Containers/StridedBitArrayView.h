@@ -301,6 +301,21 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
 
         /**
+         * @brief Construct from a @ref StridedBitArrayView of smaller dimension count
+         *
+         * The extra dimensions are added at the front, with sizes being
+         * @cpp 1 @ce and strides equal to size times stride of @p other in the
+         * first dimension. To reduce dimension count you can use
+         * @ref operator[](), potentially in combination with @ref transposed().
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<unsigned lessDimensions>
+        #else
+        template<unsigned lessDimensions, class = typename std::enable_if<lessDimensions < dimensions>::type>
+        #endif
+        /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept;
+
+        /**
          * @brief Construct from a @ref BasicBitArrayView
          *
          * Enabled only on one-dimensional views, in case of a
@@ -916,6 +931,25 @@ template<unsigned dimensions, class T> template<unsigned
 
 #ifdef CORRADE_MSVC_COMPATIBILITY /* See the declaration for details */
 template<unsigned dimensions, class T> template<unsigned> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
+#endif
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<unsigned dimensions, class T> template<unsigned lessDimensions, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
+    /* Set size and stride in the extra dimensions */
+    constexpr std::size_t extraDimensions = dimensions - lessDimensions;
+    const std::size_t stride = (other._sizeOffset._data[0] >> 3)*other._stride._data[0];
+    for(std::size_t i = 0; i != extraDimensions; ++i) {
+        _sizeOffset._data[i] = 1 << 3;
+        _stride._data[i] = stride;
+    }
+    /* Copy size and stride in the existing dimensions */
+    for(std::size_t i = 0; i != lessDimensions; ++i) {
+        _sizeOffset._data[extraDimensions + i] = other._sizeOffset._data[i] & ~0x07;
+        _stride._data[extraDimensions + i] = other._stride._data[i];
+    }
+    /* Transfer the offset as well */
+    _sizeOffset._data[0] |= other._sizeOffset._data[0] & 0x07;
+}
 #endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool BasicStridedBitArrayView<dimensions, T>::isContiguous() const {

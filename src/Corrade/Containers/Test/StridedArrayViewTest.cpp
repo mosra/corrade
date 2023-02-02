@@ -167,6 +167,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DFromStaticViewVoid();
     void construct3DFromStaticViewConstVoid();
     void construct3DDerived();
+    void construct3DFromLessDimensions();
 
     void convertBool();
     void convertConst();
@@ -376,6 +377,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DFromStaticViewVoid,
               &StridedArrayViewTest::construct3DFromStaticViewConstVoid,
               &StridedArrayViewTest::construct3DDerived,
+              &StridedArrayViewTest::construct3DFromLessDimensions,
 
               &StridedArrayViewTest::convertBool,
               &StridedArrayViewTest::convertConst,
@@ -1901,6 +1903,35 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(cav.stride(), (Stride2D{2, 2}));
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StridedArrayView3D<Base>, Containers::StridedArrayView3D<Derived>>::value);
+}
+
+void StridedArrayViewTest::construct3DFromLessDimensions() {
+    int data[6]{
+        2, 3,
+        5, -1,
+        22, 15
+    };
+    StridedArrayView1Di a = data;
+    StridedArrayView2Di b{data, {3, 2}};
+
+    StridedArrayView3Di a3 = a;
+    CORRADE_COMPARE(a3.data(), &data[0]);
+    CORRADE_COMPARE(a3.size(), (Size3D{1, 1, 6}));
+    CORRADE_COMPARE(a3.stride(), (Stride3D{24, 24, 4}));
+    CORRADE_COMPARE(a3[0][0][3], -1);
+
+    StridedArrayView3Di b3 = b;
+    CORRADE_COMPARE(b3.data(), &data[0]);
+    CORRADE_COMPARE(b3.size(), (Size3D{1, 3, 2}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{24, 8, 4}));
+    CORRADE_COMPARE(b3[0][0][1], 3);
+    CORRADE_COMPARE(b3[0][1][0], 5);
+    CORRADE_COMPARE(b3[0][1][1], -1);
+    CORRADE_COMPARE(b3[0][2][1], 15);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView1Di>::value);
+    /* Construction the other way shouldn't be possible */
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
 }
 
 void StridedArrayViewTest::convertBool() {

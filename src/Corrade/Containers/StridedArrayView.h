@@ -357,6 +357,22 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
+         * @brief Construct from a @ref StridedArrayView of smaller dimension count
+         * @m_since_latest
+         *
+         * The extra dimensions are added at the front, with sizes being
+         * @cpp 1 @ce and strides equal to size times stride of @p other in the
+         * first dimension. To reduce dimension count you can use
+         * @ref operator[](), potentially in combination with @ref transposed().
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<unsigned lessDimensions>
+        #else
+        template<unsigned lessDimensions, class = typename std::enable_if<lessDimensions < dimensions>::type>
+        #endif
+        /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept;
+
+        /**
          * @brief Construct from a @ref ArrayView
          *
          * Enabled only on one-dimensional views and if @cpp T* @ce is
@@ -2025,6 +2041,23 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     static_cast<void>(data),
     #endif
     member)}, _size{size}, _stride{stride} {}
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<unsigned dimensions, class T> template<unsigned lessDimensions, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
+    /* Set size and stride in the extra dimensions */
+    constexpr std::size_t extraDimensions = dimensions - lessDimensions;
+    const std::size_t stride = other._size._data[0]*other._stride._data[0];
+    for(std::size_t i = 0; i != extraDimensions; ++i) {
+        _size._data[i] = 1;
+        _stride._data[i] = stride;
+    }
+    /* Copy size and stride in the existing dimensions */
+    for(std::size_t i = 0; i != lessDimensions; ++i) {
+        _size._data[extraDimensions + i] = other._size._data[i];
+        _stride._data[extraDimensions + i] = other._stride._data[i];
+    }
+}
+#endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool StridedArrayView<dimensions, T>::isContiguous() const {
     static_assert(dimension < dimensions, "dimension out of bounds");
