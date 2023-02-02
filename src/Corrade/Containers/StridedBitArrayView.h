@@ -107,6 +107,10 @@ equivalent:
 
 @snippet Containers-cpp14.cpp StridedBitArrayView-usage-reshape
 
+A strided bit array view can be also sliced directly from a
+@ref StridedArrayView using @relativeref{StridedArrayView,sliceBit()}, see its
+documentation for an example.
+
 @subsection Containers-BasicStridedBitArrayView-usage-access Data access
 
 Similarly to @ref BasicBitArrayView "BitArrayView", only a small subset of the
