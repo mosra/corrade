@@ -250,6 +250,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void every2DFirstDimension();
 
     void transposed();
+    void transposedToSelf();
     void flipped();
     void flippedZeroSize();
     void flipped3D();
@@ -462,6 +463,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::every2DFirstDimension,
 
               &StridedArrayViewTest::transposed,
+              &StridedArrayViewTest::transposedToSelf,
               &StridedArrayViewTest::flipped,
               &StridedArrayViewTest::flippedZeroSize,
               &StridedArrayViewTest::flipped3D,
@@ -3700,6 +3702,17 @@ void StridedArrayViewTest::transposed() {
     CORRADE_COMPARE(b[0][1][1], 5);
     CORRADE_COMPARE(b[0][2][1], 6);
     CORRADE_COMPARE(b[0][3][1], 7);
+}
+
+void StridedArrayViewTest::transposedToSelf() {
+    int data[24]{};
+    StridedArrayView3Di a{data, {2, 3, 4}};
+
+    /* Should be a no-op */
+    StridedArrayView3Di b = a.transposed<1, 1>();
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 4}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{48, 16, 4}));
 }
 
 void StridedArrayViewTest::flipped() {

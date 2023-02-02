@@ -131,6 +131,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void every3DFirstDimension();
 
     void transposed();
+    void transposedToSelf();
     void flipped();
     void flippedZeroSize();
     void flipped3D();
@@ -392,6 +393,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::every3DFirstDimension,
 
               &StridedBitArrayViewTest::transposed,
+              &StridedBitArrayViewTest::transposedToSelf,
               &StridedBitArrayViewTest::flipped,
               &StridedBitArrayViewTest::flippedZeroSize,
               &StridedBitArrayViewTest::flipped3D,
@@ -2346,6 +2348,18 @@ void StridedBitArrayViewTest::transposed() {
     CORRADE_VERIFY(!b[1][2][1]);
     CORRADE_VERIFY(!b[1][3][1]);
     CORRADE_VERIFY( b[1][4][1]);
+}
+
+void StridedBitArrayViewTest::transposedToSelf() {
+    char data[5]{};
+    StridedBitArrayView3D a{{data + 1, 3, 24}, {2, 3, 4}};
+
+    /* Should be a no-op */
+    StridedBitArrayView3D b = a.transposed<1, 1>();
+    CORRADE_COMPARE(b.data(), data + 1);
+    CORRADE_COMPARE(b.offset(), 3);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 4}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{12, 4, 1}));
 }
 
 void StridedBitArrayViewTest::flipped() {
