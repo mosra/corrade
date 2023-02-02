@@ -297,7 +297,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t, std::size_t offset, std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(nullptr), offset, size} {}
 
         /** @brief Construct a @ref StridedBitArrayView from a @ref MutableStridedBitArrayView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(BasicStridedBitArrayView<dimensions, U> mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
+        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
 
         /**
          * @brief Construct from a @ref BasicBitArrayView

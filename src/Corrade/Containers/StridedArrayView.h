@@ -352,7 +352,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #else
         template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, U> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {
+        constexpr /*implicit*/ StridedArrayView(const StridedArrayView<dimensions, U>& view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
