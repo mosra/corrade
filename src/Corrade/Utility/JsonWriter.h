@@ -471,7 +471,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * is expected to not be a NaN or an infinity and is printed with 6
          * significant digits, consistently with @ref Debug or @ref format().
          * If you need a larger precision, use @ref write(double).
-         * @see @ref writeArray(Containers::StridedArrayView1D<const float>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const float>&, std::uint32_t)
          */
         JsonWriter& write(float value);
 
@@ -485,7 +485,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * value was closed and not when an object key is expected. The value
          * is expected to not be a NaN or an infinity and is printed with 15
          * significant digits, consistently with @ref Debug or @ref format().
-         * @see @ref writeArray(Containers::StridedArrayView1D<const double>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const double>&, std::uint32_t)
          */
         JsonWriter& write(double value);
 
@@ -497,7 +497,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * by `,` if there's another value before, with spacing and indentation
          * as appropriate. Expected to not be called after the top-level JSON
          * value was closed and not when an object key is expected.
-         * @see @ref writeArray(Containers::StridedArrayView1D<const std::uint32_t>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const std::uint32_t>&, std::uint32_t)
          */
         JsonWriter& write(std::uint32_t value);
 
@@ -509,7 +509,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * by `,` if there's another value before, with spacing and indentation
          * as appropriate. Expected to not be called after the top-level JSON
          * value was closed and not when an object key is expected.
-         * @see @ref writeArray(Containers::StridedArrayView1D<const std::int32_t>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const std::int32_t>&, std::uint32_t)
          */
         JsonWriter& write(std::int32_t value);
 
@@ -523,7 +523,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * value was closed and not when an object key is expected. The value
          * is expected to fit into 52 bits, which is the representable unsigned
          * integer range in a JSON.
-         * @see @ref writeArray(Containers::StridedArrayView1D<const std::uint64_t>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const std::uint64_t>&, std::uint32_t)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& write(std::uint64_t value);
@@ -545,7 +545,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * value was closed and not when an object key is expected. The value
          * is expected to fit into 52 bits, excluding the sign, which is the
          * representable signed integer range in a JSON.
-         * @see @ref writeArray(Containers::StridedArrayView1D<const std::int64_t>, std::uint32_t)
+         * @see @ref writeArray(const Containers::StridedArrayView1D<const std::int64_t>&, std::uint32_t)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& write(std::int64_t value);
@@ -586,7 +586,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
          * @p wrapAfter is ignored.
          */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const float> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const float>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<float> values, std::uint32_t wrapAfter = 0);
 
@@ -602,7 +602,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
          * @p wrapAfter is ignored.
          */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const double> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const double>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<double> values, std::uint32_t wrapAfter = 0);
 
@@ -618,7 +618,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
          * @p wrapAfter is ignored.
          */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const std::uint32_t> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::uint32_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<std::uint32_t> values, std::uint32_t wrapAfter = 0);
 
@@ -634,7 +634,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
          * @p wrapAfter is ignored.
          */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const std::int32_t> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::int32_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<std::int32_t> values, std::uint32_t wrapAfter = 0);
 
@@ -651,14 +651,14 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @p wrapAfter is ignored.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const std::uint64_t> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::uint64_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<std::uint64_t> values, std::uint32_t wrapAfter = 0);
         #else
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const unsigned long long> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const unsigned long long>& values, std::uint32_t wrapAfter = 0);
         JsonWriter& writeArray(std::initializer_list<unsigned long long> values, std::uint32_t wrapAfter = 0);
         /* Hey, C and C++, your types *and* your typedefs are stupid! */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const unsigned long> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const unsigned long>& values, std::uint32_t wrapAfter = 0);
         JsonWriter& writeArray(std::initializer_list<unsigned long> values, std::uint32_t wrapAfter = 0);
         #endif
 
@@ -675,14 +675,14 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @p wrapAfter is ignored.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const std::int64_t> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::int64_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
         JsonWriter& writeArray(std::initializer_list<std::int64_t> values, std::uint32_t wrapAfter = 0);
         #else
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const long long> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const long long>& values, std::uint32_t wrapAfter = 0);
         JsonWriter& writeArray(std::initializer_list<long long> values, std::uint32_t wrapAfter = 0);
         /* Hey, C and C++, your types *and* your typedefs are stupid! */
-        JsonWriter& writeArray(Containers::StridedArrayView1D<const long> values, std::uint32_t wrapAfter = 0);
+        JsonWriter& writeArray(const Containers::StridedArrayView1D<const long>& values, std::uint32_t wrapAfter = 0);
         JsonWriter& writeArray(std::initializer_list<long> values, std::uint32_t wrapAfter = 0);
         #endif
 

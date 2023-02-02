@@ -549,7 +549,7 @@ void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const 
     finalizeValue();
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const float> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const float>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -576,7 +576,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<float> values, co
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const double> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const double>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -603,7 +603,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<double> values, c
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::uint32_t> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::uint32_t>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -626,7 +626,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::uint32_t> va
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::int32_t> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::int32_t>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -649,7 +649,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::int32_t> val
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long long> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long long>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -676,7 +676,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<unsigned long lon
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long>& values, const std::uint32_t wrapAfter) {
     return writeArray(Containers::arrayCast<const typename std::conditional<sizeof(unsigned long) == 8, unsigned long long, unsigned int>::type>(values), wrapAfter);
 }
 
@@ -684,7 +684,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<unsigned long> va
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long long> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long long>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
     initializeValueArrayInternal(values.size(), wrapAfter);
 
@@ -711,7 +711,7 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<long long> values
     return writeArray(Containers::arrayView(values), wrapAfter);
 }
 
-JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long> values, const std::uint32_t wrapAfter) {
+JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long>& values, const std::uint32_t wrapAfter) {
     return writeArray(Containers::arrayCast<const typename std::conditional<sizeof(long) == 8, long long, int>::type>(values), wrapAfter);
 }
 
