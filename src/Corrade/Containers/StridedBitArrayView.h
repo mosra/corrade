@@ -233,9 +233,10 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @param offset    Bit offset in @p data
          * @param size      Bit count
          *
-         * Enabled only on one-dimensional views. Stride is implicitly set to
-         * 1 bit. Use @ref BasicStridedBitArrayView(T*, std::size_t, std::size_t)
-         * in a @cpp constexpr @ce context instead.
+         * Enabled only on one-dimensional views. The @p offset is expected to
+         * be less than 8, stride is implicitly set to 1 bit. Use
+         * @ref BasicStridedBitArrayView(T*, std::size_t, std::size_t) in a
+         * @cpp constexpr @ce context instead.
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<unsigned d = dimensions

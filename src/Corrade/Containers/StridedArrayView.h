@@ -342,7 +342,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct a view on @ref StridedArrayView
+         * @brief Construct from a @ref StridedArrayView of different type
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -357,7 +357,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct a view on @ref ArrayView
+         * @brief Construct from a @ref ArrayView
          *
          * Enabled only on one-dimensional views and if @cpp T* @ce is
          * implicitly convertible to @cpp U* @ce. Expects that both types have
