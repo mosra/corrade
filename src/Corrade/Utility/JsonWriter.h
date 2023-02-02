@@ -117,13 +117,13 @@ useful when writing deeply nested hierarchies:
 
 @snippet Utility.cpp JsonWriter-usage-object-array-scope
 
-@subsection Utility-JsonWriter-usage-write-array Writing numeric arrays
+@subsection Utility-JsonWriter-usage-write-array Writing arrays
 
 For convenience and more compact pretty-printed output, there's also a set of
-@ref writeArray() functions for writing arrays of a homogeneous numeric type,
-each having an option to wrap after a certain number of elements. This snippet
-shows writing a glTF transformation matrix and a children list, and how a
-formatted output would look like:
+@ref writeArray() functions for writing arrays of a homogeneous type, each
+having an option to wrap after a certain number of elements. This snippet shows
+writing a glTF transformation matrix and a children list, and how a formatted
+output would look like:
 
 @m_class{m-row}
 
@@ -148,6 +148,10 @@ formatted output would look like:
 @m_enddiv
 
 @endparblock
+
+This feature isn't limited to just numeric arrays --- for booleans there's
+an overload taking a @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView1D"
+and for strings there's one taking a @ref Containers::StringIterable.
 
 @subsection Utility-JsonWriter-usage-combining-writers Combining multiple writers together
 
@@ -572,6 +576,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * tab (@cpp '\t' @ce) and carriage return (@cpp '\r' @ce) values are
          * escaped, the `/` character and UTF-8 bytes are written verbatim
          * without escaping.
+         * @see @ref writeArray(const Containers::StringIterable&, std::uint32_t)
          */
         JsonWriter& write(Containers::StringView value);
 
@@ -702,6 +707,20 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const long>& values, std::uint32_t wrapAfter = 0);
         JsonWriter& writeArray(std::initializer_list<long> values, std::uint32_t wrapAfter = 0);
         #endif
+
+        /**
+         * @brief Write a string array
+         * @return Reference to self (for method chaining)
+         *
+         * A compact shorthand for calling @ref beginArray(), followed by zero
+         * or more @ref write(Containers::StringView) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information. Compared to these functions however, different
+         * pretty-printing rules are used --- see
+         * @ref Utility-JsonWriter-usage-write-array and @ref Option::Wrap for
+         * details. If @ref Option::Wrap is not set, @p wrapAfter is ignored.
+         */
+        JsonWriter& writeArray(const Containers::StringIterable& values, std::uint32_t wrapAfter = 0);
 
         /**
          * @brief Write a raw JSON string

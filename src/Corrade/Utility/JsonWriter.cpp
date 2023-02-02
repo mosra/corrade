@@ -32,9 +32,10 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::writeValue() */
 #include "Corrade/Utility/Macros.h" /* CORRADE_FALLTHROUGH */
 #include "Corrade/Utility/Path.h"
@@ -738,6 +739,21 @@ JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const lo
 
 JsonWriter& JsonWriter::writeArray(const std::initializer_list<long> values, const std::uint32_t wrapAfter) {
     return writeArray(Containers::arrayView(values), wrapAfter);
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StringIterable& values, const std::uint32_t wrapAfter) {
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        writeStringLiteralInternal(values[i]);
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
 }
 
 JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {

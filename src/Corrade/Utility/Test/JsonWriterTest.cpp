@@ -31,6 +31,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -62,8 +63,10 @@ struct JsonWriterTest: TestSuite::Tester {
 
         void singleEmptyBoolArray();
         template<class T> void singleEmptyNumberArray();
+        void singleEmptyStringArray();
         void singleBoolArray();
         template<class T> void singleNumberArray();
+        void singleStringArray();
 
         void simpleObject();
         void simpleArray();
@@ -126,22 +129,28 @@ const struct {
     std::uint32_t indentation, initialIndentation, wrapAfter;
     Containers::StringView expectedEmpty,
         expectedBool,
-        expectedNumber;
+        expectedNumber,
+        expectedString;
 } SingleArrayValueData[]{
     {"", {}, 0, 0, 0,
         R"([])",
         R"([true,false,true,false])",
-        R"([1,2,3,4])"},
+        R"([1,2,3,4])",
+        /* Not using a raw string literal here just to verify it's indeed
+           escaped properly. Other cases have it for brevity. */
+        "[\"\\n\",\"a\",\"b\",\"\\t\"]"},
     {"no wrapping, non-zero indent, wrap after 1", {}, 8, 56, 1,
         /* Wrap after and indent should get ignored */
         R"([])",
         R"([true,false,true,false])",
-        R"([1,2,3,4])"},
+        R"([1,2,3,4])",
+        R"(["\n","a","b","\t"])"},
     {"no wrapping, typographical space, non-zero indent, wrap after 1", JsonWriter::Option::TypographicalSpace, 8, 56, 1,
         /* Wrap after and indent should get ignored */
         R"([])",
         R"([true, false, true, false])",
-        R"([1, 2, 3, 4])"},
+        R"([1, 2, 3, 4])",
+        R"(["\n", "a", "b", "\t"])"},
     {"four-space indent, wrap after 0", JsonWriter::Option::Wrap, 4, 0, 0,
         /* All on the same line so no wrapping */
         R"([]
@@ -149,6 +158,8 @@ const struct {
         R"([true,false,true,false]
 )",
         R"([1,2,3,4]
+)",
+        R"(["\n","a","b","\t"]
 )"},
     {"four-space indent, wrap after 2", JsonWriter::Option::Wrap, 4, 0, 2,
         R"([]
@@ -162,6 +173,11 @@ const struct {
     1,2,
     3,4
 ]
+)",
+        R"([
+    "\n","a",
+    "b","\t"
+]
 )"},
     {"nine-space initial indent, two-space indent and a typographical space, wrap after 2", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9, 2,
         R"([])", /* no final newline */
@@ -172,6 +188,10 @@ const struct {
         R"([
            1, 2,
            3, 4
+         ])", /* no final newline */
+        R"([
+           "\n", "a",
+           "b", "\t"
          ])"} /* no final newline */
 };
 
@@ -388,6 +408,7 @@ JsonWriterTest::JsonWriterTest() {
         &JsonWriterTest::singleEmptyNumberArray<std::int64_t>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherUnsignedLongType>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherLongType>,
+        &JsonWriterTest::singleEmptyStringArray,
         &JsonWriterTest::singleBoolArray,
         &JsonWriterTest::singleNumberArray<float>,
         &JsonWriterTest::singleNumberArray<double>,
@@ -397,6 +418,7 @@ JsonWriterTest::JsonWriterTest() {
         &JsonWriterTest::singleNumberArray<std::int64_t>,
         &JsonWriterTest::singleNumberArray<TheOtherUnsignedLongType>,
         &JsonWriterTest::singleNumberArray<TheOtherLongType>,
+        &JsonWriterTest::singleStringArray
     }, Containers::arraySize(SingleArrayValueData));
 
     addInstancedTests({&JsonWriterTest::simpleObject},
@@ -630,6 +652,18 @@ template<class T> void JsonWriterTest::singleEmptyNumberArray() {
     CORRADE_COMPARE(json.toString(), data.expectedEmpty);
 }
 
+void JsonWriterTest::singleEmptyStringArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.writeArray(Containers::StringIterable{}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expectedEmpty.size());
+    CORRADE_COMPARE(json.toString(), data.expectedEmpty);
+}
+
 void JsonWriterTest::singleBoolArray() {
     auto&& data = SingleArrayValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -653,6 +687,20 @@ template<class T> void JsonWriterTest::singleNumberArray() {
     CORRADE_VERIFY(!json.isEmpty());
     CORRADE_COMPARE(json.size(), data.expectedNumber.size());
     CORRADE_COMPARE(json.toString(), data.expectedNumber);
+}
+
+void JsonWriterTest::singleStringArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    /* Using one _s literal to disambiguate from std::initializer_list<bool>.
+       I wonder how much extra pain this will cause. */
+    json.writeArray({"\n", "a"_s, "b", "\t"}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expectedString.size());
+    CORRADE_COMPARE(json.toString(), data.expectedString);
 }
 
 void JsonWriterTest::simpleObject() {
