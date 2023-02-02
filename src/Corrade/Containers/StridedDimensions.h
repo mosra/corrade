@@ -75,6 +75,9 @@ namespace Implementation {
         return 0;
     }
     template<std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const std::size_t* const size, const std::ptrdiff_t* const stride, Sequence<first, next...>) {
+        /** @todo could be combined with isAnyDimensionZero() (returning zero
+            if any of the sizes is zero) to avoid having to call
+            isAnyDimensionZero() in the assertions as well */
         return Utility::max(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
     }
