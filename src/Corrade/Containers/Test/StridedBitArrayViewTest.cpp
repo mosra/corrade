@@ -92,7 +92,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void construct3DViewTooSmall();
     /* No construct3DBeginTooSmall(), it's no different from the 1D case */
 
-    void construct3DView();
+    void construct3DFromView();
 
     void asContiguous();
     void asContiguousNonContiguous();
@@ -343,7 +343,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::construct3DSizeTooLarge,
               &StridedBitArrayViewTest::construct3DViewTooSmall,
 
-              &StridedBitArrayViewTest::construct3DView,
+              &StridedBitArrayViewTest::construct3DFromView,
 
               &StridedBitArrayViewTest::asContiguous,
               &StridedBitArrayViewTest::asContiguousNonContiguous,
@@ -1290,7 +1290,7 @@ void StridedBitArrayViewTest::construct3DViewTooSmall() {
         "Containers::StridedBitArrayView: data size 96 is not enough for {2, 5, 3} bits of stride {48, 24, 8}\n");
 }
 
-void StridedBitArrayViewTest::construct3DView() {
+void StridedBitArrayViewTest::construct3DFromView() {
     /* Not using is_convertible to catch also accidental explicit conversions */
     CORRADE_VERIFY(std::is_constructible<StridedBitArrayView1D, BitArrayView>::value);
     CORRADE_VERIFY(!std::is_constructible<StridedBitArrayView3D, BitArrayView>::value);
