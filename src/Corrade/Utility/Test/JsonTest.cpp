@@ -131,6 +131,9 @@ struct JsonTest: TestSuite::Tester {
         void findArrayIndexNotArray();
         void findArrayIndexNotParsed();
 
+        void commonArrayType();
+        void commonArrayTypeNotArray();
+
         void asTypeWrongType();
         void asTypeNotParsed();
         void asTypeWrongParsedType();
@@ -1189,6 +1192,24 @@ const struct {
         "parseStringArray(): expected a 4-element array, got 3"},
 };
 
+const struct {
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    const char* json;
+    Containers::Optional<JsonToken::Type> expected;
+} CommonArrayTypeData[]{
+    {"empty array", "[]", {}},
+    {"single string", R"(["hey"])", JsonToken::Type::String},
+    {"nulls", "[null, null, null]", JsonToken::Type::Null},
+    {"numbers", "[3.5, -777, 0, 1, 26]", JsonToken::Type::Number},
+    /* It's important that the nested object is first, to verify it correctly
+       skips to the second array element instead of going inside the first */
+    {"nested objects", R"([{"key": [], "another": 5}, {}, {"yes": true}])", JsonToken::Type::Object},
+    {"nested arrays", "[[[[]], 5], [], [true, 25]]", JsonToken::Type::Array},
+    {"bools + nulls", "[true, null, false, false]", {}},
+    {"numbers + nested arrays", "[25, [25, 26], 27]", {}},
+    {"bools + nested objects", "[false, {\"hey\": false}, true]", {}},
+};
+
 JsonTest::JsonTest() {
     addTests({&JsonTest::singleObject,
               &JsonTest::singleArray,
@@ -1312,7 +1333,12 @@ JsonTest::JsonTest() {
               &JsonTest::findArrayIndex,
               &JsonTest::findArrayIndexNotFound,
               &JsonTest::findArrayIndexNotArray,
-              &JsonTest::findArrayIndexNotParsed,
+              &JsonTest::findArrayIndexNotParsed});
+
+    addInstancedTests({&JsonTest::commonArrayType},
+        Containers::arraySize(CommonArrayTypeData));
+
+    addTests({&JsonTest::commonArrayTypeNotArray,
 
               &JsonTest::asTypeWrongType,
               &JsonTest::asTypeNotParsed,
@@ -3489,6 +3515,28 @@ void JsonTest::findArrayIndexNotParsed() {
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n");
+}
+
+void JsonTest::commonArrayType() {
+    auto&& data = CommonArrayTypeData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::Optional<Json> json = Json::fromString(data.json);
+    CORRADE_VERIFY(json);
+    CORRADE_COMPARE(json->root().commonArrayType(), data.expected);
+}
+
+void JsonTest::commonArrayTypeNotArray() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString("35");
+    CORRADE_VERIFY(json);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json->root().commonArrayType();
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonToken::commonArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n");
 }
 
 void JsonTest::asTypeWrongType() {

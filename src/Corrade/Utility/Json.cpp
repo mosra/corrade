@@ -2230,6 +2230,26 @@ Containers::StringView JsonToken::data() const {
     #endif
 }
 
+Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::commonArrayType(): token is a" << type() << Debug::nospace << ", expected an array", {});
+
+    const std::size_t childCount =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+        ;
+    if(!childCount) return {};
+
+    const JsonToken::Type type = this[1].type();
+    for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
+        if(i->type() != type) return {};
+
+    return type;
+}
+
 std::size_t JsonToken::childCount() const {
     #ifndef CORRADE_TARGET_32BIT
     /* Objects and arrays store child count directly */
