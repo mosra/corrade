@@ -30,6 +30,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -59,7 +60,9 @@ struct JsonWriterTest: TestSuite::Tester {
         void singleString();
         void singleRawJson();
 
+        void singleEmptyBoolArray();
         template<class T> void singleEmptyNumberArray();
+        void singleBoolArray();
         template<class T> void singleNumberArray();
 
         void simpleObject();
@@ -118,25 +121,32 @@ const struct {
 };
 
 const struct {
-    const char* name;
+    TestSuite::TestCaseDescriptionSourceLocation name;
     JsonWriter::Options options;
     std::uint32_t indentation, initialIndentation, wrapAfter;
-    Containers::StringView expectedEmpty, expected;
+    Containers::StringView expectedEmpty,
+        expectedBool,
+        expectedNumber;
 } SingleArrayValueData[]{
     {"", {}, 0, 0, 0,
         R"([])",
+        R"([true,false,true,false])",
         R"([1,2,3,4])"},
     {"no wrapping, non-zero indent, wrap after 1", {}, 8, 56, 1,
         /* Wrap after and indent should get ignored */
         R"([])",
+        R"([true,false,true,false])",
         R"([1,2,3,4])"},
     {"no wrapping, typographical space, non-zero indent, wrap after 1", JsonWriter::Option::TypographicalSpace, 8, 56, 1,
         /* Wrap after and indent should get ignored */
         R"([])",
+        R"([true, false, true, false])",
         R"([1, 2, 3, 4])"},
     {"four-space indent, wrap after 0", JsonWriter::Option::Wrap, 4, 0, 0,
         /* All on the same line so no wrapping */
         R"([]
+)",
+        R"([true,false,true,false]
 )",
         R"([1,2,3,4]
 )"},
@@ -144,12 +154,21 @@ const struct {
         R"([]
 )",
         R"([
+    true,false,
+    true,false
+]
+)",
+        R"([
     1,2,
     3,4
 ]
 )"},
     {"nine-space initial indent, two-space indent and a typographical space, wrap after 2", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9, 2,
-        R"([])",  /* no final newline */
+        R"([])", /* no final newline */
+        R"([
+           true, false,
+           true, false
+         ])", /* no final newline */
         R"([
            1, 2,
            3, 4
@@ -359,7 +378,8 @@ JsonWriterTest::JsonWriterTest() {
                        &JsonWriterTest::singleRawJson},
         Containers::arraySize(SingleValueData));
 
-    addInstancedTests<JsonWriterTest>({
+    addInstancedTests({
+        &JsonWriterTest::singleEmptyBoolArray,
         &JsonWriterTest::singleEmptyNumberArray<float>,
         &JsonWriterTest::singleEmptyNumberArray<double>,
         &JsonWriterTest::singleEmptyNumberArray<std::uint32_t>,
@@ -368,6 +388,7 @@ JsonWriterTest::JsonWriterTest() {
         &JsonWriterTest::singleEmptyNumberArray<std::int64_t>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherUnsignedLongType>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherLongType>,
+        &JsonWriterTest::singleBoolArray,
         &JsonWriterTest::singleNumberArray<float>,
         &JsonWriterTest::singleNumberArray<double>,
         &JsonWriterTest::singleNumberArray<std::uint32_t>,
@@ -584,6 +605,18 @@ void JsonWriterTest::singleRawJson() {
     CORRADE_COMPARE(json.toString(), expected);
 }
 
+void JsonWriterTest::singleEmptyBoolArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.writeArray(Containers::StridedBitArrayView1D{}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expectedEmpty.size());
+    CORRADE_COMPARE(json.toString(), data.expectedEmpty);
+}
+
 template<class T> void JsonWriterTest::singleEmptyNumberArray() {
     auto&& data = SingleArrayValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -597,6 +630,18 @@ template<class T> void JsonWriterTest::singleEmptyNumberArray() {
     CORRADE_COMPARE(json.toString(), data.expectedEmpty);
 }
 
+void JsonWriterTest::singleBoolArray() {
+    auto&& data = SingleArrayValueData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.writeArray({true, false, true, false}, data.wrapAfter);
+
+    CORRADE_VERIFY(!json.isEmpty());
+    CORRADE_COMPARE(json.size(), data.expectedBool.size());
+    CORRADE_COMPARE(json.toString(), data.expectedBool);
+}
+
 template<class T> void JsonWriterTest::singleNumberArray() {
     auto&& data = SingleArrayValueData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -606,8 +651,8 @@ template<class T> void JsonWriterTest::singleNumberArray() {
     json.writeArray({T(1), T(2), T(3), T(4)}, data.wrapAfter);
 
     CORRADE_VERIFY(!json.isEmpty());
-    CORRADE_COMPARE(json.size(), data.expected.size());
-    CORRADE_COMPARE(json.toString(), data.expected);
+    CORRADE_COMPARE(json.size(), data.expectedNumber.size());
+    CORRADE_COMPARE(json.toString(), data.expectedNumber);
 }
 
 void JsonWriterTest::simpleObject() {

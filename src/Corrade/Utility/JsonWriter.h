@@ -451,6 +451,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * indentation as appropriate. Expected to not be called after the
          * top-level JSON value was closed and not when an object key is
          * expected.
+         * @see @ref writeArray(const Containers::StridedBitArrayView1D&, std::uint32_t)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& write(bool value);
@@ -573,6 +574,22 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * without escaping.
          */
         JsonWriter& write(Containers::StringView value);
+
+        /**
+         * @brief Write a boolean array
+         * @return Reference to self (for method chaining)
+         *
+         * A compact shorthand for calling @ref beginArray(), followed by zero
+         * or more @ref write(bool) calls, followed by @ref endArray(). See
+         * documentation of these functions for more information. Compared to
+         * these functions however, different pretty-printing rules are used
+         * --- see @ref Utility-JsonWriter-usage-write-array and
+         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
+         * @p wrapAfter is ignored.
+         */
+        JsonWriter& writeArray(const Containers::StridedBitArrayView1D& values, std::uint32_t wrapAfter = 0);
+        /** @overload */
+        JsonWriter& writeArray(std::initializer_list<bool> values, std::uint32_t wrapAfter = 0);
 
         /**
          * @brief Write a 32-bit floating-point array

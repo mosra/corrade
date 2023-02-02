@@ -34,6 +34,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/StridedBitArrayView.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::writeValue() */
 #include "Corrade/Utility/Macros.h" /* CORRADE_FALLTHROUGH */
 #include "Corrade/Utility/Path.h"
@@ -547,6 +548,26 @@ void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const 
     /* Decide what to expect next or finalize the document if the top level
        value got written */
     finalizeValue();
+}
+
+JsonWriter& JsonWriter::writeArray(const Containers::StridedBitArrayView1D& values, const std::uint32_t wrapAfter) {
+    State& state = *_state;
+    initializeValueArrayInternal(values.size(), wrapAfter);
+
+    for(std::size_t i = 0; i != values.size(); ++i) {
+        /* Comma or comma & newline & indent before */
+        writeArrayCommaNewlineIndentInternal(i, wrapAfter);
+
+        arrayAppend(state.out, values[i] ? "true"_s : "false"_s);
+    }
+
+    finalizeValueArrayInternal(values.size(), wrapAfter);
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeArray(const std::initializer_list<bool> values, const std::uint32_t wrapAfter) {
+    return writeArray(Containers::stridedArrayView(values).sliceBit(0), wrapAfter);
 }
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const float>& values, const std::uint32_t wrapAfter) {
