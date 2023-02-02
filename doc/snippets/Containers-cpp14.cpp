@@ -59,7 +59,7 @@ const std::uint8_t data[]{
 };
 Containers::BitArrayView bits{data, 0, 32};
 
-/* square[1][3] to square[2][5] is all 1s */
+/* In both views [1][3] to [2][5] is all 1s */
 Containers::StridedBitArrayView2D a{bits, {4, 8}, {8, 1}};
 Containers::StridedBitArrayView2D b{bits, {4, 8}};
 /* [StridedBitArrayView-usage-reshape] */
