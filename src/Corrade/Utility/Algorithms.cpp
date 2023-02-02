@@ -40,7 +40,7 @@ namespace Corrade { namespace Utility {
    first dimensions having a size of 1, thus "drilling down" directly to the
    leaf branches of the 4D variant. The overhead isn't too big.
 
-   OTOH the ArrayView overhead can delegate directly to a memcpy, so for code
+   OTOH the ArrayView overload can delegate directly to a memcpy, so for code
    size savings it shouldn't be handled in the complex stride-aware code. */
 
 void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayView<void>& dst) {
