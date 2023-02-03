@@ -311,7 +311,9 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<unsigned lessDimensions>
         #else
-        template<unsigned lessDimensions, class = typename std::enable_if<lessDimensions < dimensions>::type>
+        /* MSVC needs the (), otherwise it gets totally confused and starts
+           complaining that "error C2947: expecting '>' to terminate template-parameter-list, found '>'". HAHA. (TBH, parsing this is a hell.) */
+        template<unsigned lessDimensions, class = typename std::enable_if<(lessDimensions < dimensions)>::type>
         #endif
         /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept;
 
