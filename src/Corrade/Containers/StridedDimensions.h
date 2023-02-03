@@ -63,18 +63,22 @@ namespace Implementation {
        can be zero-sized as well. Otherwise we have to compare against max
        stride.
 
-       To avoid unnecessary overhead in debug builds, these take raw pointers
-       instead of a Size<dimensions> / Stride<dimensions>. */
-    template<class T> constexpr bool isAnyDimensionZero(const T*, Sequence<>) {
+       To avoid unnecessary overhead in debug builds, these take raw array
+       references instead of a Size<dimensions> / Stride<dimensions>. Raw
+       pointers aren't used because those are not considered constexpr on GCC
+       4.8. */
+    /** @todo drop template<unsigned dimensions> and use raw pointers once GCC
+        4.8 support is no longer needed */
+    template<unsigned dimensions, class T> constexpr bool isAnyDimensionZero(const T(&)[dimensions], Sequence<>) {
         return false;
     }
-    template<class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const T* const size, Sequence<first, next...>) {
+    template<unsigned dimensions, class T, std::size_t first, std::size_t ...next> constexpr bool isAnyDimensionZero(const T(&size)[dimensions], Sequence<first, next...>) {
         return !size[first] || isAnyDimensionZero(size, Sequence<next...>{});
     }
-    constexpr std::size_t largestStride(const std::size_t*, const std::ptrdiff_t*, Sequence<>) {
+    template<unsigned dimensions> constexpr std::size_t largestStride(const std::size_t(&)[dimensions], const std::ptrdiff_t(&)[dimensions], Sequence<>) {
         return 0;
     }
-    template<std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const std::size_t* const size, const std::ptrdiff_t* const stride, Sequence<first, next...>) {
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const std::size_t(&size)[dimensions], const std::ptrdiff_t(&stride)[dimensions], Sequence<first, next...>) {
         /** @todo could be combined with isAnyDimensionZero() (returning zero
             if any of the sizes is zero) to avoid having to call
             isAnyDimensionZero() in the assertions as well */
@@ -87,12 +91,16 @@ namespace Implementation {
        is passed. In case of the bit view it's counting bits instead of bytes
        but it's the same algorithm.
 
-       To avoid unnecessary overhead in debug builds, these take raw pointers
-       instead of a Size<dimensions> / Stride<dimensions>. */
-    constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t*, std::size_t, Sequence<>) {
+       To avoid unnecessary overhead in debug builds, these take raw array
+       references instead of a Size<dimensions> / Stride<dimensions>. Raw
+       pointers aren't used because those are not considered constexpr on GCC
+       4.8. */
+    /** @todo drop template<unsigned dimensions> and use raw pointers once GCC
+        4.8 support is no longer needed */
+    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t(&)[dimensions], std::size_t, Sequence<>) {
         return 1;
     }
-    template<std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t* const size, std::size_t index, Sequence<first, next...>) {
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const std::size_t(&size)[dimensions], std::size_t index, Sequence<first, next...>) {
         /* GCC since version 10.2 complains that
             warning: comparison of unsigned expression in ‘< 0’ is always false [-Wtype-limits]
            and there's no way to silence that except for a pragma (doing things
@@ -115,7 +123,7 @@ namespace Implementation {
         #pragma GCC diagnostic pop
         #endif
     }
-    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const std::size_t* const size, std::size_t typeSize, Sequence<index...>) {
+    template<unsigned dimensions, std::size_t ...index> constexpr Stride<dimensions> strideForSize(const std::size_t(&size)[dimensions], std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
 }
