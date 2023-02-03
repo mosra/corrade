@@ -2004,6 +2004,10 @@ class CORRADE_UTILITY_EXPORT JsonToken {
     private:
         friend Json;
 
+        /* Used by asString() as well as find(Containers::StringView), doesn't
+           assert token type and whether it's parsed */
+        CORRADE_UTILITY_LOCAL Containers::StringView asStringInternal() const;
+
         enum: std::uint64_t {
             #ifndef CORRADE_TARGET_32BIT
             /* Matching public Type, stored in last 3 bits of

@@ -2339,8 +2339,7 @@ const JsonToken* JsonToken::find(const Containers::StringView key) const {
         #endif
     ; i != end; i = i->next()) {
         CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", this);
-        /** @todo asStringInternal() to avoid the nested assert? */
-        if(i->asString() == key) return i->firstChild();
+        if(i->asStringInternal() == key) return i->firstChild();
     }
 
     return nullptr;
@@ -2377,10 +2376,7 @@ const JsonToken& JsonToken::operator[](const std::size_t index) const {
     return *found;
 }
 
-Containers::StringView JsonToken::asString() const {
-    CORRADE_ASSERT(type() == Type::String && isParsed(),
-        "Utility::JsonToken::asString(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
-
+Containers::StringView JsonToken::asStringInternal() const {
     /* If the string is not escaped, reference it directly */
     if(
         #ifndef CORRADE_TARGET_32BIT
@@ -2406,6 +2402,12 @@ Containers::StringView JsonToken::asString() const {
 
     /* Otherwise take the cached version */
     return *_parsedString;
+}
+
+Containers::StringView JsonToken::asString() const {
+    CORRADE_ASSERT(type() == Type::String && isParsed(),
+        "Utility::JsonToken::asString(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
+    return asStringInternal();
 }
 
 Containers::StridedBitArrayView1D JsonToken::asBitArray(const std::size_t expectedSize) const {
