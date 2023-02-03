@@ -58,52 +58,13 @@ void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayV
     if(srcSize) std::memcpy(dst.data(), src.data(), srcSize);
 }
 
-void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {
-    /* Compared to the contiguous ArrayView copy() this has a full assertion,
-       as the expectation is that it's called on large chunks of data where the
-       assert overhead doesn't matter that much compared to the safety
-       gains. */
-    CORRADE_ASSERT(src.size() == dst.size(),
-        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
+namespace Implementation {
 
-    /* Expand the views to 4D and explicitly pick the final overload to avoid
-       having to go through the copy(From&&, To&&) proxy again */
-    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
-        Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst});
-}
-
-void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
-    /* Compared to the contiguous ArrayView copy() this has a full assertion,
-       as the expectation is that it's called on large chunks of data where the
-       assert overhead doesn't matter that much compared to the safety
-       gains. */
-    CORRADE_ASSERT(src.size() == dst.size(),
-        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
-
-    /* Expand the views to 4D and explicitly pick the final overload to avoid
-       having to go through the copy(From&&, To&&) proxy again */
-    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
-        Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst});
-}
-
-void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
-    /* Compared to the contiguous ArrayView copy() this has a full assertion,
-       as the expectation is that it's called on large chunks of data where the
-       assert overhead doesn't matter that much compared to the safety
-       gains. */
-    CORRADE_ASSERT(src.size() == dst.size(),
-        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
-
-    /* Expand the views to 4D and explicitly pick the final overload to avoid
-       having to go through the copy(From&&, To&&) proxy again */
-    return static_cast<void(*)(const Containers::StridedArrayView4D<const char>&, const Containers::StridedArrayView4D<char>&)>(copy)(
-        Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst});
-}
-
-void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
+void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst
+    #ifndef CORRADE_NO_ASSERT
+    , unsigned dimensions
+    #endif
+) {
     const Containers::Size4D srcSize = src.size();
     #ifndef CORRADE_NO_ASSERT
     const Containers::Size4D dstSize = dst.size();
@@ -113,7 +74,7 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
        assert overhead doesn't matter that much compared to the safety
        gains. */
     CORRADE_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
+        "Utility::Algorithms::copy(): sizes" << Containers::arrayView(srcSize.begin() + 4 - dimensions, dimensions) << "and" << Containers::arrayView(dstSize.begin() + 4 - dimensions, dimensions) << "don't match", );
 
     const std::size_t* const size = srcSize.begin();
     auto* const srcPtr = static_cast<const char*>(src.data());
@@ -237,8 +198,6 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
         }
     }
 }
-
-namespace Implementation {
 
 void flipSecondToLastDimensionInPlace(const Containers::StridedArrayView2D<char>& view) {
     const std::size_t* size = view.size().begin();

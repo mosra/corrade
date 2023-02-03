@@ -528,7 +528,7 @@ void AlgorithmsTest::copyStridedNonMatchingSizes() {
                   Containers::StridedArrayView3D<int>{b, {2, 3, 4}});
 
     CORRADE_COMPARE(out.str(),
-        "Utility::Algorithms::copy(): sizes 2 and 3 don't match\n"
+        "Utility::Algorithms::copy(): sizes {2} and {3} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3} and {2, 4} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5} and {2, 4, 5} don't match\n"
         "Utility::Algorithms::copy(): sizes {2, 3, 5, 7} and {2, 3, 5, 6} don't match\n"

@@ -81,29 +81,69 @@ Expects that both arrays have the same size.
 */
 template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimensions, const char>& src, const Containers::StridedArrayView<dimensions, char>& dst);
 
-/**
- * @overload
- * @m_since{2020,06}
- */
-CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst);
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst
+        #ifndef CORRADE_NO_ASSERT
+        , unsigned dimensions
+        #endif
+    );
+}
 
 /**
  * @overload
  * @m_since{2020,06}
  */
-CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst);
+inline void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {
+    return Implementation::copy(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst}
+        #ifndef CORRADE_NO_ASSERT
+        , 1
+        #endif
+    );
+}
 
 /**
  * @overload
  * @m_since{2020,06}
  */
-CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst);
+inline void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
+    return Implementation::copy(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst}
+        #ifndef CORRADE_NO_ASSERT
+        , 2
+        #endif
+    );
+}
 
 /**
  * @overload
  * @m_since{2020,06}
  */
-CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst);
+inline void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
+    return Implementation::copy(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst}
+        #ifndef CORRADE_NO_ASSERT
+        , 3
+        #endif
+    );
+}
+
+/**
+ * @overload
+ * @m_since{2020,06}
+ */
+inline void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
+    return Implementation::copy(
+        Containers::StridedArrayView4D<const char>{src},
+        Containers::StridedArrayView4D<char>{dst}
+        #ifndef CORRADE_NO_ASSERT
+        , 4
+        #endif
+    );
+}
 
 /**
 @brief Copy a strided array view to another
