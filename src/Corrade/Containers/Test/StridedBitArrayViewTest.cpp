@@ -985,6 +985,20 @@ void StridedBitArrayViewTest::construct3DConstexpr() {
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(size, (Size3D{3, 4, 5}));
     CORRADE_COMPARE(stride, (Stride3D{55, 11, 2}));
+
+    /* This is also expected to work -- stride() returns a const&, but size()
+       a value and without it marked as const it wouldn't be possible to call
+       operator[] in a constexpr context. C++ FFS. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::size_t size0 = cb.size()[0];
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    std::ptrdiff_t stride0 = cb.stride()[0];
+    CORRADE_COMPARE(size0, 3);
+    CORRADE_COMPARE(stride0, 55);
 }
 
 void StridedBitArrayViewTest::construct3DNullptrSize() {

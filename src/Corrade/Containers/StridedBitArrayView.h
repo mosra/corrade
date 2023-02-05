@@ -301,7 +301,10 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @ref offset().
          * @see @ref stride(), @ref isEmpty()
          */
-        constexpr typename std::conditional<dimensions == 1, std::size_t, Size<dimensions>>::type size() const { return sizeInternal(); }
+        /* However it *has to be* const because otherwise it's impossible to
+           easily call view.size()[0] in a constexpr context. C++ you utter
+           crap. */
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size<dimensions>>::type size() const { return sizeInternal(); }
 
         /**
          * @brief Array stride
