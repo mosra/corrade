@@ -41,9 +41,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
 
     template<class T> void constructDefault();
     template<class T> void construct();
-    template<class T> void constructChar();
-    void constructCharConstexpr();
-    void constructNullptr();
+    void constructConstexpr();
     void constructArray();
     void constructNullptrSize();
     void constructZeroStride();
@@ -57,9 +55,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void constructSizeOnlyArray();
 
     template<class T> void constructPointerSize();
-    template<class T> void constructPointerSizeChar();
-    void constructPointerSizeCharConstexpr();
-    void constructPointerSizeNullptr();
+    void constructPointerSizeConstexpr();
 
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
@@ -74,9 +70,7 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
 
     template<class T> void construct3DDefault();
     template<class T> void construct3D();
-    template<class T> void construct3DChar();
-    void construct3DCharConstexpr();
-    void construct3DNullptr();
+    void construct3DConstexpr();
     void construct3DNullptrSize();
     void construct3DZeroStride();
     void construct3DNegativeStride();
@@ -285,10 +279,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::constructDefault<char>,
               &StridedBitArrayViewTest::construct<const char>,
               &StridedBitArrayViewTest::construct<char>,
-              &StridedBitArrayViewTest::constructChar<const char>,
-              &StridedBitArrayViewTest::constructChar<char>,
-              &StridedBitArrayViewTest::constructCharConstexpr,
-              &StridedBitArrayViewTest::constructNullptr,
+              &StridedBitArrayViewTest::constructConstexpr,
               &StridedBitArrayViewTest::constructArray,
               &StridedBitArrayViewTest::constructNullptrSize,
               &StridedBitArrayViewTest::constructZeroStride,
@@ -305,10 +296,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
 
               &StridedBitArrayViewTest::constructPointerSize<const char>,
               &StridedBitArrayViewTest::constructPointerSize<char>,
-              &StridedBitArrayViewTest::constructPointerSizeChar<const char>,
-              &StridedBitArrayViewTest::constructPointerSizeChar<char>,
-              &StridedBitArrayViewTest::constructPointerSizeCharConstexpr,
-              &StridedBitArrayViewTest::constructPointerSizeNullptr,
+              &StridedBitArrayViewTest::constructPointerSizeConstexpr,
 
               &StridedBitArrayViewTest::constructOffsetTooLarge,
               &StridedBitArrayViewTest::constructSizeTooLarge,
@@ -326,10 +314,7 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::construct3DDefault<char>,
               &StridedBitArrayViewTest::construct3D<const char>,
               &StridedBitArrayViewTest::construct3D<char>,
-              &StridedBitArrayViewTest::construct3DChar<const char>,
-              &StridedBitArrayViewTest::construct3DChar<char>,
-              &StridedBitArrayViewTest::construct3DCharConstexpr,
-              &StridedBitArrayViewTest::construct3DNullptr,
+              &StridedBitArrayViewTest::construct3DConstexpr,
               &StridedBitArrayViewTest::construct3DNullptrSize,
               &StridedBitArrayViewTest::construct3DZeroStride,
               &StridedBitArrayViewTest::construct3DNegativeStride,
@@ -477,29 +462,14 @@ template<class T> void StridedBitArrayViewTest::construct() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, BasicBitArrayView<T>, void*, std::size_t, std::size_t, std::ptrdiff_t>::value);
 }
 
-template<class T> void StridedBitArrayViewTest::constructChar() {
-    setTestCaseTemplateName(NameFor<T>::name());
+constexpr std::uint64_t Data64[2]{};
 
-    char data[5];
-    const BasicBitArrayView<T> a{data, 3, 26};
-    const BasicStridedBitArrayView<1, T> b = {a, data + 1, 5, 7, 3};
-    CORRADE_COMPARE(b.data(), data + 1);
-    CORRADE_COMPARE(b.offset(), 5);
-    CORRADE_VERIFY(!b.isEmpty());
-    CORRADE_COMPARE(b.size(), 7);
-    CORRADE_COMPARE(b.stride(), 3);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, BasicBitArrayView<T>, T*, std::size_t, std::size_t, std::ptrdiff_t>::value);
-}
-
-constexpr char FiveChars[5]{};
-
-void StridedBitArrayViewTest::constructCharConstexpr() {
-    constexpr BitArrayView ca{FiveChars, 3, 26};
+void StridedBitArrayViewTest::constructConstexpr() {
+    constexpr BitArrayView ca{Data64, 3, 26};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
-    StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, 7, 3};
+    StridedBitArrayView1D cb = {ca, Data64 + 1, 5, 7, 3};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -520,16 +490,40 @@ void StridedBitArrayViewTest::constructCharConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     std::ptrdiff_t stride = cb.stride();
-    CORRADE_COMPARE(data, FiveChars + 1);
+    CORRADE_COMPARE(data, Data64 + 1);
     CORRADE_COMPARE(offset, 5);
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(size, 7);
     CORRADE_COMPARE(stride, 3);
 }
 
-void StridedBitArrayViewTest::constructNullptr() {
-    /* An explicit overload to avoid ambiguity between the char* and void*
-       constructor when passing std::nullptr_t */
+void StridedBitArrayViewTest::constructArray() {
+    /* Compared to construct[Constexpr](), size and stride is wrapped in {}.
+       Just to verify that this doesn't cause a compilation error, it isn't any
+       special overload. */
+
+    std::uint64_t data[2]{};
+    BitArrayView a{data, 3, 26};
+    StridedBitArrayView1D b = {a, data + 1, 5, {7}, {3}};
+    CORRADE_COMPARE(b.data(), data+ 1);
+    CORRADE_COMPARE(b.offset(), 5);
+    CORRADE_COMPARE(b.size(), 7);
+    CORRADE_COMPARE(b.stride(), 3);
+
+    constexpr BitArrayView ca{Data64, 3, 26};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, but also this is a cursed ancient compiler */
+    #endif
+    StridedBitArrayView1D cb = {ca, Data64 + 1, 5, {7}, {3}};
+    CORRADE_COMPARE(cb.data(), Data64 + 1);
+    CORRADE_COMPARE(cb.offset(), 5);
+    CORRADE_COMPARE(cb.size(), 7);
+    CORRADE_COMPARE(cb.stride(), 3);
+}
+
+void StridedBitArrayViewTest::constructNullptrSize() {
+    /* This should be allowed for e.g. passing a desired layout to a function
+       that allocates the memory later */
 
     StridedBitArrayView1D a{{nullptr, 5, 24}, nullptr, 5, 7, 3};
     CORRADE_COMPARE(a.data(), nullptr);
@@ -539,52 +533,6 @@ void StridedBitArrayViewTest::constructNullptr() {
     CORRADE_COMPARE(a.stride(), 3);
 
     constexpr StridedBitArrayView1D ca{{nullptr, 5, 24}, nullptr, 5, 7, 3};
-    CORRADE_COMPARE(ca.data(), nullptr);
-    CORRADE_COMPARE(ca.offset(), 5);
-    CORRADE_VERIFY(!ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 7);
-    CORRADE_COMPARE(ca.stride(), 3);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<StridedBitArrayView1D, BitArrayView, std::nullptr_t, std::size_t, std::size_t, std::ptrdiff_t>::value);
-}
-
-void StridedBitArrayViewTest::constructArray() {
-    /* Compared to constructChar[Constexpr](), size and stride is wrapped in
-       {}. Just to verify that this doesn't cause a compilation error, it isn't
-       any special overload. */
-
-    char data[5]{};
-    BitArrayView a{data, 3, 26};
-    StridedBitArrayView1D b = {a, data + 1, 5, {7}, {3}};
-    CORRADE_COMPARE(b.data(), data+ 1);
-    CORRADE_COMPARE(b.offset(), 5);
-    CORRADE_COMPARE(b.size(), 7);
-    CORRADE_COMPARE(b.stride(), 3);
-
-    constexpr BitArrayView ca{FiveChars, 3, 26};
-    #ifndef CORRADE_MSVC2015_COMPATIBILITY
-    constexpr /* No idea, but also this is a cursed ancient compiler */
-    #endif
-    StridedBitArrayView1D cb = {ca, FiveChars + 1, 5, {7}, {3}};
-    CORRADE_COMPARE(cb.data(), FiveChars + 1);
-    CORRADE_COMPARE(cb.offset(), 5);
-    CORRADE_COMPARE(cb.size(), 7);
-    CORRADE_COMPARE(cb.stride(), 3);
-}
-
-void StridedBitArrayViewTest::constructNullptrSize() {
-    /* This should be allowed for e.g. passing a desired layout to a function
-       that allocates the memory later. Explicitly casting to not pick the
-       std::nullptr_t overload that's tested in constructNullptr(). */
-
-    StridedBitArrayView1D a{{nullptr, 5, 24}, static_cast<const char*>(nullptr), 5, 7, 3};
-    CORRADE_COMPARE(a.data(), nullptr);
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.size(), 7);
-    CORRADE_COMPARE(a.stride(), 3);
-
-    constexpr StridedBitArrayView1D ca{{nullptr, 5, 24}, static_cast<const char*>(nullptr), 5, 7, 3};
     CORRADE_COMPARE(ca.data(), nullptr);
     CORRADE_COMPARE(ca.offset(), 5);
     CORRADE_VERIFY(!ca.isEmpty());
@@ -632,10 +580,10 @@ template<class T> void StridedBitArrayViewTest::constructSizeStride() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, BasicBitArrayView<T>, std::size_t, std::ptrdiff_t>::value);
 }
 
-constexpr char FourBytes[4]{};
+constexpr std::uint32_t Data32[1]{};
 
 void StridedBitArrayViewTest::constructSizeStrideConstexpr() {
-    constexpr BitArrayView ca{FourBytes, 5, 24};
+    constexpr BitArrayView ca{Data32, 5, 24};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -656,7 +604,7 @@ void StridedBitArrayViewTest::constructSizeStrideConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     std::ptrdiff_t stride = cb.stride();
-    CORRADE_COMPARE(data, FourBytes);
+    CORRADE_COMPARE(data, Data32);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 7);
     CORRADE_COMPARE(stride, 3);
@@ -676,12 +624,12 @@ void StridedBitArrayViewTest::constructSizeStrideArray() {
     CORRADE_COMPARE(b.size(), 7);
     CORRADE_COMPARE(b.stride(), 3);
 
-    constexpr BitArrayView ca{FourBytes, 5, 24};
+    constexpr BitArrayView ca{Data32, 5, 24};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     StridedBitArrayView1D cb = {ca, {7}, {3}};
-    CORRADE_COMPARE(cb.data(), FourBytes);
+    CORRADE_COMPARE(cb.data(), Data32);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 7);
@@ -703,7 +651,7 @@ template<class T> void StridedBitArrayViewTest::constructSizeOnly() {
 }
 
 void StridedBitArrayViewTest::constructSizeOnlyConstexpr() {
-    constexpr BitArrayView ca{FourBytes, 5, 24};
+    constexpr BitArrayView ca{Data32, 5, 24};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -724,7 +672,7 @@ void StridedBitArrayViewTest::constructSizeOnlyConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     std::ptrdiff_t stride = cb.stride();
-    CORRADE_COMPARE(data, FourBytes);
+    CORRADE_COMPARE(data, Data32);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 7);
     CORRADE_COMPARE(stride, 1);
@@ -744,12 +692,12 @@ void StridedBitArrayViewTest::constructSizeOnlyArray() {
     CORRADE_COMPARE(b.size(), 7);
     CORRADE_COMPARE(b.stride(), 1);
 
-    constexpr BitArrayView ca{FourBytes, 5, 24};
+    constexpr BitArrayView ca{Data32, 5, 24};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     StridedBitArrayView1D cb = {ca, {7}};
-    CORRADE_COMPARE(cb.data(), FourBytes);
+    CORRADE_COMPARE(cb.data(), Data32);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_VERIFY(!cb.isEmpty());
     CORRADE_COMPARE(cb.size(), 7);
@@ -772,27 +720,11 @@ template<class T> void StridedBitArrayViewTest::constructPointerSize() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, typename BasicStridedBitArrayView<1, T>::ErasedType*, std::size_t, std::size_t>::value);
 }
 
-template<class T> void StridedBitArrayViewTest::constructPointerSizeChar() {
-    setTestCaseTemplateName(NameFor<T>::name());
-
-    /* Same as BitArrayViewTest::constructPointerSizeChar(), just with
-       StridedBitArrayView as the type */
-
-    char data[4];
-    const BasicStridedBitArrayView<1, T> a{data, 5, 24};
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_COMPARE(a.size(), 24);
-    CORRADE_COMPARE(a.data(), &data);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, T*, std::size_t, std::size_t>::value);
-}
-
-void StridedBitArrayViewTest::constructPointerSizeCharConstexpr() {
+void StridedBitArrayViewTest::constructPointerSizeConstexpr() {
     /* Same as BitArrayViewTest::constructPointerSizeCharConstexpr(), just with
        StridedBitArrayView as the type */
 
-    constexpr StridedBitArrayView1D ca{FourBytes, 5, 24};
+    constexpr StridedBitArrayView1D ca{Data32, 5, 24};
     constexpr bool empty = ca.isEmpty();
     constexpr std::size_t offset = ca.offset();
     constexpr std::size_t size = ca.size();
@@ -800,28 +732,7 @@ void StridedBitArrayViewTest::constructPointerSizeCharConstexpr() {
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 24);
-    CORRADE_COMPARE(data, &FourBytes);
-}
-
-void StridedBitArrayViewTest::constructPointerSizeNullptr() {
-    /* An explicit overload to avoid ambiguity between the char* and void*
-       constructor when passing std::nullptr_t. Same as
-       BitArrayViewTest::constructPointerSizeNullptr(), just with
-       StridedBitArrayView as the type. */
-
-    StridedBitArrayView1D a{nullptr, 5, 24};
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_COMPARE(a.size(), 24);
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
-
-    constexpr StridedBitArrayView1D ca{nullptr, 5, 24};
-    CORRADE_VERIFY(!ca.isEmpty());
-    CORRADE_COMPARE(ca.offset(), 5);
-    CORRADE_COMPARE(ca.size(), 24);
-    CORRADE_COMPARE(static_cast<const void*>(ca.data()), nullptr);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<StridedBitArrayView1D, std::nullptr_t, std::size_t, std::size_t>::value);
+    CORRADE_COMPARE(data, &Data32);
 }
 
 void StridedBitArrayViewTest::constructOffsetTooLarge() {
@@ -916,10 +827,10 @@ template<class T> void StridedBitArrayViewTest::constructFromView() {
 }
 
 void StridedBitArrayViewTest::constructFromViewConstexpr() {
-    constexpr BitArrayView view{FourBytes, 5, 24};
+    constexpr BitArrayView view{Data32, 5, 24};
 
     constexpr StridedBitArrayView1D cb = view;
-    CORRADE_COMPARE(cb.data(), FourBytes);
+    CORRADE_COMPARE(cb.data(), Data32);
     CORRADE_COMPARE(cb.offset(), 5);
     CORRADE_COMPARE(cb.size(), 24);
     CORRADE_COMPARE(cb.stride(), 1);
@@ -1041,30 +952,14 @@ template<class T> void StridedBitArrayViewTest::construct3D() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<3, T>, BasicBitArrayView<T>, void*, std::size_t, Size3D, Stride3D>::value);
 }
 
-template<class T> void StridedBitArrayViewTest::construct3DChar() {
-    setTestCaseTemplateName(NameFor<T>::name());
+constexpr std::uint64_t Data643D[4]{};
 
-    char data[23]{};
-    BasicBitArrayView<T> a{data, 5, 23*8 - 5};
-    BasicStridedBitArrayView<3, T> b = {a, data + 1, 7, {3, 4, 5}, {55, 11, 2}};
-
-    CORRADE_COMPARE(b.data(), data + 1);
-    CORRADE_COMPARE(b.offset(), 7);
-    CORRADE_COMPARE(b.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
-    CORRADE_COMPARE(b.size(), (Size3D{3, 4, 5}));
-    CORRADE_COMPARE(b.stride(), (Stride3D{55, 11, 2}));
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<3, T>, BasicBitArrayView<T>, void*, std::size_t, Size3D, Stride3D>::value);
-}
-
-constexpr char ThirtyChars[30]{};
-
-void StridedBitArrayViewTest::construct3DCharConstexpr() {
-    constexpr BitArrayView ca{ThirtyChars, 5, 30*8 - 5};
+void StridedBitArrayViewTest::construct3DConstexpr() {
+    constexpr BitArrayView ca{Data643D, 5, 4*64 - 5};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
-    StridedBitArrayView3D cb{ca, ThirtyChars + 1, 7, {3, 4, 5}, {55, 11, 2}};
+    StridedBitArrayView3D cb{ca, Data643D + 1, 7, {3, 4, 5}, {55, 11, 2}};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -1085,47 +980,25 @@ void StridedBitArrayViewTest::construct3DCharConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     Stride3D stride = cb.stride();
-    CORRADE_COMPARE(data, ThirtyChars + 1);
+    CORRADE_COMPARE(data, Data643D + 1);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(size, (Size3D{3, 4, 5}));
     CORRADE_COMPARE(stride, (Stride3D{55, 11, 2}));
 }
 
-void StridedBitArrayViewTest::construct3DNullptr() {
-    /* An explicit overload to avoid ambiguity between the char* and void*
-       constructor when passing std::nullptr_t */
-
-    StridedBitArrayView3D a = {{nullptr, 5, 30*8 - 5}, nullptr, 7, {3, 4, 5}, {55, 11, 2}};
-    CORRADE_COMPARE(a.data(), nullptr);
-    CORRADE_COMPARE(a.offset(), 7);
-    CORRADE_COMPARE(a.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
-    CORRADE_COMPARE(a.size(), (Size3D{3, 4, 5}));
-    CORRADE_COMPARE(a.stride(), (Stride3D{55, 11, 2}));
-
-    constexpr StridedBitArrayView3D ca{{nullptr, 5, 30*8 - 5}, nullptr, 7, {3, 4, 5}, {55, 11, 2}};
-    CORRADE_COMPARE(ca.data(), nullptr);
-    CORRADE_COMPARE(ca.offset(), 7);
-    CORRADE_COMPARE(ca.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
-    CORRADE_COMPARE(ca.size(), (Size3D{3, 4, 5}));
-    CORRADE_COMPARE(ca.stride(), (Stride3D{55, 11, 2}));
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<StridedBitArrayView3D, BitArrayView, std::nullptr_t, std::size_t, Size3D, Stride3D>::value);
-}
-
 void StridedBitArrayViewTest::construct3DNullptrSize() {
     /* This should be allowed for e.g. passing a desired layout to a function
-       that allocates the memory later. Explicitly casting to not pick the
-       std::nullptr_t overload that's tested in constructNullptr(). */
+       that allocates the memory later */
 
-    StridedBitArrayView3D a{{nullptr, 5, 30*8 - 5}, static_cast<const char*>(nullptr), 7, {3, 4, 5}, {55, 11, 2}};
+    StridedBitArrayView3D a{{nullptr, 5, 4*64 - 5}, nullptr, 7, {3, 4, 5}, {55, 11, 2}};
     CORRADE_COMPARE(a.data(), nullptr);
     CORRADE_COMPARE(a.offset(), 7);
     CORRADE_COMPARE(a.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(a.size(), (Size3D{3, 4, 5}));
     CORRADE_COMPARE(a.stride(), (Stride3D{55, 11, 2}));
 
-    constexpr StridedBitArrayView3D ca{{nullptr, 5, 30*8 - 5}, static_cast<const char*>(nullptr), 7, {3, 4, 5}, {55, 11, 2}};
+    constexpr StridedBitArrayView3D ca{{nullptr, 5, 4*64 - 5}, nullptr, 7, {3, 4, 5}, {55, 11, 2}};
     CORRADE_COMPARE(ca.data(), nullptr);
     CORRADE_COMPARE(ca.offset(), 7);
     CORRADE_COMPARE(ca.isEmpty(), (StridedDimensions<3, bool>{false, false, false}));
@@ -1175,7 +1048,7 @@ template<class T> void StridedBitArrayViewTest::construct3DSizeStride() {
 }
 
 void StridedBitArrayViewTest::construct3DSizeStrideConstexpr() {
-    constexpr BitArrayView ca{ThirtyChars, 7, 30*8 - 7};
+    constexpr BitArrayView ca{Data643D, 7, 4*64 - 7};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -1200,7 +1073,7 @@ void StridedBitArrayViewTest::construct3DSizeStrideConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     Stride3D stride = cb.stride();
-    CORRADE_COMPARE(data, ThirtyChars);
+    CORRADE_COMPARE(data, Data643D);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(size, (Size3D{3, 4, 5}));
@@ -1223,7 +1096,7 @@ template<class T> void StridedBitArrayViewTest::construct3DSizeOnly() {
 }
 
 void StridedBitArrayViewTest::construct3DSizeOnlyConstexpr() {
-    constexpr BitArrayView ca{ThirtyChars, 7, 30*8 - 7};
+    constexpr BitArrayView ca{Data643D, 7, 4*64 - 7};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
@@ -1248,7 +1121,7 @@ void StridedBitArrayViewTest::construct3DSizeOnlyConstexpr() {
     constexpr /* No idea, but also this is a cursed ancient compiler */
     #endif
     Stride3D stride = cb.stride();
-    CORRADE_COMPARE(data, ThirtyChars);
+    CORRADE_COMPARE(data, Data643D);
     CORRADE_COMPARE(offset, 7);
     CORRADE_COMPARE(empty, (StridedDimensions<3, bool>{false, false, false}));
     CORRADE_COMPARE(size, (Size3D{3, 4, 5}));

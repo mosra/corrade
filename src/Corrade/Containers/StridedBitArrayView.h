@@ -39,7 +39,9 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    /* So ArrayTuple can update the data pointer */
+    /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
+       void*& because this also acts as a type disambiguator in the
+       constructor, even though it's subsequently cast back to void. */
     template<unsigned dimensions, class T>
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /* warns that "the inline specifier cannot be used when a friend
@@ -48,7 +50,7 @@ namespace Implementation {
         inline
         #endif
     T*& dataRef(BasicStridedBitArrayView<dimensions, T>& view) {
-        return view._data;
+        return reinterpret_cast<T*&>(view._data);
     }
 
     #ifndef CORRADE_NO_DEBUG_ASSERT
@@ -189,28 +191,14 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * is expected to be less than 8 and not less than offset in @p data if
          * @p begin is equal to @cpp data.data() @ce; @p size in each dimension
          * has to fit into 29 bits on 32-bit platforms and 61 bits on 64-bit
-         * platforms. Use @ref BasicStridedBitArrayView(BasicBitArrayView<T>, T*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
-         * in a @cpp constexpr @ce context instead.
+         * platforms.
          */
-        /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, ErasedType* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept: BasicStridedBitArrayView{data, static_cast<T*>(begin), offset, size, stride} {}
-
-        /**
-         * @brief Construct a constexpr view with explicit size and stride
-         *
-         * A variant of @ref BasicStridedBitArrayView(BasicBitArrayView<T>, ErasedType*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
-         * usable in a @cpp constexpr @ce context --- in order to satisfy the
-         * restrictions, the @p begin parameter has to be (@cpp const @ce)
-         * @cpp char* @ce.
-         */
-        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, T* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept;
-
-        /** @overload */
-        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, std::nullptr_t, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept: BasicStridedBitArrayView{data, static_cast<T*>(nullptr), offset, size, stride} {}
+        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, ErasedType* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept;
 
         /**
          * @brief Construct a view with explicit size and stride
          *
-         * Equivalent to calling @ref BasicStridedBitArrayView(BasicBitArrayView<T>, T*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
+         * Equivalent to calling @ref BasicStridedBitArrayView(BasicBitArrayView<T>, ErasedType*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
          * with @cpp data.data() @ce as @p begin and @cpp data.offset() @ce as
          * @p offset.
          */
@@ -234,9 +222,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @param size      Bit count
          *
          * Enabled only on one-dimensional views. The @p offset is expected to
-         * be less than 8, stride is implicitly set to 1 bit. Use
-         * @ref BasicStridedBitArrayView(T*, std::size_t, std::size_t) in a
-         * @cpp constexpr @ce context instead.
+         * be less than 8, stride is implicitly set to 1 bit.
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<unsigned d = dimensions
@@ -249,53 +235,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
             #endif
         >
         #endif
-        /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept
-            #ifndef CORRADE_MSVC_COMPATIBILITY
-            /* This has to be defined after the (T*, std::size_t, size_t)
-               overload below as otherwise MSVC without /permissive- thinks
-               the constructor delegates to itself because it evaluates the
-               template before having parsed the whole class definition. */
-            : BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
-            #else
-            ;
-            #endif
-
-        /**
-         * @brief Construct a constexpr view on an array with explicit length
-         *
-         * A variant of @ref BasicStridedBitArrayView(ErasedType*, std::size_t, std::size_t)
-         * usable in a @cpp constexpr @ce context --- in order to satisfy the
-         * restrictions, the @p data parameter has to be (@cpp const @ce)
-         * @cpp char* @ce.
-         */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions
-            #ifndef CORRADE_MSVC_COMPATIBILITY
-            /* This makes MSVC without /permissive- fail to match the
-               constructor with "could not deduce template argument for
-               '<unnamed-symbol>'". It's present just to avoid having this
-               overload picked in multi-dimensional cases, without it it will
-               fail to compile somewhere deeper with an uglier error. */
-            , class = typename std::enable_if<d == 1>::type
-            #endif
-        >
-        #endif
-        constexpr /*implicit*/ BasicStridedBitArrayView(T* data, std::size_t offset, std::size_t size) noexcept;
-
-        /** @overload */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions
-            #ifndef CORRADE_MSVC_COMPATIBILITY
-            /* This makes MSVC without /permissive- fail to match the
-               constructor with "could not deduce template argument for
-               '<unnamed-symbol>'". It's present just to avoid having this
-               overload picked in multi-dimensional cases, without it it will
-               fail to compile somewhere deeper with an uglier error. */
-            , class = typename std::enable_if<d == 1>::type
-            #endif
-        >
-        #endif
-        constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t, std::size_t offset, std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(nullptr), offset, size} {}
+        constexpr /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept;
 
         /** @brief Construct a @ref StridedBitArrayView from a @ref MutableStridedBitArrayView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
@@ -717,7 +657,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
            slice() etc. Argument order is different to avoid this function
            getting matched when passing a pointer instead of a view to the
            constructor. */
-        constexpr /*implicit*/ BasicStridedBitArrayView(const Size<dimensions>& sizeOffset, const Stride<dimensions>& stride, T* data) noexcept: _data{data}, _sizeOffset{sizeOffset}, _stride{stride} {}
+        constexpr /*implicit*/ BasicStridedBitArrayView(const Size<dimensions>& sizeOffset, const Stride<dimensions>& stride, ErasedType* data) noexcept: _data{data}, _sizeOffset{sizeOffset}, _stride{stride} {}
 
         /* Compared to size() returns Size<dimensions> even in 1D */
         constexpr Size<dimensions> sizeInternal() const {
@@ -728,7 +668,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
             return StridedDimensions<dimensions, bool>{(_sizeOffset._data[sequence] >> 3 == 0)...};
         }
 
-        T* _data;
+        ErasedType* _data;
         Size<dimensions> _sizeOffset;
         Stride<dimensions> _stride;
 };
@@ -888,7 +828,7 @@ template<unsigned dimensions> inline Utility::Debug& operator<<(Utility::Debug& 
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, const StridedBitArrayView1D& value);
 #endif
 
-template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(BasicBitArrayView<T> data, T* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept:
+template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(BasicBitArrayView<T> data, ErasedType* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept:
     _data{(
         /* A strided array view is usually not created from scratch in tight
            loops (except for slicing, which uses a different constructor) and
@@ -921,7 +861,7 @@ template<unsigned dimensions, class T> template<unsigned
     #ifndef CORRADE_MSVC_COMPATIBILITY
     , class /* See the declaration for details */
     #endif
-> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(T* data, std::size_t offset, const std::size_t size) noexcept:
+> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept:
     _data{data},
     _sizeOffset{
         (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset < 8,
@@ -930,10 +870,6 @@ template<unsigned dimensions, class T> template<unsigned
             "Containers::StridedBitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
         size << 3 | offset)},
     _stride{1} {}
-
-#ifdef CORRADE_MSVC_COMPATIBILITY /* See the declaration for details */
-template<unsigned dimensions, class T> template<unsigned> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept: BasicStridedBitArrayView{static_cast<T*>(data), offset, size} {}
-#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
@@ -1010,13 +946,13 @@ namespace Implementation {
                 outputSizeOffset._data[j] = sizeOffset._data[j + 1];
             for(std::size_t j = 0; j != dimensions - 1; ++j)
                 outputStride._data[j] = stride._data[j + 1];
-            return BasicStridedBitArrayView<dimensions - 1, T>{outputSizeOffset, outputStride, data + (offsetInBits >> 3)};
+            return BasicStridedBitArrayView<dimensions - 1, T>{outputSizeOffset, outputStride, static_cast<T*>(data) + (offsetInBits >> 3)};
         }
     };
     template<class T> struct StridedBitElement<1, T> {
         static bool get(T* data, const Size1D& sizeOffset, const Stride1D& stride, std::size_t i) {
             const std::ptrdiff_t offsetInBits = (sizeOffset._data[0] & 0x07) + i*stride._data[0];
-            return data[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
+            return static_cast<T*>(data)[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
         }
     };
 }
@@ -1024,21 +960,21 @@ namespace Implementation {
 template<unsigned dimensions, class T> auto BasicStridedBitArrayView<dimensions, T>::operator[](const std::size_t i) const -> ElementType {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::operator[](): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "elements", {});
-    return Implementation::StridedBitElement<dimensions, T>::get(_data, _sizeOffset, _stride, i);
+    return Implementation::StridedBitElement<dimensions, T>::get(static_cast<T*>(_data), _sizeOffset, _stride, i);
 }
 
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
-    _data[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
+    static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
 }
 
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
-    _data[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
+    static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
 }
 
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i, bool value) const {
@@ -1046,7 +982,7 @@ template<unsigned dimensions, class T> template<class U, class> inline void Basi
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
-    char& byte = _data[offsetInBits >> 3];
+    char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
 }
 
@@ -1060,7 +996,7 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + begin*_stride._data[0];
 
     /* Data pointer is whole bytes */
-    T* const data = _data + (offsetInBits >> 3);
+    T* const data = static_cast<T*>(_data) + (offsetInBits >> 3);
 
     /* The new offset is the remaining bits in the last byte, combine with the
        new size */
@@ -1092,7 +1028,7 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
     }
 
     /* Data pointer is whole bytes */
-    T* const data = _data + (offsetInBits >> 3);
+    T* const data = static_cast<T*>(_data) + (offsetInBits >> 3);
 
     /* The new offset is the remaining bits in the last byte */
     sizeOffset._data[0] |= offsetInBits & 0x07;
@@ -1182,7 +1118,7 @@ template<unsigned dimensions, class T> template<unsigned dimension> BasicStrided
     const std::ptrdiff_t offsetInBits =  (_sizeOffset._data[0] & 0x07) + _stride._data[dimension]*(sizeInDimension ? sizeInDimension - 1 : 0);
 
     /* Data pointer is whole bytes */
-    T* const data = _data + (offsetInBits >> 3);
+    T* const data = static_cast<T*>(_data) + (offsetInBits >> 3);
 
     /* The new offset is remaining bits in the last byte */
     Size<dimensions> sizeOffset = _sizeOffset;

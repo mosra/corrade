@@ -509,8 +509,8 @@ void ArrayTupleTest::constructNoInit() {
         CORRADE_COMPARE((initializedBits.size() + 7)/8, 2);
         for(std::size_t i = 0; i != 2; ++i) {
             CORRADE_ITERATION(i);
-            CORRADE_COMPARE(bits.data()[i], '\xce');
-            CORRADE_COMPARE(initializedBits.data()[i], 0);
+            CORRADE_COMPARE(static_cast<char*>(bits.data())[i], '\xce');
+            CORRADE_COMPARE(static_cast<char*>(initializedBits.data())[i], 0);
         }
         CORRADE_COMPARE((bitsStrided.size() + 7)/8, 2);
         CORRADE_COMPARE((initializedBitsStrided.size() + 7)/8, 2);

@@ -43,7 +43,9 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    /* So ArrayTuple can update the data pointer */
+    /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
+       void*& because this also acts as a type disambiguator in the
+       constructor, even though it's subsequently cast back to void. */
     template<class T>
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /* warns that "the inline specifier cannot be used when a friend
@@ -52,7 +54,7 @@ namespace Implementation {
         inline
         #endif
     T*& dataRef(BasicBitArrayView<T>& view) {
-        return view._data;
+        return reinterpret_cast<T*&>(view._data);
     }
 }
 
@@ -130,24 +132,9 @@ template<class T> class BasicBitArrayView {
          * @param size      Bit count
          *
          * The @p offset is expected to be less than 8, @p size has to fit into
-         * 29 bits on 32-bit platforms and 61 bits on 64-bit platforms. Use
-         * @ref BasicBitArrayView(T*, std::size_t, std::size_t) in a
-         * @cpp constexpr @ce context instead.
+         * 29 bits on 32-bit platforms and 61 bits on 64-bit platforms.
          */
-        /*implicit*/ BasicBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView<T>{static_cast<T*>(data), offset, size} {}
-
-        /**
-         * @brief Construct a view with explicit offset and length
-         *
-         * A variant of @ref BasicBitArrayView(ErasedType*, std::size_t, std::size_t)
-         * usable in a @cpp constexpr @ce context --- in order to satisfy the
-         * restrictions, the @p data parameter has to be (@cpp const @ce)
-         * @cpp char* @ce.
-         */
-        constexpr /*implicit*/ BasicBitArrayView(T* data, std::size_t offset, std::size_t size) noexcept;
-
-        /** @overload */
-        constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView{static_cast<T*>(nullptr), offset, size} {}
+        constexpr /*implicit*/ BasicBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept;
 
         /** @brief Construct a @ref BitArrayView from a @ref MutableBitArrayView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicBitArrayView(BasicBitArrayView<U> mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset} {}
@@ -162,7 +149,7 @@ template<class T> class BasicBitArrayView {
          * Use @p offset() to get location of the first bit pointed to by the
          * array.
          */
-        constexpr T* data() const { return _data; }
+        constexpr ErasedType* data() const { return _data; }
 
         /**
          * @brief Bit offset
@@ -195,7 +182,7 @@ template<class T> class BasicBitArrayView {
          * only possible on mutable views with @ref set(std::size_t) const,
          * @ref reset(std::size_t) const or @ref set(std::size_t, bool) const.
          */
-        constexpr bool operator[](std::size_t i) const;
+        bool operator[](std::size_t i) const;
 
         /**
          * @brief Set a bit at given position
@@ -242,7 +229,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref sliceSize(), @ref prefix(), @ref suffix(),
          *      @ref exceptPrefix(), @ref exceptSuffix()
          */
-        constexpr BasicBitArrayView<T> slice(std::size_t begin, std::size_t end) const;
+        BasicBitArrayView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
          * @brief View slice of given size
@@ -251,7 +238,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref slice(), @ref prefix(), @ref suffix(),
          *      @ref exceptPrefix(), @ref exceptSuffix()
          */
-        constexpr BasicBitArrayView<T> sliceSize(std::size_t begin, std::size_t size) const {
+        BasicBitArrayView<T> sliceSize(std::size_t begin, std::size_t size) const {
             return slice(begin, begin + size);
         }
 
@@ -262,7 +249,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref slice(), @ref sliceSize(), @ref exceptPrefix(),
          *      @ref suffix()
          */
-        constexpr BasicBitArrayView<T> prefix(std::size_t size) const {
+        BasicBitArrayView<T> prefix(std::size_t size) const {
             return slice(0, size);
         }
 
@@ -273,7 +260,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref slice(), @ref sliceSize(), @ref exceptSuffix(),
          *      @ref prefix()
          */
-        constexpr BasicBitArrayView<T> suffix(std::size_t size) const {
+        BasicBitArrayView<T> suffix(std::size_t size) const {
             return slice((_sizeOffset >> 3) - size, _sizeOffset >> 3);
         }
 
@@ -284,7 +271,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref slice(), @ref sliceSize(), @ref prefix(),
          *      @ref exceptSuffix()
          */
-        constexpr BasicBitArrayView<T> exceptPrefix(std::size_t size) const {
+        BasicBitArrayView<T> exceptPrefix(std::size_t size) const {
             return slice(size, _sizeOffset >> 3);
         }
 
@@ -295,7 +282,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref slice(), @ref sliceSize(), @ref suffix(),
          *      @ref exceptPrefix()
          */
-        constexpr BasicBitArrayView<T> exceptSuffix(std::size_t size) const {
+        BasicBitArrayView<T> exceptSuffix(std::size_t size) const {
             return slice(0, (_sizeOffset >> 3) - size);
         }
 
@@ -310,7 +297,7 @@ template<class T> class BasicBitArrayView {
            asserts and value decomposition in the public constructor. */
         constexpr explicit BasicBitArrayView(T* const data, std::size_t sizeOffset): _data{data}, _sizeOffset{sizeOffset} {}
 
-        T* _data;
+        ErasedType* _data;
         /* The low 3 bits are bit offset in the _data, the rest is size in
            bits. On 32bit systems this means the view can only address 512M
            bits (64 MB of memory). */
@@ -376,50 +363,48 @@ inline Utility::Debug& operator<<(Utility::Debug& debug, MutableBitArrayView val
     return debug << BitArrayView{value};
 }
 
-template<class T> constexpr BasicBitArrayView<T>::BasicBitArrayView(T* const data, const std::size_t offset, const std::size_t size) noexcept: _data{data}, _sizeOffset{
+template<class T> constexpr BasicBitArrayView<T>::BasicBitArrayView(ErasedType* const data, const std::size_t offset, const std::size_t size) noexcept: _data{data}, _sizeOffset{
     (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset < 8,
         "Containers::BitArrayView: offset expected to be smaller than 8 bits, got" << offset),
     CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
         "Containers::BitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
     size << 3 | offset)} {}
 
-template<class T> constexpr bool BasicBitArrayView<T>::operator[](std::size_t i) const {
-    return CORRADE_CONSTEXPR_DEBUG_ASSERT(i < (_sizeOffset >> 3),
-        "Containers::BitArrayView::operator[](): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits"),
-        _data[((_sizeOffset & 0x07) + i) >> 3] & (1 << ((_sizeOffset + i) & 0x7));
+template<class T> inline bool BasicBitArrayView<T>::operator[](std::size_t i) const {
+    CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
+        "Containers::BitArrayView::operator[](): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", {});
+    return static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] & (1 << ((_sizeOffset + i) & 0x7));
 }
 
 template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
-    _data[((_sizeOffset & 0x07) + i) >> 3] |= (1 << ((_sizeOffset + i) & 0x07));
+    static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] |= (1 << ((_sizeOffset + i) & 0x07));
 }
 
 template<class T> template<class U, class> inline void BasicBitArrayView<T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
-    _data[((_sizeOffset & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
+    static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
 }
 
 template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
-    char& byte = _data[((_sizeOffset & 0x07) + i) >> 3];
+    char& byte = static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3];
     byte ^= (-char(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
 }
 
-template<class T> constexpr BasicBitArrayView<T> BasicBitArrayView<T>::slice(const std::size_t begin, const std::size_t end) const {
-    return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin <= end && end <= (_sizeOffset >> 3),
-            "Containers::BitArrayView::slice(): slice ["
-            << Utility::Debug::nospace << begin
-            << Utility::Debug::nospace << ":"
-            << Utility::Debug::nospace << end
-            << Utility::Debug::nospace << "] out of range for"
-            << (_sizeOffset >> 3) << "bits"),
-        /* Using an internal assert-less constructor, the public
-           constructor asserts would be redundant */
-        BasicBitArrayView<T>{_data + (((_sizeOffset & 0x07) + begin) >> 3), ((_sizeOffset + begin) & 0x7) | ((end - begin) << 3)};
+template<class T> inline BasicBitArrayView<T> BasicBitArrayView<T>::slice(const std::size_t begin, const std::size_t end) const {
+    CORRADE_DEBUG_ASSERT(begin <= end && end <= (_sizeOffset >> 3),
+        "Containers::BitArrayView::slice(): slice [" << Utility::Debug::nospace
+        << begin << Utility::Debug::nospace << ":" << Utility::Debug::nospace
+        << end << Utility::Debug::nospace << "] out of range for"
+        << (_sizeOffset >> 3) << "bits", {});
+    /* Using an internal assert-less constructor, the public constructor
+       asserts would be redundant */
+    return BasicBitArrayView<T>{static_cast<T*>(_data) + (((_sizeOffset & 0x07) + begin) >> 3), ((_sizeOffset + begin) & 0x7) | ((end - begin) << 3)};
 }
 
 }}

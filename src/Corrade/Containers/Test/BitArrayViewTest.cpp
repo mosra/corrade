@@ -38,9 +38,7 @@ struct BitArrayViewTest: TestSuite::Tester {
 
     template<class T> void constructDefault();
     template<class T> void constructPointerSize();
-    template<class T> void constructPointerSizeChar();
-    void constructPointerSizeCharConstexpr();
-    void constructPointerSizeNullptr();
+    void constructPointerSizeConstexpr();
     void constructNullptrSize();
 
     void constructOffsetTooLarge();
@@ -106,10 +104,7 @@ BitArrayViewTest::BitArrayViewTest() {
               &BitArrayViewTest::constructDefault<char>,
               &BitArrayViewTest::constructPointerSize<const char>,
               &BitArrayViewTest::constructPointerSize<char>,
-              &BitArrayViewTest::constructPointerSizeChar<const char>,
-              &BitArrayViewTest::constructPointerSizeChar<char>,
-              &BitArrayViewTest::constructPointerSizeCharConstexpr,
-              &BitArrayViewTest::constructPointerSizeNullptr,
+              &BitArrayViewTest::constructPointerSizeConstexpr,
               &BitArrayViewTest::constructNullptrSize,
 
               &BitArrayViewTest::constructOffsetTooLarge,
@@ -151,8 +146,8 @@ template<class T> void BitArrayViewTest::constructDefault() {
     CORRADE_COMPARE(b.offset(), 0);
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(b.size(), 0);
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
-    CORRADE_COMPARE(static_cast<const void*>(b.data()), nullptr);
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
 
     constexpr BasicBitArrayView<T> ca;
     constexpr BasicBitArrayView<T> cb = nullptr;
@@ -184,28 +179,15 @@ template<class T> void BitArrayViewTest::constructPointerSize() {
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.offset(), 5);
     CORRADE_COMPARE(a.size(), 24);
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), &data);
+    CORRADE_COMPARE(a.data(), &data);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, typename BasicBitArrayView<T>::ErasedType*, std::size_t, std::size_t>::value);
 }
 
-template<class T> void BitArrayViewTest::constructPointerSizeChar() {
-    setTestCaseTemplateName(NameFor<T>::name());
+constexpr std::uint32_t Data[1]{};
 
-    char data[4];
-    const BasicBitArrayView<T> a{data, 5, 24};
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_COMPARE(a.size(), 24);
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), &data);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, T*, std::size_t, std::size_t>::value);
-}
-
-constexpr const char FourChars[4]{};
-
-void BitArrayViewTest::constructPointerSizeCharConstexpr() {
-    constexpr BitArrayView ca{FourChars, 5, 24};
+void BitArrayViewTest::constructPointerSizeConstexpr() {
+    constexpr BitArrayView ca{Data, 5, 24};
     constexpr bool empty = ca.isEmpty();
     constexpr std::size_t offset = ca.offset();
     constexpr std::size_t size = ca.size();
@@ -213,42 +195,21 @@ void BitArrayViewTest::constructPointerSizeCharConstexpr() {
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 24);
-    CORRADE_COMPARE(data, &FourChars);
+    CORRADE_COMPARE(data, &Data);
 }
 
-void BitArrayViewTest::constructPointerSizeNullptr() {
-    /* An explicit overload to avoid ambiguity between the char* and void*
-       constructor when passing std::nullptr_t */
+void BitArrayViewTest::constructNullptrSize() {
+    /* This should be allowed for e.g. passing a desired layout to a function
+       that allocates the memory later */
 
     BitArrayView a{nullptr, 5, 24};
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
+    CORRADE_COMPARE(a.data(), nullptr);
     CORRADE_COMPARE(a.offset(), 5);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 24);
 
     constexpr BitArrayView ca{nullptr, 5, 24};
-    CORRADE_COMPARE(static_cast<const void*>(ca.data()), nullptr);
-    CORRADE_COMPARE(ca.offset(), 5);
-    CORRADE_VERIFY(!ca.isEmpty());
-    CORRADE_COMPARE(ca.size(), 24);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BitArrayView, std::nullptr_t, std::size_t, std::size_t>::value);
-}
-
-void BitArrayViewTest::constructNullptrSize() {
-    /* This should be allowed for e.g. passing a desired layout to a function
-       that allocates the memory later. Explicitly casting to not pick the
-       std::nullptr_t overload that's tested in
-       constructPointerSizeNullptr(). */
-
-    BitArrayView a{static_cast<const char*>(nullptr), 5, 24};
-    CORRADE_COMPARE(static_cast<const void*>(a.data()), nullptr);
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.size(), 24);
-
-    constexpr BitArrayView ca{static_cast<const char*>(nullptr), 5, 24};
-    CORRADE_COMPARE(static_cast<const void*>(ca.data()), nullptr);
+    CORRADE_COMPARE(ca.data(), nullptr);
     CORRADE_COMPARE(ca.offset(), 5);
     CORRADE_VERIFY(!ca.isEmpty());
     CORRADE_COMPARE(ca.size(), 24);
@@ -284,7 +245,7 @@ void BitArrayViewTest::constructFromMutable() {
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.offset(), 5);
     CORRADE_COMPARE(b.size(), 47);
-    CORRADE_COMPARE(static_cast<const void*>(b.data()), &data);
+    CORRADE_COMPARE(b.data(), &data);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<BitArrayView, MutableBitArrayView>::value);
 
@@ -301,13 +262,13 @@ void BitArrayViewTest::constructCopy() {
     BitArrayView b = a;
     CORRADE_COMPARE(b.offset(), 5);
     CORRADE_COMPARE(b.size(), 47);
-    CORRADE_COMPARE(static_cast<const void*>(b.data()), &data);
+    CORRADE_COMPARE(b.data(), &data);
 
     BitArrayView c{&a, 0, 1};
     c = b;
     CORRADE_COMPARE(c.offset(), 5);
     CORRADE_COMPARE(c.size(), 47);
-    CORRADE_COMPARE(static_cast<const void*>(c.data()), &data);
+    CORRADE_COMPARE(c.data(), &data);
 
     CORRADE_VERIFY(std::is_copy_constructible<BitArrayView>::value);
     CORRADE_VERIFY(std::is_copy_assignable<BitArrayView>::value);
@@ -334,14 +295,6 @@ void BitArrayViewTest::access() {
         CORRADE_ITERATION(i);
         CORRADE_VERIFY(!a[i]);
     }
-
-    constexpr BitArrayView ca{DataPadded + 1, 5, 24};
-    constexpr bool ca15 = ca[15];
-    constexpr bool ca16 = ca[16];
-    constexpr bool ca17 = ca[17];
-    CORRADE_VERIFY(!ca15);
-    CORRADE_VERIFY(ca16);
-    CORRADE_VERIFY(!ca17);
 }
 
 void BitArrayViewTest::accessMutableSet() {
@@ -393,65 +346,35 @@ void BitArrayViewTest::accessInvalid() {
         "Containers::BitArrayView::set(): index 53 out of range for 53 bits\n");
 }
 
-constexpr char Data64[8]{};
-
 void BitArrayViewTest::slice() {
-    const std::uint64_t data64[1]{};
+    const char data64[8]{};
     BitArrayView view{data64, 6, 53};
 
     /* There isn't really any value to easily compare to, so go the hard way
        and compare pointers, offsets and sizes */
     {
         BitArrayView slice = view.slice(29, 47);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), view.data() + 4);
+        CORRADE_COMPARE(slice.data(), data64 + 4);
         CORRADE_COMPARE(slice.offset(), 3);
         CORRADE_COMPARE(slice.size(), 18);
     } {
         BitArrayView slice = view.prefix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), view.data());
+        CORRADE_COMPARE(slice.data(), data64);
         CORRADE_COMPARE(slice.offset(), 6);
         CORRADE_COMPARE(slice.size(), 12);
     } {
         BitArrayView slice = view.suffix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), view.data() + 5);
+        CORRADE_COMPARE(slice.data(), data64 + 5);
         CORRADE_COMPARE(slice.offset(), 7);
         CORRADE_COMPARE(slice.size(), 12);
     } {
         BitArrayView slice = view.exceptPrefix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), view.data() + 2);
+        CORRADE_COMPARE(slice.data(), data64 + 2);
         CORRADE_COMPARE(slice.offset(), 2);
         CORRADE_COMPARE(slice.size(), 41);
     } {
         BitArrayView slice = view.exceptSuffix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), view.data());
-        CORRADE_COMPARE(slice.offset(), 6);
-        CORRADE_COMPARE(slice.size(), 41);
-    }
-
-    constexpr BitArrayView cview{Data64, 6, 53};
-    {
-        constexpr BitArrayView slice = cview.slice(29, 47);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data() + 4);
-        CORRADE_COMPARE(slice.offset(), 3);
-        CORRADE_COMPARE(slice.size(), 18);
-    } {
-        constexpr BitArrayView slice = cview.prefix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data());
-        CORRADE_COMPARE(slice.offset(), 6);
-        CORRADE_COMPARE(slice.size(), 12);
-    } {
-        constexpr BitArrayView slice = cview.suffix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data() + 5);
-        CORRADE_COMPARE(slice.offset(), 7);
-        CORRADE_COMPARE(slice.size(), 12);
-    } {
-        constexpr BitArrayView slice = cview.exceptPrefix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data() + 2);
-        CORRADE_COMPARE(slice.offset(), 2);
-        CORRADE_COMPARE(slice.size(), 41);
-    } {
-        constexpr BitArrayView slice = cview.exceptSuffix(12);
-        CORRADE_COMPARE(static_cast<const void*>(slice.data()), cview.data());
+        CORRADE_COMPARE(slice.data(), data64);
         CORRADE_COMPARE(slice.offset(), 6);
         CORRADE_COMPARE(slice.size(), 41);
     }
