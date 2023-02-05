@@ -54,8 +54,8 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void constructSizeOnlyConstexpr();
     void constructSizeOnlyArray();
 
-    template<class T> void constructPointerSize();
-    void constructPointerSizeConstexpr();
+    template<class T> void constructPointerOffsetSize();
+    void constructPointerOffsetSizeConstexpr();
 
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
@@ -294,9 +294,9 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::constructSizeOnlyConstexpr,
               &StridedBitArrayViewTest::constructSizeOnlyArray,
 
-              &StridedBitArrayViewTest::constructPointerSize<const char>,
-              &StridedBitArrayViewTest::constructPointerSize<char>,
-              &StridedBitArrayViewTest::constructPointerSizeConstexpr,
+              &StridedBitArrayViewTest::constructPointerOffsetSize<const char>,
+              &StridedBitArrayViewTest::constructPointerOffsetSize<char>,
+              &StridedBitArrayViewTest::constructPointerOffsetSizeConstexpr,
 
               &StridedBitArrayViewTest::constructOffsetTooLarge,
               &StridedBitArrayViewTest::constructSizeTooLarge,
@@ -704,7 +704,7 @@ void StridedBitArrayViewTest::constructSizeOnlyArray() {
     CORRADE_COMPARE(cb.stride(), 1);
 }
 
-template<class T> void StridedBitArrayViewTest::constructPointerSize() {
+template<class T> void StridedBitArrayViewTest::constructPointerOffsetSize() {
     setTestCaseTemplateName(NameFor<T>::name());
 
     /* Same as BitArrayViewTest::constructPointerSize(), just with
@@ -720,7 +720,7 @@ template<class T> void StridedBitArrayViewTest::constructPointerSize() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, typename BasicStridedBitArrayView<1, T>::ErasedType*, std::size_t, std::size_t>::value);
 }
 
-void StridedBitArrayViewTest::constructPointerSizeConstexpr() {
+void StridedBitArrayViewTest::constructPointerOffsetSizeConstexpr() {
     /* Same as BitArrayViewTest::constructPointerSizeCharConstexpr(), just with
        StridedBitArrayView as the type */
 

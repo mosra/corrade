@@ -37,8 +37,8 @@ struct BitArrayViewTest: TestSuite::Tester {
     explicit BitArrayViewTest();
 
     template<class T> void constructDefault();
-    template<class T> void constructPointerSize();
-    void constructPointerSizeConstexpr();
+    template<class T> void constructPointerOffsetSize();
+    void constructPointerOffsetSizeConstexpr();
     void constructNullptrSize();
 
     void constructOffsetTooLarge();
@@ -102,9 +102,9 @@ const struct {
 BitArrayViewTest::BitArrayViewTest() {
     addTests({&BitArrayViewTest::constructDefault<const char>,
               &BitArrayViewTest::constructDefault<char>,
-              &BitArrayViewTest::constructPointerSize<const char>,
-              &BitArrayViewTest::constructPointerSize<char>,
-              &BitArrayViewTest::constructPointerSizeConstexpr,
+              &BitArrayViewTest::constructPointerOffsetSize<const char>,
+              &BitArrayViewTest::constructPointerOffsetSize<char>,
+              &BitArrayViewTest::constructPointerOffsetSizeConstexpr,
               &BitArrayViewTest::constructNullptrSize,
 
               &BitArrayViewTest::constructOffsetTooLarge,
@@ -171,7 +171,7 @@ template<class T> void BitArrayViewTest::constructDefault() {
     CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicBitArrayView<T>>::value);
 }
 
-template<class T> void BitArrayViewTest::constructPointerSize() {
+template<class T> void BitArrayViewTest::constructPointerOffsetSize() {
     setTestCaseTemplateName(NameFor<T>::name());
 
     std::uint32_t data[1];
@@ -186,7 +186,7 @@ template<class T> void BitArrayViewTest::constructPointerSize() {
 
 constexpr std::uint32_t Data[1]{};
 
-void BitArrayViewTest::constructPointerSizeConstexpr() {
+void BitArrayViewTest::constructPointerOffsetSizeConstexpr() {
     constexpr BitArrayView ca{Data, 5, 24};
     constexpr bool empty = ca.isEmpty();
     constexpr std::size_t offset = ca.offset();
