@@ -365,14 +365,15 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * first dimension. To reduce dimension count you can use
          * @ref operator[](), potentially in combination with @ref transposed().
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned lessDimensions>
-        #else
-        /* MSVC needs the (), otherwise it gets totally confused and starts
-           complaining that "error C2947: expecting '>' to terminate template-parameter-list, found '>'". HAHA. (TBH, parsing this is a hell.) */
-        template<unsigned lessDimensions, class = typename std::enable_if<(lessDimensions < dimensions)>::type>
-        #endif
-        /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept;
+        template<unsigned lessDimensions
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* MSVC needs the (), otherwise it gets totally confused and starts
+               complaining that "error C2947: expecting '>' to terminate
+               template-parameter-list, found '>'". HAHA. (TBH, parsing this is
+               a hell.) */
+            , class = typename std::enable_if<(lessDimensions < dimensions)>::type
+            #endif
+        > /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept;
 
         /**
          * @brief Construct from a @ref ArrayView
@@ -382,12 +383,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
          * @see @ref stridedArrayView(ArrayView<T>)
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -399,12 +399,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
          * @see @ref stridedArrayView(StaticArrayView<size, T>)
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<std::size_t size, class U>
-        #else
-        template<std::size_t size, class U, unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {
+        template<std::size_t size, class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
         }
 

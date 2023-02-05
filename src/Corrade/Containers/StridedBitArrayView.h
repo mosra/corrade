@@ -308,14 +308,15 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * first dimension. To reduce dimension count you can use
          * @ref operator[](), potentially in combination with @ref transposed().
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned lessDimensions>
-        #else
-        /* MSVC needs the (), otherwise it gets totally confused and starts
-           complaining that "error C2947: expecting '>' to terminate template-parameter-list, found '>'". HAHA. (TBH, parsing this is a hell.) */
-        template<unsigned lessDimensions, class = typename std::enable_if<(lessDimensions < dimensions)>::type>
-        #endif
-        /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept;
+        template<unsigned lessDimensions
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* MSVC needs the (), otherwise it gets totally confused and starts
+               complaining that "error C2947: expecting '>' to terminate
+               template-parameter-list, found '>'". HAHA. (TBH, parsing this is
+               a hell.) */
+            , class = typename std::enable_if<(lessDimensions < dimensions)>::type
+            #endif
+        > /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept;
 
         /**
          * @brief Construct from a @ref BasicBitArrayView
@@ -324,12 +325,11 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @ref MutableStridedBitArrayView only if @p view is also mutable.
          * Stride is implicitly set to 1 bit.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<U> view) noexcept: _data{view.data()}, _sizeOffset{view.size() << 3 | view.offset()}, _stride{1} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            #endif
+        > constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<U> view) noexcept: _data{view.data()}, _sizeOffset{view.size() << 3 | view.offset()}, _stride{1} {}
 
         /* No bool conversion operator right now, as it's yet unclear what
            semantic should it have -- return false if it's nullptr, if the size
