@@ -174,22 +174,22 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{}, _stride{} {}
 
         /**
-         * @brief Construct a view with explicit size and stride
+         * @brief Construct a view with explicit offset, size and stride
          * @param data      Continuous view on the data
          * @param begin     Pointer to the first byte of the strided view
          * @param offset    Offset of the first bit in @p begin
          * @param size      Bit count
          * @param stride    Data stride in bits
          *
-         * Expects that @p data is large enough to fit @p offset, @p size and
-         * @p stride in the largest dimension if the stride is either positive
-         * or negative. Zero strides unfortunately can't be reliably checked
-         * for out-of-bounds conditions, so be extra careful when specifying
-         * these. The @p offset is expected to be less than 8 and not less than
-         * offset in @p data if @p begin is equal to @cpp data.data() @ce;
-         * @p size in each dimension has to fit into 29 bits on 32-bit
-         * platforms and 61 bits on 64-bit platforms. Use
-         * @ref BasicStridedBitArrayView(BasicBitArrayView<T>, T*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
+         * The @p data view is used only for a bounds check --- expects that
+         * it's large enough to fit @p offset, @p size and @p stride in the
+         * largest dimension if the stride is either positive or negative. Zero
+         * strides unfortunately can't be reliably checked for out-of-bounds
+         * conditions, so be extra careful when specifying these. The @p offset
+         * is expected to be less than 8 and not less than offset in @p data if
+         * @p begin is equal to @cpp data.data() @ce; @p size in each dimension
+         * has to fit into 29 bits on 32-bit platforms and 61 bits on 64-bit
+         * platforms. Use @ref BasicStridedBitArrayView(BasicBitArrayView<T>, T*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
          * in a @cpp constexpr @ce context instead.
          */
         /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, ErasedType* begin, std::size_t offset, const Size<dimensions>& size, const Stride<dimensions>& stride) noexcept: BasicStridedBitArrayView{data, static_cast<T*>(begin), offset, size, stride} {}
@@ -228,7 +228,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, const Size<dimensions>& size) noexcept: BasicStridedBitArrayView{data, data.data(), data.offset(), size, Implementation::strideForSize<dimensions>(size._data, 1, typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
-         * @brief Construct a view on an array with explicit length
+         * @brief Construct a 1D view on an array with explicit offset and size
          * @param data      Data pointer
          * @param offset    Bit offset in @p data
          * @param size      Bit count

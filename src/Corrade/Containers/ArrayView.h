@@ -273,7 +273,7 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
-         * @brief Construct a view on an array with explicit length
+         * @brief Construct a view on an array with explicit size
          * @param data      Data pointer
          * @param size      Data size
          *
@@ -314,7 +314,7 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief Construct a view on @ref StaticArrayView
+         * @brief Construct a view on a @ref StaticArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -664,14 +664,14 @@ template<> class ArrayView<void> {
         constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
-         * @brief Construct a view on an array with explicit length
+         * @brief Construct a view on a type-erased array with explicit length
          * @param data      Data pointer
-         * @param size      Data size
+         * @param size      Data size in bytes
          */
         constexpr /*implicit*/ ArrayView(void* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
         /**
-         * @brief Constructor from any type
+         * @brief Construct a view on a typed array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          *
@@ -706,7 +706,7 @@ template<> class ArrayView<void> {
         > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
         /**
-         * @brief Construct a view on an external type
+         * @brief Construct a view on an external type / from an external representation
          *
          * @see @ref Containers-ArrayView-stl
          */
@@ -791,14 +791,14 @@ template<> class ArrayView<const void> {
         constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
 
         /**
-         * @brief Construct a view on an array of explicit length
+         * @brief Construct a view on a type-erased array array with explicit length
          * @param data      Data pointer
-         * @param size      Data size
+         * @param size      Data size in bytes
          */
         constexpr /*implicit*/ ArrayView(const void* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
         /**
-         * @brief Constructor from any type
+         * @brief Constructor a view on a typed array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          *
@@ -824,7 +824,7 @@ template<> class ArrayView<const void> {
         template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
         /**
-         * @brief Construct a view on an external type
+         * @brief Construct a view on an external type / from an external representation
          *
          * @see @ref Containers-ArrayView-stl
          */
@@ -1075,7 +1075,10 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Construct a static view on an array
          * @param data      Data pointer
          *
-         * The pointer is expected to contain at least @ref Size elements.
+         * The pointer is assumed to contain at least @ref Size elements, but
+         * it can't be checked in any way. Use @ref StaticArrayView(U(&)[size_])
+         * or fixed-size slicing from an @ref ArrayView / @ref Array for more
+         * safety.
          * @see @ref staticArrayView(T*)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT

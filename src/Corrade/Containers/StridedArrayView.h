@@ -278,7 +278,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @param stride    Data stride
          *
          * The @p data view is used only for a bounds check --- expects that
-         * @p data is large enough for @p size and @p stride in the largest
+         * it's is large enough for @p size and @p stride in the largest
          * dimension if the stride is either positive or negative. Zero strides
          * unfortunately can't be reliably checked for out-of-bounds
          * conditions, so be extra careful when specifying these.
@@ -309,7 +309,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize<dimensions>(size._data, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
-         * @brief Construct a view on an array with explicit length
+         * @brief Construct a 1D view on an array with explicit size
          * @param data      Data pointer
          * @param size      Data size
          * @m_since_latest

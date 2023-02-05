@@ -124,7 +124,7 @@ template<class T> class BasicBitArrayView {
         constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{} {}
 
         /**
-         * @brief Constructor
+         * @brief Construct a view on an array with explicit offset and size
          * @param data      Data pointer
          * @param offset    Bit offset in @p data
          * @param size      Bit count
@@ -137,7 +137,7 @@ template<class T> class BasicBitArrayView {
         /*implicit*/ BasicBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept: BasicBitArrayView<T>{static_cast<T*>(data), offset, size} {}
 
         /**
-         * @brief Constexpr constructor
+         * @brief Construct a view with explicit offset and length
          *
          * A variant of @ref BasicBitArrayView(ErasedType*, std::size_t, std::size_t)
          * usable in a @cpp constexpr @ce context --- in order to satisfy the
