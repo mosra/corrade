@@ -126,6 +126,23 @@ template<class T> class BasicBitArrayView {
         constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{} {}
 
         /**
+         * @brief Construct a view on a fixed-size array
+         * @param data      Fixed-size array
+         *
+         * In case of a @ref MutableBitArrayView enabled only if @p data is
+         * also mutable. Offset is implicitly set to @cpp 0 @ce, size to
+         * @cpp sizeof(U)*8 @ce.
+         * @see @ref offset(), @ref size()
+         */
+        /* Static arrays aren't expected to get so big to not fit into the
+           size limits, so no size asserts */
+        template<std::size_t size, class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<std::is_convertible<U*, ErasedType*>::value>::type
+            #endif
+        > constexpr /*implicit*/ BasicBitArrayView(U(&data)[size]) noexcept: _data{data}, _sizeOffset{sizeof(U)*8*size << 3} {}
+
+        /**
          * @brief Construct a view on an array with explicit offset and size
          * @param data      Data pointer
          * @param offset    Bit offset in @p data
@@ -135,6 +152,21 @@ template<class T> class BasicBitArrayView {
          * 29 bits on 32-bit platforms and 61 bits on 64-bit platforms.
          */
         constexpr /*implicit*/ BasicBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept;
+
+        /**
+         * @brief Construct a view on a fixed-size array with explicit offset and size
+         * @param data      Fixed-size array
+         * @param offset    Bit offset in @p data
+         * @param size      Bit count
+         *
+         * Compared to @ref BasicBitArrayView(ErasedType*, std::size_t, std::size_t)
+         * expects that @p offset and @p size fits into @p data.
+         */
+        template<std::size_t dataSize, class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<std::is_convertible<U*, ErasedType*>::value>::type
+            #endif
+        > constexpr /*implicit*/ BasicBitArrayView(U(&data)[dataSize], std::size_t offset, std::size_t size) noexcept;
 
         /** @brief Construct a @ref BitArrayView from a @ref MutableBitArrayView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicBitArrayView(BasicBitArrayView<U> mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset} {}
@@ -369,6 +401,15 @@ template<class T> constexpr BasicBitArrayView<T>::BasicBitArrayView(ErasedType* 
     CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
         "Containers::BitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
     size << 3 | offset)} {}
+
+template<class T> template<std::size_t dataSize, class U
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    , class
+    #endif
+> constexpr BasicBitArrayView<T>::BasicBitArrayView(U(&data)[dataSize], const std::size_t offset, const std::size_t size) noexcept: BasicBitArrayView{static_cast<ErasedType*>(data), offset,
+    (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset + size <= sizeof(U)*dataSize*8,
+        "Containers::BitArrayView: an array of" << sizeof(U)*dataSize << "bytes is not enough for" << offset << "+" << size << "bits"),
+     size)} {}
 
 template<class T> inline bool BasicBitArrayView<T>::operator[](std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),

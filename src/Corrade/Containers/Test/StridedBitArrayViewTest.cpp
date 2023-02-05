@@ -1098,7 +1098,7 @@ template<class T> void StridedBitArrayViewTest::construct3DSizeOnly() {
     setTestCaseTemplateName(NameFor<T>::name());
 
     char data[15]{};
-    BasicStridedBitArrayView<3, T> b = {BasicBitArrayView<T>{data, 7, 23*8 - 7}, {3, 4, 5}};
+    BasicStridedBitArrayView<3, T> b = {BasicBitArrayView<T>{data, 7, 15*8 - 7}, {3, 4, 5}};
 
     CORRADE_COMPARE(b.data(), &data[0]);
     CORRADE_COMPARE(b.offset(), 7);
@@ -1176,7 +1176,7 @@ void StridedBitArrayViewTest::construct3DViewTooSmall() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    StridedBitArrayView3D{BitArrayView{data, 0, 96}, {2, 5, 3}, {48, 24, 8}};
+    StridedBitArrayView3D{BitArrayView{data}, {2, 5, 3}, {48, 24, 8}};
     CORRADE_COMPARE(out.str(),
         "Containers::StridedBitArrayView: data size 96 is not enough for {2, 5, 3} bits of stride {48, 24, 8}\n");
 }
@@ -1634,7 +1634,7 @@ void StridedBitArrayViewTest::access3DMutable() {
         0xff0000ffu,
         0xffffffffu,
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data, 0, 32*4}, {2, 2, 32}};
+    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, {2, 2, 32}};
 
     a[1][0].set(20);
     a[1][0].set(11, true);
@@ -1716,7 +1716,7 @@ void StridedBitArrayViewTest::access3DZeroStrideMutable() {
         0x00ffff00u,
         0xff0000ffu
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data, 0, 32*4}, {2, 2, 32}, {32, 0, 1}};
+    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, {2, 2, 32}, {32, 0, 1}};
 
     a[1][0].set(20);
     a[1][0].set(11, true);
@@ -1830,7 +1830,7 @@ void StridedBitArrayViewTest::access3DNegativeStrideMutable() {
         0xff0000ffu,
         0xffffffffu,
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data, 0, 32*4}, reinterpret_cast<char*>(data) + 15, 7, {2, 2, 32}, {-64, -32, -1}};
+    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, reinterpret_cast<char*>(data) + 15, 7, {2, 2, 32}, {-64, -32, -1}};
 
     a[0][1].set(11);
     a[0][1].set(20, true);
@@ -2423,8 +2423,8 @@ void StridedBitArrayViewTest::debug3D() {
     /* Compared to the usual four rows this has only two to avoid overly
        verbose output. Bit group separation tested in the 1D case above
        already. */
-    Debug{&out} << StridedBitArrayView3D{BitArrayView{DataPadded3D + 1, 7, 23*8}, {3, 2, 5}, {55, 11, 2}};
-    Debug{&out} << MutableStridedBitArrayView3D{MutableBitArrayView{data, 7, 23*8}, {3, 2, 5}, {55, 11, 2}};
+    Debug{&out} << StridedBitArrayView3D{BitArrayView{DataPadded3D + 1, 7, 165}, {3, 2, 5}, {55, 11, 2}};
+    Debug{&out} << MutableStridedBitArrayView3D{MutableBitArrayView{data, 7, 165}, {3, 2, 5}, {55, 11, 2}};
     CORRADE_COMPARE(out.str(),
         "{{{11111}, {00000}}, {{00000}, {11001}}, {{11111}, {00000}}}\n"
         "{{{11111}, {00000}}, {{00000}, {11001}}, {{11111}, {00000}}}\n");

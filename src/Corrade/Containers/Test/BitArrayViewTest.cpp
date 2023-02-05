@@ -37,8 +37,13 @@ struct BitArrayViewTest: TestSuite::Tester {
     explicit BitArrayViewTest();
 
     template<class T> void constructDefault();
+    template<class T> void constructFixedSize();
+    void constructFixedSizeConstexpr();
     template<class T> void constructPointerOffsetSize();
     void constructPointerOffsetSizeConstexpr();
+    template<class T> void constructFixedSizeOffsetSize();
+    void constructFixedSizeOffsetSizeConstexpr();
+    void constructFixedSizeOffsetSizeArrayTooSmall();
     void constructNullptrSize();
 
     void constructOffsetTooLarge();
@@ -102,9 +107,16 @@ const struct {
 BitArrayViewTest::BitArrayViewTest() {
     addTests({&BitArrayViewTest::constructDefault<const char>,
               &BitArrayViewTest::constructDefault<char>,
+              &BitArrayViewTest::constructFixedSize<const char>,
+              &BitArrayViewTest::constructFixedSize<char>,
+              &BitArrayViewTest::constructFixedSizeConstexpr,
               &BitArrayViewTest::constructPointerOffsetSize<const char>,
               &BitArrayViewTest::constructPointerOffsetSize<char>,
               &BitArrayViewTest::constructPointerOffsetSizeConstexpr,
+              &BitArrayViewTest::constructFixedSizeOffsetSize<const char>,
+              &BitArrayViewTest::constructFixedSizeOffsetSize<char>,
+              &BitArrayViewTest::constructFixedSizeOffsetSizeConstexpr,
+              &BitArrayViewTest::constructFixedSizeOffsetSizeArrayTooSmall,
               &BitArrayViewTest::constructNullptrSize,
 
               &BitArrayViewTest::constructOffsetTooLarge,
@@ -171,6 +183,33 @@ template<class T> void BitArrayViewTest::constructDefault() {
     CORRADE_VERIFY(std::is_nothrow_default_constructible<BasicBitArrayView<T>>::value);
 }
 
+template<class T> void BitArrayViewTest::constructFixedSize() {
+    setTestCaseTemplateName(NameFor<T>::name());
+
+    std::uint16_t data[7];
+    const BasicBitArrayView<T> a = data;
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.offset(), 0);
+    CORRADE_COMPARE(a.size(), 7*16);
+    CORRADE_COMPARE(a.data(), &data);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, std::uint16_t(&)[7]>::value);
+}
+
+constexpr std::uint16_t Data16[7]{};
+
+void BitArrayViewTest::constructFixedSizeConstexpr() {
+    constexpr BitArrayView ca = Data16;
+    constexpr bool empty = ca.isEmpty();
+    constexpr std::size_t offset = ca.offset();
+    constexpr std::size_t size = ca.size();
+    constexpr const void* data = ca.data();
+    CORRADE_VERIFY(!empty);
+    CORRADE_COMPARE(offset, 0);
+    CORRADE_COMPARE(size, 7*16);
+    CORRADE_COMPARE(data, &Data16);
+}
+
 template<class T> void BitArrayViewTest::constructPointerOffsetSize() {
     setTestCaseTemplateName(NameFor<T>::name());
 
@@ -184,10 +223,10 @@ template<class T> void BitArrayViewTest::constructPointerOffsetSize() {
     CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, typename BasicBitArrayView<T>::ErasedType*, std::size_t, std::size_t>::value);
 }
 
-constexpr std::uint32_t Data[1]{};
+constexpr std::uint32_t Data[2]{};
 
 void BitArrayViewTest::constructPointerOffsetSizeConstexpr() {
-    constexpr BitArrayView ca{Data, 5, 24};
+    constexpr BitArrayView ca = {Data + 1, 5, 24};
     constexpr bool empty = ca.isEmpty();
     constexpr std::size_t offset = ca.offset();
     constexpr std::size_t size = ca.size();
@@ -195,7 +234,47 @@ void BitArrayViewTest::constructPointerOffsetSizeConstexpr() {
     CORRADE_VERIFY(!empty);
     CORRADE_COMPARE(offset, 5);
     CORRADE_COMPARE(size, 24);
-    CORRADE_COMPARE(data, &Data);
+    CORRADE_COMPARE(data, Data + 1);
+}
+
+template<class T> void BitArrayViewTest::constructFixedSizeOffsetSize() {
+    setTestCaseTemplateName(NameFor<T>::name());
+
+    std::uint16_t data[7];
+    const BasicBitArrayView<T> a = {data, 5, 100};
+    CORRADE_VERIFY(!a.isEmpty());
+    CORRADE_COMPARE(a.offset(), 5);
+    CORRADE_COMPARE(a.size(), 100);
+    CORRADE_COMPARE(a.data(), &data);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<BasicBitArrayView<T>, std::uint16_t(&)[7]>::value);
+}
+
+void BitArrayViewTest::constructFixedSizeOffsetSizeConstexpr() {
+    constexpr BitArrayView ca = {Data16, 5, 100};
+    constexpr bool empty = ca.isEmpty();
+    constexpr std::size_t offset = ca.offset();
+    constexpr std::size_t size = ca.size();
+    constexpr const void* data = ca.data();
+    CORRADE_VERIFY(!empty);
+    CORRADE_COMPARE(offset, 5);
+    CORRADE_COMPARE(size, 100);
+    CORRADE_COMPARE(data, &Data16);
+}
+
+void BitArrayViewTest::constructFixedSizeOffsetSizeArrayTooSmall() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    std::uint16_t data[7];
+
+    /* This is fine */
+    BitArrayView{data, 5, 107};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    /* Would pass without the offset */
+    BitArrayView{data, 6, 107};
+    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: an array of 14 bytes is not enough for 6 + 107 bits\n");
 }
 
 void BitArrayViewTest::constructNullptrSize() {
