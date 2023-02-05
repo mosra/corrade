@@ -175,7 +175,7 @@ template<class T> void BitArrayViewTest::constructPointerOffsetSize() {
     setTestCaseTemplateName(NameFor<T>::name());
 
     std::uint32_t data[1];
-    const BasicBitArrayView<T> a{data, 5, 24};
+    const BasicBitArrayView<T> a = {data, 5, 24};
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.offset(), 5);
     CORRADE_COMPARE(a.size(), 24);
