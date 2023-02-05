@@ -181,14 +181,14 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @param size      Bit count
          * @param stride    Data stride in bits
          *
-         * Expects that @p data is large enough to fit @p begin, @p offset,
-         * @p size and @p stride in the largest dimension if the stride is
-         * either positive or negative. Zero strides unfortunately can't be
-         * reliably checked for out-of-bounds conditions, so be extra careful
-         * when specifying these. The @p offset is expected to be less than 8
-         * and not less than offset in @p data if @p begin is equal to
-         * @cpp data.data() @ce; @p size in each dimension has to fit into 29
-         * bits on 32-bit platforms and 61 bits on 64-bit platforms. Use
+         * Expects that @p data is large enough to fit @p offset, @p size and
+         * @p stride in the largest dimension if the stride is either positive
+         * or negative. Zero strides unfortunately can't be reliably checked
+         * for out-of-bounds conditions, so be extra careful when specifying
+         * these. The @p offset is expected to be less than 8 and not less than
+         * offset in @p data if @p begin is equal to @cpp data.data() @ce;
+         * @p size in each dimension has to fit into 29 bits on 32-bit
+         * platforms and 61 bits on 64-bit platforms. Use
          * @ref BasicStridedBitArrayView(BasicBitArrayView<T>, T*, std::size_t, const Size<dimensions>&, const Stride<dimensions>&)
          * in a @cpp constexpr @ce context instead.
          */
@@ -904,7 +904,7 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
             null pointer in a constexpr context and given that we're counting
             bits here the comparisons would be way too complex to avoid pointer
             overflows and rounding errors */
-        CORRADE_CONSTEXPR_ASSERT(begin > data.data() || (begin == data.data() && offset >= data.offset()),
+        CORRADE_CONSTEXPR_ASSERT(begin != data.data() || (begin == data.data() && offset >= data.offset()),
             "Containers::StridedBitArrayView: offset" << offset << "is less than data offset" << data.offset() << "in the same byte"),
         #ifdef CORRADE_NO_ASSERT
         static_cast<void>(data),
