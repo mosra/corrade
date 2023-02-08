@@ -201,7 +201,7 @@ also available as preprocessor variables if you include
     mode for MSVC 2017
 -   `CORRADE_MSVC2015_COMPATIBILITY` --- Defined if compiled with compatibility
     mode for MSVC 2015
--   `CORRADE_BUILD_DEPRECATED` --- Defined if compiled with deprecated APIs
+-   `CORRADE_BUILD_DEPRECATED` --- Defined if compiled with deprecated features
     included
 -   `CORRADE_BUILD_STATIC` --- Defined if compiled as static libraries. Default
     are shared libraries.

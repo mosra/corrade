@@ -544,11 +544,11 @@ Options controlling the build:
     Enabled by default for static builds. May introduce additional overhead on
     some platforms, disable if you will only link static libraries to one final
     executable and won't use any dynamic plugins.
--   `CORRADE_BUILD_DEPRECATED` --- Include deprecated APIs in the build.
+-   `CORRADE_BUILD_DEPRECATED` --- Build with deprecated features included.
     Enabled by default to preserve backwards compatibility, disabling it forces
-    you to update your code whenever there's a breaking API change. It's
-    however recommended to have this option disabled when deploying a final
-    application as it can result in smaller binaries.
+    you to update your code whenever there's a breaking change in the APIs or
+    in library behavior. It's however recommended to have this option disabled
+    when deploying a final application as it can result in smaller binaries.
 -   `CORRADE_BUILD_MULTITHREADED` --- Makes it possible to safely use certain
     Corrade features simultaneously in multiple threads. Enabled by default,
     disable if you don't need this and don't want to pay potential performance

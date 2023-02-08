@@ -65,11 +65,11 @@ Defined if compatibility mode for MSVC 2015 is enabled.
 #undef CORRADE_MSVC2015_COMPATIBILITY
 
 /**
-@brief Build with deprecated API included
+@brief Build with deprecated features included
 
-Defined if the library contains deprecated API (which will be removed in the
-future). To preserve backward compatibility, Corrade is by default built with
-deprecated API included.
+Defined if the library contains deprecated features and APIs (which will be
+removed in the future). To preserve backward compatibility, Corrade is by
+default built with deprecated features included.
 @see @ref building-corrade, @ref corrade-cmake
 */
 /* This macro is enabled by default in Doxyfile, but we may still want to
