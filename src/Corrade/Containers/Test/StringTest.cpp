@@ -34,6 +34,7 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace {
@@ -213,6 +214,8 @@ struct StringTest: TestSuite::Tester {
        null-terminated string, thus there's no customDeleterNullData() */
     void customDeleterZeroSize();
     void customDeleterMovedOutInstance();
+
+    void dataAlignment();
 };
 
 StringTest::StringTest() {
@@ -366,7 +369,9 @@ StringTest::StringTest() {
               &StringTest::defaultDeleter,
               &StringTest::customDeleter,
               &StringTest::customDeleterZeroSize,
-              &StringTest::customDeleterMovedOutInstance});
+              &StringTest::customDeleterMovedOutInstance,
+
+              &StringTest::dataAlignment});
 }
 
 template<class T> struct ConstTraits;
@@ -2752,6 +2757,27 @@ void StringTest::customDeleterMovedOutInstance() {
     /* The deleter got reset to nullptr in a, which means the function gets
        called only once, consistently with what Array does */
     CORRADE_COMPARE(CustomDeleterCallCount, 1);
+}
+
+void StringTest::dataAlignment() {
+    /* A heap-allocated string will be always aligned to the allocation
+       granularity, which is usually 2*sizeof(void*) and always at least
+       sizeof(void*). It's good to have this property to avoid unnecessary
+       special-casing in various SIMD / SWAR algorithms. */
+    String a{AllocatedInit, "hello!"};
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE_AS(a.data(), sizeof(void*), TestSuite::Compare::Aligned);
+
+    /* A SSO string should be aligned to sizeof(void*), since the data storage
+       is inside the class that's pointer-aligned. Only on LE though. */
+    String b{"hello!"};
+    CORRADE_VERIFY(b.isSmall());
+    {
+        #ifdef CORRADE_TARGET_BIG_ENDIAN
+        CORRADE_EXPECT_FAIL("The internal class layout doesn't allow to have the SSO data aligned on Big Endian.");
+        #endif
+        CORRADE_COMPARE_AS(b.data(), sizeof(void*), TestSuite::Compare::Aligned);
+    }
 }
 
 }}}}
