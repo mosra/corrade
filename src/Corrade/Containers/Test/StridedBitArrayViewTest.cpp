@@ -54,9 +54,6 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void constructSizeOnlyConstexpr();
     void constructSizeOnlyArray();
 
-    template<class T> void constructPointerOffsetSize();
-    void constructPointerOffsetSizeConstexpr();
-
     void constructOffsetTooLarge();
     void constructSizeTooLarge();
     void constructViewTooSmall();
@@ -293,10 +290,6 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::constructSizeOnly<char>,
               &StridedBitArrayViewTest::constructSizeOnlyConstexpr,
               &StridedBitArrayViewTest::constructSizeOnlyArray,
-
-              &StridedBitArrayViewTest::constructPointerOffsetSize<const char>,
-              &StridedBitArrayViewTest::constructPointerOffsetSize<char>,
-              &StridedBitArrayViewTest::constructPointerOffsetSizeConstexpr,
 
               &StridedBitArrayViewTest::constructOffsetTooLarge,
               &StridedBitArrayViewTest::constructSizeTooLarge,
@@ -704,46 +697,13 @@ void StridedBitArrayViewTest::constructSizeOnlyArray() {
     CORRADE_COMPARE(cb.stride(), 1);
 }
 
-template<class T> void StridedBitArrayViewTest::constructPointerOffsetSize() {
-    setTestCaseTemplateName(NameFor<T>::name());
-
-    /* Same as BitArrayViewTest::constructPointerSize(), just with
-       StridedBitArrayView as the type */
-
-    std::uint32_t data[1]{};
-    const BasicStridedBitArrayView<1, T> a = {data, 5, 24};
-    CORRADE_VERIFY(!a.isEmpty());
-    CORRADE_COMPARE(a.offset(), 5);
-    CORRADE_COMPARE(a.size(), 24);
-    CORRADE_COMPARE(a.data(), &data);
-
-    CORRADE_VERIFY(std::is_nothrow_constructible<BasicStridedBitArrayView<1, T>, typename BasicStridedBitArrayView<1, T>::ErasedType*, std::size_t, std::size_t>::value);
-}
-
-void StridedBitArrayViewTest::constructPointerOffsetSizeConstexpr() {
-    /* Same as BitArrayViewTest::constructPointerSizeCharConstexpr(), just with
-       StridedBitArrayView as the type */
-
-    constexpr StridedBitArrayView1D ca = {Data32, 5, 24};
-    constexpr bool empty = ca.isEmpty();
-    constexpr std::size_t offset = ca.offset();
-    constexpr std::size_t size = ca.size();
-    constexpr const void* data = ca.data();
-    CORRADE_VERIFY(!empty);
-    CORRADE_COMPARE(offset, 5);
-    CORRADE_COMPARE(size, 24);
-    CORRADE_COMPARE(data, &Data32);
-}
-
 void StridedBitArrayViewTest::constructOffsetTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     StridedBitArrayView1D{BitArrayView{nullptr, 0, 0}, nullptr, 8, 0, 1};
-    StridedBitArrayView1D{nullptr, 8, 0};
     CORRADE_COMPARE(out.str(),
-        "Containers::StridedBitArrayView: offset expected to be smaller than 8 bits, got 8\n"
         "Containers::StridedBitArrayView: offset expected to be smaller than 8 bits, got 8\n");
 }
 
@@ -752,17 +712,14 @@ void StridedBitArrayViewTest::constructSizeTooLarge() {
 
     std::ostringstream out;
     Error redirectError{&out};
-    StridedBitArrayView1D{nullptr, 0, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
     /* Creating a view with zero stride, otherwise this would get caught by
        other asserts already */
     StridedBitArrayView1D{BitArrayView{nullptr, 0, 1}, std::size_t{1} << (sizeof(std::size_t)*8 - 3), 0};
     #ifndef CORRADE_TARGET_32BIT
     CORRADE_COMPARE(out.str(),
-        "Containers::StridedBitArrayView: size expected to be smaller than 2^61 bits, got 2305843009213693952\n"
         "Containers::StridedBitArrayView: size expected to be smaller than 2^61 bits, got {2305843009213693952}\n");
     #else
     CORRADE_COMPARE(out.str(),
-        "Containers::StridedBitArrayView: size expected to be smaller than 2^29 bits, got 536870912\n"
         "Containers::StridedBitArrayView: size expected to be smaller than 2^29 bits, got {536870912}\n");
     #endif
 }
@@ -1192,7 +1149,7 @@ void StridedBitArrayViewTest::construct3DFromLessDimensions() {
          01
          10'0000'0000 << 2 */
     char data[]{'\x00', '\x98'};
-    StridedBitArrayView1D a{data + 1, 2, 6};
+    StridedBitArrayView1D a{BitArrayView{data + 1, 2, 6}};
     StridedBitArrayView2D b{{data + 1, 2, 6}, {3, 2}};
 
     StridedBitArrayView3D a3 = a;

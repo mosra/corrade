@@ -215,27 +215,18 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          */
         constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, const Size<dimensions>& size) noexcept: BasicStridedBitArrayView{data, data.data(), data.offset(), size, Implementation::strideForSize<dimensions>(size._data, 1, typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
-        /**
-         * @brief Construct a 1D view on an array with explicit offset and size
-         * @param data      Data pointer
-         * @param offset    Bit offset in @p data
-         * @param size      Bit count
-         *
-         * Enabled only on one-dimensional views. The @p offset is expected to
-         * be less than 8, stride is implicitly set to 1 bit.
-         */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions
-            #ifndef CORRADE_MSVC_COMPATIBILITY
-            /* This makes MSVC without /permissive- fail to match the
-               constructor. It's present just to avoid having this overload
-               present in multi-dimensional cases, without it it will fail to
-               compile somewhere deeper, causing an uglier error message. */
-            , class = typename std::enable_if<d == 1>::type
-            #endif
-        >
-        #endif
-        constexpr /*implicit*/ BasicStridedBitArrayView(ErasedType* data, std::size_t offset, std::size_t size) noexcept;
+        /* Unlike with StridedArrayView, the following constructors, compatible
+           with BitArrayView, are not defined here:
+            BasicStridedBitArrayView(ErasedType*, std::size_t, std::size_t)
+            BasicStridedBitArrayView(U(&)[size], std::size_t, std::size_t)
+           The reason is that, in case of the second variant, it'd be very
+           close to
+            BasicStridedBitArrayView(BitArrayView, const Size&, const Stride&)
+           in an one-dimensional case --- i.e., the U[] implicitly convertible
+           to a BitArrayView, the *bit offset* directly convertible to a 1D
+           *size* and the *size* directly convertible to a 1D *stride*. Which
+           is an absolutely undesirable footgun, to have the arguments
+           interpreted as something completely different by accident. */
 
         /** @brief Construct a @ref StridedBitArrayView from a @ref MutableStridedBitArrayView */
         template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
@@ -859,20 +850,6 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
         /* Size checked to be small enough inside sizeWithOffset() */
         Implementation::sizeWithOffset(size, offset, typename Implementation::GenerateSequence<dimensions>::Type{}))},
     _stride{stride} {}
-
-template<unsigned dimensions, class T> template<unsigned
-    #ifndef CORRADE_MSVC_COMPATIBILITY
-    , class /* See the declaration for details */
-    #endif
-> constexpr BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(ErasedType* data, std::size_t offset, const std::size_t size) noexcept:
-    _data{data},
-    _sizeOffset{
-        (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset < 8,
-            "Containers::StridedBitArrayView: offset expected to be smaller than 8 bits, got" << offset),
-        CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
-            "Containers::StridedBitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
-        size << 3 | offset)},
-    _stride{1} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
