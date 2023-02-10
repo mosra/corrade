@@ -422,8 +422,18 @@ template<class T> void StridedBitArrayViewTest::constructDefault() {
     bool emptyB = cb.isEmpty();
     constexpr std::size_t offsetA = ca.offset();
     constexpr std::size_t offsetB = cb.offset();
-    constexpr std::size_t sizeA = ca.size();
-    constexpr std::size_t sizeB = cb.size();
+    /* These two started failing with "C2131: expression did not evaluate to a
+       constant" after a removal of the (ErasedType*, std::size_t, std::size_t)
+       constructor in f7644abea5675a1559edc7cd7b5e2ccecb28e63b. I don't see how
+       is that even related to anything. MSVC, *what the fuck*. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr
+    #endif
+    std::size_t sizeA = ca.size();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr
+    #endif
+    std::size_t sizeB = cb.size();
     constexpr std::ptrdiff_t strideA = ca.stride();
     constexpr std::ptrdiff_t strideB = cb.stride();
     CORRADE_COMPARE(dataA, nullptr);
