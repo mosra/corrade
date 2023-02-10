@@ -274,7 +274,11 @@ void BitArrayViewTest::constructFixedSizeOffsetSizeArrayTooSmall() {
     Error redirectError{&out};
     /* Would pass without the offset */
     BitArrayView{data, 6, 107};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     CORRADE_COMPARE(out.str(), "Containers::BitArrayView: an array of 14 bytes is not enough for 6 + 107 bits\n");
+    #else
+    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: an array is not large enough for 6 + 107 bits\n");
+    #endif
 }
 
 void BitArrayViewTest::constructNullptrSize() {

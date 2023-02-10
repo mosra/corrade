@@ -406,10 +406,18 @@ template<class T> template<std::size_t dataSize, class U
     #ifndef DOXYGEN_GENERATING_OUTPUT
     , class
     #endif
-> constexpr BasicBitArrayView<T>::BasicBitArrayView(U(&data)[dataSize], const std::size_t offset, const std::size_t size) noexcept: BasicBitArrayView{static_cast<ErasedType*>(data), offset,
-    (CORRADE_CONSTEXPR_DEBUG_ASSERT(offset + size <= sizeof(U)*dataSize*8,
+> constexpr BasicBitArrayView<T>::BasicBitArrayView(U(&data)[dataSize], const std::size_t offset, const std::size_t size) noexcept: BasicBitArrayView{static_cast<ErasedType*>(data), offset, (
+    /* MSVC 2015 complains about "error C2065: 'U': undeclared identifier" in
+       the lambda inside this macro. Sorry, the assert will be less useful on
+       that stupid thing. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    CORRADE_CONSTEXPR_DEBUG_ASSERT(offset + size <= sizeof(U)*dataSize*8,
         "Containers::BitArrayView: an array of" << sizeof(U)*dataSize << "bytes is not enough for" << offset << "+" << size << "bits"),
-     size)} {}
+    #else
+    CORRADE_CONSTEXPR_DEBUG_ASSERT(offset + size <= sizeof(U)*dataSize*8,
+        "Containers::BitArrayView: an array is not large enough for" << offset << "+" << size << "bits"),
+    #endif
+    size)} {}
 
 template<class T> inline bool BasicBitArrayView<T>::operator[](std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
