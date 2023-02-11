@@ -54,6 +54,7 @@ if(CORRADE_WITH_UTILITY)
 
         ../Containers/ArrayTuple.cpp
         ../Containers/BitArray.cpp
+        ../Containers/BitArrayView.cpp
         ../Containers/String.cpp
         ../Containers/StringIterable.cpp
         ../Containers/StringView.cpp)

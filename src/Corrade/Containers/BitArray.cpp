@@ -149,27 +149,6 @@ Utility::Debug& operator<<(Utility::Debug& debug, const BitArray& value) {
     return operator<<(debug, BitArrayView{value});
 }
 
-Utility::Debug& operator<<(Utility::Debug& debug, BitArrayView value) {
-    debug << "{" << Utility::Debug::nospace;
-
-    const auto* data = reinterpret_cast<const unsigned char*>(value.data());
-    unsigned char mask = 1 << value.offset();
-    for(std::size_t i = 0, iMax = value.size(); i != iMax; ++i) {
-        if(!mask) {
-            ++data;
-            mask = 1;
-        }
-
-        if(i && i % 8 == 0) debug << ",";
-
-        debug << (*data & mask ? "1" : "0") << Utility::Debug::nospace;
-
-        mask <<= 1;
-    }
-
-    return debug << "}";
-}
-
 Utility::Debug& operator<<(Utility::Debug& debug, const StridedBitArrayView1D& value) {
     debug << "{" << Utility::Debug::nospace;
 
