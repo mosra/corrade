@@ -2192,14 +2192,19 @@ void StringTest::join() {
     CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"ab", "c", "def"}),
         "ab, c, def");
 
-    /* Empty parts, also the overload directly on a String */
+    /* Empty parts, also the overload directly on a String, and on a
+       MutableStringView to verify they delegate to the right thing */
     CORRADE_COMPARE(", "_s.join({"ab", "", "c", "def", "", ""}),
         "ab, , c, def, , ");
     CORRADE_COMPARE(String{", "}.join({"ab", "", "c", "def", "", ""}),
         "ab, , c, def, , ");
+    CORRADE_COMPARE(MutableStringView{String{", "}}.join({"ab", "", "c", "def", "", ""}),
+        "ab, , c, def, , ");
     CORRADE_COMPARE(", "_s.joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}),
         "ab, c, def");
     CORRADE_COMPARE(String{", "}.joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}),
+        "ab, c, def");
+    CORRADE_COMPARE(MutableStringView{String{", "}}.joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}),
         "ab, c, def");
 }
 

@@ -832,7 +832,9 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
     };
 }
 
-template<class T> String BasicStringView<T>::join(const StringIterable& strings) const {
+/* On Windows (MSVC, clang-cl and MinGw) it needs an explicit export otherwise
+   the specialization doesn't get exported. */
+template<> CORRADE_UTILITY_EXPORT String BasicStringView<const char>::join(const StringIterable& strings) const {
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
     std::size_t totalSize = strings.isEmpty() ? 0 : (strings.size() - 1)*delimiterSize;
@@ -863,7 +865,17 @@ template<class T> String BasicStringView<T>::join(const StringIterable& strings)
     return result;
 }
 
-template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const StringIterable& strings) const {
+/* On Windows (MSVC, clang-cl and MinGw) it needs an explicit export otherwise
+   the specialization doesn't get exported. */
+template<> CORRADE_UTILITY_EXPORT String BasicStringView<char>::join(const StringIterable& strings) const {
+    /* Delegate to the const implementation to avoid having the exact same code
+       generated twice */
+    return StringView{*this}.join(strings);
+}
+
+/* On Windows (MSVC, clang-cl and MinGw) it needs an explicit export otherwise
+   the specialization doesn't get exported. */
+template<> CORRADE_UTILITY_EXPORT String BasicStringView<const char>::joinWithoutEmptyParts(const StringIterable& strings) const {
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
     std::size_t totalSize = 0;
@@ -898,6 +910,14 @@ template<class T> String BasicStringView<T>::joinWithoutEmptyParts(const StringI
     CORRADE_INTERNAL_ASSERT(out == end);
 
     return result;
+}
+
+/* On Windows (MSVC, clang-cl and MinGw) it needs an explicit export otherwise
+   the specialization doesn't get exported. */
+template<> CORRADE_UTILITY_EXPORT String BasicStringView<char>::joinWithoutEmptyParts(const StringIterable& strings) const {
+    /* Delegate to the const implementation to avoid having the exact same code
+       generated twice */
+    return StringView{*this}.joinWithoutEmptyParts(strings);
 }
 
 template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
