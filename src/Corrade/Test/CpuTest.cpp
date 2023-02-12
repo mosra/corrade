@@ -198,6 +198,7 @@ CpuTest::CpuTest() {
               &CpuTest::enableMacros<Cpu::PopcntT>,
               &CpuTest::enableMacros<Cpu::LzcntT>,
               &CpuTest::enableMacros<Cpu::Bmi1T>,
+              &CpuTest::enableMacros<Cpu::Bmi2T>,
               &CpuTest::enableMacros<Cpu::AvxT>,
               &CpuTest::enableMacros<Cpu::AvxF16cT>,
               &CpuTest::enableMacros<Cpu::AvxFmaT>,
@@ -729,11 +730,11 @@ void CpuTest::priority() {
     /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
        zero, times the count of extra tags plus one */
     CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Scalar)), 0);
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Sse2)), 1*6);
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2)), 7*6);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Sse2)), 1*7);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2)), 7*7);
 
     /* Base tag + extra tags is a sum of the two */
-    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), 7*6 + 2);
+    CORRADE_COMPARE(priorityValue(Cpu::Implementation::priority(Cpu::Avx2|Cpu::AvxFma|Cpu::AvxF16c)), 7*7 + 2);
     #elif defined(CORRADE_TARGET_ARM)
     /* Base tag alone is its BitIndex, where the Scalar is the lowest, thus
        zero, times one as there are no extra tags */
@@ -1507,6 +1508,18 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(BMI1) int callInstructionFor<Cpu:
     CORRADE_COMPARE(_tzcnt_u32(0), 32);
 
     CORRADE_COMPARE(count, 13);
+    return count;
+}
+#endif
+#ifdef CORRADE_ENABLE_BMI2
+template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(BMI2) int callInstructionFor<Cpu::Bmi2T>() {
+    /* Just _bzhi_u32 alone; using volatile to prevent this from being folded into
+       a constant */
+    volatile unsigned a = 0xffffffffu;
+    /* Clearing 13 highest bits (i.e., bit 19 and up) */
+    unsigned int count = _bzhi_u32(a, 19);
+
+    CORRADE_COMPARE(count, 524287);
     return count;
 }
 #endif

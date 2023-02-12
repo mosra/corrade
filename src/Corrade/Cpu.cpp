@@ -170,6 +170,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
     _c(Popcnt)
     _c(Lzcnt)
     _c(Bmi1)
+    _c(Bmi2)
     _c(AvxF16c)
     _c(AvxFma)
     #elif defined(CORRADE_TARGET_ARM)

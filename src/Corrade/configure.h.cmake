@@ -237,7 +237,7 @@
 #endif
 #endif
 
-/* POPCNT, LZCNT and BMI1 on GCC, queried wth
+/* POPCNT, LZCNT, BMI1 and BMI2 on GCC, queried wth
    `gcc -mpopcnt -dM -E - | grep POPCNT`, and equivalent for others. */
 #ifdef CORRADE_TARGET_GCC
 #ifdef __POPCNT__
@@ -248,6 +248,9 @@
 #endif
 #ifdef __BMI__
 #define CORRADE_TARGET_BMI1
+#endif
+#ifdef __BMI2__
+#define CORRADE_TARGET_BMI2
 #endif
 
 /* There doesn't seem to be any equivalent on MSVC,
@@ -276,6 +279,9 @@
 #endif
 #if !defined(CORRADE_TARGET_CLANG_CL) || defined(__BMI__)
 #define CORRADE_TARGET_BMI1
+#endif
+#if !defined(CORRADE_TARGET_CLANG_CL) || defined(__BMI2__)
+#define CORRADE_TARGET_BMI2
 #endif
 #endif
 #endif

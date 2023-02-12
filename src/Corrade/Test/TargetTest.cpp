@@ -326,6 +326,11 @@ void TargetTest::cpu() {
     #endif
     /* No dependencies for CORRADE_TARGET_BMI1 */
 
+    #ifdef CORRADE_TARGET_BMI2
+    Debug{&out} << "CORRADE_TARGET_BMI2";
+    #endif
+    /* No dependencies for CORRADE_TARGET_BMI2 */
+
     #ifdef CORRADE_TARGET_AVX
     Debug{&out} << "CORRADE_TARGET_AVX";
     #ifndef CORRADE_TARGET_SSE42
@@ -369,6 +374,7 @@ void TargetTest::cpu() {
         defined(CORRADE_TARGET_POPCNT) || \
         defined(CORRADE_TARGET_LZCNT) || \
         defined(CORRADE_TARGET_BMI1) || \
+        defined(CORRADE_TARGET_BMI2) || \
         defined(CORRADE_TARGET_AVX) || \
         defined(CORRADE_TARGET_AVX_F16C) || \
         defined(CORRADE_TARGET_AVX_FMA) || \

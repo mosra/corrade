@@ -46,13 +46,14 @@ namespace Corrade {
 -   New @ref CORRADE_TARGET_SSE3, @ref CORRADE_TARGET_SSSE3,
     @ref CORRADE_TARGET_SSE41, @ref CORRADE_TARGET_SSE42,
     @ref CORRADE_TARGET_POPCNT, @ref CORRADE_TARGET_LZCNT,
-    @ref CORRADE_TARGET_BMI1, @ref CORRADE_TARGET_AVX,
-    @ref CORRADE_TARGET_AVX_F16C, @ref CORRADE_TARGET_AVX_FMA,
-    @ref CORRADE_TARGET_AVX2, @ref CORRADE_TARGET_AVX512F,
-    @ref CORRADE_TARGET_NEON, @ref CORRADE_TARGET_NEON_FMA,
-    @ref CORRADE_TARGET_NEON_FP16 and @ref CORRADE_TARGET_SIMD128 preprocessor
-    variables added to the already existing @ref CORRADE_TARGET_SSE2 for
-    detecting enabled instruction sets on x86, ARM and WebAssembly
+    @ref CORRADE_TARGET_BMI1, @ref CORRADE_TARGET_BMI2,
+    @ref CORRADE_TARGET_AVX, @ref CORRADE_TARGET_AVX_F16C,
+    @ref CORRADE_TARGET_AVX_FMA, @ref CORRADE_TARGET_AVX2,
+    @ref CORRADE_TARGET_AVX512F, @ref CORRADE_TARGET_NEON,
+    @ref CORRADE_TARGET_NEON_FMA, @ref CORRADE_TARGET_NEON_FP16 and
+    @ref CORRADE_TARGET_SIMD128 preprocessor variables added to the already
+    existing @ref CORRADE_TARGET_SSE2 for detecting enabled instruction sets on
+    x86, ARM and WebAssembly
 -   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
     detection of 32-bit builds
 -   New @ref Cpu namespace that provides building blocks for compile-time and

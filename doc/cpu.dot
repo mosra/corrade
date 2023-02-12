@@ -43,11 +43,13 @@ digraph "x86 instruction family tree" {
     POPCNT [width=0.75 fontsize=13 margin="0,0" class="m-primary"]
     LZCNT [width=0.75 fontsize=13 class="m-primary"]
     BMI1 [width=0.75 fontsize=13 class="m-primary"]
+    BMI2 [width=0.75 fontsize=13 class="m-primary"]
 
     POPCNT -> SSE3 [style=invis]
     LZCNT -> SSE3 [style=invis]
     LZCNT -> POPCNT [style=invis]
     BMI1 -> LZCNT [style=invis]
+    BMI2 -> BMI1 [style=invis]
 
     FMA3 -> AVX [class="m-primary"]
     F16C -> AVX [class="m-primary"]

@@ -701,11 +701,30 @@ including the `TZCNT` instruction is enabled at compile time (on GCC/Clang it's
 compatible with an earlier `BSF` instruction which has a slightly different
 behavior. To avoid wrong results if it isn't available, prefer to detect its
 presence with @ref Cpu::runtimeFeatures() instead.
+
+Presence of this instruction set is *not* implied by @ref CORRADE_TARGET_BMI2.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Bmi1},
     @ref CORRADE_ENABLE_BMI1
 */
 #define CORRADE_TARGET_BMI1
 #undef CORRADE_TARGET_BMI1
+
+/**
+@brief Target with BMI2 instructions
+@m_since_latest
+
+Defined on @ref CORRADE_TARGET_X86 "x86" if
+[BMI2](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI2_(Bit_Manipulation_Instruction_Set_2))
+is enabled at compile time. On GCC/Clang it's `-mbmi2`, MSVC doesn't have a
+direct option but it's assumed to be implied by `/arch:AVX2`. To avoid failures
+at runtime, prefer to detect its presence with @ref Cpu::runtimeFeatures().
+
+Presence of this instruction set does *not* imply @ref CORRADE_TARGET_BMI1.
+@see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Bmi2},
+    @ref CORRADE_ENABLE_BMI2
+*/
+#define CORRADE_TARGET_BMI2
+#undef CORRADE_TARGET_BMI2
 
 /**
 @brief AVX target
