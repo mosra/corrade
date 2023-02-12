@@ -459,6 +459,10 @@ inverse.
         there it's harder to verify
     -   Special-case clang-cl under the MSVC branch, reusing the `__FOO__`
         check for it
+    -   Add a case into `TargetTest::cpu()` verifying that it correctly implies
+        / is implied by other target macros, or if independent that it's set
+        only if the overarching platform macro such as @ref CORRADE_TARGET_X86
+        is set as well.
 3.  Add a new `FooT` tag type into `Cpu.h`
     -   Roughly at the place where it historically appeared among other
         extensions (e.g. @ref Cpu::PopcntT is after `Sse42T` and before `AvxT`
@@ -495,7 +499,7 @@ inverse.
     -   Mentioned in @ref Cpu::DefaultBase / @ref Cpu::DefaultExtra and
         @ref Cpu::compiledFeatures() docs, again in proper order
     -   If it doesn't have a direct mapping to a MSVC `/arch:` option, consider
-        also listing it among others in the yllow warning block in @ref Cpu
+        also listing it among others in the yellow warning block in @ref Cpu
         namespace docs
 7.  Wire it into runtime detection:
     -   For x86 find the right [CPUID](https://en.wikipedia.org/wiki/CPUID)
@@ -542,11 +546,14 @@ inverse.
         it so it doesn't need a second `CORRADE_ENABLE_*`. Clearly mark which
         expression uses the tested instruction set. It should verify something
         nontrivial (so not just a load/store) and return a non-zero value.
-    -   Be sure to build & run on weird / broken compilers such as GCC 4.8 or
-        clang-cl. In case of GCC 4.8 the `Utility/Intrinsics*.h` headers may
-        need to get expanded to correctly pull in the intrinsics without
-        requiring `-mfoo` globally, see their code for more info.
-10. Run `CpuTest` to verify everything:
+10. Be sure to build & run on weird / broken compilers such as GCC 4.8 or
+    clang-cl:
+    -   In case of GCC 4.8 the `Utility/Intrinsics*.h` headers may need to get
+        expanded to correctly pull in the intrinsics without requiring `-mfoo`
+        globally, see their code for more info.
+    -   Otherwise, if the new instruction set is pulled in by one of these
+        headers already, update their docs to list it as well.
+11. Run `CpuTest` to verify everything:
     -   Compile-time detection (test with a `-march=native` build or
         equivalent)
     -   Runtime detection, ideally on multiple platforms (AMD/Intel for x86,
@@ -557,9 +564,9 @@ inverse.
     -   If the instruction set isn't detected as supported on a target, verify
         that calling it crashes (temporarily comment out the `CORRADE_SKIP()`
         in `enableMacros()`)
-11. List the new `CORRADE_TARGET_FOO`, `CORRADE_ENABLE_FOO` variables and the
+12. List the new `CORRADE_TARGET_FOO`, `CORRADE_ENABLE_FOO` variables and the
     `Cpu::Foo` tag in `doc/changelog.dox`
-12. Check the output of `CpuTest` CI jobs for sanity:
+13. Check the output of `CpuTest` CI jobs for sanity:
     -   Especially differences between Linux, Windows and macOS
     -   Between x86, ARM and WebAssembly
     -   Docker CircleCI x86 and ARM jobs tend to have very recent hardware,

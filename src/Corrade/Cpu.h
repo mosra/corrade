@@ -708,7 +708,8 @@ template<> struct TypeTraits<Avx512fT> {
     static const char* name() { return "Avx512f"; }
 };
 
-/* The total bit range should not be larger than ExtraTagCount */
+/* The total bit range should not be larger than ExtraTagCount (checked by a
+   static assert) */
 template<> struct TypeTraits<PopcntT> {
     enum: unsigned int { Index = 1 << (0 + Implementation::ExtraTagBitOffset) };
     static const char* name() { return "Popcnt"; }

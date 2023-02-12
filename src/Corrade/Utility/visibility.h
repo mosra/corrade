@@ -46,7 +46,7 @@
 #endif
 
 /* Function-pointer-based CPU dispatch, exposing also the runtime dispatcher
-   implementation */
+   implementation. If used, those need Corrade.h included. */
 #if defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH) || (defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH) && !defined(CORRADE_CPU_USE_IFUNC))
     #define CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(name)                \
         CORRADE_UTILITY_EXPORT decltype(name) name ## Implementation(Cpu::Features);
