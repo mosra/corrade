@@ -343,8 +343,14 @@ usually just one or two out of the whole set:
 
 @snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-extra-declare
 
-On the call side, there's no difference. The created dispatcher function takes
-@ref Features as well.
+If some extra instruction sets are always used together (like it is above with
+@ref Popcnt and @ref Lzcnt), you can reduce the amount of tested combinations
+by specifying them as a single ORed argument instead:
+
+@snippet Corrade.cpp Cpu-usage-automatic-runtime-dispatch-extra-declare-or
+
+On the call side, there's no difference compared to using just the base
+instruction sets. The created dispatcher function takes @ref Features as well.
 
 @section Cpu-usage-automatic-cached-dispatch Automatic cached dispatch
 

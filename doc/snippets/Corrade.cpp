@@ -136,6 +136,14 @@ LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Sse41|Cpu::Popcnt|Cpu::Lzc
 CORRADE_CPU_DISPATCHER(lookupImplementation, Cpu::Popcnt, Cpu::Lzcnt)
 /* [Cpu-usage-automatic-runtime-dispatch-extra-declare] */
 
+namespace Bizz {
+LookupT lookupImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar));
+LookupT lookupImplementation(Cpu::Features);
+/* [Cpu-usage-automatic-runtime-dispatch-extra-declare-or] */
+CORRADE_CPU_DISPATCHER(lookupImplementation, Cpu::Popcnt|Cpu::Lzcnt)
+/* [Cpu-usage-automatic-runtime-dispatch-extra-declare-or] */
+}
+
 #ifdef CORRADE_CPU_USE_IFUNC
 /* [Cpu-usage-automatic-cached-dispatch-ifunc] */
 CORRADE_CPU_DISPATCHED_IFUNC(lookupImplementation, int lookup(DOXYGEN_ELLIPSIS(int)))
