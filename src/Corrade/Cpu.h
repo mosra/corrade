@@ -3016,8 +3016,9 @@ See @ref Cpu-usage-target-attributes for more information and usage example.
    expands to just CORRADE_ENABLE_FOO CORRADE_ENABLE_BAR. I hope GCC eventually
    fixes this as well, so keeping both variants so I can drop the GCC-specific
    one in the future. As another future-proof this also gets used for any
-   compilers other than MSVC. MSVC's preprocessor won't be able to perform the
-   delayed expansion so CORRADE_ENABLE()  */
+   compilers other than MSVC. MSVC's preprocessor isn't able to perform the
+   delayed expansion without /Zc:preprocessor, fortunately CORRADE_ENABLE()
+   isn't needed there at all. */
 #elif defined(CORRADE_TARGET_CLANG) || !defined(CORRADE_TARGET_MSVC)
 /* Using _CORRADE_HELPER_PASTE2() instead of _CORRADE_HELPER_PASTE() here, as
    that's enough to make that work and it's less work for the preprocessor.
