@@ -311,6 +311,21 @@ void TargetTest::cpu() {
     #endif
     #endif
 
+    #ifdef CORRADE_TARGET_POPCNT
+    Debug{&out} << "CORRADE_TARGET_POPCNT";
+    #endif
+    /* No dependencies for CORRADE_TARGET_POPCNT */
+
+    #ifdef CORRADE_TARGET_LZCNT
+    Debug{&out} << "CORRADE_TARGET_LZCNT";
+    #endif
+    /* No dependencies for CORRADE_TARGET_LZCNT */
+
+    #ifdef CORRADE_TARGET_BMI1
+    Debug{&out} << "CORRADE_TARGET_BMI1";
+    #endif
+    /* No dependencies for CORRADE_TARGET_BMI1 */
+
     #ifdef CORRADE_TARGET_AVX
     Debug{&out} << "CORRADE_TARGET_AVX";
     #ifndef CORRADE_TARGET_SSE42
@@ -345,7 +360,20 @@ void TargetTest::cpu() {
     CORRADE_FAIL("CORRADE_TARGET_AVX512F defined but CORRADE_TARGET_AVX2 not");
     #endif
     #endif
-    #elif defined(CORRADE_TARGET_SSE2) || defined(CORRADE_TARGET_SSE3) || defined(CORRADE_TARGET_SSSE3) || defined(CORRADE_TARGET_SSE41) || defined(CORRADE_TARGET_SSE42) || defined(CORRADE_TARGET_AVX) || defined(CORRADE_TARGET_AVX_F16C) || defined(CORRADE_TARGET_AVX_FMA) || defined(CORRADE_TARGET_AVX2) || defined(CORRADE_TARGET_AVX512F)
+    #elif \
+        defined(CORRADE_TARGET_SSE2) || \
+        defined(CORRADE_TARGET_SSE3) || \
+        defined(CORRADE_TARGET_SSSE3) || \
+        defined(CORRADE_TARGET_SSE41) || \
+        defined(CORRADE_TARGET_SSE42) || \
+        defined(CORRADE_TARGET_POPCNT) || \
+        defined(CORRADE_TARGET_LZCNT) || \
+        defined(CORRADE_TARGET_BMI1) || \
+        defined(CORRADE_TARGET_AVX) || \
+        defined(CORRADE_TARGET_AVX_F16C) || \
+        defined(CORRADE_TARGET_AVX_FMA) || \
+        defined(CORRADE_TARGET_AVX2) || \
+        defined(CORRADE_TARGET_AVX512F)
     CORRADE_FAIL("CORRADE_TARGET_{SSE*,AVX*} defined but CORRADE_TARGET_X86 not");
     #endif
 
@@ -368,7 +396,10 @@ void TargetTest::cpu() {
     #endif
     #endif
 
-    #elif defined(CORRADE_TARGET_NEON) || defined(CORRADE_TARGET_NEON_FP16) || defined(CORRADE_TARGET_NEON_FMA)
+    #elif \
+        defined(CORRADE_TARGET_NEON) || \
+        defined(CORRADE_TARGET_NEON_FP16) || \
+        defined(CORRADE_TARGET_NEON_FMA)
     CORRADE_FAIL("CORRADE_TARGET_NEON* defined but CORRADE_TARGET_ARM not");
     #endif
 
@@ -376,7 +407,8 @@ void TargetTest::cpu() {
     #ifdef CORRADE_TARGET_SIMD128
     Debug{&out} << "CORRADE_TARGET_SIMD128";
     #endif
-    #elif defined(CORRADE_TARGET_SIMD128)
+    #elif \
+        defined(CORRADE_TARGET_SIMD128)
     CORRADE_FAIL("CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_WASM not");
     #endif
 
