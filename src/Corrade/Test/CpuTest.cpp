@@ -119,6 +119,7 @@ struct CpuTest: TestSuite::Tester {
 
     void enableMacrosMultiple();
     void enableMacrosMultipleAllEmpty();
+    void enableMacrosMultipleNoDependencies();
 
     void enableMacrosLambda();
     void enableMacrosLambdaMultiple();
@@ -212,6 +213,7 @@ CpuTest::CpuTest() {
 
               &CpuTest::enableMacrosMultiple,
               &CpuTest::enableMacrosMultipleAllEmpty,
+              &CpuTest::enableMacrosMultipleNoDependencies,
 
               &CpuTest::enableMacrosLambda,
               &CpuTest::enableMacrosLambdaMultiple,
@@ -1683,9 +1685,17 @@ template<class T> void CpuTest::enableMacros() {
 }
 
 #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_AVX)
-/* If set to 1, should fail on GCC (unless CORRADE_TARGET_AVX is set) */
+/* If set to 1, should fail on GCC < 12 (unless CORRADE_TARGET_AVX2 is set), as
+   GCC picks only the last specified target until this commit:
+    https://github.com/gcc-mirror/gcc/commit/364539710f828851b9fac51c39033cd09aa620de
+   The first release of GCC 12 is 12.1.0, according to their versioning scheme
+   docs. */
 #if 0
 CORRADE_ENABLE_AVX2 CORRADE_ENABLE_AVX
+/* If set to 1, should fail on Clang (unless CORRADE_TARGET_AVX2 is set), as
+   Clang picks only the first specified target. Still present in version 15. */
+#elif 0
+CORRADE_ENABLE_AVX CORRADE_ENABLE_AVX2
 #else
 /* If CORRADE_TARGET_SSE2 is set (on 64bit), it'll result in just "avx2,avx" */
 CORRADE_ENABLE(AVX2,SSE2,AVX)
@@ -1764,6 +1774,41 @@ int callInstructionMultipleAllEmpty() {
 
 void CpuTest::enableMacrosMultipleAllEmpty() {
     CORRADE_COMPARE(callInstructionMultipleAllEmpty(), 1);
+}
+
+#if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)
+/* If set to 1, should fail on GCC < 12 and Clang 15 (unless CORRADE_TARGET_*
+   for both POPCNT and BMI1 is set). Compared to callInstructionMultiple(),
+   these don't have any dependencies among each other and thus both have to be
+   enabled explicitly -- i.e., with callInstructionMultiple() the compiler
+   could have just gotten lucky in which of the two picks, here it can't. */
+#if 0
+CORRADE_ENABLE_POPCNT CORRADE_ENABLE_BMI1
+#else
+CORRADE_ENABLE(POPCNT,BMI1)
+#endif
+int callInstructionMultipleNoDependencies() {
+    if(!(Cpu::runtimeFeatures() >= (Cpu::Popcnt|Cpu::Bmi1)))
+        CORRADE_SKIP("POPCNT + BMI1 feature not supported");
+
+    std::uint32_t i = 0xffffffffu;
+
+    /* Extracts 17 middle bits and counts 1s (which is all of them, given the
+       input). If both instructions aren't enabled, this will fail to
+       link/compile. */
+    int count = _mm_popcnt_u32(_bextr_u32(i, 5, 17));
+
+    CORRADE_COMPARE(count, 17);
+    return count;
+}
+#endif
+
+void CpuTest::enableMacrosMultipleNoDependencies() {
+    #if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)
+    CORRADE_VERIFY(callInstructionMultipleNoDependencies());
+    #else
+    CORRADE_SKIP("No mutually independent CORRADE_ENABLE_ macros defined");
+    #endif
 }
 
 /* On Clang it's enough to have the ENABLE macro just on the wrapper function.
