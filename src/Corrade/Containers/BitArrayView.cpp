@@ -76,7 +76,7 @@ CORRADE_ALWAYS_INLINE std::uint64_t maskAfter(const std::uint64_t after) {
     const std::uint64_t i = 1ull << (after - 1);
     return (i|(i - 1));
 }
-#if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)
+#if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1) && !defined(CORRADE_TARGET_32BIT)
 /* Like maskBefore() / maskAfter() above, but combined together into a single
    instruction. Gives the result right-shifted by `before` so it's not the same
    operation. */
@@ -86,7 +86,10 @@ CORRADE_ALWAYS_INLINE CORRADE_ENABLE(BMI1) std::uint64_t maskBeforeAfter(Cpu::Bm
 }
 #endif
 
-#if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)
+/* The 64-bit variants of POPCNT and BMI1 instructions aren't exposed on 32-bit
+   systems for some reason. 32-bit x86 isn't that important nowadays so there
+   it uses just the scalar code, I won't bother making a 32-bit variant. */
+#if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1) && !defined(CORRADE_TARGET_32BIT)
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(POPCNT,BMI1) typename std::decay<decltype(bitCountSet)>::type bitCountSetImplementation(CORRADE_CPU_DECLARE(Cpu::Popcnt|Cpu::Bmi1)) {
   return [](const char* const data, const std::size_t bitOffset, const std::size_t size) CORRADE_ENABLE(POPCNT,BMI1) {
     CORRADE_ASSUME(bitOffset < 8);

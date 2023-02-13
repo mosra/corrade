@@ -62,7 +62,10 @@ const struct {
     std::size_t(*function)(const char*, std::size_t, std::size_t);
 } CountData[]{
     {Cpu::Scalar, nullptr},
-    #ifdef CORRADE_ENABLE_POPCNT
+    /* The 64-bit variants of POPCNT and BMI1 instructions aren't exposed on
+       32-bit systems, and no 32-bit fallback is implemented. See the source
+       for details. */
+    #if defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
     {Cpu::Popcnt, bitCountSetImplementationPopcnt},
     #endif
     #if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)

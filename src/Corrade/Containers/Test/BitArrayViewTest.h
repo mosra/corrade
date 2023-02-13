@@ -38,7 +38,10 @@
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
-#ifdef CORRADE_ENABLE_POPCNT
+/* The 64-bit variants of POPCNT and BMI1 instructions aren't exposed on 32-bit
+   systems, and no 32-bit fallback is implemented for the library version
+   either. See the source for details. */
+#if defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
 /* Copy of the functions in BitArrayView.cpp, keep in sync */
 CORRADE_ALWAYS_INLINE std::uint64_t maskBefore(const std::uint64_t before) {
     CORRADE_INTERNAL_DEBUG_ASSERT(before < 64);
