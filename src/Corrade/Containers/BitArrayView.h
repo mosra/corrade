@@ -222,7 +222,8 @@ template<class T> class BasicBitArrayView {
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
          * @ref MutableBitArrayView.
-         * @see @ref operator[]()
+         * @see @ref operator[](), @ref reset(),
+         *      @ref set(std::size_t, bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
@@ -234,7 +235,7 @@ template<class T> class BasicBitArrayView {
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
          * @ref MutableBitArrayView.
-         * @see @ref operator[]()
+         * @see @ref operator[](), @ref set()
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>

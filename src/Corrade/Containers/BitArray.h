@@ -283,7 +283,7 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @brief Set a bit at given position
          *
          * Expects that @p i is less than @ref size().
-         * @see @ref operator[]()
+         * @see @ref operator[](), @ref reset(), @ref set(std::size_t, bool)
          */
         void set(std::size_t i);
 
@@ -291,7 +291,7 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @brief Reset a bit at given position
          *
          * Expects that @p i is less than @ref size().
-         * @see @ref operator[]()
+         * @see @ref operator[](), @ref set()
          */
         void reset(std::size_t i);
 
