@@ -26,15 +26,21 @@
 
 #include <sstream>
 
+#include "Corrade/Cpu.h"
 #include "Corrade/Containers/BitArrayView.h"
+#include "Corrade/Containers/Test/BitArrayViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct BitArrayViewTest: TestSuite::Tester {
     explicit BitArrayViewTest();
+
+    void captureImplementations();
+    void restoreImplementations();
 
     template<class T> void constructDefault();
     template<class T> void constructFixedSize();
@@ -60,7 +66,15 @@ struct BitArrayViewTest: TestSuite::Tester {
     void slice();
     void sliceInvalid();
 
+    void countAllOnes();
+    void countBitPattern();
+
     void debug();
+
+    private:
+        #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(Implementation::bitCountSet) bitCountSetImplementation;
+        #endif
 };
 
 const struct {
@@ -104,6 +118,21 @@ const struct {
         0x89abcdefu, 0x89abc5efu},
 };
 
+const struct {
+    Cpu::Features features;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    std::size_t(*function)(const char*, std::size_t, std::size_t);
+} CountData[]{
+    {Cpu::Scalar, nullptr},
+    #ifdef CORRADE_ENABLE_POPCNT
+    {Cpu::Popcnt, bitCountSetImplementationPopcnt},
+    #endif
+    #if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Popcnt|Cpu::Bmi1, nullptr},
+    #endif
+};
+
 BitArrayViewTest::BitArrayViewTest() {
     addTests({&BitArrayViewTest::constructDefault<const char>,
               &BitArrayViewTest::constructDefault<char>,
@@ -134,9 +163,19 @@ BitArrayViewTest::BitArrayViewTest() {
     addTests({&BitArrayViewTest::accessInvalid,
 
               &BitArrayViewTest::slice,
-              &BitArrayViewTest::sliceInvalid,
+              &BitArrayViewTest::sliceInvalid});
 
-              &BitArrayViewTest::debug});
+    addInstancedTests({&BitArrayViewTest::countAllOnes},
+        Utility::Test::cpuVariantCount(CountData),
+        &BitArrayViewTest::captureImplementations,
+        &BitArrayViewTest::restoreImplementations);
+
+    addRepeatedInstancedTests({&BitArrayViewTest::countBitPattern}, 64*187,
+        Utility::Test::cpuVariantCount(CountData),
+        &BitArrayViewTest::captureImplementations,
+        &BitArrayViewTest::restoreImplementations);
+
+    addTests({&BitArrayViewTest::debug});
 }
 
 template<class> struct NameFor;
@@ -146,6 +185,18 @@ template<> struct NameFor<const char> {
 template<> struct NameFor<char> {
     static const char* name() { return "MutableBitArrayView"; }
 };
+
+void BitArrayViewTest::captureImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    bitCountSetImplementation = Implementation::bitCountSet;
+    #endif
+}
+
+void BitArrayViewTest::restoreImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    Implementation::bitCountSet = bitCountSetImplementation;
+    #endif
+}
 
 template<class T> void BitArrayViewTest::constructDefault() {
     setTestCaseTemplateName(NameFor<T>::name());
@@ -476,6 +527,217 @@ void BitArrayViewTest::sliceInvalid() {
     CORRADE_COMPARE(out.str(),
         "Containers::BitArrayView::slice(): slice [47:54] out of range for 53 bits\n"
         "Containers::BitArrayView::slice(): slice [47:46] out of range for 53 bits\n");
+}
+
+void BitArrayViewTest::countAllOnes() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountData[testCaseInstanceId()];
+    Implementation::bitCountSet = data.function ? data.function : Implementation::bitCountSetImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Empty without and with offset, shouldn't attempt to read anything */
+    {
+        CORRADE_COMPARE((BitArrayView{nullptr, 0, 0}.count()), 0);
+        CORRADE_COMPARE((BitArrayView{nullptr, 5, 0}.count()), 0);
+
+    /* Less than 64 bits, should go just through the special case */
+    } {
+        const std::uint64_t ones[]{~0ull};
+
+        /* Byte-aligned */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 56}.count()), 56);
+
+        /* 7 bit offset at the front */
+        CORRADE_COMPARE((BitArrayView{ones, 7, 49}.count()), 49);
+
+        /* 7 bit offset at the back */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 49}.count()), 49);
+
+        /* 3- and 4-bit offset at both sides */
+        CORRADE_COMPARE((BitArrayView{ones, 3, 49}.count()), 49);
+
+    /* Exactly 64 bits, should again go just through the special case (see the
+       source for why) */
+    } {
+        const std::uint64_t ones[]{~0ull};
+
+        /* Byte-aligned */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 64}.count()), 64);
+
+        /* 7 bit offset at the front */
+        CORRADE_COMPARE((BitArrayView{ones, 7, 57}.count()), 57);
+
+        /* 7 bit offset at the back */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 57}.count()), 57);
+
+        /* 3- and 4-bit offset at both sides */
+        CORRADE_COMPARE((BitArrayView{ones, 3, 57}.count()), 57);
+
+    /* 128 bits, should go just through the initial and final masking section
+       with no overlap */
+    } {
+        const std::uint64_t ones[]{~0ull, ~0ull};
+
+        /* Byte-aligned */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 128}.count()), 128);
+
+        /* 7 bit offset at the front */
+        CORRADE_COMPARE((BitArrayView{ones, 7, 121}.count()), 121);
+
+        /* 7 bit offset at the back */
+        CORRADE_COMPARE((BitArrayView{ones, 0, 121}.count()), 121);
+
+        /* 4- and 3-bit offset at both sides */
+        CORRADE_COMPARE((BitArrayView{ones, 4, 121}.count()), 121);
+
+    /* Less than 128 bits, should go through the initial and final masking
+       sections with overlap */
+    } {
+        const std::uint64_t ones[]{~0ull, ~0ull};
+
+        /* Byte-aligned, 1 byte overlap from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 1, 0, 120}.count()), 120);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 0, 120}.count()), 120);
+
+        /* Byte-aligned, 7 byte overlap from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 0, 72}.count()), 72);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 0, 72}.count()), 72);
+
+        /* 7 bit offset at the front, 7 byte overlap from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 7, 65}.count()), 65);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 7, 65}.count()), 65);
+
+        /* 7 bit offset at the back, 7 byte overlap from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 0, 65}.count()), 65);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 0, 65}.count()), 65);
+
+        /* 3- and 4-bit offset at both sides */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 3, 65}.count()), 65);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 3, 65}.count()), 65);
+
+    /* More than 128 bits, should go through also the middle section */
+    } {
+        const std::uint64_t ones[]{~0ull, ~0ull, ~0ull, ~0ull};
+
+        /* 64-bit-aligned, no overlap */
+        CORRADE_COMPARE((BitArrayView{ones}.count()), 256);
+
+        /* Byte-aligned, 1 byte overlap with the middle section from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 1, 0, 248}.count()), 248);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 0, 248}.count()), 248);
+
+        /* Byte-aligned, 7 byte overlap with the middle section from either side */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 0, 200}.count()), 200);
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 0, 0, 200}.count()), 200);
+
+        /* Byte-aligned, 7 byte overlap with the middle section from both sides */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 0, 144}.count()), 144);
+
+        /* 1 bit offset at the front and at the back, 7 byte overlap from both
+           sides */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 1, 142}.count()), 142);
+
+        /* 7 bit offset at the front and at the back, 7 byte overlap from both
+           sides */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 7, 7, 130}.count()), 130);
+
+        /* 3- and 4-bit offset at the front and at the back, 4- and 3- byte overlap
+           from both sides */
+        CORRADE_COMPARE((BitArrayView{reinterpret_cast<const char*>(ones) + 4, 3, 193}.count()), 193);
+    }
+}
+
+void BitArrayViewTest::countBitPattern()  {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountData[testCaseInstanceId()];
+    Implementation::bitCountSet = data.function ? data.function : Implementation::bitCountSetImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* A bit pattern with groups of 8/4/2/1 ones and zeros, then 9/3/1 ones and
+       zeros and then 10/5/2/1 ones and zeros, 187 bits in total:
+
+        0b___010'10101010'01100110'01100110'01111111'00000000'00111110'00000000
+        01111111'11101010'10100101'01010001'11000111'00011100'00000001'11111111
+        10101010'01010101'11001100'00110011'11110000'00001111'00000000'11111111
+
+       The values are then shifted by 0 to 63 bits, a prefix is taken and it's
+       expected that the calculated count is always the same for given size
+       regardless of the shift. */
+    constexpr std::uint64_t bits[]{
+        0x0000000000000000ull,
+        0xaa55cc33f00f00ffull,
+        0x7feaa551c71c01ffull,
+        0x02aa66667f003e00ull,
+        0x0000000000000000ull
+    };
+
+    /* There's 64*187 repeats, shift ranges from 0 to 63 and size from 1 to
+       187 */
+    const std::uint32_t shift = testCaseRepeatId() & 0x3f;
+    const std::uint32_t size = (testCaseRepeatId() >> 6) + 1;
+    CORRADE_COMPARE_AS(shift, 63, TestSuite::Compare::LessOrEqual);
+    CORRADE_COMPARE_AS(size, 187, TestSuite::Compare::LessOrEqual);
+
+    std::uint8_t bitsShifted[4*8];
+    for(std::size_t i = 0; i != 4; ++i) {
+        std::uint64_t shifted = (bits[i + 1] << shift);
+        if(shift) shifted |= bits[i] >> (64 - shift);
+        for(std::size_t j = 0; j != 8; ++j)
+            bitsShifted[i*8 + j] = (shifted >> j*8) & 0xff;
+    }
+
+    Containers::BitArrayView view{bitsShifted + (shift >> 3), shift & 0x07, size};
+
+    /* Expected bit counts, should be the same for given size regardless of
+       shift */
+    std::size_t expected[187]{
+         1,  2,  3,  4,  5,  6,  7,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+         9, 10, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 14, 15, 16,
+        17, 18, 18, 18, 19, 20, 20, 20, 20, 20, 21, 22, 22, 22, 23, 24,
+        25, 25, 26, 26, 27, 27, 28, 28, 28, 29, 29, 30, 30, 31, 31, 32,
+        33, 34, 35, 36, 37, 38, 39, 40, 41, 41, 41, 41, 41, 41, 41, 41,
+        41, 41, 42, 43, 44, 44, 44, 44, 45, 46, 47, 47, 47, 47, 48, 49,
+        50, 50, 50, 50, 51, 51, 52, 52, 53, 53, 54, 54, 54, 55, 55, 56,
+        56, 57, 57, 58, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 68,
+        68, 68, 68, 68, 68, 68, 68, 68, 68, 69, 70, 71, 72, 73, 73, 73,
+        73, 73, 73, 73, 73, 73, 73, 73, 74, 75, 76, 77, 78, 79, 80, 80,
+        80, 81, 82, 82, 82, 83, 84, 84, 84, 85, 86, 86, 86, 87, 88, 88,
+        88, 89, 89, 90, 90, 91, 91, 92, 92, 93, 93,
+    };
+
+    /* Verify that we have the shift correct with the naive counting first */
+    std::size_t naiveCount = 0;
+    for(std::size_t i = 0; i != size; ++i) {
+        if(view[i]) ++naiveCount;
+    }
+
+    /* Set to 1 to generate data for the above table */
+    #if 0
+    if(shift == 0) {
+        Debug d{Debug::Flag::NoNewlineAtTheEnd};
+        if(naiveCount < 10) d << " " << Debug::nospace;
+        d << naiveCount << Debug::nospace << ",";
+        if(size % 16 == 0 || size == 187) d << Debug::newline;
+        else d << Debug::space;
+    }
+    #else
+    CORRADE_FAIL_IF(naiveCount != expected[size - 1],
+        "Naive count" << naiveCount << "expected to be" << expected[size - 1] << "for" << view << "with shift" << shift << "and size" << size);
+    CORRADE_FAIL_IF(view.count() != expected[size - 1],
+        "Count" << view.count() << "expected to be" << expected[size - 1] << "for" << view << "with shift" << shift << "and size" << size);
+    #endif
 }
 
 void BitArrayViewTest::debug() {

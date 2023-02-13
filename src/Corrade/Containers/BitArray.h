@@ -354,6 +354,13 @@ class CORRADE_UTILITY_EXPORT BitArray {
         BitArrayView exceptSuffix(std::size_t size) const; /**< @overload */
 
         /**
+         * @brief Count of set bits
+         *
+         * Equivalent to @ref BasicBitArrayView::count().
+         */
+        std::size_t count() const;
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, offset, size and

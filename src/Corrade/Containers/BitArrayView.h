@@ -34,6 +34,7 @@
 #include <cstddef> /* std::nullptr_t, std::size_t */
 #include <type_traits>
 
+#include "Corrade/Corrade.h"
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/DebugAssert.h"
@@ -196,7 +197,7 @@ template<class T> class BasicBitArrayView {
         /**
          * @brief Size in bits
          *
-         * @see @ref isEmpty(), @ref offset()
+         * @see @ref isEmpty(), @ref offset(), @ref count()
          */
         constexpr std::size_t size() const { return _sizeOffset >> 3; }
 
@@ -317,6 +318,14 @@ template<class T> class BasicBitArrayView {
         BasicBitArrayView<T> exceptSuffix(std::size_t size) const {
             return slice(0, (_sizeOffset >> 3) - size);
         }
+
+        /**
+         * @brief Count of set bits
+         *
+         * Count of unset bits is @ref size() minus the result of this
+         * function.
+         */
+        std::size_t count() const;
 
     private:
         /* Needed for mutable/immutable conversion */
@@ -454,6 +463,17 @@ template<class T> inline BasicBitArrayView<T> BasicBitArrayView<T>::slice(const 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant */
     return BasicBitArrayView<T>{static_cast<T*>(_data) + (((_sizeOffset & 0x07) + begin) >> 3), ((_sizeOffset + begin) & 0x7) | ((end - begin) << 3)};
+}
+
+namespace Implementation {
+
+CORRADE_UTILITY_EXPORT extern std::size_t CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(bitCountSet)(const char* data, std::size_t offset, std::size_t size);
+CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(bitCountSet)
+
+}
+
+template<class T> inline std::size_t BasicBitArrayView<T>::count() const {
+    return Implementation::bitCountSet(static_cast<const char*>(_data), _sizeOffset & 0x07, _sizeOffset >> 3);
 }
 
 }}

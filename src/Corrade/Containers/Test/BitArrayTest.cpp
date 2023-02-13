@@ -61,6 +61,8 @@ struct BitArrayTest: TestSuite::Tester {
 
     template<class T> void slice();
 
+    void count();
+
     void release();
 
     void defaultDeleter();
@@ -154,6 +156,8 @@ BitArrayTest::BitArrayTest() {
 
               &BitArrayTest::slice<const BitArray>,
               &BitArrayTest::slice<BitArray>,
+
+              &BitArrayTest::count,
 
               &BitArrayTest::release,
 
@@ -505,6 +509,15 @@ template<class T> void BitArrayTest::slice() {
         CORRADE_COMPARE(slice.offset(), 6);
         CORRADE_COMPARE(slice.size(), 41);
     }
+}
+
+void BitArrayTest::count() {
+    /* A single case from BitArrayViewTest::countBitPattern(), just to verify
+       that all data including bit offset are passed through to the underlying
+       API */
+    std::uint64_t data = 0xa55cc33f00f00ffull << 7;
+    BitArray a{&data, 7, 56, [](char*, std::size_t) {}};
+    CORRADE_COMPARE(a.count(), 28);
 }
 
 void BitArrayTest::release() {

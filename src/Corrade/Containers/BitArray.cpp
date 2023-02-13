@@ -145,6 +145,10 @@ BitArrayView BitArray::exceptSuffix(const std::size_t size) const {
     return BitArrayView{*this}.exceptSuffix(size);
 }
 
+std::size_t BitArray::count() const {
+    return BitArrayView{*this}.count();
+}
+
 Utility::Debug& operator<<(Utility::Debug& debug, const BitArray& value) {
     return operator<<(debug, BitArrayView{value});
 }
