@@ -368,7 +368,7 @@ for(Foo& f: e) new(&f) Foo{index++};
 
 {
 /* [arrayAllocatorCast] */
-Containers::Array<char> data;
+Containers::Array<char> data = DOXYGEN_ELLIPSIS({});
 Containers::Array<float> floats =
     Containers::arrayAllocatorCast<float>(std::move(data));
 arrayAppend(floats, 37.0f);

@@ -2851,11 +2851,15 @@ void GrowableArrayTest::cast() {
 }
 
 void GrowableArrayTest::castEmpty() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
     Array<char> a;
 
-    /* Shouldn't complain about any allocator, we're empty anyway */
-    auto b = arrayAllocatorCast<std::uint16_t>(Utility::move(a));
-    CORRADE_COMPARE(b.size(), 0);
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayAllocatorCast<std::uint16_t>(Utility::move(a));
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
 }
 
 void GrowableArrayTest::castNonTrivial() {

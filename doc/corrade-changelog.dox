@@ -709,6 +709,12 @@ namespace Corrade {
     an @cpp operator[]() @ce instead of relying on implicit pointer
     conversions. Code that previously inadvertently made out-of-bound access
     will now assert in debug builds.
+-   @ref Containers::arrayAllocatorCast() used to be allowed on
+    @cpp nullptr @ce @ref Containers::Array instances regardless of their
+    allocator but attempting to query capacity of such array or do any growable
+    operation on it then resulted in a crash. It's now checked by an assert,
+    which may cause breakages in existing code that attempted to call this API
+    on default-constructed or empty arrays.
 -   @ref Containers::LinkedList destruction was changed in a way that makes
     @ref Containers::LinkedListItem::list() still accessible in a destructor
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make
