@@ -127,6 +127,10 @@ void EnumSetTest::construct() {
 }
 
 void EnumSetTest::constructNoInit() {
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 11 && __OPTIMIZE__
+    CORRADE_SKIP("GCC 11+ is stupid and I can't suppress the -W[maybe-]uninitialized warnings in order to test this, skipping to achieve build log silence");
+    #endif
+
     {
         Features features{Feature::Tested};
         new(&features)Features{};

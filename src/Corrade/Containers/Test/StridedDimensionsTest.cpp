@@ -150,6 +150,10 @@ void StridedDimensionsTest::construct3D() {
 }
 
 void StridedDimensionsTest::constructNoInit() {
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 11 && __OPTIMIZE__
+    CORRADE_SKIP("GCC 11+ is stupid and I can't suppress the -W[maybe-]uninitialized warnings in order to test this, skipping to achieve build log silence");
+    #endif
+
     Size3D a{1, 37, 4564};
 
     /* GCC 11 misoptimizes only if I don't expect it, so I have to check every

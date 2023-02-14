@@ -648,7 +648,17 @@ struct alignas(16) StatefulAlignedNonTriviallyDestructibleDeleter {
     }
 
     ~StatefulAlignedNonTriviallyDestructibleDeleter() {
+        /* I'm seriously tired of this crap warning already. I DO NOT see any
+           way where this would be "used uninitialized". Fuck off, "helpful"
+           GCC warnings. Happens since GCC 11 at least. */
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 11 && __OPTIMIZE__
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wuninitialized"
+        #endif
         ++*_destructorCallCount;
+        #if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 11 && __OPTIMIZE__
+        #pragma GCC diagnostic pop
+        #endif
     }
 
     private:
