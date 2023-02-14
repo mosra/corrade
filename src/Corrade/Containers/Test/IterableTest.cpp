@@ -419,9 +419,16 @@ void IterableTest::initializerList() {
 }
 
 void IterableTest::initializerListReference() {
+    #ifdef CORRADE_TARGET_CLANG
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-member-function"
+    #endif
     struct NonCopyable {
         explicit NonCopyable(int a): a{a} {}
 
+        /* These are defined to make it clear the struct is not copyable, but
+           aren't used at all. Thus suppress Clang warnings as they aren't
+           helping. */
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable(NonCopyable&&) = default;
         NonCopyable& operator=(const NonCopyable&) = delete;
@@ -429,6 +436,9 @@ void IterableTest::initializerListReference() {
 
         int a;
     };
+    #ifdef CORRADE_TARGET_CLANG
+    #pragma GCC diagnostic pop
+    #endif
 
     /* Capture correct function name */
     CORRADE_VERIFY(true);
