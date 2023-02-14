@@ -30,6 +30,7 @@
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/Test/BitArrayViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
@@ -61,6 +62,8 @@ struct BitArrayViewTest: TestSuite::Tester {
     void access();
     void accessMutableSet();
     void accessMutableReset();
+    void accessMutableSetAll();
+    void accessMutableResetAll();
     void accessInvalid();
 
     void slice();
@@ -163,7 +166,9 @@ BitArrayViewTest::BitArrayViewTest() {
                        &BitArrayViewTest::accessMutableReset},
         Containers::arraySize(AccessMutableData));
 
-    addTests({&BitArrayViewTest::accessInvalid,
+    addTests({&BitArrayViewTest::accessMutableSetAll,
+              &BitArrayViewTest::accessMutableResetAll,
+              &BitArrayViewTest::accessInvalid,
 
               &BitArrayViewTest::slice,
               &BitArrayViewTest::sliceInvalid});
@@ -462,6 +467,120 @@ void BitArrayViewTest::accessMutableReset() {
     b.set(data.bit, false);
     CORRADE_COMPARE(valueA[1], data.expectedReset);
     CORRADE_COMPARE(valueB[1], data.expectedReset);
+}
+
+void BitArrayViewTest::accessMutableSetAll() {
+    /* Empty view with an offset */
+    {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 5, 0}.setAll();
+        CORRADE_COMPARE(a, 0x0000000000000000ull);
+
+    /* One aligned byte */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 0, 8}.setAll();
+        CORRADE_COMPARE(a, 0x00000000ff000000ull);
+
+    /* Less than a byte with initial offset */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 2, 6}.setAll();
+        CORRADE_COMPARE(a, 0x0000000fc000000ull);
+
+    /* Less than a byte with final offset */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 0, 6}.setAll();
+        CORRADE_COMPARE(a, 0x00000003f000000ull);
+
+    /* Less than a byte with both initial and final offset */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 3, 2}.setAll();
+        CORRADE_COMPARE(a, 0x000000018000000ull);
+
+    /* Two aligned bytes */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 2, 0, 16}.setAll();
+        CORRADE_COMPARE(a, 0x00000000ffff0000ull);
+
+    /* Two bytes with initial and final offsets */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 2, 3, 10}.setAll();
+        CORRADE_COMPARE(a, 0x000000001ff80000ull);
+
+    /* Five bytes with initial and final offsets */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 1, 1, 38}.setAll();
+        CORRADE_COMPARE(a, 0x00007ffffffffe00ull);
+
+    /* Same as above, with a boolean argument */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 1, 1, 38}.setAll(true);
+        CORRADE_COMPARE(a, 0x00007ffffffffe00ull);
+    }
+}
+
+void BitArrayViewTest::accessMutableResetAll() {
+    /* Empty view with an offset */
+    {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 5, 0}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffffffffffffull);
+
+    /* One aligned byte */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 0, 8}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffff00ffffffull);
+
+    /* Less than a byte with initial offset */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 2, 6}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffff03ffffffull);
+
+    /* Less than a byte with final offset */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 0, 6}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffffc0ffffffull);
+
+    /* Less than a byte with both initial and final offset */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 3, 3, 2}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffffe7ffffffull);
+
+    /* Two aligned bytes */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 2, 0, 16}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffff0000ffffull);
+
+    /* Two bytes with initial and final offsets */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 2, 3, 10}.resetAll();
+        CORRADE_COMPARE(a, 0xffffffffe007ffffull);
+
+    /* Five bytes with initial and final offsets */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 1, 1, 38}.resetAll();
+        CORRADE_COMPARE(a, 0xffff8000000001ffull);
+
+    /* Same as above, with a boolean argument */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        MutableBitArrayView{reinterpret_cast<char*>(&a) + 1, 1, 38}.setAll(false);
+        CORRADE_COMPARE(a, 0xffff8000000001ffull);
+    }
 }
 
 void BitArrayViewTest::accessInvalid() {

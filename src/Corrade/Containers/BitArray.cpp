@@ -103,6 +103,14 @@ BitArray::operator BitArrayView() const {
     return BitArrayView{_data, _sizeOffset};
 }
 
+void BitArray::setAll() {
+    MutableBitArrayView{*this}.setAll();
+}
+
+void BitArray::resetAll() {
+    MutableBitArrayView{*this}.resetAll();
+}
+
 MutableBitArrayView BitArray::slice(const std::size_t begin, const std::size_t end) {
     return MutableBitArrayView{*this}.slice(begin, end);
 }

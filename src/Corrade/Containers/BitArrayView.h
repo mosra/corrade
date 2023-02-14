@@ -223,7 +223,7 @@ template<class T> class BasicBitArrayView {
          * Expects that @p i is less than @ref size(). Enabled only on a
          * @ref MutableBitArrayView.
          * @see @ref operator[](), @ref reset(),
-         *      @ref set(std::size_t, bool) const
+         *      @ref set(std::size_t, bool) const, @ref setAll()
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
@@ -231,16 +231,41 @@ template<class T> class BasicBitArrayView {
         void set(std::size_t i) const;
 
         /**
+         * @brief Set all bits
+         *
+         * Enabled only on a @ref MutableBitArrayView. You can set just a range
+         * of bits by making a @ref slice() first.
+         * @see @ref resetAll(), @ref setAll(bool) const,
+         *      @ref set(std::size_t) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void setAll() const;
+
+        /**
          * @brief Reset a bit at given position
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
          * @ref MutableBitArrayView.
-         * @see @ref operator[](), @ref set()
+         * @see @ref operator[](), @ref set(), @ref resetAll()
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
         void reset(std::size_t i) const;
+
+        /**
+         * @brief Reset all bits
+         *
+         * Enabled only on a @ref MutableBitArrayView. You can set just a range
+         * of bits by making a @ref slice() first.
+         * @see @ref setAll(), @ref reset(std::size_t) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void resetAll() const;
 
         /**
          * @brief Set or reset a bit at given position
@@ -249,12 +274,26 @@ template<class T> class BasicBitArrayView {
          * @ref MutableBitArrayView. For a @p value known at compile time,
          * explicitly calling either @ref set(std::size_t) const or
          * @ref reset(std::size_t) const is a simpler operation.
-         * @see @ref operator[]()
+         * @see @ref operator[](), @ref setAll(bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
         void set(std::size_t i, bool value) const;
+
+        /**
+         * @brief Set or reset all bits
+         *
+         * Enabled only on a @ref MutableBitArrayView. Calls either
+         * @ref setAll() const or @ref resetAll() const based on @p value. You
+         * can set or reset just a range of bits by making a @ref slice()
+         * first.
+         * @see @ref set(std::size_t, bool) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void setAll(bool value) const { value ? setAll() : resetAll(); }
 
         /**
          * @brief View slice

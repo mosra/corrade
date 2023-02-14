@@ -57,6 +57,8 @@ struct BitArrayTest: TestSuite::Tester {
     void access();
     void accessMutableSet();
     void accessMutableReset();
+    void accessMutableSetAll();
+    void accessMutableResetAll();
     void accessInvalid();
 
     template<class T> void slice();
@@ -152,7 +154,9 @@ BitArrayTest::BitArrayTest() {
                        &BitArrayTest::accessMutableReset},
         Containers::arraySize(AccessMutableData));
 
-    addTests({&BitArrayTest::accessInvalid,
+    addTests({&BitArrayTest::accessMutableSetAll,
+              &BitArrayTest::accessMutableResetAll,
+              &BitArrayTest::accessInvalid,
 
               &BitArrayTest::slice<const BitArray>,
               &BitArrayTest::slice<BitArray>,
@@ -449,6 +453,40 @@ void BitArrayTest::accessMutableReset() {
     b.set(data.bit, false);
     CORRADE_COMPARE(valueA[0], data.expectedReset);
     CORRADE_COMPARE(valueB[0], data.expectedReset);
+}
+
+void BitArrayTest::accessMutableSetAll() {
+    /* A single case from BitArrayViewTest::accessMutableSetAll(), just to
+       verify that all data including bit offset are passed through to the
+       underlying API */
+    {
+        std::uint64_t a = 0x0000000000000000ull;
+        BitArray{reinterpret_cast<char*>(&a) + 1, 1, 38, [](char*, std::size_t) {}}.setAll();
+        CORRADE_COMPARE(a, 0x00007ffffffffe00ull);
+
+    /* Same as above, with a boolean argument */
+    } {
+        std::uint64_t a = 0x0000000000000000ull;
+        BitArray{reinterpret_cast<char*>(&a) + 1, 1, 38, [](char*, std::size_t) {}}.setAll(true);
+        CORRADE_COMPARE(a, 0x00007ffffffffe00ull);
+    }
+}
+
+void BitArrayTest::accessMutableResetAll() {
+    /* A single case from BitArrayViewTest::accessMutableSetAll(), just to
+       verify that all data including bit offset are passed through to the
+       underlying API */
+    {
+        std::uint64_t a = 0xffffffffffffffffull;
+        BitArray{reinterpret_cast<char*>(&a) + 1, 1, 38, [](char*, std::size_t) {}}.resetAll();
+        CORRADE_COMPARE(a, 0xffff8000000001ffull);
+
+    /* Same as above, with a boolean argument */
+    } {
+        std::uint64_t a = 0xffffffffffffffffull;
+        BitArray{reinterpret_cast<char*>(&a) + 1, 1, 38, [](char*, std::size_t) {}}.setAll(false);
+        CORRADE_COMPARE(a, 0xffff8000000001ffull);
+    }
 }
 
 void BitArrayTest::accessInvalid() {

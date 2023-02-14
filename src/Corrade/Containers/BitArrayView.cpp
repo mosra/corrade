@@ -27,6 +27,7 @@
 #include "BitArrayView.h"
 
 #include <cstdint>
+#include <cstring>
 
 #include "Corrade/Cpu.h"
 #include "Corrade/Utility/Debug.h"
@@ -36,6 +37,88 @@
 #include "Corrade/Utility/Math.h"
 
 namespace Corrade { namespace Containers {
+
+/* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
+   needs an explicit export otherwise the symbol doesn't get exported. */
+template<> template<> CORRADE_UTILITY_EXPORT void BasicBitArrayView<char>::setAll() const {
+    /* If there are no bits to go through, bail. Otherwise the code touches at
+       least one byte. */
+    const std::size_t size = _sizeOffset >> 3;
+    if(!size)
+        return;
+
+    std::uint8_t* const data = static_cast<std::uint8_t*>(_data);
+
+    const std::size_t bitOffset = _sizeOffset & 0x07;
+    const std::size_t bitEndOffset = bitOffset + size;
+    /* All bits before `bitOffset` are 0, with `bitOffset == 0` this is 0xff */
+    const std::uint8_t initialMask = ~((1 << bitOffset) - 1);
+    /* All bits after `bitEndOffset % 7` are 0, with `bitEndOffset % 7 == 0`
+       this is 0xff */
+    /** @todo branch is ew! */
+    const std::uint8_t finalMask = bitEndOffset & 0x07 ? (1ull << (bitEndOffset & 0x07)) - 1 : 0xff;
+
+    /* A special case for when there's just one byte to modify, in which case
+       we have to mask out both the initial and the final offset */
+    if(bitEndOffset <= 8) {
+        /* Keep bits before `bitOffset` and after `bitEndOffset`, set
+           everything in between to 1 */
+        data[0] |= initialMask & finalMask;
+        return;
+    }
+
+    /* Keep bits before `bitOffset`, set everything after to 1 */
+    data[0] |= initialMask;
+
+    /* Last, potentially partial byte that we have to modify. Everything before
+       is full bytes, for which we can efficiently use memset(). */
+    const std::size_t lastByteOffset = (bitEndOffset - 1) >> 3;
+    std::memset(data + 1, '\xff', lastByteOffset - 1);
+
+    /* Keep bits after `bitEndOffset`, set everything before to 1 */
+    data[lastByteOffset] |= finalMask;
+}
+
+/* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
+   needs an explicit export otherwise the symbol doesn't get exported. */
+template<> template<> CORRADE_UTILITY_EXPORT void BasicBitArrayView<char>::resetAll() const {
+    /* If there are no bits to go through, bail. Otherwise the code touches at
+       least one byte. */
+    const std::size_t size = _sizeOffset >> 3;
+    if(!size)
+        return;
+
+    char* const data = static_cast<char*>(_data);
+
+    const std::size_t bitOffset = _sizeOffset & 0x07;
+    const std::size_t bitEndOffset = bitOffset + size;
+    /* All bits after `bitOffset` are 0, with `bitOffset == 0` this is 0 */
+    const std::uint8_t initialMask = (1ull << bitOffset) - 1;
+    /* All bits before `bitEndOffset % 7` are 0, with `bitEndOffset % 7 == 0`
+       this is 0 */
+    /** @todo branch is ew! */
+    const std::size_t finalMask = bitEndOffset & 0x07 ? ~((1ull << (bitEndOffset & 0x07)) - 1) : 0x00;
+
+    /* A special case for when there's just one byte to modify, in which case
+       we have to mask out both the initial and the final offset */
+    if(bitEndOffset <= 8) {
+        /* Keep bits before `bitOffset` and after `bitEndOffset`, zero-out
+           everything in between */
+        data[0] &= initialMask | finalMask;
+        return;
+    }
+
+    /* Keep bits before `bitOffset`, zero-out everything after */
+    data[0] &= initialMask;
+
+    /* Last, potentially partial byte that we have to modify. Everything before
+       is full bytes, for which we can efficiently use memset(). */
+    const std::size_t lastByteOffset = (bitEndOffset - 1) >> 3;
+    std::memset(data + 1, '\x00', lastByteOffset - 1);
+
+    /* Keep bits after `bitEndOffset`, zero-out everything before */
+    data[lastByteOffset] &= finalMask;
+}
 
 namespace Implementation {
 

@@ -24,9 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstring>
 #include <bitset>
 
 #include "Corrade/Cpu.h"
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/Test/BitArrayViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -42,6 +44,17 @@ struct BitArrayViewBenchmark: TestSuite::Tester {
 
     void captureImplementations();
     void restoreImplementations();
+
+    void setAllUnaligned8();
+    void resetAllUnaligned8();
+    void setAllUnaligned16();
+    void resetAllUnaligned16();
+    void setAllByteAligned1024();
+    void resetAllByteAligned1024();
+    void setAllNaive16();
+    void resetAllNaive16();
+    void setAllByteAlignedMemset1024();
+    void resetAllByteAlignedMemset1024();
 
     void countLessThan64();
     void countAligned64();
@@ -74,6 +87,17 @@ const struct {
 };
 
 BitArrayViewBenchmark::BitArrayViewBenchmark() {
+    addBenchmarks({&BitArrayViewBenchmark::setAllUnaligned8,
+                   &BitArrayViewBenchmark::resetAllUnaligned8,
+                   &BitArrayViewBenchmark::setAllUnaligned16,
+                   &BitArrayViewBenchmark::resetAllUnaligned16,
+                   &BitArrayViewBenchmark::setAllByteAligned1024,
+                   &BitArrayViewBenchmark::resetAllByteAligned1024,
+                   &BitArrayViewBenchmark::setAllNaive16,
+                   &BitArrayViewBenchmark::resetAllNaive16,
+                   &BitArrayViewBenchmark::setAllByteAlignedMemset1024,
+                   &BitArrayViewBenchmark::resetAllByteAlignedMemset1024}, 100);
+
     addInstancedBenchmarks({&BitArrayViewBenchmark::countLessThan64,
                             &BitArrayViewBenchmark::countAligned64,
                             &BitArrayViewBenchmark::countUnaligned128,
@@ -97,6 +121,224 @@ void BitArrayViewBenchmark::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     Implementation::bitCountSet = bitCountSetImplementation;
     #endif
+}
+
+constexpr std::size_t SetRepeats = 256;
+
+void BitArrayViewBenchmark::setAllUnaligned8() {
+    std::uint64_t bits[]{
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*8 + 2, 5).setAll();
+    }
+
+    /* Out of every 8 bits there's 5 set */
+    CORRADE_COMPARE(view.count(), SetRepeats*5);
+}
+
+void BitArrayViewBenchmark::resetAllUnaligned8() {
+    std::uint64_t bits[]{
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*8 + 2, 5).resetAll();
+    }
+
+    /* Out of every 8 bits there's 5 unset */
+    CORRADE_COMPARE(view.count(), SetRepeats*3);
+}
+
+void BitArrayViewBenchmark::setAllUnaligned16() {
+    std::uint64_t bits[]{
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*16 + 3, 11).setAll();
+    }
+
+    /* Out of every 16 bits there's 11 set */
+    CORRADE_COMPARE(view.count(), SetRepeats*11);
+}
+
+void BitArrayViewBenchmark::resetAllUnaligned16() {
+    std::uint64_t bits[]{
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*16 + 3, 11).resetAll();
+    }
+
+    /* Out of every 16 bits there's 11 unset */
+    CORRADE_COMPARE(view.count(), SetRepeats*5);
+}
+
+void BitArrayViewBenchmark::setAllByteAligned1024() {
+    std::uint64_t bits[]{
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*8, 1024).setAll();
+    }
+
+    /* Only the last byte stays unset */
+    CORRADE_COMPARE(view.count(), arraySize(bits)*64 - 8);
+}
+
+void BitArrayViewBenchmark::resetAllByteAligned1024() {
+    std::uint64_t bits[]{
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        view.sliceSize((i++)*8, 1024).resetAll();
+    }
+
+    /* Only the last byte stays set */
+    CORRADE_COMPARE(view.count(), 8);
+}
+
+void BitArrayViewBenchmark::setAllNaive16() {
+    std::uint64_t bits[]{
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        Containers::MutableBitArrayView slice = view.sliceSize((i++)*16 + 3, 11);
+        for(std::size_t j = 0; j != slice.size(); ++j)
+            slice.set(j);
+    }
+
+    /* Out of every 16 bits there's 11 set */
+    CORRADE_COMPARE(view.count(), SetRepeats*11);
+}
+
+void BitArrayViewBenchmark::resetAllNaive16() {
+    std::uint64_t bits[]{
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        Containers::MutableBitArrayView slice = view.sliceSize((i++)*16 + 3, 11);
+        for(std::size_t j = 0; j != slice.size(); ++j)
+            slice.reset(j);
+    }
+
+    /* Out of every 16 bits there's 11 unset */
+    CORRADE_COMPARE(view.count(), SetRepeats*5);
+}
+
+CORRADE_NEVER_INLINE void memsetSetAll(void* memory, std::size_t size) {
+    std::memset(memory, '\xff', size);
+}
+
+void BitArrayViewBenchmark::setAllByteAlignedMemset1024() {
+    std::uint64_t bits[]{
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull,
+        0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull, 0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        memsetSetAll(reinterpret_cast<char*>(bits) + i++, 128);
+    }
+
+    /* Only the last byte stays unset */
+    CORRADE_COMPARE(view.count(), arraySize(bits)*64 - 8);
+}
+
+CORRADE_NEVER_INLINE void memsetResetAll(void* memory, std::size_t size) {
+    std::memset(memory, '\x00', size);
+}
+
+void BitArrayViewBenchmark::resetAllByteAlignedMemset1024() {
+    std::uint64_t bits[]{
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull,
+        ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull, ~0ull
+    };
+    Containers::MutableBitArrayView view{bits};
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(SetRepeats) {
+        memsetResetAll(reinterpret_cast<char*>(bits) + i++, 128);
+    }
+
+    /* Only the last byte stays set */
+    CORRADE_COMPARE(view.count(), 8);
 }
 
 constexpr std::size_t CountRepeats = 100;

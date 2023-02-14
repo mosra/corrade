@@ -283,17 +283,34 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @brief Set a bit at given position
          *
          * Expects that @p i is less than @ref size().
-         * @see @ref operator[](), @ref reset(), @ref set(std::size_t, bool)
+         * @see @ref operator[](), @ref reset(), @ref set(std::size_t, bool),
+         *      @ref setAll()
          */
         void set(std::size_t i);
+
+        /**
+         * @brief Set all bits
+         *
+         * You can set just a range of bits by making a @ref slice() first.
+         * @see @ref resetAll(), @ref setAll(bool), @ref set(std::size_t)
+         */
+        void setAll();
 
         /**
          * @brief Reset a bit at given position
          *
          * Expects that @p i is less than @ref size().
-         * @see @ref operator[](), @ref set()
+         * @see @ref operator[](), @ref set(), @ref resetAll()
          */
         void reset(std::size_t i);
+
+        /**
+         * @brief Reset all bits
+         *
+         * You can set just a range of bits by making a @ref slice() first.
+         * @see @ref setAll(), @ref reset(std::size_t)
+         */
+        void resetAll();
 
         /**
          * @brief Set or reset a bit at given position
@@ -304,6 +321,16 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @see @ref operator[]()
          */
         void set(std::size_t i, bool value);
+
+        /**
+         * @brief Set or reset all bits
+         *
+         * Calls either @ref setAll() or @ref resetAll() based on @p value. You
+         * can set or reset just a range of bits by making a @ref slice()
+         * first.
+         * @see @ref set(std::size_t, bool)
+         */
+        void setAll(bool value) { value ? setAll() : resetAll(); }
 
         /**
          * @brief View on a slice
