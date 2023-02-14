@@ -608,6 +608,16 @@ void PointerTest::moveConstructPlainStruct() {
     CORRADE_COMPARE(a->a, 4);
 }
 
+/* GCC 11 adds -Wfree-nonheap-object, which then complains that "void operator
+   delete(void*) called on a pointer to an unallocated object 3735928559" which
+   is extremely silly, given it would happen only if we threw an exception
+   before the release() call, which we don't. The suppression has to be outside
+   of the function as otherwise it doesn't work at all. I don't like your
+   "helpful" warnings, GCC, shut up. */
+#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 11 && __OPTIMIZE__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+#endif
 void PointerTest::debug() {
     std::stringstream out;
     std::intptr_t a = 0xdeadbeef;
@@ -616,6 +626,9 @@ void PointerTest::debug() {
     aptr.release();
     CORRADE_COMPARE(out.str(), "0xdeadbeef 0x0 nullptr\n");
 }
+#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 11 && __OPTIMIZE__
+#pragma GCC diagnostic pop
+#endif
 
 }}}}
 
