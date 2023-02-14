@@ -353,6 +353,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
+-   The library now uses `-fno-strict-aliasing` on GCC and contains this flag
+    also in the `CORRADE_PEDANTIC_COMPILER_OPTIONS` @ref corrade-cmake "CMake variable".
+    Strict aliasing was disabled for the Magnum library since 2013 already,
+    this change just brings it to all Magnum-related projects and makes it
+    public.
 -   The oldest supported Clang version is now 6.0 (available on Ubuntu 18.04),
     or equivalently Apple Clang 10.0 (Xcode 10). Oldest supported GCC version
     is still 4.8.

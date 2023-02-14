@@ -115,7 +115,17 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         # by different translation units being compiled with different
         # visibility settings." See also various google results for the above
         # message.
-        "-fvisibility=hidden" "-fvisibility-inlines-hidden")
+        "-fvisibility=hidden" "-fvisibility-inlines-hidden"
+        # A lot of functionality relies on aliased pointers, such as the whole
+        # StridedArrayView. Given numerous other libraries including stb_image
+        # *and the Linux kernel itself* disable this as well, I see no reason
+        # for needless suffering either. I don't remember strict aliasing to
+        # ever help with optimizing anything, plus it was disabled for the
+        # whole of Magnum since December 2013 already:
+        #   https://github.com/mosra/magnum/commit/f373b6518e0b1fa3e4d0ffb19f77e80a8a56484c
+        # So let's just make it official and disable it for everything,
+        # everywhere, forever.
+        "-fno-strict-aliasing")
 
     # Some flags are not yet supported everywhere
     # TODO: do this with check_c_compiler_flags()
