@@ -275,7 +275,7 @@ auto Debug::color(Color color) -> Modifier {
         #undef _c
     }
 
-    return [](Debug&) {}; /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 auto Debug::boldColor(Color color) -> Modifier {
@@ -297,7 +297,7 @@ auto Debug::boldColor(Color color) -> Modifier {
         #undef _c
     }
 
-    return [](Debug&) {}; /* LCOV_EXCL_LINE */
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 void Debug::resetColor(Debug& debug) {
