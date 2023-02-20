@@ -44,6 +44,33 @@ namespace Corrade { namespace TestSuite {
 namespace Compare {
 
 /**
+@brief Pseudo-type for comparing two strings
+@m_since_latest
+
+Compares the two strings, printing a line-by-line difference in case they are
+not the same. Example usage and a potential output:
+
+@m_class{m-code-figure}
+
+@parblock
+
+@snippet testsuite-compare-string.cpp 0
+
+<b></b>
+
+@m_class{m-nopad m-console-wrap}
+
+@include testsuite-compare-string.ansi
+
+@endparblock
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+@see @ref StringHasPrefix, @ref StringHasSuffix, @ref StringContains,
+    @ref StringNotContains
+*/
+class String {};
+
+/**
 @brief Pseudo-type for verifying that a string has given prefix
 @m_since_latest
 
@@ -57,7 +84,8 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringHasSuffix, @ref StringContains, @ref StringNotContains
+@see @ref StringHasSuffix, @ref StringContains, @ref StringNotContains,
+    @ref String
 */
 class StringHasPrefix {};
 
@@ -75,7 +103,8 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringHasPrefix, @ref StringContains, @ref StringNotContains
+@see @ref StringHasPrefix, @ref StringContains, @ref StringNotContains,
+    @ref String
 */
 class StringHasSuffix {};
 
@@ -93,7 +122,8 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringNotContains, @ref StringHasPrefix, @ref StringHasSuffix
+@see @ref StringNotContains, @ref StringHasPrefix, @ref StringHasSuffix,
+    @ref String
 */
 class StringContains {};
 
@@ -111,13 +141,25 @@ If the `--verbose` @ref TestSuite-Tester-command-line "command-line option" is
 specified, passed comparisons where the strings are different will print an
 @cb{.ansi} [1;39mINFO @ce message with the full string content for detailed
 inspection.
-@see @ref StringContains, @ref StringHasPrefix, @ref StringHasSuffix
+@see @ref StringContains, @ref StringHasPrefix, @ref StringHasSuffix,
+    @ref String
 */
 class StringNotContains {};
 
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::String> {
+    public:
+        ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expected);
+
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
+
+    private:
+        Containers::StringView _actualValue;
+        Containers::StringView _expectedValue;
+};
+
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringHasPrefix> {
     public:
         ComparisonStatusFlags operator()(Containers::StringView actual, Containers::StringView expectedPrefix);

@@ -138,6 +138,7 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-benchmark ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-benchmark-custom.cpp)
     add_executable(testsuite-description-source-location ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-description-source-location.cpp)
+    add_executable(testsuite-compare-string ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} testsuite-compare-string.cpp)
 
     target_link_libraries(testsuite-basic PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-templated PUBLIC CorradeTestSuite)
@@ -148,6 +149,7 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     target_link_libraries(testsuite-benchmark PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-benchmark-custom PUBLIC CorradeTestSuite)
     target_link_libraries(testsuite-description-source-location PUBLIC CorradeTestSuite)
+    target_link_libraries(testsuite-compare-string PUBLIC CorradeTestSuite)
 
     if(CORRADE_TARGET_EMSCRIPTEN)
         # Wasn't a problem for Emscripten <= 2.0.13 and isn't a problem for
@@ -163,6 +165,7 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
             testsuite-benchmark
             testsuite-benchmark-custom
             testsuite-description-source-location
+            testsuite-compare-string
             APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
     endif()
 
@@ -176,7 +179,8 @@ if(CORRADE_WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
             testsuite-iteration
             testsuite-benchmark
             testsuite-benchmark-custom
-            testsuite-description-source-location)
+            testsuite-description-source-location
+            testsuite-compare-string)
     endif()
 endif()
 

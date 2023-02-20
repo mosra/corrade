@@ -1,0 +1,11 @@
+[0;1;39mStarting ChatbotTest with 1 test cases...[0m
+[0;1;31m  FAIL[0;34m [[0;1;36m1[0;34m][0;1;39m greeting()[0m at …/testsuite-compare-string.cpp:57
+        Strings chatbot.greet() and "Hello!\n" "I'm Marvin.\n" "I'm here to answer your questions.\n" "Let's get started." are different.[0;32m Actual (+)[0m vs[0;31m expected (-)[0m:
+        Hello!
+        I'm Marvin.
+[0;31m       -I'm here to answer your questions.[0m
+[0;32m       +I'm here to question your answers.[0m
+        Let's get started.
+[0;32m       +You're not here to tell me what to do.[0m
+[0;32m       +I am.[0m
+[0;1;39mFinished ChatbotTest with[0;1;31m 1 errors[0;1;39m out of 1 checks.[0m

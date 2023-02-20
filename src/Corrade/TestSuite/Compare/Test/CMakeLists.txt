@@ -40,6 +40,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 corrade_add_test(TestSuiteCompareContainerTest ContainerTest.cpp)
+corrade_add_test(TestSuiteCompareDiffTest DiffTest.cpp)
 corrade_add_test(TestSuiteCompareSortedContainerTest SortedContainerTest.cpp)
 corrade_add_test(TestSuiteCompareFileTest FileTest.cpp
     FILES

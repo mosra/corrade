@@ -26,7 +26,56 @@
 
 #include "String.h"
 
+#include "Implementation/Diff.h"
+
 namespace Corrade { namespace TestSuite {
+
+ComparisonStatusFlags Comparator<Compare::String>::operator()(const Containers::StringView actual, const Containers::StringView expected) {
+    _actualValue = actual;
+    _expectedValue = expected;
+    return actual != expected ? ComparisonStatusFlag::Failed : ComparisonStatusFlags{};
+}
+
+void Comparator<Compare::String>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    CORRADE_INTERNAL_ASSERT(flags == ComparisonStatusFlag::Failed);
+
+    out << "Strings" << actual << "and" << expected << "are different."
+        << Utility::Debug::color(Utility::Debug::Color::Green) << "Actual (+)"
+        << Utility::Debug::resetColor << "vs"
+        << Utility::Debug::color(Utility::Debug::Color::Red) << "expected (-)"
+        << Utility::Debug::resetColor << Utility::Debug::nospace << ":";
+
+    /* Split into lines, pass that to the diff algorithm */
+    const Containers::Array<Containers::StringView> actualLines = _actualValue.split('\n');
+    const Containers::Array<Containers::StringView> expectedLines = _expectedValue.split('\n');
+
+    /* Calculate a set of longest matching slices */
+    Containers::Array<Containers::Triple<std::size_t, std::size_t, std::size_t>> slices;
+    Compare::Implementation::matchingSlicesInto(slices, stridedArrayView(actualLines), 0, stridedArrayView(expectedLines), 0);
+
+    /* Include an empty zero-length slice at the end in order to have the rest
+       after the last matching slice printed as well */
+    arrayAppend(slices, InPlaceInit, actualLines.size(), expectedLines.size(), std::size_t{});
+
+    /* Print everything */
+    std::size_t actualI = 0;
+    std::size_t expectedI = 0;
+    for(const Containers::Triple<std::size_t, std::size_t, std::size_t>& slice: slices) {
+        /* All lines from `expected` after the previous matching slice and
+           before the current matching slice are marked as deleted */
+        for(const Containers::StringView& i: expectedLines.slice(expectedI, slice.second()))
+            out << Utility::Debug::newline << Utility::Debug::color(Utility::Debug::Color::Red) << "       -" << Utility::Debug::nospace << i << Utility::Debug::resetColor;
+        /* All lines from `actual` after the previous matching slice and before
+           the current matching slice are marked as added */
+        for(const Containers::StringView& i: actualLines.slice(actualI, slice.first()))
+            out << Utility::Debug::newline << Utility::Debug::color(Utility::Debug::Color::Green) << "       +" << Utility::Debug::nospace << i << Utility::Debug::resetColor;
+        /* The matching slice is not marked in any way */
+        for(const Containers::StringView& i: actualLines.sliceSize(slice.first(), slice.third()))
+            out << Utility::Debug::newline << "        " << Utility::Debug::nospace << i;
+        actualI = slice.first() + slice.third();
+        expectedI = slice.second() + slice.third();
+    }
+}
 
 ComparisonStatusFlags Comparator<Compare::StringHasPrefix>::operator()(const Containers::StringView actual, const Containers::StringView expectedPrefix) {
     _actualValue = actual;

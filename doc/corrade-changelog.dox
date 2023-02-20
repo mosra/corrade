@@ -137,6 +137,8 @@ namespace Corrade {
     testing
 -   New @ref TestSuite::Compare::NotEqual comparator to provide an alternative
     to @cpp CORRADE_VERIFY(a != b) @ce with a better failure diagnostic
+-   New @ref TestSuite::Compare::String comparator that prints a colored
+    line diff on failure (see also [mosra/corrade#38](https://github.com/mosra/corrade/pull/38))
 -   New @ref TestSuite::Compare::StringHasPrefix,
     @relativeref{TestSuite::Compare,StringHasSuffix},
     @relativeref{TestSuite::Compare,StringContains} and

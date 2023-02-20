@@ -35,6 +35,10 @@ namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { n
 struct StringTest: TestSuite::Tester {
     explicit StringTest();
 
+    void diff();
+    void diffMessageFailed();
+    void diffMessageFailedReverse();
+
     void hasPrefix();
     void hasPrefixMessageFailed();
     void hasPrefixMessageVerbose();
@@ -52,7 +56,93 @@ struct StringTest: TestSuite::Tester {
     void notContainsMessageVerbose();
 };
 
+const struct {
+    const char* name;
+    Containers::StringView actual;
+    Containers::StringView expected;
+    const char* message;
+    const char* messageReverse;
+} DiffData[]{
+    {"different in the middle",
+        "hello world\n"
+        "this is cool\n"
+        "yes",
+        "hello world\n"
+        "this isn't cool\n"
+        "\n"
+        "   at\n"
+        "  a l l\n"
+        "\n"
+        "yes",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this isn't cool\n"
+        "       -\n"
+        "       -   at\n"
+        "       -  a l l\n"
+        "       -\n"
+        "       +this is cool\n"
+        "        yes\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this is cool\n"
+        "       +this isn't cool\n"
+        "       +\n"
+        "       +   at\n"
+        "       +  a l l\n"
+        "       +\n"
+        "        yes\n"},
+    {"different at the start",
+        "Hello\n"
+        "world!\n"
+        "this is cool",
+        "hello world\n"
+        "this is cool",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "       -hello world\n"
+        "       +Hello\n"
+        "       +world!\n"
+        "        this is cool\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "       -Hello\n"
+        "       -world!\n"
+        "       +hello world\n"
+        "        this is cool\n"},
+    {"different at the end",
+        "hello world\n"
+        "this is\n"
+        "very cool!",
+        "hello world\n"
+        "this is cool",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this is cool\n"
+        "       +this is\n"
+        "       +very cool!\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this is\n"
+        "       -very cool!\n"
+        "       +this is cool\n"},
+    {"only additions / deletions",
+        "",
+        "hello world\n"
+        "this is cool",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "       -hello world\n"
+        "       -this is cool\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "       +hello world\n"
+        "       +this is cool\n"}
+};
+
 StringTest::StringTest() {
+    addTests({&StringTest::diff});
+
+    addInstancedTests({&StringTest::diffMessageFailed,
+                       &StringTest::diffMessageFailedReverse},
+        Containers::arraySize(DiffData));
+
     addTests({&StringTest::hasPrefix,
               &StringTest::hasPrefixMessageFailed,
               &StringTest::hasPrefixMessageVerbose,
@@ -68,6 +158,64 @@ StringTest::StringTest() {
               &StringTest::notContains,
               &StringTest::notContainsMessageFailed,
               &StringTest::notContainsMessageVerbose});
+}
+
+void StringTest::diff() {
+    Containers::StringView a = "hello world";
+    Containers::StringView b = "hell";
+
+    CORRADE_COMPARE(Comparator<String>{}(a, a), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<String>{}(a, b), ComparisonStatusFlag::Failed);
+}
+
+void StringTest::diffMessageFailed() {
+    auto&& data = DiffData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    /* The diff algorithm is tested thoroughly in DiffTest, this verifies just
+       the printing */
+
+    Comparator<String> compare;
+    ComparisonStatusFlags flags = compare(data.actual, data.expected);
+    CORRADE_COMPARE(flags, TestSuite::ComparisonStatusFlag::Failed);
+
+    CORRADE_INFO("Visual color verification:");
+    {
+        Debug out;
+        compare.printMessage(flags, out, "a", "b");
+    }
+
+    std::ostringstream out;
+    {
+        Debug dc{&out, Debug::Flag::DisableColors};
+        compare.printMessage(flags, dc, "a", "b");
+    }
+    CORRADE_COMPARE(out.str(), data.message);
+}
+
+void StringTest::diffMessageFailedReverse() {
+    auto&& data = DiffData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    /* The diff algorithm is tested thoroughly in DiffTest, this verifies just
+       the printing */
+
+    Comparator<String> compare;
+    ComparisonStatusFlags flags = compare(data.expected, data.actual);
+    CORRADE_COMPARE(flags, TestSuite::ComparisonStatusFlag::Failed);
+
+    CORRADE_INFO("Visual color verification:");
+    {
+        Debug out;
+        compare.printMessage(flags, out, "b", "a");
+    }
+
+    std::ostringstream out;
+    {
+        Debug dc{&out, Debug::Flag::DisableColors};
+        compare.printMessage(flags, dc, "b", "a");
+    }
+    CORRADE_COMPARE(out.str(), data.messageReverse);
 }
 
 void StringTest::hasPrefix() {

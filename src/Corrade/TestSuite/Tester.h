@@ -270,9 +270,9 @@ differ, which becomes useful with large data sizes:
 @snippet TestSuite.cpp Compare-Container
 </li>
 <li>
-@ref Compare::StringHasPrefix, @relativeref{Compare,StringHasSuffix},
+@ref Compare::String provides multi-line diffs; @relativeref{Compare,StringHasPrefix}, @relativeref{Compare,StringHasSuffix},
 @relativeref{Compare,StringContains} and @relativeref{Compare,StringNotContains}
-will provide a better diagnostic compared to e.g. checking
+provide a better diagnostic compared to e.g. checking
 @ref Containers::StringView::hasPrefix() with @ref CORRADE_VERIFY():
 
 @snippet TestSuite.cpp Compare-StringHasPrefix
