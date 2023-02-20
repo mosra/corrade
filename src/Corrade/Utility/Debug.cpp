@@ -144,7 +144,7 @@ struct DebugGlobals {
     std::ostream *output, *warningOutput, *errorOutput;
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color color;
-    bool colorBold;
+    bool colorBold, colorInverted;
     #endif
 };
 
@@ -171,7 +171,7 @@ DebugGlobals debugGlobals{
     &std::cout, &std::cerr, &std::cerr,
     #endif
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-    Debug::Color::Default, false
+    Debug::Color::Default, false, false
     #endif
 };
 
@@ -230,11 +230,36 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
         #else
         debugGlobals.color = c;
         debugGlobals.colorBold = bold;
-        constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
-        *debug._output << code;
+        debugGlobals.colorInverted = false;
+        if(bold) {
+            /* Adds an extra reset to also undo the inverse, if was set
+               before */
+            constexpr const char code[]{'\033', '[', '0', ';', '1' , ';', '3', '0' + char(c), 'm', '\0'};
+            *debug._output << code;
+        } else {
+            /* This resets both bold and inverse */
+            constexpr const char code[]{'\033', '[', '0', ';', '3', '0' + char(c), 'm', '\0'};
+            *debug._output << code;
+        }
         #endif
     };
 }
+
+#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+template<Debug::Color c> Debug::Modifier Debug::invertedColorInternal() {
+    return [](Debug& debug) {
+        if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
+
+        debug._flags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
+        debugGlobals.color = c;
+        debugGlobals.colorBold = false;
+        debugGlobals.colorInverted = true;
+        /* Adds an extra reset to also undo the bold, if was set before */
+        constexpr const char code[] = { '\033', '[', '0', ';', '7', ';', '3', '0' + char(c), 'm', '\0' };
+        *debug._output << code;
+    };
+}
+#endif
 
 inline void Debug::resetColorInternal() {
     if(!_output || !(_flags & InternalFlag::ColorWritten)) return;
@@ -246,13 +271,19 @@ inline void Debug::resetColorInternal() {
     if(h != INVALID_HANDLE_VALUE)
         SetConsoleTextAttribute(h, _previousColorAttributes);
     #else
-    if(_previousColor != Color::Default || _previousColorBold) {
-        const char code[] = { '\033', '[', _previousColorBold ? '1' : '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0' };
+    if(_previousColorBold || _previousColorInverted) {
+        /* Only one of the two should be set by our code */
+        CORRADE_INTERNAL_ASSERT(!_previousColorBold || !_previousColorInverted);
+        const char code[]{'\033', '[', '0', ';', _previousColorBold ? '1' : '7', ';', '3', char('0' + char(_previousColor)), 'm', '\0'};
+        *_output << code;
+    } else if(_previousColor != Color::Default) {
+        const char code[]{'\033', '[', '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0'};
         *_output << code;
     } else *_output << "\033[0m";
 
     debugGlobals.color = _previousColor;
     debugGlobals.colorBold = _previousColorBold;
+    debugGlobals.colorInverted = _previousColorInverted;
     #endif
 }
 
@@ -299,6 +330,28 @@ auto Debug::boldColor(Color color) -> Modifier {
 
     CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
+
+#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+auto Debug::invertedColor(Color color) -> Modifier {
+    /* Crazy but working solution to work around the need for capturing lambda
+       which disallows converting it to function pointer */
+    switch(color) {
+        #define _c(color) case Color::color: return invertedColorInternal<Color::color>();
+        _c(Black)
+        _c(Red)
+        _c(Green)
+        _c(Yellow)
+        _c(Blue)
+        _c(Magenta)
+        _c(Cyan)
+        _c(White)
+        _c(Default)
+        #undef _c
+    }
+
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+}
+#endif
 
 void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
@@ -424,6 +477,7 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     #else
     _previousColor = debugGlobals.color;
     _previousColorBold = debugGlobals.colorBold;
+    _previousColorInverted = debugGlobals.colorInverted;
     #endif
 }
 

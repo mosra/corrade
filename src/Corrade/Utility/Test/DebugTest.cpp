@@ -71,6 +71,9 @@ struct DebugTest: TestSuite::Tester {
     void colors();
     void colorsAutoReset();
     void colorsExplicitReset();
+    #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    void colorsBoldInvertedReset();
+    #endif
     void colorsDisabled();
     void colorsNospace();
     void colorsNoOutput();
@@ -141,6 +144,9 @@ DebugTest::DebugTest() {
     addTests({
         &DebugTest::colorsAutoReset,
         &DebugTest::colorsExplicitReset,
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        &DebugTest::colorsBoldInvertedReset,
+        #endif
         &DebugTest::colorsDisabled,
         &DebugTest::colorsNospace,
         &DebugTest::colorsNoOutput,
@@ -525,7 +531,11 @@ void DebugTest::colors() {
     auto fn = [&data](std::ostream& out) {
         Debug{&out}
             << Debug::color(data.color) << data.desc
-            << Debug::boldColor(data.color) << "bold";
+            << Debug::boldColor(data.color) << "bold"
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            << Debug::space << Debug::invertedColor(data.color) << "inverted"
+            #endif
+            ;
     };
 
     fn(std::cout);
@@ -536,7 +546,7 @@ void DebugTest::colors() {
     std::ostringstream out;
     fn(out);
     CORRADE_COMPARE(out.str(), formatString(
-        "\033[0;3{0}m{1}\033[1;3{0}m bold\033[0m\n",
+        "\033[0;3{0}m{1}\033[0;1;3{0}m bold \033[0;7;3{0}minverted\033[0m\n",
         Containers::StringView{&data.c, 1}, data.desc));
     #endif
 }
@@ -546,6 +556,10 @@ void DebugTest::colorsAutoReset() {
     auto fn = [](std::ostream& out) {
         Debug{&out} << "Default" << Debug::color(Debug::Color::Green) << "Green";
         Debug{&out} << "Default" << Debug::boldColor(Debug::Color::Green) << "Bold green";
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        Debug{&out} << "Default" << Debug::space << Debug::invertedColor(Debug::Color::Green) << "Inverted green"
+        #endif
+        ;
     };
 
     /* Print it for visual verification */
@@ -558,7 +572,8 @@ void DebugTest::colorsAutoReset() {
     fn(out);
     CORRADE_COMPARE(out.str(),
         "Default\033[0;32m Green\033[0m\n"
-        "Default\033[1;32m Bold green\033[0m\n");
+        "Default\033[0;1;32m Bold green\033[0m\n"
+        "Default \033[0;7;32mInverted green\033[0m\n");
     #endif
 }
 
@@ -571,6 +586,11 @@ void DebugTest::colorsExplicitReset() {
         Debug{&out}
             << Debug::boldColor(Debug::Color::Red) << "Bold red"
             << Debug::resetColor << "Default";
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        Debug{&out}
+            << Debug::invertedColor(Debug::Color::Red) << "Inverted red"
+            << Debug::resetColor << "Default";
+        #endif
     };
 
     /* Print it for visual verification */
@@ -583,9 +603,35 @@ void DebugTest::colorsExplicitReset() {
     fn(out);
     CORRADE_COMPARE(out.str(),
         "\033[0;31mRed\033[0m Default\n"
-        "\033[1;31mBold red\033[0m Default\n");
+        "\033[0;1;31mBold red\033[0m Default\n"
+        "\033[0;7;31mInverted red\033[0m Default\n");
     #endif
 }
+
+#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+void DebugTest::colorsBoldInvertedReset() {
+    /* The bold and inverted style shouldn't carry over but get reset as well */
+    auto fn = [](std::ostream& out) {
+        Debug{&out}
+            << Debug::boldColor(Debug::Color::Red) << "Bold red"
+            << Debug::space << Debug::invertedColor(Debug::Color::Green) << "Non-bold inverted green"
+            << Debug::color(Debug::Color::Blue) << "Non-inverted blue";
+        Debug{&out}
+            << Debug::invertedColor(Debug::Color::Red) << "Inverted red"
+            << Debug::boldColor(Debug::Color::Green) << "Non-inverted bold green"
+            << Debug::color(Debug::Color::Blue) << "Non-bold blue";
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout);
+
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(),
+        "\033[0;1;31mBold red \033[0;7;32mNon-bold inverted green\033[0;34m Non-inverted blue\033[0m\n"
+        "\033[0;7;31mInverted red\033[0;1;32m Non-inverted bold green\033[0;34m Non-bold blue\033[0m\n");
+}
+#endif
 
 void DebugTest::colorsDisabled() {
     /* Disabled globally */
@@ -594,6 +640,9 @@ void DebugTest::colorsDisabled() {
             << Debug::color(Debug::Color::Default) << "Default"
             << Debug::color(Debug::Color::Cyan) << "Default"
             << Debug::boldColor(Debug::Color::Red) << "Default"
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            << Debug::invertedColor(Debug::Color::Red) << "Default"
+            #endif
             << Debug::resetColor;
     };
 
@@ -605,7 +654,7 @@ void DebugTest::colorsDisabled() {
     #else
     std::ostringstream out;
     fn(out);
-    CORRADE_COMPARE(out.str(), "Default Default Default\n");
+    CORRADE_COMPARE(out.str(), "Default Default Default Default\n");
     #endif
 }
 
@@ -621,6 +670,14 @@ void DebugTest::colorsNoOutput() {
 
         Debug{&std::cout} << "This shouldn't be bold red.";
     }
+    #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    {
+        Debug out{nullptr, Debug::Flag::DisableColors};
+        out << Debug::invertedColor(Debug::Color::Red);
+
+        Debug{&std::cout} << "This shouldn't be inverted red.";
+    }
+    #endif
 
     CORRADE_SKIP("Only possible to test visually.");
 }
@@ -630,13 +687,20 @@ void DebugTest::colorsNospace() {
        output */
     auto fn = [](std::ostream& out1, std::ostream& out2) {
         Debug{&out1} << "H"
-            << Debug::boldColor(Debug::Color::Blue) << Debug::nospace << "e"
-            << Debug::color(Debug::Color::Yellow) << Debug::nospace << "ll"
-            << Debug::resetColor << Debug::nospace << "o";
+            << Debug::color(Debug::Color::Blue) << Debug::nospace << "e"
+            << Debug::boldColor(Debug::Color::Yellow) << Debug::nospace << "l"
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            << Debug::invertedColor(Debug::Color::Green)
+            #endif
+            << Debug::nospace << "l" << Debug::resetColor << Debug::nospace << "o";
         Debug{&out2} << "H"
-            << Debug::nospace << Debug::boldColor(Debug::Color::Blue) << "e"
-            << Debug::nospace << Debug::color(Debug::Color::Yellow) << "ll"
-            << Debug::nospace << Debug::resetColor << "o";
+            << Debug::nospace << Debug::color(Debug::Color::Blue) << "e"
+            << Debug::nospace << Debug::boldColor(Debug::Color::Yellow) << "l"
+            << Debug::nospace
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            << Debug::invertedColor(Debug::Color::Green)
+            #endif
+            << "l" << Debug::nospace << Debug::resetColor << "o";
     };
 
     /* Print it for visual verification */
@@ -647,8 +711,8 @@ void DebugTest::colorsNospace() {
     #else
     std::ostringstream out1, out2;
     fn(out1, out2);
-    CORRADE_COMPARE(out1.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
-    CORRADE_COMPARE(out2.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
+    CORRADE_COMPARE(out1.str(), "H\033[0;34me\033[0;1;33ml\033[0;7;32ml\033[0mo\n");
+    CORRADE_COMPARE(out2.str(), "H\033[0;34me\033[0;1;33ml\033[0;7;32ml\033[0mo\n");
     #endif
 }
 
@@ -660,12 +724,48 @@ void DebugTest::colorsScoped() {
             Debug d{&out, Debug::Flag::NoNewlineAtTheEnd};
             d << Debug::color(Debug::Color::Cyan) << "This should be cyan." << Debug::newline;
 
-            Debug{&out} << "This also" << Debug::boldColor(Debug::Color::Blue) << "and this blue.";
+            Debug{&out} << "This also,"
+                << Debug::boldColor(Debug::Color::Blue) << "this bold blue,"
+                << Debug::resetColor << "this again cyan and" << Debug::space
+                #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+                << Debug::invertedColor(Debug::Color::Green)
+                #endif
+                << "this inverted green.";
 
             Debug{&out} << "This should be cyan again.";
 
             Debug{&out, Debug::Flag::DisableColors} << "Disabling colors shouldn't affect outer scope, so also cyan.";
+        } {
+            Debug d{&out, Debug::Flag::NoNewlineAtTheEnd};
+            d << Debug::boldColor(Debug::Color::Magenta) << "This should be bold magenta." << Debug::newline;
+
+            Debug{&out} << "This also,"
+                << Debug::color(Debug::Color::Blue) << "this non-bold blue,"
+                << Debug::resetColor << "this again magenta and" << Debug::space
+                #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+                << Debug::invertedColor(Debug::Color::Green)
+                #endif
+                << "this inverted green.";
+
+            Debug{&out} << "This should be bold magenta again.";
+
+            Debug{&out, Debug::Flag::DisableColors} << "Disabling colors shouldn't affect outer scope, so also bold magenta.";
         }
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        {
+            Debug d{&out, Debug::Flag::NoNewlineAtTheEnd};
+            d << Debug::invertedColor(Debug::Color::Yellow) << "This should be inverted yellow." << Debug::newline;
+
+            Debug{&out} << "This also,"
+                << Debug::boldColor(Debug::Color::Blue) << "this bold blue,"
+                << Debug::resetColor << "this again yellow and"
+                << Debug::color(Debug::Color::Green) << "this non-inverted green.";
+
+            Debug{&out} << "This should be inverted yellow again.";
+
+            Debug{&out, Debug::Flag::DisableColors} << "Disabling colors shouldn't affect outer scope, so also inverted yellow.";
+        }
+        #endif
 
         Debug{&out} << "And this resets back to default color.";
     };
@@ -680,11 +780,25 @@ void DebugTest::colorsScoped() {
     fn(out);
     CORRADE_COMPARE(out.str(),
         "This should have default color.\n"
+
         "\033[0;36mThis should be cyan.\n"
-        "This also\033[1;34m and this blue.\033[0;36m\n"
+        "This also,\033[0;1;34m this bold blue,\033[0;36m this again cyan and \033[0;7;32mthis inverted green.\033[0;36m\n"
         "This should be cyan again.\n"
         "Disabling colors shouldn't affect outer scope, so also cyan.\n"
         "\033[0m"
+
+        "\033[0;1;35mThis should be bold magenta.\n"
+        "This also,\033[0;34m this non-bold blue,\033[0;1;35m this again magenta and \033[0;7;32mthis inverted green.\033[0;1;35m\n"
+        "This should be bold magenta again.\n"
+        "Disabling colors shouldn't affect outer scope, so also bold magenta.\n"
+        "\033[0m"
+
+        "\033[0;7;33mThis should be inverted yellow.\n"
+        "This also,\033[0;1;34m this bold blue,\033[0;7;33m this again yellow and\033[0;32m this non-inverted green.\033[0;7;33m\n"
+        "This should be inverted yellow again.\n"
+        "Disabling colors shouldn't affect outer scope, so also inverted yellow.\n"
+        "\033[0m"
+
         "And this resets back to default color.\n");
     #endif
 }

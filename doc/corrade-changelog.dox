@@ -170,6 +170,8 @@ namespace Corrade {
 -   @ref Utility::ConfigurationGroup gained an ability to iterate through its
     values and subgroups using @relativeref{Utility::ConfigurationGroup,values()}
     and @relativeref{Utility::ConfigurationGroup,groups()}
+-   New @ref Utility::Debug::invertedColor() output modifier for printing
+    colored text with the foreground and background colors inverted
 -   New @ref Corrade::Utility::Json class for tokenizing and parsing JSON files
     into an immutable memory-efficient representation
 -   New @ref Corrade::Utility::JsonWriter class for stream-like writing and

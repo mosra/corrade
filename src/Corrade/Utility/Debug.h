@@ -117,9 +117,10 @@ modifier:
 
 @subsection Utility-Debug-modifiers-colors Colored output
 
-It is possible to color the output using @ref color() and @ref boldColor(). The
-color is automatically reset to previous value on destruction to avoid messing
-up the terminal, you can also use @ref resetColor() to reset it explicitly.
+It is possible to color the output using @ref color(), @ref boldColor() and
+@ref invertedColor(). The color is automatically reset to previous value on
+destruction to avoid messing up the terminal, you can also use
+@ref resetColor() to reset it explicitly.
 
 @snippet Utility.cpp Debug-modifiers-colors
 
@@ -265,7 +266,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Output color
          *
-         * @see @ref color(), @ref boldColor()
+         * @see @ref color(), @ref boldColor(), @ref invertedColor()
          */
         enum class Color: char {
             /**
@@ -394,31 +395,48 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Set output color
          *
-         * Resets previous @ref color() or @ref boldColor() setting. The color
-         * is also automatically reset on object destruction to a value that
-         * was active in outer scope. If @ref Flag::DisableColors was set, this
-         * function does nothing.
+         * Resets previous @ref color(), @ref boldColor() or
+         * @ref invertedColor() setting. The color is also automatically reset
+         * on object destruction to a value that was active in outer scope. If
+         * @ref Flag::DisableColors was set, this function does nothing.
          */
         static Modifier color(Color color);
 
         /**
          * @brief Set bold output color
          *
-         * Resets previous @ref color() or @ref boldColor() setting. The color
-         * is also automatically reset on object destruction to a value that
-         * was active in outer scope. If @ref Flag::DisableColors was set, this
-         * function does nothing.
+         * Resets previous @ref color(), @ref boldColor() or
+         * @ref invertedColor() setting. The color is also automatically reset
+         * on object destruction to a value that was active in outer scope. If
+         * @ref Flag::DisableColors was set, this function does nothing.
          */
         static Modifier boldColor(Color color);
+
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        /**
+         * @brief Set inverted output color
+         * @m_since_latest
+         *
+         * The @p color is used for background while foreground is rendered
+         * with the terminal background color instead. Resets previous
+         * @ref color(), @ref boldColor() or @ref invertedColor() setting. The
+         * color is also automatically reset on object destruction to a value
+         * that was active in outer scope. If @ref Flag::DisableColors was set,
+         * this function does nothing.
+         * @partialsupport Not available on @ref CORRADE_TARGET_WINDOWS "Windows"
+         *      with @ref CORRADE_UTILITY_USE_ANSI_COLORS disabled.
+         */
+        static Modifier invertedColor(Color color);
+        #endif
 
         /**
          * @brief Reset output color
          *
-         * Resets any previous @ref color() or @ref boldColor() setting to a
-         * value that was active in outer scope. The same is also automatically
-         * done on object destruction. If the color was not changed by this
-         * instance or @ref Flag::DisableColors was set, this function does
-         * nothing.
+         * Resets any previous @ref color(), @ref boldColor() or
+         * @ref invertedColor() setting to a value that was active in outer
+         * scope. The same is also automatically done on object destruction. If
+         * the color was not changed by this instance or
+         * @ref Flag::DisableColors was set, this function does nothing.
          */
         static void resetColor(Debug& debug);
 
@@ -763,6 +781,9 @@ class CORRADE_UTILITY_EXPORT Debug {
         #endif
 
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        template<Color c> CORRADE_UTILITY_LOCAL static Modifier invertedColorInternal();
+        #endif
 
         CORRADE_UTILITY_LOCAL void resetColorInternal();
 
@@ -771,7 +792,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         unsigned short _previousColorAttributes = 0xffff;
         #else
         Color _previousColor;
-        bool _previousColorBold;
+        bool _previousColorBold, _previousColorInverted;
         #endif
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         const char* _sourceLocationFile{};
