@@ -523,7 +523,9 @@ void DebugTest::colors() {
     auto&& data = ColorsData[testCaseInstanceId()];
     setTestCaseDescription(data.desc);
     auto fn = [&data](std::ostream& out) {
-        Debug{&out} << Debug::color(data.color) << data.desc << Debug::boldColor(data.color) << "bold";
+        Debug{&out}
+            << Debug::color(data.color) << data.desc
+            << Debug::boldColor(data.color) << "bold";
     };
 
     fn(std::cout);
@@ -543,6 +545,7 @@ void DebugTest::colorsAutoReset() {
     /* Auto-reset at the end */
     auto fn = [](std::ostream& out) {
         Debug{&out} << "Default" << Debug::color(Debug::Color::Green) << "Green";
+        Debug{&out} << "Default" << Debug::boldColor(Debug::Color::Green) << "Bold green";
     };
 
     /* Print it for visual verification */
@@ -553,14 +556,20 @@ void DebugTest::colorsAutoReset() {
     #else
     std::ostringstream out;
     fn(out);
-    CORRADE_COMPARE(out.str(), "Default\033[0;32m Green\033[0m\n");
+    CORRADE_COMPARE(out.str(),
+        "Default\033[0;32m Green\033[0m\n"
+        "Default\033[1;32m Bold green\033[0m\n");
     #endif
 }
 
 void DebugTest::colorsExplicitReset() {
     /* Don't reset twice */
     auto fn = [](std::ostream& out) {
-        Debug{&out} << Debug::color(Debug::Color::Red) << "Red"
+        Debug{&out}
+            << Debug::color(Debug::Color::Red) << "Red"
+            << Debug::resetColor << "Default";
+        Debug{&out}
+            << Debug::boldColor(Debug::Color::Red) << "Bold red"
             << Debug::resetColor << "Default";
     };
 
@@ -572,7 +581,9 @@ void DebugTest::colorsExplicitReset() {
     #else
     std::ostringstream out;
     fn(out);
-    CORRADE_COMPARE(out.str(), "\033[0;31mRed\033[0m Default\n");
+    CORRADE_COMPARE(out.str(),
+        "\033[0;31mRed\033[0m Default\n"
+        "\033[1;31mBold red\033[0m Default\n");
     #endif
 }
 
@@ -582,6 +593,7 @@ void DebugTest::colorsDisabled() {
         Debug{&out, Debug::Flag::DisableColors}
             << Debug::color(Debug::Color::Default) << "Default"
             << Debug::color(Debug::Color::Cyan) << "Default"
+            << Debug::boldColor(Debug::Color::Red) << "Default"
             << Debug::resetColor;
     };
 
@@ -593,7 +605,7 @@ void DebugTest::colorsDisabled() {
     #else
     std::ostringstream out;
     fn(out);
-    CORRADE_COMPARE(out.str(), "Default Default\n");
+    CORRADE_COMPARE(out.str(), "Default Default Default\n");
     #endif
 }
 
@@ -603,6 +615,11 @@ void DebugTest::colorsNoOutput() {
         out << Debug::color(Debug::Color::Red);
 
         Debug{&std::cout} << "This shouldn't be red.";
+    } {
+        Debug out{nullptr, Debug::Flag::DisableColors};
+        out << Debug::boldColor(Debug::Color::Red);
+
+        Debug{&std::cout} << "This shouldn't be bold red.";
     }
 
     CORRADE_SKIP("Only possible to test visually.");
