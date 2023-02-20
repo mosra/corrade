@@ -977,10 +977,11 @@ void DebugTest::multithreaded() {
 void DebugTest::sourceLocation() {
     std::ostringstream out;
 
+    std::size_t line;
     {
         Debug redirect{&out};
 
-        !Debug{} << "hello";
+        !Debug{} << "hello"; line = __LINE__;
 
         !Debug{} << "and this is from another line";
 
@@ -990,11 +991,11 @@ void DebugTest::sourceLocation() {
     }
 
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
-    CORRADE_COMPARE(out.str(),
-        __FILE__ ":983: hello\n"
-        __FILE__ ":985: and this is from another line\n"
-        __FILE__ ":987\n"
-        "this no longer\n");
+    CORRADE_COMPARE(out.str(), Utility::formatString(
+        __FILE__ ":{}: hello\n"
+        __FILE__ ":{}: and this is from another line\n"
+        __FILE__ ":{}\n"
+        "this no longer\n", line, line + 2, line + 4));
     #else
     CORRADE_COMPARE(out.str(),
         "hello\n"
