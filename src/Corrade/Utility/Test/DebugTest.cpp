@@ -36,6 +36,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is stream-free */
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 #include <thread>
@@ -532,7 +533,9 @@ void DebugTest::colors() {
     #else
     std::ostringstream out;
     fn(out);
-    CORRADE_COMPARE(out.str(), (std::string{"\033[0;3" + std::string{data.c} + "m" + data.desc + "\033[1;3" + std::string{data.c} + "m bold\033[0m\n"}));
+    CORRADE_COMPARE(out.str(), formatString(
+        "\033[0;3{0}m{1}\033[1;3{0}m bold\033[0m\n",
+        Containers::StringView{&data.c, 1}, data.desc));
     #endif
 }
 
@@ -988,9 +991,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":980: hello\n"
-        __FILE__ ":982: and this is from another line\n"
-        __FILE__ ":984\n"
+        __FILE__ ":983: hello\n"
+        __FILE__ ":985: and this is from another line\n"
+        __FILE__ ":987\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),
