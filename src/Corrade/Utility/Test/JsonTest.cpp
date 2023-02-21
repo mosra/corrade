@@ -132,6 +132,8 @@ struct JsonTest: TestSuite::Tester {
         void findArrayIndexNotParsed();
 
         void commonArrayType();
+        void commonArrayTypeParsedHeterogeneous();
+        void commonArrayTypeParsedArrayNotParsed();
         void commonArrayTypeNotArray();
 
         void asTypeWrongType();
@@ -1196,18 +1198,40 @@ const struct {
     TestSuite::TestCaseDescriptionSourceLocation name;
     const char* json;
     Containers::Optional<JsonToken::Type> expected;
+    Containers::Optional<JsonToken::ParsedType> expectedParsed;
 } CommonArrayTypeData[]{
-    {"empty array", "[]", {}},
-    {"single string", R"(["hey"])", JsonToken::Type::String},
-    {"nulls", "[null, null, null]", JsonToken::Type::Null},
-    {"numbers", "[3.5, -777, 0, 1, 26]", JsonToken::Type::Number},
+    {"empty array",
+        "[]",
+        {}, {}},
+    {"single string",
+        R"(["hey"])",
+        JsonToken::Type::String, JsonToken::ParsedType::Other},
+    {"nulls",
+        "[null, null, null]",
+        JsonToken::Type::Null, JsonToken::ParsedType::Other},
+    {"numbers",
+        "[3.5, -777, 0, 1, 26]",
+        /* This is the "default" numeric type used by
+           JsonTest::commonArrayType(). Others are tested in
+           commonArrayTypeParsedHeterogeneous() and
+           commonArrayTypeParsedArrayNotParsed(). */
+        JsonToken::Type::Number, JsonToken::ParsedType::Float},
     /* It's important that the nested object is first, to verify it correctly
        skips to the second array element instead of going inside the first */
-    {"nested objects", R"([{"key": [], "another": 5}, {}, {"yes": true}])", JsonToken::Type::Object},
-    {"nested arrays", "[[[[]], 5], [], [true, 25]]", JsonToken::Type::Array},
-    {"bools + nulls", "[true, null, false, false]", {}},
-    {"numbers + nested arrays", "[25, [25, 26], 27]", {}},
-    {"bools + nested objects", "[false, {\"hey\": false}, true]", {}},
+    {"nested objects",
+        R"([{"key": [], "another": 5}, {}, {"yes": true}])",
+        JsonToken::Type::Object, JsonToken::ParsedType::Other},
+    {"nested arrays", "[[[[]], 5], [], [true, 25]]",
+        JsonToken::Type::Array, JsonToken::ParsedType::Other},
+    {"bools + nulls",
+        "[true, null, false, false]",
+        {}, JsonToken::ParsedType::Other},
+    {"numbers + nested arrays",
+        "[25, [25, 26], 27]",
+        {}, {}},
+    {"bools + nested objects",
+        "[false, {\"hey\": false}, true]",
+        {}, JsonToken::ParsedType::Other},
 };
 
 JsonTest::JsonTest() {
@@ -1338,7 +1362,9 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::commonArrayType},
         Containers::arraySize(CommonArrayTypeData));
 
-    addTests({&JsonTest::commonArrayTypeNotArray,
+    addTests({&JsonTest::commonArrayTypeParsedHeterogeneous,
+              &JsonTest::commonArrayTypeParsedArrayNotParsed,
+              &JsonTest::commonArrayTypeNotArray,
 
               &JsonTest::asTypeWrongType,
               &JsonTest::asTypeNotParsed,
@@ -3524,6 +3550,38 @@ void JsonTest::commonArrayType() {
     Containers::Optional<Json> json = Json::fromString(data.json);
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->root().commonArrayType(), data.expected);
+    /* By default nothing is parsed */
+    CORRADE_COMPARE(json->root().commonParsedArrayType(), Containers::NullOpt);
+
+    json->parseFloats(json->root());
+    json->parseLiterals(json->root());
+    json->parseStrings(json->root());
+    CORRADE_COMPARE(json->root().commonParsedArrayType(), data.expectedParsed);
+}
+
+void JsonTest::commonArrayTypeParsedHeterogeneous() {
+    Containers::Optional<Json> json = Json::fromString("[37.5, 4294967295, -33]");
+    CORRADE_VERIFY(json);
+    CORRADE_COMPARE(json->root().commonArrayType(), JsonToken::Type::Number);
+
+    /* Parse everything as a double */
+    json->parseLiterals(json->root());
+    json->parseDoubles(json->root());
+    CORRADE_COMPARE(json->root().commonParsedArrayType(), JsonToken::ParsedType::Double);
+
+    /* Parse the middle element as a float, now it's no longer a common type */
+    json->parseUnsignedInts(json->root()[1]);
+    CORRADE_COMPARE(json->root().commonParsedArrayType(), Containers::NullOpt);
+}
+
+void JsonTest::commonArrayTypeParsedArrayNotParsed() {
+    Containers::Optional<Json> json = Json::fromString("[37, -2147483648, -33]");
+    CORRADE_VERIFY(json);
+    CORRADE_COMPARE(json->root().commonArrayType(), JsonToken::Type::Number);
+
+    /* Should still result in a */
+    json->parseInts(json->root());
+    CORRADE_COMPARE(json->root().commonParsedArrayType(), JsonToken::ParsedType::Int);
 }
 
 void JsonTest::commonArrayTypeNotArray() {
@@ -3535,8 +3593,10 @@ void JsonTest::commonArrayTypeNotArray() {
     std::ostringstream out;
     Error redirectError{&out};
     json->root().commonArrayType();
+    json->root().commonParsedArrayType();
     CORRADE_COMPARE(out.str(),
-        "Utility::JsonToken::commonArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n");
+        "Utility::JsonToken::commonArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n"
+        "Utility::JsonToken::commonParsedArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n");
 }
 
 void JsonTest::asTypeWrongType() {

@@ -1416,7 +1416,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * the array is heterogeneous or empty. Expects that @ref type() is
          * @ref JsonToken::Type::Array, but @ref isParsed() doesn't have to be
          * set.
-         * @see @ref childCount()
+         * @see @ref commonParsedArrayType(), @ref childCount()
          */
         Containers::Optional<Type> commonArrayType() const;
 
@@ -1461,6 +1461,22 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref type(), @ref isParsed()
          */
         ParsedType parsedType() const;
+
+        /**
+         * @brief Common parsed array type
+         *
+         * Returns a parsed type of the array tokens or @ref Containers::NullOpt
+         * if the array is not parsed at all, only partially, to a
+         * heterogeneous @ref ParsedType or is empty. Expects that @ref type()
+         * is @ref JsonToken::Type::Array. The returned value is never
+         * @ref ParsedType::None, however @ref ParsedType::Other can be
+         * returned also if the array is a combination of nulls and bools, for
+         * example --- use this function in combination with
+         * @ref commonArrayType() to distinguish that case. The returned value
+         * is independent from @ref isParsed() being set or not.
+         * @see @ref commonArrayType(), @ref childCount()
+         */
+        Containers::Optional<ParsedType> commonParsedArrayType() const;
 
         /**
          * @brief Child token count

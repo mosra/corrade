@@ -2250,6 +2250,33 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
     return type;
 }
 
+Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() const {
+    CORRADE_ASSERT(type() == Type::Array,
+        "Utility::JsonToken::commonParsedArrayType(): token is a" << type() << Debug::nospace << ", expected an array", {});
+
+    const std::size_t childCount =
+        #ifndef CORRADE_TARGET_32BIT
+        _childCount
+        #else
+        (_childCountFlagsTypeNan & ChildCountMask)
+        #endif
+        ;
+    if(!childCount) return {};
+
+    /* If the first token isn't parsed, bail. It doesn't make sense to return
+       ParsedType::None as the common parsed type, since that says nothing
+       about the contents -- it could be a heterogeneous mixture of whatever
+       and still have a None as a common oarsed type. */
+    const ParsedType type = this[1].parsedType();
+    if(type == ParsedType::None)
+        return {};
+
+    for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
+        if(i->parsedType() != type) return {};
+
+    return type;
+}
+
 std::size_t JsonToken::childCount() const {
     #ifndef CORRADE_TARGET_32BIT
     /* Objects and arrays store child count directly */
