@@ -2243,7 +2243,7 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
         ;
     if(!childCount) return {};
 
-    const JsonToken::Type type = this[1].type();
+    const Type type = this[1].type();
     for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
         if(i->type() != type) return {};
 
