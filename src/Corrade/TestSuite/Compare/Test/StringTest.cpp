@@ -92,6 +92,58 @@ const struct {
         "       +  a l l\n"
         "       +\n"
         "        yes\n"},
+    {"small single-line difference in the middle",
+        "hello world\n"
+        "this is cool\n"
+        "yes",
+        "hello world\n"
+        "this isn't cool\n"
+        "yes",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this isn't cool\n"
+        "       +this is cool\n"
+        "        yes\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this is cool\n"
+        "       +this isn't cool\n"
+        "        yes\n"},
+    {"difference in the middle of a UTF-8 character",
+        "média",
+        "mèdia",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "       -mèdia\n"
+        "       +média\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "       -média\n"
+        "       +mèdia\n"},
+    {"difference next to a UTF-8 character",
+        "média",
+        "mědia",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "       -mědia\n"
+        "       +média\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "       -média\n"
+        "       +mědia\n"},
+    {"large single-line difference in the middle",
+        "hello world\n"
+        "this is cool\n"
+        "yes",
+        "hello world\n"
+        "That's awful\n"
+        "yes",
+        "Strings a and b are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -That's awful\n"
+        "       +this is cool\n"
+        "        yes\n",
+        "Strings b and a are different. Actual (+) vs expected (-):\n"
+        "        hello world\n"
+        "       -this is cool\n"
+        "       +That's awful\n"
+        "        yes\n"},
     {"different at the start",
         "Hello\n"
         "world!\n"

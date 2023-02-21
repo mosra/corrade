@@ -61,6 +61,86 @@ void Comparator<Compare::String>::printMessage(const ComparisonStatusFlags flags
     std::size_t actualI = 0;
     std::size_t expectedI = 0;
     for(const Containers::Triple<std::size_t, std::size_t, std::size_t>& slice: slices) {
+        /* If there's exactly one differing line in both, print differences
+           inside that line */
+        if(slice.first() - actualI == 1 &&
+           slice.second() - expectedI == 1) {
+            const Containers::StringView actualLine = actualLines[actualI];
+            const Containers::StringView expectedLine = expectedLines[expectedI];
+
+            Containers::Array<Containers::Triple<std::size_t, std::size_t, std::size_t>> lineSlices;
+            Compare::Implementation::matchingSlicesInto(lineSlices, stridedArrayView(actualLine), 0, stridedArrayView(expectedLine), 0);
+
+            /* Count total matching bytes */
+            std::size_t totalMatchingBytes = 0;
+            for(const Containers::Triple<std::size_t, std::size_t, std::size_t>& i: lineSlices) {
+                /* If the slice cut is in the middle of a UTF-8 character,
+                   abort the mission -- report there's nothing matching so it
+                   doesn't attempt to put ANSI highlight in the middle of a
+                   character as that'd break the output. */
+                /** @todo handle better (move the cut out of the character) */
+                if(actualLine[i.first()] & '\x80' ||
+                   expectedLine[i.second()] & '\x80' ||
+                   (i.third() && actualLine[i.first() + i.third() - 1] & '\x80') ||
+                   (i.third() && expectedLine[i.second() + i.third() - 1] & '\x80'))
+                {
+                    totalMatchingBytes = 0;
+                    break;
+                }
+
+                totalMatchingBytes += i.third();
+            }
+
+            /* Highlight the difference only if there's at least 50% of the
+               shorter line same, otherwise it'd be just noise */
+            if(totalMatchingBytes >= Utility::min(actualLine.size(), expectedLine.size())/2) {
+                /* Include an empty zero-length slice at the end in order to
+                   have the rest after the last matching slice printed as well */
+                arrayAppend(lineSlices, InPlaceInit, actualLine.size(), expectedLine.size(), std::size_t{});
+
+                /* First goes the expected (deleted) line */
+                out << Utility::Debug::newline << Utility::Debug::color(Utility::Debug::Color::Red) << "       -";
+                std::size_t expectedLineI = 0;
+                for(const Containers::Triple<std::size_t, std::size_t, std::size_t>& lineSlice: lineSlices) {
+                    out << Utility::Debug::nospace
+                        /* Mark the deleted part with inverse red color */
+                        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+                        << Utility::Debug::invertedColor(Utility::Debug::Color::Red)
+                        #endif
+                        << expectedLine.slice(expectedLineI, lineSlice.second())
+                        << Utility::Debug::nospace
+                        /* And the matching part with normal red */
+                        << Utility::Debug::color(Utility::Debug::Color::Red)
+                        << expectedLine.sliceSize(lineSlice.second(), lineSlice.third())
+                        << Utility::Debug::resetColor;
+                    expectedLineI = lineSlice.second() + lineSlice.third();
+                }
+
+                /* Then the actual (added) line */
+                out << Utility::Debug::newline << Utility::Debug::color(Utility::Debug::Color::Green) << "       +";
+                std::size_t actualLineI = 0;
+                for(const Containers::Triple<std::size_t, std::size_t, std::size_t>& lineSlice: lineSlices) {
+                    out << Utility::Debug::nospace
+                        /* Mark the deleted part with inverse green color */
+                        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+                        << Utility::Debug::invertedColor(Utility::Debug::Color::Green)
+                        #endif
+                        << actualLine.slice(actualLineI, lineSlice.first())
+                        << Utility::Debug::nospace
+                        /* And the matching part with normal green */
+                        << Utility::Debug::color(Utility::Debug::Color::Green)
+                        << actualLine.sliceSize(lineSlice.first(), lineSlice.third())
+                        << Utility::Debug::resetColor;
+                    actualLineI = lineSlice.first() + lineSlice.third();
+                }
+
+                /* Advancethe line iterators so the lines aren't printed again
+                   below */
+                ++actualI;
+                ++expectedI;
+            }
+        }
+
         /* All lines from `expected` after the previous matching slice and
            before the current matching slice are marked as deleted */
         for(const Containers::StringView& i: expectedLines.slice(expectedI, slice.second()))

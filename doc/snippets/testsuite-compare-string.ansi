@@ -3,8 +3,8 @@
         Strings chatbot.greet() and "Hello!\n" "I'm Marvin.\n" "I'm here to answer your questions.\n" "Let's get started." are different.[0;32m Actual (+)[0m vs[0;31m expected (-)[0m:
         Hello!
         I'm Marvin.
-[0;31m       -I'm here to answer your questions.[0m
-[0;32m       +I'm here to question your answers.[0m
+[0;31m       -[0;7;31m[0;31mI'm here to [0m[0;7;31manswer your [0;31mquestion[0m[0;7;31m[0;31ms.[0m[0;7;31m[0;31m[0m
+[0;32m       +[0;7;32m[0;32mI'm here to [0m[0;7;32m[0;32mquestion[0m[0;7;32m your answer[0;32ms.[0m[0;7;32m[0;32m[0m
         Let's get started.
 [0;32m       +You're not here to tell me what to do.[0m
 [0;32m       +I am.[0m

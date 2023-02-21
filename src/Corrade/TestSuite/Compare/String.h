@@ -48,7 +48,9 @@ namespace Compare {
 @m_since_latest
 
 Compares the two strings, printing a line-by-line difference in case they are
-not the same. Example usage and a potential output:
+not the same, highlighting also changed line portions in case a difference
+between two standalone lines is less than a half of their size. Example usage
+and a potential output:
 
 @m_class{m-code-figure}
 
