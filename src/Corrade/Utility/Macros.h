@@ -410,6 +410,19 @@ that make use of C++14 constexpr.
 #endif
 
 /** @hideinitializer
+@brief C++14 constexpr (non-broken compilers)
+
+Same as @ref CORRADE_CONSTEXPR14 except it excludes broken compilers that
+don't fully implement @cpp constexpr @ce, such as GCC 4.8.
+*/
+#if defined __cpp_constexpr && __cpp_constexpr >= 201304 || \
+    defined CORRADE_TARGET_MSVC && _MSC_VER >= 1910 && CORRADE_CXX_STANDARD >= 201402L
+#define CORRADE_CONSTEXPR14_ constexpr
+#else
+#define CORRADE_CONSTEXPR14_
+#endif
+
+/** @hideinitializer
 @brief Always inline a function
 @m_since{2019,10}
 
