@@ -70,9 +70,8 @@ if((CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS) AND NOT CORRADE_PLUGINMANAGE
     target_link_libraries(Dog PUBLIC CorradePluginManagerTestLib)
     target_link_libraries(Bulldog PRIVATE CorradePluginManagerTestLib)
     target_link_libraries(PitBull PRIVATE CorradePluginManagerTestLib)
-endif()
-
-# Additionally the plugin dependencies have to be linked as well
-if(CORRADE_TARGET_WINDOWS)
-    target_link_libraries(PitBull PRIVATE Dog)
+    # Additionally the plugin dependencies have to be linked as well
+    if(CORRADE_TARGET_WINDOWS)
+        target_link_libraries(PitBull PRIVATE Dog)
+    endif()
 endif()
