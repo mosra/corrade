@@ -160,8 +160,10 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
     corrade_add_test(Cpp17ContainersPairStlTest PairStlCpp17Test.cpp)
+    corrade_add_test(Cpp17ContainersTripleStlTest TripleStlCpp17Test.cpp)
     set_target_properties(
         Cpp17ContainersPairStlTest
+        Cpp17ContainersTripleStlTest
         PROPERTIES
         CORRADE_CXX_STANDARD 17 COMPILE_DEFINITIONS COMPILING_AS_CPP17)
 endif()

@@ -42,7 +42,18 @@ information.
 
 /* Listing these namespaces doesn't add anything to the docs, so don't */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-namespace Corrade { namespace Containers { namespace Implementation {
+#if CORRADE_CXX_STANDARD >= 201703
+namespace std {
+template<class F, class S, class T> struct tuple_size<Corrade::Containers::Triple<F, S, T>> : std::integral_constant<std::size_t, 3> {};
+template<class F, class S, class T> struct tuple_element<0, Corrade::Containers::Triple<F, S, T>> { using type = F; };
+template<class F, class S, class T> struct tuple_element<1, Corrade::Containers::Triple<F, S, T>> { using type = S; };
+template<class F, class S, class T> struct tuple_element<2, Corrade::Containers::Triple<F, S, T>> { using type = T; };
+}
+#endif
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
 
 template<class F, class S, class T> struct TripleConverter<F, S, T, std::tuple<F, S, T>> {
     static Triple<F, S, T> from(const std::tuple<F, S, T>& other) {
@@ -64,7 +75,24 @@ template<class F, class S, class T> struct TripleConverter<F, S, T, std::tuple<F
 
 template<class F, class S, class T> struct DeducedTripleConverter<std::tuple<F, S, T>>: TripleConverter<F, S, T, std::tuple<F, S, T>> {};
 
-}}}
+}
+
+#if CORRADE_CXX_STANDARD >= 201703
+template<std::size_t N, class F, class S, class T> constexpr std::tuple_element_t<N, Triple<F, S, T>>& get(Triple<F, S, T>& value) {
+    static_assert(N <= 2);
+    if constexpr(N == 0)
+        return value.first();
+    else if constexpr(N == 1)
+        return value.second();
+    else
+        return value.third();
+}
+template<std::size_t N, class F, class S, class T> constexpr const std::tuple_element_t<N, Triple<F, S, T>>& get(const Triple<F, S, T>& value) { return get<N>(const_cast<Triple<F, S, T>&>(value)); }
+template<std::size_t N, class F, class S, class T> constexpr std::tuple_element_t<N, Triple<F, S, T>> get(Triple<F, S, T>&& value) { return get<N>(const_cast<Triple<F, S, T>&>(value)); }
+#endif
+
+}}
+
 #endif
 
 #endif
