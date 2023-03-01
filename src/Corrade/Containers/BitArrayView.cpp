@@ -260,14 +260,19 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(POPCNT,BMI1) typename std::decay
 
 /* http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel and
    https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation for a
-   64-bit version. On Emscripten this has equivalent performance to
-   __builtin_popcountll(), question is however whether Clang actually replaces
-   that with the WASM popcount instruction or not. */
+   64-bit version. */
 CORRADE_ALWAYS_INLINE std::uint64_t popcount(Cpu::ScalarT, std::uint64_t v) {
+    /* On Emscripten this *does* expand to a WASM i64.popcnt instruction with
+       -O3 (https://godbolt.org/z/4dhsKjq5e), but to play safe I'll just use
+       the builtin directly. */
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    return __builtin_popcountll(v);
+    #else
     v = v - ((v >> 1) & 0x5555555555555555ull);
     v = (v & 0x3333333333333333ull) + ((v >> 2) & 0x3333333333333333ull);
     v = (v + (v >> 4)) & 0x0f0f0f0f0f0f0f0full;
     return (v*0x0101010101010101ull) >> 56;
+    #endif
 }
 
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(bitCountSet)>::type bitCountSetImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
