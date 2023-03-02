@@ -104,6 +104,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseShortBooleanOptionPack();
     void parseShortBooleanOptionValuePack();
 
+    void parseDuplicateOptions();
+
     void parseArrayArguments();
     void parseArrayOptions();
 
@@ -205,6 +207,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseShortOptionValuePackEmpty,
               &ArgumentsTest::parseShortBooleanOptionPack,
               &ArgumentsTest::parseShortBooleanOptionValuePack,
+
+              &ArgumentsTest::parseDuplicateOptions,
 
               &ArgumentsTest::parseArrayArguments,
               &ArgumentsTest::parseArrayOptions,
@@ -945,6 +949,21 @@ void ArgumentsTest::parseShortBooleanOptionValuePack() {
     CORRADE_VERIFY(args.isSet("refresh"));
     CORRADE_COMPARE(args.value("search"), "magnum");
     CORRADE_COMPARE(args.value("package"), "corrade");
+}
+
+void ArgumentsTest::parseDuplicateOptions() {
+    Arguments args;
+    args.addOption('F', "foo")
+        .addNamedArgument('B', "bar")
+        .addBooleanOption('v', "verbose");
+
+    /* The second value should override the first; the boolean option stays
+       set */
+    const char* argv[]{"", "--verbose", "--foo", "first", "-v", "-B", "one", "-F", "second", "--bar", "two", "-v"};
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("foo"), "second");
+    CORRADE_COMPARE(args.value("bar"), "two");
+    CORRADE_VERIFY(args.isSet("verbose"));
 }
 
 void ArgumentsTest::parseArrayArguments() {

@@ -481,7 +481,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If no help text is set, the argument is not displayed in the
          * argument list. Call @ref setHelp() to set it. Argument value can be
-         * retrieved using @ref value().
+         * retrieved using @ref value(). If more than one `-a` / `--argument`
+         * is passed, value of the last one is picked.
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
@@ -532,7 +533,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If no help text is set, the option is not displayed in the argument
          * list. Call @ref setHelp() to set it. Option value can be retrieved
-         * using @ref value().
+         * using @ref value(). If more than one `-o` / `--option` is passed,
+         * value of the last one is picked.
          *
          * Short key is not allowed in the prefixed version, use
          * @ref addOption(std::string, std::string) in that case instead.
@@ -629,8 +631,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * If no help text is set, the option is not displayed in the argument
          * list. Call @ref setHelp() to set it, however setting displayed
          * key name in @ref setHelp() is not possible with boolean options.
-         * Option presence can be queried with @ref isSet() Option for getting
-         * help (`-h`, `--help`) is added automatically.
+         * Option presence can be queried with @ref isSet(). Specifying `-o` or
+         * `--option` more than once has the same effect as specifying it just
+         * once. Option for getting help (`-h`, `--help`) is added
+         * automatically.
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() in that case instead.
