@@ -768,6 +768,9 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
         }
     }
 
+    /* There should be no leftover unparsed packed short options */
+    CORRADE_INTERNAL_ASSERT(!shortOptionPackOffset);
+
     /* Expected value, but none given */
     if(valueFor && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
         Error() << "Missing value for command-line argument" << keyName(*valueFor);
