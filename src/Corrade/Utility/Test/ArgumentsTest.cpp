@@ -1715,6 +1715,10 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
         .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
             ++*reinterpret_cast<int*>(args.parseErrorCallbackState());
 
+            #ifdef CORRADE_TARGET_GCC
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic error "-Wswitch"
+            #endif
             switch(error) {
                 case Arguments::ParseError::InvalidShortArgument:
                     if(key == "?") CORRADE_COMPARE(key, "?");
@@ -1743,6 +1747,9 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
                 case Arguments::ParseError::SuperfluousArgument:
                     break;
             }
+            #ifdef CORRADE_TARGET_GCC
+            #pragma GCC diagnostic pop
+            #endif
 
             CORRADE_ITERATION(error);
             CORRADE_ITERATION(key);
@@ -1766,6 +1773,10 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
         .setParseErrorCallback([](const Utility::Arguments& args, Utility::Arguments::ParseError error, const std::string& key) {
             ++*reinterpret_cast<int*>(args.parseErrorCallbackState());
 
+            #ifdef CORRADE_TARGET_GCC
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic error "-Wswitch"
+            #endif
             switch(error) {
                 /* All those handled above */
                 case Arguments::ParseError::InvalidShortArgument:
@@ -1781,6 +1792,9 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
                     CORRADE_COMPARE(key, "/dev/null 3");
                     return true;
             }
+            #ifdef CORRADE_TARGET_GCC
+            #pragma GCC diagnostic pop
+            #endif
 
             CORRADE_ITERATION(error);
             CORRADE_ITERATION(key);
