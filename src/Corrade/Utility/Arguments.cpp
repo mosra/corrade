@@ -573,24 +573,30 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
     const Entry* valueFor = nullptr;
     bool optionsAllowed = true;
     std::size_t shortOptionPackOffset = 0;
+    std::size_t valueOffset = 0;
     Containers::Array<bool> parsedArguments{_entries.size()};
     Containers::Array<const char*> argumentValues;
 
     for(int i = 1; i < argc; ++i) {
+        /* There can be always only one of these non-zero */
+        CORRADE_INTERNAL_ASSERT(!shortOptionPackOffset || !valueOffset);
+
         /* Value for given argument. The shortOptionPackOffset is zero in case
-           we're not coming from a short option pack */
+           we're not coming from a short option pack, the valueOffset is
+           non-zero only if this is a long option with a =. */
         if(valueFor) {
             if(valueFor->type == Type::NamedArgument || valueFor->type == Type::Option) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
-                _values[valueFor->id] = argv[i] + shortOptionPackOffset;
+                _values[valueFor->id] = argv[i] + shortOptionPackOffset + valueOffset;
             } else if(valueFor->type == Type::ArrayOption) {
                 CORRADE_INTERNAL_ASSERT(valueFor->id < _arrayValues.size());
-                arrayAppend(_arrayValues[valueFor->id], InPlaceInit, argv[i] + shortOptionPackOffset);
+                arrayAppend(_arrayValues[valueFor->id], InPlaceInit, argv[i] + shortOptionPackOffset + valueOffset);
             } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 
             /* The value always eats everything until the end, so there's
                nothing left in the pack for the next iteration */
             shortOptionPackOffset = 0;
+            valueOffset = 0;
 
             parsedArguments[valueFor-_entries.begin()] = true;
             valueFor = nullptr;
@@ -650,7 +656,13 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
 
             /* Long option */
             } else {
-                const std::string key = argv[i]+2;
+                std::string key = argv[i]+2;
+
+                /* If the key contains a =, use just the prefix before, the
+                   rest is the value */
+                const std::size_t foundEquals = key.find('=');
+                if(foundEquals != std::string::npos)
+                    key = key.substr(0, foundEquals);
 
                 /* If this is prefixed version and the option does not have the
                    prefix, ignore. Do this before verifying validity of the key
@@ -701,12 +713,31 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
                     Error() << "Unknown command-line argument" << std::string("--") + key;
                     return false;
                 }
+
+                /* If the option contained a =, parse the rest of the argument
+                   as a value in the next step */
+                if(foundEquals != std::string::npos) {
+                    CORRADE_INTERNAL_ASSERT(!valueOffset);
+                    valueOffset = foundEquals + 3;
+                }
             }
 
             CORRADE_INTERNAL_ASSERT(found);
 
             /* Boolean option */
             if(found->type == Type::BooleanOption) {
+                /* Boolean options can't be specified with = right now */
+                /** @todo allow =0, =1, =false, =true to reset the boolean
+                    options if set previously (also on/off to be consistent
+                    with env vars?) */
+                if(valueOffset) {
+                    if(_parseErrorCallback(*this, ParseError::InvalidBooleanOption, argv[i] + 2))
+                        continue;
+
+                    Error{} << "Invalid boolean command-line argument" << argv[i];
+                    return false;
+                }
+
                 CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
                 _booleans[found->id] = true;
                 parsedArguments[found-_entries.begin()] = true;
@@ -756,6 +787,10 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
                pack offset to zero  */
             } else shortOptionPackOffset = 0;
 
+            /* If there is an equals sign, stay at the same value */
+            if(valueOffset)
+                --i;
+
         /* Argument */
         } else {
             /* Ignore if this is the prefixed version */
@@ -768,8 +803,9 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
         }
     }
 
-    /* There should be no leftover unparsed packed short options */
-    CORRADE_INTERNAL_ASSERT(!shortOptionPackOffset);
+    /* There should be no leftover unparsed packed short options or long option
+       values after the equals sign */
+    CORRADE_INTERNAL_ASSERT(!shortOptionPackOffset && !valueOffset);
 
     /* Expected value, but none given */
     if(valueFor && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
@@ -1167,6 +1203,7 @@ Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
         #define _c(value) case Arguments::ParseError::value: return debug << "::" #value;
         _c(InvalidShortArgument)
         _c(InvalidArgument)
+        _c(InvalidBooleanOption)
         _c(UnknownShortArgument)
         _c(UnknownArgument)
         _c(SuperfluousArgument)

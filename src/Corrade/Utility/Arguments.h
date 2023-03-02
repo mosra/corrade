@@ -50,11 +50,11 @@ namespace Corrade { namespace Utility {
 @brief Command-line argument parser
 
 Parses Unix-style command line, with positional and named arguments and options
-both in a short (e.g., `-o file`) and long variant (e.g., `--output file`),
-boolean options and array options. If needed, positional arguments can be
-separated from named ones using `--`; short options can be packed together
-(e.g. `-xzOfile.dat` is equivalent to `-x -z -O file.dat` providing `-x` and
-`-z` are boolean options).
+both in a short (e.g., `-o file`) and long variant (e.g., `--output file` as
+well as `--output=file`), boolean options and array options. If needed,
+positional arguments can be separated from named ones using `--`; short options
+can be packed together (e.g. `-xzOfile.dat` is equivalent to
+`-x -z -O file.dat` providing `-x` and `-z` are boolean options).
 
 The parsing is semi-autonomous, which means that the parser will also exit with
 failure or print help text (and exit) on its own. if `-h` or `--help` is
@@ -239,6 +239,20 @@ class CORRADE_UTILITY_EXPORT Arguments {
              * @endcode
              */
             InvalidArgument,
+
+            /**
+             * Invalid long boolean option (i.e., specified with an equals
+             * sign). The function receives the key, equals and value without
+             * the leading `--`. If not handled, the default diagnostic is for
+             * example
+             *
+             * @code{.shell-session}
+             * Invalid command-line argument --verbose=13
+             * @endcode
+             *
+             * @m_since_latest
+             */
+            InvalidBooleanOption,
 
             /**
              * A short argument that was not added with @ref addArgument(),
@@ -481,8 +495,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If no help text is set, the argument is not displayed in the
          * argument list. Call @ref setHelp() to set it. Argument value can be
-         * retrieved using @ref value(). If more than one `-a` / `--argument`
-         * is passed, value of the last one is picked.
+         * retrieved using @ref value(). It's also possible to use
+         * `--argument=ARGUMENT` instead of delimiting the argument value with
+         * whitespace. If more than one `-a` / `--argument` is passed, value of
+         * the last one is picked.
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
@@ -533,8 +549,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If no help text is set, the option is not displayed in the argument
          * list. Call @ref setHelp() to set it. Option value can be retrieved
-         * using @ref value(). If more than one `-o` / `--option` is passed,
-         * value of the last one is picked.
+         * using @ref value(). It's also possible to use `--option=OPTION`
+         * instead of delimiting the option value with whitespace. If more than
+         * one `-o` / `--option` is passed, value of the last one is picked.
          *
          * Short key is not allowed in the prefixed version, use
          * @ref addOption(std::string, std::string) in that case instead.

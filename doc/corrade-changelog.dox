@@ -304,6 +304,9 @@ namespace Corrade {
 -   @ref Utility::Arguments can now recognize short options packed together
     (e.g. `-xzOfile.dat` is equivalent to `-x -z -O file.dat` providing `-x`
     and `-z` are boolean options)
+-   @ref Utility::Arguments now recognizes long options in the `--option=value`
+    form in addition to `--option value`, and there's a related new
+    @ref Utility::Arguments::ParseError::InvalidBooleanOption error state.
 -   Removed unnecessarily excessive @cpp char** @ce overloads in
     @ref Utility::Arguments in favor of a single one (see
     [mosra/corrade#](https://github.com/mosra/corrade/pull/142))

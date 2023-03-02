@@ -104,6 +104,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseShortBooleanOptionPack();
     void parseShortBooleanOptionValuePack();
 
+    void parseLongOptionEquals();
+
     void parseDuplicateOptions();
 
     void parseArrayArguments();
@@ -111,6 +113,7 @@ struct ArgumentsTest: TestSuite::Tester {
 
     void parseUnknownShortArgument();
     void parseUnknownLongArgument();
+    void parseUnknownLongArgumentEquals();
     void parseSuperfluousArgument();
     void parsePositionalArgumentAsNamed();
     void parsePositionalArrayArgumentAsNamed();
@@ -119,7 +122,10 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseArgumentAfterSeparator();
     void parseInvalidShortArgument();
     void parseInvalidLongArgument();
+    void parseInvalidLongArgumentEquals();
     void parseInvalidLongArgumentDashes();
+    void parseEqualsWithNoKey();
+    void parseBooleanWithEquals();
 
     void parseMissingValue();
     void parseMissingOption();
@@ -128,6 +134,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingArrayArgumentLast();
 
     void prefixedParse();
+    void prefixedParseEquals();
     void prefixedParseMinus();
     void prefixedParseMinusMinus();
     void prefixedParseHelpArgument();
@@ -213,8 +220,11 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArrayArguments,
               &ArgumentsTest::parseArrayOptions,
 
+              &ArgumentsTest::parseLongOptionEquals,
+
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseUnknownLongArgument,
+              &ArgumentsTest::parseUnknownLongArgumentEquals,
               &ArgumentsTest::parseSuperfluousArgument,
               &ArgumentsTest::parsePositionalArgumentAsNamed,
               &ArgumentsTest::parsePositionalArrayArgumentAsNamed,
@@ -223,7 +233,10 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArgumentAfterSeparator,
               &ArgumentsTest::parseInvalidShortArgument,
               &ArgumentsTest::parseInvalidLongArgument,
+              &ArgumentsTest::parseInvalidLongArgumentEquals,
               &ArgumentsTest::parseInvalidLongArgumentDashes,
+              &ArgumentsTest::parseEqualsWithNoKey,
+              &ArgumentsTest::parseBooleanWithEquals,
 
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
@@ -232,6 +245,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseMissingArrayArgumentLast,
 
               &ArgumentsTest::prefixedParse,
+              &ArgumentsTest::prefixedParseEquals,
               &ArgumentsTest::prefixedParseMinus,
               &ArgumentsTest::prefixedParseMinusMinus,
               &ArgumentsTest::prefixedParseHelpArgument,
@@ -951,6 +965,30 @@ void ArgumentsTest::parseShortBooleanOptionValuePack() {
     CORRADE_COMPARE(args.value("package"), "corrade");
 }
 
+void ArgumentsTest::parseLongOptionEquals() {
+    Arguments args;
+    args.addOption("foo")
+        .addNamedArgument("bar")
+        .addOption("no")
+        .addArrayOption('a', "add")
+        .addBooleanOption('v', "verbose");
+
+    /* The short options shouldn't interfere with the = parsing in any way */
+    const char* argv[]{"", "-a13", "--foo=first", "-a=###", "--add=226", "--no", "equals", "--bar=second", "--add", "no equals either", "-va12v"};
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("foo"), "first");
+    CORRADE_COMPARE(args.value("bar"), "second");
+    CORRADE_COMPARE(args.value("no"), "equals");
+    CORRADE_COMPARE(args.arrayValueCount("add"), 5);
+    CORRADE_COMPARE(args.arrayValue("add", 0), "13");
+    /* The equals is a part of the value in case of the short option */
+    CORRADE_COMPARE(args.arrayValue("add", 1), "=###");
+    CORRADE_COMPARE(args.arrayValue("add", 2), "226");
+    CORRADE_COMPARE(args.arrayValue("add", 3), "no equals either");
+    CORRADE_COMPARE(args.arrayValue("add", 4), "12v");
+    CORRADE_VERIFY(args.isSet("verbose"));
+}
+
 void ArgumentsTest::parseDuplicateOptions() {
     Arguments args;
     args.addOption('F', "foo")
@@ -1044,6 +1082,28 @@ void ArgumentsTest::parseUnknownLongArgument() {
     });
 
     const char* argv[] = { "", "--error" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
+}
+
+void ArgumentsTest::parseUnknownLongArgumentEquals() {
+    /* Same as parseUnknownLongArgument(), except that the equals and the value
+       should be stripped away from the callback as well as the message */
+
+    Arguments args;
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::UnknownArgument);
+        CORRADE_COMPARE(key, "error");
+        return false;
+    });
+
+    const char* argv[] = { "", "--error=large" };
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1201,6 +1261,28 @@ void ArgumentsTest::parseInvalidLongArgument() {
     CORRADE_COMPARE(out.str(), "Invalid command-line argument --??\n");
 }
 
+void ArgumentsTest::parseInvalidLongArgumentEquals() {
+    /* Same as parseInvalidLongArgument() except that the equals and the value
+       should be stripped away from the callback as well as the message */
+
+    Arguments args;
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidArgument);
+        CORRADE_COMPARE(key, "help?");
+        return false;
+    });
+
+    const char* argv[] = { "", "--help?=##" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument --help?\n");
+}
+
 void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Arguments args;
     args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
@@ -1218,6 +1300,45 @@ void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
+}
+
+void ArgumentsTest::parseEqualsWithNoKey() {
+    Arguments args;
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidArgument);
+        CORRADE_COMPARE(key, "");
+        return false;
+    });
+
+    const char* argv[] = { "", "--=value" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument --\n");
+}
+
+void ArgumentsTest::parseBooleanWithEquals() {
+    Arguments args;
+    args.addBooleanOption("yes");
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::InvalidBooleanOption);
+        CORRADE_COMPARE(key, "yes=13");
+        return false;
+    });
+
+    const char* argv[] = { "", "--yes=13" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Invalid boolean command-line argument --yes=13\n");
 }
 
 void ArgumentsTest::parseMissingValue() {
@@ -1331,6 +1452,38 @@ void ArgumentsTest::prefixedParse() {
     CORRADE_COMPARE(arg2.prefix(), "read");
 
     const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "file.dat", "--read-seek", "-0" };
+
+    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(arg1.isSet("binary"));
+    CORRADE_COMPARE(arg1.value("speed"), "fast");
+    CORRADE_COMPARE(arg1.value("file"), "file.dat");
+
+    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(arg2.value("behavior"), "buffered");
+    CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
+    CORRADE_COMPARE(arg2.arrayValueCount("seek"), 2);
+    CORRADE_COMPARE(arg2.arrayValue("seek", 0), "33");
+    CORRADE_COMPARE(arg2.arrayValue("seek", 1), "-0");
+}
+
+void ArgumentsTest::prefixedParseEquals() {
+    /* Same as prefixedParse(), except that some options on both sides use = */
+
+    Arguments arg1;
+    arg1.addArgument("file")
+        .addBooleanOption('b', "binary")
+        .addOption("speed")
+        .addSkippedPrefix("read");
+
+    Arguments arg2{"read"};
+    arg2.addOption("behavior")
+        .addOption("buffer-size")
+        .addArrayOption("seek");
+
+    CORRADE_COMPARE(arg1.prefix(), "");
+    CORRADE_COMPARE(arg2.prefix(), "read");
+
+    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed=fast", "--binary", "--read-seek=33", "--read-buffer-size=4K", "file.dat", "--read-seek", "-0" };
 
     CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(arg1.isSet("binary"));
@@ -1727,6 +1880,9 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
                 case Arguments::ParseError::InvalidArgument:
                     CORRADE_COMPARE(key, "!!");
                     return true;
+                case Arguments::ParseError::InvalidBooleanOption:
+                    CORRADE_COMPARE(key, "hello=");
+                    return true;
                 case Arguments::ParseError::UnknownShortArgument:
                     CORRADE_COMPARE(key, "v");
                     return true;
@@ -1757,7 +1913,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
             return true;
         }, &count);
 
-    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--input", "--output" };
+    const char* argv[] = { "", "-?", "--!!", "-v", "--halp", "-help", "--hello", "--hello=", "--input", "--output" };
     /* The parsing should ignore the errors, not die where it shouldn't, but
        still extracting the valid optionas */
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
@@ -1781,6 +1937,7 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
                 /* All those handled above */
                 case Arguments::ParseError::InvalidShortArgument:
                 case Arguments::ParseError::InvalidArgument:
+                case Arguments::ParseError::InvalidBooleanOption:
                 case Arguments::ParseError::UnknownShortArgument:
                 case Arguments::ParseError::UnknownArgument:
                 case Arguments::ParseError::PositionalArgumentAsNamed:
