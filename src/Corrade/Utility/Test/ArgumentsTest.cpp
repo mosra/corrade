@@ -109,8 +109,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseArrayArguments();
     void parseArrayOptions();
 
-    void parseUnknownArgument();
     void parseUnknownShortArgument();
+    void parseUnknownLongArgument();
     void parseSuperfluousArgument();
     void parsePositionalArgumentAsNamed();
     void parsePositionalArrayArgumentAsNamed();
@@ -213,8 +213,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArrayArguments,
               &ArgumentsTest::parseArrayOptions,
 
-              &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
+              &ArgumentsTest::parseUnknownLongArgument,
               &ArgumentsTest::parseSuperfluousArgument,
               &ArgumentsTest::parsePositionalArgumentAsNamed,
               &ArgumentsTest::parsePositionalArrayArgumentAsNamed,
@@ -1013,25 +1013,6 @@ void ArgumentsTest::parseArrayOptions() {
     CORRADE_COMPARE(args.arrayValue("input", 0), "in.txt");
 }
 
-void ArgumentsTest::parseUnknownArgument() {
-    Arguments args;
-    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
-        /* Not parsed yet as this is an unrecoverable error */
-        CORRADE_VERIFY(!args.isParsed());
-
-        CORRADE_COMPARE(error, Arguments::ParseError::UnknownArgument);
-        CORRADE_COMPARE(key, "error");
-        return false;
-    });
-
-    const char* argv[] = { "", "--error" };
-
-    std::ostringstream out;
-    Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
-}
-
 void ArgumentsTest::parseUnknownShortArgument() {
     Arguments args;
     args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
@@ -1049,6 +1030,25 @@ void ArgumentsTest::parseUnknownShortArgument() {
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument -e\n");
+}
+
+void ArgumentsTest::parseUnknownLongArgument() {
+    Arguments args;
+    args.setParseErrorCallback([](const Arguments& args, Arguments::ParseError error, const std::string& key) {
+        /* Not parsed yet as this is an unrecoverable error */
+        CORRADE_VERIFY(!args.isParsed());
+
+        CORRADE_COMPARE(error, Arguments::ParseError::UnknownArgument);
+        CORRADE_COMPARE(key, "error");
+        return false;
+    });
+
+    const char* argv[] = { "", "--error" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
 }
 
 void ArgumentsTest::parseSuperfluousArgument() {
