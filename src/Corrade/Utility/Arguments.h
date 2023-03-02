@@ -426,7 +426,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
-         * @see @ref addArrayArgument(), @ref addFinalOptionalArgument()
+         * @see @ref addArrayArgument(), @ref addFinalOptionalArgument(),
+         *      @ref addNamedArgument()
          */
         Arguments& addArgument(std::string key);
 
@@ -484,6 +485,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, no
          * arguments --- use @ref addOption() in that case instead.
+         * @see @ref addOption()
          */
         Arguments& addNamedArgument(char shortKey, std::string key);
 
@@ -500,13 +502,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Arguments:
          *   --argument        help text
          * @endcode
-         *
-         * If no help text is set, the argument is not displayed in the
-         * argument list. Call @ref setHelp() to set it. Argument value can be
-         * retrieved using @ref value().
-         *
-         * Only non-boolean options are allowed in the prefixed version, no
-         * arguments --- use @ref addOption() in that case instead.
          */
         Arguments& addNamedArgument(std::string key) {
             return addNamedArgument('\0', std::move(key));
@@ -541,7 +536,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Short key is not allowed in the prefixed version, use
          * @ref addOption(std::string, std::string) in that case instead.
-         * @see @ref addArrayOption(), @ref addBooleanOption()
+         * @see @ref addArrayOption(), @ref addBooleanOption(),
+         *      @ref addNamedArgument()
          */
         Arguments& addOption(char shortKey, std::string key, std::string defaultValue = std::string());
 
@@ -559,8 +555,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   --option          help text
          *                     (default: defaultValue)
          * @endcode
-         *
-         * @see @ref addNamedArgument(), @ref addFinalOptionalArgument()
          */
         Arguments& addOption(std::string key, std::string defaultValue = std::string()) {
             return addOption('\0', std::move(key), std::move(defaultValue));
@@ -626,7 +620,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * @code{.shell-session}
          * Usage:
-         *   ./app [-o|-option]
+         *   ./app [-o|--option]
          *
          * Arguments:
          *   -o, --option      help text
@@ -640,7 +634,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() in that case instead.
-         * @see @ref addOption(), @ref addArrayOption()
+         * @see @ref addOption()
          */
         Arguments& addBooleanOption(char shortKey, std::string key);
 
