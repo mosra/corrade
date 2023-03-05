@@ -169,6 +169,8 @@ const struct {
 } PrefixedParseData[]{
     {"", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "file.dat", "--read-seek", "-0"}}},
     {"some long values with equals", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--speed=fast", "--binary", "--read-seek=33", "--read-buffer-size=4K", "file.dat", "--read-seek", "-0"}}},
+    {"positional argument after prefixed with equals", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "--read-seek=-0", "file.dat"}}},
+    {"unprefixed argument after prefixed with equals", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "--read-seek=-0", "--speed", "fast", "file.dat"}}}
 };
 
 ArgumentsTest::ArgumentsTest() {
