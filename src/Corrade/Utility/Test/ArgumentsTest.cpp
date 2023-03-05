@@ -163,6 +163,14 @@ struct ArgumentsTest: TestSuite::Tester {
     void debugParseError();
 };
 
+const struct {
+    const char* name;
+    Containers::Array<const char*> argv;
+} PrefixedParseData[]{
+    {"", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "file.dat", "--read-seek", "-0"}}},
+    {"some long values with equals", {InPlaceInit, {"", "-b", "--read-behavior", "buffered", "--speed=fast", "--binary", "--read-seek=33", "--read-buffer-size=4K", "file.dat", "--read-seek", "-0"}}},
+};
+
 ArgumentsTest::ArgumentsTest() {
     addTests({&ArgumentsTest::environment,
               &ArgumentsTest::environmentUtf8,
@@ -242,11 +250,12 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseMissingOption,
               &ArgumentsTest::parseMissingArgument,
               &ArgumentsTest::parseMissingArrayArgumentMiddle,
-              &ArgumentsTest::parseMissingArrayArgumentLast,
+              &ArgumentsTest::parseMissingArrayArgumentLast});
 
-              &ArgumentsTest::prefixedParse,
-              &ArgumentsTest::prefixedParseEquals,
-              &ArgumentsTest::prefixedParseMinus,
+    addInstancedTests({&ArgumentsTest::prefixedParse},
+        Containers::arraySize(PrefixedParseData));
+
+    addTests({&ArgumentsTest::prefixedParseMinus,
               &ArgumentsTest::prefixedParseMinusMinus,
               &ArgumentsTest::prefixedParseHelpArgument,
               &ArgumentsTest::prefixedHelpWithoutPrefix,
@@ -1437,37 +1446,8 @@ void ArgumentsTest::parseMissingArrayArgumentLast() {
 }
 
 void ArgumentsTest::prefixedParse() {
-    Arguments arg1;
-    arg1.addArgument("file")
-        .addBooleanOption('b', "binary")
-        .addOption("speed")
-        .addSkippedPrefix("read");
-
-    Arguments arg2{"read"};
-    arg2.addOption("behavior")
-        .addOption("buffer-size")
-        .addArrayOption("seek");
-
-    CORRADE_COMPARE(arg1.prefix(), "");
-    CORRADE_COMPARE(arg2.prefix(), "read");
-
-    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-seek", "33", "--read-buffer-size", "4K", "file.dat", "--read-seek", "-0" };
-
-    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_VERIFY(arg1.isSet("binary"));
-    CORRADE_COMPARE(arg1.value("speed"), "fast");
-    CORRADE_COMPARE(arg1.value("file"), "file.dat");
-
-    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(arg2.value("behavior"), "buffered");
-    CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
-    CORRADE_COMPARE(arg2.arrayValueCount("seek"), 2);
-    CORRADE_COMPARE(arg2.arrayValue("seek", 0), "33");
-    CORRADE_COMPARE(arg2.arrayValue("seek", 1), "-0");
-}
-
-void ArgumentsTest::prefixedParseEquals() {
-    /* Same as prefixedParse(), except that some options on both sides use = */
+    auto&& data = PrefixedParseData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
     Arguments arg1;
     arg1.addArgument("file")
@@ -1483,14 +1463,12 @@ void ArgumentsTest::prefixedParseEquals() {
     CORRADE_COMPARE(arg1.prefix(), "");
     CORRADE_COMPARE(arg2.prefix(), "read");
 
-    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed=fast", "--binary", "--read-seek=33", "--read-buffer-size=4K", "file.dat", "--read-seek", "-0" };
-
-    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(arg1.tryParse(data.argv.size(), data.argv));
     CORRADE_VERIFY(arg1.isSet("binary"));
     CORRADE_COMPARE(arg1.value("speed"), "fast");
     CORRADE_COMPARE(arg1.value("file"), "file.dat");
 
-    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_VERIFY(arg2.tryParse(data.argv.size(), data.argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
     CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
     CORRADE_COMPARE(arg2.arrayValueCount("seek"), 2);
