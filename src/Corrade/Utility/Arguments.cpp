@@ -679,10 +679,13 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
                 for(const std::pair<std::string, std::string>& prefix: _skippedPrefixes) {
                     if(!keyHasPrefix(key, prefix.first)) continue;
 
-                    /* Ignore the option and also its value (except for
-                       help, which is the only allowed boolean option) */
+                    /* Ignore the option and also its value, unless the option
+                       contains an equals sign (in which case the value is a
+                       part of it) and unless it's --prefix-help, which is the only allowed prefixed boolean option (in which case
+                       there's no value). */
                     ignore = true;
-                    if(key != prefix.first + "help") ++i;
+                    if(foundEquals == std::string::npos && key != prefix.first + "help")
+                        ++i;
                     break;
                 }
                 if(ignore) continue;
