@@ -365,8 +365,8 @@ void TripleTest::constructValueInit() {
 }
 
 void TripleTest::constructNoInit() {
-    Triple<float, int, bool> aTrivial{35.0f, 3, true};
-    new(&aTrivial) Triple<float, int, bool>{Corrade::NoInit};
+    Triple<float, int, char> aTrivial{35.0f, 3, 'F'};
+    new(&aTrivial) Triple<float, int, char>{Corrade::NoInit};
     {
         /* Explicitly check we're not on Clang because certain Clang-based IDEs
            inherit __GNUC__ if GCC is used instead of leaving it at 4 like
@@ -381,9 +381,9 @@ void TripleTest::constructNoInit() {
            inherit __GNUC__ if GCC is used instead of leaving it at 4 like
            Clang itself does */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
-        CORRADE_EXPECT_FAIL_IF(aTrivial.third() != true, "GCC 6.1+ misoptimizes and leaves the value at random.");
+        CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and leaves the value at random.");
         #endif
-        CORRADE_COMPARE(aTrivial.third(), true);
+        CORRADE_COMPARE(aTrivial.third(), 'F');
     }
 
     struct Foo {
