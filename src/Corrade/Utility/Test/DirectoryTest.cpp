@@ -1353,8 +1353,11 @@ void DirectoryTest::tmp() {
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
-        CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
-        CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
+        /* PathTest writes a file named 'a', and often these two tests get run
+           at the same time, causing a race where one removes the other's file.
+           So name it 'b' instead. */
+        CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "b"), "hello"));
+        CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "b")));
     }
 }
 
