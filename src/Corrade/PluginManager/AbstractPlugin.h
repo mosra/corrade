@@ -292,7 +292,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         virtual bool canBeDeleted();
 
         /**
-         * @brief Identifier string
+         * @brief Plugin identifier string
          *
          * Name under which the plugin was instantiated, either its true name
          * or an alias. If the plugin was not instantiated via a plugin manager,
@@ -307,7 +307,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         Containers::StringView plugin() const;
 
         /**
-         * @brief Metadata
+         * @brief Plugin metadata
          *
          * Metadata associated with given plugin. If the plugin was not
          * instantiated through a plugin manager, returns @cpp nullptr @ce.

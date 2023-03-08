@@ -342,7 +342,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         void save(std::ostream& out);
 
         /**
-         * @brief Save configuration
+         * @brief Save the configuration
          *
          * If @ref filename() is not empty, writes configuration back to the
          * file. Returns @cpp true @ce on success, @cpp false @ce otherwise.

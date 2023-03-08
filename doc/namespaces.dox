@@ -137,7 +137,7 @@ Parts of this library are additionally available in a form of
  * @brief Namespace @ref Corrade::Utility, @ref Corrade::Utility::Path, @ref Corrade::Utility::String, @ref Corrade::Utility::System, @ref Corrade::Utility::Unicode
  */
 /** @namespace Corrade::Utility
-@brief Utitlities
+@brief Utilities
 
 This library contains utility classes used by all other Corrade parts, like
 debug and error output (class @ref Debug), access to configuration files (class

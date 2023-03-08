@@ -227,7 +227,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         AbstractManager& operator=(AbstractManager&&) = delete;
 
         /**
-         * @brief Plugin interface
+         * @brief Plugin interface string
          *
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager. The returned view is always both

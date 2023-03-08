@@ -42,7 +42,7 @@
 namespace Corrade { namespace Utility {
 
 /**
-@brief Group of values in configuration file
+@brief Group of values in a configuration file
 
 Provides access to values and subgroups. See @ref Configuration class
 documentation for usage example.
@@ -162,7 +162,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         Groups groups() const;
 
         /**
-         * @brief Whether this group has subgroups
+         * @brief Whether this group has any subgroups
          *
          * @see @ref isEmpty(), @ref hasGroup(), @ref groupCount(),
          *      @ref hasValues()
@@ -196,7 +196,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         unsigned int groupCount(const std::string& name) const;
 
         /**
-         * @brief Group of given name
+         * @brief Group
          * @param name      Name
          * @param index     Group index. Default is first found group.
          *
@@ -211,7 +211,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         std::vector<const ConfigurationGroup*> groups(const std::string& name) const; /**< @overload */
 
         /**
-         * @brief Add new group
+         * @brief Add a group
          * @param name      Name. The name must not be empty and must not
          *      contain newline or any of `[]/` characters.
          * @param group     Existing group.
@@ -223,7 +223,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         void addGroup(const std::string& name, ConfigurationGroup* group);
 
         /**
-         * @brief Add new group
+         * @brief Add a group
          * @param name      Name. The name must not be empty and must not
          *      contain newline or any of `[]/` characters.
          *
@@ -232,7 +232,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         ConfigurationGroup* addGroup(const std::string& name);
 
         /**
-         * @brief Remove group
+         * @brief Remove a group
          * @param name      Name of the group
          * @param index     Group index. Default is first found group.
          *
@@ -243,7 +243,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         bool removeGroup(const std::string& name, unsigned int index = 0);
 
         /**
-         * @brief Remove group
+         * @brief Remove a group
          *
          * Returns @cpp true @ce if given group was found and removed,
          * @cpp false @ce otherwise.
@@ -351,7 +351,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
-         * @brief Set string value
+         * @brief Set a string value
          * @param key       Key. The key must not be empty and must not contain
          *      newline or `=` character.
          * @param value     Value

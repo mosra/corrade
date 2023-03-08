@@ -106,7 +106,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         std::string name() const;
 
         /**
-         * @brief Plugins on which this plugin depend
+         * @brief Plugins on which this plugin depends
          *
          * List of plugins which must be loaded before this plugin can be
          * loaded.
