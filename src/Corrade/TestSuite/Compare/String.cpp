@@ -37,6 +37,9 @@ ComparisonStatusFlags Comparator<Compare::String>::operator()(const Containers::
 }
 
 void Comparator<Compare::String>::printMessage(const ComparisonStatusFlags flags, Utility::Debug& out, const char* const actual, const char* const expected) const {
+    #ifdef CORRADE_NO_ASSERT
+    static_cast<void>(flags);
+    #endif
     CORRADE_INTERNAL_ASSERT(flags == ComparisonStatusFlag::Failed);
 
     out << "Strings" << actual << "and" << expected << "are different."
