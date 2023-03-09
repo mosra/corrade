@@ -54,6 +54,7 @@ corrade_add_test(PluginManagerManagerTest
     AbstractDeletable.cpp
     AbstractDisabledMetadata.cpp
     AbstractFood.cpp
+    AbstractWrongPlugin.cpp
     LIBRARIES
         CorradePluginManagerTestLib
         Canary CustomSuffixStatic DisabledMetadataStatic

@@ -48,6 +48,7 @@
 #include "AbstractDisabledMetadata.h"
 #include "AbstractFood.h"
 #include "AbstractGeneratedMetadata.h"
+#include "AbstractWrongPlugin.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
@@ -457,12 +458,6 @@ void ManagerTest::nameList() {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-struct WrongPlugin: AbstractPlugin {
-    static Containers::Array<Containers::String> pluginSearchPaths() {
-        return {InPlaceInit, {Utility::Path::join(PLUGINS_DIR, "wrong")}};
-    }
-};
-
 void ManagerTest::wrongMetadataFile() {
     std::ostringstream out;
     Error redirectError{&out};
@@ -500,11 +495,11 @@ void ManagerTest::unresolvedReference() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("UnresolvedReference"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("UnresolvedReference"), PluginManager::LoadState::NotLoaded);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::formatString("PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"{}/UnresolvedReference{}\": ", manager.pluginDirectory(), WrongPlugin::pluginSuffix()),
+        Utility::formatString("PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"{}/UnresolvedReference{}\": ", manager.pluginDirectory(), AbstractWrongPlugin::pluginSuffix()),
         TestSuite::Compare::StringHasPrefix);
 }
 
@@ -512,7 +507,7 @@ void ManagerTest::noPluginVersion() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginVersion"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginVersion"), PluginManager::LoadState::NotLoaded);
     /* On Windows the error code is printed as well, on Unix only dlerror()
@@ -542,7 +537,7 @@ void ManagerTest::noPluginInterface() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInterface"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInterface"), PluginManager::LoadState::NotLoaded);
     /* On Windows the error code is printed as well, on Unix only dlerror()
@@ -571,7 +566,7 @@ void ManagerTest::noPluginInitializer() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInitializer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInitializer"), PluginManager::LoadState::NotLoaded);
     /* On Windows the error code is printed as well, on Unix only dlerror()
@@ -591,7 +586,7 @@ void ManagerTest::noPluginFinalizer() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginFinalizer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginFinalizer"), PluginManager::LoadState::NotLoaded);
     /* On Windows the error code is printed as well, on Unix only dlerror()
@@ -611,7 +606,7 @@ void ManagerTest::noPluginInstancer() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<WrongPlugin> manager;
+    PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("NoPluginInstancer"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("NoPluginInstancer"), PluginManager::LoadState::NotLoaded);
     /* On Windows the error code is printed as well, on Unix only dlerror()

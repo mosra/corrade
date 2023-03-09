@@ -33,7 +33,7 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(InitFiniDynamic PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../$<CONFIG>)
 endif()
 
-corrade_add_static_plugin(InitFiniStatic ${CMAKE_CURRENT_BINARY_DIR} ../dummy.conf InitFiniStatic.cpp)
+corrade_add_static_plugin(InitFiniStatic ${CMAKE_CURRENT_BINARY_DIR} InitFiniStatic.conf InitFiniStatic.cpp)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(InitFiniStatic PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../$<CONFIG>)
 endif()

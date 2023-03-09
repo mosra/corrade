@@ -24,18 +24,18 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-corrade_add_plugin(NoPluginVersion ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginVersion.cpp)
-corrade_add_plugin(NoPluginInterface ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInterface.cpp)
-corrade_add_plugin(NoPluginInitializer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInitializer.cpp)
-corrade_add_plugin(NoPluginFinalizer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginFinalizer.cpp)
-corrade_add_plugin(NoPluginInstancer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInstancer.cpp)
+corrade_add_plugin(NoPluginVersion ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginVersion.cpp)
+corrade_add_plugin(NoPluginInterface ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginInterface.cpp)
+corrade_add_plugin(NoPluginInitializer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginInitializer.cpp)
+corrade_add_plugin(NoPluginFinalizer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginFinalizer.cpp)
+corrade_add_plugin(NoPluginInstancer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginInstancer.cpp)
 
 set_target_properties(
-    NoPluginVersion NoPluginVersion-metadata
-    NoPluginInterface NoPluginInterface-metadata
-    NoPluginInitializer NoPluginInitializer-metadata
-    NoPluginFinalizer NoPluginFinalizer-metadata
-    NoPluginInstancer NoPluginInstancer-metadata
+    NoPluginVersion
+    NoPluginInterface
+    NoPluginInitializer
+    NoPluginFinalizer
+    NoPluginInstancer
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
@@ -43,8 +43,8 @@ set_target_properties(
 
 if(NOT CORRADE_TARGET_WINDOWS)
     # On Windows it's SHARED, not MODULE, so this doesn't really work
-    corrade_add_plugin(UnresolvedReference ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf UnresolvedReference.cpp)
-    set_target_properties(UnresolvedReference UnresolvedReference-metadata
+    corrade_add_plugin(UnresolvedReference ${CMAKE_CURRENT_BINARY_DIR} "" "" UnresolvedReference.cpp)
+    set_target_properties(UnresolvedReference
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
