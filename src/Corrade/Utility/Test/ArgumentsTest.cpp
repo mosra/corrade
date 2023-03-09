@@ -134,7 +134,6 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingArrayArgumentLast();
 
     void prefixedParse();
-    void prefixedParseEquals();
     void prefixedParseMinus();
     void prefixedParseMinusMinus();
     void prefixedParseHelpArgument();
