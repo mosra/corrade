@@ -110,6 +110,12 @@ extern "C" int wmain(int argc, wchar_t** wargv) {
         SetConsoleMode(out, currentConsoleMode|ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     #endif
 
+    /* Opening a dialog for std::abort() from within a terminal app is stupid,
+       don't. Note that this is done only for terminal apps, wWinMain() above
+       doesn't have this -- without a console attached it would have no other
+       way to report a failure to the user. */
+    _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG|_CALL_REPORTFAULT);
+
     /* Convert argv to UTF-8 */
     Containers::Array<char> storage;
     #ifdef __MINGW32__

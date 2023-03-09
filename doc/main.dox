@@ -100,6 +100,19 @@ can either temporarily remove the `WIN32` option and rebuild or use console
 redirection (@cb{.bat} app.exe > stdout.txt @ce and
 @cb{.bat} app.exe 2> stderr.txt @ce works as expected).
 
+@section main-no-assert-dialogs No GUI assertion dialogs for command-line apps
+
+Console executables, i.e. ones *without* `WIN32` in @cmake add_executable() @ce,
+will no longer open an annoying GUI dialog in case of an assertion, but instead
+either directly jump into the debugger or exit the application. This also means
+that running command-line apps or tests in a non-interactive scenario (such as
+on a CI) will no longer make them "stuck" forever waiting for someone to close
+the dialog.
+
+This applies only to console executables, WIN32 apps still open a dialog
+because without a console attached there's no other way to report that an
+assertion fired.
+
 @section main-ansi-colors ANSI colors in console output
 
 By default, for compatibility reasons, Corrade is built with the

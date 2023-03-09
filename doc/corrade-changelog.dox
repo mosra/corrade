@@ -67,6 +67,11 @@ namespace Corrade {
     [mosra/corrade#160](https://github.com/mosra/corrade/pull/160) and
     [mosra/corrade#165](https://github.com/mosra/corrade/pull/165) for more
     information.
+-   For console applications, the @ref main "Corrade::Main" library now
+    disables showing an assertion dialog on Windows, making them either jump
+    to the debugger or exit directly. This fixes a problem in non-interactive
+    scenarios where assertions caused the apps to get stuck forever waiting for
+    someone to close the dialog.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
