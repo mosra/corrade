@@ -30,23 +30,31 @@ corrade_add_plugin(NoPluginInitializer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPlugi
 corrade_add_plugin(NoPluginFinalizer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginFinalizer.cpp)
 corrade_add_plugin(NoPluginInstancer ${CMAKE_CURRENT_BINARY_DIR} "" "" NoPluginInstancer.cpp)
 
+add_library(MissingLibraryDependencyLibrary SHARED MissingLibraryDependencyLibrary.cpp)
+# For the VisibilityMacros include
+target_link_libraries(MissingLibraryDependencyLibrary PRIVATE Corrade::Utility)
+corrade_add_plugin(MissingLibraryDependency ${CMAKE_CURRENT_BINARY_DIR} "" "" MissingLibraryDependency.cpp)
+
 set_target_properties(
     NoPluginVersion
     NoPluginInterface
     NoPluginInitializer
     NoPluginFinalizer
     NoPluginInstancer
+    MissingLibraryDependency
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong)
 
-if(NOT CORRADE_TARGET_WINDOWS)
-    # On Windows it's SHARED, not MODULE, so this doesn't really work
-    corrade_add_plugin(UnresolvedReference ${CMAKE_CURRENT_BINARY_DIR} "" "" UnresolvedReference.cpp)
-    set_target_properties(UnresolvedReference
+# On Windows the plugin dependencies have to be linked, but if we don't put the
+# DLL next to the executable (and don't load it explicitly before either), it
+# still won't work
+if(CORRADE_TARGET_WINDOWS)
+    set_target_properties(MissingLibraryDependencyLibrary
         PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong
-            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong)
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/wrong/dependency
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/wrong/dependency
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/wrong/dependency)
+    target_link_libraries(MissingLibraryDependency PRIVATE MissingLibraryDependencyLibrary CorradePluginManagerTestLib)
 endif()

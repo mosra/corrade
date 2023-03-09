@@ -47,14 +47,17 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/configure.h
     INPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
 
-corrade_add_test(PluginManagerManagerTest
+set(PluginManagerManagerTest_SRCS
     ManagerTest.cpp
     AbstractAnimal.cpp
     AbstractCustomSuffix.cpp
     AbstractDeletable.cpp
     AbstractDisabledMetadata.cpp
-    AbstractFood.cpp
-    AbstractWrongPlugin.cpp
+    AbstractFood.cpp)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    list(APPEND PluginManagerManagerTest_SRCS AbstractWrongPlugin.cpp)
+endif()
+corrade_add_test(PluginManagerManagerTest ${PluginManagerManagerTest_SRCS}
     LIBRARIES
         CorradePluginManagerTestLib
         Canary CustomSuffixStatic DisabledMetadataStatic
@@ -67,11 +70,8 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
         CustomSuffix Deletable DisabledMetadata GeneratedMetadataDynamic
         Doggo
         HotDog HotDogWithSnail OldBread RottenTomato
-        NoPluginFinalizer NoPluginInitializer NoPluginInstancer
-        NoPluginInterface NoPluginVersion WrongMetadata)
-    if(NOT CORRADE_TARGET_WINDOWS)
-        add_dependencies(PluginManagerManagerTest UnresolvedReference)
-    endif()
+        MissingLibraryDependency NoPluginFinalizer NoPluginInitializer
+        NoPluginInstancer NoPluginInterface NoPluginVersion WrongMetadata)
 endif()
 
 corrade_add_test(PluginManagerManagerInitFiniTest

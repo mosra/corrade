@@ -24,10 +24,23 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Interconnect/Receiver.h"
+#include "../AbstractWrongPlugin.h"
 
-CORRADE_VISIBILITY_EXPORT int foo(Corrade::Interconnect::Receiver& r);
-CORRADE_VISIBILITY_EXPORT int foo(Corrade::Interconnect::Receiver& r) {
-    r.disconnectAllSlots();
-    return r.slotConnectionCount();
-}
+#include "Corrade/Containers/String.h"
+#include "Corrade/PluginManager/AbstractManager.h"
+#include "Corrade/Utility/Debug.h"
+
+CORRADE_VISIBILITY_IMPORT const char* greetFromALibrary();
+
+namespace Corrade { namespace PluginManager { namespace Test {
+
+class MissingLibraryDependency: public AbstractWrongPlugin {
+    public:
+        explicit MissingLibraryDependency(AbstractManager& manager, const Containers::StringView& plugin): AbstractWrongPlugin{manager, plugin} {
+            Utility::Debug{} << greetFromALibrary();
+        }
+};
+
+}}}
+
+CORRADE_PLUGIN_REGISTER(MissingLibraryDependency, Corrade::PluginManager::Test::MissingLibraryDependency, "")

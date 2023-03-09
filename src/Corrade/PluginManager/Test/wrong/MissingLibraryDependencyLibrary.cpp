@@ -1,5 +1,3 @@
-#ifndef Corrade_PluginManager_Test_WrongPlugin_h
-#define Corrade_PluginManager_Test_WrongPlugin_h
 /*
     This file is part of Corrade.
 
@@ -26,20 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/StringView.h"
-#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/Utility/VisibilityMacros.h"
 
-namespace Corrade { namespace PluginManager { namespace Test {
-
-struct AbstractWrongPlugin: AbstractPlugin {
-    /* No interface, no metadata for the least possible code overhead */
-    static Containers::StringView pluginInterface();
-    static Containers::Array<Containers::String> pluginSearchPaths();
-    static Containers::StringView pluginMetadataSuffix();
-
-    explicit AbstractWrongPlugin(AbstractManager& manager, Containers::StringView plugin): AbstractPlugin{manager, plugin} {}
-};
-
-}}}
-
-#endif
+CORRADE_VISIBILITY_EXPORT const char* greetFromALibrary();
+CORRADE_VISIBILITY_EXPORT const char* greetFromALibrary() {
+    return "Hello!";
+}

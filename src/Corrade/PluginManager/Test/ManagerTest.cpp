@@ -89,7 +89,7 @@ struct ManagerTest: TestSuite::Tester {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void wrongMetadataFile();
     void missingMetadataFile();
-    void unresolvedReference();
+    void missingLibraryDependency();
     void noPluginVersion();
     void wrongPluginVersion();
     void noPluginInterface();
@@ -180,7 +180,7 @@ ManagerTest::ManagerTest() {
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::wrongMetadataFile,
               &ManagerTest::missingMetadataFile,
-              &ManagerTest::unresolvedReference,
+              &ManagerTest::missingLibraryDependency,
               &ManagerTest::noPluginVersion,
               &ManagerTest::wrongPluginVersion,
               &ManagerTest::noPluginInterface,
@@ -487,19 +487,15 @@ void ManagerTest::missingMetadataFile() {
         Utility::Path::join(dir, "MissingMetadata.conf")));
 }
 
-void ManagerTest::unresolvedReference() {
-    #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_SKIP("At the moment, plugins are not compiled as modules on Windows, so this is not possible to test.");
-    #endif
-
+void ManagerTest::missingLibraryDependency() {
     std::ostringstream out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
-    CORRADE_COMPARE(manager.load("UnresolvedReference"), PluginManager::LoadState::LoadFailed);
-    CORRADE_COMPARE(manager.loadState("UnresolvedReference"), PluginManager::LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.load("MissingLibraryDependency"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("MissingLibraryDependency"), PluginManager::LoadState::NotLoaded);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::formatString("PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"{}/UnresolvedReference{}\": ", manager.pluginDirectory(), AbstractWrongPlugin::pluginSuffix()),
+        Utility::formatString("PluginManager::Manager::load(): cannot load plugin MissingLibraryDependency from \"{}/MissingLibraryDependency{}\": ", manager.pluginDirectory(), AbstractWrongPlugin::pluginSuffix()),
         TestSuite::Compare::StringHasPrefix);
 }
 
