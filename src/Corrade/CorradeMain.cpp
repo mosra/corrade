@@ -110,11 +110,21 @@ extern "C" int wmain(int argc, wchar_t** wargv) {
         SetConsoleMode(out, currentConsoleMode|ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     #endif
 
+    #if !defined(CORRADE_TARGET_MINGW) || __MSVCRT_VERSION__ >= 0x800
     /* Opening a dialog for std::abort() from within a terminal app is stupid,
        don't. Note that this is done only for terminal apps, wWinMain() above
        doesn't have this -- without a console attached it would have no other
-       way to report a failure to the user. */
+       way to report a failure to the user.
+
+       On MinGW this is supported only with MSVCRT >= 8, otherwise it causes a
+       linker error: https://sourceforge.net/p/mingw/mailman/message/29347302/
+       Another source says MSVCRT 9, though, but I suspect the earlier message
+       is right: https://sourceforge.net/p/mingw-w64/mailman/message/35296351/
+
+       Sigh -- are really people expected to define __MSVCRT_VERSION__ to a
+       random value for every program they build with MinGW? */
     _set_abort_behavior(_CALL_REPORTFAULT, _WRITE_ABORT_MSG|_CALL_REPORTFAULT);
+    #endif
 
     /* Convert argv to UTF-8 */
     Containers::Array<char> storage;
