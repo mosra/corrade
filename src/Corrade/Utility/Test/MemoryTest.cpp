@@ -26,6 +26,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -61,7 +62,7 @@ struct MemoryTest: TestSuite::Tester {
 };
 
 MemoryTest::MemoryTest() {
-    addRepeatedTests<MemoryTest>({
+    addTests<MemoryTest>({
         &MemoryTest::allocateAlignedTrivial<1>,
         &MemoryTest::allocateAlignedTrivial<2>,
         &MemoryTest::allocateAlignedTrivial<4>,
@@ -69,12 +70,12 @@ MemoryTest::MemoryTest() {
         &MemoryTest::allocateAlignedTrivial<16>,
         &MemoryTest::allocateAlignedTrivial<32>,
         &MemoryTest::allocateAlignedTrivial<64>,
-        &MemoryTest::allocateAlignedTrivial<128>}, 100);
+        &MemoryTest::allocateAlignedTrivial<128>});
 
     /* https://stackoverflow.com/q/48070361. I found nothing that would give
        me the max allowed alignas value, std::max_align_t is useless. */
     #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 7
-    addRepeatedTests<MemoryTest>({&MemoryTest::allocateAlignedTrivial<256>}, 100);
+    addTests<MemoryTest>({&MemoryTest::allocateAlignedTrivial<256>});
     #endif
 
     addTests({&MemoryTest::allocateAlignedTrivialNoInit,
@@ -107,12 +108,22 @@ template<std::size_t alignment> struct alignas(alignment) Aligned {
 template<std::size_t alignment> void MemoryTest::allocateAlignedTrivial() {
     setTestCaseTemplateName(format("{}", alignment));
 
-    Containers::Array<Aligned<alignment>> data = allocateAligned<Aligned<alignment>>(testCaseRepeatId() + 1);
-    CORRADE_VERIFY(data.data());
-    CORRADE_COMPARE(data.size(), testCaseRepeatId() + 1);
-    CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(data.data()), alignment,
-        TestSuite::Compare::Divisible);
-    /* No way to verify that we *didn't* zero-initialize */
+    Containers::Array<Containers::Array<Aligned<alignment>>> allocations;
+
+    for(std::size_t i = 0; i != 100; ++i) {
+        CORRADE_ITERATION(i);
+
+        Containers::Array<Aligned<alignment>> data = allocateAligned<Aligned<alignment>>(i + 1);
+        CORRADE_VERIFY(data.data());
+        CORRADE_COMPARE(data.size(), i + 1);
+        CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(data.data()), alignment,
+            TestSuite::Compare::Divisible);
+        /* No way to verify that we *didn't* zero-initialize */
+
+        /* Keep all allocations resident to avoid the allocator returning the
+           same (aligned) pointer every time */
+        arrayAppend(allocations, std::move(data));
+    }
 }
 
 struct alignas(32) FourLongs {
