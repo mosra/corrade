@@ -275,7 +275,7 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     if(offset == 0) {
         deleter = Implementation::alignedDeleter<T>;
     } else {
-        pointer[-1] = offset; /* looking great, isn't it */
+        (pointer + offset)[-1] = offset; /* looking great, isn't it */
         deleter = Implementation::alignedOffsetDeleter<T>;
     }
     return Containers::Array<T>{reinterpret_cast<T*>(pointer + offset), size, deleter};
