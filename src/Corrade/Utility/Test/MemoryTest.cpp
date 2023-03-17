@@ -62,6 +62,9 @@ struct MemoryTest: TestSuite::Tester {
 
 MemoryTest::MemoryTest() {
     addRepeatedTests<MemoryTest>({
+        &MemoryTest::allocateAlignedTrivial<1>,
+        &MemoryTest::allocateAlignedTrivial<2>,
+        &MemoryTest::allocateAlignedTrivial<4>,
         &MemoryTest::allocateAlignedTrivial<8>,
         &MemoryTest::allocateAlignedTrivial<16>,
         &MemoryTest::allocateAlignedTrivial<32>,
@@ -98,7 +101,7 @@ MemoryTest::MemoryTest() {
 }
 
 template<std::size_t alignment> struct alignas(alignment) Aligned {
-    int someData;
+    char someData;
 };
 
 template<std::size_t alignment> void MemoryTest::allocateAlignedTrivial() {
