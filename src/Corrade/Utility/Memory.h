@@ -71,7 +71,12 @@ being a multiple of the alignment:
 
 @snippet Utility.cpp allocateAligned-explicit
 
-The function is implemented using @m_class{m-doc-external} [aligned_alloc()](https://man.archlinux.org/man/aligned_alloc.3)
+The returned pointer is always aligned to at least the desired value, but the
+alignment can be also higher. For example, allocating a 2 MB buffer may result
+in it being aligned to the whole memory page, or small alignment values could
+get rounded up to the default @cpp 2*sizeof(void*) @ce alignment.
+
+The function is implemented using @m_class{m-doc-external} [posix_memalign()](https://man.archlinux.org/man/posix_memalign.3)
 on @ref CORRADE_TARGET_UNIX "UNIX" systems and @m_class{m-doc-external} [_aligned_malloc()](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/aligned-malloc)
 on @ref CORRADE_TARGET_WINDOWS "Windows". On other platforms (such as
 @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"), if requested alignment is higher
@@ -219,9 +224,15 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
 
     /* I would use aligned_alloc() but then there's APPLE who comes and says
        NO. And on top of everything they DARE to have posix_memalign() in a
-       different header. */
+       different header.
+
+       What's perhaps a bit surprising is that posix_memalign() requires the
+       alignment to be >= sizeof(void*). It seems like a strange requirement --
+       it could just overalign for lower alignment values instead of failing.
+       Which is what we do here. The Windows _aligned_malloc() API doesn't have
+       this requirement. */
     void* data{};
-    CORRADE_INTERNAL_ASSERT_OUTPUT(posix_memalign(&data, alignment, size*sizeof(T)) == 0);
+    CORRADE_INTERNAL_ASSERT_OUTPUT(posix_memalign(&data, Utility::max(alignment, sizeof(void*)), size*sizeof(T)) == 0);
     return Containers::Array<T>{static_cast<T*>(data), size, Implementation::alignedDeleter<T>};
 
     /* Windows */
