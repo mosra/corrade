@@ -55,8 +55,14 @@ possible or is unknown is equivalent to @cpp #include <array> @ce.
 #include "Corrade/configure.h"
 
 #ifdef CORRADE_TARGET_LIBCXX
-/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L223 */
+/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L223,
+   then it got granularized to smaller headers in Clang 16:
+   https://github.com/llvm/llvm-project/commit/2d52c6bfae801b016dd3627b8c0e7c4a99405549 */
+#if _LIBCPP_VERSION < 160000
 #include <__tuple>
+#else
+#include <__fwd/array.h>
+#endif
 #elif defined(CORRADE_TARGET_DINKUMWARE)
 /* MSVC has it defined next to std::pair */
 #include <utility>

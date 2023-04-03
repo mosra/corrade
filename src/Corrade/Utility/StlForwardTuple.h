@@ -55,8 +55,14 @@ is equivalent to @cpp #include <tuple> @ce.
 #include "Corrade/configure.h"
 
 #ifdef CORRADE_TARGET_LIBCXX
-/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163 */
+/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163,
+   then it got granularized to smaller headers in Clang 16:
+   https://github.com/llvm/llvm-project/commit/2d52c6bfae801b016dd3627b8c0e7c4a99405549 */
+#if _LIBCPP_VERSION < 160000
 #include <__tuple>
+#else
+#include <__fwd/tuple.h>
+#endif
 #elif defined(CORRADE_TARGET_LIBSTDCXX)
 #if _GLIBCXX_RELEASE >= 7 && _GLIBCXX_RELEASE < 12
 /* https://github.com/gcc-mirror/gcc/blob/releases/gcc-7.1.0/libstdc++-v3/include/std/type_traits#L2557-L2558

@@ -436,6 +436,8 @@ namespace Corrade {
     recognizes a new `CORRADE_TESTSUITE_TEST_TARGET` CMake variable to put
     tests into a dedicated target instead of building them as part of the
     implicit `ALL` target.
+-   Updated @ref Corrade/Utility/StlForwardArray.h and
+    @ref Corrade/Utility/StlForwardTuple.h to work on libc++ 16
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
