@@ -169,6 +169,19 @@ template<class T> class Iterable {
         template<class U = typename std::remove_const<T>::type, class = typename std::enable_if<!std::is_same<T, U>::value>::type> /*implicit*/ Iterable(std::initializer_list<AnyReference<typename std::remove_const<T>::type>> view) noexcept: Iterable{reinterpret_cast<std::initializer_list<AnyReference<T>>&>(view)} {}
 
         /**
+         * @brief Construct a custom iterable
+         * @param data      Container data pointer
+         * @param size      Number of items in the container
+         * @param stride    Stride between items in the container
+         * @param accessor  Accessor function
+         *
+         * For item `i`, the @p accessor gets @cpp data + i*stride @ce in the
+         * argument.
+         * @experimental
+         */
+        explicit Iterable(const void* data, std::size_t size, std::ptrdiff_t stride, T&(*accessor)(const void*)) noexcept: _data{data}, _size{size}, _stride{stride}, _accessor{accessor} {}
+
+        /**
          * @brief Data pointer
          *
          * Not meant to be used directly, as the returned value may point to an

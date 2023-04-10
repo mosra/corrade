@@ -74,6 +74,8 @@ struct IterableTest: TestSuite::Tester {
     void rangeBasedFor();
     void rangeBasedForReference();
 
+    void customIterable();
+
     void overloadsWithForwardDeclaredType();
 };
 
@@ -128,6 +130,8 @@ IterableTest::IterableTest() {
 
     addTests({&IterableTest::rangeBasedFor,
               &IterableTest::rangeBasedForReference,
+
+              &IterableTest::customIterable,
 
               &IterableTest::overloadsWithForwardDeclaredType});
 }
@@ -666,6 +670,25 @@ void IterableTest::rangeBasedForReference() {
     CORRADE_COMPARE(data2, 2);
     CORRADE_COMPARE(data3, 1);
     CORRADE_COMPARE(data4, 33);
+}
+
+void IterableTest::customIterable() {
+    int a = 17;
+    int b = 33;
+    int c = -21;
+    int d = 25;
+    int* data[]{&a, &b, &c, &d};
+
+    Iterable<int> ai{data, 4, sizeof(int*), [](const void* data) -> int& {
+        return **static_cast<int**>(const_cast<void*>(data));
+    }};
+    CORRADE_COMPARE(ai.data(), data);
+    CORRADE_COMPARE(ai.size(), 4);
+    CORRADE_COMPARE(ai.stride(), sizeof(int*));
+    CORRADE_COMPARE(ai[0], 17);
+    CORRADE_COMPARE(ai[1], 33);
+    CORRADE_COMPARE(ai[2], -21);
+    CORRADE_COMPARE(ai[3], 25);
 }
 
 struct ForwardDeclared;
