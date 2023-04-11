@@ -318,17 +318,20 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeTestSuiteTe
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
 corrade_add_resource(ResourceTestEmptyFileData ResourceTestFiles/resources-empty-file.conf)
 corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resources-nothing.conf)
+corrade_add_resource(ResourceTestUtf8Data ResourceTestFiles/hýždě.conf)
 corrade_add_resource(ResourceTestSpacesData ResourceTestFiles/resources-spaces.conf)
 corrade_add_resource(ResourceTestNullTerminatedAlignedData ResourceTestFiles/resources-null-terminated-aligned.conf)
 corrade_add_resource(ResourceTestNullTerminatedLastFileData ResourceTestFiles/resources-null-terminated-last-file.conf)
 corrade_add_resource(ResourceTestAlignmentLargerThanDataSizeData ResourceTestFiles/resources-alignment-larger-than-data-size.conf)
 corrade_add_resource(ResourceTestSingleData ResourceTestFiles/consequence.bin SINGLE)
 corrade_add_resource(ResourceTestSingleEmptyData ResourceTestFiles/empty.bin SINGLE)
+
 corrade_add_test(UtilityResourceTest
     ResourceTest.cpp
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
+    ${ResourceTestUtf8Data}
     ${ResourceTestSpacesData}
     ${ResourceTestNullTerminatedAlignedData}
     ${ResourceTestNullTerminatedLastFileData}
@@ -346,7 +349,6 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin
         ResourceTestFiles/hýždě.bin
-        ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
         # Referenced from resources-overriden.conf
         ResourceTestFiles/predisposition2.txt

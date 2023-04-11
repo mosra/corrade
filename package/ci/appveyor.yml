@@ -111,7 +111,9 @@ environment:
 install:
 # Ninja. `cinst ninja` started 503ing in late November 2019 and wasn't really
 # reliable before either. So install by hand, as that's reliable always.
-- IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\ninja-win.zip appveyor DownloadFile https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-win.zip
+# Version 1.11 needed to make UTF-8 work with corrade_add_resource():
+# https://github.com/ninja-build/ninja/pull/1915
+- IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\ninja-win.zip appveyor DownloadFile https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip
 - 7z x ninja-win.zip -oC:/tools/ninja
 
 - set PATH=C:/tools/ninja;%PATH%
