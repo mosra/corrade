@@ -117,6 +117,15 @@ class EnumSet {
             _value(static_cast<UnderlyingType>(value)) {}
 
         /**
+         * @brief Create a set directly from the underlying integer type
+         * @m_since_latest
+         *
+         * Mirrors the way builtin @cpp enum @ce can be constructed from the
+         * underlying integer type, where it's also explicit.
+         */
+        constexpr explicit EnumSet(UnderlyingType value) noexcept: _value{value} {}
+
+        /**
          * @brief Create an uninitialized set
          *
          * The contents are left in an undefined state.
@@ -205,8 +214,6 @@ class EnumSet {
         }
 
     private:
-        constexpr explicit EnumSet(UnderlyingType type) noexcept: _value{type} {}
-
         UnderlyingType _value;
 };
 

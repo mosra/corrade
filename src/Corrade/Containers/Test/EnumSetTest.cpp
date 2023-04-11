@@ -36,6 +36,7 @@ struct EnumSetTest: TestSuite::Tester {
     explicit EnumSetTest();
 
     void construct();
+    void constructFromUnderlyingType();
     void constructNoInit();
     void constructCopy();
 
@@ -89,6 +90,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 
 EnumSetTest::EnumSetTest() {
     addTests({&EnumSetTest::construct,
+              &EnumSetTest::constructFromUnderlyingType,
               &EnumSetTest::constructNoInit,
               &EnumSetTest::constructCopy,
 
@@ -124,6 +126,18 @@ void EnumSetTest::construct() {
     /** @todo this should be for all the operators as well, sigh */
     CORRADE_VERIFY(std::is_nothrow_default_constructible<Features>::value);
     CORRADE_VERIFY(std::is_nothrow_constructible<Features, Feature>::value);
+}
+
+void EnumSetTest::constructFromUnderlyingType() {
+    Features features{376};
+    constexpr Features cFeatures{376};
+    CORRADE_COMPARE(int(features), 376);
+    CORRADE_COMPARE(int(cFeatures), 376);
+
+    /* Implicit conversion isn't allowed */
+    CORRADE_VERIFY(std::is_convertible<Feature, Features>::value);
+    CORRADE_VERIFY(!std::is_convertible<int, Features>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Features, int>::value);
 }
 
 void EnumSetTest::constructNoInit() {

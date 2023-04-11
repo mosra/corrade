@@ -239,6 +239,9 @@ namespace Corrade {
 -   @ref Containers::arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type) and
     @ref Containers::arrayAppend(Array<T>&, NoInitT, std::size_t) are now no-op
     in case the item count is zero
+-   Added a @ref Containers::EnumSet::EnumSet(UnderlyingType) constructor to
+    match how builtin @cpp enum @ce can be explictly constructed from its
+    underlying integer representation
 -   Added an ability to construct a @ref Containers::StridedArrayView1D from a
     pointer and size, the same way as with contiguous array views
 -   Added a @ref Containers::StridedArrayView constructor from a strided view
