@@ -1537,7 +1537,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * @see @ref parent(), @ref next()
          */
-        const JsonToken* firstChild() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline const JsonToken* firstChild() const;
 
         /**
          * @brief Next token or next
