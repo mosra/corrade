@@ -236,8 +236,13 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          *
          * The extra dimensions are added at the front, with sizes being
          * @cpp 1 @ce and strides equal to size times stride of @p other in the
-         * first dimension. To reduce dimension count you can use
-         * @ref operator[](), potentially in combination with @ref transposed().
+         * first dimension. For example, a 1D view that represents an image row
+         * (the X axis) expanded to a 3D view would have 1 row (the Y axis) and
+         * 1 slice (the Z axis), in the common Z-Y-X order, with the last
+         * dimension being the most dense or even contiguous.
+         *
+         * To reduce dimension count you can use @ref operator[](), potentially
+         * in combination with @ref transposed().
          */
         template<unsigned lessDimensions
             #ifndef DOXYGEN_GENERATING_OUTPUT
