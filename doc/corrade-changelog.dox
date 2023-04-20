@@ -181,9 +181,11 @@ namespace Corrade {
     into an immutable memory-efficient representation
 -   New @ref Corrade::Utility::JsonWriter class for stream-like writing and
     pretty-printing of JSON files
--   New @ref Corrade/Utility/Math.h header implementing @ref Utility::min() and
-    @ref Utility::max() because having to @cpp #include <algorithm> @ce to get
-    @ref std::min() and @ref std::max() is unacceptable.
+-   New @ref Corrade/Utility/Math.h header implementing @ref Utility::min(),
+    @ref Utility::max() and @ref Utility::abs() because having to
+    @cpp #include <algorithm> @ce to get @ref std::min() and @ref std::max() is
+    unacceptable, and similarly but less so for @cpp #include <cmath> @ce to
+    get @ref std::abs()
 -   @ref Utility::Resource and @ref corrade-rc "corrade-rc" is now capable of
     optional making resources null-terminated and arbitrarily aligned
 -   Added @ref Utility::String::lowercaseInPlace() and @relativeref{Utility::String,uppercaseInPlace()}

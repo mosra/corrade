@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::min(), @ref Corrade::Utility::max()
+ * @brief Function @ref Corrade::Utility::min(), @ref Corrade::Utility::max(), @ref Corrade::Utility::abs()
  * @m_since_latest
  */
 
@@ -67,6 +67,20 @@ arguments are taken by value and not by reference.
 template<class T> constexpr T max(T value, T max) {
     /* Implementation matching the one in Magnum */
     return value < max ? max : value;
+}
+
+/**
+@brief Absolute value
+@m_since_latest
+
+The main purpose of this function is to be used in places where having to
+@cpp #include <cmath> @ce to get @ref std::abs() would be an unnecessary
+overkill. It's primarily meant to be used on builtin scalar types, thus the
+arguments are taken by value and not by reference.
+@see @ref Corrade/Utility/StlMath.h
+*/
+template<class T> constexpr T abs(T a) {
+    return a < T{0} ? -a : a;
 }
 
 }}

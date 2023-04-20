@@ -35,11 +35,15 @@ struct MathTest: TestSuite::Tester {
 
     void minMax();
     void minMaxNanPropagation();
+
+    void abs();
 };
 
 MathTest::MathTest() {
     addTests({&MathTest::minMax,
-              &MathTest::minMaxNanPropagation});
+              &MathTest::minMaxNanPropagation,
+
+              &MathTest::abs});
 }
 
 void MathTest::minMax() {
@@ -61,6 +65,14 @@ void MathTest::minMaxNanPropagation() {
     CORRADE_COMPARE(Utility::max(float(NAN), 5.0f), float(NAN));
     CORRADE_COMPARE(Utility::min(5.0f, float(NAN)), 5.0f);
     CORRADE_COMPARE(Utility::max(5.0f, float(NAN)), 5.0f);
+}
+
+void MathTest::abs() {
+    CORRADE_COMPARE(Utility::abs(-5), 5);
+    CORRADE_COMPARE(Utility::abs(5), 5);
+
+    constexpr int cabs = Utility::abs(-15);
+    CORRADE_COMPARE(cabs, 15);
 }
 
 }}}}
