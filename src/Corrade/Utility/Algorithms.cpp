@@ -43,7 +43,7 @@ namespace Corrade { namespace Utility {
    OTOH the ArrayView overload can delegate directly to a memcpy, so for code
    size savings it shouldn't be handled in the complex stride-aware code. */
 
-void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayView<void>& dst) {
+void copy(const Containers::ArrayView<const void> src, const Containers::ArrayView<void> dst) {
     const std::size_t srcSize = src.size();
     #ifndef CORRADE_NO_DEBUG_ASSERT
     const std::size_t dstSize = dst.size();

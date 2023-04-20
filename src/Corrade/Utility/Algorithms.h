@@ -43,18 +43,18 @@ namespace Corrade { namespace Utility {
 Calls @ref std::memcpy() on the contents. Expects that both arrays have the
 same size.
 */
-CORRADE_UTILITY_EXPORT void copy(const Containers::ArrayView<const void>& src, const Containers::ArrayView<void>& dst);
+CORRADE_UTILITY_EXPORT void copy(Containers::ArrayView<const void> src, Containers::ArrayView<void> dst);
 
 /**
 @brief Copy an array view to another
 @m_since{2020,06}
 
 Casts views into a @cpp void @ce type and delegates into
-@ref copy(const Containers::ArrayView<const void>&, const Containers::ArrayView<void>&).
+@ref copy(Containers::ArrayView<const void>, Containers::ArrayView<void>).
 Expects that both arrays have the same size and @p T is a trivially copyable
 type.
 */
-template<class T> inline void copy(const Containers::ArrayView<const T>& src, const Containers::ArrayView<T>& dst) {
+template<class T> inline void copy(Containers::ArrayView<const T> src, Containers::ArrayView<T> dst) {
     static_assert(
         #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
         std::is_trivially_copyable<T>::value
@@ -187,8 +187,8 @@ template<class From, class To, class FromView = decltype(Implementation::arrayVi
 
 Based on whether the @p dst is convertible to either @ref Containers::ArrayView
 or @ref Containers::StridedArrayView, calls either
-@ref copy(const Containers::ArrayView<const T>&, const Containers::ArrayView<T>&)
-or @ref copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>&).
+@ref copy(Containers::ArrayView<const T>, Containers::ArrayView<T>) or
+@ref copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>&).
 Works with any @p dst that's convertible to an one-dimensional
 @ref Containers::StridedArrayView, expects that @p src has the same underlying
 type as @p dst, that they have both the same size and the @p dst is not
