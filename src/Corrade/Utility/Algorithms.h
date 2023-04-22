@@ -51,8 +51,7 @@ CORRADE_UTILITY_EXPORT void copy(Containers::ArrayView<const void> src, Containe
 
 Casts views into a @cpp void @ce type and delegates into
 @ref copy(Containers::ArrayView<const void>, Containers::ArrayView<void>).
-Expects that both arrays have the same size and @p T is a trivially copyable
-type.
+Expects that @p T is a trivially copyable type.
 */
 template<class T> inline void copy(Containers::ArrayView<const T> src, Containers::ArrayView<T> dst) {
     static_assert(
@@ -168,20 +167,6 @@ template<unsigned dimensions, class T> static Containers::StridedArrayView<dimen
 }
 
 /**
-@brief Copy a view to another
-@m_since{2020,06}
-
-Converts @p src and @p dst to a common array view type that's either
-@ref Containers::ArrayView or @ref Containers::StridedArrayView and then calls
-either @ref copy(const Containers::ArrayView<const T>&, const Containers::ArrayView<T>&)
-or @ref copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>&).
-Works with any type that's convertible to @ref Containers::StridedArrayView,
-expects that both views have the same underlying type, the same dimension count
-and size and the @p dst is not @cpp const @ce.
-*/
-template<class From, class To, class FromView = decltype(Implementation::arrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst);
-
-/**
 @brief Copy an initializer list to a view
 @m_since_latest
 
@@ -248,7 +233,12 @@ template<unsigned dimensions, class T> struct ArrayViewType<Containers::StridedA
 
 }
 
-template<class From, class To, class FromView, class ToView> void copy(From&& src, To&& dst) {
+/* Hidden from documentation output because it only adds confusion on top of
+   the ArrayView and StridedArrayView variants. All it does is magic that
+   prefers to delegate to the ArrayView variant if both arguments are
+   convertible to it to save on complicated assertions. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class From, class To, class FromView = decltype(Implementation::arrayViewTypeFor(std::declval<From&&>())), class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))> void copy(From&& src, To&& dst) {
     static_assert(std::is_same<typename std::remove_const<typename FromView::Type>::type, typename std::remove_const<typename ToView::Type>::type>::value, "can't copy between views of different types");
     static_assert(!std::is_const<typename ToView::Type>::value, "can't copy to a const view");
     static_assert(unsigned(Implementation::ArrayViewType<FromView>::Dimensions) ==
@@ -264,6 +254,7 @@ template<class From, class To, class FromView, class ToView> void copy(From&& sr
         typename Implementation::ArrayViewType<ToView>::Type>::type dstV{dst};
     copy(srcV, dstV);
 }
+#endif
 
 template<class To, class ToView
     #ifdef CORRADE_TARGET_DINKUMWARE
