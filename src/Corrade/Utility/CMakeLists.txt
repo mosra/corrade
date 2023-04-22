@@ -44,6 +44,7 @@ if(CORRADE_WITH_UTILITY)
     set(CorradeUtility_GracefulAssert_SRCS
         Algorithms.cpp
         Arguments.cpp
+        BitAlgorithms.cpp
         ConfigurationGroup.cpp
         Format.cpp
         Json.cpp
@@ -71,6 +72,7 @@ if(CORRADE_WITH_UTILITY)
         Arguments.h
         AbstractHash.h
         Assert.h
+        BitAlgorithms.h
         Configuration.h
         ConfigurationGroup.h
         ConfigurationValue.h

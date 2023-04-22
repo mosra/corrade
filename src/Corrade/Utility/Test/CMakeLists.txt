@@ -48,6 +48,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 corrade_add_test(UtilityAlgorithmsTest AlgorithmsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 target_compile_definitions(UtilityAlgorithmsTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
 
+corrade_add_test(UtilityBitAlgorithmsTest BitAlgorithmsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
+
 corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 set_tests_properties(UtilityArgumentsTest
     PROPERTIES ENVIRONMENT "ARGUMENTSTEST_SIZE=1337;ARGUMENTSTEST_VERBOSE=ON;ARGUMENTSTEST_COLOR=OFF;ARGUMENTSTEST_UNICODE=hýždě")

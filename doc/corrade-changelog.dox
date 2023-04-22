@@ -161,6 +161,9 @@ namespace Corrade {
 
 -   New @ref Utility::flipInPlace() algorithm for in-place flipping of strided
     array views
+-   New @ref Corrade/Utility/BitAlgorithms.h header with
+    @ref Utility::copyMasked() and other algorithms that use the new
+    @ref Containers::BitArrayView containers
 -   @ref Utility::allocateAligned() family of functions for overaligned
     allocations, suitable for efficient SIMD operations
 -   Added @ref Utility::forward() and @ref Utility::move() equivalents to
