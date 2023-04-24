@@ -956,7 +956,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         struct CORRADE_UTILITY_LOCAL Entry;
 
-        CORRADE_UTILITY_LOCAL void addOptionInternal(char shortKey, std::string key, std::string helpKey, std::string defaultValue, Type type, std::size_t id, const char* assertPrefix);
+        CORRADE_UTILITY_LOCAL void addOptionInternal(char shortKey, std::string key, std::string helpKey, std::string defaultValue, Type type, std::size_t id
+            #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
+            , const char* assertPrefix
+            #endif
+        );
         bool CORRADE_UTILITY_LOCAL skippedPrefix(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(char shortKey) const;

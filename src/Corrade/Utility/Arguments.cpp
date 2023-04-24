@@ -275,16 +275,17 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     return *this;
 }
 
-void Arguments::addOptionInternal(const char shortKey, std::string key, std::string helpKey, std::string defaultValue, const Type type, std::size_t id, const char* assertPrefix) {
+void Arguments::addOptionInternal(const char shortKey, std::string key, std::string helpKey, std::string defaultValue, const Type type, std::size_t id
+    #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
+    , const char* assertPrefix
+    #endif
+) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         assertPrefix << "invalid key" << key << "or its short variant", );
     CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
         assertPrefix << "the key" << key << "or its short variant is already used", );
     CORRADE_ASSERT(!skippedPrefix(key),
         assertPrefix << "key" << key << "conflicts with skipped prefixes", );
-    #ifdef CORRADE_NO_ASSERT
-    static_cast<void>(assertPrefix);
-    #endif
 
     /* Reset the parsed flag -- it's probably a mistake to add an option and
        then ask for values without parsing again */
@@ -306,7 +307,11 @@ Arguments& Arguments::addOption(const char shortKey, std::string key, std::strin
         helpKey = std::move(tmp);
     }
 
-    addOptionInternal(shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), Type::Option, _values.size(), "Utility::Arguments::addOption():");
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), Type::Option, _values.size()
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
+        , "Utility::Arguments::addOption():"
+        #endif
+    );
     arrayAppend(_values, InPlaceInit);
     return *this;
 }
@@ -324,7 +329,11 @@ Arguments& Arguments::addArrayOption(const char shortKey, std::string key) {
         helpKey = std::move(tmp);
     }
 
-    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::ArrayOption, _arrayValues.size(), "Utility::Arguments::addArrayOption():");
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::ArrayOption, _arrayValues.size()
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
+        , "Utility::Arguments::addArrayOption():"
+        #endif
+    );
     arrayAppend(_arrayValues, InPlaceInit);
     return *this;
 }
@@ -341,7 +350,11 @@ Arguments& Arguments::addBooleanOption(const char shortKey, std::string key) {
     else
         helpKey = key = _prefix + std::move(key);
 
-    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::BooleanOption, _booleans.size(), "Utility::Arguments::addBooleanOption():");
+    addOptionInternal(shortKey, std::move(key), std::move(helpKey), {}, Type::BooleanOption, _booleans.size()
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
+        , "Utility::Arguments::addBooleanOption():"
+        #endif
+    );
     arrayAppend(_booleans, false);
     return *this;
 }

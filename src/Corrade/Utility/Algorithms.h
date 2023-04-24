@@ -82,7 +82,7 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
 
 namespace Implementation {
     CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst
-        #ifndef CORRADE_NO_ASSERT
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
         , unsigned dimensions
         #endif
     );
@@ -96,7 +96,7 @@ inline void copy(const Containers::StridedArrayView1D<const char>& src, const Co
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
         Containers::StridedArrayView4D<char>{dst}
-        #ifndef CORRADE_NO_ASSERT
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
         , 1
         #endif
     );
@@ -110,7 +110,7 @@ inline void copy(const Containers::StridedArrayView2D<const char>& src, const Co
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
         Containers::StridedArrayView4D<char>{dst}
-        #ifndef CORRADE_NO_ASSERT
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
         , 2
         #endif
     );
@@ -124,7 +124,7 @@ inline void copy(const Containers::StridedArrayView3D<const char>& src, const Co
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
         Containers::StridedArrayView4D<char>{dst}
-        #ifndef CORRADE_NO_ASSERT
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
         , 3
         #endif
     );
@@ -138,7 +138,7 @@ inline void copy(const Containers::StridedArrayView4D<const char>& src, const Co
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
         Containers::StridedArrayView4D<char>{dst}
-        #ifndef CORRADE_NO_ASSERT
+        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
         , 4
         #endif
     );
