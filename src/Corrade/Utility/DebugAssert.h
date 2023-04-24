@@ -66,6 +66,8 @@ of given macro behavior.
 @attention Compared to @ref CORRADE_NO_ASSERT, this macro is *not* meant to be
     defined by the user. Instead, control its behavior by (un)defining the
     macros it relies on.
+
+@see @ref CORRADE_SKIP_IF_NO_DEBUG_ASSERT()
 */
 #if defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)) || defined(DOXYGEN_GENERATING_OUTPUT)
 #define CORRADE_NO_DEBUG_ASSERT

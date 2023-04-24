@@ -56,7 +56,8 @@ user. When defined, assertions are not checked at all. See documentation of
 @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
 and @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() for detailed description of
 given macro behavior.
-@see @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
+@see @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT,
+    @ref CORRADE_SKIP_IF_NO_ASSERT()
 */
 #define CORRADE_NO_ASSERT
 #undef CORRADE_NO_ASSERT
@@ -78,7 +79,11 @@ behavior. The @ref CORRADE_INTERNAL_ASSERT(),
 conditions and thus are not affected by this macro.
 
 When both @ref CORRADE_NO_ASSERT and @ref CORRADE_GRACEFUL_ASSERT are defined,
-@ref CORRADE_NO_ASSERT has a precedence.
+@ref CORRADE_NO_ASSERT has a precedence. When both @ref CORRADE_STANDARD_ASSERT
+and @ref CORRADE_GRACEFUL_ASSERT are defined, @ref CORRADE_STANDARD_ASSERT has
+a preceeence --- i.e., the assertions *aren't* graceful in that case. This
+precedence is reflected also in the @ref CORRADE_SKIP_IF_NO_ASSERT() helper
+in the @ref TestSuite library
 */
 #define CORRADE_GRACEFUL_ASSERT
 #undef CORRADE_GRACEFUL_ASSERT
@@ -168,6 +173,8 @@ You can override this implementation by placing your own
 #ifndef CORRADE_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_ASSERT(condition, message, returnValue) do {} while(false)
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_ASSERT(condition, message, returnValue) assert(condition)
 #elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
@@ -177,8 +184,6 @@ You can override this implementation by placing your own
             return returnValue;                                             \
         }                                                                   \
     } while(false)
-#elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_ASSERT(condition, message, returnValue) assert(condition)
 #else
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
@@ -228,16 +233,16 @@ You can override this implementation by placing your own
 #ifndef CORRADE_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_CONSTEXPR_ASSERT(condition, message) static_cast<void>(0)
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
+    static_cast<void>((condition) ? 0 : ([&]() {                            \
+        assert(!#condition);                                                \
+    }(), 0))
 #elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
         Corrade::Utility::Error{} << message;                               \
         if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
-    }(), 0))
-#elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
-    static_cast<void>((condition) ? 0 : ([&]() {                            \
-        assert(!#condition);                                                \
     }(), 0))
 #else
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
@@ -273,6 +278,8 @@ You can override this implementation by placing your own
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     static_cast<void>(call)
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_ASSERT_OUTPUT(call, message, returnValue) assert(call)
 #elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     do {                                                                    \
@@ -282,8 +289,6 @@ You can override this implementation by placing your own
             return returnValue;                                             \
         }                                                                   \
     } while(false)
-#elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_ASSERT_OUTPUT(call, message, returnValue) assert(call)
 #else
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     do {                                                                    \
@@ -333,6 +338,8 @@ You can override this implementation by placing your own
 #else
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) std::abort()
 #endif
+#elif defined(CORRADE_STANDARD_ASSERT)
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) assert(!"unreachable code")
 #elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                    \
     do {                                                                    \
@@ -340,8 +347,6 @@ You can override this implementation by placing your own
         if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
         return returnValue;                                                 \
     } while(false)
-#elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) assert(!"unreachable code")
 #else
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                                        \
     do {                                                                    \

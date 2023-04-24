@@ -2356,6 +2356,15 @@ void TesterTest::failIfExplicitBool() {
 }
 
 void TesterTest::skipIfNoAssert() {
+    #ifdef CORRADE_STANDARD_ASSERT
+    /* CORRADE_SKIP_IF_NO_ASSERT() skips also in presence of
+       CORRADE_STANDARD_ASSERT because then the assertions can't be tested
+       either. But that means this test case would fail because it expects the
+       skip to be done only if expressions inside assertions aren't
+       evaluated. */
+    CORRADE_SKIP("Can't test CORRADE_SKIP_IF_NO_ASSERT() in presence of CORRADE_STANDARD_ASSERT");
+    #endif
+
     int a = 3;
 
     /* Checks that the value is incremented at the end of a scope. If asserts
@@ -2377,6 +2386,15 @@ void TesterTest::skipIfNoAssert() {
 }
 
 void TesterTest::skipIfNoDebugAssert() {
+    #ifdef CORRADE_STANDARD_ASSERT
+    /* CORRADE_SKIP_IF_NO_ASSERT() skips also in presence of
+       CORRADE_STANDARD_ASSERT because then the assertions can't be tested
+       either. But that means this test case would fail because it expects the
+       skip to be done only if expressions inside assertions aren't
+       evaluated. */
+    CORRADE_SKIP("Can't test CORRADE_SKIP_IF_NO_DEBUG_ASSERT() in presence of CORRADE_STANDARD_ASSERT");
+    #endif
+
     int a = 3;
 
     /* Checks that the value is incremented at the end of a scope. If debug

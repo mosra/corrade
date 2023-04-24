@@ -527,6 +527,8 @@ namespace Corrade {
     Clang 14 with AddressSanitizer enabled. Fixed again in Clang 15, although
     no related bug report or commit was found. See also
     [mosra/corrade#135](https://github.com/mosra/corrade/issues/135).
+-   Fixed the library to build and pass tests when @ref CORRADE_NO_ASSERT or
+    @ref CORRADE_STANDARD_ASSERT is defined.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

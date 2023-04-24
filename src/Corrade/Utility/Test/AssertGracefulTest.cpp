@@ -75,6 +75,9 @@ void AssertGracefulTest::test() {
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
     #endif
+    #ifdef CORRADE_STANDARD_ASSERT
+    CORRADE_SKIP("CORRADE_STANDARD_ASSERT defined, can't test graceful assertions");
+    #endif
     #ifdef TEST_DEBUG_ASSERT
     #ifndef CORRADE_IS_DEBUG_BUILD
     CORRADE_SKIP("CORRADE_IS_DEBUG_BUILD not defined, can't test graceful debug assertions");
@@ -126,6 +129,9 @@ void AssertGracefulTest::constexprTest() {
        messages */
     #ifdef CORRADE_NO_ASSERT
     CORRADE_SKIP("CORRADE_NO_ASSERT defined, can't test graceful assertions");
+    #endif
+    #ifdef CORRADE_STANDARD_ASSERT
+    CORRADE_SKIP("CORRADE_STANDARD_ASSERT defined, can't test graceful assertions");
     #endif
     #ifdef TEST_DEBUG_ASSERT
     #ifndef CORRADE_IS_DEBUG_BUILD
