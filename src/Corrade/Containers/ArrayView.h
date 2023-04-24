@@ -38,6 +38,10 @@
 #include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#endif
+
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
