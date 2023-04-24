@@ -111,9 +111,10 @@ the stride instead of expecting the total byte size to stay the same.
 @section Containers-StridedArrayView-multidimensional Multi-dimensional views
 
 Strided array views are very useful for describing and iteration over
-multi-dimensional data such as 2D (sub)images. In that case, @ref operator[]()
-and iterator access return a view of one dimension less instead of a direct
-element reference, and there are
+multi-dimensional data such as 2D (sub)images. In that case,
+@ref operator[](std::size_t) const and iterator access return a view of one
+dimension less instead of a direct element reference, and there are
+@ref operator[](const Containers::Size<dimensions>&) const,
 @ref slice(const Containers::Size<dimensions>&, const Containers::Size<dimensions>&) const,
 @ref prefix(const Containers::Size<dimensions>&) const,
 @ref exceptPrefix(const Containers::Size<dimensions>&) const and
@@ -524,7 +525,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Iterator to first element
          *
-         * @see @ref front(), @ref operator[]()
+         * @see @ref front(), @ref operator[](std::size_t) const
          */
         StridedIterator<dimensions, T> begin() const { return {_data, _size, _stride, 0}; }
         /** @overload */
@@ -533,7 +534,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Iterator to (one item after) last element
          *
-         * @see @ref back(), @ref operator[]()
+         * @see @ref back(), @ref operator[](std::size_t) const
          */
         StridedIterator<dimensions, T> end() const {
             return {_data, _size, _stride, _size[0]};
@@ -547,7 +548,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref begin(), @ref operator[](std::size_t) const
          */
         ElementType front() const;
 
@@ -555,17 +556,28 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref end(), @ref operator[](std::size_t) const
          */
         ElementType back() const;
 
         /**
-         * @brief Element access
+         * @brief Element or sub-view access
          *
-         * Expects that @p i is less than @ref size().
+         * Expects that @p i is less than @ref size(). On multi-dimensional
+         * views returns a view of one dimension less, use
+         * @ref operator[](const Containers::Size<dimensions>&) const to index
+         * all dimensions.
          * @see @ref front(), @ref back()
          */
         ElementType operator[](std::size_t i) const;
+
+        /**
+         * @brief Element access
+         * @m_since_latest
+         *
+         * Expects that @p i is less than @ref size().
+         */
+        T& operator[](const Containers::Size<dimensions>& i) const;
 
         /**
          * @brief View slice in the first dimension
@@ -2133,6 +2145,17 @@ template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::bac
 template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::operator[](const std::size_t i) const -> ElementType {
     CORRADE_DEBUG_ASSERT(i < _size._data[0], "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size._data[0] << "elements", (Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i)));
     return Implementation::StridedElement<dimensions, T>::get(_data, _size, _stride, i);
+}
+
+template<unsigned dimensions, class T> T& StridedArrayView<dimensions, T>::operator[](const Containers::Size<dimensions>& i) const {
+    auto data = static_cast<ArithmeticType*>(_data);
+    for(std::size_t j = 0; j != dimensions; ++j) {
+        CORRADE_DEBUG_ASSERT(i._data[j] < _size._data[j],
+            "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size << "elements", *reinterpret_cast<T*>(static_cast<ArithmeticType*>(_data)));
+        data += i._data[j]*_stride._data[j];
+    }
+
+    return *reinterpret_cast<T*>(data);
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::slice(std::size_t begin, std::size_t end) const {

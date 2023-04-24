@@ -27,9 +27,11 @@
 #include <sstream>
 
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers {
@@ -1561,6 +1563,9 @@ void StridedBitArrayViewTest::access3D() {
         CORRADE_VERIFY(row00[i]);
         CORRADE_VERIFY(row13[i]);
         CORRADE_VERIFY(row20[i]);
+        CORRADE_VERIFY(a[{0, 0, i}]);
+        CORRADE_VERIFY(a[{1, 3, i}]);
+        CORRADE_VERIFY(a[{2, 0, i}]);
 
         CORRADE_VERIFY(!row01[i]);
         CORRADE_VERIFY(!row03[i]);
@@ -1568,6 +1573,12 @@ void StridedBitArrayViewTest::access3D() {
         CORRADE_VERIFY(!row12[i]);
         CORRADE_VERIFY(!row21[i]);
         CORRADE_VERIFY(!row23[i]);
+        CORRADE_VERIFY(!a[{0, 1, i}]);
+        CORRADE_VERIFY(!a[{0, 3, i}]);
+        CORRADE_VERIFY(!a[{1, 0, i}]);
+        CORRADE_VERIFY(!a[{1, 2, i}]);
+        CORRADE_VERIFY(!a[{2, 1, i}]);
+        CORRADE_VERIFY(!a[{2, 3, i}]);
     }
 
     /* Slices 0 and 2 are the same */
@@ -1575,11 +1586,15 @@ void StridedBitArrayViewTest::access3D() {
         CORRADE_ITERATION(i);
         CORRADE_VERIFY(row02[i]);
         CORRADE_VERIFY(row22[i]);
+        CORRADE_VERIFY(a[{0, 2, i}]);
+        CORRADE_VERIFY(a[{2, 2, i}]);
     }
     for(std::size_t i: {1, 3}) {
         CORRADE_ITERATION(i);
         CORRADE_VERIFY(!row02[i]);
         CORRADE_VERIFY(!row22[i]);
+        CORRADE_VERIFY(!a[{0, 2, i}]);
+        CORRADE_VERIFY(!a[{2, 2, i}]);
     }
 
     CORRADE_VERIFY(row11[0]);
@@ -1587,28 +1602,49 @@ void StridedBitArrayViewTest::access3D() {
     CORRADE_VERIFY(!row11[2]);
     CORRADE_VERIFY(!row11[3]);
     CORRADE_VERIFY(row11[4]);
+    CORRADE_VERIFY(a[{1, 1, 0}]);
+    CORRADE_VERIFY(a[{1, 1, 1}]);
+    CORRADE_VERIFY(!a[{1, 1, 2}]);
+    CORRADE_VERIFY(!a[{1, 1, 3}]);
+    CORRADE_VERIFY(a[{1, 1, 4}]);
 }
 
 void StridedBitArrayViewTest::access3DMutable() {
-    /* Mutable access is currently limited to a single dimension so just verify
-       that accessing the last dimension preserves the mutability. Everything
-       else is tested well enough in accessMutable{Set,Reset}() already. */
-
-    std::uint32_t data[]{
+    std::uint32_t data1[]{
         0x00000000u,
         0x00ffff00u,
 
         0xff0000ffu,
         0xffffffffu,
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, {2, 2, 32}};
+    std::uint32_t data2[]{
+        0x00000000u,
+        0x00ffff00u,
 
-    a[1][0].set(20);
-    a[1][0].set(11, true);
-    a[0][1].reset(11);
-    a[0][1].set(20, false);
+        0xff0000ffu,
+        0xffffffffu,
+    };
+    MutableStridedBitArrayView3D a1{MutableBitArrayView{data1}, {2, 2, 32}};
+    MutableStridedBitArrayView3D a2{MutableBitArrayView{data2}, {2, 2, 32}};
 
-    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView({
+    a1[1][0].set(20);
+    a1[1][0].set(11, true);
+    a1[0][1].reset(11);
+    a1[0][1].set(20, false);
+
+    a2.set({1, 0, 20});
+    a2.set({1, 0, 11}, true);
+    a2.reset({0, 1, 11});
+    a2.set({0, 1, 20}, false);
+
+    CORRADE_COMPARE_AS(Containers::arrayView(data1), Containers::arrayView({
+        0x00000000u,
+        0x00eff700u,
+
+        0xff1008ffu,
+        0xffffffffu,
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(data2), Containers::arrayView({
         0x00000000u,
         0x00eff700u,
 
@@ -1671,6 +1707,10 @@ void StridedBitArrayViewTest::access3DZeroStride() {
             CORRADE_VERIFY(!row1[i2]);
             CORRADE_VERIFY(row2[i2]);
             CORRADE_VERIFY(!row3[i2]);
+            CORRADE_VERIFY(a[{i0, 0, i2}]);
+            CORRADE_VERIFY(!a[{i0, 1, i2}]);
+            CORRADE_VERIFY(a[{i0, 2, i2}]);
+            CORRADE_VERIFY(!a[{i0, 3, i2}]);
         }
     }
 }
@@ -1679,18 +1719,31 @@ void StridedBitArrayViewTest::access3DZeroStrideMutable() {
     /* Like access3DMutable() but with the second stride zero, so just a single
        row of data */
 
-    std::uint32_t data[]{
+    std::uint32_t data1[]{
         0x00ffff00u,
         0xff0000ffu
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, {2, 2, 32}, {32, 0, 1}};
+    std::uint32_t data2[]{
+        0x00ffff00u,
+        0xff0000ffu
+    };
+    MutableStridedBitArrayView3D a1{MutableBitArrayView{data1}, {2, 2, 32}, {32, 0, 1}};
+    MutableStridedBitArrayView3D a2{MutableBitArrayView{data2}, {2, 2, 32}, {32, 0, 1}};
 
-    a[1][0].set(20);
-    a[1][0].set(11, true);
-    a[0][1].reset(11);
-    a[0][1].set(20, false);
+    a1[1][0].set(20);
+    a1[1][0].set(11, true);
+    a1[0][1].reset(11);
+    a1[0][1].set(20, false);
+    a2.set({1, 0, 20});
+    a2.set({1, 0, 11}, true);
+    a2.reset({0, 1, 11});
+    a2.set({0, 1, 20}, false);
 
-    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView({
+    CORRADE_COMPARE_AS(Containers::arrayView(data1), Containers::arrayView({
+        0x00eff700u,
+        0xff1008ffu,
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(data2), Containers::arrayView({
         0x00eff700u,
         0xff1008ffu,
     }), TestSuite::Compare::Container);
@@ -1759,6 +1812,9 @@ void StridedBitArrayViewTest::access3DNegativeStride() {
         CORRADE_VERIFY(row00[i]);
         CORRADE_VERIFY(row13[i]);
         CORRADE_VERIFY(row20[i]);
+        CORRADE_VERIFY(a[{0, 0, i}]);
+        CORRADE_VERIFY(a[{1, 3, i}]);
+        CORRADE_VERIFY(a[{2, 0, i}]);
 
         CORRADE_VERIFY(!row01[i]);
         CORRADE_VERIFY(!row03[i]);
@@ -1766,6 +1822,12 @@ void StridedBitArrayViewTest::access3DNegativeStride() {
         CORRADE_VERIFY(!row12[i]);
         CORRADE_VERIFY(!row21[i]);
         CORRADE_VERIFY(!row23[i]);
+        CORRADE_VERIFY(!a[{0, 1, i}]);
+        CORRADE_VERIFY(!a[{0, 3, i}]);
+        CORRADE_VERIFY(!a[{1, 0, i}]);
+        CORRADE_VERIFY(!a[{1, 2, i}]);
+        CORRADE_VERIFY(!a[{2, 1, i}]);
+        CORRADE_VERIFY(!a[{2, 3, i}]);
     }
 
     /* Slices 0 and 2 are the same, with flipped order compared to access3D() */
@@ -1773,11 +1835,15 @@ void StridedBitArrayViewTest::access3DNegativeStride() {
         CORRADE_ITERATION(i);
         CORRADE_VERIFY(row02[i]);
         CORRADE_VERIFY(row22[i]);
+        CORRADE_VERIFY(a[{0, 2, i}]);
+        CORRADE_VERIFY(a[{2, 2, i}]);
     }
     for(std::size_t i: {3, 1}) {
         CORRADE_ITERATION(i);
         CORRADE_VERIFY(!row02[i]);
         CORRADE_VERIFY(!row22[i]);
+        CORRADE_VERIFY(!a[{0, 2, i}]);
+        CORRADE_VERIFY(!a[{2, 2, i}]);
     }
 
     CORRADE_VERIFY(row11[4]);
@@ -1785,26 +1851,50 @@ void StridedBitArrayViewTest::access3DNegativeStride() {
     CORRADE_VERIFY(!row11[2]);
     CORRADE_VERIFY(!row11[1]);
     CORRADE_VERIFY(row11[0]);
+    CORRADE_VERIFY(a[{1, 1, 4}]);
+    CORRADE_VERIFY(a[{1, 1, 3}]);
+    CORRADE_VERIFY(!a[{1, 1, 2}]);
+    CORRADE_VERIFY(!a[{1, 1, 1}]);
+    CORRADE_VERIFY(a[{1, 1, 0}]);
 }
 
 void StridedBitArrayViewTest::access3DNegativeStrideMutable() {
     /* Like access3DMutable() but with all strides and indices negative */
 
-    std::uint32_t data[]{
+    std::uint32_t data1[]{
         0x00000000u,
         0x00ffff00u,
 
         0xff0000ffu,
         0xffffffffu,
     };
-    MutableStridedBitArrayView3D a{MutableBitArrayView{data}, reinterpret_cast<char*>(data) + 15, 7, {2, 2, 32}, {-64, -32, -1}};
+    std::uint32_t data2[]{
+        0x00000000u,
+        0x00ffff00u,
 
-    a[0][1].set(11);
-    a[0][1].set(20, true);
-    a[1][0].reset(20);
-    a[1][0].set(11, false);
+        0xff0000ffu,
+        0xffffffffu,
+    };
+    MutableStridedBitArrayView3D a1{MutableBitArrayView{data1}, reinterpret_cast<char*>(data1) + 15, 7, {2, 2, 32}, {-64, -32, -1}};
+    MutableStridedBitArrayView3D a2{MutableBitArrayView{data2}, reinterpret_cast<char*>(data2) + 15, 7, {2, 2, 32}, {-64, -32, -1}};
 
-    CORRADE_COMPARE_AS(Containers::arrayView(data), Containers::arrayView({
+    a1[0][1].set(11);
+    a1[0][1].set(20, true);
+    a1[1][0].reset(20);
+    a1[1][0].set(11, false);
+    a2.set({0, 1, 11});
+    a2.set({0, 1, 20}, true);
+    a2.reset({1, 0, 20});
+    a2.set({1, 0, 11}, false);
+
+    CORRADE_COMPARE_AS(Containers::arrayView(data1), Containers::arrayView({
+        0x00000000u,
+        0x00eff700u,
+
+        0xff1008ffu,
+        0xffffffffu,
+    }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(data2), Containers::arrayView({
         0x00000000u,
         0x00eff700u,
 
@@ -1823,15 +1913,42 @@ void StridedBitArrayViewTest::access3DInvalid() {
     MutableStridedBitArrayView3D b{MutableBitArrayView{data, 7, 24}, {1, 2, 3}, {24, 12, 4}};
     b[1];
     b[0][2];
+    b[0][1][3];
+    b[{0, 1, 3}];
+    b[{0, 2, 2}];
+    b[{1, 1, 2}];
     b[0][1].set(3);
     b[0][0].reset(3);
     b[0][1].set(3, false);
-    CORRADE_COMPARE(out.str(),
+    b.set({0, 1, 3});
+    b.set({0, 2, 2});
+    b.set({1, 1, 2});
+    b.reset({0, 0, 3});
+    b.reset({0, 2, 0});
+    b.reset({1, 0, 0});
+    b.set({0, 1, 3}, false);
+    b.set({0, 2, 2}, false);
+    b.set({1, 1, 2}, false);
+    CORRADE_COMPARE_AS(out.str(),
         "Containers::StridedBitArrayView::operator[](): index 1 out of range for 1 elements\n"
         "Containers::StridedBitArrayView::operator[](): index 2 out of range for 2 elements\n"
+        "Containers::StridedBitArrayView::operator[](): index 3 out of range for 3 elements\n"
+        "Containers::StridedBitArrayView::operator[](): index {0, 1, 3} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::operator[](): index {0, 2, 2} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::operator[](): index {1, 1, 2} out of range for {1, 2, 3} bits\n"
         "Containers::StridedBitArrayView::set(): index 3 out of range for 3 bits\n"
         "Containers::StridedBitArrayView::reset(): index 3 out of range for 3 bits\n"
-        "Containers::StridedBitArrayView::set(): index 3 out of range for 3 bits\n");
+        "Containers::StridedBitArrayView::set(): index 3 out of range for 3 bits\n"
+        "Containers::StridedBitArrayView::set(): index {0, 1, 3} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::set(): index {0, 2, 2} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::set(): index {1, 1, 2} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::reset(): index {0, 0, 3} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::reset(): index {0, 2, 0} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::reset(): index {1, 0, 0} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::set(): index {0, 1, 3} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::set(): index {0, 2, 2} out of range for {1, 2, 3} bits\n"
+        "Containers::StridedBitArrayView::set(): index {1, 1, 2} out of range for {1, 2, 3} bits\n",
+        TestSuite::Compare::String);
 }
 
 void StridedBitArrayViewTest::slice() {

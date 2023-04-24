@@ -2422,7 +2422,12 @@ void StridedArrayViewTest::access3D() {
     CORRADE_COMPARE(b[0][1].stride(), 8);
 
     CORRADE_COMPARE(b.front().back().front(), -100);
+    CORRADE_COMPARE(b[0][0][1], 16);
+    CORRADE_COMPARE((b[{0, 0, 1}]), 16);
+    CORRADE_COMPARE(b[0][1][0], -100);
+    CORRADE_COMPARE((b[{0, 1, 0}]), -100);
     CORRADE_COMPARE(b[0][1][2], 232342);
+    CORRADE_COMPARE((b[{0, 1, 2}]), 232342);
 
     ConstStridedArrayView3Di c = {a, &a[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
     CORRADE_COMPARE(c.data(), a);
@@ -2442,23 +2447,20 @@ void StridedArrayViewTest::access3D() {
 void StridedArrayViewTest::access3DConst() {
     /* The array is non-owning, so it should provide write access to the data */
 
-    int a[7];
-    const StridedArrayView3Di b = {a, {7, 1, 1}};
+    int a[8];
+    const StridedArrayView3Di b = {a, {4, 2, 1}};
     b.front().front().front() = 0;
     *(*(*(b.begin() + 1)).begin()).begin() = 1;
     *(*(*(b.cbegin() + 2)).cbegin()).begin() = 2;
     b[3][0][0] = 3;
-    *((*((*(b.end() - 3)).end() - 1)).end() - 1) = 4;
-    *((*((*(b.end() - 2)).end() - 1)).end() - 1) = 5;
-    b.back().back().back() = 6;
+    b[{0, 1, 0}] = 4;
+    *((*((*(b.end() - 3)).end() - 1)).end() - 1) = 5;
+    *((*((*(b.end() - 2)).end() - 1)).end() - 1) = 6;
+    b.back().back().back() = 7;
 
-    CORRADE_COMPARE(a[0], 0);
-    CORRADE_COMPARE(a[1], 1);
-    CORRADE_COMPARE(a[2], 2);
-    CORRADE_COMPARE(a[3], 3);
-    CORRADE_COMPARE(a[4], 4);
-    CORRADE_COMPARE(a[5], 5);
-    CORRADE_COMPARE(a[6], 6);
+    CORRADE_COMPARE_AS(Containers::arrayView(a),
+        Containers::arrayView({0, 4, 1, 5, 2, 6, 3, 7}),
+        TestSuite::Compare::Container);
 }
 
 void StridedArrayViewTest::access3DNegativeStride() {
@@ -2486,6 +2488,7 @@ void StridedArrayViewTest::access3DNegativeStride() {
 
     CORRADE_COMPARE(b.back().front().back(), -100);
     CORRADE_COMPARE(b[1][0][0], 232342);
+    CORRADE_COMPARE((b[{1, 0, 0}]), 232342);
 }
 
 void StridedArrayViewTest::access3DZeroStride() {
@@ -2511,6 +2514,7 @@ void StridedArrayViewTest::access3DZeroStride() {
 
     CORRADE_COMPARE(b.front().back().front(), 2);
     CORRADE_COMPARE(b[0][1][2], 2);
+    CORRADE_COMPARE((b[{0, 1, 2}]), 2);
 }
 
 void StridedArrayViewTest::access3DInvalid() {
@@ -2525,12 +2529,18 @@ void StridedArrayViewTest::access3DInvalid() {
 
     int data[6];
     StridedArrayView3Di b{data, {1, 2, 3}, {24, 12, 4}};
-    b[0][1][5];
+    b[0][1][3];
+    b[{0, 1, 5}];
+    b[{0, 2, 3}];
+    b[{1, 1, 3}];
 
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::back(): view is empty\n"
         "Containers::StridedArrayView::front(): view is empty\n"
-        "Containers::StridedArrayView::operator[](): index 5 out of range for 3 elements\n");
+        "Containers::StridedArrayView::operator[](): index 3 out of range for 3 elements\n"
+        "Containers::StridedArrayView::operator[](): index {0, 1, 5} out of range for {1, 2, 3} elements\n"
+        "Containers::StridedArrayView::operator[](): index {0, 2, 3} out of range for {1, 2, 3} elements\n"
+        "Containers::StridedArrayView::operator[](): index {1, 1, 3} out of range for {1, 2, 3} elements\n");
 }
 
 void StridedArrayViewTest::iterator() {

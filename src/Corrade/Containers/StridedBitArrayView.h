@@ -118,8 +118,10 @@ documentation for an example.
 Similarly to @ref BasicBitArrayView "BitArrayView", only a small subset of the
 usual @ref StridedArrayView access interface is provided --- @ref size(),
 @ref isEmpty() and querying subviews or bits using @ref operator[](). Setting
-bits can be done only in one-dimensional views using @ref set(std::size_t) const,
-@ref reset(std::size_t) const or @ref set(std::size_t, bool) const.
+bits is done using @ref set(std::size_t) const,
+@ref reset(std::size_t) const or @ref set(std::size_t, bool) const, with all
+APIs having overloads for directly accessing individual bits in
+multi-dimensional views as well.
 
 @subsection Containers-BasicStridedBitArrayView-usage-slicing View slicing and transformation
 
@@ -365,21 +367,36 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         template<unsigned dimension> BasicStridedBitArrayView<dimension + 1, T> asContiguous() const;
 
         /**
-         * @brief Element at given position
+         * @brief Bit or sub-view at given position
          *
-         * Expects that @p i is less than @ref size(). Setting bit values is
-         * only possible on mutable single-dimensional views with
-         * @ref set(std::size_t) const, @ref reset(std::size_t) const or
+         * Expects that @p i is less than @ref size(). On multi-dimensional
+         * views returns a view of one dimension less, use
+         * @ref operator[](const Containers::Size<dimensions>&) const to index
+         * all dimensions. Setting bit values is only possible on mutable views
+         * with @ref set(std::size_t) const, @ref reset(std::size_t) const or
          * @ref set(std::size_t, bool) const.
          */
         ElementType operator[](std::size_t i) const;
 
         /**
+         * @brief Bit at given position
+         *
+         * Expects that @p i is less than @ref size(). Setting bit values is
+         * only possible on mutable views with @ref set(const Size<dimensions>&) const,
+         * @ref reset(const Size<dimensions>&) const or
+         * @ref set(const Size<dimensions>&, bool) const.
+         */
+        bool operator[](const Size<dimensions>& i) const;
+
+        /**
          * @brief Set a bit at given position
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
-         * single-dimensional @ref MutableStridedBitArrayView.
-         * @see @ref operator[](), @ref reset(),
+         * single-dimensional @ref MutableStridedBitArrayView, use
+         * @ref set(const Size<dimensions>&) const to set a bit in a
+         * multi-dimensional view.
+         * @see @ref operator[](std::size_t) const,
+         *      @ref reset(std::size_t) const,
          *      @ref set(std::size_t, bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -388,11 +405,27 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         void set(std::size_t i) const;
 
         /**
+         * @brief Set a bit at given position
+         *
+         * Expects that @p i is less than @ref size(). Enabled only on a
+         * @ref MutableStridedBitArrayView.
+         * @see @ref operator[](const Size<dimensions>&) const,
+         *      @ref reset(const Size<dimensions>&) const,
+         *      @ref set(const Size<dimensions>&, bool) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void set(const Size<dimensions>& i) const;
+
+        /**
          * @brief Reset a bit at given position
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
-         * single-dimensional @ref MutableStridedBitArrayView.
-         * @see @ref operator[](), @ref set()
+         * single-dimensional @ref MutableStridedBitArrayView, use
+         * @ref reset(const Size<dimensions>&) const to sreet a bit in a
+         * multi-dimensional view.
+         * @see @ref operator[](std::size_t) const, @ref set(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value && dimensions == 1>::type>
@@ -400,19 +433,47 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         void reset(std::size_t i) const;
 
         /**
+         * @brief Reset a bit at given position
+         *
+         * Expects that @p i is less than @ref size(). Enabled only on a
+         * @ref MutableStridedBitArrayView.
+         * @see @ref operator[](const Size<dimensions>&) const,
+         *      @ref set(const Size<dimensions>&) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void reset(const Size<dimensions>& i) const;
+
+        /**
          * @brief Set or reset a bit at given position
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
-         * single-dimensional @ref MutableStridedBitArrayView. For a @p value
-         * known at compile time, explicitly calling either
-         * @ref set(std::size_t) const or @ref reset(std::size_t) const is a
-         * simpler operation.
-         * @see @ref operator[]()
+         * single-dimensional @ref MutableStridedBitArrayView, use
+         * @ref set(const Size<dimensions>&, bool) const to set or reset a bit
+         * in a multi-dimensional view. For a @p value known at compile time,
+         * explicitly calling either @ref set(std::size_t) const or
+         * @ref reset(std::size_t) const is a simpler operation.
+         * @see @ref operator[](std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         template<class U = T, class = typename std::enable_if<!std::is_const<U>::value && dimensions == 1>::type>
         #endif
         void set(std::size_t i, bool value) const;
+
+        /**
+         * @brief Set a bit at given position
+         *
+         * Expects that @p i is less than @ref size(). Enabled only on a
+         * @ref MutableStridedBitArrayView. For a @p value known at compile
+         * time, explicitly calling either @ref set(const Size<dimensions>&) const
+         * or @ref reset(const Size<dimensions>&) const is a simpler operation.
+         * @see @ref operator[](const Size<dimensions>&) const
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        #endif
+        void set(const Size<dimensions>& i, bool value) const;
 
         /**
          * @brief View slice in the first dimension
@@ -949,10 +1010,32 @@ template<unsigned dimensions, class T> auto BasicStridedBitArrayView<dimensions,
     return Implementation::StridedBitElement<dimensions, T>::get(static_cast<T*>(_data), _sizeOffset, _stride, i);
 }
 
+template<unsigned dimensions, class T> bool BasicStridedBitArrayView<dimensions, T>::operator[](const Size<dimensions>& i) const {
+    std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
+    for(std::size_t j = 0; j != dimensions; ++j) {
+        CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
+            "Containers::StridedBitArrayView::operator[](): index" << i << "out of range for" << sizeInternal() << "bits", {});
+        offsetInBits += i._data[j]*_stride._data[j];
+    }
+
+    return static_cast<T*>(_data)[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
+}
+
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
+    static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
+}
+
+template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i) const {
+    std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
+    for(std::size_t j = 0; j != dimensions; ++j) {
+        CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
+            "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << size() << "bits", );
+        offsetInBits += i._data[j]*_stride._data[j];
+    }
+
     static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
 }
 
@@ -963,10 +1046,34 @@ template<unsigned dimensions, class T> template<class U, class> inline void Basi
     static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
 }
 
+template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::reset(const Size<dimensions>& i) const {
+    std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
+    for(std::size_t j = 0; j != dimensions; ++j) {
+        CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
+            "Containers::StridedBitArrayView::reset(): index" << i << "out of range for" << size() << "bits", );
+        offsetInBits += i._data[j]*_stride._data[j];
+    }
+
+    static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
+}
+
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
+    /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
+    char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
+    byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
+}
+
+template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i, bool value) const {
+    std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
+    for(std::size_t j = 0; j != dimensions; ++j) {
+        CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
+            "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << size() << "bits", );
+        offsetInBits += i._data[j]*_stride._data[j];
+    }
+
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));

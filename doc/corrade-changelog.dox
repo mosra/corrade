@@ -269,6 +269,8 @@ namespace Corrade {
     member typedef for consistency with other containers
 -   @ref Containers::StridedArrayView can now be used in STL algorithms such as
     @ref std::lower_bound() if you include @ref Corrade/Containers/StridedArrayViewStl.h
+-   Added @ref Containers::StridedArrayView::operator[](const Containers::Size<dimensions>&) const
+    for directly accessing individual elements in multi-dimensional views
 -   Added convenience @ref Containers::Size, @ref Containers::Size1D,
     @ref Containers::Size2D, @ref Containers::Size3D, @ref Containers::Size4D,
     @ref Containers::Stride, @ref Containers::Stride1D,
