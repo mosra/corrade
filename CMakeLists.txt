@@ -131,7 +131,14 @@ option(CORRADE_BUILD_DEPRECATED "Include deprecated API in the build" ON)
 
 option(CORRADE_BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaneously in multiple threads" ON)
 
-option(CORRADE_BUILD_STATIC "Build static libraries (default are shared)" OFF)
+# It's inconvenient to manually load all shared libs using Android / JNI,
+# similarly on Emscripten, so there default to static.
+if(CMAKE_SYSTEM_NAME STREQUAL Android OR CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN ON)
+else()
+    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN OFF)
+endif()
+option(CORRADE_BUILD_STATIC "Build static libraries" ${OFF_EXCEPT_ANDROID_EMSCRIPTEN})
 # Disable PIC on Emscripten by default (but still allow it to be enabled
 # explicitly if one so desired). Currently causes linker errors related to
 # __memory_base etc.: https://github.com/emscripten-core/emscripten/issues/8761
@@ -147,8 +154,6 @@ option(CORRADE_BUILD_TESTS "Build unit tests" OFF)
 # Option-independent platform discovery
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
-    # It's meaningless to use dynamic libraries with Emscripten
-    set(CORRADE_BUILD_STATIC ON)
 elseif(UNIX)
     # Both APPLE and UNIX are defined on OSX
     if(APPLE)
@@ -165,8 +170,6 @@ elseif(UNIX)
     # UNIX is also defined on Android
     if(CMAKE_SYSTEM_NAME STREQUAL Android)
         set(CORRADE_TARGET_ANDROID 1)
-        # It's too inconvenient to manually load all shared libs using JNI
-        set(CORRADE_BUILD_STATIC ON)
     endif()
 
     # Emscripten is Unix too, this selects only the other ones
