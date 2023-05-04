@@ -27,6 +27,7 @@
 #include "Debug.h"
 
 #include <cstdlib>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <sstream>

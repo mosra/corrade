@@ -31,6 +31,8 @@
    explicitly via function pointers from the respective test case and benchmark
    instances */
 
+#include <cstdint>
+
 #include "Corrade/Cpu.h"
 #ifdef CORRADE_ENABLE_POPCNT
 #include "Corrade/Utility/IntrinsicsAvx.h"

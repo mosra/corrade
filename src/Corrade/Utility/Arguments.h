@@ -30,6 +30,7 @@
  * @brief Class @ref Corrade::Utility::Arguments
  */
 
+#include <cstdint>
 #include <string>
 #include <utility>
 

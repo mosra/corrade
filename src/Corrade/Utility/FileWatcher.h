@@ -30,6 +30,7 @@
  * @brief Class @ref Corrade::Utility::FileWatcher
  */
 
+#include <cstdint>
 #include <string>
 
 #include "Corrade/Containers/EnumSet.h"
