@@ -37,7 +37,7 @@
 
 /* Otherwise _wrename() and _wremove() is not defined on TDM-GCC 5.1. This has
    to be undefined before including any other header or it doesn't work. */
-#ifdef __MINGW32__
+#if defined(__MINGW32__) && defined(__GNUC__) && __GNUC__ <= 5
 #undef __STRICT_ANSI__
 #endif
 
