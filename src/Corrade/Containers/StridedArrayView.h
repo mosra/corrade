@@ -2224,14 +2224,15 @@ template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFun
        block me from slicing into pairs of virtual classes, which would again
        be fine. */
     alignas(T) typename std::conditional<std::is_const<T>::value, const char, char>::type storage[sizeof(T)]{};
-    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 12
-    /* GCC 12 is stupid. There's {} and yet it still warns about `storage`
-       being uninitialized. */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 12
+    /* GCC 12+ is stupid. There's {} and yet it still warns about `storage`
+       being uninitialized. Happens in 13 too, so this wasn't a temporary
+       regression it seems. */
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     #endif
     const std::size_t offset = reinterpret_cast<const char*>(&(reinterpret_cast<T*>(storage)->*memberFunction)()) - storage;
-    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 12
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 12
     #pragma GCC diagnostic pop
     #endif
     /* Unlike plain slice(begin, end), complex member slicing is usually not
