@@ -143,6 +143,15 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
             list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "-Wno-missing-field-initializers")
         endif()
+
+        # Prints a warning in all cases of
+        #   functionReturningATemporaryView()[i]
+        # i.e., basically all use cases of Utility::Json. Hopefully gets fixed
+        # better than what https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107532
+        # did so far.
+        if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "13.0")
+            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "-Wno-dangling-reference")
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
