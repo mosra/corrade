@@ -863,8 +863,23 @@ void ArrayTest::release() {
     delete[] released;
 
     /* Not comparing pointers directly because then Clang Analyzer complains
-       that printing the value of `released` is use-after-free. Um. */
+       that printing the value of `released` is use-after-free. Um.
+
+       GCC 13 now also crashes in, breathing heavily, trying to be helpful with
+       a "warning: pointer may be used after ‘void operator delete [](void*)’".
+       Well, no shit? I'm looking at the value. If I'd be comparing the value
+       before a delete instead, you'd complain that I might have a potential
+       leak. Happens only in a Release build. Possibly related is the
+       following, however this didn't happen on GCC 12:
+       https://gcc.gnu.org/bugzilla//show_bug.cgi?id=106119 */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 13
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wuse-after-free"
+    #endif
     CORRADE_COMPARE(reinterpret_cast<std::intptr_t>(data), reinterpret_cast<std::intptr_t>(released));
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 13
+    #pragma GCC diagnostic pop
+    #endif
     CORRADE_COMPARE(a.begin(), nullptr);
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_VERIFY(a.deleter() == nullptr);
