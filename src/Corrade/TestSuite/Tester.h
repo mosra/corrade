@@ -1003,6 +1003,14 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
             addCustomBenchmarks<Derived>(benchmarks, batchCount, nullptr, nullptr, static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), benchmarkUnits);
+            /* "warning: parameter ‘benchmarkBegin’ set but not used", is that
+               some GCC 13 regression? I thought such silly warnings where a
+               static_cast made a variable look like being unused were bugs
+               from the GCC 4.8 and MSVC 2015 era. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 13
+            static_cast<void>(benchmarkBegin);
+            static_cast<void>(benchmarkEnd);
+            #endif
         }
 
         /**
