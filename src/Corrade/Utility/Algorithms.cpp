@@ -51,7 +51,7 @@ void copy(const Containers::ArrayView<const void> src, const Containers::ArrayVi
     /* A debug assertion since this API should be as close with overhead to a
        raw memcpy() as possible */
     CORRADE_DEBUG_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
+        "Utility::copy(): sizes" << srcSize << "and" << dstSize << "don't match", );
 
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
@@ -74,7 +74,7 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
        assert overhead doesn't matter that much compared to the safety
        gains. */
     CORRADE_ASSERT(srcSize == dstSize,
-        "Utility::Algorithms::copy(): sizes" << Containers::arrayView(srcSize.begin() + 4 - dimensions, dimensions) << "and" << Containers::arrayView(dstSize.begin() + 4 - dimensions, dimensions) << "don't match", );
+        "Utility::copy(): sizes" << Containers::arrayView(srcSize.begin() + 4 - dimensions, dimensions) << "and" << Containers::arrayView(dstSize.begin() + 4 - dimensions, dimensions) << "don't match", );
 
     const std::size_t* const size = srcSize.begin();
     auto* const srcPtr = static_cast<const char*>(src.data());

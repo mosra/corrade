@@ -278,7 +278,7 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
        assert overhead doesn't matter that much compared to the safety
        gains. */
     CORRADE_ASSERT(src.size() == dst.size(),
-        "Utility::Algorithms::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
+        "Utility::copy(): sizes" << src.size() << "and" << dst.size() << "don't match", );
 
     for(std::size_t i = 0, max = src.size()[0]; i != max; ++i)
         /* Explicitly pick the final overload to avoid having to go through the
