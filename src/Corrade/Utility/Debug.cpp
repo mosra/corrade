@@ -606,7 +606,7 @@ Debug& Debug::operator<<(unsigned char value) {
     /* Convert to int to avoid infinite recursion to operator<<(unsigned char) */
     const int v = value;
 
-    /* Print the value as a shade of grey */
+    /* Print the value as a shade of gray */
     if(immediateFlags() & Flag::Color) {
         const char* shade;
         if(value < 51)       shade = "  ";

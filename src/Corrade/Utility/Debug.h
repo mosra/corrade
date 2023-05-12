@@ -144,7 +144,7 @@ Similarly as with scoped output redirection, colors can be also scoped:
 
 With @ref Flag::Color and/or the @ref color modifier, some types can be also
 printed as actual 24bit colors. The @ref operator<<(unsigned char) printer can
-interpret 8bit values as greyscale colors and other libraries may provide
+interpret 8bit values as grayscale colors and other libraries may provide
 support for other types. For example, printing a container of 8bit values
 together with the @ref packed modifier:
 
@@ -153,7 +153,7 @@ together with the @ref packed modifier:
 This prints the below output on terminals that support it. See the operator
 documentation for more information.
 
-@include UtilityDebug-color-greyscale.ansi
+@include UtilityDebug-color-grayscale.ansi
 
 @section Utility-Debug-source-location Source location
 
@@ -670,7 +670,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Print unsigned char to debug output
          *
          * If @ref Flag::Color is enabled or @ref color was set immediately
-         * before, prints the value as a greyscale ANSI 24bit color escape
+         * before, prints the value as a grayscale ANSI 24bit color escape
          * sequence using two successive Unicode block characters (to have it
          * roughly square). To preserve at least some information when text is
          * copied, the square consists of one of the five

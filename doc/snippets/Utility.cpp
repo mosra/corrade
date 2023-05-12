@@ -607,7 +607,7 @@ Utility::Debug{} << Utility::Debug::space << 16;
 {
 /* [Debug-color] */
 unsigned char data[] { 0, 32, 64, 96, 128, 160, 192, 224, 255 };
-Utility::Debug{} << "41 shades of grey missing:"
+Utility::Debug{} << "41 shades of gray missing:"
     << Utility::Debug::packed << Utility::Debug::color
     << Containers::arrayView(data);
 /* [Debug-color] */

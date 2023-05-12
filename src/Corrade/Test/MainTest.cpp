@@ -65,7 +65,7 @@ void MainTest::colors() {
     Debug{} << "CORRADE_UTILITY_USE_ANSI_COLORS set";
     #endif
     #endif
-    Debug{} << "Visual check:" << Debug::boldColor(Debug::Color::Blue) << "this is blue!" << Debug::resetColor << "and this is a grey square:" << Debug::color << std::uint8_t(0x77);
+    Debug{} << "Visual check:" << Debug::boldColor(Debug::Color::Blue) << "this is blue!" << Debug::resetColor << "and this is a gray square:" << Debug::color << std::uint8_t(0x77);
 
     CORRADE_VERIFY(true);
 }
