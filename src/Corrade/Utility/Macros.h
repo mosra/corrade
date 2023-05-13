@@ -482,10 +482,14 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ASSUME(condition) __assume(condition)
 #elif defined(CORRADE_TARGET_GCC)
+#if __GNUC__ >= 13
+#define CORRADE_ASSUME(condition) __attribute__((assume(condition)))
+#else
 #define CORRADE_ASSUME(condition)                                           \
     do {                                                                    \
         if(!(condition)) __builtin_unreachable(); \
     } while(false)
+#endif
 #else
 #define CORRADE_ASSUME(condition) do {} while(false)
 #endif

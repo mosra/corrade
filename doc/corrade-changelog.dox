@@ -371,6 +371,9 @@ namespace Corrade {
     representation
 -   The @ref CORRADE_FALLTHROUGH macro is implemented on MSVC 2019 16.6 if
     compiling as C++17.
+-   The @ref CORRADE_ASSUME() macro now uses @cpp __attribute__((assume)) @ce
+    on GCC 13+, which should lead to [better optimization opportunities](https://wg21.link/p1774r8)
+    compared to @cpp if(!(condition)) __builtin_unreachable() @ce
 -   Minor exception guarantee improvements (see [mosra/corrade#148](https://github.com/mosra/corrade/pull/148))
 
 @subsection corrade-changelog-latest-buildsystem Build system
