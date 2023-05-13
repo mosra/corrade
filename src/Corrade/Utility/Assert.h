@@ -331,7 +331,7 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#if defined(CORRADE_TARGET_GCC)
+#ifdef CORRADE_TARGET_GCC
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __builtin_unreachable()
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
@@ -590,7 +590,7 @@ You can override this implementation by placing your own
 */
 #ifndef CORRADE_INTERNAL_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-#if defined(CORRADE_TARGET_GCC)
+#ifdef CORRADE_TARGET_GCC
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __builtin_unreachable()
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __assume(0)
