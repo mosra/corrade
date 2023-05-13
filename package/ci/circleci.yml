@@ -46,6 +46,9 @@ executors:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
+  s390x:
+    docker:
+    - image: multiarch/qemu-user-static:x86_64-s390x-7.2.0-1
 
 commands:
   install-base-linux:
@@ -75,6 +78,19 @@ commands:
         # Compared to Docker images this needs sudo
         command: |
           sudo apt update
+          if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
+          sudo apt install -y ninja-build gcc cmake $LCOV_PACKAGES << parameters.extra >>
+
+  install-base-linux-s390x:
+    parameters:
+      extra:
+        type: string
+        default: ""
+    steps:
+    - run:
+        name: Update apt and install base packages
+        command: |
+          apt update
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
           sudo apt install -y ninja-build gcc cmake $LCOV_PACKAGES << parameters.extra >>
 
@@ -390,6 +406,20 @@ jobs:
     - build:
         script: ios-simulator.sh
 
+  linux-s390x:
+    executor: s390x
+    environment:
+      CMAKE_CXX_FLAGS: --coverage
+      CONFIGURATION: Debug
+    steps:
+    # Not installing the old GCC 4.8 and CMake 3.4 to speed up. These are
+    # tested more than enough on other jobs.
+    - install-base-linux-s390x
+    - make-expected-linux-dirs
+    - build:
+        script: unix-desktop.sh
+    - lcov
+
   # Python preprocessor for magnum-singles, for a lack of better name
   acme:
     executor: python-3_6
@@ -452,4 +482,5 @@ workflows:
         requires:
         - macos-static
         - linux-arm64
+    - linux-s390x
     - acme
