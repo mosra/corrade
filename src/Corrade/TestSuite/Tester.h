@@ -1933,6 +1933,13 @@ or to check that given code path is never reached.
 
 @snippet TestSuite.cpp CORRADE_FAIL
 
+Even though the failure is unconditional, the test case can still continue
+execution when combined with @ref CORRADE_EXPECT_FAIL() /
+@ref CORRADE_EXPECT_FAIL_IF(). Such behavior is thus different from
+@ref CORRADE_ASSERT_UNREACHABLE(), where the macro also tells the compiler the
+code following it will never be executed, allowing to omit @cpp return @ce
+statements among other things.
+
 The message is prefixed with @cb{.ansi} [1;31mFAIL @ce including a file and
 line where the failure happened and execution of given test case is terminated.
 The message can be formatted in the same way as in @ref CORRADE_ASSERT(), including stream output operators. Note that, however, it isn't meant to
