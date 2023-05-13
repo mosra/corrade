@@ -40,10 +40,6 @@
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Macros.h"
 
-#ifdef CORRADE_TARGET_EMSCRIPTEN
-#include <cstdlib>
-#endif
-
 #ifdef CORRADE_BUILD_DEPRECATED
 /* Some arguments used to be a std::string, so provide implicit conversion to a
    StringView */
