@@ -412,7 +412,7 @@ the process. Example usage:
 
 @snippet Containers.cpp arrayAllocatorCast
 
-Equivalently to to @ref arrayCast(), the size of the new array is calculated as
+Equivalently to @ref arrayCast(), the size of the new array is calculated as
 @cpp view.size()*sizeof(T)/sizeof(U) @ce. Expects that both types are
 trivially copyable and [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change.
