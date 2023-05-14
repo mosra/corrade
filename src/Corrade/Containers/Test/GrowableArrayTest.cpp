@@ -2851,15 +2851,27 @@ void GrowableArrayTest::cast() {
 }
 
 void GrowableArrayTest::castEmpty() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    /* This models a typical use case -- an empty array is resized / reserved
+       to a dynamic size, which is however 0 in that particular case. That
+       results in no change being made to the array, it's still nullptr with
+       the default deleter. */
+    Array<std::uint16_t> a;
+    arrayResize(a, 0);
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(a.deleter(), nullptr);
 
-    Array<char> a;
+    /* If we then want to cast the array to a different type, the behavior
+       should not be different from what's in cast() above if the array is
+       empty with the default deleter. In this case it should also just keep
+       the default deleter.
 
-    std::ostringstream out;
-    Error redirectError{&out};
-    arrayAllocatorCast<std::uint16_t>(Utility::move(a));
-    CORRADE_COMPARE(out.str(),
-        "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
+       It *should definitely not* use a growable deleter in this case -- that
+       deleter needs a non-null data array in order to store the capacity, and
+       giving it null would make it blow up on the first capacity access. */
+    auto b = arrayAllocatorCast<char>(Utility::move(a));
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.deleter(), nullptr);
 }
 
 void GrowableArrayTest::castNonTrivial() {

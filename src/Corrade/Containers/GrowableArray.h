@@ -433,6 +433,15 @@ template<class U, template<class> class Allocator, class T> Array<U> arrayAlloca
         Implementation::IsTriviallyCopyableOnOldGcc<T>::value && Implementation::IsTriviallyCopyableOnOldGcc<U>::value
         #endif
         , "only trivially copyable types can use the allocator cast");
+
+    /* If the array is default-constructed or just generally empty with the
+       default deleter, just pass it through without changing anything. This
+       behavior is consistent with calling `arrayResize(array, 0)`,
+       `arrayReserve(array, 0)` and such, which also just pass empty arrays
+       through without affecting their deleter. */
+    if(array.isEmpty() && !array.data() && !array.deleter())
+        return {};
+
     /* Unlike arrayInsert() etc, this is not called that often and should be as
        checked as possible, so it's not a debug assert */
     CORRADE_ASSERT(array.deleter() == Allocator<T>::deleter && (std::is_base_of<ArrayMallocAllocator<T>, Allocator<T>>::value),
