@@ -81,9 +81,9 @@ conditions and thus are not affected by this macro.
 When both @ref CORRADE_NO_ASSERT and @ref CORRADE_GRACEFUL_ASSERT are defined,
 @ref CORRADE_NO_ASSERT has a precedence. When both @ref CORRADE_STANDARD_ASSERT
 and @ref CORRADE_GRACEFUL_ASSERT are defined, @ref CORRADE_STANDARD_ASSERT has
-a preceeence --- i.e., the assertions *aren't* graceful in that case. This
+a precedence --- i.e., the assertions *aren't* graceful in that case. This
 precedence is reflected also in the @ref CORRADE_SKIP_IF_NO_ASSERT() helper
-in the @ref TestSuite library
+in the @relativeref{Corrade,TestSuite} library
 */
 #define CORRADE_GRACEFUL_ASSERT
 #undef CORRADE_GRACEFUL_ASSERT
