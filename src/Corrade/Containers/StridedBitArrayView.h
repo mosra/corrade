@@ -129,8 +129,9 @@ Slicing functions match the @ref StridedArrayView interface --- @ref slice(),
 @ref sliceSize(), @ref prefix(), @ref suffix(), @ref exceptPrefix() and
 @ref exceptSuffix(), all operating with bit offsets and with shorthand versions
 operating only on the top-level dimension. The @ref every(), @ref transposed(),
-@ref flipped() and @ref broadcasted() transformation APIs work equivalently to
-their @ref StridedArrayView counterparts.
+@ref flipped(), @ref broadcasted(), @ref expanded() and @ref collapsed() view
+transformation APIs work equivalently to their @ref StridedArrayView
+counterparts.
 
 @see @ref StridedBitArrayView1D, @ref StridedBitArrayView2D,
     @ref StridedBitArrayView3D, @ref StridedBitArrayView4D,
@@ -214,6 +215,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * dimension times next dimension size, while last dimension stride is
          * implicitly 1 bit. In a one-dimensional case you probably want to use
          * @ref BasicStridedBitArrayView(BasicBitArrayView<U>) instead.
+         * @see @ref expanded()
          */
         constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<T> data, const Size<dimensions>& size) noexcept: BasicStridedBitArrayView{data, data.data(), data.offset(), size, Implementation::strideForSize<dimensions>(size._data, 1, typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
@@ -345,7 +347,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          *
          * Returns a view large as the product of sizes in all dimensions.
          * Expects that the view is contiguous.
-         * @see @ref isContiguous() const
+         * @see @ref isContiguous() const, @ref collapsed() const
          */
         BasicBitArrayView<T> asContiguous() const;
 
@@ -363,6 +365,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @ref StridedBitArrayView1D with stride of 1 bit; while the
          * non-templated @ref asContiguous() will return a @ref BitArrayView
          * (where the stride is implicitly defined as 1 bit).
+         * @see @ref collapsed() const
          */
         template<unsigned dimension> BasicStridedBitArrayView<dimension + 1, T> asContiguous() const;
 
@@ -702,6 +705,39 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * than one bit, @ref slice() it first.
          */
         template<unsigned dimension> BasicStridedBitArrayView<dimensions, T> broadcasted(std::size_t size) const;
+
+        /**
+         * @brief Expand a dimension
+         *
+         * Expands given @p dimension into multiple. The product of @p size is
+         * expected to be equal to size in the original dimension. The
+         * resulting view has sizes and strides before @p dimension unchanged,
+         * after that @cpp count - 1 @ce new dimensions gets inserted, where
+         * each has size from @p size and stride equal to size times stride of
+         * the next dimension, then a @p dimension with size equal to last
+         * element of @p size and its original stride, and after that all other
+         * dimensions with sizes and strides unchanged again.
+         *
+         * See @ref collapsed() for an inverse of this operation.
+         */
+        template<unsigned dimension, unsigned count> BasicStridedBitArrayView<dimensions + count - 1, T> expanded(const Containers::Size<count>& size) const;
+
+        /**
+         * @brief Collapse dimensions
+         *
+         * Assuming dimensions from @p dimension up to
+         * @cpp dimension + count - 1 @ce all have strides equal to size times
+         * stride of the next dimension, returns a view that has them all
+         * collapsed into one with its size equal to a product of sizes of
+         * these dimensions and stride equal to stride of the last dimension in
+         * this range.
+         *
+         * See @ref expanded() for an inverse of this operation and
+         * @ref asContiguous() for a variant that collapses all dimensions from
+         * given index, requiring the stride of last one to be equal to the
+         * type size.
+         */
+        template<unsigned dimension, unsigned count> BasicStridedBitArrayView<dimensions - count + 1, T> collapsed() const;
 
     private:
         /* Needed for mutable/immutable conversion */
@@ -1245,6 +1281,78 @@ template<unsigned dimensions, class T> template<unsigned dimension> BasicStrided
     stride._data[dimension] = 0;
 
     return BasicStridedBitArrayView<dimensions, T>{sizeOffset, stride, _data};
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension, unsigned count> BasicStridedBitArrayView<dimensions + count - 1, T> BasicStridedBitArrayView<dimensions, T>::expanded(const Size<count>& size) const {
+    static_assert(dimension < dimensions, "dimension out of range");
+
+    Size<dimensions + count - 1> sizeOffset_{Corrade::NoInit};
+    Stride<dimensions + count - 1> stride_{Corrade::NoInit};
+
+    /* Copy over unchanged sizes and strides before and after the expanded
+       dimension */
+    for(std::size_t i = 0; i != dimension; ++i) {
+        sizeOffset_._data[i] = _sizeOffset._data[i];
+        stride_._data[i] = _stride._data[i];
+    }
+    for(std::size_t i = dimension + 1; i != dimensions; ++i) {
+        sizeOffset_._data[i + count - 1] = _sizeOffset._data[i];
+        stride_._data[i + count - 1] = _stride._data[i];
+    }
+
+    /* Copy new sizes for the expanded dimensions. Strides in each are equal to
+       stride of the next dimension times size of the next dimension */
+    std::size_t totalSize = 1;
+    const std::ptrdiff_t baseStride = _stride._data[dimension];
+    for(std::size_t i = count; i != 0; --i) {
+        sizeOffset_._data[dimension + i - 1] = size._data[i - 1] << 3;
+        stride_._data[dimension + i - 1] = baseStride*totalSize;
+        totalSize *= size._data[i - 1];
+    }
+    CORRADE_ASSERT(totalSize == _sizeOffset._data[dimension] >> 3,
+        "Containers::StridedBitArrayView::expanded(): product of" << size << "doesn't match" << (_sizeOffset._data[dimension] >> 3) << "elements in dimension" << dimension, {});
+
+    /* Put offset into the first dimension. If it was already put there above,
+       it's overwritten with the same value so no need to clear it first. */
+    sizeOffset_._data[0] |= _sizeOffset._data[0] & 0x07;
+
+    return BasicStridedBitArrayView<dimensions + count - 1, T>{sizeOffset_, stride_, _data};
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension, unsigned count> BasicStridedBitArrayView<dimensions - count + 1, T> BasicStridedBitArrayView<dimensions, T>::collapsed() const {
+    static_assert(dimension + count <= dimensions, "dimension + count out of range");
+
+    Containers::Size<dimensions - count + 1> sizeOffset_{Corrade::NoInit};
+    Containers::Stride<dimensions - count + 1> stride_{Corrade::NoInit};
+
+    /* Copy over unchanged sizes and strides before and after the collapsed
+       dimensions */
+    for(std::size_t i = 0; i != dimension; ++i) {
+        sizeOffset_._data[i] = _sizeOffset._data[i];
+        stride_._data[i] = _stride._data[i];
+    }
+    for(std::size_t i = dimension + count; i != dimensions; ++i) {
+        sizeOffset_._data[i - count + 1] = _sizeOffset._data[i];
+        stride_._data[i - count + 1] = _stride._data[i];
+    }
+
+    /* Calculate total size for the collapsed dimension, its stride is then
+       stride of the last dimension in the set */
+    std::size_t totalSize = 1;
+    const std::ptrdiff_t baseStride = _stride._data[dimension + count - 1];
+    for(std::size_t i = dimension + count; i != dimension; --i) {
+        CORRADE_ASSERT(_stride._data[i - 1] == std::ptrdiff_t(totalSize)*baseStride,
+            "Containers::StridedBitArrayView::collapsed(): expected dimension" << i - 1 << "stride to be" << totalSize*baseStride << "but got" << _stride._data[i - 1], {});
+        totalSize *= _sizeOffset._data[i - 1] >> 3;
+    }
+    sizeOffset_._data[dimension] = totalSize << 3;
+    stride_._data[dimension] = baseStride;
+
+    /* Put offset into the first dimension. If it was already put there above,
+       it's overwritten with the same value so no need to clear it first. */
+    sizeOffset_._data[0] |= _sizeOffset._data[0] & 0x07;
+
+    return BasicStridedBitArrayView<dimensions - count + 1, T>{sizeOffset_, stride_, _data};
 }
 
 }}

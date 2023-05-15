@@ -105,6 +105,10 @@ namespace Corrade {
     references and both l-value and r-value references
 -   Added a @ref Containers::StridedArrayView::slice() overload for slicing
     into @cpp struct @ce members and @cpp class @ce getter functions
+-   Added @ref Containers::StridedArrayView::expanded() and
+    @relativeref{Containers,StridedArrayView::collapsed()} view transformation
+    functions for expanding a dimension to multiple dimensions and collapsing
+    them back
 -   New @ref Containers::Array2, @ref Containers::Array3 and
     @ref Containers::Array4 convenience aliases for
     @ref Containers::StaticArray, together with @ref Containers::Array1 that's

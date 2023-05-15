@@ -1040,6 +1040,18 @@ Containers::StridedArrayView3D<std::uint8_t> channels =
 Utility::Debug{} << channels[128][128][1]; // green channel, 0xff
 /* [StridedArrayView-usage-inflate] */
 
+/* [StridedArrayView-usage-expanded-collapsed] */
+Containers::StridedArrayView3D<std::uint32_t> halves =
+    image.expanded<1>(Containers::Size2D{2, 128});
+
+Utility::Debug{} << halves[128][1][0]; // first pixel of second half of row 128
+
+Containers::StridedArrayView1D<std::uint32_t> linear =
+    image.collapsed<0, 2>();
+
+Utility::Debug{} << linear[8359];      // pixel at offset 8359
+/* [StridedArrayView-usage-expanded-collapsed] */
+
 /* [StridedArrayView-usage-rotate] */
 /* Bottom left before is now bottom right */
 Containers::StridedArrayView2D<std::uint32_t> rotated90DegLeft =

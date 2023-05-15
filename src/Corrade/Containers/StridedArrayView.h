@@ -132,12 +132,20 @@ lower-dimensional view into a slice in a higher-dimensional view.
 
 @snippet Containers.cpp StridedArrayView-usage-3d-slice-2d
 
-Finally, since the actual view elements can be also non-scalar data, there's an
-overload of @ref arrayCast(const StridedArrayView<dimensions, T>&) that can
-"extract" an additional dimension out of these or, on the other hand, flatten
-it back if the last dimension is contiguous.
+Since the actual view elements can be also non-scalar data, there's an overload
+of @ref arrayCast(const StridedArrayView<dimensions, T>&) that can "extract" an
+additional dimension out of these or, on the other hand, flatten it back if the
+last dimension is contiguous.
 
 @snippet Containers.cpp StridedArrayView-usage-inflate
+
+With @ref expanded() it's possible to expand a particular dimension to
+multiple, @ref collapsed() then does the inverse assuming the strides allow
+that. The following example splits the 256-pixel-wide image into two 128-pixel
+halves, and the second expression turns the 2D image into a linear list of
+pixels:
+
+@snippet Containers.cpp StridedArrayView-usage-expanded-collapsed
 
 @section Containers-StridedArrayView-zero-stride Zero and negative stride
 
@@ -306,6 +314,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * dimension times next dimension size, while last dimension stride is
          * implicitly @cpp sizeof(T) @ce. In a one-dimensional case you
          * probably want to use @ref StridedArrayView(ArrayView<U>) instead.
+         * @see @ref expanded()
          */
         constexpr /*implicit*/ StridedArrayView(ArrayView<T> data, const Containers::Size<dimensions>& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize<dimensions>(size._data, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
@@ -499,7 +508,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *
          * Returns a view large as the product of sizes in all dimensions.
          * Expects that the view is contiguous.
-         * @see @ref isContiguous() const
+         * @see @ref isContiguous() const, @ref collapsed() const
          */
         ArrayView<T> asContiguous() const;
 
@@ -519,6 +528,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * while the non-templated @ref asContiguous() will return an
          * @ref ArrayView (where the stride is implicitly defined as
          * @cpp sizeof(T) @ce).
+         * @see @ref collapsed() const
          */
         template<unsigned dimension> StridedArrayView<dimension + 1, T> asContiguous() const;
 
@@ -946,6 +956,41 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * elements, @ref slice() it first.
          */
         template<unsigned dimension> StridedArrayView<dimensions, T> broadcasted(std::size_t size) const;
+
+        /**
+         * @brief Expand a dimension
+         * @m_since_latest
+         *
+         * Expands given @p dimension into multiple. The product of @p size is
+         * expected to be equal to size in the original dimension. The
+         * resulting view has sizes and strides before @p dimension unchanged,
+         * after that @cpp count - 1 @ce new dimensions gets inserted, where
+         * each has size from @p size and stride equal to size times stride of
+         * the next dimension, then a @p dimension with size equal to last
+         * element of @p size and its original stride, and after that all other
+         * dimensions with sizes and strides unchanged again.
+         *
+         * See @ref collapsed() for an inverse of this operation.
+         */
+        template<unsigned dimension, unsigned count> StridedArrayView<dimensions + count - 1, T> expanded(const Containers::Size<count>& size) const;
+
+        /**
+         * @brief Collapse dimensions
+         * @m_since_latest
+         *
+         * Assuming dimensions from @p dimension up to
+         * @cpp dimension + count - @ce all have strides equal to size times
+         * stride of the next dimension, returns a view that has them all
+         * collapsed into one with its size equal to a product of sizes of
+         * these dimensions and stride equal to stride of the last dimension in
+         * this range.
+         *
+         * See @ref expanded() for an inverse of this operation and
+         * @ref asContiguous() for a variant that collapses all dimensions from
+         * given index, requiring the stride of last one to be equal to the
+         * type size.
+         */
+        template<unsigned dimension, unsigned count> StridedArrayView<dimensions - count + 1, T> collapsed() const;
 
     private:
         /* Needed for type and mutable/immutable conversion */
@@ -2392,6 +2437,70 @@ template<unsigned dimensions, class T> template<unsigned dimension> StridedArray
     Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] = 0;
     return StridedArrayView<dimensions, T>{size_, stride, _data};
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension, unsigned count> StridedArrayView<dimensions + count - 1, T> StridedArrayView<dimensions, T>::expanded(const Containers::Size<count>& size) const {
+    static_assert(dimension < dimensions, "dimension out of range");
+
+    Containers::Size<dimensions + count - 1> size_{Corrade::NoInit};
+    Containers::Stride<dimensions + count - 1> stride_{Corrade::NoInit};
+
+    /* Copy over unchanged sizes and strides before and after the expanded
+       dimension */
+    for(std::size_t i = 0; i != dimension; ++i) {
+        size_._data[i] = _size._data[i];
+        stride_._data[i] = _stride._data[i];
+    }
+    for(std::size_t i = dimension + 1; i != dimensions; ++i) {
+        size_._data[i + count - 1] = _size._data[i];
+        stride_._data[i + count - 1] = _stride._data[i];
+    }
+
+    /* Copy new sizes for the expanded dimensions. Strides in each are equal to
+       stride of the next dimension times size of the next dimension */
+    std::size_t totalSize = 1;
+    const std::ptrdiff_t baseStride = _stride._data[dimension];
+    for(std::size_t i = count; i != 0; --i) {
+        size_._data[dimension + i - 1] = size._data[i - 1];
+        stride_._data[dimension + i - 1] = baseStride*totalSize;
+        totalSize *= size._data[i - 1];
+    }
+    CORRADE_ASSERT(totalSize == _size._data[dimension],
+        "Containers::StridedArrayView::expanded(): product of" << size << "doesn't match" << _size._data[dimension] << "elements in dimension" << dimension, {});
+
+    return StridedArrayView<dimensions + count - 1, T>{size_, stride_, _data};
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension, unsigned count> StridedArrayView<dimensions - count + 1, T> StridedArrayView<dimensions, T>::collapsed() const {
+    static_assert(dimension + count <= dimensions, "dimension + count out of range");
+
+    Containers::Size<dimensions - count + 1> size_{Corrade::NoInit};
+    Containers::Stride<dimensions - count + 1> stride_{Corrade::NoInit};
+
+    /* Copy over unchanged sizes and strides before and after the collapsed
+       dimensions */
+    for(std::size_t i = 0; i != dimension; ++i) {
+        size_._data[i] = _size._data[i];
+        stride_._data[i] = _stride._data[i];
+    }
+    for(std::size_t i = dimension + count; i != dimensions; ++i) {
+        size_._data[i - count + 1] = _size._data[i];
+        stride_._data[i - count + 1] = _stride._data[i];
+    }
+
+    /* Calculate total size for the collapsed dimension, its stride is then
+       stride of the last dimension in the set */
+    std::size_t totalSize = 1;
+    const std::ptrdiff_t baseStride = _stride._data[dimension + count - 1];
+    for(std::size_t i = dimension + count; i != dimension; --i) {
+        CORRADE_ASSERT(_stride._data[i - 1] == std::ptrdiff_t(totalSize)*baseStride,
+            "Containers::StridedArrayView::collapsed(): expected dimension" << i - 1 << "stride to be" << totalSize*baseStride << "but got" << _stride._data[i - 1], {});
+        totalSize *= _size._data[i - 1];
+    }
+    size_._data[dimension] = totalSize;
+    stride_._data[dimension] = baseStride;
+
+    return StridedArrayView<dimensions - count + 1, T>{size_, stride_, _data};
 }
 
 }}

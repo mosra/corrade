@@ -258,6 +258,10 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void broadcasted();
     void broadcasted3D();
     void broadcastedInvalid();
+    void expandedCollapsed();
+    void expandedCollapsedZeroStride();
+    void expandedCollapsedNegativeStride();
+    void expandedCollapsedInvalid();
 
     void cast();
     void castZeroStride();
@@ -280,6 +284,7 @@ typedef StridedArrayView1D<int> StridedArrayView1Di;
 typedef StridedArrayView1D<const int> ConstStridedArrayView1Di;
 typedef StridedArrayView2D<int> StridedArrayView2Di;
 typedef StridedArrayView3D<int> StridedArrayView3Di;
+typedef StridedArrayView4D<int> StridedArrayView4Di;
 typedef StridedArrayView3D<const int> ConstStridedArrayView3Di;
 typedef StridedArrayView1D<void> VoidStridedArrayView1D;
 typedef StridedArrayView1D<const void> ConstVoidStridedArrayView1D;
@@ -471,6 +476,10 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::broadcasted,
               &StridedArrayViewTest::broadcasted3D,
               &StridedArrayViewTest::broadcastedInvalid,
+              &StridedArrayViewTest::expandedCollapsed,
+              &StridedArrayViewTest::expandedCollapsedZeroStride,
+              &StridedArrayViewTest::expandedCollapsedNegativeStride,
+              &StridedArrayViewTest::expandedCollapsedInvalid,
 
               &StridedArrayViewTest::cast,
               &StridedArrayViewTest::castZeroStride,
@@ -3861,6 +3870,178 @@ void StridedArrayViewTest::broadcastedInvalid() {
     a.broadcasted<2>(16);
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::broadcasted(): can't broadcast dimension 2 with 4 elements\n");
+}
+
+void StridedArrayViewTest::expandedCollapsed() {
+    /* Three blocks of 6x2 pairs, first pair item always ends with 0, second
+       with 1 */
+    int data[]{
+        00, 01, 10, 11, 20, 21, 30, 31, 40, 41, 50, 51,
+        60, 61, 70, 71, 80, 81, 90, 91, 100, 101, 110, 111,
+
+        120, 121, 130, 131, 140, 141, 150, 151, 160, 161, 170, 171,
+        180, 181, 190, 191, 200, 201, 210, 211, 220, 221, 230, 231,
+
+        240, 241, 250, 251, 260, 261, 270, 271, 280, 281, 290, 291,
+        300, 301, 310, 311, 320, 321, 330, 331, 340, 341, 350, 351
+    };
+
+    StridedArrayView3Di a0{data, {3, 12, 2}};
+    StridedArrayView2Di a1{data, {3, 24}};
+    StridedArrayView2Di a2{data, {36, 2}};
+
+    /* All three should expand to exactly the same */
+    StridedArrayView4Di b[]{
+        a0.expanded<1>(Size2D{2, 6}),
+        a1.expanded<1>(Size3D{2, 6, 2}),
+        a2.expanded<0>(Size3D{3, 2, 6})
+    };
+    for(std::size_t i = 0; i != Containers::arraySize(b); ++i) {
+        CORRADE_ITERATION(i);
+
+        CORRADE_COMPARE(b[i].data(), static_cast<void*>(data));
+        CORRADE_COMPARE(b[i].size(), (Size4D{3, 2, 6, 2}));
+        CORRADE_COMPARE(b[i].stride(), (Stride4D{96, 48, 8, 4}));
+
+        /* Just a random sanity check */
+        CORRADE_COMPARE(b[i][0][1][5][0], 110);
+        CORRADE_COMPARE(b[i][1][0][4][1], 161);
+        CORRADE_COMPARE(b[i][2][1][2][0], 320);
+    }
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedArrayView3Di c0 = b[0].collapsed<1, 2>();
+    CORRADE_COMPARE(c0.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c0.size(), a0.size());
+    CORRADE_COMPARE(c0.stride(), a0.stride());
+
+    StridedArrayView2Di c1 = b[1].collapsed<1, 3>();
+    CORRADE_COMPARE(c1.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c1.size(), a1.size());
+    CORRADE_COMPARE(c1.stride(), a1.stride());
+
+    StridedArrayView2Di c2 = b[2].collapsed<0, 3>();
+    CORRADE_COMPARE(c2.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c2.size(), a2.size());
+    CORRADE_COMPARE(c2.stride(), a2.stride());
+
+    /* These should all be a no-op, i.e. giving back the original view */
+    StridedArrayView3Di d[]{
+        a0.expanded<0>(Size1D{3}),
+        a0.expanded<1>(Size1D{12}),
+        a0.expanded<2>(Size1D{2})
+    };
+    for(std::size_t i = 0; i != Containers::arraySize(d); ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(d[i].data(), static_cast<void*>(data));
+        CORRADE_COMPARE(d[i].size(), a0.size());
+        CORRADE_COMPARE(d[i].stride(), a0.stride());
+    }
+}
+
+void StridedArrayViewTest::expandedCollapsedZeroStride() {
+    /* Compared to expandedCollapsed() it's just the first value in each group,
+       broadcasted */
+    int data[]{
+        110, 111,
+
+        230, 231,
+
+        350, 351,
+    };
+
+    StridedArrayView3Di a = StridedArrayView3Di{data, {3, 1, 2}}.broadcasted<1>(12);
+
+    StridedArrayView4Di b = a.expanded<1>(Size2D{2, 6});
+
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(b.size(), (Size4D{3, 2, 6, 2}));
+    CORRADE_COMPARE(b.stride(), (Stride4D{8, 0, 0, 4}));
+
+    CORRADE_COMPARE(b[0][1][5][0], 110);
+    CORRADE_COMPARE(b[1][0][4][1], 231);
+    CORRADE_COMPARE(b[2][1][2][0], 350);
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedArrayView3Di c = b.collapsed<1, 2>();
+    CORRADE_COMPARE(c.data(), a.data());
+    CORRADE_COMPARE(c.size(), a.size());
+    CORRADE_COMPARE(c.stride(), a.stride());
+
+    /* No-op, giving back the original view */
+    StridedArrayView3Di d = a.expanded<1>(Size1D{12});
+    CORRADE_COMPARE(d.data(), a.data());
+    CORRADE_COMPARE(d.size(), a.size());
+    CORRADE_COMPARE(d.stride(), a.stride());
+}
+
+void StridedArrayViewTest::expandedCollapsedNegativeStride() {
+    /* Data like in expandedCollapsed(), but with the middle dimension flipped
+       which should result in the same data being at the same index */
+    int data[]{
+        110, 111, 100, 101, 90, 91, 80, 81, 70, 71, 60, 61,
+        50, 51, 40, 41, 30, 31, 20, 21, 10, 11, 00, 01,
+
+        230, 231, 220, 221, 210, 211, 200, 201, 190, 191, 180, 181,
+        170, 171, 160, 161, 150, 151, 140, 141, 130, 131, 120, 121,
+
+        350, 351, 340, 341, 330, 331, 320, 321, 310, 311, 300, 301,
+        290, 291, 280, 281, 270, 271, 260, 261, 250, 251, 240, 241
+    };
+
+    StridedArrayView3Di a = StridedArrayView3Di{data, {3, 12, 2}}.flipped<1>();
+
+    StridedArrayView4Di b = a.expanded<1>(Size2D{2, 6});
+
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(b.size(), (Size4D{3, 2, 6, 2}));
+    CORRADE_COMPARE(b.stride(), (Stride4D{96, -48, -8, 4}));
+
+    /* Same as in expandedCollapsed() */
+    CORRADE_COMPARE(b[0][1][5][0], 110);
+    CORRADE_COMPARE(b[1][0][4][1], 161);
+    CORRADE_COMPARE(b[2][1][2][0], 320);
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedArrayView3Di c = b.collapsed<1, 2>();
+    CORRADE_COMPARE(c.data(), a.data());
+    CORRADE_COMPARE(c.size(), a.size());
+    CORRADE_COMPARE(c.stride(), a.stride());
+
+    /* No-op, giving back the original view */
+    StridedArrayView3Di d = a.expanded<1>(Size1D{12});
+    CORRADE_COMPARE(d.data(), a.data());
+    CORRADE_COMPARE(d.size(), a.size());
+    CORRADE_COMPARE(d.stride(), a.stride());
+}
+
+void StridedArrayViewTest::expandedCollapsedInvalid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    int data[39]{};
+
+    StridedArrayView2Di a{data, {3, 13}};
+    StridedArrayView3Di b0{data, {4, 3, 2}, {24, 8, 4}};
+    StridedArrayView3Di b1{data, {4, 3, 2}, {36, 8, 4}};
+    StridedArrayView3Di b2{data, {4, 3, 2}, {36, 12, 4}};
+
+    /* These are fine */
+    b0.collapsed<0, 3>();
+    b1.collapsed<1, 2>();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    a.expanded<1>(Size1D{14});
+    a.expanded<1>(Size2D{2, 6});
+    a.expanded<1>(Size3D{2, 3, 2});
+    b1.collapsed<0, 3>();
+    b2.collapsed<0, 3>();
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView::expanded(): product of {14} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedArrayView::expanded(): product of {2, 6} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedArrayView::expanded(): product of {2, 3, 2} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedArrayView::collapsed(): expected dimension 0 stride to be 24 but got 36\n"
+        "Containers::StridedArrayView::collapsed(): expected dimension 1 stride to be 8 but got 12\n");
 }
 
 void StridedArrayViewTest::cast() {

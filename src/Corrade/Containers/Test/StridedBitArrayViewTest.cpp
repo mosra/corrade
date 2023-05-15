@@ -132,6 +132,10 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void broadcasted();
     void broadcasted3D();
     void broadcastedInvalid();
+    void expandedCollapsed();
+    void expandedCollapsedZeroStride();
+    void expandedCollapsedNegativeStride();
+    void expandedCollapsedInvalid();
 
     void debug();
     void debug3D();
@@ -381,6 +385,10 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
               &StridedBitArrayViewTest::broadcasted,
               &StridedBitArrayViewTest::broadcasted3D,
               &StridedBitArrayViewTest::broadcastedInvalid,
+              &StridedBitArrayViewTest::expandedCollapsed,
+              &StridedBitArrayViewTest::expandedCollapsedZeroStride,
+              &StridedBitArrayViewTest::expandedCollapsedNegativeStride,
+              &StridedBitArrayViewTest::expandedCollapsedInvalid,
 
               &StridedBitArrayViewTest::debug,
               &StridedBitArrayViewTest::debug3D});
@@ -2470,6 +2478,250 @@ void StridedBitArrayViewTest::broadcastedInvalid() {
     a.broadcasted<2>(16);
     CORRADE_COMPARE(out.str(),
         "Containers::StridedBitArrayView::broadcasted(): can't broadcast dimension 2 with 5 elements\n");
+}
+
+void StridedBitArrayViewTest::expandedCollapsed() {
+    /*   0b110011001100
+       2   111111000000
+
+           001100110011
+       1   000000111111
+
+           111111111111
+       0   000000000000 << 5 */
+    char data[]{
+        '\x00', '\x00', '\xfe', '\xff', '\x07',
+        '\x66', '\x06', '\xf8', '\x99', '\x19'
+    };
+    BitArrayView view{data, 5, 72};
+    StridedBitArrayView3D a0{view, {3, 12, 2}};
+    StridedBitArrayView2D a1{view, {3, 24}};
+    StridedBitArrayView2D a2{view, {36, 2}};
+
+    /* All three should expand to exactly the same */
+    StridedBitArrayView4D b[]{
+        a0.expanded<1>(Size2D{2, 6}),
+        a1.expanded<1>(Size3D{2, 6, 2}),
+        a2.expanded<0>(Size3D{3, 2, 6})
+    };
+    for(std::size_t i = 0; i != Containers::arraySize(b); ++i) {
+        CORRADE_ITERATION(i);
+
+        CORRADE_COMPARE(b[i].data(), static_cast<void*>(data));
+        CORRADE_COMPARE(b[i].offset(), 5);
+        CORRADE_COMPARE(b[i].size(), (Size4D{3, 2, 6, 2}));
+        CORRADE_COMPARE(b[i].stride(), (Stride4D{24, 12, 2, 1}));
+
+        /* Check the pattern in the bit pattern */
+        for(std::size_t j = 0; j != 6; ++j) {
+            /* Items in the pair are always the same */
+            CORRADE_COMPARE(b[i][0][0][j][0], b[i][0][0][j][1]);
+
+            /* Inverses */
+            CORRADE_COMPARE(b[i][0][1][j][0], !b[i][0][0][j][0]);
+            CORRADE_COMPARE(b[i][1][0][j][0], !b[i][2][0][j][0]);
+            CORRADE_COMPARE(b[i][1][1][j][0], !b[i][2][1][j][0]);
+        }
+
+        /* First slice in the first block is all 0s */
+        for(std::size_t j = 0; j != 6; ++j) {
+            CORRADE_ITERATION(j);
+            CORRADE_VERIFY(!b[i][0][0][j][0]);
+        }
+        /* First slice in second and third is half and half */
+        for(std::size_t j = 0; j != 3; ++j) {
+            CORRADE_ITERATION(j);
+            CORRADE_VERIFY( b[i][1][0][j][0]);
+            CORRADE_VERIFY(!b[i][2][0][j][0]);
+            CORRADE_VERIFY(!b[i][1][0][3 + j][0]);
+            CORRADE_VERIFY( b[i][2][0][3 + j][0]);
+        }
+        /* Second slice in second and third has every second set */
+        for(std::size_t j = 0; j != 6; ++j) {
+            CORRADE_ITERATION(j);
+            CORRADE_COMPARE(b[i][1][1][j][0], j % 2 == 0);
+            CORRADE_COMPARE(b[i][2][1][j][0], j % 2 != 0);
+        }
+    }
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedBitArrayView3D c0 = b[0].collapsed<1, 2>();
+    CORRADE_COMPARE(c0.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c0.offset(), a0.offset());
+    CORRADE_COMPARE(c0.size(), a0.size());
+    CORRADE_COMPARE(c0.stride(), a0.stride());
+
+    StridedBitArrayView2D c1 = b[1].collapsed<1, 3>();
+    CORRADE_COMPARE(c1.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c1.offset(), a1.offset());
+    CORRADE_COMPARE(c1.size(), a1.size());
+    CORRADE_COMPARE(c1.stride(), a1.stride());
+
+    StridedBitArrayView2D c2 = b[2].collapsed<0, 3>();
+    CORRADE_COMPARE(c2.data(), static_cast<void*>(data));
+    CORRADE_COMPARE(c2.offset(), a2.offset());
+    CORRADE_COMPARE(c2.size(), a2.size());
+    CORRADE_COMPARE(c2.stride(), a2.stride());
+
+    /* These should all be a no-op, i.e. giving back the original view */
+    StridedBitArrayView3D d[]{
+        a0.expanded<0>(Size1D{3}),
+        a0.expanded<1>(Size1D{12}),
+        a0.expanded<2>(Size1D{2})
+    };
+    for(std::size_t i = 0; i != Containers::arraySize(d); ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(d[i].data(), static_cast<void*>(data));
+        CORRADE_COMPARE(d[i].offset(), a0.offset());
+        CORRADE_COMPARE(d[i].size(), a0.size());
+        CORRADE_COMPARE(d[i].stride(), a0.stride());
+    }
+}
+
+void StridedBitArrayViewTest::expandedCollapsedZeroStride() {
+    /* Compared to expandedCollapsed() it's just the first value in each group,
+       broadcasted
+
+       2 0b00
+
+       1   11
+
+       0   00 << 5 */
+    char data[]{
+        '\x80', '\x01'
+    };
+    BitArrayView view{data, 5, 6};
+
+    StridedBitArrayView3D a = StridedBitArrayView3D{view, {3, 1, 2}}.broadcasted<1>(12);
+
+    StridedBitArrayView4D b = a.expanded<1>(Size2D{2, 6});
+
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(b.size(), (Size4D{3, 2, 6, 2}));
+    CORRADE_COMPARE(b.stride(), (Stride4D{2, 0, 0, 1}));
+
+    for(std::size_t j = 0; j != 6; ++j) {
+        /* The two slices are always the same */
+        for(std::size_t k = 0; k != 2; ++k) {
+            /* Items in the pair are always the same */
+            CORRADE_COMPARE(b[0][k][j][0], b[0][k][j][1]);
+
+            CORRADE_VERIFY(!b[0][k][j][0]);
+            CORRADE_VERIFY( b[1][k][j][0]);
+            CORRADE_VERIFY(!b[2][k][j][0]);
+        }
+    }
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedBitArrayView3D c = b.collapsed<1, 2>();
+    CORRADE_COMPARE(c.data(), a.data());
+    CORRADE_COMPARE(c.size(), a.size());
+    CORRADE_COMPARE(c.stride(), a.stride());
+
+    /* No-op, giving back the original view */
+    StridedBitArrayView3D d = a.expanded<1>(Size1D{12});
+    CORRADE_COMPARE(d.data(), a.data());
+    CORRADE_COMPARE(d.size(), a.size());
+    CORRADE_COMPARE(d.stride(), a.stride());
+}
+
+void StridedBitArrayViewTest::expandedCollapsedNegativeStride() {
+    /* Data like in expandedCollapsed(), but with the middle dimension flipped
+       which should result in the same data being at the same index
+
+         0b000000111111
+       2   001100110011
+
+           111111000000
+       1   110011001100
+
+           000000000000
+       0   111111111111 << 5 */
+    char data[]{
+        '\xe0', '\xff', '\x01', '\x80', '\x99',
+        '\x81', '\x7f', '\x66', '\x7e', '\x00'
+    };
+    BitArrayView view{data, 5, 72};
+
+    StridedBitArrayView3D a = StridedBitArrayView3D{view, {3, 12, 2}}.flipped<1>();
+
+    StridedBitArrayView4D b = a.expanded<1>(Size2D{2, 6});
+
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(b.size(), (Size4D{3, 2, 6, 2}));
+    CORRADE_COMPARE(b.stride(), (Stride4D{24, -12, -2, 1}));
+
+    /* Same as in expandedCollapsed() */
+    for(std::size_t j = 0; j != 6; ++j) {
+        /* Items in the pair are always the same */
+        CORRADE_COMPARE(b[0][0][j][0], b[0][0][j][1]);
+
+        /* Inverses */
+        CORRADE_COMPARE(b[0][1][j][0], !b[0][0][j][0]);
+        CORRADE_COMPARE(b[1][0][j][0], !b[2][0][j][0]);
+        CORRADE_COMPARE(b[1][1][j][0], !b[2][1][j][0]);
+    }
+
+    /* First slice in the first block is all 0s */
+    for(std::size_t j = 0; j != 6; ++j) {
+        CORRADE_ITERATION(j);
+        CORRADE_VERIFY(!b[0][0][j][0]);
+    }
+    /* First slice in second and third is half and half */
+    for(std::size_t j = 0; j != 3; ++j) {
+        CORRADE_ITERATION(j);
+        CORRADE_VERIFY( b[1][0][j][0]);
+        CORRADE_VERIFY(!b[2][0][j][0]);
+        CORRADE_VERIFY(!b[1][0][3 + j][0]);
+        CORRADE_VERIFY( b[2][0][3 + j][0]);
+    }
+    /* Second slice in second and third has every second set */
+    for(std::size_t j = 0; j != 6; ++j) {
+        CORRADE_ITERATION(j);
+        CORRADE_COMPARE(b[1][1][j][0], j % 2 == 0);
+        CORRADE_COMPARE(b[2][1][j][0], j % 2 != 0);
+    }
+
+    /* Collapsing them makes them equivalent to the originals again */
+    StridedBitArrayView3D c = b.collapsed<1, 2>();
+    CORRADE_COMPARE(c.data(), a.data());
+    CORRADE_COMPARE(c.size(), a.size());
+    CORRADE_COMPARE(c.stride(), a.stride());
+
+    /* No-op, giving back the original view */
+    StridedBitArrayView3D d = a.expanded<1>(Size1D{12});
+    CORRADE_COMPARE(d.data(), a.data());
+    CORRADE_COMPARE(d.size(), a.size());
+    CORRADE_COMPARE(d.stride(), a.stride());
+}
+
+void StridedBitArrayViewTest::expandedCollapsedInvalid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    char data[6]{};
+    BitArrayView view{data, 5, 39};
+    StridedBitArrayView2D a{view, {3, 13}};
+    StridedBitArrayView3D b0{view, {4, 3, 2}, {6, 2, 1}};
+    StridedBitArrayView3D b1{view, {4, 3, 2}, {9, 2, 1}};
+    StridedBitArrayView3D b2{view, {4, 3, 2}, {9, 3, 1}};
+
+    /* These are fine */
+    b0.collapsed<0, 3>();
+    b1.collapsed<1, 2>();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    a.expanded<1>(Size1D{14});
+    a.expanded<1>(Size2D{2, 6});
+    a.expanded<1>(Size3D{2, 3, 2});
+    b1.collapsed<0, 3>();
+    b2.collapsed<0, 3>();
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedBitArrayView::expanded(): product of {14} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedBitArrayView::expanded(): product of {2, 6} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedBitArrayView::expanded(): product of {2, 3, 2} doesn't match 13 elements in dimension 1\n"
+        "Containers::StridedBitArrayView::collapsed(): expected dimension 0 stride to be 6 but got 9\n"
+        "Containers::StridedBitArrayView::collapsed(): expected dimension 1 stride to be 2 but got 3\n");
 }
 
 void StridedBitArrayViewTest::debug() {
