@@ -78,6 +78,26 @@ commands:
           if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then export LCOV_PACKAGES="lcov curl"; fi
           sudo apt install -y ninja-build gcc cmake $LCOV_PACKAGES << parameters.extra >>
 
+  # TODO this might get resolved with 1.11.1:
+  #   https://github.com/ninja-build/ninja/pull/1827
+  #   https://github.com/ninja-build/ninja/pull/2174
+  # But wouldn't it build too slow then? Heh
+  cap-ninja-jobs:
+    parameters:
+      count:
+        type: integer
+        # It reports 36 cores and ninja goes with 38 currently, RAM fluctuates
+        # from 3 to 70 GB.
+        default: 24
+    steps:
+    - run:
+        name: Query CPU cores, default Ninja parallelism and available RAM, cap jobs
+        command: |
+          nproc
+          ninja --help 2>&1 | grep "N jobs in parallel" || true
+          free
+          echo "export NINJA_JOBS=-j<< parameters.count >>" >> $BASH_ENV
+
   install-base-macos:
     parameters:
       extra:
@@ -249,6 +269,11 @@ jobs:
     # Install also Git so we verify that Git version embedding works
     - install-base-linux:
         extra: git
+    # OOMs during compilation of Strided[Bit]ArrayViewTest with -j16 and more
+    # TODO revisit once deprecated includes are dropped (non-deprecated build
+    # doesn't fail), https://github.com/mosra/corrade/pull/140 may also help?
+    - cap-ninja-jobs:
+        count: 8
     - install-gcc-4_8
     - install-cmake:
         version: "3.4.3"
@@ -282,6 +307,11 @@ jobs:
       CONFIGURATION: Debug
     steps:
     - install-base-linux
+    # OOMs during compilation of Strided[Bit]ArrayViewTest with -j16 and more
+    # TODO revisit once deprecated includes are dropped (non-deprecated build
+    # doesn't fail), https://github.com/mosra/corrade/pull/140 may also help?
+    - cap-ninja-jobs:
+        count: 8
     - install-gcc-4_8
     - install-cmake:
         version: "3.4.3"
