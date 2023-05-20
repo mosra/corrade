@@ -294,7 +294,7 @@ JsonWriter& JsonWriter::endArray() {
     arrayRemoveSuffix(state.levels, 1);
 
     /* If a comma is expected it means a value was written. Add a newline and
-       an indent in that case, otherwise nothing. */
+       an indent in that case, otherwise nothing so this becomes a []. */
     if(state.needsCommaBefore)
         arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
 
@@ -495,23 +495,18 @@ JsonWriter& JsonWriter::write(const Containers::StringView value) {
     return *this;
 }
 
-void JsonWriter::initializeValueArrayInternal(const std::size_t valueCount, const std::uint32_t wrapAfter) {
+void JsonWriter::initializeValueArrayInternal() {
     State& state = *_state;
-    CORRADE_ASSERT(
-        state.expecting == Expecting::Value ||
-        state.expecting == Expecting::ObjectValue ||
-        state.expecting == Expecting::ArrayValueOrArrayEnd,
-        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], );
 
     /* Comma, newline and indent, array opening brace */
     writeCommaNewlineIndentInternal();
     arrayAppend(state.out, '[');
 
-    /* If we have values and are told to wrap, indent next level further; mark
-       this as an array */
-    if(valueCount && wrapAfter)
-        if(arrayAppend(state.levels, InPlaceInit, state.levels.back().first() + state.indentation.size(), 0u).first() > state.whitespace.size())
-            arrayAppend(state.whitespace, state.indentation);
+    /* Indent next level further; mark this as an array. If we won't wrap at
+       all, the next level indentation will never get used by
+       writeArrayCommaNewlineIndentInternal() however. */
+    if(arrayAppend(state.levels, InPlaceInit, state.levels.back().first() + state.indentation.size(), 0u).first() > state.whitespace.size())
+        arrayAppend(state.whitespace, state.indentation);
 }
 
 void JsonWriter::writeArrayCommaNewlineIndentInternal(const std::size_t i, const std::uint32_t wrapAfter) {
@@ -532,16 +527,17 @@ void JsonWriter::writeArrayCommaNewlineIndentInternal(const std::size_t i, const
 
 void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    /* If we have values and are told to wrap, one nesting level back */
-    if(valueCount && wrapAfter) {
-        /* There's at least one level and it's an array with uncounted items,
-           as done in the initializeValueArrayInternal() counterpart */
-        CORRADE_INTERNAL_ASSERT(state.levels.back().second() == 0);
-        arrayRemoveSuffix(state.levels, 1);
 
-        /* Add a newline and an indent */
+    /* One nesting level back. There's at least one level and it's an array
+       with uncounted items, as done in the initializeValueArrayInternal()
+       counterpart. */
+    CORRADE_INTERNAL_ASSERT(state.levels.back().second() == 0);
+    arrayRemoveSuffix(state.levels, 1);
+
+    /* If any values were written and we were wrapping, add a newline and an
+       indent. Otherwise do nothing so this becomes a []. */
+    if(wrapAfter && valueCount)
         arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));
-    }
 
     /* Array closing brace */
     arrayAppend(state.out, ']');
@@ -553,7 +549,13 @@ void JsonWriter::finalizeValueArrayInternal(const std::size_t valueCount, const 
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedBitArrayView1D& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -573,7 +575,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<bool> values, con
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const float>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -600,7 +608,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<float> values, co
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const double>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -627,7 +641,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<double> values, c
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::uint32_t>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -650,7 +670,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::uint32_t> va
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const std::int32_t>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -673,7 +699,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<std::int32_t> val
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const unsigned long long>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -708,7 +740,13 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<unsigned long> va
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedArrayView1D<const long long>& values, const std::uint32_t wrapAfter) {
     State& state = *_state;
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */
@@ -742,7 +780,14 @@ JsonWriter& JsonWriter::writeArray(const std::initializer_list<long> values, con
 }
 
 JsonWriter& JsonWriter::writeArray(const Containers::StringIterable& values, const std::uint32_t wrapAfter) {
-    initializeValueArrayInternal(values.size(), wrapAfter);
+    State& state = *_state;
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeArray(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    initializeValueArrayInternal();
 
     for(std::size_t i = 0; i != values.size(); ++i) {
         /* Comma or comma & newline & indent before */

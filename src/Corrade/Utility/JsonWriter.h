@@ -774,7 +774,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
            writeString() and writeObjectKey(). */
         CORRADE_UTILITY_LOCAL void writeStringLiteralInternal(Containers::StringView string);
 
-        CORRADE_UTILITY_LOCAL void initializeValueArrayInternal(std::size_t valueCount, std::uint32_t wrapAfter);
+        CORRADE_UTILITY_LOCAL void initializeValueArrayInternal();
         CORRADE_UTILITY_LOCAL void writeArrayCommaNewlineIndentInternal(std::size_t i, std::uint32_t wrapAfter);
         CORRADE_UTILITY_LOCAL void finalizeValueArrayInternal(std::size_t valueCount, std::uint32_t wrapAfter);
 

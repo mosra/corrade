@@ -1036,10 +1036,24 @@ void JsonWriterTest::valueButObjectKeyExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
-        .writeArray({5})
+        .writeArray({true})
+        .writeArray({5.0f})
+        .writeArray({5.0})
+        .writeArray({5u})
+        .writeArray({static_cast<unsigned long>(0)})
+        .writeArray({static_cast<long>(0)})
+        .writeArray({static_cast<unsigned long long>(0)})
+        .writeArray({static_cast<long long>(0)})
         .writeJson("false");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
@@ -1078,10 +1092,24 @@ void JsonWriterTest::valueButDocumentEndExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
-        .writeArray({5})
+        .writeArray({true})
+        .writeArray({5.0f})
+        .writeArray({5.0})
+        .writeArray({5u})
+        .writeArray({static_cast<unsigned long>(0)})
+        .writeArray({static_cast<long>(0)})
+        .writeArray({static_cast<unsigned long long>(0)})
+        .writeArray({static_cast<long long>(0)})
         .writeJson("/* HI JSON CAN YOU COMMENT */");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeArray(): expected document end\n"
         "Utility::JsonWriter::writeArray(): expected document end\n"
         "Utility::JsonWriter::writeJson(): expected document end\n");
 }
