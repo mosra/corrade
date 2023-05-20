@@ -70,10 +70,12 @@ struct JsonWriterTest: TestSuite::Tester {
 
         void simpleObject();
         void simpleArray();
+        void compactArray();
         void nested();
 
         void objectScope();
         void arrayScope();
+        void compactArrayScope();
 
         void escapedString();
         template<class T> void negativeZero();
@@ -98,6 +100,7 @@ struct JsonWriterTest: TestSuite::Tester {
         void objectKeyButValueExpected();
         void objectKeyButDocumentEndExpected();
         void valueButDocumentEndExpected();
+        void disallowedInCompactArray();
         void toStringOrFileNoValue();
         void toStringOrFileIncompleteObject();
         void toStringOrFileIncompleteObjectValue();
@@ -273,6 +276,38 @@ const struct {
 const struct {
     const char* name;
     JsonWriter::Options options;
+    std::uint32_t indentation, initialIndentation, wrapAfter;
+    const char* expected;
+} CompactArrayData[]{
+    /* Tests similar cases as SingleArrayValueData */
+    {"", {}, 0, 0, 0,
+        R"([13,5.5,"yes",null,true])"},
+    {"no wrapping, non-zero indent, wrap after 1", {}, 8, 56, 1,
+        /* Wrap after and indent should get ignored */
+        R"([13,5.5,"yes",null,true])"},
+    {"no wrapping, typographical space, non-zero indent, wrap after 1", JsonWriter::Option::TypographicalSpace, 8, 56, 1,
+        /* Wrap after and indent should get ignored */
+        R"([13, 5.5, "yes", null, true])"},
+    {"four-space indent, wrap after 0", JsonWriter::Option::Wrap, 4, 0, 0,
+        /* All on the same line so no wrapping */
+        R"([13,5.5,"yes",null,true]
+)"},
+    {"four-space indent, wrap after 3", JsonWriter::Option::Wrap, 4, 0, 3,
+        R"([
+    13,5.5,"yes",
+    null,true
+]
+)"},
+    {"nine-space initial indent, two-space indent and a typographical space, wrap after 3", JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2, 9, 3,
+        R"([
+           13, 5.5, "yes",
+           null, true
+         ])"},/* no final newline */
+};
+
+const struct {
+    const char* name;
+    JsonWriter::Options options;
     std::uint32_t indentation, initialIndentation;
     const char* expected;
 } NestedData[]{
@@ -427,11 +462,15 @@ JsonWriterTest::JsonWriterTest() {
     addInstancedTests({&JsonWriterTest::simpleArray},
         Containers::arraySize(SimpleArrayData));
 
+    addInstancedTests({&JsonWriterTest::compactArray},
+        Containers::arraySize(CompactArrayData));
+
     addInstancedTests({&JsonWriterTest::nested},
         Containers::arraySize(NestedData));
 
     addTests({&JsonWriterTest::objectScope,
               &JsonWriterTest::arrayScope,
+              &JsonWriterTest::compactArrayScope,
 
               &JsonWriterTest::escapedString,
               &JsonWriterTest::negativeZero<float>,
@@ -457,6 +496,7 @@ JsonWriterTest::JsonWriterTest() {
               &JsonWriterTest::objectKeyButValueExpected,
               &JsonWriterTest::objectKeyButDocumentEndExpected,
               &JsonWriterTest::valueButDocumentEndExpected,
+              &JsonWriterTest::disallowedInCompactArray,
               &JsonWriterTest::toStringOrFileNoValue,
               &JsonWriterTest::toStringOrFileIncompleteObject,
               &JsonWriterTest::toStringOrFileIncompleteObjectValue,
@@ -754,6 +794,33 @@ void JsonWriterTest::simpleArray() {
     CORRADE_COMPARE(out, data.expected);
 }
 
+void JsonWriterTest::compactArray() {
+    auto&& data = CompactArrayData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    JsonWriter json{data.options, data.indentation, data.initialIndentation};
+    json.beginCompactArray(data.wrapAfter);
+    CORRADE_COMPARE(json.currentArraySize(), 0);
+
+    json.write(13);
+    CORRADE_COMPARE(json.currentArraySize(), 1);
+
+    json.write(5.5);
+    CORRADE_COMPARE(json.currentArraySize(), 2);
+
+    json.write("yes");
+    CORRADE_COMPARE(json.currentArraySize(), 3);
+
+    json.write(nullptr);
+    CORRADE_COMPARE(json.currentArraySize(), 4);
+
+    json.write(true);
+    CORRADE_COMPARE(json.currentArraySize(), 5);
+
+    Containers::StringView out = json.endArray().toString();
+    CORRADE_COMPARE(out, data.expected);
+}
+
 void JsonWriterTest::nested() {
     auto&& data = NestedData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
@@ -834,6 +901,29 @@ void JsonWriterTest::arrayScope() {
 
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* expected = R"(["hello!","works?",true])";
+    CORRADE_COMPARE(json.toString(), expected);
+}
+
+void JsonWriterTest::compactArrayScope() {
+    /* Using an indented formatter to test that this doesn't do the same as
+       beginArrayScope() */
+    JsonWriter json{JsonWriter::Option::Wrap|JsonWriter::Option::TypographicalSpace, 2};
+
+    {
+        Containers::ScopeGuard array = json.beginCompactArrayScope(2);
+
+        json.write(13)
+            .write(5.5f)
+            .write("yes")
+            .write(true);
+    }
+
+    /* GCC 4.8 can't handle raw string literals in macros */
+    const char* expected = R"([
+  13, 5.5,
+  "yes", true
+]
+)";
     CORRADE_COMPARE(json.toString(), expected);
 }
 
@@ -1036,24 +1126,10 @@ void JsonWriterTest::valueButObjectKeyExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
-        .writeArray({true})
-        .writeArray({5.0f})
-        .writeArray({5.0})
-        .writeArray({5u})
-        .writeArray({static_cast<unsigned long>(0)})
-        .writeArray({static_cast<long>(0)})
-        .writeArray({static_cast<unsigned long long>(0)})
-        .writeArray({static_cast<long long>(0)})
+        .writeArray({5})
         .writeJson("false");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
-        "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
@@ -1092,26 +1168,38 @@ void JsonWriterTest::valueButDocumentEndExpected() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write("hello")
-        .writeArray({true})
-        .writeArray({5.0f})
-        .writeArray({5.0})
-        .writeArray({5u})
-        .writeArray({static_cast<unsigned long>(0)})
-        .writeArray({static_cast<long>(0)})
-        .writeArray({static_cast<unsigned long long>(0)})
-        .writeArray({static_cast<long long>(0)})
+        .writeArray({5})
         .writeJson("/* HI JSON CAN YOU COMMENT */");
     CORRADE_COMPARE(out.str(),
         "Utility::JsonWriter::write(): expected document end\n"
         "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
-        "Utility::JsonWriter::writeArray(): expected document end\n"
         "Utility::JsonWriter::writeJson(): expected document end\n");
+}
+
+void JsonWriterTest::disallowedInCompactArray() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    JsonWriter json;
+    json.beginCompactArray();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    json
+        .beginObject()
+        .beginArray()
+        .beginCompactArray()
+        .writeArray({5})
+        /* This could eventually get allowed if a compelling use case is found,
+           but the assumption is that JSON strings are inherently complex with
+           their own internal indentation etc., which would significantly break
+           the formatting here. */
+        .writeJson("/* HI JSON CAN YOU COMMENT */");
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonWriter::beginObject(): expected a compact array value or array end\n"
+        "Utility::JsonWriter::beginArray(): expected a compact array value or array end\n"
+        "Utility::JsonWriter::beginCompactArray(): expected a compact array value or array end\n"
+        "Utility::JsonWriter::writeArray(): expected a compact array value or array end\n"
+        "Utility::JsonWriter::writeJson(): expected a compact array value or array end\n");
 }
 
 void JsonWriterTest::toStringOrFileNoValue() {
@@ -1185,10 +1273,8 @@ void JsonWriterTest::invalidFloat() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.floatValue);
-    json.writeArray({3.5f, 7.6f, data.floatValue});
     CORRADE_COMPARE(out.str(), formatString(
-        "Utility::JsonWriter::write(): invalid floating-point value {0}\n"
-        "Utility::JsonWriter::writeArray(): invalid floating-point value {0}\n",
+        "Utility::JsonWriter::write(): invalid floating-point value {}\n",
         data.message));
 }
 
@@ -1203,10 +1289,8 @@ void JsonWriterTest::invalidDouble() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.doubleValue);
-    json.writeArray({3.5, 7.6, data.doubleValue});
     CORRADE_COMPARE(out.str(), formatString(
-        "Utility::JsonWriter::write(): invalid floating-point value {0}\n"
-        "Utility::JsonWriter::writeArray(): invalid floating-point value {0}\n",
+        "Utility::JsonWriter::write(): invalid floating-point value {0}\n",
         data.message));
 }
 
@@ -1218,10 +1302,8 @@ void JsonWriterTest::invalidUnsignedLong() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(4503599627370496ull);
-    json.writeArray({3ull, 7ull, 4503599627370496ull});
-    CORRADE_COMPARE(out.str(), formatString(
-        "Utility::JsonWriter::write(): too large integer value 4503599627370496\n"
-        "Utility::JsonWriter::writeArray(): too large integer value 4503599627370496\n"));
+    CORRADE_COMPARE(out.str(),
+        "Utility::JsonWriter::write(): too large integer value 4503599627370496\n");
 }
 
 void JsonWriterTest::invalidLong() {
@@ -1235,11 +1317,8 @@ void JsonWriterTest::invalidLong() {
     std::ostringstream out;
     Error redirectError{&out};
     json.write(data.value);
-    /* FFS, C and C++ types!! */
-    json.writeArray({std::int64_t(3), std::int64_t(-7), data.value});
     CORRADE_COMPARE(out.str(), formatString(
-        "Utility::JsonWriter::write(): too small or large integer value {0}\n"
-        "Utility::JsonWriter::writeArray(): too small or large integer value {0}\n",
+        "Utility::JsonWriter::write(): too small or large integer value {}\n",
         data.message));
 }
 

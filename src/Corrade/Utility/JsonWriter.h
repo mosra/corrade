@@ -151,7 +151,9 @@ output would look like:
 
 This feature isn't limited to just numeric arrays --- for booleans there's
 an overload taking a @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView1D"
-and for strings there's one taking a @ref Containers::StringIterable.
+and for strings there's one taking a @ref Containers::StringIterable. It's also
+possible to use @ref beginCompactArray() instead of @ref beginArray() to
+achieve the same compact formatting without passing the array as a whole.
 
 @subsection Utility-JsonWriter-usage-combining-writers Combining multiple writers together
 
@@ -211,10 +213,11 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
              * be subsequently put inside another JSON document and thus a
              * newline is not added as it may break the formatting.
              *
-             * The @ref writeArray() APIs use a different, more compact
-             * formatting, with the @p wrapAfter argument specifying after how
-             * many values to wrap. In the following case, a nested array of 8
-             * values is printed, wrapping after the fourth:
+             * If @ref beginCompactArray() or @ref writeArray() is used, a
+             * different, more compact formatting is used, with the
+             * @p wrapAfter argument specifying after how many values to wrap.
+             * In the following case, a nested array of 8 values is printed,
+             * wrapping after the fourth:
              *
              * @code{.json}
              * {
@@ -349,9 +352,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          *
          * Writes `{` to the output, separated by `,` if there's another value
          * before, with spacing and indentation as appropriate. Expected to not
-         * be called after the top-level JSON value was closed and not when an
-         * object key is expected.
-         * @see @ref endObject(), @ref writeKey(), @ref beginObjectScope()
+         * be called after the top-level JSON value was closed, when an object
+         * key is expected or when inside a compact array.
+         * @see @ref endObject(), @ref writeKey(), @ref beginObjectScope(),
+         *      @ref beginCompactArray()
          */
         JsonWriter& beginObject();
 
@@ -372,19 +376,38 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          *
          * Writes `[` to the output, separated by `,` if there's another value
          * before, with spacing and indentation as appropriate. Expected to not
-         * be called after the top-level JSON value was closed and not when an
-         * object key is expected.
-         * @see @ref endArray(), @ref beginArrayScope()
+         * be called after the top-level JSON value was closed, when an
+         * object key is expected or inside a compact array.
+         * @see @ref endArray(), @ref beginArrayScope(),
+         *      @ref beginCompactArray()
          */
         JsonWriter& beginArray();
+
+        /**
+         * @brief Begin a compact array
+         * @return Reference to self (for method chaining)
+         *
+         * Writes `[` to the output, separated by `,` if there's another value
+         * before, with spacing and indentation as appropriate. Compared to
+         * @ref beginArray(), a more compact formatting is used --- see
+         * @ref Utility-JsonWriter-usage-write-array and @ref Option::Wrap for
+         * details. Only values are allowed inside compact arrays, not nested
+         * arrays or objects. If @ref Option::Wrap is not set, @p wrapAfter is
+         * ignored. Expected to not be called after the top-level JSON value
+         * was closed, when an object key is expected or inside a compact
+         * array.
+         * @see @ref endArray(), @ref beginCompactArrayScope()
+         */
+        JsonWriter& beginCompactArray(std::uint32_t wrapAfter = 0);
 
         /**
          * @brief End an array
          * @return Reference to self (for method chaining)
          *
          * Writes `]` to the output, with spacing and indentation as
-         * appropriate. Expected to be called only if @ref beginArray() was
-         * called before with no unclosed object in the meantime.
+         * appropriate. Expected to be called only if @ref beginArray() or
+         * @ref beginCompactArray() was called before with no unclosed object
+         * in the meantime.
          */
         JsonWriter& endArray();
 
@@ -405,6 +428,15 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @ref Utility-JsonWriter-usage-object-array-scope for an example.
          */
         Containers::ScopeGuard beginArrayScope();
+
+        /**
+         * @brief Begin a compact array scope
+         *
+         * Calls @ref beginCompactArray() and returns a scope guard instance
+         * that calls @ref endArray() at the end of the scope. See
+         * @ref Utility-JsonWriter-usage-object-array-scope for an example.
+         */
+        Containers::ScopeGuard beginCompactArrayScope(std::uint32_t wrapAfter = 0);
 
         /**
          * @brief Size of the currently written array
@@ -584,13 +616,9 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a boolean array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(bool) calls, followed by @ref endArray(). See
-         * documentation of these functions for more information. Compared to
-         * these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(bool) calls, followed by @ref endArray().
+         * See documentation of these functions for more information.
          */
         JsonWriter& writeArray(const Containers::StridedBitArrayView1D& values, std::uint32_t wrapAfter = 0);
         /** @overload */
@@ -600,13 +628,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a 32-bit floating-point array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(float) calls, followed by @ref endArray(). See
-         * documentation of these functions for more information. Compared to
-         * these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(float) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const float>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
@@ -616,13 +641,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a 64-bit floating-point array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(double) calls, followed by @ref endArray(). See
-         * documentation of these functions for more information. Compared
-         * to these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(double) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const double>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
@@ -632,13 +654,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write an unsigned 32-bit integer array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(std::uint32_t) calls, followed by @ref endArray().
-         * See documentation of these functions for more information. Compared
-         * to these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(std::uint32_t) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::uint32_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
@@ -648,13 +667,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a signed 32-bit integer array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(std::int32_t) calls, followed by @ref endArray().
-         * See documentation of these functions for more information. Compared
-         * to these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(std::int32_t) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::int32_t>& values, std::uint32_t wrapAfter = 0);
         /** @overload */
@@ -664,13 +680,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write an unsigned 52-bit integer array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(std::uint64_t) calls, followed by @ref endArray().
-         * See documentation of these functions for more information. Compared
-         * to these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(std::uint64_t) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::uint64_t>& values, std::uint32_t wrapAfter = 0);
@@ -688,13 +701,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a signed 53-bit integer array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(std::int64_t) calls, followed by @ref endArray().
-         * See documentation of these functions for more information. Compared
-         * to these functions however, different pretty-printing rules are used
-         * --- see @ref Utility-JsonWriter-usage-write-array and
-         * @ref Option::Wrap for details. If @ref Option::Wrap is not set,
-         * @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(std::int64_t) calls, followed by
+         * @ref endArray(). See documentation of these functions for more
+         * information.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& writeArray(const Containers::StridedArrayView1D<const std::int64_t>& values, std::uint32_t wrapAfter = 0);
@@ -712,13 +722,10 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a string array
          * @return Reference to self (for method chaining)
          *
-         * A compact shorthand for calling @ref beginArray(), followed by zero
-         * or more @ref write(Containers::StringView) calls, followed by
-         * @ref endArray(). See documentation of these functions for more
-         * information. Compared to these functions however, different
-         * pretty-printing rules are used --- see
-         * @ref Utility-JsonWriter-usage-write-array and @ref Option::Wrap for
-         * details. If @ref Option::Wrap is not set, @p wrapAfter is ignored.
+         * A compact shorthand for calling @ref beginCompactArray(), followed
+         * by zero or more @ref write(Containers::StringView) calls, followed
+         * by @ref endArray(). See documentation of these functions for more
+         * information.
          */
         JsonWriter& writeArray(const Containers::StringIterable& values, std::uint32_t wrapAfter = 0);
 
@@ -774,13 +781,13 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
            writeString() and writeObjectKey(). */
         CORRADE_UTILITY_LOCAL void writeStringLiteralInternal(Containers::StringView string);
 
-        CORRADE_UTILITY_LOCAL void initializeValueArrayInternal();
-        CORRADE_UTILITY_LOCAL void writeArrayCommaNewlineIndentInternal(std::size_t i, std::uint32_t wrapAfter);
-        CORRADE_UTILITY_LOCAL void finalizeValueArrayInternal(std::size_t valueCount, std::uint32_t wrapAfter);
-
         /* Writes a raw piece of JSON, including a potential comma before and
            indentation. Used by all write() APIs except strings. */
         CORRADE_UTILITY_LOCAL JsonWriter& writeInternal(Containers::StringView literal);
+
+        /* T can be StridedBitArrayView1D, StridedArrayView1D or
+           StringIterable, can't really make it any more concrete */
+        template<class T> CORRADE_UTILITY_LOCAL JsonWriter& writeArrayInternal(const T& values, std::uint32_t wrapAfter);
 
         Containers::Pointer<State> _state;
 };
