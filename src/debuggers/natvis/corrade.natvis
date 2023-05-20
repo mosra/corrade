@@ -8,6 +8,7 @@
               Vladimír Vondruš <mosra@centrum.cz>
     Copyright © 2021 Jonathan Hale <squareys@googlemail.com>
     Copyright © 2022 Pablo Escobar <mail@rvrs.in>
+    Copyright @ 2022 Hugo Amiard <hugo.amiard@wonderlandengine.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -80,6 +81,10 @@
         <ValueNode>(bool)(_data[(offset() + $i)/8] &amp; (1 &lt;&lt; ((offset() + $i)%8)))</ValueNode>
       </IndexListItems>
     </Expand>
+  </Type>
+  <!-- Containers::EnumSet -->
+  <Type Name="Corrade::Containers::EnumSet&lt;*&gt;">
+    <DisplayString>{ ($T1)_value }</DisplayString>
   </Type>
   <!-- Containers::Optional -->
   <Type Name="Corrade::Containers::Optional&lt;*&gt;">
