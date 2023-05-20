@@ -44,8 +44,7 @@ namespace Corrade { namespace Containers {
 @tparam fullValue   All enum values together. Defaults to all bits set to `1`.
 
 Provides strongly-typed set-like functionality for strongly typed enums, such
-as binary OR and AND operations. The only requirement for the enum type is that
-all the values must be binary exclusive.
+as binary OR and AND operations.
 
 @anchor EnumSet-out-of-class-operators
 
