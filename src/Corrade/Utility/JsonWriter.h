@@ -398,7 +398,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         Containers::ScopeGuard beginObjectScope();
 
         /**
-         * @brief Begin an object scope
+         * @brief Begin an array scope
          *
          * Calls @ref beginArray() and returns a scope guard instance that
          * calls @ref endArray() at the end of the scope. See
@@ -760,8 +760,8 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
     private:
         struct State;
 
-        /* Because unguarded writeValue(bool) would get a preference over
-           writeValue(Containers::StringView) for const char*, sigh */
+        /* Because unguarded write(bool) would get a preference over
+           write(Containers::StringView) for const char*, sigh */
         JsonWriter& writeBoolInternal(bool value);
 
         /* Writes a comma if not at the start or at when object value is
@@ -779,8 +779,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         CORRADE_UTILITY_LOCAL void finalizeValueArrayInternal(std::size_t valueCount, std::uint32_t wrapAfter);
 
         /* Writes a raw piece of JSON, including a potential comma before and
-           indentation. Used by all writeValue() APIs except strings and
-           arrays. */
+           indentation. Used by all write() APIs except strings. */
         CORRADE_UTILITY_LOCAL JsonWriter& writeInternal(Containers::StringView literal);
 
         Containers::Pointer<State> _state;
