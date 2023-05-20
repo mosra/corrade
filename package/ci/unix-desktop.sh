@@ -12,7 +12,7 @@ cmake .. \
     -DCORRADE_BUILD_STATIC=$BUILD_STATIC \
     -DCMAKE_BUILD_TYPE=$CONFIGURATION \
     -G Ninja
-ninja
+ninja $NINJA_JOBS
 ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" TSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest -V
 
 # Test install, after running the tests as for them it shouldn't be needed

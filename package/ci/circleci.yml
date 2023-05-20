@@ -269,11 +269,10 @@ jobs:
     # Install also Git so we verify that Git version embedding works
     - install-base-linux:
         extra: git
-    # OOMs during compilation of Strided[Bit]ArrayViewTest with -j16 and more
+    # OOMs during compilation of Strided[Bit]ArrayViewTest
     # TODO revisit once deprecated includes are dropped (non-deprecated build
     # doesn't fail), https://github.com/mosra/corrade/pull/140 may also help?
-    - cap-ninja-jobs:
-        count: 8
+    - cap-ninja-jobs
     - install-gcc-4_8
     - install-cmake:
         version: "3.4.3"
@@ -307,11 +306,10 @@ jobs:
       CONFIGURATION: Debug
     steps:
     - install-base-linux
-    # OOMs during compilation of Strided[Bit]ArrayViewTest with -j16 and more
+    # OOMs during compilation of Strided[Bit]ArrayViewTest
     # TODO revisit once deprecated includes are dropped (non-deprecated build
     # doesn't fail), https://github.com/mosra/corrade/pull/140 may also help?
-    - cap-ninja-jobs:
-        count: 8
+    - cap-ninja-jobs
     - install-gcc-4_8
     - install-cmake:
         version: "3.4.3"
