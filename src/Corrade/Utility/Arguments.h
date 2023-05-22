@@ -37,6 +37,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/ConfigurationValue.h"
+#include "Corrade/Utility/ConfigurationValueStl.h"
 #include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"

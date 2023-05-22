@@ -76,6 +76,7 @@ if(CORRADE_WITH_UTILITY)
         Configuration.h
         ConfigurationGroup.h
         ConfigurationValue.h
+        ConfigurationValueStl.h
         Debug.h
         DebugAssert.h
         DebugStl.h

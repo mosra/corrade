@@ -76,11 +76,11 @@ namespace Corrade { namespace Utility {
 template<> struct ConfigurationValue<Foo> {
     static std::string toString(const Foo& value, ConfigurationValueFlags flags) {
         return
-            ConfigurationValue<int>::toString(value.a, flags) + ' ' +
+            ConfigurationValue<int>::toString(value.a, flags) + " " +
             ConfigurationValue<int>::toString(value.b, flags);
     }
 
-    static Foo fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+    static Foo fromString(Containers::StringView stringValue, ConfigurationValueFlags flags) {
         std::istringstream i{stringValue};
         std::string a, b;
 

@@ -49,7 +49,7 @@ template<> struct ConfigurationValue<NoDefaultConstructor> {
     static std::string toString(NoDefaultConstructor value, ConfigurationValueFlags) {
         return std::string(value.a, 'a');
     }
-    static NoDefaultConstructor fromString(const std::string& stringValue, ConfigurationValueFlags) {
+    static NoDefaultConstructor fromString(Containers::StringView stringValue, ConfigurationValueFlags) {
         return NoDefaultConstructor{stringValue.size()};
     }
 };
