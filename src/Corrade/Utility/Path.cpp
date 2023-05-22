@@ -71,6 +71,12 @@
 #endif
 #endif
 
+/* For executableLocation() on FreeBSD */
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
 /* Windows */
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
 #ifdef CORRADE_TARGET_WINDOWS
@@ -519,6 +525,18 @@ Containers::Optional<Containers::String> executableLocation() {
     CORRADE_INTERNAL_ASSERT(size);
     Containers::String path{NoInit, size - 1};
     CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(path.data(), &size) == 0);
+    return path;
+
+    /* FreeBSD */
+    #elif defined(__FreeBSD__)
+    /* Get path size, it's returned excluding the null terminator */
+    std::size_t size;
+    constexpr int mib[4]{CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+    sysctl(mib, 4, nullptr, &size, nullptr, 0);
+
+    /* Allocate a string of proper size and retreive the path into it */
+    Containers::String path{NoInit, size}
+    sysctl(mib, 4, path.data(), &size, nullptr, 0);
     return path;
 
     /* Windows (not RT) */
