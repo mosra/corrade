@@ -702,10 +702,24 @@ template<> inline std::vector<std::string> ConfigurationGroup::values(const std:
 
 template<class T> inline T ConfigurationGroup::value(const std::string& key, const unsigned int index, const ConfigurationValueFlags flags) const {
     const std::string* value = valueInternal(key, index, flags);
-    /* Can't do value ? *value : std::string{} BECAUSE THAT MAKES A COPY! C++
-       YOU'RE FIRED */
-    const std::string empty;
-    return ConfigurationValue<T>::fromString(value ? *value : empty, flags);
+    /* If the value is not found, it's important to *not* call fromString()
+       with an empty std::string -- if T is a view, it would cause it to
+       reference that temporary std::string, which is SSO'd on the stack. That
+       wouldn't be a problem per-se given the view is empty, but with
+       StringView a conversion from an empty std::string marks it as
+       NullTerminated, and that's a problem because the stack location gets
+       overwritten and the view pointing to it won't be null-terminated
+       anymore. Asserting in the better case, causing some rogue memory access
+       in the worse scenario.
+
+       Instead, pass it a StringView -- the fromString() implementation is
+       likely using it already anyway and so it'll properly not reference
+       anything temporary, and if the implementation doesn't use StringView,
+       it'll get implicitly converted to a temporary std::string instance. */
+    /** @todo clean up once Configuration is STL-free */
+    return value ?
+        ConfigurationValue<T>::fromString(*value, flags) :
+        ConfigurationValue<T>::fromString(Containers::StringView{}, flags);
 }
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {

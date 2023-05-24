@@ -34,7 +34,7 @@
 
 namespace Corrade { namespace Utility {
 
-Containers::StringView ConfigurationValue<Containers::StringView>::fromString(const std::string& value, ConfigurationValueFlags) {
+Containers::StringView ConfigurationValue<Containers::StringView>::fromString(const Containers::StringView value, ConfigurationValueFlags) {
     return value;
 }
 std::string ConfigurationValue<Containers::StringView>::toString(const Containers::StringView value, ConfigurationValueFlags) {

@@ -115,7 +115,11 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<Containers::StringVi
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    static Containers::StringView fromString(const std::string& value, ConfigurationValueFlags flags);
+    /* This is taking a StringView already in order to be able to distinguish
+       not found values, for which the view shouldn't point to some temporary
+       empty string */
+    /** @todo clean up once Configuration is STL-free */
+    static Containers::StringView fromString(Containers::StringView value, ConfigurationValueFlags flags);
     static std::string toString(Containers::StringView value, ConfigurationValueFlags flags);
     #endif
 };
