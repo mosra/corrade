@@ -148,8 +148,12 @@ void ConfigurationValueTest::stringView() {
     c.setValue("empty", Containers::StringView{});
     CORRADE_COMPARE(c.value<Containers::StringView>("empty"), ""_s);
 
-    /* Non-existent value is an empty view */
-    CORRADE_COMPARE(c.value<Containers::StringView>("nonexistent"), ""_s);
+    /* Non-existent value is an empty view. In particular it shouldn't be
+       marked as null-terminated, only global -- it shouldn't point to some
+       temporary empty string, it should point nowhere. Nowhere *is* global. */
+    Containers::StringView nonexistent = c.value<Containers::StringView>("nonexistent");
+    CORRADE_COMPARE(nonexistent, ""_s);
+    CORRADE_COMPARE(nonexistent.flags(), Containers::StringViewFlag::Global);
 }
 
 void ConfigurationValueTest::stringViewArray() {
