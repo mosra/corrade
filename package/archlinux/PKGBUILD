@@ -12,6 +12,9 @@ provides=('corrade-git')
 
 _rootdir=$startdir/../../
 
+_buildtype=Release
+# _buildtype=RelWithDebInfo
+
 build() {
     mkdir -p "$_rootdir/build"
     cd "$_rootdir/build"
@@ -25,14 +28,14 @@ build() {
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCORRADE_BUILD_TESTS=ON \
         -G "Ninja Multi-Config"
-    ninja all:Debug all:Release
+    ninja all:Debug all:$_buildtype
 }
 
 check() {
     cd "$_rootdir/build"
     export CORRADE_TEST_COLOR=ON
 
-    for config in Debug Release; do
+    for config in Debug $_buildtype; do
         # The Tester test *needs* benchmarks enabled to pass properly
         ctest -C $config --output-on-failure -R TestSuiteTesterTest
         CORRADE_TEST_SKIP_BENCHMARKS=ON ctest -C $config --output-on-failure -j9 -E TestSuiteTesterTest
@@ -48,5 +51,9 @@ package() {
         mv ${i}{,d}
     done
 
-    DESTDIR="$pkgdir/" ninja install/strip:Release
+    if [ "$_buildtype" = RelWithDebInfo ]; then
+        DESTDIR="$pkgdir/" ninja install:$_buildtype
+    else
+        DESTDIR="$pkgdir/" ninja install/strip:$_buildtype
+    fi
 }
