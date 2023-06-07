@@ -556,7 +556,7 @@ void IterableTest::accessInvalid() {
 
     int data[]{5, 0, -26};
 
-    Iterable<const int> ai = Containers::arrayView(data).prefix(std::size_t{0});
+    Iterable<const int> ai = Containers::arrayView(data).prefix(0);
     Iterable<const int> bi = data;
     CORRADE_COMPARE(bi.size(), 3);
 

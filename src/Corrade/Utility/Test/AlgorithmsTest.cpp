@@ -290,7 +290,7 @@ void AlgorithmsTest::copy() {
 
 void AlgorithmsTest::copyZeroSize() {
     int dst[1];
-    Utility::copy(nullptr, Containers::arrayView(dst).prefix(std::size_t{0}));
+    Utility::copy(nullptr, Containers::arrayView(dst).prefix(0));
 
     /* Shouldn't crash */
     CORRADE_VERIFY(true);
@@ -457,7 +457,7 @@ void AlgorithmsTest::copyInitializerList() {
 void AlgorithmsTest::copyInitializerListZeroSize() {
     /* Shouldn't crash and neither should be ambiguous */
     int dst[1];
-    Utility::copy({}, Containers::arrayView(dst).prefix(std::size_t{0}));
+    Utility::copy({}, Containers::arrayView(dst).prefix(0));
 
     CORRADE_VERIFY(true);
 }
@@ -475,7 +475,7 @@ void AlgorithmsTest::copyInitializerListStrided() {
 void AlgorithmsTest::copyInitializerListStridedZeroSize() {
     /* Shouldn't crash and neither should be ambiguous */
     int dst[1];
-    Utility::copy({}, Containers::stridedArrayView(dst).prefix(std::size_t{0}));
+    Utility::copy({}, Containers::stridedArrayView(dst).prefix(0));
 
     CORRADE_VERIFY(true);
 }

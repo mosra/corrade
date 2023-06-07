@@ -356,7 +356,7 @@ void StringIterableTest::accessInvalid() {
 
     const char* data[]{"hello", "world", "!"};
 
-    StringIterable ai = Containers::arrayView(data).prefix(std::size_t{0});
+    StringIterable ai = Containers::arrayView(data).prefix(0);
     StringIterable bi = data;
     CORRADE_COMPARE(bi.size(), 3);
 
