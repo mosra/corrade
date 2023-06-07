@@ -166,6 +166,7 @@ struct StringTest: TestSuite::Tester {
 
     template<class T> void slice();
     template<class T> void slicePointer();
+    template<class T> void sliceZero();
 
     void split();
     void splitOnAny();
@@ -315,6 +316,8 @@ StringTest::StringTest() {
               &StringTest::slice<String>,
               &StringTest::slicePointer<const String>,
               &StringTest::slicePointer<String>,
+              &StringTest::sliceZero<const String>,
+              &StringTest::sliceZero<String>,
 
               &StringTest::split,
               &StringTest::splitOnAny,
@@ -2032,6 +2035,24 @@ template<class T> void StringTest::slicePointer() {
     CORRADE_COMPARE(a.prefix(a.data() + 2).flags(), StringViewFlags{});
     CORRADE_COMPARE(a.suffix(a.data() + 2), "llo"_s);
     CORRADE_COMPARE(a.suffix(a.data() + 2).flags(), StringViewFlag::NullTerminated);
+}
+
+template<class T> void StringTest::sliceZero() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    T a = "hello";
+
+    /* These should all unambigously pick the std::size_t overloads, not the
+       T* overloads */
+
+    CORRADE_COMPARE(a.sliceSize(0, 3), "hel"_s);
+
+    StringView c = a.prefix(0);
+    CORRADE_COMPARE(c.size(), 0);
+    CORRADE_COMPARE(c.data(), static_cast<const void*>(a.data()));
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
 }
 
 void StringTest::split() {

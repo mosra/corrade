@@ -105,6 +105,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
+    void sliceZero();
 
     void cast();
     void size();
@@ -139,6 +140,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::slicePointer,
               &StaticArrayViewTest::sliceToStatic,
               &StaticArrayViewTest::sliceToStaticPointer,
+              &StaticArrayViewTest::sliceZero,
 
               &StaticArrayViewTest::cast,
               &StaticArrayViewTest::size});
@@ -737,6 +739,51 @@ void StaticArrayViewTest::sliceToStaticPointer() {
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);
     #endif
+}
+
+void StaticArrayViewTest::sliceZero() {
+    int data[5] = {1, 2, 3, 4, 5};
+    StaticArrayView<5> a = data;
+
+    /* These should all unambigously pick the std::size_t overloads, not the
+       T* overloads */
+
+    ArrayView b = a.sliceSize(0, 3);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 1);
+    CORRADE_COMPARE(b[1], 2);
+    CORRADE_COMPARE(b[2], 3);
+
+    ArrayView c = a.prefix(0);
+    CORRADE_COMPARE(c.size(), 0);
+    CORRADE_COMPARE(c.data(), static_cast<void*>(a.data()));
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
+
+    StaticArrayView<3> e = a.slice<3>(0);
+    CORRADE_COMPARE(e[0], 1);
+    CORRADE_COMPARE(e[1], 2);
+    CORRADE_COMPARE(e[2], 3);
+
+    constexpr ConstArrayView ca = Array5;
+    constexpr ConstArrayView cb = ca.sliceSize(0, 3);
+    CORRADE_COMPARE(cb.size(), 3);
+    CORRADE_COMPARE(cb[0], 1);
+    CORRADE_COMPARE(cb[1], 2);
+    CORRADE_COMPARE(cb[2], 3);
+
+    constexpr ConstArrayView cc = ca.prefix(0);
+    CORRADE_COMPARE(cc.size(), 0);
+    CORRADE_COMPARE(cc.data(), static_cast<const void*>(ca.data()));
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
+
+    constexpr ConstStaticArrayView<3> ce = ca.slice<3>(0);
+    CORRADE_COMPARE(ce[0], 1);
+    CORRADE_COMPARE(ce[1], 2);
+    CORRADE_COMPARE(ce[2], 3);
 }
 
 void StaticArrayViewTest::cast() {

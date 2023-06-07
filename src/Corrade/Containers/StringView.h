@@ -549,6 +549,9 @@ BasicStringView {
          *      @ref exceptPrefix(), @ref exceptSuffix(),
          *      @ref slice(std::size_t, std::size_t) const
          */
+        /* Unlike sliceSize(T*, size_t), prefix(T*) and suffix(T*) this doesn't
+           have ambiguity prevention for slice(0, 0) as such use case is rather
+           rare I think */
         constexpr BasicStringView<T> slice(T* begin, T* end) const;
 
         /** @overload */
@@ -562,9 +565,16 @@ BasicStringView {
          *      @ref exceptPrefix(), @ref exceptSuffix(),
          *      @ref sliceSize(std::size_t, std::size_t) const
          */
-        constexpr BasicStringView<T> sliceSize(T* begin, std::size_t size) const {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr BasicStringView<T> sliceSize(T* begin, std::size_t size) const;
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr BasicStringView<T> sliceSize(U begin, std::size_t size) const {
             return slice(begin, begin + size);
         }
+        #endif
 
         /** @overload */
         constexpr BasicStringView<T> sliceSize(std::size_t begin, std::size_t size) const {
@@ -579,9 +589,15 @@ BasicStringView {
          * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
          *      @ref suffix(T*) const, @ref prefix(std::size_t) const
          */
-        constexpr BasicStringView<T> prefix(T* end) const {
-            return end ? slice(_data, end) : BasicStringView<T>{};
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr BasicStringView<T> prefix(T* end) const;
+        #else
+        /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
+           was deprecated in C++11 already, why is this still a problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr BasicStringView<T> prefix(U end) const {
+            return static_cast<T*>(end) ? slice(_data, end) : BasicStringView<T>{};
         }
+        #endif
 
         /**
          * @brief View suffix after a pointer
@@ -592,6 +608,8 @@ BasicStringView {
          * @see @ref slice(T*, T*) const, @ref sliceSize(T*, std::size_t) const,
          *      @ref prefix(T*) const
          * @todoc link to suffix(std::size_t) once it takes size and not begin
+         * @todo once non-deprecated suffix(std::size_t size) is a thing, add
+         *      the ambiguity-preventing template here as well
          */
         constexpr BasicStringView<T> suffix(T* begin) const {
             return _data && !begin ? BasicStringView<T>{} : slice(begin, _data + (_sizePlusFlags & ~Implementation::StringViewSizeMask));

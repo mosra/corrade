@@ -739,6 +739,9 @@ class CORRADE_UTILITY_EXPORT String {
          * @ref StringViewFlag::NullTerminated set.
          * @m_keywords{substr()}
          */
+        /* Unlike sliceSize(T*, size_t), prefix(T*) and suffix(T*) this doesn't
+           have ambiguity prevention for slice(0, 0) as such use case is rather
+           rare I think */
         MutableStringView slice(char* begin, char* end);
         StringView slice(const char* begin, const char* end) const; /**< @overload */
         MutableStringView slice(std::size_t begin, std::size_t end); /**< @overload */
@@ -753,8 +756,26 @@ class CORRADE_UTILITY_EXPORT String {
          * has @ref StringViewFlag::NullTerminated set.
          * @m_keywords{substr()}
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         MutableStringView sliceSize(char* begin, std::size_t size);
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value>::type> MutableStringView sliceSize(T begin, std::size_t size) {
+            return sliceSizePointerInternal(begin, size);
+        }
+        #endif
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         StringView sliceSize(const char* begin, std::size_t size) const; /**< @overload */
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> StringView sliceSize(T begin, std::size_t size) const {
+            return sliceSizePointerInternal(begin, size);
+        }
+        #endif
         MutableStringView sliceSize(std::size_t begin, std::size_t size); /**< @overload */
         StringView sliceSize(std::size_t begin, std::size_t size) const; /**< @overload */
 
@@ -765,17 +786,42 @@ class CORRADE_UTILITY_EXPORT String {
          * points to (one item after) the end of the original (null-terminated)
          * string, the result has @ref StringViewFlag::NullTerminated set.
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         MutableStringView prefix(char* end);
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value>::type> MutableStringView prefix(T end) {
+            return prefixPointerInternal(end);
+        }
+        #endif
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         StringView prefix(const char* end) const; /**< @overload */
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> StringView prefix(T end) const {
+            return prefixPointerInternal(end);
+        }
+        #endif
 
         /**
          * @brief View on a suffix after a pointer
          *
          * Equivalent to @ref BasicStringView::suffix(T*) const. The result has
          * always @ref StringViewFlag::NullTerminated set.
+         * @todo once non-deprecated suffix(std::size_t size) is a thing, add
+         *      the ambiguity-preventing template here as well
          */
         MutableStringView suffix(char* begin);
-        StringView suffix(const char* begin) const; /**< @overload */
+        /**
+         * @overload
+         * @todo once non-deprecated suffix(std::size_t size) is a thing, add
+         *      the ambiguity-preventing template here as well
+         */
+        StringView suffix(const char* begin) const;
 
         /**
          * @brief View on the first @p size bytes
@@ -1226,6 +1272,11 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();
         CORRADE_UTILITY_LOCAL Containers::Pair<const char*, std::size_t> dataInternal() const;
+
+        MutableStringView sliceSizePointerInternal(char* begin, std::size_t size);
+        StringView sliceSizePointerInternal(const char* begin, std::size_t size) const;
+        MutableStringView prefixPointerInternal(char* end);
+        StringView prefixPointerInternal(const char* end) const;
 
         /* Small string optimization. Following size restrictions from
            StringView (which uses the top two bits for marking global and

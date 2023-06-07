@@ -148,6 +148,7 @@ struct StringViewTest: TestSuite::Tester {
     void slice();
     void slicePointer();
     void sliceFlags();
+    void sliceZero();
 
     void split();
     void splitFlags();
@@ -287,6 +288,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::slice,
               &StringViewTest::slicePointer,
               &StringViewTest::sliceFlags,
+              &StringViewTest::sliceZero,
 
               &StringViewTest::split,
               &StringViewTest::splitFlags,
@@ -1173,6 +1175,39 @@ void StringViewTest::sliceFlags() {
 
     CORRADE_COMPARE(none.prefix(4).flags(), StringViewFlags{});
     CORRADE_COMPARE(none.prefix(none.data() + 4).flags(), StringViewFlags{});
+}
+
+void StringViewTest::sliceZero() {
+    StringView a = "hello";
+
+    /* These should all unambigously pick the std::size_t overloads, not the
+       T* overloads */
+
+    CORRADE_COMPARE(a.sliceSize(0, 3), "hel"_s);
+
+    StringView c = a.prefix(0);
+    CORRADE_COMPARE(c.size(), 0);
+    CORRADE_COMPARE(c.data(), static_cast<const void*>(a.data()));
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
+
+    constexpr StringView ca = "hello"_s;
+
+    constexpr StringView cb = ca.sliceSize(0, 3);
+    CORRADE_COMPARE(cb, "hel");
+
+    constexpr StringView cc = ca.prefix(0);
+    CORRADE_COMPARE(cc.size(), 0);
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
+        CORRADE_EXPECT_FAIL("MSVC 2017+ does some crazy shit with constexpr data. But only in Debug builds. Fixed in 2022 19.31.");
+        #endif
+        CORRADE_COMPARE(cc.data(), static_cast<const void*>(ca.data()));
+    }
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
 }
 
 void StringViewTest::split() {

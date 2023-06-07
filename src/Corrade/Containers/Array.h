@@ -628,6 +628,9 @@ class Array {
          *
          * Equivalent to @ref ArrayView::slice(T*, T*) const and overloads.
          */
+        /* Unlike sliceSize(T*, size_t), slice<size>(T*), prefix(T*) and
+           suffix(T*) this doesn't have ambiguity prevention for slice(0, 0)
+           as such use case is rather rare I think. */
         ArrayView<T> slice(T* begin, T* end) {
             return ArrayView<T>(*this).slice(begin, end);
         }
@@ -651,16 +654,30 @@ class Array {
          * Equivalent to @ref ArrayView::sliceSize(T*, std::size_t) const and
          * overloads.
          */
-        ArrayView<T> sliceSize(T* begin, std::size_t size) {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        ArrayView<T> sliceSize(T* begin, std::size_t size);
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<T> sliceSize(U begin, std::size_t size) {
             return ArrayView<T>{*this}.sliceSize(begin, size);
         }
+        #endif
         /**
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> sliceSize(const T* begin, std::size_t size) const {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        ArrayView<const T> sliceSize(const T* begin, std::size_t size) const;
+        #else
+        /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
             return ArrayView<const T>{*this}.sliceSize(begin, size);
         }
+        #endif
         /**
          * @overload
          * @m_since_latest
@@ -681,13 +698,27 @@ class Array {
          *
          * Equivalent to @ref ArrayView::slice(T*) const and overloads.
          */
-        template<std::size_t size_> StaticArrayView<size_, T> slice(T* begin) {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<std::size_t size_> StaticArrayView<size_, T> slice(T* begin);
+        #else
+        /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<std::size_t size_, class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size_, T> slice(U begin) {
             return ArrayView<T>(*this).template slice<size_>(begin);
         }
+        #endif
         /** @overload */
-        template<std::size_t size_> StaticArrayView<size_, const T> slice(const T* begin) const {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<std::size_t size_> StaticArrayView<size_, const T> slice(const T* begin) const;
+        #else
+        /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
+           pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<std::size_t size_, class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size_, const T> slice(U begin) const {
             return ArrayView<const T>(*this).template slice<size_>(begin);
         }
+        #endif
         /** @overload */
         template<std::size_t size_> StaticArrayView<size_, T> slice(std::size_t begin) {
             return ArrayView<T>(*this).template slice<size_>(begin);
@@ -738,23 +769,43 @@ class Array {
          *
          * Equivalent to @ref ArrayView::prefix(T*) const.
          */
-        ArrayView<T> prefix(T* end) {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        ArrayView<T> prefix(T* end);
+        #else
+        /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
+           was deprecated in C++11 already, why is this still a problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
+        ArrayView<T> prefix(U end) {
             return ArrayView<T>(*this).prefix(end);
         }
+        #endif
         /** @overload */
-        ArrayView<const T> prefix(const T* end) const {
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        ArrayView<const T> prefix(const T* end) const;
+        #else
+        /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
+           was deprecated in C++11 already, why is this still a problem?! */
+        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
+        ArrayView<const T> prefix(U end) const {
             return ArrayView<const T>(*this).prefix(end);
         }
+        #endif
 
         /**
          * @brief View on a suffix after a pointer
          *
          * Equivalent to @ref ArrayView::suffix(T*) const.
+         * @todo once non-deprecated suffix(std::size_t size) is a thing, add
+         *      the ambiguity-preventing template here as well
          */
         ArrayView<T> suffix(T* begin) {
             return ArrayView<T>(*this).suffix(begin);
         }
-        /** @overload */
+        /**
+         * @overload
+         * @todo once non-deprecated suffix(std::size_t size) is a thing, add
+         *      the ambiguity-preventing template here as well
+         */
         ArrayView<const T> suffix(const T* begin) const {
             return ArrayView<const T>(*this).suffix(begin);
         }

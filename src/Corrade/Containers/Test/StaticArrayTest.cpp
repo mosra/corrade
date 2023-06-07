@@ -103,6 +103,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
+    void sliceZero();
 
     void cast();
     void size();
@@ -163,6 +164,7 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::slicePointer,
               &StaticArrayTest::sliceToStatic,
               &StaticArrayTest::sliceToStaticPointer,
+              &StaticArrayTest::sliceZero,
 
               &StaticArrayTest::cast,
               &StaticArrayTest::size,
@@ -964,6 +966,47 @@ void StaticArrayTest::sliceToStaticPointer() {
     CORRADE_COMPARE(bc[0], 2);
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
+}
+
+void StaticArrayTest::sliceZero() {
+    StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+
+    /* These should all unambigously pick the std::size_t overloads, not the
+       T* overloads */
+
+    ArrayView b = a.sliceSize(0, 3);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 1);
+    CORRADE_COMPARE(b[1], 2);
+    CORRADE_COMPARE(b[2], 3);
+
+    ConstArrayView bc = ac.sliceSize(0, 3);
+    CORRADE_COMPARE(bc.size(), 3);
+    CORRADE_COMPARE(bc[0], 1);
+    CORRADE_COMPARE(bc[1], 2);
+    CORRADE_COMPARE(bc[2], 3);
+
+    ArrayView c = a.prefix(0);
+    CORRADE_COMPARE(c.size(), 0);
+    CORRADE_COMPARE(c.data(), static_cast<void*>(a.data()));
+
+    ConstArrayView cc = ac.prefix(0);
+    CORRADE_COMPARE(cc.size(), 0);
+    CORRADE_COMPARE(cc.data(), static_cast<const void*>(ac.data()));
+
+    /** @todo suffix(0), once the non-deprecated suffix(std::size_t size) is a
+        thing */
+
+    Containers::StaticArrayView<3, int> e = a.slice<3>(0);
+    CORRADE_COMPARE(e[0], 1);
+    CORRADE_COMPARE(e[1], 2);
+    CORRADE_COMPARE(e[2], 3);
+
+    Containers::StaticArrayView<3, const int> ec = ac.slice<3>(0);
+    CORRADE_COMPARE(ec[0], 1);
+    CORRADE_COMPARE(ec[1], 2);
+    CORRADE_COMPARE(ec[2], 3);
 }
 
 void StaticArrayTest::cast() {
