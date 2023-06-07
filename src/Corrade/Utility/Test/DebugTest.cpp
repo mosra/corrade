@@ -227,8 +227,11 @@ template<class> struct IntsData;
 template<> struct IntsData<char> {
     static const char* name() { return "char"; }
     static char value() {
+        if(std::is_signed<char>::value)
+            return -123;
         /* Android has unsigned char */
-        return std::is_signed<char>::value ? -123 : char(223);
+        CORRADE_INFO("char is unsigned");
+        return char(223);
     }
     static const char* expected() {
         /* Android has unsigned char */
@@ -332,6 +335,9 @@ void DebugTest::isTty() {
 
 template<class T> void DebugTest::ints() {
     setTestCaseTemplateName(IntsData<T>::name());
+
+    /* To capture correct function name */
+    CORRADE_VERIFY(true);
 
     std::ostringstream out;
     Debug{&out} << IntsData<T>::value();

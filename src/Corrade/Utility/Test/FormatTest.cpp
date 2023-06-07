@@ -243,6 +243,7 @@ void FormatTest::integerChar() {
     if(std::is_signed<char>::value) {
         CORRADE_COMPARE(format<char>("{}", -15), "-15");
     } else {
+        CORRADE_INFO("char is unsigned");
         /* Android simulator does this. Huh? */
         CORRADE_COMPARE(format<char>("{}", -15), "241");
     }
