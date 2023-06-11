@@ -3152,18 +3152,22 @@ void GrowableArrayTest::appendInsertConflictingType() {
     arrayAppend(a, value);
     arrayAppend(a, 5);
     arrayAppend(a, b);
+    arrayAppend(a, {4, 4});
     arrayAppend<ArrayAllocator>(a, value);
     arrayAppend<ArrayAllocator>(a, 5);
     arrayAppend<ArrayAllocator>(a, b);
+    arrayAppend<ArrayAllocator>(a, {4, 4});
     arrayInsert(a, 0, value);
     arrayInsert(a, 0, 5);
     arrayInsert(a, 0, b);
+    arrayInsert(a, 0, {4, 4});
     arrayInsert<ArrayAllocator>(a, 0, value);
     arrayInsert<ArrayAllocator>(a, 0, 5);
     arrayInsert<ArrayAllocator>(a, 0, b);
-    CORRADE_COMPARE_AS(a,
-        Containers::arrayView<unsigned>({3, 5, 5, 3, 5, 5, 5, 5, 3, 5, 5, 3}),
-        TestSuite::Compare::Container);
+    arrayInsert<ArrayAllocator>(a, 0, {4, 4});
+    CORRADE_COMPARE_AS(a, Containers::arrayView<unsigned>({
+        4, 4, 3, 5, 5, 4, 4, 3, 5, 5, 5, 5, 3, 4, 4, 5, 5, 3, 4, 4
+    }), TestSuite::Compare::Container);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {
