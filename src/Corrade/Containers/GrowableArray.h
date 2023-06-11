@@ -943,7 +943,7 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppe
 @overload
 @m_since{2020,06}
 */
-template<class T, class Allocator = ArrayAllocator<T>> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+template<class T, class Allocator = ArrayAllocator<T>> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<typename std::common_type<T>::type> values) {
     return arrayAppend<T, Allocator>(array, arrayView(values));
 }
 
@@ -958,7 +958,7 @@ template<class T, class Allocator = ArrayAllocator<T>> inline ArrayView<T>  arra
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+template<template<class> class Allocator, class T> inline ArrayView<T>  arrayAppend(Array<T>& array, std::initializer_list<typename std::common_type<T>::type> values) {
     return arrayAppend<T, Allocator<T>>(array, values);
 }
 #endif
@@ -1166,7 +1166,7 @@ template<template<class> class Allocator, class T> inline ArrayView<T> arrayInse
 @overload
 @m_since_latest
 */
-template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<T> values) {
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<typename std::common_type<T>::type> values) {
     return arrayInsert<T, Allocator>(array, index, arrayView(values));
 }
 
@@ -1181,7 +1181,7 @@ template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T>  arrayInsert
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<T> values) {
+template<template<class> class Allocator, class T> inline ArrayView<T>  arrayInsert(Array<T>& array, std::size_t index, std::initializer_list<typename std::common_type<T>::type> values) {
     return arrayInsert<T, Allocator<T>>(array, index, values);
 }
 #endif

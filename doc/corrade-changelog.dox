@@ -461,7 +461,7 @@ namespace Corrade {
 -   @ref Containers::arrayReserve() was not correctly propagating an explicit
     allocator argument when checking for capacity, using always the implicit
     one, and thus resulting in unnecessary reallocation in some cases
-    @ref Containers::arrayAppend(Array<T>&, std::initializer_list<T>) was not
+    @ref Containers::arrayAppend(Array<T>&, std::initializer_list<typename std::common_type<T>::type>) was not
     correctly propagating an explicit allocator argument, causing the array to
     be always reallocated using the implicit one
 -   @ref Utility::Path::libraryLocation() documentation now mentions caveats
