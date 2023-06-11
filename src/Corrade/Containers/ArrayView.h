@@ -1605,6 +1605,7 @@ template<std::size_t size_, class T> template<class U, class> constexpr T& Stati
         "Containers::StaticArrayView::operator[](): index" << i << "out of range for" << size_ << "elements"), _data[i];
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> template<std::size_t size_, class U, class> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(const U begin) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin + size_ <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
@@ -1615,6 +1616,7 @@ template<class T> template<std::size_t size_, class U, class> constexpr StaticAr
             << "elements"),
         StaticArrayView<size_, T>{begin};
 }
+#endif
 
 template<class T> template<std::size_t size_> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(std::size_t begin) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(begin + size_ <= _size,
