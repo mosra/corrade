@@ -78,7 +78,7 @@
     <Expand>
       <IndexListItems>
         <Size>size()</Size>
-        <ValueNode>(bool)(_data[(offset() + $i)/8] &amp; (1 &lt;&lt; ((offset() + $i)%8)))</ValueNode>
+        <ValueNode>(bool)((($T1*)_data)[(offset() + $i)/8] &amp; (1 &lt;&lt; ((offset() + $i)%8)))</ValueNode>
       </IndexListItems>
     </Expand>
   </Type>
