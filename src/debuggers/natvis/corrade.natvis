@@ -130,6 +130,21 @@
       <ExpandedItem>_reference</ExpandedItem>
     </Expand>
   </Type>
+  <!-- Containers::MoveReference -->
+  <Type Name="Corrade::Containers::MoveReference&lt;*&gt;">
+    <DisplayString>{*_reference,na}</DisplayString>
+    <Expand>
+      <ExpandedItem>*_reference</ExpandedItem>
+    </Expand>
+  </Type>
+  <!-- Containers::AnyReference -->
+  <Type Name="Corrade::Containers::AnyReference&lt;*&gt;">
+    <DisplayString>{*_reference,na}</DisplayString>
+    <Expand>
+      <Item Name="[r-value]" ExcludeView="simple">_isRvalue</Item>
+      <ExpandedItem>*_reference</ExpandedItem>
+    </Expand>
+  </Type>
   <!-- Containers::StaticArray -->
   <Type Name="Corrade::Containers::StaticArray&lt;*&gt;">
     <DisplayString>{{ size={$T1} }}</DisplayString>
