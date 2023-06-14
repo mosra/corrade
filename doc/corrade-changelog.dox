@@ -64,8 +64,9 @@ namespace Corrade {
     @ref corrade-debuggers,
     [mosra/corrade#111](https://github.com/mosra/corrade/issues/111),
     [mosra/corrade#147](https://github.com/mosra/corrade/pull/147),
-    [mosra/corrade#160](https://github.com/mosra/corrade/pull/160) and
-    [mosra/corrade#165](https://github.com/mosra/corrade/pull/165) for more
+    [mosra/corrade#160](https://github.com/mosra/corrade/pull/160),
+    [mosra/corrade#165](https://github.com/mosra/corrade/pull/165) and
+    [mosra/corrade#172](https://github.com/mosra/corrade/pull/172) for more
     information.
 -   For console applications, the @ref main "Corrade::Main" library now
     disables showing an assertion dialog on Windows, making them either jump
