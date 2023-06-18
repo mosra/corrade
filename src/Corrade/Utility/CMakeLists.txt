@@ -155,7 +155,7 @@ if(CORRADE_WITH_UTILITY)
     endif()
 
     # Functionality specific to static Windows builds
-    if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC)
+    if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC AND CORRADE_BUILD_STATIC_UNIQUE_GLOBALS)
         list(APPEND CorradeUtility_SRCS Implementation/WindowsWeakSymbol.cpp)
         list(APPEND CorradeUtility_PRIVATE_HEADERS Implementation/WindowsWeakSymbol.h)
     endif()
@@ -284,7 +284,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         # Functionality specific to static Windows builds. Not really needed
         # for corrade-rc as it doesn't load any plugins yet but easier than
         # having a special handling.
-        if(NOT CORRADE_TARGET_WINDOWS_RT)
+        if(NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC_UNIQUE_GLOBALS)
             list(APPEND CorradeUtilityRc_SRCS Implementation/WindowsWeakSymbol.cpp)
         endif()
     endif()
