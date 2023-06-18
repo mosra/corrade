@@ -544,6 +544,12 @@ Options controlling the build:
     Enabled by default for static builds. May introduce additional overhead on
     some platforms, disable if you will only link static libraries to one final
     executable and won't use any dynamic plugins.
+-   `CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME` --- Name of a DLL in which
+    to search for unique globals symbols. By default, the main executable is
+    searched, which works in most cases except when Corrade is only linked to a
+    DLL, such as in Python modules. The name is expected to be just a filename
+    without any path. Used only on Windows and only if
+    `CORRADE_BUILD_STATIC_UNIQUE_GLOBALS` is enabled.
 -   `CORRADE_BUILD_DEPRECATED` --- Build with deprecated features included.
     Enabled by default to preserve backwards compatibility, disabling it forces
     you to update your code whenever there's a breaking change in the APIs or

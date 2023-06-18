@@ -191,6 +191,12 @@ if(CORRADE_TARGET_WINDOWS)
         set(CORRADE_UTILITY_USE_ANSI_COLORS ON)
     else()
         option(CORRADE_UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
+        # TODO is there some cmake_dependent_option() but for strings? I.e., to
+        #   hide this if a static build isn't enabled? I don't want to repeat
+        #   the complicated logic from inside cmake_dependent_option() just for
+        #   a single option.
+        set(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME ""
+            CACHE STRING "Name of a DLL in which to search for unique globals symbols if CORRADE_BUILD_STATIC_UNIQUE_GLOBALS is enabled")
     endif()
 endif()
 

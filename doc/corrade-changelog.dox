@@ -456,6 +456,10 @@ namespace Corrade {
     implicit `ALL` target.
 -   Updated @ref Corrade/Utility/StlForwardArray.h and
     @ref Corrade/Utility/StlForwardTuple.h to work on libc++ 16
+-   On Windows there's a new `CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME`
+    @ref building-corrade-features "CMake option" to aid
+    @ref CORRADE_BUILD_STATIC_UNIQUE_GLOBALS in cases where Corrade is only
+    linked to a DLL but not the main executable.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

@@ -95,8 +95,10 @@ Defined if built as static libraries. Default are shared libraries.
 @brief Static library build with globals unique across shared libraries
 @m_since{2020,06}
 
-Enabled by default in a static build.
-@see @ref building-corrade, @ref corrade-cmake
+Enabled by default in a static build. On Windows see also the
+`CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME`
+@ref building-corrade-features "CMake option".
+@see @ref corrade-cmake
 */
 #define CORRADE_BUILD_STATIC_UNIQUE_GLOBALS
 #undef CORRADE_BUILD_STATIC_UNIQUE_GLOBALS

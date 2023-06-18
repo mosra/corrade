@@ -28,6 +28,20 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/Utility")
 
+# The configure.h is used by Implementation/WindowsWeakSymbol.cpp which is
+# used only if CORRADE_BUILD_STATIC_UNIQUE_GLOBALS is defined. In that case
+# it's compiled to the CorradeUtility library if it's static and to the
+# corrade-rc executable always (as it's statically built always).
+if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC_UNIQUE_GLOBALS AND (CORRADE_BUILD_STATIC OR NOT CMAKE_CROSSCOMPILING))
+    if(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME)
+        set(WINDOWS_WEAK_SYMBOL_DLL_NAME "\"${CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME}\"")
+    else()
+        set(WINDOWS_WEAK_SYMBOL_DLL_NAME nullptr)
+    endif()
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+endif()
+
 if(CORRADE_WITH_UTILITY)
     set(CorradeUtility_SRCS
         Debug.cpp
