@@ -103,7 +103,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
-    void sliceZero();
+    void sliceZeroNullPointerAmbiguity();
 
     void cast();
     void size();
@@ -164,7 +164,7 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::slicePointer,
               &StaticArrayTest::sliceToStatic,
               &StaticArrayTest::sliceToStaticPointer,
-              &StaticArrayTest::sliceZero,
+              &StaticArrayTest::sliceZeroNullPointerAmbiguity,
 
               &StaticArrayTest::cast,
               &StaticArrayTest::size,
@@ -968,7 +968,7 @@ void StaticArrayTest::sliceToStaticPointer() {
     CORRADE_COMPARE(bc[2], 4);
 }
 
-void StaticArrayTest::sliceZero() {
+void StaticArrayTest::sliceZeroNullPointerAmbiguity() {
     StaticArray a{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
     const StaticArray ac{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
 

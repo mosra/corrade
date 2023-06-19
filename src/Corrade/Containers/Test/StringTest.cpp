@@ -166,7 +166,7 @@ struct StringTest: TestSuite::Tester {
 
     template<class T> void slice();
     template<class T> void slicePointer();
-    template<class T> void sliceZero();
+    template<class T> void sliceZeroNullPointerAmbiguity();
 
     void split();
     void splitOnAny();
@@ -316,8 +316,8 @@ StringTest::StringTest() {
               &StringTest::slice<String>,
               &StringTest::slicePointer<const String>,
               &StringTest::slicePointer<String>,
-              &StringTest::sliceZero<const String>,
-              &StringTest::sliceZero<String>,
+              &StringTest::sliceZeroNullPointerAmbiguity<const String>,
+              &StringTest::sliceZeroNullPointerAmbiguity<String>,
 
               &StringTest::split,
               &StringTest::splitOnAny,
@@ -2037,7 +2037,7 @@ template<class T> void StringTest::slicePointer() {
     CORRADE_COMPARE(a.suffix(a.data() + 2).flags(), StringViewFlag::NullTerminated);
 }
 
-template<class T> void StringTest::sliceZero() {
+template<class T> void StringTest::sliceZeroNullPointerAmbiguity() {
     setTestCaseTemplateName(ConstTraits<T>::name());
 
     T a = "hello";

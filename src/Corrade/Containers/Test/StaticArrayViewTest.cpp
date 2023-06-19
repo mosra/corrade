@@ -105,7 +105,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
-    void sliceZero();
+    void sliceZeroNullPointerAmbiguity();
 
     void cast();
     void size();
@@ -140,7 +140,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::slicePointer,
               &StaticArrayViewTest::sliceToStatic,
               &StaticArrayViewTest::sliceToStaticPointer,
-              &StaticArrayViewTest::sliceZero,
+              &StaticArrayViewTest::sliceZeroNullPointerAmbiguity,
 
               &StaticArrayViewTest::cast,
               &StaticArrayViewTest::size});
@@ -741,7 +741,7 @@ void StaticArrayViewTest::sliceToStaticPointer() {
     #endif
 }
 
-void StaticArrayViewTest::sliceZero() {
+void StaticArrayViewTest::sliceZeroNullPointerAmbiguity() {
     int data[5] = {1, 2, 3, 4, 5};
     StaticArrayView<5> a = data;
 

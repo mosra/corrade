@@ -111,7 +111,7 @@ struct ArrayTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
-    void sliceZero();
+    void sliceZeroNullPointerAmbiguity();
 
     void release();
 
@@ -183,7 +183,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::slicePointer,
               &ArrayTest::sliceToStatic,
               &ArrayTest::sliceToStaticPointer,
-              &ArrayTest::sliceZero,
+              &ArrayTest::sliceZeroNullPointerAmbiguity,
 
               &ArrayTest::release,
 
@@ -858,7 +858,7 @@ void ArrayTest::sliceToStaticPointer() {
     CORRADE_COMPARE(bc[2], 4);
 }
 
-void ArrayTest::sliceZero() {
+void ArrayTest::sliceZeroNullPointerAmbiguity() {
     Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
     const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 

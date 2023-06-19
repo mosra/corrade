@@ -148,7 +148,7 @@ struct StringViewTest: TestSuite::Tester {
     void slice();
     void slicePointer();
     void sliceFlags();
-    void sliceZero();
+    void sliceZeroNullPointerAmbiguity();
 
     void split();
     void splitFlags();
@@ -288,7 +288,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::slice,
               &StringViewTest::slicePointer,
               &StringViewTest::sliceFlags,
-              &StringViewTest::sliceZero,
+              &StringViewTest::sliceZeroNullPointerAmbiguity,
 
               &StringViewTest::split,
               &StringViewTest::splitFlags,
@@ -1177,7 +1177,7 @@ void StringViewTest::sliceFlags() {
     CORRADE_COMPARE(none.prefix(none.data() + 4).flags(), StringViewFlags{});
 }
 
-void StringViewTest::sliceZero() {
+void StringViewTest::sliceZeroNullPointerAmbiguity() {
     StringView a = "hello";
 
     /* These should all unambigously pick the std::size_t overloads, not the

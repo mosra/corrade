@@ -138,7 +138,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void slicePointer();
     void sliceToStatic();
     void sliceToStaticPointer();
-    void sliceZero();
+    void sliceZeroNullPointerAmbiguity();
 
     void cast();
     void castInvalid();
@@ -194,7 +194,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::slicePointer,
               &ArrayViewTest::sliceToStatic,
               &ArrayViewTest::sliceToStaticPointer,
-              &ArrayViewTest::sliceZero,
+              &ArrayViewTest::sliceZeroNullPointerAmbiguity,
 
               &ArrayViewTest::cast,
               &ArrayViewTest::castInvalid,
@@ -1236,7 +1236,7 @@ void ArrayViewTest::sliceToStaticPointer() {
     #endif
 }
 
-void ArrayViewTest::sliceZero() {
+void ArrayViewTest::sliceZeroNullPointerAmbiguity() {
     int data[5] = {1, 2, 3, 4, 5};
     ArrayView a = data;
 
