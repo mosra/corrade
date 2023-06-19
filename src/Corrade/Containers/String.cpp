@@ -147,7 +147,7 @@ String::String(const ArrayView<const char> view): String{view.data(), view.size(
 
 String::String(const ArrayView<char> view): String{view.data(), view.size()} {}
 
-String::String(const char* const data): String{data, data ? std::strlen(data) : 0} {}
+String::String(std::nullptr_t, std::nullptr_t, std::nullptr_t, const char* const data): String{data, data ? std::strlen(data) : 0} {}
 
 String::String(const char* const data, const std::size_t size)
     #ifdef CORRADE_GRACEFUL_ASSERT

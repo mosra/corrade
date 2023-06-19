@@ -315,7 +315,18 @@ BasicStringView {
          * A default-constructed instance has @ref StringViewFlag::Global set.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ BasicStringView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StringView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicStringView(U) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
+
+        constexpr /*implicit*/ BasicStringView() noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
+        #endif
 
         /**
          * @brief Construct from a C string of known size
@@ -396,7 +407,7 @@ BasicStringView {
            because it'd get preferred over the implicit copy constructor. */
         /** @todo even though the implicit copy constructor would be overriden
             without the is_same part, is_trivially_copyable still says yes?! */
-        template<class U, class = typename std::enable_if<!std::is_array<typename std::remove_reference<U&&>::type>::value && !std::is_same<typename std::decay<U&&>::type, BasicStringView<T>>::value, decltype(ArrayView<T>{std::declval<U&&>()})>::type> constexpr /*implicit*/ BasicStringView(U&& data, StringViewFlags flags = {}) noexcept: BasicStringView{flags, ArrayView<T>(data)} {}
+        template<class U, class = typename std::enable_if<!std::is_array<typename std::remove_reference<U&&>::type>::value && !std::is_same<typename std::decay<U&&>::type, BasicStringView<T>>::value && !std::is_same<typename std::decay<U&&>::type, std::nullptr_t>::value, decltype(ArrayView<T>{std::declval<U&&>()})>::type> constexpr /*implicit*/ BasicStringView(U&& data, StringViewFlags flags = {}) noexcept: BasicStringView{flags, ArrayView<T>(data)} {}
         #endif
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
@@ -418,7 +429,17 @@ BasicStringView {
          * The @ref BasicStringView(std::nullptr_t) overload (which is a
          * default constructor) is additionally @cpp constexpr @ce.
          */
-        /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ BasicStringView(T* data, StringViewFlags extraFlags = {}) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StringView or std::size_t, *and* avoid ambiguity with
+           the other two StringView(U) overloads above. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_pointer<U>::value && std::is_convertible<const U&, T*>::value>::type> /*implicit*/ BasicStringView(U data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
+        #endif
 
         /**
          * @brief Construct a view on an external type / from an external representation

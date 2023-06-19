@@ -318,23 +318,24 @@ class Array {
          */
         typedef D Deleter;
 
-        /** @brief Conversion from `nullptr` */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        /*implicit*/ Array(std::nullptr_t) noexcept:
-        #else
-        /* Has to be like this because otherwise Array{0} is ambiguous. FFS
-           C++. */
-        template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
-        #endif
-            _data{nullptr}, _size{0}, _deleter{} {}
-
         /**
          * @brief Default constructor
          *
          * Creates a zero-sized array. Move an @ref Array with a nonzero size
          * onto the instance to make it useful.
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ Array(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity either when calling Array{0} or in certain cases
+           of passing 0 to overloads that take either an Array or std::size_t.
+           See the constructZeroNullPointerAmbiguity() test for more info. FFS,
+           zero as null pointer was deprecated in C++11 already, why is this
+           still a problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept: _data{nullptr}, _size{0}, _deleter{} {}
+
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{} {}
+        #endif
 
         /**
          * @brief Construct a default-initialized array

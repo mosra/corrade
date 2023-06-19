@@ -124,7 +124,18 @@ template<class T> class BasicBitArrayView {
          * @ref BitArray or @ref BasicBitArrayView "BitArrayView" onto the
          * instance to make it useful.
          */
-        constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ BasicBitArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a BitArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicBitArrayView(U) noexcept: _data{}, _sizeOffset{} {}
+
+        constexpr /*implicit*/ BasicBitArrayView() noexcept: _data{}, _sizeOffset{} {}
+        #endif
 
         /**
          * @brief Construct a view on a fixed-size array

@@ -277,7 +277,18 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @ref ArrayView or @ref StridedArrayView onto the instance to make it
          * useful.
          */
-        constexpr /*implicit*/ StridedArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{}, _stride{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StridedArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
+
+        constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+        #endif
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -1093,16 +1104,25 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
             Dimensions = dimensions     /**< View dimensions */
         };
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
-
         /**
          * @brief Default constructor
          *
-         * Creates an empty view. Copy a non-empty @ref Array, @ref ArrayView
-         * or @ref StridedArrayView onto the instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array,
+         * @ref ArrayView or @ref StridedArrayView onto the instance to make it
+         * useful.
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StridedArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
+
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+        #endif
 
         /**
          * @brief Construct a view with explicit size and stride
@@ -1336,16 +1356,25 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
             Dimensions = dimensions     /**< View dimensions */
         };
 
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
-
         /**
          * @brief Default constructor
          *
-         * Creates an empty view. Copy a non-empty @ref Array, @ref ArrayView
-         * or @ref StridedArrayView onto the instance to make it useful.
+         * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array,
+         * @ref ArrayView or @ref StridedArrayView onto the instance to make it
+         * useful.
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StridedArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
+
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+        #endif
 
         /**
          * @brief Construct a view with explicit size and stride

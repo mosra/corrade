@@ -274,7 +274,18 @@ template<class T> class ArrayView {
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
          * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either an ArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
+
+        constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
+        #endif
 
         /**
          * @brief Construct a view on an array with explicit size
@@ -690,7 +701,18 @@ template<> class ArrayView<void> {
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
          * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either an ArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
+
+        constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
+        #endif
 
         /**
          * @brief Construct a view on a type-erased array with explicit length
@@ -817,7 +839,18 @@ template<> class ArrayView<const void> {
          * Creates an empty @cpp nullptr @ce view. Copy a non-empty @ref Array
          * or @ref ArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _size{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ ArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either an ArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
+
+        constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
+        #endif
 
         /**
          * @brief Construct a view on a type-erased array array with explicit length
@@ -1098,7 +1131,18 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Creates a @cpp nullptr @ce view. Copy a non-empty @ref StaticArray
          * or @ref StaticArrayView onto the instance to make it useful.
          */
-        constexpr /*implicit*/ StaticArrayView(std::nullptr_t = nullptr) noexcept: _data{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ StaticArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StaticArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StaticArrayView(U) noexcept: _data{} {}
+
+        constexpr /*implicit*/ StaticArrayView() noexcept: _data{} {}
+        #endif
 
         /**
          * @brief Construct a static view on an array

@@ -176,7 +176,18 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @ref BasicStridedBitArrayView "StridedBitArrayView" onto the
          * instance to make it useful.
          */
-        constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{}, _stride{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ BasicStridedBitArrayView(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StridedBitArrayView or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(U) noexcept: _data{}, _sizeOffset{}, _stride{} {}
+
+        constexpr /*implicit*/ BasicStridedBitArrayView() noexcept: _data{}, _sizeOffset{}, _stride{} {}
+        #endif
 
         /**
          * @brief Construct a view with explicit offset, size and stride

@@ -100,7 +100,18 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          * Creates an instance with @cpp nullptr @ce data and size and stride
          * set to @cpp 0 @ce.
          */
-        constexpr /*implicit*/ StringIterable(std::nullptr_t = nullptr) noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr /*implicit*/ StringIterable(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a StringIterable or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_same<std::nullptr_t, T>::value>::type> constexpr /*implicit*/ StringIterable(T) noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
+
+        constexpr /*implicit*/ StringIterable() noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
+        #endif
 
         /**
          * @brief Construct from any sequential iterable container

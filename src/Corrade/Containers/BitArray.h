@@ -128,7 +128,18 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * Creates a zero-sized array. Move a @ref BitArray with a nonzero size
          * onto the instance to make it useful.
          */
-        /*implicit*/ BitArray(std::nullptr_t = nullptr) noexcept: _data{}, _sizeOffset{}, _deleter{} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ BitArray(std::nullptr_t = nullptr) noexcept;
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a BitArray or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_same<std::nullptr_t, T>::value>::type> /*implicit*/ BitArray(T) noexcept: _data{}, _sizeOffset{}, _deleter{} {}
+
+        /*implicit*/ BitArray() noexcept: _data{}, _sizeOffset{}, _deleter{} {}
+        #endif
 
         /**
          * @brief Construct a zero-initialized array

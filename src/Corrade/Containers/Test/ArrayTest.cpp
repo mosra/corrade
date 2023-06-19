@@ -71,8 +71,8 @@ namespace Test { namespace {
 struct ArrayTest: TestSuite::Tester {
     explicit ArrayTest();
 
+    void constructDefault();
     void constructEmpty();
-    void constructNullptr();
     void construct();
     void constructZeroSize();
     void constructDefaultInit();
@@ -145,8 +145,8 @@ typedef Containers::ArrayView<void> VoidArrayView;
 typedef Containers::ArrayView<const void> ConstVoidArrayView;
 
 ArrayTest::ArrayTest() {
-    addTests({&ArrayTest::constructEmpty,
-              &ArrayTest::constructNullptr,
+    addTests({&ArrayTest::constructDefault,
+              &ArrayTest::constructEmpty,
               &ArrayTest::construct,
               &ArrayTest::constructZeroSize,
               &ArrayTest::constructDefaultInit,
@@ -212,33 +212,32 @@ ArrayTest::ArrayTest() {
               &ArrayTest::moveConstructPlainStruct});
 }
 
-void ArrayTest::constructEmpty() {
-    const Array a;
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.size(), 0);
-
-    /* Zero-length should not call new */
-    const std::size_t size = 0;
-    const Array b(size);
-    CORRADE_VERIFY(b == nullptr);
-    CORRADE_COMPARE(b.size(), 0);
-}
-
-void ArrayTest::constructNullptr() {
+void ArrayTest::constructDefault() {
+    const Array a1;
     /* GCC 4.8 tries to use the deleted Array copy constructor with = nullptr,
        probably due to the workaround to avoid Array{0} being ambiguous between
        a std::size_t and a nullptr constructor */
     /** @todo drop this once the single-argument size constructor is
         deprecated in favor of explicit DefaultInit / ValueInit */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-    const Array a{nullptr};
+    const Array a2{nullptr};
     #else
-    const Array a = nullptr;
+    const Array a2 = nullptr;
     #endif
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a1 == nullptr);
+    CORRADE_VERIFY(a2 == nullptr);
+    CORRADE_VERIFY(a1.isEmpty());
+    CORRADE_VERIFY(a2.isEmpty());
+    CORRADE_COMPARE(a1.size(), 0);
+    CORRADE_COMPARE(a2.size(), 0);
+}
+
+void ArrayTest::constructEmpty() {
+    /* Zero-length should not call new */
+    const std::size_t size = 0;
+    const Array b(size);
+    CORRADE_VERIFY(b == nullptr);
+    CORRADE_COMPARE(b.size(), 0);
 }
 
 void ArrayTest::construct() {

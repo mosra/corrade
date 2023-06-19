@@ -284,6 +284,9 @@ namespace Corrade {
     @ref Containers::Stride, @ref Containers::Stride1D,
     @ref Containers::Stride2D, @ref Containers::Stride3D and
     @ref Containers::Stride4D aliases for @ref Containers::StridedDimensions
+-   All classes that have a constructor taking a single pointer or
+    @ref std::nullptr_t argument now prevent ambiguity when used in function
+    overloads together with an integer argument and called with @cpp 0 @ce
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

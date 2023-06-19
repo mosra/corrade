@@ -189,11 +189,16 @@ template<> struct ConstTraits<const BitArray> {
 };
 
 void BitArrayTest::constructDefault() {
-    BitArray a;
-    CORRADE_VERIFY(a.isEmpty());
-    CORRADE_COMPARE(a.offset(), 0);
-    CORRADE_COMPARE(a.size(), 0);
-    CORRADE_VERIFY(!a.data());
+    BitArray a1;
+    BitArray a2 = nullptr;
+    CORRADE_VERIFY(a1.isEmpty());
+    CORRADE_VERIFY(a2.isEmpty());
+    CORRADE_COMPARE(a1.offset(), 0);
+    CORRADE_COMPARE(a2.offset(), 0);
+    CORRADE_COMPARE(a1.size(), 0);
+    CORRADE_COMPARE(a2.size(), 0);
+    CORRADE_VERIFY(!a1.data());
+    CORRADE_VERIFY(!a2.data());
 }
 
 void BitArrayTest::constructValueInit() {

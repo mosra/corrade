@@ -350,7 +350,16 @@ class CORRADE_UTILITY_EXPORT String {
          * @see @ref Containers-String-usage-sso,
          *      @ref String(AllocatedInitT, const char*)
          */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         /*implicit*/ String(const char* data);
+        #else
+        /* To avoid ambiguity in certain cases of passing 0 to overloads that
+           take either a String or std::size_t. See the
+           constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
+           null pointer was deprecated in C++11 already, why is this still a
+           problem?! */
+        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> /*implicit*/ String(T data): String{nullptr, nullptr, nullptr, data} {}
+        #endif
 
         /**
          * @brief Construct from a sized C string
@@ -1263,6 +1272,9 @@ class CORRADE_UTILITY_EXPORT String {
         char* release();
 
     private:
+        /* Delegated to from the (templated) String(const char*). THREE extra
+           nullptr arguments to avoid accidental ambiguous overloads. */
+        explicit String(std::nullptr_t, std::nullptr_t, std::nullptr_t, const char* data);
         /* Delegated to from the (templated) String(char*, Deleter). Argument
            order shuffled together with a null parameter to avoid accidental
            ambiguous overloads. */
