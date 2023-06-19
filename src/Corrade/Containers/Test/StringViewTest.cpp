@@ -123,6 +123,8 @@ struct StringViewTest: TestSuite::Tester {
     void constructTooLarge();
     void constructNullptrNullTerminated();
 
+    void constructZeroNullPointerAmbiguity();
+
     template<class T> void convertArrayView();
     void convertArrayViewConstexpr();
     template<class T> void convertVoidArrayView();
@@ -263,6 +265,8 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructLiteralEmpty,
               &StringViewTest::constructTooLarge,
               &StringViewTest::constructNullptrNullTerminated,
+
+              &StringViewTest::constructZeroNullPointerAmbiguity,
 
               &StringViewTest::convertArrayView<const char>,
               &StringViewTest::convertArrayView<char>,
@@ -651,6 +655,27 @@ void StringViewTest::constructNullptrNullTerminated() {
     StringView{nullptr, 0, StringViewFlag::NullTerminated};
     CORRADE_COMPARE(out.str(),
         "Containers::StringView: can't use StringViewFlag::NullTerminated with null data\n");
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerStringOverload(std::size_t, long long) {
+    return 76;
+}
+int integerStringOverload(StringView, int) {
+    return 39;
+}
+
+void StringViewTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerStringOverload(25, 2), 76);
+    CORRADE_COMPARE(integerStringOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerStringOverload(0, 3), 76);
 }
 
 template<class T> void StringViewTest::convertArrayView() {

@@ -115,6 +115,10 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructCopy();
     void constructInitializerList();
 
+    void constructZeroNullPointerAmbiguity();
+    void constructZeroNullPointerAmbiguityVoid();
+    void constructZeroNullPointerAmbiguityConstVoid();
+
     void convertBool();
     void convertPointer();
     void convertConst();
@@ -170,6 +174,10 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructDerived,
               &ArrayViewTest::constructCopy,
               &ArrayViewTest::constructInitializerList,
+
+              &ArrayViewTest::constructZeroNullPointerAmbiguity,
+              &ArrayViewTest::constructZeroNullPointerAmbiguityVoid,
+              &ArrayViewTest::constructZeroNullPointerAmbiguityConstVoid,
 
               &ArrayViewTest::convertBool,
               &ArrayViewTest::convertPointer,
@@ -637,6 +645,61 @@ void ArrayViewTest::constructInitializerList() {
 
     /* R-value init list should work too */
     CORRADE_COMPARE(arrayView<int>({3, 5, 7}).front(), 3);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerArrayOverload(std::size_t, long long) {
+    return 76;
+}
+int integerArrayOverload(ConstArrayView, int) {
+    return 39;
+}
+
+void ArrayViewTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverload(25, 2), 76);
+    CORRADE_COMPARE(integerArrayOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverload(0, 3), 76);
+}
+
+/* Same as above, just for the void ArrayView specialization */
+int integerArrayOverloadVoid(std::size_t, long long) {
+    return 67;
+}
+int integerArrayOverloadVoid(VoidArrayView, int) {
+    return 93;
+}
+
+void ArrayViewTest::constructZeroNullPointerAmbiguityVoid() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverloadVoid(25, 2), 67);
+    CORRADE_COMPARE(integerArrayOverloadVoid(nullptr, 2), 93);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverloadVoid(0, 3), 67);
+}
+
+/* Same as above, just for the const void ArrayView specialization */
+int integerArrayOverloadConstVoid(std::size_t, long long) {
+    return 676;
+}
+int integerArrayOverloadConstVoid(ConstVoidArrayView, int) {
+    return 939;
+}
+
+void ArrayViewTest::constructZeroNullPointerAmbiguityConstVoid() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(25, 2), 676);
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(nullptr, 2), 939);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(0, 3), 676);
 }
 
 void ArrayViewTest::convertBool() {

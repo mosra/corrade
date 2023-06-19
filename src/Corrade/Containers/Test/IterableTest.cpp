@@ -48,6 +48,8 @@ struct IterableTest: TestSuite::Tester {
 
     void constructDefault();
 
+    void constructZeroNullPointerAmbiguity();
+
     void arrayView();
     void arrayViewMutableToConst();
     template<template<class> class T> void arrayViewReference();
@@ -94,6 +96,8 @@ constexpr struct {
 
 IterableTest::IterableTest() {
     addTests({&IterableTest::constructDefault,
+
+              &IterableTest::constructZeroNullPointerAmbiguity,
 
               &IterableTest::arrayView,
               &IterableTest::arrayViewMutableToConst,
@@ -153,6 +157,27 @@ void IterableTest::constructDefault() {
     CORRADE_COMPARE(cai.size(), 0);
     CORRADE_COMPARE(cai.stride(), 0);
     CORRADE_VERIFY(cai.isEmpty());
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerIterableOverload(std::size_t, long long) {
+    return 76;
+}
+int integerIterableOverload(const Iterable<const int>&, int) {
+    return 39;
+}
+
+void IterableTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerIterableOverload(25, 2), 76);
+    CORRADE_COMPARE(integerIterableOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerIterableOverload(0, 3), 76);
 }
 
 void IterableTest::arrayView() {

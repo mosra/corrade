@@ -169,6 +169,10 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DDerived();
     void construct3DFromLessDimensions();
 
+    void constructZeroNullPointerAmbiguity();
+    void constructZeroNullPointerAmbiguityVoid();
+    void constructZeroNullPointerAmbiguityConstVoid();
+
     void convertBool();
     void convertConst();
     void convertFromExternalView();
@@ -384,6 +388,10 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DFromStaticViewConstVoid,
               &StridedArrayViewTest::construct3DDerived,
               &StridedArrayViewTest::construct3DFromLessDimensions,
+
+              &StridedArrayViewTest::constructZeroNullPointerAmbiguity,
+              &StridedArrayViewTest::constructZeroNullPointerAmbiguityVoid,
+              &StridedArrayViewTest::constructZeroNullPointerAmbiguityConstVoid,
 
               &StridedArrayViewTest::convertBool,
               &StridedArrayViewTest::convertConst,
@@ -1943,6 +1951,61 @@ void StridedArrayViewTest::construct3DFromLessDimensions() {
     CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView1Di>::value);
     /* Construction the other way shouldn't be possible */
     CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerArrayOverload(std::size_t, long long) {
+    return 76;
+}
+int integerArrayOverload(const ConstStridedArrayView1Di&, int) {
+    return 39;
+}
+
+void StridedArrayViewTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverload(25, 2), 76);
+    CORRADE_COMPARE(integerArrayOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverload(0, 3), 76);
+}
+
+/* Same as above, just for the void StridedArrayView specialization */
+int integerArrayOverloadVoid(std::size_t, long long) {
+    return 67;
+}
+int integerArrayOverloadVoid(const VoidStridedArrayView1D&, int) {
+    return 93;
+}
+
+void StridedArrayViewTest::constructZeroNullPointerAmbiguityVoid() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverloadVoid(25, 2), 67);
+    CORRADE_COMPARE(integerArrayOverloadVoid(nullptr, 2), 93);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverloadVoid(0, 3), 67);
+}
+
+/* Same as above, just for the const void StridedArrayView specialization */
+int integerArrayOverloadConstVoid(std::size_t, long long) {
+    return 676;
+}
+int integerArrayOverloadConstVoid(const ConstVoidStridedArrayView1D&, int) {
+    return 939;
+}
+
+void StridedArrayViewTest::constructZeroNullPointerAmbiguityConstVoid() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(25, 2), 676);
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(nullptr, 2), 939);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverloadConstVoid(0, 3), 676);
 }
 
 void StridedArrayViewTest::convertBool() {

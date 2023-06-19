@@ -88,6 +88,8 @@ struct StridedBitArrayViewTest: TestSuite::Tester {
     void construct3DFromView();
     void construct3DFromLessDimensions();
 
+    void constructZeroNullPointerAmbiguity();
+
     void asContiguous();
     void asContiguousNonContiguous();
 
@@ -331,6 +333,8 @@ StridedBitArrayViewTest::StridedBitArrayViewTest() {
 
               &StridedBitArrayViewTest::construct3DFromView,
               &StridedBitArrayViewTest::construct3DFromLessDimensions,
+
+              &StridedBitArrayViewTest::constructZeroNullPointerAmbiguity,
 
               &StridedBitArrayViewTest::asContiguous,
               &StridedBitArrayViewTest::asContiguousNonContiguous,
@@ -1194,6 +1198,27 @@ void StridedBitArrayViewTest::construct3DFromLessDimensions() {
     CORRADE_VERIFY(std::is_nothrow_constructible<StridedBitArrayView3D, StridedBitArrayView2D>::value);
     /* Construction the other way shouldn't be possible */
     CORRADE_VERIFY(!std::is_constructible<StridedBitArrayView2D, StridedBitArrayView3D>::value);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerArrayOverload(std::size_t, long long) {
+    return 76;
+}
+int integerArrayOverload(const StridedBitArrayView1D&, int) {
+    return 39;
+}
+
+void StridedBitArrayViewTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverload(25, 2), 76);
+    CORRADE_COMPARE(integerArrayOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverload(0, 3), 76);
 }
 
 void StridedBitArrayViewTest::asContiguous() {

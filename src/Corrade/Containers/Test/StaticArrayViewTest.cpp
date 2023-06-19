@@ -90,6 +90,8 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void constructDerived();
     void constructCopy();
 
+    void constructZeroNullPointerAmbiguity();
+
     void convertBool();
     void convertPointer();
     void convertConst();
@@ -124,6 +126,8 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::constructFixedSize,
               &StaticArrayViewTest::constructDerived,
               &StaticArrayViewTest::constructCopy,
+
+              &StaticArrayViewTest::constructZeroNullPointerAmbiguity,
 
               &StaticArrayViewTest::convertBool,
               &StaticArrayViewTest::convertPointer,
@@ -308,6 +312,27 @@ void StaticArrayViewTest::constructCopy() {
     #endif
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<StaticArrayView<5>>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<StaticArrayView<5>>::value);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerArrayOverload(std::size_t, long long) {
+    return 76;
+}
+int integerArrayOverload(StaticArrayView<5>, int) {
+    return 39;
+}
+
+void StaticArrayViewTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverload(25, 2), 76);
+    CORRADE_COMPARE(integerArrayOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverload(0, 3), 76);
 }
 
 void StaticArrayViewTest::convertBool() {

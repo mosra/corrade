@@ -51,6 +51,8 @@ struct BitArrayTest: TestSuite::Tester {
     void constructTakeOwnershipSizeTooLarge();
     void constructMove();
 
+    void constructZeroNullPointerAmbiguity();
+
     void convertView();
     void convertMutableView();
 
@@ -144,6 +146,8 @@ BitArrayTest::BitArrayTest() {
               &BitArrayTest::constructTakeOwnershipOffsetTooLarge,
               &BitArrayTest::constructTakeOwnershipSizeTooLarge,
               &BitArrayTest::constructMove,
+
+              &BitArrayTest::constructZeroNullPointerAmbiguity,
 
               &BitArrayTest::convertView,
               &BitArrayTest::convertMutableView,
@@ -367,6 +371,27 @@ void BitArrayTest::constructMove() {
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<BitArray>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<BitArray>::value);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerArrayOverload(std::size_t, long long) {
+    return 76;
+}
+int integerArrayOverload(const BitArray&, int) {
+    return 39;
+}
+
+void BitArrayTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerArrayOverload(25, 2), 76);
+    CORRADE_COMPARE(integerArrayOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerArrayOverload(0, 3), 76);
 }
 
 void BitArrayTest::convertView() {

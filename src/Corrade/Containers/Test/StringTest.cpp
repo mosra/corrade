@@ -112,6 +112,8 @@ struct StringTest: TestSuite::Tester {
     void constructNullTerminatedGlobalView();
     void constructNullTerminatedGlobalViewAllocatedInit();
 
+    void constructZeroNullPointerAmbiguity();
+
     void convertStringView();
     void convertStringViewSmall();
     void convertStringViewSmallAllocatedInit();
@@ -259,6 +261,8 @@ StringTest::StringTest() {
 
               &StringTest::constructNullTerminatedGlobalView,
               &StringTest::constructNullTerminatedGlobalViewAllocatedInit,
+
+              &StringTest::constructZeroNullPointerAmbiguity,
 
               &StringTest::convertStringView,
               &StringTest::convertStringViewSmall,
@@ -1073,6 +1077,27 @@ void StringTest::constructNullTerminatedGlobalViewAllocatedInit() {
         CORRADE_COMPARE(a.size(), view.size());
         CORRADE_COMPARE(b.size(), view.size());
     }
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerStringOverload(std::size_t, long long) {
+    return 76;
+}
+int integerStringOverload(const String&, int) {
+    return 39;
+}
+
+void StringTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerStringOverload(25, 2), 76);
+    CORRADE_COMPARE(integerStringOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerStringOverload(0, 3), 76);
 }
 
 void StringTest::convertStringView() {

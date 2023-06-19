@@ -78,6 +78,9 @@ struct StaticArrayTest: TestSuite::Tester {
     void constructNoImplicitConstructor();
     void constructDirectReferences();
 
+    /* No constructZeroNullPointerAmbiguity() here as the StaticArray is never
+       empty, thus never null, thus std::nullptr_t constructor makes no sense */
+
     void copy();
     void move();
 

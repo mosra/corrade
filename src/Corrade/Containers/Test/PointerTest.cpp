@@ -89,6 +89,9 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
     void constructDerived();
+
+    void constructZeroNullPointerAmbiguity();
+
     void convert();
 
     void boolConversion();
@@ -125,6 +128,9 @@ PointerTest::PointerTest() {
 
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
               &PointerTest::constructDerived,
+
+              &PointerTest::constructZeroNullPointerAmbiguity,
+
               &PointerTest::convert,
 
               &PointerTest::boolConversion,
@@ -355,6 +361,27 @@ void PointerTest::constructDerived() {
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Base*>::value);
     CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Pointer<Derived>>::value);
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Pointer<Base>>::value);
+}
+
+/* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
+   is ambiguous, but *only* if the size_t overload has a second 64-bit
+   argument. If both would be the same, it wouldn't be ambigous, if the size_t
+   overload second argument was 32-bit and the other 16-bit it wouldn't be
+   either. */
+int integerPointerOverload(std::size_t, long long) {
+    return 76;
+}
+int integerPointerOverload(const Pointer<int>&, int) {
+    return 39;
+}
+
+void PointerTest::constructZeroNullPointerAmbiguity() {
+    /* Obvious cases */
+    CORRADE_COMPARE(integerPointerOverload(25, 2), 76);
+    CORRADE_COMPARE(integerPointerOverload(nullptr, 2), 39);
+
+    /* This should pick the integer overload, not convert 0 to nullptr */
+    CORRADE_COMPARE(integerPointerOverload(0, 3), 76);
 }
 
 void PointerTest::convert() {
