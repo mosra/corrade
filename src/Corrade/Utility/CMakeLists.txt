@@ -38,8 +38,8 @@ if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_ST
     else()
         set(WINDOWS_WEAK_SYMBOL_DLL_NAME nullptr)
     endif()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Implementation/configure.h.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/Implementation/configure.h)
 endif()
 
 if(CORRADE_WITH_UTILITY)

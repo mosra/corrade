@@ -32,7 +32,7 @@
 #define VC_EXTRALEAN
 #include <windows.h>
 
-#include "Corrade/Utility/configure.h"
+#include "Corrade/Utility/Implementation/configure.h"
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
