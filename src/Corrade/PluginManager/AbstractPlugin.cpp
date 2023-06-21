@@ -35,7 +35,7 @@
 #include "Corrade/Utility/Path.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include "Corrade/PluginManager/configure.h"
+#include "Corrade/PluginManager/Implementation/configure.h"
 #endif
 
 namespace Corrade { namespace PluginManager {
