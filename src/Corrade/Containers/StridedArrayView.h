@@ -2282,7 +2282,11 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
 
 namespace {
 
-template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFunction) {
+template<class T, class U, class V> std::size_t memberFunctionSliceOffset(V U::*memberFunction) {
+    /* See StridedArrayViewTest::sliceMemberFunctionPointerDerived() for
+       details */
+    static_assert(std::is_base_of<U, T>::value, "expected a member function pointer to the view type or its base classes");
+
     /* A zeroed-out piece of memory of the same size as T to execute the member
        function pointer on. *Technically* it might be enough to reinterpret
        nullptr as T* and execute the member on that, but that would probably
@@ -2297,7 +2301,7 @@ template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFun
        pass the triviality check. Same goes for `std::is_standard_layout`, it'd
        block me from slicing into pairs of virtual classes, which would again
        be fine. */
-    alignas(T) typename std::conditional<std::is_const<T>::value, const char, char>::type storage[sizeof(T)]{};
+    alignas(U) typename std::conditional<std::is_const<U>::value, const char, char>::type storage[sizeof(U)]{};
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 12
     /* GCC 12+ is stupid. There's {} and yet it still warns about `storage`
        being uninitialized. Happens in 13 too, so this wasn't a temporary
@@ -2305,15 +2309,15 @@ template<class T, class U> std::size_t memberFunctionSliceOffset(U T::*memberFun
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     #endif
-    const std::size_t offset = reinterpret_cast<const char*>(&(reinterpret_cast<T*>(storage)->*memberFunction)()) - storage;
+    const std::size_t offset = reinterpret_cast<const char*>(&(reinterpret_cast<U*>(storage)->*memberFunction)()) - storage;
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 12
     #pragma GCC diagnostic pop
     #endif
     /* Unlike plain slice(begin, end), complex member slicing is usually not
        called in tight loops and should be as checked as possible, so it's not
        a debug assert */
-    CORRADE_ASSERT(offset < sizeof(T),
-        "Containers::StridedArrayView::slice(): member function slice returned offset" << std::ptrdiff_t(offset) << "for a" << sizeof(T) << Utility::Debug::nospace << "-byte type", {});
+    CORRADE_ASSERT(offset < sizeof(U),
+        "Containers::StridedArrayView::slice(): member function slice returned offset" << std::ptrdiff_t(offset) << "for a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
     return offset;
 }
 
