@@ -229,6 +229,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceMemberPointer();
     void sliceMemberPointerConstData();
     void sliceConstMemberPointer();
+    void sliceMemberPointerDerived();
     void sliceMemberPointerEmptyView();
 
     void sliceMemberFunctionPointer();
@@ -236,6 +237,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceMemberFunctionPointerReturningConst();
     void sliceConstOverloadedMemberFunctionPointer();
     void sliceRvalueOverloadedMemberFunctionPointer();
+    void sliceMemberFunctionPointerDerived();
     void sliceMemberFunctionPointerEmptyView();
     void sliceMemberFunctionPointerReturningOffsetOutOfBounds();
 
@@ -451,6 +453,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceMemberPointer,
               &StridedArrayViewTest::sliceMemberPointerConstData,
               &StridedArrayViewTest::sliceConstMemberPointer,
+              &StridedArrayViewTest::sliceMemberPointerDerived,
               &StridedArrayViewTest::sliceMemberPointerEmptyView,
 
               &StridedArrayViewTest::sliceMemberFunctionPointer,
@@ -458,6 +461,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningConst,
               &StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
+              &StridedArrayViewTest::sliceMemberFunctionPointerDerived,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds,
 
@@ -3225,6 +3229,43 @@ void StridedArrayViewTest::sliceConstMemberPointer() {
         TestSuite::Compare::Container);
 }
 
+void StridedArrayViewTest::sliceMemberPointerDerived() {
+    struct Data {
+        int nothing;
+        float a;
+    };
+
+    struct Derived: Data {
+        /* C++, why the F you need this?! */
+        /*implicit*/ Derived(int nothing, float a): Data{nothing, a} {}
+    };
+
+    const Derived data[]{
+        {0, 1.5f},
+        {0, -0.5f}
+    };
+    Containers::StridedArrayView1D<const Derived> view = data;
+
+    /* Here the member pointer is actually &Data::a in both cases, and both
+       should work the same */
+    auto floats1 = view.slice(&Data::a);
+    auto floats2 = view.slice(&Derived::a);
+    CORRADE_VERIFY(std::is_same<decltype(floats1), Containers::StridedArrayView1D<const float>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(floats2), Containers::StridedArrayView1D<const float>>::value);
+    CORRADE_COMPARE(floats1.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(floats2.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(floats1.size(), 2);
+    CORRADE_COMPARE(floats2.size(), 2);
+    CORRADE_COMPARE(floats1.stride(), sizeof(Derived));
+    CORRADE_COMPARE(floats2.stride(), sizeof(Derived));
+    CORRADE_COMPARE_AS(floats1,
+        Containers::stridedArrayView({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(floats2,
+        Containers::stridedArrayView({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+}
+
 void StridedArrayViewTest::sliceMemberPointerEmptyView() {
     struct Data {
         float first;
@@ -3474,6 +3515,48 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
         TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(csecond,
         Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerDerived() {
+    /* Like sliceMemberPointerDerived(), just with functions instead */
+
+    class Data {
+        public:
+            /*implicit*/ Data(float a): _a{a} {}
+            const float& a() const { return _a; }
+            int nothing;
+        private:
+            float _a;
+    };
+
+    struct Derived: Data {
+        using Data::Data;
+    };
+
+    const Derived data[]{
+        {1.5f},
+        {-0.5f}
+    };
+    Containers::StridedArrayView1D<const Derived> view = data;
+
+    /* Here the member pointer is actually &Data::a in both cases, and both
+       should work the same */
+    auto floats1 = view.slice(&Data::a);
+    auto floats2 = view.slice(&Derived::a);
+    CORRADE_VERIFY(std::is_same<decltype(floats1), Containers::StridedArrayView1D<const float>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(floats2), Containers::StridedArrayView1D<const float>>::value);
+    CORRADE_COMPARE(floats1.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(floats2.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(floats1.size(), 2);
+    CORRADE_COMPARE(floats2.size(), 2);
+    CORRADE_COMPARE(floats1.stride(), sizeof(Derived));
+    CORRADE_COMPARE(floats2.stride(), sizeof(Derived));
+    CORRADE_COMPARE_AS(floats1,
+        Containers::stridedArrayView({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(floats2,
+        Containers::stridedArrayView({1.5f, -0.5f}),
         TestSuite::Compare::Container);
 }
 
