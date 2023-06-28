@@ -3516,6 +3516,9 @@ void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
             short _data[2];
     };
 
+    /* To capture a correct test case name */
+    CORRADE_VERIFY(true);
+
     Containers::StridedArrayView1D<Data> empty;
     Containers::StridedArrayView1D<const Data> cempty;
     Containers::StridedArrayView1D<short> second = empty.slice(&Data::second);
