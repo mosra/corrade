@@ -712,6 +712,20 @@ BasicStringView {
         Array<BasicStringView<T>> split(char delimiter) const;
 
         /**
+         * @brief Split on given substring
+         *
+         * If @p delimiter is not found, returns a single-item array containing
+         * the full input string. If the string is empty, returns an empty
+         * array. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate.
+         *
+         * Note that this function looks for the whole delimiter. If you want
+         * to split on any character from a set, use
+         * @ref splitOnAnyWithoutEmptyParts() instead.
+         */
+        Array<BasicStringView<T>> split(StringView delimiter) const;
+
+        /**
          * @brief Split on given character, removing empty parts
          *
          * If @p delimiter is not found, returns a single-item array containing
@@ -732,9 +746,18 @@ BasicStringView {
          * consists just of characters from @p delimiters, returns an empty
          * array. The function uses @ref slice() internally, meaning it
          * propagates the @ref flags() as appropriate.
-         * @see @ref split(), @ref splitOnWhitespaceWithoutEmptyParts() const
+         *
+         * If you have just a single delimiter character,
+         * @ref split(char) const is more efficient. If you need to split on a
+         * multi-character delimiter, use @ref split(StringView) const instead.
+         * @see @ref splitOnWhitespaceWithoutEmptyParts() const
          */
         Array<BasicStringView<T>> splitOnAnyWithoutEmptyParts(StringView delimiters) const;
+
+        /** @todo once the deprecated splitWithoutEmptyParts(StringView) is
+            removed and enough time passes, reintroduce it and make it work
+            similarly to split(StringView), i.e. taking the delimiter as a
+            whole */
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @brief @copybrief splitOnAnyWithoutEmptyParts()

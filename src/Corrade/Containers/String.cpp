@@ -616,6 +616,14 @@ Array<StringView> String::split(const char delimiter) const {
     return StringView{*this}.split(delimiter);
 }
 
+Array<MutableStringView> String::split(const StringView delimiter) {
+    return MutableStringView{*this}.split(delimiter);
+}
+
+Array<StringView> String::split(const StringView delimiter) const {
+    return StringView{*this}.split(delimiter);
+}
+
 Array<MutableStringView> String::splitWithoutEmptyParts(const char delimiter) {
     return MutableStringView{*this}.splitWithoutEmptyParts(delimiter);
 }

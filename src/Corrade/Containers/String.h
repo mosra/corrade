@@ -892,7 +892,7 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Split on given character
          *
-         * Equivalent to @ref BasicStringView::split().
+         * Equivalent to @ref BasicStringView::split(char) const.
          */
         Array<MutableStringView> split(char delimiter);
         Array<StringView> split(char delimiter) const; /**< @overload */
@@ -903,12 +903,25 @@ class CORRADE_UTILITY_EXPORT String {
             splitOn()?? */
 
         /**
+         * @brief Split on given substring
+         *
+         * Equivalent to @ref BasicStringView::split(StringView) const.
+         */
+        Array<MutableStringView> split(StringView delimiter);
+        Array<StringView> split(StringView delimiter) const; /**< @overload */
+
+        /**
          * @brief Split on given character, removing empty parts
          *
          * Equivalent to @ref BasicStringView::splitWithoutEmptyParts(char) const.
          */
         Array<MutableStringView> splitWithoutEmptyParts(char delimiter);
         Array<StringView> splitWithoutEmptyParts(char delimiter) const; /**< @overload */
+
+        /** @todo once the deprecated splitWithoutEmptyParts(StringView) is
+            removed and enough time passes, reintroduce it and make it work
+            similarly to split(StringView), i.e. taking the delimiter as a
+            whole */
 
         /**
          * @brief Split on any character from given set, removing empty parts

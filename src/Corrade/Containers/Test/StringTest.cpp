@@ -170,7 +170,8 @@ struct StringTest: TestSuite::Tester {
     template<class T> void slicePointer();
     template<class T> void sliceZeroNullPointerAmbiguity();
 
-    void split();
+    void splitCharacter();
+    void splitString();
     void splitOnAny();
     void splitOnWhitespace();
 
@@ -323,7 +324,8 @@ StringTest::StringTest() {
               &StringTest::sliceZeroNullPointerAmbiguity<const String>,
               &StringTest::sliceZeroNullPointerAmbiguity<String>,
 
-              &StringTest::split,
+              &StringTest::splitCharacter,
+              &StringTest::splitString,
               &StringTest::splitOnAny,
               &StringTest::splitOnWhitespace,
 
@@ -2080,7 +2082,7 @@ template<class T> void StringTest::sliceZeroNullPointerAmbiguity() {
         thing */
 }
 
-void StringTest::split() {
+void StringTest::splitCharacter() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
@@ -2109,6 +2111,33 @@ void StringTest::split() {
     CORRADE_COMPARE_AS(a.splitWithoutEmptyParts('/'),
         (StringIterable{"ab", "c", "def"}),
         TestSuite::Compare::Container);
+}
+
+void StringTest::splitString() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior or empty delimiter assertions, only the
+       basics and flag propagation */
+
+    const String ca = "ab::::c::def";
+    {
+        Array<StringView> s = ca.split("::");
+        CORRADE_COMPARE_AS(s, (StringIterable{"ab", "", "c", "def"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(s[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[2].flags(), StringViewFlags{});
+        CORRADE_COMPARE(s[3].flags(), StringViewFlag::NullTerminated);
+    } {
+        /** @todo splitWithoutEmptyParts(), once it takes the delimiter as a
+            whole */
+    }
+
+    String a = "ab::::c::def";
+    CORRADE_COMPARE_AS(a.split("::"),
+        (StringIterable{"ab", {}, "c", "def"}),
+        TestSuite::Compare::Container);
+    /** @todo splitWithoutEmptyParts(), once it takes the delimiter as a
+        whole */
 }
 
 void StringTest::splitOnAny() {

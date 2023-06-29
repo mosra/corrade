@@ -84,7 +84,6 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     Array<BasicStringView<T>> parts;
     T* const end = this->end();
     T* oldpos = _data;
-
     while(oldpos < end) {
         T* pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos));
         /* Not sure why memchr can't just do this, it would make much more
@@ -123,6 +122,30 @@ const char* stringFindString(const char* data, const std::size_t size, const cha
     /* If the substring is larger or no match was found, fail */
     return {};
 }
+
+}
+
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const StringView delimiter) const {
+    const char* const delimiterData = delimiter.data();
+    const std::size_t delimiterSize = delimiter.size();
+    CORRADE_ASSERT(delimiterSize, "Containers::StringView::split(): delimiter is empty", {});
+
+    Array<BasicStringView<T>> parts;
+    const char* const end = this->end();
+    const char* oldpos = _data;
+    const char* pos;
+    while(oldpos < end && (pos = Implementation::stringFindString(oldpos, end - oldpos, delimiterData, delimiterSize))) {
+        arrayAppend(parts, slice(const_cast<T*>(oldpos), const_cast<T*>(pos)));
+        oldpos = pos + delimiterSize;
+    }
+
+    if(!isEmpty())
+        arrayAppend(parts, suffix(const_cast<T*>(oldpos)));
+
+    return parts;
+}
+
+namespace Implementation {
 
 const char* stringFindLastString(const char* const data, const std::size_t size, const char* const substring, const std::size_t substringSize) {
     /* If the substring is not larger than the string we search in */

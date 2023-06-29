@@ -152,7 +152,9 @@ struct StringViewTest: TestSuite::Tester {
     void sliceFlags();
     void sliceZeroNullPointerAmbiguity();
 
-    void split();
+    void splitCharacter();
+    void splitString();
+    void splitStringEmpty();
     void splitFlags();
     void splitOnAny();
     void splitOnAnyFlags();
@@ -294,7 +296,9 @@ StringViewTest::StringViewTest() {
               &StringViewTest::sliceFlags,
               &StringViewTest::sliceZeroNullPointerAmbiguity,
 
-              &StringViewTest::split,
+              &StringViewTest::splitCharacter,
+              &StringViewTest::splitString,
+              &StringViewTest::splitStringEmpty,
               &StringViewTest::splitFlags,
               &StringViewTest::splitOnAny,
               &StringViewTest::splitOnAnyFlags,
@@ -1235,7 +1239,7 @@ void StringViewTest::sliceZeroNullPointerAmbiguity() {
         thing */
 }
 
-void StringViewTest::split() {
+void StringViewTest::splitCharacter() {
     /* Empty */
     CORRADE_COMPARE_AS(""_s.split('/'),
         Array<StringView>{},
@@ -1275,6 +1279,48 @@ void StringViewTest::split() {
     CORRADE_COMPARE_AS("ab//c/def//"_s.splitWithoutEmptyParts('/'),
         arrayView({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
+}
+
+void StringViewTest::splitString() {
+    /* Using a delimiter with repeated characters to verify it doesn't try to
+       find a the next one in the middle of previous (repeated) delimiter */
+
+    /* Empty */
+    CORRADE_COMPARE_AS(""_s.split("::"),
+        Array<StringView>{},
+        TestSuite::Compare::Container);
+
+    /* Only delimiter */
+    CORRADE_COMPARE_AS("::"_s.split("::"),
+        arrayView({""_s, ""_s}),
+        TestSuite::Compare::Container);
+
+    /* No delimiters */
+    CORRADE_COMPARE_AS("abcdef"_s.split("::"),
+        arrayView({"abcdef"_s}),
+        TestSuite::Compare::Container);
+
+    /* Common case */
+    CORRADE_COMPARE_AS("ab::c::def"_s.split("::"),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
+        TestSuite::Compare::Container);
+
+    /* Empty parts */
+    CORRADE_COMPARE_AS("ab::::c::def::::"_s.split("::"),
+        arrayView({"ab"_s, ""_s, "c"_s, "def"_s, ""_s, ""_s}),
+        TestSuite::Compare::Container);
+
+    /** @todo splitWithoutEmptyParts() everywhere, once it takes the delimiter
+        as a whole */
+}
+
+void StringViewTest::splitStringEmpty() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    "hello"_s.split("");
+    CORRADE_COMPARE(out.str(), "Containers::StringView::split(): delimiter is empty\n");
 }
 
 void StringViewTest::splitFlags() {
