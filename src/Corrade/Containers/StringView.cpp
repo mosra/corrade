@@ -841,10 +841,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
 #endif
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {
-    /** @todo partition() using multiple characters, would need implementing
-        a non-shitty strstr() that can work on non-null-terminated strings */
-    /** @todo and then rpartition(), which has absolutely no standard library
-        functions either, SIGH */
+    /** @todo partitionLast() */
     /** @todo use findOr(char) for this, this has an awful lot of branches */
 
     const std::size_t size = this->size();
@@ -853,6 +850,22 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
         pos ? prefix(pos) : *this,
         pos ? slice(pos, pos + 1) : exceptPrefix(size),
         pos ? suffix(pos + 1) : exceptPrefix(size)
+    };
+}
+
+template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const StringView separator) const {
+    /** @todo partitionLast() */
+    /** @todo use findOr(StringView) for this, this has an awful lot of
+        branches */
+
+    const char* const separatorData = separator.data();
+    const std::size_t separatorSize = separator.size();
+    const std::size_t size = this->size();
+    T* const pos = const_cast<T*>(Implementation::stringFindString(_data, size, separatorData, separatorSize));
+    return {
+        pos ? prefix(pos) : *this,
+        pos ? slice(pos, pos + separatorSize) : exceptPrefix(size),
+        pos ? suffix(pos + separatorSize) : exceptPrefix(size)
     };
 }
 

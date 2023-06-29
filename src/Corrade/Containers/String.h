@@ -970,13 +970,23 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Partition
          *
-         * Equivalent to @ref BasicStringView::partition(). The last returned
-         * value has always @ref StringViewFlag::NullTerminated set.
+         * Equivalent to @ref BasicStringView::partition(char) const. The last
+         * returned value has always @ref StringViewFlag::NullTerminated set.
          */
         Array3<MutableStringView> partition(char separator);
         Array3<StringView> partition(char separator) const; /**< @overload */
 
-        /** @todo change this to return a Triple? it's a smaller header */
+        /**
+         * @brief Partition
+         *
+         * Equivalent to @ref BasicStringView::partition(StringView) const. The
+         * last returned value has always @ref StringViewFlag::NullTerminated
+         * set.
+         */
+        Array3<MutableStringView> partition(StringView separator);
+        Array3<StringView> partition(StringView separator) const; /**< @overload */
+
+        /** @todo change these to return a Triple? it's a smaller header */
 
         /**
          * @brief Join strings with this view as the delimiter

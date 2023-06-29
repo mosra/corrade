@@ -175,7 +175,8 @@ struct StringTest: TestSuite::Tester {
     void splitOnAny();
     void splitOnWhitespace();
 
-    void partition();
+    void partitionCharacter();
+    void partitionString();
 
     void add();
     void addNullViews();
@@ -329,7 +330,8 @@ StringTest::StringTest() {
               &StringTest::splitOnAny,
               &StringTest::splitOnWhitespace,
 
-              &StringTest::partition,
+              &StringTest::partitionCharacter,
+              &StringTest::partitionString,
 
               &StringTest::add,
               &StringTest::addNullViews,
@@ -2182,7 +2184,7 @@ void StringTest::splitOnWhitespace() {
         TestSuite::Compare::Container);
 }
 
-void StringTest::partition() {
+void StringTest::partitionCharacter() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
@@ -2199,6 +2201,26 @@ void StringTest::partition() {
     String a = "ab=c";
     CORRADE_COMPARE_AS(a.partition('='),
         (StringIterable{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
+}
+
+void StringTest::partitionString() {
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    const String ca = "ab::c";
+    {
+        Array3<StringView> p = ca.partition("::");
+        CORRADE_COMPARE_AS(p, (StringIterable{"ab", "::", "c"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(p[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p[2].flags(), StringViewFlag::NullTerminated);
+    }
+
+    String a = "ab::c";
+    CORRADE_COMPARE_AS(a.partition("::"),
+        (StringIterable{"ab", "::", "c"}),
         TestSuite::Compare::Container);
 }
 

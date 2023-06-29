@@ -676,6 +676,14 @@ Array3<StringView> String::partition(const char separator) const {
     return StringView{*this}.partition(separator);
 }
 
+Array3<MutableStringView> String::partition(const StringView separator) {
+    return MutableStringView{*this}.partition(separator);
+}
+
+Array3<StringView> String::partition(const StringView separator) const {
+    return StringView{*this}.partition(separator);
+}
+
 String String::join(const StringIterable& strings) const {
     return StringView{*this}.join(strings);
 }

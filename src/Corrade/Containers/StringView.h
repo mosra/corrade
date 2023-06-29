@@ -707,7 +707,7 @@ BasicStringView {
          * the full input string. If the string is empty, returns an empty
          * array. The function uses @ref slice() internally, meaning it
          * propagates the @ref flags() as appropriate.
-         * @see @ref splitWithoutEmptyParts(), @ref partition()
+         * @see @ref splitWithoutEmptyParts(), @ref partition(char) const
          */
         Array<BasicStringView<T>> split(char delimiter) const;
 
@@ -722,6 +722,7 @@ BasicStringView {
          * Note that this function looks for the whole delimiter. If you want
          * to split on any character from a set, use
          * @ref splitOnAnyWithoutEmptyParts() instead.
+         * @see @ref partition(StringView) const
          */
         Array<BasicStringView<T>> split(StringView delimiter) const;
 
@@ -784,7 +785,7 @@ BasicStringView {
         #endif
 
         /**
-         * @brief Partition
+         * @brief Partition on a character
          *
          * Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
          * Splits @p string at the first occurrence of @p separator. First
@@ -796,9 +797,20 @@ BasicStringView {
          * @ref flags() as appropriate. Additionally, the resulting views are
          * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
          * the view always points to existing memory.
-         * @see @ref split()
+         * @see @ref split(char) const
          */
         Array3<BasicStringView<T>> partition(char separator) const;
+
+        /**
+         * @brief Partition on a substring
+         *
+         * Like @ref partition(char) const, but looks for a whole substring
+         * instead of a single character.
+         * @see @ref split(StringView) const
+         */
+        Array3<BasicStringView<T>> partition(StringView separator) const;
+
+        /** @todo change these to return a Triple? it's a smaller header */
 
         /**
          * @brief Join strings with this view as the delimiter
