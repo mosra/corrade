@@ -1256,7 +1256,7 @@ void StringViewTest::split() {
     CORRADE_COMPARE_AS("abcdef"_s.split('/'),
         arrayView({"abcdef"_s}),
         TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS("abcdef"_s.split('/'),
+    CORRADE_COMPARE_AS("abcdef"_s.splitWithoutEmptyParts('/'),
         arrayView({"abcdef"_s}),
         TestSuite::Compare::Container);
 
