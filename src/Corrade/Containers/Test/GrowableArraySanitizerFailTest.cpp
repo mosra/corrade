@@ -25,6 +25,10 @@
 */
 
 #include <string>
+/* On MSVC STL, <vector> contains a potentially incompatible declaration of
+   __sanitizer_annotate_contiguous_container(), see GrowableArray.h for
+   details. Thus this include should stay even after all STL remains are
+   removed to verify compatibility of the declaration. */
 #include <vector>
 
 #include "Corrade/Containers/GrowableArray.h"

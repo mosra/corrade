@@ -463,6 +463,11 @@ namespace Corrade {
     @ref building-corrade-features "CMake option" to aid
     @ref CORRADE_BUILD_STATIC_UNIQUE_GLOBALS in cases where Corrade is only
     linked to a DLL but not the main executable.
+-   Worked around a compilation failure on MSVC 2022 with
+    `/fsanitize=address /std:c++17 /permissive-`, where a definition of
+    `__sanitizer_annotate_contiguous_container()` in
+    @ref Corrade/Containers/GrowableArray.h would conflict with MSVC's own in
+    `<vector>` that additionally has a `noexcept` specifier
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

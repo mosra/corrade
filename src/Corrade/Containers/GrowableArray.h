@@ -53,9 +53,31 @@
 #endif
 
 #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
-/* https://github.com/llvm-mirror/compiler-rt/blob/master/include/sanitizer/common_interface_defs.h */
+/* https://github.com/llvm/llvm-project/blob/main/compiler-rt/include/sanitizer/common_interface_defs.h */
 extern "C" void __sanitizer_annotate_contiguous_container(const void *beg,
-    const void *end, const void *old_mid, const void *new_mid);
+    const void *end, const void *old_mid, const void *new_mid)
+        /* Declaration of this function in <vector> in MSVC 2022 14.35 and
+           earlier STL includes a noexcept for some strange unexplained reason,
+           which makes the signature differ from Clang's. See the PR comment
+           here:
+            https://github.com/microsoft/STL/pull/2071/commits/daa4db9bf10400678438d9c6b33630c7947e469e
+           However, it got then subsequently removed, again without any
+           additional explanation:
+            https://github.com/microsoft/STL/pull/3164/commits/9f503ca22bcc32cd885184ea754ec4223759c431
+           The STL repo has unfortunately no tags or any mapping to actual
+           releases so it's impossible to know which MSVC version contains this
+           change. If you get a build error at this declaration with MSVC >
+           2022 14.35 (_MSC_VER > 1935), let me know so I can update the ifdef
+           logic.
+
+           The difference in noexcept is only a problem with `/std:c++17`
+           (where noexcept becomes a part of the function signature) *and* with
+           the `/permissive-` flag set, or `/std:c++20` alone (where the flag
+           is implicitly enabled). */
+        #ifdef CORRADE_TARGET_DINKUMWARE
+        noexcept
+        #endif
+    ;
 #endif
 
 namespace Corrade { namespace Containers {
