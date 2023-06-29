@@ -553,7 +553,9 @@ JsonWriter& JsonWriter::write(const Containers::StringView value) {
 }
 
 template<class T> JsonWriter& JsonWriter::writeArrayInternal(const T& values, const std::uint32_t wrapAfter) {
+    #ifndef CORRADE_NO_ASSERT
     State& state = *_state;
+    #endif
     CORRADE_ASSERT(
         state.expecting == Expecting::Value ||
         state.expecting == Expecting::ObjectValue ||
@@ -571,7 +573,9 @@ template<class T> JsonWriter& JsonWriter::writeArrayInternal(const T& values, co
 }
 
 JsonWriter& JsonWriter::writeArray(const Containers::StridedBitArrayView1D& values, const std::uint32_t wrapAfter) {
+    #ifndef CORRADE_NO_ASSERT
     State& state = *_state;
+    #endif
     CORRADE_ASSERT(
         state.expecting == Expecting::Value ||
         state.expecting == Expecting::ObjectValue ||
