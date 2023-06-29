@@ -754,7 +754,7 @@ const char* stringFindLastNotAny(const char* const data, const std::size_t size,
 
 }
 
-template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithoutEmptyParts(const Containers::StringView delimiters) const {
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithoutEmptyParts(const StringView delimiters) const {
     Array<BasicStringView<T>> parts;
     const char* const characters = delimiters._data;
     const std::size_t characterCount = delimiters.size();
@@ -776,7 +776,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithou
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
-template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const Containers::StringView delimiters) const {
+template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmptyParts(const StringView delimiters) const {
     return splitOnAnyWithoutEmptyParts(delimiters);
 }
 #endif
@@ -795,8 +795,8 @@ namespace {
        the problem go away, and I discovered this only by accident after
        removing basically all other code. WHAT THE FUCK, MSVC. */
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
-    using namespace Containers::Literals;
-    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
+    using namespace Literals;
+    constexpr StringView Whitespace = " \t\f\v\r\n"_s;
     #else
     #define WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID " \t\f\v\r\n"_s
     #endif
@@ -806,7 +806,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnWhitespac
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return splitOnAnyWithoutEmptyParts(Whitespace);
     #else
-    using namespace Containers::Literals;
+    using namespace Literals;
     return splitOnAnyWithoutEmptyParts(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
 }
@@ -968,7 +968,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmed() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return trimmed(Whitespace);
     #else
-    using namespace Containers::Literals;
+    using namespace Literals;
     return trimmed(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
 }
@@ -977,7 +977,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedPrefix() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return trimmedPrefix(Whitespace);
     #else
-    using namespace Containers::Literals;
+    using namespace Literals;
     return trimmedPrefix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
 }
@@ -986,7 +986,7 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return trimmedSuffix(Whitespace);
     #else
-    using namespace Containers::Literals;
+    using namespace Literals;
     return trimmedSuffix(WHITESPACE_MACRO_BECAUSE_MSVC_IS_STUPID);
     #endif
 }

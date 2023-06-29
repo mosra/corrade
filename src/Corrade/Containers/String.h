@@ -334,11 +334,11 @@ class CORRADE_UTILITY_EXPORT String {
          *      @ref String(AllocatedInitT, StringView)
          */
         /*implicit*/ String(StringView view);
-        /*implicit*/ String(Containers::ArrayView<const char> view); /**< @overload */
+        /*implicit*/ String(ArrayView<const char> view); /**< @overload */
         /* Without these there's ambiguity between StringView / ArrayView and
            char* */
         /*implicit*/ String(MutableStringView view); /**< @overload */
-        /*implicit*/ String(Containers::ArrayView<char> view); /**< @overload */
+        /*implicit*/ String(ArrayView<char> view); /**< @overload */
 
         /**
          * @brief Construct from a null-terminated C string
@@ -381,11 +381,11 @@ class CORRADE_UTILITY_EXPORT String {
          *      @ref Containers-String-usage-c-string-conversion
          */
         explicit String(AllocatedInitT, StringView view);
-        explicit String(AllocatedInitT, Containers::ArrayView<const char> view); /**< @overload */
+        explicit String(AllocatedInitT, ArrayView<const char> view); /**< @overload */
         /* Without these there's ambiguity between StringView / ArrayView and
            char* */
         explicit String(AllocatedInitT, MutableStringView view); /**< @overload */
-        explicit String(AllocatedInitT, Containers::ArrayView<char> view); /**< @overload */
+        explicit String(AllocatedInitT, ArrayView<char> view); /**< @overload */
 
         /**
          * @brief Create a string instance bypassing SSO
@@ -1283,7 +1283,7 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_UTILITY_LOCAL void construct(Corrade::NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void destruct();
-        CORRADE_UTILITY_LOCAL Containers::Pair<const char*, std::size_t> dataInternal() const;
+        CORRADE_UTILITY_LOCAL Pair<const char*, std::size_t> dataInternal() const;
 
         MutableStringView sliceSizePointerInternal(char* begin, std::size_t size);
         StringView sliceSizePointerInternal(const char* begin, std::size_t size) const;
