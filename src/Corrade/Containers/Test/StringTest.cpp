@@ -1998,6 +1998,15 @@ void StringTest::accessSmall() {
     ++a.front();
     ++a.back();
     CORRADE_COMPARE(a, "Kell!@");
+
+    const String ca = "hello!";
+    CORRADE_VERIFY(ca.isSmall());
+    CORRADE_COMPARE(*ca.begin(), 'h');
+    CORRADE_COMPARE(*ca.cbegin(), 'h');
+    CORRADE_COMPARE(ca.front(), 'h');
+    CORRADE_COMPARE(*(ca.end() - 1), '!');
+    CORRADE_COMPARE(*(ca.cend() - 1), '!');
+    CORRADE_COMPARE(ca.back(), '!');
 }
 
 void StringTest::accessInvalid() {
