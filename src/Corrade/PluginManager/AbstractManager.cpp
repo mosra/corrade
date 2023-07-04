@@ -693,8 +693,16 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check plugin version */
-    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
+    /* MinGW GCC 12 (and perhaps older) warns that "cast between incompatible
+       function types from ‘FARPROC’ to ‘int (*)()’", the __extension__ doesn't
+       help. OTOH, on Linux without the __extension__ it causes a -Wpedantic
+       warning on GCC 4.8 (and perhaps newer), so we need both. */
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type"
+    #endif
+    #ifdef CORRADE_TARGET_GCC
+    __extension__ /* http://web.archive.org/web/20160826013457/http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     #endif
     int (*version)() = reinterpret_cast<int(*)()>(
         #ifndef CORRADE_TARGET_WINDOWS
@@ -703,6 +711,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginVersion"));
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic pop
+    #endif
     if(version == nullptr) {
         Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get version of plugin"
@@ -732,8 +743,12 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check interface string */
-    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
+    #endif
+    #ifdef CORRADE_TARGET_GCC
+    __extension__ /* see above */
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(
         #ifndef CORRADE_TARGET_WINDOWS
@@ -742,6 +757,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInterface"));
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic pop
+    #endif
     if(interface == nullptr) {
         Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get interface string of plugin"
@@ -769,8 +787,12 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin initializer */
-    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
+    #endif
+    #ifdef CORRADE_TARGET_GCC
+    __extension__ /* see above */
     #endif
     void(*initializer)() = reinterpret_cast<void(*)()>(
         #ifndef CORRADE_TARGET_WINDOWS
@@ -779,6 +801,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInitializer"));
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic pop
+    #endif
     if(initializer == nullptr) {
         Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get initializer of plugin"
@@ -797,8 +822,12 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin finalizer */
-    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
+    #endif
+    #ifdef CORRADE_TARGET_GCC
+    __extension__ /* see above */
     #endif
     void(*finalizer)() = reinterpret_cast<void(*)()>(
         #ifndef CORRADE_TARGET_WINDOWS
@@ -807,6 +836,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginFinalizer"));
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic pop
+    #endif
     if(finalizer == nullptr) {
         Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get finalizer of plugin"
@@ -825,8 +857,12 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin instancer */
-    #ifdef CORRADE_TARGET_GCC /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
+    #endif
+    #ifdef CORRADE_TARGET_GCC
+    __extension__ /* see above */
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(
         #ifndef CORRADE_TARGET_WINDOWS
@@ -835,6 +871,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInstancer"));
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #pragma GCC diagnostic pop
+    #endif
     if(instancer == nullptr) {
         Utility::Error err;
         err << "PluginManager::Manager::load(): cannot get instancer of plugin"
