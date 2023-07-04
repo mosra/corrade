@@ -181,6 +181,9 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Emitter;
         friend Receiver;
+        /* Interestingly enough, unlike in Emitter.h, here MinGW GCC doesn't
+           warn about disconnect() being redeclared without a dllimport
+           attribute. */
         friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
         #endif
 

@@ -497,7 +497,19 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
         template<class EmitterObject, class Emitter, class Functor, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), Functor&&);
+        /* MinGW GCC 12 (and maybe other versions?) complains that this
+           function doesn't have the EXPORT macro. BUT IT'S THERE GODDAMIT,
+           DON'T YOU SEE?! Placing it after the bool doesn't help, removing it
+           altogether doesn't help either (and makes MSVC complain). The same
+           occurence in Connection.h causes no warnings. */
+        #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wattributes"
+        #endif
         friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
+        #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+        #pragma GCC diagnostic pop
+        #endif
         #endif
 
         /* Returns the actual location of the connection in the hashmap */
