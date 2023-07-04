@@ -211,7 +211,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * Resets data pointer, offset, size and deleter of @p other to be
          * equivalent to a default-constructed instance.
          */
-        BitArray(BitArray&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline BitArray(BitArray&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -228,7 +229,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          *
          * Swaps data pointer, offset, size and deleter of the two instances.
          */
-        BitArray& operator=(BitArray&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline BitArray& operator=(BitArray&& other) noexcept;
 
         /** @brief Conversion to a view */
         /*implicit*/ operator MutableBitArrayView();
@@ -288,7 +290,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @ref reset(std::size_t) or @ref set(std::size_t, bool) to set a bit
          * value.
          */
-        bool operator[](std::size_t i) const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline bool operator[](std::size_t i) const;
 
         /**
          * @brief Set a bit at given position
@@ -297,7 +300,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @see @ref operator[](), @ref reset(), @ref set(std::size_t, bool),
          *      @ref setAll()
          */
-        void set(std::size_t i);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline void set(std::size_t i);
 
         /**
          * @brief Set all bits
@@ -313,7 +317,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * Expects that @p i is less than @ref size().
          * @see @ref operator[](), @ref set(), @ref resetAll()
          */
-        void reset(std::size_t i);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline void reset(std::size_t i);
 
         /**
          * @brief Reset all bits
@@ -331,7 +336,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @ref reset(std::size_t) is more efficient.
          * @see @ref operator[]()
          */
-        void set(std::size_t i, bool value);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline void set(std::size_t i, bool value);
 
         /**
          * @brief Set or reset all bits
@@ -407,7 +413,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * have a custom @ref deleter() and so @cpp delete[] @ce might not be
          * always appropriate.
          */
-        char* release();
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline char* release();
 
     private:
         char* _data;

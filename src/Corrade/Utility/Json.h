@@ -1407,7 +1407,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         Containers::StringView data() const;
 
         /** @brief Token type */
-        Type type() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline Type type() const;
 
         /**
          * @brief Common array type
@@ -1453,14 +1454,16 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @relativeref{Json,parseLong()}, @relativeref{Json,parseSize()} or
          * @relativeref{Json,parseString()}.
          */
-        bool isParsed() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline bool isParsed() const;
 
         /**
          * @brief Parsed token type
          *
          * @see @ref type(), @ref isParsed()
          */
-        ParsedType parsedType() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline ParsedType parsedType() const;
 
         /**
          * @brief Common parsed array type
@@ -1705,7 +1708,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * set. If not, use @ref Json::parseNull() instead.
          * @see @ref Json::Option::ParseLiterals, @ref Json::parseLiterals()
          */
-        std::nullptr_t asNull() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::nullptr_t asNull() const;
 
         /**
          * @brief Get a parsed boolean value
@@ -1715,7 +1719,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref Json::Option::ParseLiterals, @ref Json::parseLiterals(),
          *      @ref asBitArray()
          */
-        bool asBool() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline bool asBool() const;
 
         /**
          * @brief Get a parsed 64-bit floating-point value
@@ -1726,7 +1731,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref Json::Option::ParseDoubles, @ref Json::parseDoubles(),
          *      @ref asDoubleArray()
          */
-        double asDouble() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline double asDouble() const;
 
         /**
          * @brief Get a parsed 32-bit floating-point value
@@ -1736,7 +1742,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref Json::Option::ParseFloats, @ref Json::parseFloats(),
          *      @ref asFloatArray()
          */
-        float asFloat() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline float asFloat() const;
 
         /**
          * @brief Get a parsed unsigned 32-bit integer value
@@ -1747,7 +1754,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref Json::parseUnsignedInts(), @ref asUnsignedIntArray(),
          *      @ref asSize()
          */
-        std::uint32_t asUnsignedInt() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::uint32_t asUnsignedInt() const;
 
         /**
          * @brief Get a parsed signed 32-bit integer value
@@ -1756,7 +1764,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @ref ParsedType::Int. If not, use @ref Json::parseInt() instead.
          * @see @ref Json::parseInts(), @ref asIntArray()
          */
-        std::int32_t asInt() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::int32_t asInt() const;
 
         /**
          * @brief Get a parsed unsigned 52-bit integer value
@@ -1767,7 +1776,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @see @ref Json::parseUnsignedLongs(), @ref asUnsignedLongArray(),
          *      @ref asSize()
          */
-        std::uint64_t asUnsignedLong() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::uint64_t asUnsignedLong() const;
 
         /**
          * @brief Get a parsed signed 53-bit integer value
@@ -1776,7 +1786,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @ref ParsedType::Long. If not, use @ref Json::parseLong() instead.
          * @see @ref Json::parseLongs(), @ref asLongArray()
          */
-        std::int64_t asLong() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::int64_t asLong() const;
 
         /**
          * @brief Get a parsed size value
@@ -1785,7 +1796,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @ref ParsedType::Size. If not, use @ref Json::parseSize() instead.
          * @see @ref Json::parseSizes(), @ref asSizeArray()
          */
-        std::size_t asSize() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline std::size_t asSize() const;
 
         /**
          * @brief Get a parsed string value

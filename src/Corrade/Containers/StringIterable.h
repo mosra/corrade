@@ -208,18 +208,20 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          *
          * @see @ref front()
          */
-        StringIterableIterator begin() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline StringIterableIterator begin() const;
         /** @overload */
-        StringIterableIterator cbegin() const;
+        inline StringIterableIterator cbegin() const;
 
         /**
          * @brief Iterator to (one item after) last element
          *
          * @see @ref back()
          */
-        StringIterableIterator end() const;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline StringIterableIterator end() const;
         /** @overload */
-        StringIterableIterator cend() const;
+        inline StringIterableIterator cend() const;
 
         /**
          * @brief First element
