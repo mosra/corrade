@@ -237,6 +237,13 @@ ASan aborts and produces a failure report similar to the one below:
 
 @endparblock
 
+In some cases sanitizer annotations are undesirable, for example when only a
+part of the application is built with AddressSanitizer enabled, causing false
+positives due to the annotations being done only partially, or when a
+particular platform is known to have broken behavior. The annotations can be
+disabled by defining `CORRADE_CONTAINERS_NO_SANITIZER_ANNOTATIONS` on the
+compiler command line.
+
 @section Containers-Array-views Conversion to array views
 
 Arrays are implicitly convertible to @ref ArrayView as described in the

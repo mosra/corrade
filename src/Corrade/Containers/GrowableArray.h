@@ -43,6 +43,7 @@
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
    Using a dedicated macro instead: https://stackoverflow.com/a/34814667 */
+#ifndef CORRADE_CONTAINERS_NO_SANITIZER_ANNOTATIONS
 #ifdef __has_feature
 #if __has_feature(address_sanitizer)
 #define _CORRADE_CONTAINERS_SANITIZER_ENABLED
@@ -50,6 +51,7 @@
 #endif
 #ifdef __SANITIZE_ADDRESS__
 #define _CORRADE_CONTAINERS_SANITIZER_ENABLED
+#endif
 #endif
 
 #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
