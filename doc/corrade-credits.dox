@@ -96,8 +96,8 @@ Is the below list missing your name or something's wrong?
 -   **[\@Amphaal](https://github.com/Amphaal)** --- MinGW/Clang and
     crosscompilation fixes
 -   **[\@biosek](https://github.com/biosek)** --- MinGW compilation fixes
--   **Burak Canik** ([\@HaroldReyiz](https://github.com/HaroldReyiz)) --- MSVC
-    warning fixes
+-   **Burak Canik** ([\@fauder](https://github.com/fauder)) --- MSVC warning
+    fixes
 -   **David Lin** ([\@davll](https://github.com/davll)) --- initial macOS port
 -   **Chris Chambers** ([\@chris-chambers](https://github.com/chris-chambers))
     --- interfacing @ref Utility::Debug with @ref std::ostream operators
