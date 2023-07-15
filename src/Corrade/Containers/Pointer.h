@@ -282,6 +282,10 @@ template<class T> class Pointer {
             return *_pointer;
         }
 
+        /** @todo operator->*(), is it even possible in a generic way without
+            stamping out all possible variants (variables, functions, const
+            functions, ...)? */
+
         /**
          * @brief Reset the pointer to a new value
          *

@@ -544,6 +544,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
         /* Similar to findCharacterSingleVectorUnaligned(Cpu::NeonT), except
            that four "shift right and narrow" operations are done, interleaving
            the result into two registers instead of four */
+        /** @todo might want to look into using umaxp instead on newer
+            architectures or larger strings: https://github.com/BurntSushi/memchr/pull/114#issuecomment-1631413095 */
         const uint8x8_t maska = vshrn_n_u16(vreinterpretq_u16_u8(eqa), 4);
         const uint8x16_t maskab = vshrn_high_n_u16(maska, vreinterpretq_u16_u8(eqb), 4);
         const uint8x8_t maskc = vshrn_n_u16(vreinterpretq_u16_u8(eqc), 4);
