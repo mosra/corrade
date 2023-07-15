@@ -190,6 +190,11 @@ Containers::StringIterable Resource::list() const {
     }};
 }
 
+bool Resource::hasFile(const Containers::StringView filename) const {
+    CORRADE_INTERNAL_ASSERT(_group);
+    return Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, filename) != _group->count;
+}
+
 Containers::ArrayView<const char> Resource::getRaw(const Containers::StringView filename) const {
     /* Going this way instead of the other way around because the StringView
        can hold information about null termination or global lifetime, which

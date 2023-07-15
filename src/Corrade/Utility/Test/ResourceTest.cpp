@@ -66,8 +66,11 @@ struct ResourceTest: TestSuite::Tester {
     void hasGroup();
     void emptyGroup();
     void nonexistentGroup();
+
     void list();
     void listEmptyGroup();
+
+    void hasFile();
     void getRaw();
     void getString();
     void getEmptyFileRaw();
@@ -101,8 +104,11 @@ ResourceTest::ResourceTest() {
     addTests({&ResourceTest::hasGroup,
               &ResourceTest::emptyGroup,
               &ResourceTest::nonexistentGroup,
+
               &ResourceTest::list,
               &ResourceTest::listEmptyGroup,
+
+              &ResourceTest::hasFile,
               &ResourceTest::getRaw,
               &ResourceTest::getString,
               &ResourceTest::getEmptyFileRaw,
@@ -307,6 +313,14 @@ void ResourceTest::listEmptyGroup() {
         TestSuite::Compare::Container);
 }
 
+void ResourceTest::hasFile() {
+    Resource rs{"test"};
+
+    CORRADE_VERIFY(rs.hasFile("predisposition.bin"));
+    CORRADE_VERIFY(rs.hasFile("consequence.bin"));
+    CORRADE_VERIFY(!rs.hasFile("nonexistentFile"));
+}
+
 void ResourceTest::getRaw() {
     Resource rs{"test"};
 
@@ -337,6 +351,7 @@ void ResourceTest::getString() {
 
 void ResourceTest::getEmptyFileRaw() {
     Resource rs{"empty"};
+    CORRADE_VERIFY(rs.hasFile("empty.bin"));
 
     Containers::ArrayView<const char> empty = rs.getRaw("empty.bin");
     CORRADE_VERIFY(!empty.data());
@@ -345,6 +360,7 @@ void ResourceTest::getEmptyFileRaw() {
 
 void ResourceTest::getEmptyFileString() {
     Resource rs{"empty"};
+    CORRADE_VERIFY(rs.hasFile("empty.bin"));
 
     Containers::StringView empty = rs.getString("empty.bin");
     CORRADE_VERIFY(!empty.data());
@@ -372,6 +388,7 @@ void ResourceTest::filenameWithSpaces() {
 
     /* Both of these should get compiled correctly as well as found by CMake
        for dependency tracking */
+    CORRADE_VERIFY(rs.hasFile("name with spaces.txt"));
     CORRADE_COMPARE(rs.getString("name with spaces.txt"), "hello\n");
     CORRADE_COMPARE_AS(rs.getString("predisposition.bin"),
         Path::join(RESOURCE_TEST_DIR, "predisposition.bin"),
@@ -553,6 +570,9 @@ void ResourceTest::overrideGroupFileNonexistent() {
 
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
     Resource rs{"test"};
+    /* The file is in the overriden group, but not in the compiled-in data and
+       thus it fails */
+    CORRADE_VERIFY(!rs.hasFile("consequence2.bin"));
 
     std::ostringstream out;
     Error redirectError{&out};

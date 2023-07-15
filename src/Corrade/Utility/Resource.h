@@ -294,7 +294,11 @@ class CORRADE_UTILITY_EXPORT Resource {
          */
         static void overrideGroup(Containers::StringView group, Containers::StringView configurationFile);
 
-        /** @brief Whether given group exists */
+        /**
+         * @brief Whether given group exists
+         *
+         * @see @ref hasFile()
+         */
         static bool hasGroup(Containers::StringView group);
 
         /**
@@ -325,14 +329,24 @@ class CORRADE_UTILITY_EXPORT Resource {
         Containers::StringIterable list() const;
 
         /**
+         * @brief Whether a file is present in the resource group
+         * @m_since_latest
+         *
+         * The @p filename is expected to be in in UTF-8.
+         * @see @ref hasGroup()
+         */
+        bool hasFile(Containers::StringView filename) const;
+
+        /**
          * @brief Get resource data
          *
-         * Expects that the group contains given @p filename. If the file is
-         * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
-         * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
-         * unless the file is coming from an @ref Utility-Resource-override "overriden group".
-         * no OS-specific treatment of non-null-terminated strings nor any
-         * encoding conversion is done --- this function never allocates.
+         * Expects that the resource group contains given @p filename. If the
+         * file is empty, returns a zero-sized @cpp nullptr @ce view. The
+         * @p filename is expected to be in in UTF-8. Unlike with
+         * @ref Path::read(), and unless the file is coming from an
+         * @ref Utility-Resource-override "overriden group", no OS-specific
+         * treatment of non-null-terminated strings nor any encoding conversion
+         * is done --- this function never allocates.
          *
          * Unless the file is coming from an overriden group, the returned view
          * can be assumed to have unlimited lifetime, otherwise it's alive
@@ -341,7 +355,8 @@ class CORRADE_UTILITY_EXPORT Resource {
          * if it was set for given file. If the file is coming from an
          * overriden group however, its alignment isn't respected at the
          * moment.
-         * @see @ref Utility-Resource-compilation-null-terminated-align
+         * @see @ref Utility-Resource-compilation-null-terminated-align,
+         *      @ref hasFile()
          * @todo when get() is gone and enough time passes, this should be
          *      renamed to get() to be consistent with Path
          */
@@ -351,12 +366,13 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get resource data as a string
          * @m_since_latest
          *
-         * Expects that the group contains given @p filename. If the file is
-         * empty, returns a zero-sized @cpp nullptr @ce view. The @p filename
-         * is expected to be in in UTF-8. Unlike with @ref Path::read(), and
-         * unless the file is coming from an @ref Utility-Resource-override "overriden group",
-         * no OS-specific treatment of non-null-terminated filenames nor any
-         * encoding conversion is done --- this function never allocates.
+         * Expects that the resource group contains given @p filename. If the
+         * file is empty, returns a zero-sized @cpp nullptr @ce view. The
+         * @p filename is expected to be in in UTF-8. Unlike with
+         * @ref Path::read(), and unless the file is coming from an
+         * @ref Utility-Resource-override "overriden group", no OS-specific
+         * treatment of non-null-terminated filenames nor any encoding
+         * conversion is done --- this function never allocates.
          *
          * The returned string has @ref Containers::StringViewFlag::Global set
          * unless it's coming from an overriden group, otherwise it's alive
@@ -372,7 +388,8 @@ class CORRADE_UTILITY_EXPORT Resource {
          * marked as null terminated if there's some padding after in order to
          * align the next file, but such behavior is specific to the internal
          * implementation and thus null termination isn't guaranteed.
-         * @see @ref Utility-Resource-compilation-null-terminated-align
+         * @see @ref Utility-Resource-compilation-null-terminated-align,
+         *      @ref hasFile()
          */
         Containers::StringView getString(Containers::StringView filename) const;
 
