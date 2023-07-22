@@ -471,6 +471,10 @@ namespace Corrade {
     `__sanitizer_annotate_contiguous_container()` in
     @ref Corrade/Containers/GrowableArray.h would conflict with MSVC's own in
     `<vector>` that additionally has a `noexcept` specifier
+-   Made it possible to optionally find TestSuite via @cmake find_package() @ce
+    without causing a fatal error if not found on platforms that need
+    additional runner files like XCTest, Android and Emscripten. See also
+    [mosra/corrade#170](https://github.com/mosra/corrade/pull/170).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
