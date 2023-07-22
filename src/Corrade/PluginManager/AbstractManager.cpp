@@ -693,11 +693,11 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check plugin version */
-    /* MinGW GCC 12 (and perhaps older) warns that "cast between incompatible
-       function types from ‘FARPROC’ to ‘int (*)()’", the __extension__ doesn't
-       help. OTOH, on Linux without the __extension__ it causes a -Wpedantic
-       warning on GCC 4.8 (and perhaps newer), so we need both. */
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    /* MinGW GCC 8+ warns that "cast between incompatible function types from
+       ‘FARPROC’ to ‘int (*)()’", the __extension__ doesn't help. OTOH, on
+       Linux without the __extension__ it causes a -Wpedantic warning on GCC
+       4.8 (and perhaps newer), so we need both. */
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type"
     #endif
@@ -711,7 +711,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginVersion"));
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic pop
     #endif
     if(version == nullptr) {
@@ -743,7 +743,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Check interface string */
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
     #endif
@@ -757,7 +757,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInterface"));
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic pop
     #endif
     if(interface == nullptr) {
@@ -787,7 +787,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin initializer */
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
     #endif
@@ -801,7 +801,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInitializer"));
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic pop
     #endif
     if(initializer == nullptr) {
@@ -822,7 +822,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin finalizer */
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
     #endif
@@ -836,7 +836,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginFinalizer"));
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic pop
     #endif
     if(finalizer == nullptr) {
@@ -857,7 +857,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     }
 
     /* Load plugin instancer */
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type" /* see above */
     #endif
@@ -871,7 +871,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
         GetProcAddress
         #endif
         (module, "pluginInstancer"));
-    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
+    #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 8
     #pragma GCC diagnostic pop
     #endif
     if(instancer == nullptr) {
