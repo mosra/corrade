@@ -157,6 +157,8 @@ Is the below list missing your name or something's wrong?
     usability and API cleanliness improvements, MSVC warning fixes
 -   **Tracy Ma** ([\@linuxaged](https://github.com/linuxaged)) --- UWP build
     fixes
+-   **Vincent Le Garrec** ([\@bansan85](https://github.com/bansan85)) ---
+    Android buildsystem fixes and improvements
 -   **[\@xantares](https://github.com/xantares)** --- Windows port improvements
 */
 
