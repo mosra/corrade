@@ -32,6 +32,14 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2020.06
 
+@subsection corrade-changelog-latest-dependencies Dependency changes
+
+-   Minimal supported CMake version is now 3.5, changed from 3.4, since CMake
+    3.27+ warns if a compatibility with CMake below 3.5 is requested. Older
+    versions are not supported anymore and all workarounds for them were
+    removed. This is a conservative change, as there are no known supported
+    distributions which would have anything older than 3.5.
+
 @subsection corrade-changelog-latest-new New features
 
 -   MSVC 2022 support. For that there's a new @ref CORRADE_MSVC_COMPATIBILITY

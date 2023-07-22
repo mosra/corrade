@@ -25,11 +25,13 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-# Oldest known CMake currently in use is 3.0.2 on Debian 8 (Jessie). Next
-# oldest supported version is 3.5.2 (Ubuntu 16.04), but we don't need any
-# features from that, 3.4 is required in order to have RUNTIME_OUTPUT_DIRECTORY
-# etc. properties accept generator expressions.
-cmake_minimum_required(VERSION 3.4)
+# Oldest known CMake version in use is 3.5 on ancient Ubuntu 16.04, all other
+# distributions have a newer version. Additionally, CMake 3.27+ warns if
+# anything older than 3.5 is used in cmake_minimum_required().
+#
+# Next minimal version will probably need to be 3.6 for Android NDK
+# compatibility.
+cmake_minimum_required(VERSION 3.5)
 
 # As reported in https://github.com/mosra/corrade/issues/52 and then tracked
 # down to https://gitlab.kitware.com/cmake/cmake/issues/18099, CMake < 3.12 has
@@ -369,15 +371,7 @@ if(_CORRADE_ACCEPT_DEPRECATED_UNPREFIXED_OPTIONS AND CORRADE_BUILD_DEPRECATED)
     endforeach()
 
     if(_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION)
-        # CMake 3.5+ has deprecation warnings enabled by default (which makes
-        # sense), 3.4 not. Use a warning there instead.
-        # TODO: drop when 3.4 is not supported anymore
-        if(CMAKE_VERSION VERSION_LESS 3.5)
-            set(DEPRECATION_OR_WARNING WARNING)
-        else()
-            set(DEPRECATION_OR_WARNING DEPRECATION)
-        endif()
-        message(${DEPRECATION_OR_WARNING} "Unprefixed options such as ${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} are deprecated, use CORRADE_${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} instead. Delete the unprefixed variable from CMake cache or set both to the same value to silence this warning.")
+        message(DEPRECATION "Unprefixed options such as ${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} are deprecated, use CORRADE_${_CORRADE_WARN_DEPRECATED_UNPREFIXED_OPTION} instead. Delete the unprefixed variable from CMake cache or set both to the same value to silence this warning.")
     endif()
 endif()
 

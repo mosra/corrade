@@ -275,7 +275,7 @@ jobs:
     - cap-ninja-jobs
     - install-gcc-4_8
     - install-cmake:
-        version: "3.4.3"
+        version: "3.5.2"
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
@@ -287,7 +287,7 @@ jobs:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
     steps:
-    # Not installing the old GCC 4.8 and CMake 3.4 to speed up. These are
+    # Not installing the old GCC 4.8 and CMake 3.5 to speed up. These are
     # tested more than enough on other jobs.
     - install-base-linux-arm64
     - make-expected-linux-dirs
@@ -312,7 +312,7 @@ jobs:
     - cap-ninja-jobs
     - install-gcc-4_8
     - install-cmake:
-        version: "3.4.3"
+        version: "3.5.2"
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
@@ -329,7 +329,7 @@ jobs:
     - install-base-linux
     - install-gcc-4_8
     - install-cmake:
-        version: "3.4.3"
+        version: "3.5.2"
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
@@ -343,7 +343,7 @@ jobs:
     - install-base-linux
     - install-clang
     - install-cmake:
-        version: "3.4.3"
+        version: "3.5.2"
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
@@ -357,7 +357,7 @@ jobs:
     - install-base-linux
     - install-clang
     - install-cmake:
-        version: "3.4.3"
+        version: "3.5.2"
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh

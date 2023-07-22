@@ -40,7 +40,7 @@ Minimal set of tools required for building and using Corrade is:
     everything needed are **GCC** >= 4.8.1, **Clang** >= 6 (or equivalently
     **Apple Clang** >= 10) and **MSVC** >= 2015. For Windows you can also use
     **Clang-CL** or **MinGW-w64**.
--   **CMake** >= 3.4
+-   **CMake** >= 3.5
 
 CMake is not a strict requirement, it's also possible to use Corrade with
 custom buildsystems. Building Corrade without CMake is possible if you recreate
