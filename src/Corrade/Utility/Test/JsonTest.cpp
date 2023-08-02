@@ -102,7 +102,11 @@ struct JsonTest: TestSuite::Tester {
 
         void parsedObjectChildAccess();
         void parsedObjectFind();
+        void parsedObjectFindEmpty();
+        void parsedObjectAccessEmpty();
         void parsedArrayFind();
+        void parsedArrayFindEmpty();
+        void parsedArrayAccessEmpty();
 
         void parseError();
         void parseOptionError();
@@ -653,6 +657,16 @@ const struct {
 } ParseStringArrayData[]{
     {"", {}},
     {"global literal", Containers::StringViewFlag::Global},
+};
+
+const struct {
+    const char* name;
+    const char* jsonArray;
+    const char* jsonObject;
+    std::size_t tokenIndex;
+} ParseObjectArrayEmptyData[]{
+    {"root token", "[]", "{}", 0},
+    {"nested", "{\"a\": [], \"b\": 3}", "[16, {}, 23]", 2},
 };
 
 const struct {
@@ -1320,8 +1334,17 @@ JsonTest::JsonTest() {
               &JsonTest::reparseNumberArrayDifferentType,
 
               &JsonTest::parsedObjectChildAccess,
-              &JsonTest::parsedObjectFind,
-              &JsonTest::parsedArrayFind});
+              &JsonTest::parsedObjectFind});
+
+    addInstancedTests({&JsonTest::parsedObjectFindEmpty,
+                       &JsonTest::parsedObjectAccessEmpty},
+        Containers::arraySize(ParseObjectArrayEmptyData));
+
+    addTests({&JsonTest::parsedArrayFind});
+
+    addInstancedTests({&JsonTest::parsedArrayFindEmpty,
+                       &JsonTest::parsedArrayAccessEmpty},
+        Containers::arraySize(ParseObjectArrayEmptyData));
 
     addInstancedTests({&JsonTest::parseError},
         Containers::arraySize(ParseErrorData));
@@ -3058,6 +3081,42 @@ void JsonTest::parsedObjectFind() {
     CORRADE_VERIFY(!object->find("different"));
 }
 
+void JsonTest::parsedObjectFindEmpty() {
+    auto&& data = ParseObjectArrayEmptyData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    /* The view delegates to find() of the parent token, but the parent is
+       inaccessible if the token has no children so it has to special-case
+       that. The operator[] then asserts for this case, which is tested
+       separately below. */
+
+    Containers::Optional<Json> json = Json::fromString(data.jsonObject);
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
+    CORRADE_VERIFY(object);
+
+    CORRADE_COMPARE(object->find("something"), nullptr);
+}
+
+void JsonTest::parsedObjectAccessEmpty() {
+    auto&& data = ParseObjectArrayEmptyData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString(data.jsonObject);
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
+    CORRADE_VERIFY(object);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    (*object)["something"];
+    CORRADE_COMPARE(out.str(), "Utility::JsonView::operator[](): view is empty\n");
+}
+
 void JsonTest::parsedArrayFind() {
     Containers::Optional<Json> json = Json::fromString(R"([
         "value",
@@ -3075,6 +3134,42 @@ void JsonTest::parsedArrayFind() {
     CORRADE_COMPARE((*array)[2].data(), "3");
 
     CORRADE_VERIFY(!array->find(3));
+}
+
+void JsonTest::parsedArrayFindEmpty() {
+    auto&& data = ParseObjectArrayEmptyData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    /* The view delegates to find() of the parent token, but the parent is
+       inaccessible if the token has no children so it has to special-case
+       that. The operator[] then asserts for this case, which is tested
+       separately below. */
+
+    Containers::Optional<Json> json = Json::fromString(data.jsonArray);
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
+    CORRADE_VERIFY(array);
+
+    CORRADE_COMPARE(array->find(0), nullptr);
+}
+
+void JsonTest::parsedArrayAccessEmpty() {
+    auto&& data = ParseObjectArrayEmptyData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString(data.jsonArray);
+    CORRADE_VERIFY(json);
+
+    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
+    CORRADE_VERIFY(array);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    (*array)[0];
+    CORRADE_COMPARE(out.str(), "Utility::JsonView::operator[](): view is empty\n");
 }
 
 void JsonTest::parseError() {
