@@ -39,7 +39,16 @@
 #include "Corrade/Utility/String.h"
 
 /* For Arguments::environment() */
-#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+#ifdef CORRADE_TARGET_APPLE
+/* macOS 10.5+ used to have the environ var only available for executables, not
+   for dynamic libraries: https://epics.anl.gov/tech-talk/2009/msg00299.php.
+   This was apparently reverted back and newer versions have it working again,
+   but for compatibility with older versions, which MacPorts still build for,
+   I'm using the the _NSGetEnviron() API instead. According to builds at
+   https://ports.macports.org/all_builds/?port_name=corrade, 10.8+ seems to
+   work with environ again. */
+#include <crt_externs.h>
+#elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <cstdio>
 extern char **environ;
 #ifdef CORRADE_TARGET_EMSCRIPTEN
@@ -107,7 +116,15 @@ std::vector<std::string> Arguments::environment() {
 
     /* Standard Unix and local Emscripten environment */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    for(char** e = environ; *e; ++e)
+    for(char** e =
+        #ifdef CORRADE_TARGET_APPLE
+        /* For compatibility with macOS 10.5, 6, 7. See the <crt_externs.h>
+           include at the top for details. */
+        *_NSGetEnviron()
+        #else
+        environ
+        #endif
+    ; *e; ++e)
         list.emplace_back(*e);
 
     /* System environment provided by Node.js. Hopefully nobody uses \b in
