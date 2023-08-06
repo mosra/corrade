@@ -487,6 +487,8 @@ namespace Corrade {
 -   It's now possible to build dynamic libraries on Android and Emscripten with
     the usual options. Static libraries are still a default but it isn't
     enforced anymore. See [mosra/corrade#170](https://github.com/mosra/corrade/pull/170).
+-   Fixed a build error related to the `environ` variable on macOS versions
+    before 10.8. See [mosra/corrade#175](https://github.com/mosra/corrade/pull/175).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

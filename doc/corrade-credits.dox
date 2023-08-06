@@ -151,6 +151,8 @@ Is the below list missing your name or something's wrong?
 -   **Pascal Thomet** ([\@pthom](https://github.com/pthom)) --- Hunter package
 -   **[\@pkubaj](https://github.com/pkubaj)**  --- fixes for big-endian
     platforms
+-   **Sergey Fedorov** ([\@barracuda156](https://github.com/barracuda156)) ---
+    macOS build fixes
 -   **[\@sigman78](https://github.com/sigman78)** --- initial MSVC 2017 port,
     Vcpkg packages
 -   **Stanislaw Halik** ([\@sthalik](https://github.com/sthalik)) ---
