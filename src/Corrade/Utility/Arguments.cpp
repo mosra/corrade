@@ -41,7 +41,12 @@
 /* For Arguments::environment() */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <cstdio>
+#ifdef __APPLE__
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#else
 extern char **environ;
+#endif
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <emscripten.h>
 #endif
