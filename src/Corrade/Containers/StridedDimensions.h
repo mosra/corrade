@@ -201,7 +201,9 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
         /** @brief Non-equality comparison */
         bool operator!=(const StridedDimensions<dimensions, T>& other) const {
-            return !operator==(other);
+            for(std::size_t i = 0; i != dimensions; ++i)
+                if(_data[i] != other._data[i]) return true;
+            return false;
         }
 
         /** @brief Element access */

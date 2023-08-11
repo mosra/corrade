@@ -287,6 +287,7 @@ void StridedDimensionsTest::compare() {
 
     CORRADE_VERIFY(a == b);
     CORRADE_VERIFY(!(a == c));
+    CORRADE_VERIFY(!(a != b));
     CORRADE_VERIFY(a != c);
 }
 
