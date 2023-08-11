@@ -280,6 +280,8 @@ void EnumSetTest::compare() {
     CORRADE_VERIFY(features == features);
     CORRADE_VERIFY(!(features != features));
     CORRADE_VERIFY(Feature::Cheap == Features(Feature::Cheap));
+    CORRADE_VERIFY(!(Feature::Cheap == Features(Feature::Popular)));
+    CORRADE_VERIFY(!(Feature::Cheap != Features(Feature::Cheap)));
     CORRADE_VERIFY(Feature::Cheap != Features(Feature::Popular));
 
     CORRADE_VERIFY(Features() <= Feature::Popular);

@@ -138,7 +138,7 @@ class EnumSet {
 
         /** @brief Non-equality comparison */
         constexpr bool operator!=(EnumSet<T, fullValue> other) const {
-            return !operator==(other);
+            return _value != other._value;
         }
 
         /**
@@ -147,7 +147,7 @@ class EnumSet {
          * Equivalent to @cpp (a & other) == other @ce.
          */
         constexpr bool operator>=(EnumSet<T, fullValue> other) const {
-            return (*this & other) == other;
+            return (_value & other._value) == other._value;
         }
 
         /**
@@ -156,7 +156,7 @@ class EnumSet {
          * Equivalent to @cpp (a & other) == a @ce.
          */
         constexpr bool operator<=(EnumSet<T, fullValue> other) const {
-            return (*this & other) == *this;
+            return (_value & other._value) == _value;
         }
 
         /** @brief Union of two sets */
