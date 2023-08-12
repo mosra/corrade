@@ -37,6 +37,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/initializeHelpers.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_TARGET_APPLE
