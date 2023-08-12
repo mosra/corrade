@@ -361,6 +361,13 @@ target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DI
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData}
     ${ResourceTestNothingData})
+if(CMAKE_GENERATOR STREQUAL Xcode)
+    # Xcode's "new build system" doesn't like when the same (generated) source
+    # file is used by two different targets (UtilityResourceTest and
+    # ResourceTestDataLib) that don't have any other dependency between them.
+    # WTF.
+    add_dependencies(UtilityResourceTest ResourceTestDataLib)
+endif()
 target_compile_definitions(ResourceTestDataLib PRIVATE
     "CORRADE_AUTOMATIC_INITIALIZER=CORRADE_NOOP"
     "CORRADE_AUTOMATIC_FINALIZER=CORRADE_NOOP")
