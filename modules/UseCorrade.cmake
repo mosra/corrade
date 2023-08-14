@@ -460,7 +460,7 @@ function(corrade_add_test test_name)
                 # because it doesn't need to parse the whole project every
                 # time), but so far I don't see how to run that as part of the
                 # build for all schemes
-                COMMAND xcodebuild test-without-building -scheme ${test_name}Runner -destination "${CORRADE_TESTSUITE_XCTEST_DESTINATION}" -only-testing:${test_name}Runner -only-test-configuration $<CONFIG>
+                COMMAND xcodebuild test-without-building -scheme ${test_name}Runner -configuration $<CONFIG> -destination "${CORRADE_TESTSUITE_XCTEST_DESTINATION}" -only-testing:${test_name}Runner
                 # Has to be run in the directory where the xcodeproj is
                 # generated
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
