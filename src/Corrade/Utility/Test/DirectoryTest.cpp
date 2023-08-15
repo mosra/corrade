@@ -378,7 +378,7 @@ DirectoryTest::DirectoryTest() {
     if(System::isSandboxed()
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         /** @todo Fix this once I persuade CMake to run XCTest tests properly */
-        && std::getenv("SIMULATOR_MAINSCREEN_SCALE")
+        && !std::getenv("SIMULATOR_MAINSCREEN_SCALE")
         #endif
     ) {
         _testDir = Directory::join(Directory::path(Directory::executableLocation()), "PathTestFiles");
@@ -575,7 +575,7 @@ void DirectoryTest::existsUtf8() {
 void DirectoryTest::isDirectory() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) thinks all paths are files.");
         #endif
         CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDir, "dir")));
@@ -599,7 +599,7 @@ void DirectoryTest::isDirectorySymlink() {
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) thinks all paths are files.");
         #endif
         CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirSymlink, "dir-symlink")));
@@ -646,7 +646,7 @@ void DirectoryTest::isDirectoryNoPermission() {
 void DirectoryTest::isDirectoryUtf8() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) thinks all paths are files.");
         #endif
         CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirUtf8, "šňůra")));
@@ -1144,7 +1144,7 @@ void DirectoryTest::executableLocation() {
     #ifdef CORRADE_TARGET_APPLE
     if(System::isSandboxed()) {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
 
@@ -1314,7 +1314,7 @@ void DirectoryTest::tmp() {
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_VERIFY(Directory::exists(dir));
@@ -1350,7 +1350,7 @@ void DirectoryTest::tmp() {
     /* Verify that it's possible to write stuff there */
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         /* PathTest writes a file named 'a', and often these two tests get run
@@ -1371,7 +1371,7 @@ void DirectoryTest::tmpUtf8() {
 
 void DirectoryTest::list() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1382,7 +1382,7 @@ void DirectoryTest::list() {
 
 void DirectoryTest::listSkipDirectories() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1393,7 +1393,7 @@ void DirectoryTest::listSkipDirectories() {
 
 void DirectoryTest::listSkipDirectoriesSymlinks() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1409,7 +1409,7 @@ void DirectoryTest::listSkipDirectoriesSymlinks() {
 
 void DirectoryTest::listSkipFiles() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1420,7 +1420,7 @@ void DirectoryTest::listSkipFiles() {
 
 void DirectoryTest::listSkipFilesSymlinks() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1436,7 +1436,7 @@ void DirectoryTest::listSkipFilesSymlinks() {
 
 void DirectoryTest::listSkipSpecial() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1447,7 +1447,7 @@ void DirectoryTest::listSkipSpecial() {
 
 void DirectoryTest::listSkipSpecialSymlink() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1459,7 +1459,7 @@ void DirectoryTest::listSkipSpecialSymlink() {
 
 void DirectoryTest::listSkipDotAndDotDot() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1470,7 +1470,7 @@ void DirectoryTest::listSkipDotAndDotDot() {
 
 void DirectoryTest::listSort() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1523,7 +1523,7 @@ void DirectoryTest::listUtf8() {
 
     #ifdef CORRADE_TARGET_APPLE
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -1588,7 +1588,7 @@ void DirectoryTest::fileSizeEarlyEof() {
 
 void DirectoryTest::fileSizeDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
@@ -1674,7 +1674,7 @@ void DirectoryTest::readEarlyEof() {
 
 void DirectoryTest::readDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
@@ -1945,7 +1945,7 @@ void DirectoryTest::copyEmpty() {
 
 void DirectoryTest::copyDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
@@ -2230,7 +2230,7 @@ void DirectoryTest::mapReadEmpty() {
 
 void DirectoryTest::mapReadDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
