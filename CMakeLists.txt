@@ -166,7 +166,22 @@ elseif(UNIX)
     if(APPLE)
         set(CORRADE_TARGET_APPLE 1)
 
-        if(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS[0-9.]*\\.sdk")
+        # Since CMake 3.14, setting CMAKE_SYSTEM_NAME to iOS and not using any
+        # explicit toolchain file is the builtin way to build for iOS, not by
+        # overriding CMAKE_OSX_SYSROOT. For backwards compatiblity the
+        # CMAKE_OSX_SYSROOT check is present as well, but it isn't expected to
+        # be set anymore.
+        #
+        # CMAKE_OSX_SYSROOT originally also used to be used for switching
+        # between a device and a simulator build. Nowadays, an iOS binary is
+        # often made "fat", containing both device and simulator code, and
+        # building for either a device or the simulator is controlled via a
+        # -sdk option passed at the *build* time, i.e. there's no way to know
+        # whether it'll be a simulator at the *configure* time. Thus
+        # CORRADE_TARGET_IOS_SIMULATOR is no longer set.
+        if(CMAKE_SYSTEM_NAME STREQUAL iOS)
+            set(CORRADE_TARGET_IOS 1)
+        elseif(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS[0-9.]*\\.sdk")
             set(CORRADE_TARGET_IOS 1)
         elseif(CMAKE_OSX_SYSROOT MATCHES "/iPhoneSimulator[0-9.]*\\.sdk")
             set(CORRADE_TARGET_IOS 1)

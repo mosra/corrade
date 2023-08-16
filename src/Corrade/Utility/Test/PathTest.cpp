@@ -455,7 +455,7 @@ PathTest::PathTest() {
     if(System::isSandboxed()
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         /** @todo Fix this once I persuade CMake to run XCTest tests properly */
-        && std::getenv("SIMULATOR_UDID")
+        && !std::getenv("SIMULATOR_MAINSCREEN_SCALE")
         #endif
     ) {
         _testDir = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFiles");
@@ -800,7 +800,7 @@ void PathTest::existsUtf8() {
 void PathTest::isDirectory() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dir")));
@@ -824,7 +824,7 @@ void PathTest::isDirectorySymlink() {
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDirSymlink, "dir-symlink")));
@@ -871,7 +871,7 @@ void PathTest::isDirectoryNoPermission() {
 void PathTest::isDirectoryNonNullTerminated() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDir, "dirX").exceptSuffix(1)));
@@ -882,7 +882,7 @@ void PathTest::isDirectoryNonNullTerminated() {
 void PathTest::isDirectoryUtf8() {
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "iOS (in a simulator) has no idea about file types.");
         #endif
         CORRADE_VERIFY(Path::isDirectory(Path::join(_testDirUtf8, "šňůra")));
@@ -1451,7 +1451,7 @@ void PathTest::executableLocation() {
     #ifdef CORRADE_TARGET_APPLE
     if(System::isSandboxed()) {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
 
@@ -1636,7 +1636,7 @@ void PathTest::temporaryDirectory() {
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_VERIFY(Path::exists(*temporaryDirectory));
@@ -1684,7 +1684,7 @@ void PathTest::temporaryDirectory() {
     /* Verify that it's possible to write stuff there */
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_VERIFY(Path::write(Path::join(*temporaryDirectory, "a"), "hello"_s));
@@ -1706,7 +1706,7 @@ void PathTest::list() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1733,7 +1733,7 @@ void PathTest::listIterateRangeFor() {
         arrayAppend(out, a);
 
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
     CORRADE_COMPARE_AS(out, Containers::array<Containers::String>({
@@ -1754,7 +1754,7 @@ void PathTest::listEmptyDirectory() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1769,7 +1769,7 @@ void PathTest::listSkipDirectories() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1784,7 +1784,7 @@ void PathTest::listSkipDirectoriesSymlinks() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -1804,7 +1804,7 @@ void PathTest::listSkipFiles() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1819,7 +1819,7 @@ void PathTest::listSkipFilesSymlinks() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -1839,7 +1839,7 @@ void PathTest::listSkipSpecial() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1856,7 +1856,7 @@ void PathTest::listSkipSpecialSymlink() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1871,7 +1871,7 @@ void PathTest::listSkipDotAndDotDot() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1886,7 +1886,7 @@ void PathTest::listSkipEverything() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1900,7 +1900,7 @@ void PathTest::listSort() {
         CORRADE_VERIFY(list);
 
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1911,7 +1911,7 @@ void PathTest::listSort() {
         CORRADE_VERIFY(list);
 
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1923,7 +1923,7 @@ void PathTest::listSort() {
         CORRADE_VERIFY(list);
 
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1959,7 +1959,7 @@ void PathTest::listNonNullTerminated() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1975,7 +1975,7 @@ void PathTest::listTrailingSlash() {
 
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -2002,7 +2002,7 @@ void PathTest::listUtf8Result() {
 
     #ifdef CORRADE_TARGET_APPLE
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
@@ -2028,7 +2028,7 @@ void PathTest::listUtf8Path() {
     CORRADE_VERIFY(actual);
 
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+    CORRADE_EXPECT_FAIL_IF(std::getenv("SIMULATOR_MAINSCREEN_SCALE"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
     CORRADE_COMPARE_AS(*actual,
@@ -2086,7 +2086,7 @@ void PathTest::sizeEarlyEof() {
 
 void PathTest::sizeDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_UDID"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
@@ -2255,7 +2255,7 @@ void PathTest::readEarlyEofString() {
 
 void PathTest::readDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_UDID"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
@@ -2635,7 +2635,7 @@ void PathTest::copyEmpty() {
 
 void PathTest::copyDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_UDID"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 
@@ -2974,7 +2974,7 @@ void PathTest::mapReadEmpty() {
 
 void PathTest::mapReadDirectory() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_UDID"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) has no idea about file types, can't test.");
     #endif
 

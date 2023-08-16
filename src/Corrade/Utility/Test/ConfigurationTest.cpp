@@ -416,7 +416,7 @@ void ConfigurationTest::readonly() {
 
 void ConfigurationTest::readError() {
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
-    if(!std::getenv("SIMULATOR_UDID"))
+    if(std::getenv("SIMULATOR_MAINSCREEN_SCALE"))
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't abuse a directory to simulate a read error.");
     #endif
 

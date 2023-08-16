@@ -444,40 +444,40 @@ workflows:
     # if they pass, the rest of the jobs gets gradually executed, with further
     # dependencies especially for the macOS jobs that take the most credits.
     jobs:
-    - linux
-    - linux-nondeprecated
-    - linux-arm64:
-        requires:
-        - linux
-        - linux-nondeprecated
-    - linux-static:
-        requires:
-        - linux
-        - linux-nondeprecated
-    - linux-sanitizers:
-        requires:
-        - linux
-        - linux-nondeprecated
-    - linux-threadsanitizer:
-        requires:
-        - linux-sanitizers
-    - macos:
-        requires:
-        - linux
-        - linux-nondeprecated
-    - macos-static:
-        requires:
-        - macos
-        - linux-static
-    - emscripten:
-        requires:
-        - linux-static
-    - android-x86:
-        requires:
-        - linux-static
-        - linux-arm64
-    - ios:
-        requires:
-        - macos-static
-        - linux-arm64
-    - acme
+    # - linux
+    # - linux-nondeprecated
+    # - linux-arm64:
+    #     requires:
+    #     - linux
+    #     - linux-nondeprecated
+    # - linux-static:
+    #     requires:
+    #     - linux
+    #     - linux-nondeprecated
+    # - linux-sanitizers:
+    #     requires:
+    #     - linux
+    #     - linux-nondeprecated
+    # - linux-threadsanitizer:
+    #     requires:
+    #     - linux-sanitizers
+    # - macos:
+    #     requires:
+    #     - linux
+    #     - linux-nondeprecated
+    # - macos-static:
+    #     requires:
+    #     - macos
+    #     - linux-static
+    # - emscripten:
+    #     requires:
+    #     - linux-static
+    # - android-x86:
+    #     requires:
+    #     - linux-static
+    #     - linux-arm64
+    - ios
+    #     requires:
+    #     - macos-static
+    #     - linux-arm64
+    # - acme

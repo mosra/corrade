@@ -450,18 +450,20 @@ function(corrade_add_test test_name)
                        ${test_runner_file})
         xctest_add_bundle(${test_name}Runner ${test_name} ${test_runner_file})
         if(CORRADE_TARGET_IOS)
-            # The EFFECTIVE_PLATFORM_NAME variable is not expanded when using
-            # TARGET_* generator expressions on iOS, we need to hardcode it
-            # manually. See http://public.kitware.com/pipermail/cmake/2016-March/063049.html
-            # In case we redirect the runtime output directory, use that (and
-            # assume there's no TARGET_* generator expression). This will of
-            # course break when someone sets the LIBRARY_OUTPUT_DIRECTORY
-            # property of the target, but that didn't work before either.
-            if(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-                add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${test_name}Runner.xctest)
-            else()
-                add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>${_CORRADE_EFFECTIVE_PLATFORM_NAME}/${test_name}Runner.xctest)
+            if(NOT CORRADE_TESTSUITE_XCTEST_DESTINATION)
+                message(FATAL_ERROR "On iOS with CORRADE_TESTSUITE_TARGET_XCTEST enabled you need to set CORRADE_TESTSUITE_XCTEST_DESTINATION to a destination on which the tests should be run, such as \"platform=iOS Simulator,name=iPhone 12\"")
             endif()
+            add_test(NAME ${test_name}
+                # TODO Running build-for-testing and then
+                #   xcodebuild -xctestrun ${test_name}Runner.*.xctestrun
+                # with the generated files is significantly faster (probably
+                # because it doesn't need to parse the whole project every
+                # time), but so far I don't see how to run that as part of the
+                # build for all schemes
+                COMMAND xcodebuild test-without-building -scheme ${test_name}Runner -configuration $<CONFIG> -destination "${CORRADE_TESTSUITE_XCTEST_DESTINATION}" -only-testing:${test_name}Runner
+                # Has to be run in the directory where the xcodeproj is
+                # generated
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
         else()
             xctest_add_test(${test_name} ${test_name}Runner)
         endif()

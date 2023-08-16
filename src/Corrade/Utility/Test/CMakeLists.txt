@@ -423,6 +423,13 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
     add_library(UtilityGlobalStateAcrossLibrariesLibrary SHARED
         GlobalStateAcrossLibrariesLibrary.cpp
         ${ResourceTestData})
+    if(CMAKE_GENERATOR STREQUAL Xcode)
+        # Xcode's "new build system" doesn't like when the same (generated)
+        # source file is used by two different targets (ResourceTestDataLib and
+        # UtilityGlobalStateAcrossLibrariesLibrary) that don't have any other
+        # dependency between them. WTF.
+        add_dependencies(UtilityGlobalStateAcrossLibrariesLibrary ResourceTestDataLib)
+    endif()
     target_link_libraries(UtilityGlobalStateAcrossLibrariesLibrary PRIVATE CorradeUtility)
 
     corrade_add_test(UtilityGlobalStateAcrossLibrariesTest
