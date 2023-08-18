@@ -103,9 +103,20 @@
    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65473
    https://github.com/gcc-mirror/gcc/commit/19665740d336d4ee7d0cf92b5b0643fa1d7da14a
    https://en.cppreference.com/w/cpp/header/ciso646 */
-/** @todo this header is REMOVED in C++20 and one is supposed to use <version>
-    instead FFS */
+/* <ciso646> is removed in C++20 and replaced by <version>. As of August 2023
+   only MSVC 2022 warns that it's removed (which is why <version> is used
+   here), neither libc++ nor libstdc++ are at such level of annoyance yet.
+
+   Note that the check for CORRADE_CXX_STANDARD may theoretically not be enough
+   for certain combinations of Clang + libstdc++ where libstdc++ doesn't have
+   <version> yet but Clang supports C++20 already. Didn't come across any such
+   case in practice yet, but if it happens this may need an additional
+   __has_include guard. */
+#if CORRADE_CXX_STANDARD >= 202002
+#include <version>
+#else
 #include <ciso646>
+#endif
 #ifdef _LIBCPP_VERSION
 #define CORRADE_TARGET_LIBCXX
 #elif defined(_CPPLIB_VER)

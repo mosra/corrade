@@ -24,7 +24,20 @@
 /* We need just the STL implementation detection from configure.h, copying it
    verbatim here. Keep in sync. */
 #pragma ACME enable Corrade_configure_h
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+#if CORRADE_CXX_STANDARD >= 202002
+#include <version>
+#else
 #include <ciso646>
+#endif
 #ifdef _LIBCPP_VERSION
 #define CORRADE_TARGET_LIBCXX
 #elif defined(__GLIBCXX__)

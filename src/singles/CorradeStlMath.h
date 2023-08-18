@@ -22,7 +22,20 @@
 
 #pragma ACME stats preprocessed-cpp17 g++ -std=c++17 -P -E -x c++ - | wc -l
 
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+#if CORRADE_CXX_STANDARD >= 202002
+#include <version>
+#else
 #include <ciso646>
+#endif
 
 /* A semi-verbatim copy of Utility/StlMath.h because otherwise the includes
    don't stay in the correct place. */

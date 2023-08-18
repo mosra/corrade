@@ -65,10 +65,10 @@ these two this header effectively does just a simple @cpp #include <cmath> @ce.
 
 #include "Corrade/configure.h"
 
-/* On GCC 6.1+ this brings in bits/c++config.h, which defines the below macro
-   to 1 on C++17 and up. On other implementations does nothing. */
-#include <ciso646>
-
+/* On GCC 6.1+ and C++17 and up this macro is defined to 1 by bits/c++config.h.
+   On other implementations does nothing. bits/c++config.h is brought in by
+   <ciso646> or <version> (the former being deprecated in C++ 20). The correct
+   header is already included by Corrade/configure.h above. */
 #ifdef _GLIBCXX_USE_STD_SPEC_FUNCS
 #undef _GLIBCXX_USE_STD_SPEC_FUNCS
 #define _GLIBCXX_USE_STD_SPEC_FUNCS 0
