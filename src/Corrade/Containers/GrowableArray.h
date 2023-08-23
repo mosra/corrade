@@ -255,6 +255,8 @@ template<class T> struct ArrayMallocAllocator {
            (as the deleter is a typeless std::free() in any case) */
         const std::size_t inBytes = capacity*sizeof(T) + AllocationOffset;
         char* const memory = static_cast<char*>(std::malloc(inBytes));
+        CORRADE_ASSERT(memory,
+            "Containers::ArrayMallocAllocator: can't allocate" << inBytes << "bytes", {});
         reinterpret_cast<std::size_t*>(memory)[0] = inBytes;
         return reinterpret_cast<T*>(memory + AllocationOffset);
     }
@@ -1572,6 +1574,8 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
 template<class T> void ArrayMallocAllocator<T>::reallocate(T*& array, std::size_t, const std::size_t newCapacity) {
     const std::size_t inBytes = newCapacity*sizeof(T) + AllocationOffset;
     char* const memory = static_cast<char*>(std::realloc(reinterpret_cast<char*>(array) - AllocationOffset, inBytes));
+    CORRADE_ASSERT(memory,
+        "Containers::ArrayMallocAllocator: can't reallocate" << inBytes << "bytes", );
     reinterpret_cast<std::size_t*>(memory)[0] = inBytes;
     array = reinterpret_cast<T*>(memory + AllocationOffset);
 }

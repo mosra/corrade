@@ -46,6 +46,16 @@
 #define _CORRADE_CONTAINERS_SANITIZER_ENABLED
 #endif
 
+/* For malloc() / realloc() failure tests, as TSan doesn't like those either */
+#ifdef __has_feature
+#if __has_feature(thread_sanitizer)
+#define _CORRADE_CONTAINERS_THREAD_SANITIZER_ENABLED
+#endif
+#endif
+#ifdef __SANITIZE_THREAD__
+#define _CORRADE_CONTAINERS_THREAD_SANITIZER_ENABLED
+#endif
+
 #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
 /* https://github.com/llvm-mirror/compiler-rt/blob/master/include/sanitizer/common_interface_defs.h */
 extern "C" int __sanitizer_verify_contiguous_container(const void *beg,
@@ -148,6 +158,9 @@ struct GrowableArrayTest: TestSuite::Tester {
     void removeUnorderedShiftOperationOrderNoOp();
     void removeUnorderedShiftOperationOrderNoOverlap();
     void removeInvalid();
+
+    void mallocFailed();
+    void reallocFailed();
 
     template<class T> void shrinkNonGrowableEmptyNoInit();
     template<class T> void shrinkNonGrowableEmptyDefaultInit();
@@ -389,6 +402,9 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp,
               &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap,
               &GrowableArrayTest::removeInvalid,
+
+              &GrowableArrayTest::mallocFailed,
+              &GrowableArrayTest::reallocFailed,
 
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<int>,
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<Movable>,
@@ -2589,6 +2605,57 @@ void GrowableArrayTest::removeInvalid() {
         "Containers::arrayRemoveUnordered(): can't remove 1 elements at index 4 from an array of size 4\n"
         "Containers::arrayRemoveUnordered(): can't remove 3 elements at index 2 from an array of size 4\n"
         "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n");
+}
+
+void GrowableArrayTest::mallocFailed() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+    #if defined(_CORRADE_CONTAINERS_SANITIZER_ENABLED) || defined(_CORRADE_CONTAINERS_THREAD_SANITIZER_ENABLED)
+    CORRADE_SKIP("AddressSanitizer or ThreadSanitizer enabled, can't test");
+    #endif
+
+    Array<char> a;
+
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+    #endif
+    arrayReserve(a, ~std::size_t{} - Implementation::AllocatorTraits<char>::Offset);
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
+    #pragma GCC diagnostic pop
+    #endif
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't allocate 18446744073709551615 bytes\n");
+    #else
+    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't allocate 4294967295 bytes\n");
+    #endif
+}
+
+void GrowableArrayTest::reallocFailed() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+    #if defined(_CORRADE_CONTAINERS_SANITIZER_ENABLED) || defined(_CORRADE_CONTAINERS_THREAD_SANITIZER_ENABLED)
+    CORRADE_SKIP("AddressSanitizer or ThreadSanitizer enabled, can't test");
+    #endif
+
+    Array<char> a;
+    arrayAppend(a, '3');
+
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+    #endif
+    arrayReserve(a, ~std::size_t{} - Implementation::AllocatorTraits<char>::Offset);
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
+    #pragma GCC diagnostic pop
+    #endif
+    #ifndef CORRADE_TARGET_32BIT
+    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't reallocate 18446744073709551615 bytes\n");
+    #else
+    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't reallocate 4294967295 bytes\n");
+    #endif
 }
 
 template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyNoInit() {
