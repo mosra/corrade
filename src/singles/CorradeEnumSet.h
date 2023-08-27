@@ -13,6 +13,10 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   It's now possible to construct the EnumSet directly from the underlying
+        enum's type instead of having to cast to the enum type first
+    -   Removed unnecessary function calls for improved debug performace
     v2020.06-1075-gdd71 (2022-10-13)
     -   Initial release
 

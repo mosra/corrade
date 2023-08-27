@@ -23,6 +23,13 @@
     `#define CORRADE_UTILITY_EXPORT` as appropriate. To enable the IFUNC
     functionality, `#define CORRADE_CPU_USE_IFUNC` before including the file.
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   Added BMI2 detection on x86
+    -   Fixed an issue on GCC 12+ and Clang, where only one of multiple
+        CORRADE_ENABLE_ macro annotations would get used
+    -   Fixed a potential build issue on x86 if none of the extra instruction
+        sets are enabled at compile time
+    -   Compatibility with C++20 which removes the <ciso646> header
     v2020.06-1040-g30cd2 (2022-09-05)
     -   Fixed a build issue on platforms that are neither x86, ARM nor WASM
     -   Renamed to CorradeCpu.hpp to imply the separate implementation part

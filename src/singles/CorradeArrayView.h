@@ -15,6 +15,24 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
+        The suffix() API, which took an offset, is removed and will be
+        eventually reintroduced again but taking suffix size, consistently with
+        prefix() that takes prefix size.
+    -   New sliceSize() API, taking a begin + size instead of begin + end
+    -   Element access with operator[](), front() and back() is now
+        bounds-checked with assertions
+    -   The front() and back() APIs are now constexpr
+    -   Convenience ArrayView2, ArrayView3, ArrayView4 aliases for
+        StaticArrayView
+    -   Renamed empty() to isEmpty() for consistency with other bool-returning
+        APIs
+    -   MSVC 2022 compatibility
+    -   Compatibility of the std::span conversion code with C++20 which removes
+        the <ciso646> header
+    -   Removed dependency on <utility>, resulting in about ~600 preprocessed
+        lines less
     v2020.06-0-g61d1b58c (2020-06-27)
     -   Conversion of const types to mutable arrays is now disabled with SFINAE
         to prevent ambiguous constructor overloads

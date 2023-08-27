@@ -12,6 +12,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   Compatibility with C++20 which removes the <ciso646> header
     v2019.01-186-gdd93f1f1 (2019-06-06)
     -   Initial release
 

@@ -13,6 +13,14 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   The InPlaceInit tag is moved from Containers to the root namespace
+    -   The underlying type is exposed in a new Optional::Type typedef
+    -   Working around false-positive uninitialized value warnings in GCC 10+
+    -   Further workarounds for various compiler-specific issues and standard
+        defects when using {}-initialization for aggregate types
+    -   Removed dependency on <utility>, resulting in about ~600 preprocessed
+        lines less
     v2020.06-0-g61d1b58c (2020-06-27)
     -   Working around various compiler-specific issues and standard defects
         when using {}-initialization for aggregate types

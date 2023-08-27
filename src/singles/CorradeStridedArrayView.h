@@ -15,6 +15,24 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   New expanded() and collapsed() APIs
+    -   Ability to slice to struct members and member functions
+    -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
+        The suffix() API, which took an offset, is removed and will be
+        eventually reintroduced again but taking suffix size, consistently with
+        prefix() that takes prefix size.
+    -   New sliceSize() API, taking a begin + size instead of begin + end
+    -   New stridedArrayView() convenience helpers for creating 1D strided
+        array views from ArrayView instances and a pointer + size
+    -   The Size and Stride member typedefs are moved to the Containers
+        namespace; Size1D, Size2D, Size3D, Size4D, Stride1D, Stride2D,
+        Stride3D and Stride4D convenience typedefs were added
+    -   Renamed empty() to isEmpty() for consistency with other bool-returning
+        APIs
+    -   MSVC 2022 compatibility
+    -   Removed dependency on <utility>, resulting in about ~600 preprocessed
+        lines less
     v2020.06-0-g61d1b58c (2020-06-27)
     -   Added mutable StridedDimensions::begin()/end()
     -   New cross-dimension arrayCast() overloads

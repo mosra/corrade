@@ -13,6 +13,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   Ability to construct a NoCreate'd ScopeGuard and then move a complete
+        instance over it
     v2019.01-41-g39c08d7c (2019-02-18)
     -   Ability to create a handle-less ScopeGuard
     v2018.10-232-ge927d7f3 (2019-01-28)

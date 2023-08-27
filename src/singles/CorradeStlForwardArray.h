@@ -13,6 +13,10 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   Compatibility with libc++ 16 and newer which has the std::array forward
+        declaration in a different header
+    -   Compatibility with C++20 which removes the <ciso646> header
     v2019.01-115-ged348b26 (2019-03-27)
     -   Initial release
 

@@ -13,6 +13,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   The underlying type is exposed in a new Reference::Type typedef
+    -   Removed unnecessary function calls for improved debug performace
     v2018.10-232-ge927d7f3 (2019-01-28)
     -   Stricter matching for external representation conversion
     -   Fixed STL compatibility to not recurse infinitely

@@ -17,6 +17,24 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1454-gfc3b7 (2023-08-27)
+    -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
+        The suffix() API, which took an offset, is removed and will be
+        eventually reintroduced again but taking suffix size, consistently with
+        prefix() that takes prefix size.
+    -   New sliceSize() API, taking a begin + size instead of begin + end
+    -   Element access with operator[](), front() and back() is now
+        bounds-checked with assertions
+    -   Convenience Array2, Array3, Array4 aliases for StaticArray
+    -   The DefaultInit, ValueInit, NoInit, DirectInit and InPlaceInit tags
+        were moved from Containers to the root namespace
+    -   Renamed empty() to isEmpty() for consistency with other bool-returning
+        APIs
+    -   MSVC 2022 compatibility
+    -   Further workarounds for various compiler-specific issues and standard
+        defects when using {}-initialization for aggregate types
+    -   Removed dependency on <utility>, resulting in about ~450 preprocessed
+        lines less
     v2020.06-0-g61d1b58c (2020-06-27)
     -   Default initialization got changed to ValueInit, which means builtin
         types are zero-initialized instead of kept uninitialized
