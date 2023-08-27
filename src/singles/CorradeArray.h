@@ -57,16 +57,27 @@
    view ones are again already in CorradeArrayView.h. */
 #pragma ACME enable Corrade_Containers_Containers_h
 
-/* Disable all asserts, CorradeArrayView.h has both CORRADE_ASSERT and
-   CORRADE_CONSTEXPR_ASSERT */
+/* CorradeArrayView.h has CORRADE_ASSERT, CORRADE_CONSTEXPR_ASSERT and
+   CORRADE_CONSTEXPR_DEBUG_ASSERT, we additionally need CORRADE_DEBUG_ASSERT
+   here */
 #pragma ACME enable CORRADE_ASSERT
+#pragma ACME enable CORRADE_CONSTEXPR_ASSERT
+#pragma ACME enable CORRADE_CONSTEXPR_DEBUG_ASSERT
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_DEBUG_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_INTERNAL_ASSERT_EXPRESSION
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION
 #pragma ACME enable CORRADE_ASSERT_UNREACHABLE
+#pragma ACME enable CORRADE_DEBUG_ASSERT_UNREACHABLE
 #pragma ACME enable CORRADE_INTERNAL_ASSERT
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_ASSERT
+#pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT_UNREACHABLE
-
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE
+#include "Corrade/Utility/DebugAssert.h"
 #ifndef CorradeArray_h
 #define CorradeArray_h
 namespace Corrade { namespace Containers {

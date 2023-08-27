@@ -41,16 +41,26 @@
 #define CORRADE_TARGET_GCC
 #endif
 
-/* Disable asserts that are not used. CORRADE_ASSERT is used, wrapping the
-   #include <cassert> above. When enabling additional asserts, be sure to
-   update it above as well. */
+/* Disable asserts that are not used. CORRADE_DEBUG_ASSERT is used, wrapping
+   the #include <cassert> above. When enabling additional asserts, be sure to
+   update it above as well -- without the _DEBUG variants, as they just
+   delegate to the non-debug version of the macro. */
 #pragma ACME enable CORRADE_CONSTEXPR_ASSERT
+#pragma ACME enable CORRADE_CONSTEXPR_DEBUG_ASSERT
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_DEBUG_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_INTERNAL_ASSERT_EXPRESSION
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION
 #pragma ACME enable CORRADE_ASSERT_UNREACHABLE
+#pragma ACME enable CORRADE_DEBUG_ASSERT_UNREACHABLE
 #pragma ACME enable CORRADE_INTERNAL_ASSERT
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_ASSERT
+#pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT_OUTPUT
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT_UNREACHABLE
+#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE
 
 #include "Corrade/Containers/Optional.h"
 #ifdef CORRADE_OPTIONAL_STL_COMPATIBILITY

@@ -35,6 +35,7 @@
 #pragma ACME disable CORRADE_BUILD_DEPRECATED
 
 #pragma ACME disable CORRADE_NO_ASSERT
+#pragma ACME disable CORRADE_NO_DEBUG_ASSERT
 #pragma ACME enable CORRADE_STANDARD_ASSERT
 #pragma ACME enable CORRADE_NO_DEBUG
 #pragma ACME disable CORRADE_GRACEFUL_ASSERT
@@ -48,8 +49,9 @@
 #pragma ACME enable CORRADE_NO_PYTHON_COMPATIBILITY
 #pragma ACME enable CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
 
-/* Make it possible to include Assert.h multiple times */
+/* Make it possible to include Assert.h and DebugAssert.h multiple times */
 #pragma ACME disable Corrade_Utility_Assert_h
+#pragma ACME disable Corrade_Utility_DebugAssert_h
 
 #pragma ACME revision * echo "$(git describe --long --match 'v*' --abbrev=4) ($(date -d @$(git log -1 --format=%at) +%Y-%m-%d))"
 #pragma ACME stats loc wc -l
