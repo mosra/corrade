@@ -631,8 +631,8 @@ This assumes the `magnum-singles` repository is cloned next to the `corrade`
 repository.
 
 1.  Create/update a driver file in `src/singles/`, if needed
-2.  Update `src/singles/postprocess.sh`, if needed
-3.  Run `src/singles/postprocess.sh`, regenerating all headers
+2.  Update `src/singles/generate.sh`, if needed
+3.  Run `src/singles/generate.sh`, regenerating all headers
 4.  Check `git diff` for suspicious changes.
     -   no `-dirty` suffix in revision IDs
     -   no preprocessed LoC being over 10k
