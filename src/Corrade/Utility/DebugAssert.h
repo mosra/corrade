@@ -45,7 +45,8 @@ asserts.
 #include <cstdlib> /* std::abort() where unreachable builtin not available */
 #endif
 
-namespace Corrade { namespace Utility {
+/* There's deliberately no namespace Corrade::Utility in order to avoid noise
+   in Corrade Singles */
 
 /**
 @brief Whether debug assertions are disabled
@@ -279,7 +280,5 @@ You can override this implementation by placing your own
 #endif
 #endif
 #endif
-
-}}
 
 #endif

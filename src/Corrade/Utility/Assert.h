@@ -42,7 +42,8 @@
 #endif
 #endif
 
-namespace Corrade { namespace Utility {
+/* There's deliberately no namespace Corrade::Utility in order to avoid noise
+   in Corrade Singles */
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
@@ -495,7 +496,7 @@ You can override this implementation by placing your own
 #endif
 
 #if !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) && !defined(CORRADE_NO_ASSERT) && !(defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
-namespace Implementation {
+namespace Corrade { namespace Utility { namespace Implementation {
     #ifdef CORRADE_STANDARD_ASSERT
     template<class T> T assertExpression(T&& value) {
         assert(value);
@@ -511,7 +512,7 @@ namespace Implementation {
         return Corrade::Utility::forward<T>(value);
     }
     #endif
-}
+}}}
 #endif
 
 /** @hideinitializer
@@ -607,7 +608,5 @@ You can override this implementation by placing your own
     } while(false)
 #endif
 #endif
-
-}}
 
 #endif
