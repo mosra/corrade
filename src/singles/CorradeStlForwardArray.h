@@ -20,7 +20,7 @@
 */
 
 #include "base.h"
-
+/* No external includes, so avoid extraneous newline here */
 /* We need just the STL implementation detection from configure.h, copying it
    verbatim here. Keep in sync. */
 #pragma ACME enable Corrade_configure_h

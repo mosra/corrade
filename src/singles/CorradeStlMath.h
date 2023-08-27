@@ -19,9 +19,9 @@
 */
 
 #include "base.h"
-
-#pragma ACME stats preprocessed-cpp17 g++ -std=c++17 -P -E -x c++ - | wc -l
-
+/* No external includes, so avoid extraneous newline here */
+/* Just make sure bits/c++config.h with _GLIBCXX_USE_STD_SPEC_FUNCS is brought
+   in by <ciso646> or <version>. */
 #ifdef _MSC_VER
 #ifdef _MSVC_LANG
 #define CORRADE_CXX_STANDARD _MSVC_LANG
@@ -36,6 +36,8 @@
 #else
 #include <ciso646>
 #endif
+
+#pragma ACME stats preprocessed-cpp17 g++ -std=c++17 -P -E -x c++ - | wc -l
 
 /* A semi-verbatim copy of Utility/StlMath.h because otherwise the includes
    don't stay in the correct place. */
