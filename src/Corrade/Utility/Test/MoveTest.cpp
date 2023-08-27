@@ -24,9 +24,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstdlib> /* std::div_t */
 #include <utility>
 
+#include "Corrade/Containers/Pair.h" /* need a template that isn't in Utility or std */
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/AbstractHash.h" /* need just *some* type from Utility */
 #include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -36,11 +39,21 @@ struct MoveTest: TestSuite::Tester {
 
     void forward();
     void move();
+
+    void swap();
+    void swapMoveOnly();
+    void swapStlTypesAdlAmbiguity();
+    void swapUtilityTypesAdlAmbiguity();
 };
 
 MoveTest::MoveTest() {
     addTests({&MoveTest::forward,
-              &MoveTest::move});
+              &MoveTest::move,
+
+              &MoveTest::swap,
+              &MoveTest::swapMoveOnly,
+              &MoveTest::swapStlTypesAdlAmbiguity,
+              &MoveTest::swapUtilityTypesAdlAmbiguity});
 }
 
 struct Foo {
@@ -95,6 +108,125 @@ void MoveTest::move() {
 
     constexpr Foo cb = Utility::move(ca);
     CORRADE_COMPARE(cb.a, 5);
+}
+
+void MoveTest::swap() {
+    int a = 3;
+    int b = -27;
+    Utility::swap(a, b);
+    CORRADE_COMPARE(a, -27);
+    CORRADE_COMPARE(b, 3);
+}
+
+void MoveTest::swapMoveOnly() {
+    Containers::Pointer<int> a{InPlaceInit, 3};
+    Containers::Pointer<int> b{InPlaceInit, -27};
+    Utility::swap(a, b);
+    CORRADE_COMPARE(*a, -27);
+    CORRADE_COMPARE(*b, 3);
+}
+
+void MoveTest::swapStlTypesAdlAmbiguity() {
+    /* With the `using` pattern, it should delegate to std::swap() (for which
+       std::pair has a specialization) */
+    {
+        std::pair<int, int> a{3, -27};
+        std::pair<int, int> b{-6, 54};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, std::make_pair(-6, 54));
+        CORRADE_COMPARE(b, std::make_pair(3, -27));
+
+    /* A pointer to std::pair should also use std::swap(), as that's what ADL
+       finds for it. The `using Utility::swap` does not introduce an ambiguity
+       as the second argument is a `typename std::common_type<T>&` instead,
+       which makes it a "worse" candidate. */
+    } {
+        std::pair<int, int> aData;
+        std::pair<int, int> bData;
+        std::pair<int, int>* a = &aData;
+        std::pair<int, int>* b = &bData;
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, &bData);
+        CORRADE_COMPARE(b, &aData);
+
+    /* On the other hand, std::div_t picks Utility::swap, as -- I suspect --
+       div_t exists in the global namespace and is brought into the std
+       namespace with an `using`, so std::swap isn't found for it by ADL. */
+    } {
+        std::div_t aData, bData;
+        std::div_t* a = &aData;
+        std::div_t* b = &bData;
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, &bData);
+        CORRADE_COMPARE(b, &aData);
+    }
+}
+
+void MoveTest::swapUtilityTypesAdlAmbiguity() {
+    /* With `using Utility::swap`, it should pick the implementation that it
+       would pick with ADL anyway. There's no potential for ambiguity with
+       std::swap here. */
+    {
+        HashDigest<3> a{'a', 'b', 'c'};
+        HashDigest<3> b{'C', 'B', 'A'};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, (HashDigest<3>{'C', 'B', 'A'}));
+        CORRADE_COMPARE(b, (HashDigest<3>{'a', 'b', 'c'}));
+
+    /* With `using std::swap` (as opposed to `using Utility::swap`), it picks
+       std::swap, because the Utility::swap picked by ADL is a worse
+       candidate due to `typename std::common_type<T>&` for its second
+       argument.
+
+       An alternative solution here would be a so-called "ADL Barrier idiom",
+       i.e.
+
+        namespace Corrade { namespace Utility {
+
+            namespace StopAdl {
+                template<class T> void swap(T& a, T& b);
+            }
+
+            // Note that using StopAdl::swap wouldn't work!
+            using namespace StopAdl;
+        }
+
+       but that doesn't solve the conflicts with std::swap() in the pair* case
+       above, or the "both std and Utility" case below. The common_type does. */
+    } {
+        HashDigest<3> a{'a', 'b', 'c'};
+        HashDigest<3> b{'C', 'B', 'A'};
+        using std::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, (HashDigest<3>{'C', 'B', 'A'}));
+        CORRADE_COMPARE(b, (HashDigest<3>{'a', 'b', 'c'}));
+
+    /* A type that's both in the std and Utility namespace and there's no
+       specialization for it. Like with the std::pair* case above,
+       `using Utility::swap` would be ambiguous without the common_type, and
+       ADL Barrier wouldn't help either. */
+    } {
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> a{HashDigest<3>{'a', 'b', 'c'}, {-3, 6}};
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> b{HashDigest<3>{'C', 'B', 'A'}, {2, -4}};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, Containers::pair(HashDigest<3>{'C', 'B', 'A'}, std::make_pair(2, -4)));
+        CORRADE_COMPARE(b, Containers::pair(HashDigest<3>{'a', 'b', 'c'}, std::make_pair(-3, 6)));
+
+    /* Then, `using std::swap` would stop being ambiguous with just the ADL
+       Barrier alone, but common_type fixes it too. */
+    } {
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> a{HashDigest<3>{'a', 'b', 'c'}, {-3, 6}};
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> b{HashDigest<3>{'C', 'B', 'A'}, {2, -4}};
+        using std::swap;
+        swap(a, b);
+        CORRADE_COMPARE(a, Containers::pair(HashDigest<3>{'C', 'B', 'A'}, std::make_pair(2, -4)));
+        CORRADE_COMPARE(b, Containers::pair(HashDigest<3>{'a', 'b', 'c'}, std::make_pair(-3, 6)));
+    }
 }
 
 }}}}
