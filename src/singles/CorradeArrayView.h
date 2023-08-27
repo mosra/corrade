@@ -82,14 +82,17 @@
 
 #ifndef CorradeArrayView_h
 #define CorradeArrayView_h
-
 namespace Corrade { namespace Containers {
 
-template<class> class ArrayView;
+/* Needs to be defined here because it's referenced before its definition */
 template<std::size_t, class> class StaticArrayView;
+/* These need to be defined here because the other occurence is guarded with
+   #ifndef CORRADE_MSVC2015_COMPATIBILITY */
+template<class T> using ArrayView2 = StaticArrayView<2, T>;
+template<class T> using ArrayView3 = StaticArrayView<3, T>;
+template<class T> using ArrayView4 = StaticArrayView<4, T>;
 
 }}
-
 #endif
 #include "Corrade/Containers/ArrayView.h"
 #ifdef CORRADE_ARRAYVIEW_STL_COMPATIBILITY

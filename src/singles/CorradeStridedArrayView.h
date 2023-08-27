@@ -83,18 +83,25 @@
 #include "Corrade/Utility/DebugAssert.h"
 #ifndef CorradeStridedArrayView_h
 #define CorradeStridedArrayView_h
-
 namespace Corrade { namespace Containers {
 
+/* These need to be defined here because the other occurence is guarded with
+   #ifndef CORRADE_MSVC2015_COMPATIBILITY. And thus also StridedDimensions. */
 template<unsigned, class> class StridedDimensions;
-template<unsigned, class> class StridedArrayView;
+template<unsigned dimensions> using Size = StridedDimensions<dimensions, std::size_t>;
+template<unsigned dimensions> using Stride = StridedDimensions<dimensions, std::ptrdiff_t>;
+/* Needs to be defined here because it's referenced before its definition */
 template<unsigned, class> class StridedIterator;
+/* These need to be defined here because the other occurence is guarded with
+   #ifndef CORRADE_MSVC2015_COMPATIBILITY. And thus also StridedArrayView. */
+template<unsigned, class> class StridedArrayView;
 template<class T> using StridedArrayView1D = StridedArrayView<1, T>;
 template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
 template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
+/* Needs to be defined here because sliceBit() uses it */
+template<unsigned, class> class BasicStridedBitArrayView;
 
 }}
-
 #endif
 #include "Corrade/Containers/StridedArrayView.h"

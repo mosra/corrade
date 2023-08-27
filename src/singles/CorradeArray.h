@@ -88,7 +88,13 @@
 namespace Corrade { namespace Containers {
 
 template<class T, class = void(*)(T*, std::size_t)> class Array;
+/* Needs to be defined here because it's referenced before its definition */
 template<std::size_t, class> class StaticArray;
+/* These need to be defined here because the other occurence is guarded with
+   #ifndef CORRADE_MSVC2015_COMPATIBILITY */
+template<class T> using Array2 = StaticArray<2, T>;
+template<class T> using Array3 = StaticArray<3, T>;
+template<class T> using Array4 = StaticArray<4, T>;
 
 }}
 #endif
