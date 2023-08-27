@@ -5,9 +5,11 @@ set -e
 ../acme/acme.py CorradeArray.h --output ../../../magnum-singles
 ../acme/acme.py CorradeEnumSet.h --output ../../../magnum-singles
 ../acme/acme.py CorradeOptional.h --output ../../../magnum-singles
+../acme/acme.py CorradePair.h --output ../../../magnum-singles
 ../acme/acme.py CorradePointer.h --output ../../../magnum-singles
 ../acme/acme.py CorradeReference.h --output ../../../magnum-singles
 ../acme/acme.py CorradeScopeGuard.h --output ../../../magnum-singles
+../acme/acme.py CorradeTriple.h --output ../../../magnum-singles
 
 ../acme/acme.py CorradeStlForwardArray.h --output ../../../magnum-singles
 ../acme/acme.py CorradeStlForwardString.h --output ../../../magnum-singles

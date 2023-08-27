@@ -51,9 +51,11 @@ Class, library or header    | Single-header version
 @ref Containers::Array, \n @ref Containers::StaticArray | [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h), depends on `CorradeArrayView.h`
 @ref Containers::EnumSet    | [CorradeEnumSet.h](https://github.com/mosra/magnum-singles/tree/master/CorradeEnumSet.h)
 @ref Containers::Optional   | [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
+@ref Containers::Pair       | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePair.h)
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
 @ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
+@ref Containers::Triple     | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradeTriple.h)
 @ref Corrade::Cpu           | [CorradeCpu.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.hpp)
 @ref Corrade/Utility/StlForwardArray.h | [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
 @ref Corrade/Utility/StlForwardString.h | [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)

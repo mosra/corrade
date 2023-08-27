@@ -79,6 +79,20 @@ overload also allows for such a conversion. Example:
 
 @snippet Containers-stl.cpp Pair
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradePair.h](https://github.com/mosra/magnum-singles/tree/master/CorradePair.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information. The above
+    mentioned STL compatibility is included as well, but disabled by default.
+    Enable it by specifying @cpp #define CORRADE_PAIR_STL_COMPATIBILITY @ce
+    before including the file. Including it multiple times with different
+    macros defined works as well.
+
 @see @ref pair(F&&, S&&), @ref pair(T&&)
 */
 template<class F, class S> class Pair {

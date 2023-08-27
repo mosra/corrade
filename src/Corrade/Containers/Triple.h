@@ -78,6 +78,20 @@ Example:
 
 @snippet Containers-stl.cpp Triple
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradeTriple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeTriple.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information. The above
+    mentioned STL compatibility is included as well, but disabled by default.
+    Enable it by specifying @cpp #define CORRADE_TRIPLE_STL_COMPATIBILITY @ce
+    before including the file. Including it multiple times with different
+    macros defined works as well.
+
 @see @ref triple(F&&, S&&, T&&), @ref triple(T&&)
 */
 template<class F, class S, class T> class Triple {
