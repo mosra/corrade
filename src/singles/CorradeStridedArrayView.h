@@ -42,18 +42,23 @@
    hide everything it already includes */
 #pragma ACME noexpand CorradeArrayView.h
 #pragma ACME enable Corrade_Containers_ArrayView_h
+#pragma ACME enable Corrade_Utility_Move_h
 #include "CorradeArrayView.h"
 
-/* We need just CORRADE_MSVC2015_COMPATIBILITY from configure.h, this is
-   equivalent to the version check in UseCorrade.cmake.
-   CORRADE_MSVC2019_COMPATIBILITY is handled by CorradeArrayView.h already.
-   From Containers.h we need just the array forward declarations, the array
-   view ones are again already in CorradeArrayView.h. */
+/* We need just CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h, which is
+   handled by CorradeArrayView.h already, and CORRADE_TARGET_GCC +
+   CORRADE_TARGET_CLANG */
 #pragma ACME enable Corrade_configure_h
-#pragma ACME enable Corrade_Containers_Containers_h
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-#define CORRADE_MSVC2015_COMPATIBILITY
+#ifdef __GNUC__
+#define CORRADE_TARGET_GCC
 #endif
+#ifdef __clang__
+#define CORRADE_TARGET_CLANG
+#endif
+
+/* From Containers.h we need just the strided array view forward declarations,
+   the array view ones are again already in CorradeArrayView.h. */
+#pragma ACME enable Corrade_Containers_Containers_h
 
 /* CorradeArrayView.h has CORRADE_ASSERT, CORRADE_CONSTEXPR_ASSERT and
    CORRADE_CONSTEXPR_DEBUG_ASSERT, we additionally need CORRADE_DEBUG_ASSERT

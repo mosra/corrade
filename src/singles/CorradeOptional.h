@@ -40,6 +40,9 @@
 #ifdef __GNUC__
 #define CORRADE_TARGET_GCC
 #endif
+#ifdef __clang__
+#define CORRADE_TARGET_CLANG
+#endif
 
 /* Disable asserts that are not used. CORRADE_DEBUG_ASSERT is used, wrapping
    the #include <cassert> above. When enabling additional asserts, be sure to

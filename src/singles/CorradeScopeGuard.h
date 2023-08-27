@@ -22,11 +22,11 @@
 */
 
 #include "base.h"
-/* No external includes, so avoid extraneous newline here */
+
 /* We need just CORRADE_MSVC2015_COMPATIBILITY from configure.h. This is
    equivalent to the version check in UseCorrade.cmake. */
 #pragma ACME enable Corrade_configure_h
-#if defined(_MSC_VER) && _MSC_VER <= 1900
+#if defined(_MSC_VER) && _MSC_VER < 1910
 #define CORRADE_MSVC2015_COMPATIBILITY
 #endif
 

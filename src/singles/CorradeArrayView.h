@@ -46,11 +46,14 @@
 #include <cassert>
 #endif
 
-/* We need just CORRADE_MSVC2019_COMPATIBILITY from configure.h. This is
+/* We need just CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h. This is
    equivalent to the version check in UseCorrade.cmake. */
 #pragma ACME enable Corrade_configure_h
-#if defined(_MSC_VER) && _MSC_VER <= 1930
-#define CORRADE_MSVC2019_COMPATIBILITY
+#ifdef _MSC_VER
+#define CORRADE_MSVC_COMPATIBILITY
+#endif
+#if defined(_MSC_VER) && _MSC_VER < 1910
+#define CORRADE_MSVC2015_COMPATIBILITY
 #endif
 
 /* We need just the array forward declarations from Containers.h */

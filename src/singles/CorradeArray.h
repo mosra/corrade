@@ -44,13 +44,18 @@
    hide everything it already includes */
 #pragma ACME noexpand CorradeArrayView.h
 #pragma ACME enable Corrade_Containers_ArrayView_h
+#pragma ACME enable Corrade_Utility_Move_h
 #include "CorradeArrayView.h"
 
-/* We need CORRADE_MSVC2019_COMPATIBILITY from configure.h, which is handled by
-   CorradeArrayView.h already, and CORRADE_TARGET_GCC */
+/* We need CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h, which is handled
+   by CorradeArrayView.h already, and CORRADE_TARGET_GCC +
+   CORRADE_TARGET_CLANG */
 #pragma ACME enable Corrade_configure_h
 #ifdef __GNUC__
 #define CORRADE_TARGET_GCC
+#endif
+#ifdef __clang__
+#define CORRADE_TARGET_CLANG
 #endif
 
 /* From Containers.h we need just the array forward declarations, the array
