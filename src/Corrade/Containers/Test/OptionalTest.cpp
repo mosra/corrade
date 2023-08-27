@@ -50,7 +50,7 @@ struct MaybePtr {
     /* Some compilers get upset when move assignment is not implemented even
        though it's not actually used */
     CORRADE_UNUSED MaybePtr& operator=(MaybePtr&& other) {
-        Corrade::Utility::swap(a, other.a);
+        std::swap(a, other.a);
         return *this;
     }
 
@@ -317,7 +317,7 @@ int Immovable::destructed = 0;
 
 void swap(Movable& a, Movable& b) {
     /* Swap these without copying the parent class */
-    Utility::swap(a.a, b.a);
+    std::swap(a.a, b.a);
 }
 
 void OptionalTest::constructDefault() {
@@ -830,7 +830,7 @@ void OptionalTest::moveSetToSet() {
         CORRADE_COMPARE(b->a, 32);
     }
 
-    /* One extra construction due to the temporary inside Utility::swap() */
+    /* One extra construction due to the temporary inside std::swap() */
     CORRADE_COMPARE(Copyable::constructed, 3);
     CORRADE_COMPARE(Copyable::destructed, 3);
     CORRADE_COMPARE(Copyable::copied, 0);

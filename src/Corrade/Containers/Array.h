@@ -33,6 +33,7 @@
 #include <initializer_list>
 #include <new>
 #include <type_traits>
+#include <utility> /* std::swap() */ /** @todo make our own */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
@@ -1037,7 +1038,7 @@ template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initia
 }
 
 template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {
-    using Utility::swap;
+    using std::swap;
     swap(_data, other._data);
     swap(_size, other._size);
     swap(_deleter, other._deleter);

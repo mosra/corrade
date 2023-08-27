@@ -179,11 +179,9 @@ namespace Corrade {
     @ref Containers::BitArrayView containers
 -   @ref Utility::allocateAligned() family of functions for overaligned
     allocations, suitable for efficient SIMD operations
--   Added @ref Utility::forward(), @ref Utility::move() and
-    @ref Utility::swap() equivalents to @ref std::forward(),
-    @m_class{m-doc-external} [std::move()](https://en.cppreference.com/w/cpp/utility/move)
-    and @ref std::swap() without having to pull in everything else from
-    @cpp #include <utility> @ce.
+-   Added @ref Utility::forward() and @ref Utility::move() equivalents to
+    @ref std::forward() and @m_class{m-doc-external} [std::move()](https://en.cppreference.com/w/cpp/utility/move)
+    without having to pull in everything else from @cpp #include <utility> @ce.
 -   Added @ref Utility::Arguments::addArrayArgument() as a positional
     counterpart to @ref Utility::Arguments::addArrayOption()
 -   @ref Utility::Configuration and @ref Utility::Arguments can now read and

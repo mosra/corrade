@@ -31,13 +31,13 @@
 #include "Corrade/configure.h"
 
 /** @file
- * @brief Function @ref Corrade::Utility::forward(), @ref Corrade::Utility::move(), @ref Corrade::Utility::swap()
+ * @brief Function @ref Corrade::Utility::forward(), @ref Corrade::Utility::move()
  * @m_since_latest
  */
 
 namespace Corrade { namespace Utility {
 
-/* forward() and move() are basically copied from libstdc++'s bits/move.h */
+/* Basically a copy of bits/move.h from libstdc++ */
 
 /**
 @brief Forward an l-value
@@ -47,7 +47,6 @@ Returns @cpp static_cast<T&&>(t) @ce. Equivalent to @ref std::forward(), which
 is used to implement perfect forwarding, but without the
 @cpp #include <utility> @ce dependency and guaranteed to be @cpp constexpr @ce
 even in C++11.
-@see @ref move(), @ref swap()
 */
 template<class T> constexpr T&& forward(typename std::remove_reference<T>::type& t) noexcept {
     return static_cast<T&&>(t);
@@ -61,7 +60,6 @@ Returns @cpp static_cast<T&&>(t) @ce. Equivalent to @ref std::forward(), which
 is used to implement perfect forwarding, but without the
 @cpp #include <utility> @ce dependency and guaranteed to be @cpp constexpr @ce
 even in C++11.
-@see @ref move(), @ref swap()
 */
 template<class T> constexpr T&& forward(typename std::remove_reference<T>::type&& t) noexcept {
     /* bits/move.h in libstdc++ has this and it makes sense to have it here
@@ -78,41 +76,10 @@ Returns @cpp static_cast<typename std::remove_reference<T>::type&&>(t) @ce.
 Equivalent to @m_class{m-doc-external} [std::move()](https://en.cppreference.com/w/cpp/utility/move),
 but without the @cpp #include <utility> @ce dependency and guaranteed to be
 @cpp constexpr @ce even in C++11.
-@see @ref forward(), @ref swap()
 */
 template<class T> constexpr typename std::remove_reference<T>::type&& move(T&& t) noexcept {
     return static_cast<typename std::remove_reference<T>::type&&>(t);
 }
-
-/**
-@brief Swap two values
-@m_since_latest
-
-Swaps two values. Equivalent to @ref std::swap(), but without the
-@cpp #include <utility> @ce dependency. In order to keep supporting custom
-specializations, the usage pattern should be similar to the standard utility,
-i.e. with @cpp using Utility::swap @ce:
-
-@snippet Utility.cpp swap
-@see @ref forward(), @ref move()
-*/
-template<class T> void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value) {
-    /* "Deinlining" move() for nicer debug perf */
-    T tmp = static_cast<T&&>(a);
-    a = static_cast<T&&>(b);
-    b = static_cast<T&&>(tmp);
-}
-#ifndef DOXYGEN_GENERATING_OUTPUT
-/* Needed in order to avoid ambiguity with std::swap() when called on pointers
-   to STL types (or generally, on pointers to any types where their enclosing
-   namespace provides a generic swap() implementation as well). See
-   MoveTest::swapStlTypesAdlAmbiguity() for a repro case. */
-template<class T> void swap(T*& a, T*& b) noexcept {
-    T* tmp = a;
-    a = b;
-    b = tmp;
-}
-#endif
 
 }}
 

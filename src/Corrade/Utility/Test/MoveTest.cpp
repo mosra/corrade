@@ -24,7 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cstdlib> /* std::div_t */
 #include <utility>
 
 #include "Corrade/TestSuite/Tester.h"
@@ -37,17 +36,11 @@ struct MoveTest: TestSuite::Tester {
 
     void forward();
     void move();
-    void swap();
-    void swapMoveOnly();
-    void swapStlTypesAdlAmbiguity();
 };
 
 MoveTest::MoveTest() {
     addTests({&MoveTest::forward,
-              &MoveTest::move,
-              &MoveTest::swap,
-              &MoveTest::swapMoveOnly,
-              &MoveTest::swapStlTypesAdlAmbiguity});
+              &MoveTest::move});
 }
 
 struct Foo {
@@ -102,65 +95,6 @@ void MoveTest::move() {
 
     constexpr Foo cb = Utility::move(ca);
     CORRADE_COMPARE(cb.a, 5);
-}
-
-void MoveTest::swap() {
-    int a = 3;
-    int b = -27;
-    Utility::swap(a, b);
-    CORRADE_COMPARE(a, -27);
-    CORRADE_COMPARE(b, 3);
-}
-
-void MoveTest::swapMoveOnly() {
-    Containers::Pointer<int> a{InPlaceInit, 3};
-    Containers::Pointer<int> b{InPlaceInit, -27};
-    Utility::swap(a, b);
-    CORRADE_COMPARE(*a, -27);
-    CORRADE_COMPARE(*b, 3);
-}
-
-void MoveTest::swapStlTypesAdlAmbiguity() {
-    /* With the `using` pattern, it should delegate to std::swap() (for which
-       std::pair has a specialization */
-    {
-        std::pair<int, int> a{3, -27};
-        std::pair<int, int> b{-6, 54};
-        using Utility::swap;
-        swap(a, b);
-        CORRADE_COMPARE(a, std::make_pair(-6, 54));
-        CORRADE_COMPARE(b, std::make_pair(3, -27));
-
-    /* A pointer to std::pair should use Utility::swap() though. Practically
-       however, it's ambiguous, because ADL picks std::swap() for the STL type
-       as well. The ambiguity is resolving by providing another Utility::swap()
-       overload that specializes for pointers.
-
-       I suspect the same scenario would happen when Utility::swap() would be
-       called on a `Namespace::Foo*` where `Namespace` would have its own
-       swap() implementation. */
-    } {
-        std::pair<int, int> aData;
-        std::pair<int, int> bData;
-        std::pair<int, int>* a = &aData;
-        std::pair<int, int>* b = &bData;
-        using Utility::swap;
-        swap(a, b);
-        CORRADE_COMPARE(a, &bData);
-        CORRADE_COMPARE(b, &aData);
-
-    /* It however isn't ambiguous for all types, std::div_t works well for
-       example. I suspect this is because div_t exists in the global namespace
-       and is brought into the std namespace with an `using`. */
-    } {
-        std::div_t aData, bData;
-        std::div_t* a = &aData;
-        std::div_t* b = &bData;
-        using Utility::swap;
-        swap(a, b);
-        CORRADE_COMPARE(a, &bData);
-        CORRADE_COMPARE(b, &aData);
-    }
 }
 
 }}}}

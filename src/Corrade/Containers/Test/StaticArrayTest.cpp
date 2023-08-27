@@ -290,7 +290,7 @@ int Movable::moved = 0;
 
 void swap(Movable& a, Movable& b) {
     /* Swap these without copying the parent class */
-    Corrade::Utility::swap(a.a, b.a);
+    std::swap(a.a, b.a);
 }
 
 struct Immovable {

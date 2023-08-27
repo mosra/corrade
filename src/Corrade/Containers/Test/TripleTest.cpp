@@ -53,9 +53,9 @@ struct BoolPtrDouble {
     /* Clang complains this function is unused. But removing it may have
        unintended consequences, so don't. */
     CORRADE_UNUSED BoolPtrDouble& operator=(BoolPtrDouble&& other) {
-        Corrade::Utility::swap(a, other.a);
-        Corrade::Utility::swap(b, other.b);
-        Corrade::Utility::swap(c, other.c);
+        std::swap(a, other.a);
+        std::swap(b, other.b);
+        std::swap(c, other.c);
         return *this;
     }
 
