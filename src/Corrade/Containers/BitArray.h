@@ -33,11 +33,11 @@
 
 #include <cstddef>
 #include <type_traits>
-#include <utility> /* std::swap() */ /** @todo make our own */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/DebugAssert.h"
+#include "Corrade/Utility/Move.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -444,7 +444,7 @@ inline BitArray::BitArray(BitArray&& other) noexcept: _data{other._data}, _sizeO
 }
 
 inline BitArray& BitArray::operator=(BitArray&& other) noexcept {
-    using std::swap;
+    using Utility::swap;
     swap(_data, other._data);
     swap(_sizeOffset, other._sizeOffset);
     swap(_deleter, other._deleter);

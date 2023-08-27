@@ -1243,8 +1243,8 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
     /* Clear offset from the first dimension, swap the dimensions and then put
        it back */
     sizeOffset._data[0] &= ~0x07;
-    std::swap(sizeOffset._data[dimensionA], sizeOffset._data[dimensionB]);
-    std::swap(stride._data[dimensionA], stride._data[dimensionB]);
+    Utility::swap(sizeOffset._data[dimensionA], sizeOffset._data[dimensionB]);
+    Utility::swap(stride._data[dimensionA], stride._data[dimensionB]);
     sizeOffset._data[0] |= _sizeOffset._data[0] & 0x07;
 
     return BasicStridedBitArrayView<dimensions, T>{sizeOffset, stride, _data};

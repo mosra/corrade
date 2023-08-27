@@ -180,7 +180,7 @@ ArrayTuple::~ArrayTuple() {
 }
 
 ArrayTuple& ArrayTuple::operator=(ArrayTuple&& other) noexcept {
-    using std::swap;
+    using Utility::swap;
     swap(other._data, _data);
     swap(other._size, _size);
     swap(other._deleter, _deleter);

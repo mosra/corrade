@@ -345,7 +345,7 @@ String& String::operator=(String&& other) noexcept {
          the above.
        - If both are small, there's just data exchange, with neither instance
          deleting anything. */
-    using std::swap;
+    using Utility::swap;
     swap(other._large.data, _large.data);
     swap(other._large.size, _large.size); /* including the potential Global bit */
     swap(other._large.deleter, _large.deleter);

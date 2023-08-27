@@ -30,8 +30,6 @@
  * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator, alias @ref Corrade::Containers::StridedArrayView1D, @ref Corrade::Containers::StridedArrayView2D, @ref Corrade::Containers::StridedArrayView3D, @ref Corrade::Containers::StridedArrayView4D
  */
 
-#include <utility> /* std::swap() */ /** @todo make our own */
-
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StridedDimensions.h"
 
@@ -2443,8 +2441,8 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
 
     Containers::Size<dimensions> size = _size;
     Containers::Stride<dimensions> stride = _stride;
-    std::swap(size._data[dimensionA], size._data[dimensionB]);
-    std::swap(stride._data[dimensionA], stride._data[dimensionB]);
+    Utility::swap(size._data[dimensionA], size._data[dimensionB]);
+    Utility::swap(stride._data[dimensionA], stride._data[dimensionB]);
     return StridedArrayView<dimensions, T>{size, stride, _data};
 }
 

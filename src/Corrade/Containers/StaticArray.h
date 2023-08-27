@@ -32,7 +32,6 @@
 
 #include <new>
 #include <type_traits>
-#include <utility> /* std::swap() */ /** @todo make our own */
 
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/ArrayView.h"
@@ -912,7 +911,7 @@ template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T
 }
 
 template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value) {
-    using std::swap;
+    using Utility::swap;
     for(std::size_t i = 0; i != other.size(); ++i)
         swap(_data[i], other._data[i]);
     return *this;
