@@ -260,6 +260,19 @@ static_assert(HasSize<std::vector<int>>::value, "");
 static_assert(!HasSize<std::tuple<int, int>>::value, "");
 /* [CORRADE_HAS_TYPE-function] */
 
+struct MyClass {
+    MyClass& operator=(MyClass&&) noexcept;
+    int _member, _another;
+};
+/* [swap] */
+MyClass& MyClass::operator=(MyClass&& other) noexcept {
+    using Utility::swap;
+    swap(other._member, _member);
+    swap(other._another, _another);
+    return *this;
+}
+/* [swap] */
+
 class Buzz {
 /* [Arguments-usage] */
 int main(int argc, char** argv) {
