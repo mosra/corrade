@@ -35,7 +35,9 @@
 
 namespace Corrade { namespace Containers {
 
+#if !defined(CORRADE_NO_ARRAYTUPLE_COMPATIBILITY) || !defined(CORRADE_NO_PYTHON_COMPATIBILITY)
 namespace Implementation {
+    #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
     /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
        void*& because this also acts as a type disambiguator in the
        constructor, even though it's subsequently cast back to void. */
@@ -49,6 +51,7 @@ namespace Implementation {
     T*& dataRef(StridedArrayView<dimensions, T>& view) {
         return reinterpret_cast<T*&>(view._data);
     }
+    #endif
     #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
     template<unsigned dimensions, class T>
@@ -73,6 +76,7 @@ namespace Implementation {
     }
     #endif
 }
+#endif
 
 /**
 @brief Multi-dimensional array view with size and stride information
@@ -1005,8 +1009,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /* Needed for type and mutable/immutable conversion */
         template<unsigned, class> friend class StridedArrayView;
 
+        #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
         /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(StridedArrayView<dimensions, T>&);
+        #endif
         #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* So Python buffer protocol can point to the size / stride members */
         friend Containers::Size<dimensions>& Implementation::sizeRef<>(StridedArrayView<dimensions, T>&);

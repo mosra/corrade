@@ -48,6 +48,7 @@ namespace Implementation {
     template<unsigned, class> struct StridedBitElement;
     template<int> struct ArrayCastFlattenOrInflate;
 
+    #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
     /* So ArrayTuple can know the total size without having to include this
        header. It needs it for both StridedArrayView and StridedBitArrayView so
        it's defined here. */
@@ -57,6 +58,7 @@ namespace Implementation {
             out *= size[i];
         return out;
     }
+    #endif
     #ifndef CORRADE_NO_ASSERT
     /* Used by both StridedArrayView and StridedBitArrayView in assertions
        that data array is large enough. If any size element is zero, the data

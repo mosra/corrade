@@ -43,9 +43,10 @@
 /* This is not used anywhere right now */
 #pragma ACME enable CORRADE_ASSUME
 
-/* Array views publicize some internals for buffer protocol, no need for that
-   here */
+/* Array views publicize some internals for buffer protocol and for ArrayTuple,
+   no need for that here */
 #pragma ACME enable CORRADE_NO_PYTHON_COMPATIBILITY
+#pragma ACME enable CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
 
 /* Make it possible to include Assert.h multiple times */
 #pragma ACME disable Corrade_Utility_Assert_h
