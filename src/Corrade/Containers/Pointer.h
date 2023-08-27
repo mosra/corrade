@@ -192,7 +192,7 @@ template<class T> class Pointer {
 
         /** @brief Move assignment */
         Pointer<T>& operator=(Pointer<T>&& other) noexcept {
-            std::swap(_pointer, other._pointer);
+            Utility::swap(_pointer, other._pointer);
             return *this;
         }
 

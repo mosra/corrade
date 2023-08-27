@@ -89,7 +89,7 @@ template<class T> Containers::Triple<std::size_t, std::size_t, std::size_t> long
 
         /* Save the new runs == discard all previously-active runs that didn't
            get extended in this iteration */
-        std::swap(runs, newRuns);
+        Utility::swap(runs, newRuns);
     }
 
     return {startA, startB, longestSize};

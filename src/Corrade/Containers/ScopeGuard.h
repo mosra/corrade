@@ -30,9 +30,8 @@
  * @brief Class @ref Corrade::Containers::ScopeGuard
  */
 
-#include <utility> /* std::swap */ /** @todo make our own */
-
 #include "Corrade/Tags.h"
+#include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers {
 
@@ -182,7 +181,7 @@ inline ScopeGuard::ScopeGuard(ScopeGuard&& other) noexcept: _deleterWrapper{othe
 }
 
 inline ScopeGuard& ScopeGuard::operator=(ScopeGuard&& other) noexcept {
-    using std::swap;
+    using Utility::swap;
     swap(other._deleterWrapper, _deleterWrapper);
     swap(other._deleter, _deleter);
     swap(other._handle, _handle);

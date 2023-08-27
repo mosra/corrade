@@ -52,8 +52,8 @@ struct BoolPtr {
     /* Clang complains this function is unused. But removing it may have
        unintended consequences, so don't. */
     CORRADE_UNUSED BoolPtr& operator=(BoolPtr&& other) {
-        std::swap(a, other.a);
-        std::swap(b, other.b);
+        Corrade::Utility::swap(a, other.a);
+        Corrade::Utility::swap(b, other.b);
         return *this;
     }
 

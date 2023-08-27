@@ -527,7 +527,7 @@ template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) 
 
 template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value) {
     if(_set && other._set) {
-        using std::swap;
+        using Utility::swap;
         swap(other._value, _value);
     } else {
         if(_set) _value.~T();
@@ -549,7 +549,7 @@ template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
 }
 
 template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args) {
-    /* Done like this instead of std::swap() so it works for non-movable /
+    /* Done like this instead of Utility::swap() so it works for non-movable /
        non-copyable types as well. */
     if(_set) _value.~T();
     Implementation::construct<T>(_value, Utility::forward<Args>(args)...);
