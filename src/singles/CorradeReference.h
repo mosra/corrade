@@ -31,7 +31,7 @@
 #pragma ACME enable Corrade_configure_h
 
 #include "Corrade/Containers/Reference.h"
-#ifdef CORRADE_POINTER_STL_COMPATIBILITY
+#ifdef CORRADE_REFERENCE_STL_COMPATIBILITY
 // {{includes}}
 #include "Corrade/Containers/ReferenceStl.h"
 #endif
