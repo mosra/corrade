@@ -15,6 +15,11 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    The STL compatibility bits are included as well --- opt-in by specifying
+    either `#define CORRADE_ARRAYVIEW_STL_COMPATIBILITY` or
+    `#define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY` before including the
+    file. Including it multiple times with different macros defined works too.
+
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
         The suffix() API, which took an offset, is removed and will be

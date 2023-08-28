@@ -13,6 +13,12 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    The STL compatibility bits are included as well --- opt-in by specifying
+    `#define CORRADE_REFERENCE_STL_COMPATIBILITY` before including the file.
+    Including it multiple times with different macros defined works too.
+
+    v2020.06-1459-g65d9b (2023-08-28)
+    -   Fixed a copypaste error in the STL compatibility opt-in macro
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   The underlying type is exposed in a new Reference::Type typedef
     -   Removed unnecessary function calls for improved debug performace

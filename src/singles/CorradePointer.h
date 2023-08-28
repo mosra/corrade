@@ -13,6 +13,10 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    The STL compatibility bits are included as well --- opt-in by specifying
+    `#define CORRADE_POINTER_STL_COMPATIBILITY` before including the file.
+    Including it multiple times with different macros defined works too.
+
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   The InPlaceInit tag is moved from Containers to the root namespace
     -   The underlying type is exposed in a new Pointer::Type typedef
