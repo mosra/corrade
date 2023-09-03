@@ -487,11 +487,11 @@ function(corrade_add_test test_name)
             #   https://github.com/v8/v8/blob/ba8ad5dd17ea85c856c09c2ff603641487d1f0ca/src/wasm/wasm-feature-flags.h#L101-L109
             # even though it causes numerous issues such as:
             #   https://github.com/nodejs/node/issues/43592
-            # I'm future-proofing and not setting it for version 17+. From the
-            # other side, the flag goes back to ancient version 6 (2017), so it
-            # should be no problem to just pass it there always:
+            # Not setting it for version 17+, the flag is removed in version
+            # 20. From the other side, the flag goes back to ancient version 6
+            # (2017), so it should be no problem to just pass it there always:
             #   https://github.com/v8/v8/commit/45618a9ab5cc98a5de200b0116670e8c272f0c5f
-            if(NodeJS_VERSION VERSION_LESS 17)
+            if(NodeJs_VERSION VERSION_LESS 17)
                 set(experimental_wasm_simd --experimental-wasm-simd)
             endif()
             add_test(NAME ${test_name} COMMAND NodeJs::NodeJs ${experimental_wasm_simd} $<TARGET_FILE:${test_name}> ${arguments})
