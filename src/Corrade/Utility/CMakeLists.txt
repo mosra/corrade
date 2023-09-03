@@ -197,6 +197,19 @@ if(CORRADE_WITH_UTILITY)
         set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
+    # Patch the Utility.js file to contain only __deps that match given
+    # Emscripten version. No, there's no known better way. See the comment in
+    # the file itself for details.
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        if(EMSCRIPTEN_VERSION VERSION_LESS 3.1.35)
+            set(CorradeUtility_EMSCRIPTEN_3135_ONLY "//") # Haha
+        else()
+            set(CorradeUtility_EMSCRIPTEN_3135_ONLY "/* Emscripten 3.1.35+ */")
+        endif()
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Utility.js.in
+                       ${CMAKE_CURRENT_BINARY_DIR}/Utility.js)
+    endif()
+
     # Main Utility library
     add_library(CorradeUtility ${SHARED_OR_STATIC}
         $<TARGET_OBJECTS:CorradeUtilityObjects>
@@ -209,6 +222,14 @@ if(CORRADE_WITH_UTILITY)
         INTERFACE_CORRADE_CXX_STANDARD 11)
     set_property(TARGET CorradeUtility APPEND PROPERTY
         COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        # TODO switch to target_link_options() and SHELL: once we require CMake
+        #   3.13 unconditionally
+        target_link_libraries(CorradeUtility PUBLIC "--js-library ${CMAKE_CURRENT_BINARY_DIR}/Utility.js")
+        # TODO this adds the dependency only on 3.13+ and only for Make/Ninja,
+        #   any better option?
+        set_property(TARGET CorradeUtility APPEND PROPERTY INTERFACE_LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Utility.js)
+    endif()
     set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
     if(NOT CORRADE_BUILD_STATIC)
         set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
@@ -230,6 +251,9 @@ if(CORRADE_WITH_UTILITY)
             LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
             ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
     install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Utility.js DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR} RENAME CorradeUtility.js)
+    endif()
 
     if(CORRADE_BUILD_TESTS)
         # Library with graceful assert, function-pointer-based CPU dispatch
@@ -251,6 +275,14 @@ if(CORRADE_WITH_UTILITY)
             if(CORRADE_BUILD_TESTS_FORCE_WASM_SIMD128)
                 target_compile_options(CorradeUtilityTestLib PUBLIC "-msimd128")
             endif()
+        endif()
+        if(CORRADE_TARGET_EMSCRIPTEN)
+            # TODO switch to target_link_options() and SHELL: once we require
+            #   CMake 3.13 unconditionally
+            target_link_libraries(CorradeUtilityTestLib PUBLIC "--js-library ${CMAKE_CURRENT_BINARY_DIR}/Utility.js")
+            # TODO this adds the dependency only on 3.13+ and only for
+            #   Make/Ninja, any better option?
+            set_property(TARGET CorradeUtilityTestLib APPEND PROPERTY INTERFACE_LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Utility.js)
         endif()
         set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
         if(CORRADE_BUILD_STATIC_PIC)

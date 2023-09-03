@@ -498,6 +498,11 @@ namespace Corrade {
     [mosra/toolchains#13](https://github.com/mosra/toolchains/issues/13),
     [mosra/toolchains#14](https://github.com/mosra/toolchains/pull/14) and
     [mosra/magnum#490](https://github.com/mosra/magnum/issues/490).
+-   The Emscripten build now uses `--js-library` instead of inline `EM_ASM()`
+    for calling into JavaScript. This allows it to properly specify its runtime
+    dependencies without risking breakages when new Emscripten versions make
+    more JS API functions optional, and circumvents the need for users to
+    specify `-s EXPORTED_FUNCTIONS` on their side.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

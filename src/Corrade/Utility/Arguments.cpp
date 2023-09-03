@@ -62,6 +62,14 @@ using Corrade::Utility::Unicode::widen;
 using Corrade::Utility::Unicode::narrow;
 #endif
 
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+/* Implemented in Utility.js.in */
+extern "C" {
+    char* corradeUtilityNodeEnvironment();
+    char* corradeUtilityNodeEnvironmentValue(const char* key, std::size_t size);
+}
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -131,24 +139,7 @@ std::vector<std::string> Arguments::environment() {
     /* System environment provided by Node.js. Hopefully nobody uses \b in
        environment variables. (Can't use \0 because Emscripten chokes on it.) */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
-    #ifdef CORRADE_TARGET_CLANG
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Winvalid-pp-token"
-    #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-    #endif
-    char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
-        var env = '';
-        if(typeof process !== 'undefined') for(var key in process.env)
-            env += key + '=' + process.env[key] + '\b';
-        env += '\b';
-        const bytes = lengthBytesUTF8(env) + 1;
-        const memory = _malloc(bytes);
-        stringToUTF8(env, memory, bytes);
-        return memory;
-    }));
-    #ifdef CORRADE_TARGET_CLANG
-    #pragma GCC diagnostic pop
-    #endif
+    char* const env = corradeUtilityNodeEnvironment();
     char* e = env;
     while(*e != '\b') {
         char* end = std::strchr(e, '\b');
@@ -539,27 +530,10 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
         #ifndef CORRADE_TARGET_WINDOWS
         const char* const env = std::getenv(entry.environment.data());
         #ifdef CORRADE_TARGET_EMSCRIPTEN
-        #ifdef CORRADE_TARGET_CLANG
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
-        #endif
         /* Note: can't use let or const, as that breaks closure compiler:
             ERROR - [JSC_LANGUAGE_FEATURE] This language feature is only
             supported for ECMASCRIPT6 mode or better: const declaration. */
-        char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
-            var name = UTF8ToString($0, $1);
-            if(typeof process !== 'undefined' && name in process.env) {
-                var env = process.env[name];
-                var bytes = lengthBytesUTF8(env) + 1;
-                var memory = _malloc(bytes);
-                stringToUTF8(env, memory, bytes);
-                return memory;
-            }
-            return 0;
-        }, entry.environment.data(), entry.environment.size()));
-        #ifdef CORRADE_TARGET_CLANG
-        #pragma GCC diagnostic pop
-        #endif
+        char* const systemEnv = corradeUtilityNodeEnvironmentValue(entry.environment.data(), entry.environment.size());
         #endif
 
         #ifndef CORRADE_TARGET_EMSCRIPTEN

@@ -1,0 +1,87 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018, 2019, 2020, 2021, 2022, 2023
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+/* JavaScript called by C++ code. Doing it this way instead of having it inline
+   with EM_ASM(), because this provides an actually usable way of expressing
+   dependencies. With EM_ASM() one would instead have to pass
+    -s EXPORTED_FUNCTIONS=[...]
+   to the linker, and OF COURSE there still isn't a way to combine multiple of
+   those together: https://github.com/emscripten-core/emscripten/issues/19058
+   Which would mean shifting the burden of specifying all possible exported
+   functions to the end user, which has no way to know if the list is correct
+   until the actual code needing given function gets called!
+
+   Note: can't use let or const, as that breaks closure compiler:
+    ERROR - [JSC_LANGUAGE_FEATURE] This language feature is only supported for
+    ECMASCRIPT6 mode or better: const declaration.
+
+   Also, lengthBytesUTF8, stringToUTF8 and UTF8ToString are only made library
+   functions as of https://github.com/emscripten-core/emscripten/pull/19097
+   (Emscripten 3.1.35), before that they cause an error if included in __deps.
+   There's (of course, what else to expect) no way to query Emscripten version
+   from within the JS library file, and there's also no useful change in the
+   predefined setting variables between 3.1.34 and 35 I could rely on. Well,
+   except for STRUCT_INFO, which got removed from settings_internal.js in 35,
+   but the dumb-as-a-rock preprocessor in src/parseTools.js doesn't even
+   recognize #ifndef, tells me to use #if if I attempt to use #ifdef, and then
+   while it does what's expected on 3.1.34, on 3.1.35 it fails on
+    ReferenceError: STRUCT_INFO is not defined
+   Ourageously stupid. All of this. So what I do instead is passing this file
+   through configure_file() and replacing CorradeUtility_EMSCRIPTEN_3135_ONLY
+   with a // on older versions. */
+
+mergeInto(LibraryManager.library, {
+    /* Used by Arguments */
+    corradeUtilityNodeEnvironment__deps: ['malloc',
+        ${CorradeUtility_EMSCRIPTEN_3135_ONLY} '$lengthBytesUTF8', '$stringToUTF8'
+    ],
+    corradeUtilityNodeEnvironment: function() {
+        var env = '';
+        if(typeof process !== 'undefined') for(var key in process.env)
+            env += key + '=' + process.env[key] + '\b';
+        env += '\b';
+        const bytes = lengthBytesUTF8(env) + 1;
+        const memory = _malloc(bytes);
+        stringToUTF8(env, memory, bytes);
+        return memory;
+    },
+    corradeUtilityNodeEnvironmentValue__deps: ['malloc',
+        ${CorradeUtility_EMSCRIPTEN_3135_ONLY} '$lengthBytesUTF8', '$stringToUTF8', '$UTF8ToString'
+    ],
+    corradeUtilityNodeEnvironmentValue: function(key, keyLength) {
+        var name = UTF8ToString(key, keyLength);
+        if(typeof process !== 'undefined' && name in process.env) {
+            var env = process.env[name];
+            var bytes = lengthBytesUTF8(env) + 1;
+            var memory = _malloc(bytes);
+            stringToUTF8(env, memory, bytes);
+            return memory;
+        }
+        return 0;
+    },
+});
+
+// kate: hl javascript
