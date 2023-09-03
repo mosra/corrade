@@ -85,7 +85,7 @@ Is the below list missing your name or something's wrong?
 [Let us know!](https://magnum.graphics/contact/)
 
 -   **Aaron Gokaslan** ([\@Skylion007](https://github.com/Skylion007)) ---
-    minor performance fixes
+    Emscripten LTO support, minor performance fixes
 -   **[\@abgita](https://github.com/abgita)** --- minor typo fixes
 -   **Alexander F Rødseth** ([\@xyproto](https://github.com/xyproto)) ---
     packages in the ArchLinux community repository
