@@ -47,6 +47,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 
 corrade_add_test(UtilityAlgorithmsTest AlgorithmsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 target_compile_definitions(UtilityAlgorithmsTest PRIVATE "CORRADE_GRACEFUL_ASSERT")
+# In Emscripten 3.1.27, the stack size was reduced from 5 MB (!) to 64 kB:
+#   https://github.com/emscripten-core/emscripten/pull/18191
+# One benchmark in this test uses 64 kB of stack space (two arrays of 64*64*2
+# ints), need to increase it a bit to not make it crash.
+if(CORRADE_TARGET_EMSCRIPTEN AND NOT EMSCRIPTEN_VERSION VERSION_LESS 3.1.27)
+    set_property(TARGET UtilityAlgorithmsTest APPEND_STRING PROPERTY LINK_FLAGS " -s STACK_SIZE=128kB")
+endif()
 
 corrade_add_test(UtilityBitAlgorithmsTest BitAlgorithmsTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 
