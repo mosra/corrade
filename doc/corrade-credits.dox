@@ -147,7 +147,7 @@ Is the below list missing your name or something's wrong?
 -   **Olga Turanksaya** ([\@olga-python](https://github.com/olga-python)) ---
     gentoo ebuild
 -   **Pablo Escobar** ([\@pezcode](https://github.com/pezcode)) --- MSVC Natvis
-    files, Emscripten version compatibility fixes
+    files, Emscripten buildsystem and compatibility fixes
 -   **Pascal Thomet** ([\@pthom](https://github.com/pthom)) --- Hunter package
 -   **[\@pkubaj](https://github.com/pkubaj)**  --- fixes for big-endian
     platforms
