@@ -390,6 +390,9 @@ jobs:
     executor: emscripten
     steps:
     - install-base-linux
+    - run:
+        name: Query CMake version
+        command: cmake --version
     - build:
         script: emscripten.sh
 
