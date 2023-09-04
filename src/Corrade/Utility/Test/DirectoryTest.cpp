@@ -46,6 +46,16 @@
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
 
+/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
+   3.1.4 moved them to a version header and version 3.1.23 dropped the
+   backwards compatibility. To work consistently on all versions, including the
+   header only if the version macros aren't present.
+   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
+   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
+#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
+#include <emscripten/version.h>
+#endif
+
 #include "configure.h"
 
 #ifdef CORRADE_TARGET_UNIX
@@ -569,6 +579,16 @@ void DirectoryTest::existsNoPermission() {
 }
 
 void DirectoryTest::existsUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_VERIFY(Directory::exists(Directory::join(_testDirUtf8, "hýždě")));
 }
 
@@ -644,6 +664,16 @@ void DirectoryTest::isDirectoryNoPermission() {
 }
 
 void DirectoryTest::isDirectoryUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -1509,6 +1539,16 @@ void DirectoryTest::listNonexistent() {
 }
 
 void DirectoryTest::listUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     std::vector<std::string> list{".", "..", "hýždě", "šňůra"};
 
     std::vector<std::string> actual = Directory::list(_testDirUtf8, Directory::Flag::SortAscending);
@@ -1625,6 +1665,16 @@ void DirectoryTest::fileSizeNonexistent() {
 }
 
 void DirectoryTest::fileSizeUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_COMPARE(Directory::fileSize(Directory::join(_testDirUtf8, "hýždě")),
         Containers::arraySize(Data));
 }
@@ -1717,6 +1767,16 @@ void DirectoryTest::readNonexistent() {
 }
 
 void DirectoryTest::readUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDirUtf8, "hýždě")),
         Containers::arrayView(Data),
         TestSuite::Compare::Container);
@@ -1802,6 +1862,16 @@ void DirectoryTest::writeNoPermission() {
 }
 
 void DirectoryTest::writeUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     std::string file = Directory::join(_writeTestDir, "hýždě");
 
     if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
@@ -1905,6 +1975,16 @@ void DirectoryTest::appendNoPermission() {
 }
 
 void DirectoryTest::appendUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     std::string file = Directory::join(_writeTestDir, "hýždě");
 
     if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
@@ -2041,6 +2121,16 @@ void DirectoryTest::copyWriteNoPermission() {
 }
 
 void DirectoryTest::copyUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     std::string output = Directory::join(_writeTestDir, "hýždě");
 
     if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));

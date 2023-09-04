@@ -215,6 +215,17 @@ target_compile_definitions(UtilityDebugAssertGracefulTest PRIVATE
 corrade_add_test(UtilityEndiannessTest EndiannessTest.cpp)
 corrade_add_test(UtilityErrorStringTest ErrorStringTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
+
+# Emscripten 3.1.3 changed the way files are bundled, putting them directly to
+# WASM instead of Base64'd to the JS file. However, it broke UTF-8 handling,
+# causing both a compile error (due to a syntax error in the assembly file) and
+# if that's patched, also runtime errors later.
+#   https://github.com/emscripten-core/emscripten/pull/16050
+# TODO: re-add and re-enable the test cases once a fix is made
+if(NOT CORRADE_TARGET_EMSCRIPTEN OR EMSCRIPTEN_VERSION VERSION_LESS 3.1.3)
+    set(UtilityConfigurationTest_UTF8_FILES
+        ConfigurationTestFiles/hýždě.conf)
+endif()
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
     LIBRARIES CorradeTestSuiteTestLib
     FILES
@@ -231,7 +242,7 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/hierarchic-modified.conf
         ConfigurationTestFiles/hierarchic-shortcuts.conf
         ConfigurationTestFiles/hierarchic-shortcuts-modified.conf
-        ConfigurationTestFiles/hýždě.conf
+        ${UtilityConfigurationTest_UTF8_FILES}
         ConfigurationTestFiles/iterate.conf
         ConfigurationTestFiles/iterate-modified.conf
         ConfigurationTestFiles/missing-equals.conf
@@ -329,6 +340,18 @@ if(CORRADE_TARGET_IOS)
         PathTestFilesSymlink
         PathTestFilesUtf8)
 endif()
+# Emscripten 3.1.3 changed the way files are bundled, putting them directly to
+# WASM instead of Base64'd to the JS file. However, it broke UTF-8 handling,
+# causing both a compile error (due to a syntax error in the assembly file) and
+# if that's patched, also runtime errors later.
+#   https://github.com/emscripten-core/emscripten/pull/16050
+# TODO: re-add and re-enable the test cases once a fix is made
+if(NOT CORRADE_TARGET_EMSCRIPTEN OR EMSCRIPTEN_VERSION VERSION_LESS 3.1.3)
+    set(UtilityPathTest_UTF8_FILES
+        PathTestFilesUtf8/šňůra/dummy
+        PathTestFilesUtf8/šňůra/klíče
+        PathTestFilesUtf8/hýždě)
+endif()
 corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
     FILES
         PathTestFiles/dir/dummy
@@ -337,9 +360,7 @@ corrade_add_test(UtilityPathTest ${UtilityPathTest_SRCS}
         PathTestFilesSymlink/dir-symlink
         PathTestFilesSymlink/file
         PathTestFilesSymlink/file-symlink
-        PathTestFilesUtf8/šňůra/dummy
-        PathTestFilesUtf8/šňůra/klíče
-        PathTestFilesUtf8/hýždě)
+        ${UtilityPathTest_UTF8_FILES})
 if(CORRADE_TARGET_UNIX)
     # Without -fPIE libraryLocation() may sometimes return the executable
     # location and not library location. See its docs for more information.
@@ -436,6 +457,17 @@ corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp
         ResourceTestFiles/predisposition.bin)
 target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+# Emscripten 3.1.3 changed the way files are bundled, putting them directly to
+# WASM instead of Base64'd to the JS file. However, it broke UTF-8 handling,
+# causing both a compile error (due to a syntax error in the assembly file) and
+# if that's patched, also runtime errors later.
+#   https://github.com/emscripten-core/emscripten/pull/16050
+# TODO: re-add and re-enable the test cases once a fix is made
+if(NOT CORRADE_TARGET_EMSCRIPTEN OR EMSCRIPTEN_VERSION VERSION_LESS 3.1.3)
+    set(UtilityResourceCompileTest_UTF8_FILES
+        ResourceTestFiles/hýždě.bin
+        ResourceTestFiles/hýždě.conf)
+endif()
 corrade_add_test(UtilityResourceCompileTest
     ResourceCompileTest.cpp
     FILES
@@ -454,8 +486,7 @@ corrade_add_test(UtilityResourceCompileTest
         ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/empty.bin
-        ResourceTestFiles/hýždě.bin
-        ResourceTestFiles/hýždě.conf
+        ${UtilityResourceCompileTest_UTF8_FILES}
         ResourceTestFiles/predisposition.bin
         ResourceTestFiles/resources.conf
         ResourceTestFiles/resources-alignment-larger-than-data-size.conf
@@ -518,6 +549,17 @@ if(CORRADE_BUILD_DEPRECATED)
             PathTestFilesSymlink
             PathTestFilesUtf8)
     endif()
+    # Emscripten 3.1.3 changed the way files are bundled, putting them directly
+    # to WASM instead of Base64'd to the JS file. However, it broke UTF-8
+    # handling, causing both a compile error (due to a syntax error in the
+    # assembly file) and if that's patched, also runtime errors later.
+    #   https://github.com/emscripten-core/emscripten/pull/16050
+    # TODO: re-add and re-enable the test cases once a fix is made
+    if(NOT CORRADE_TARGET_EMSCRIPTEN OR EMSCRIPTEN_VERSION VERSION_LESS 3.1.3)
+        set(UtilityDirectoryTest_UTF8_FILES
+            PathTestFilesUtf8/šňůra/dummy
+            PathTestFilesUtf8/hýždě)
+    endif()
     corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
         FILES
             PathTestFiles/dir/dummy
@@ -526,8 +568,7 @@ if(CORRADE_BUILD_DEPRECATED)
             PathTestFilesSymlink/dir-symlink
             PathTestFilesSymlink/file
             PathTestFilesSymlink/file-symlink
-            PathTestFilesUtf8/šňůra/dummy
-            PathTestFilesUtf8/hýždě)
+            ${UtilityDirectoryTest_UTF8_FILES})
     if(CORRADE_TARGET_UNIX)
         # Without -fPIE libraryLocation() may sometimes return the executable
         # location and not library location. See its docs for more information.

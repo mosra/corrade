@@ -45,8 +45,6 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
 
-#include "configure.h"
-
 #ifdef CORRADE_TARGET_UNIX
 /* Needed for chdir() in currentInvalid() */
 #include <unistd.h>
@@ -55,6 +53,18 @@
 #ifdef CORRADE_TARGET_APPLE
 #include "Corrade/Utility/System.h" /* isSandboxed() */
 #endif
+
+/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
+   3.1.4 moved them to a version header and version 3.1.23 dropped the
+   backwards compatibility. To work consistently on all versions, including the
+   header only if the version macros aren't present.
+   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
+   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
+#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
+#include <emscripten/version.h>
+#endif
+
+#include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -794,6 +804,16 @@ void PathTest::existsNonNullTerminated() {
 }
 
 void PathTest::existsUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_VERIFY(Path::exists(Path::join(_testDirUtf8, "hýždě")));
 }
 
@@ -880,6 +900,16 @@ void PathTest::isDirectoryNonNullTerminated() {
 }
 
 void PathTest::isDirectoryUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -1985,6 +2015,16 @@ void PathTest::listTrailingSlash() {
 }
 
 void PathTest::listUtf8Result() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     const Containers::String list[]{".", "..", "hýždě", "šňůra"};
 
     Containers::Optional<Containers::Array<Containers::String>> actual = Path::list(_testDirUtf8, Path::ListFlag::SortAscending);
@@ -2022,6 +2062,16 @@ void PathTest::listUtf8Result() {
 }
 
 void PathTest::listUtf8Path() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     const Containers::String list[]{".", "..", "dummy", "klíče"};
 
     Containers::Optional<Containers::Array<Containers::String>> actual = Path::list(Path::join(_testDirUtf8, "šňůra"), Path::ListFlag::SortAscending);
@@ -2129,6 +2179,16 @@ void PathTest::sizeNonNullTerminated() {
 }
 
 void PathTest::sizeUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_COMPARE(Path::size(Path::join(_testDirUtf8, "hýždě")),
         Containers::arraySize(Data));
 }
@@ -2309,6 +2369,16 @@ void PathTest::readNonNullTerminated() {
 }
 
 void PathTest::readUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(_testDirUtf8, "hýždě"));
     CORRADE_VERIFY(data);
     CORRADE_COMPARE_AS(*data,
@@ -2437,6 +2507,16 @@ void PathTest::writeNonNullTerminated() {
 }
 
 void PathTest::writeUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_VERIFY(Path::make(_writeTestDir));
 
     Containers::String file = Path::join(_writeTestDir, "hýždě");
@@ -2585,6 +2665,16 @@ void PathTest::appendNonNullTerminated() {
 }
 
 void PathTest::appendUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_VERIFY(Path::make(_writeTestDir));
 
     Containers::String file = Path::join(_writeTestDir, "hýždě");
@@ -2747,6 +2837,16 @@ void PathTest::copyNonNullTerminated() {
 }
 
 void PathTest::copyUtf8() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    /* Emscripten 3.1.3 changed the way files are bundled, putting them
+       directly to WASM instead of Base64'd to the JS file. However, it broke
+       UTF-8 handling, causing both a compile error (due to a syntax error in
+       the assembly file) and if that's patched, also runtime errors later.
+        https://github.com/emscripten-core/emscripten/pull/16050 */
+    /** @todo re-enable once a fix is made */
+    CORRADE_SKIP("Emscripten 3.1.3+ has broken UTF-8 handling in bundled files.");
+    #endif
+
     CORRADE_VERIFY(Path::make(_writeTestDir));
 
     Containers::String output = Path::join(_writeTestDir, "hýždě");

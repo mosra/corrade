@@ -42,12 +42,24 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 corrade_add_test(TestSuiteCompareContainerTest ContainerTest.cpp)
 corrade_add_test(TestSuiteCompareDiffTest DiffTest.cpp)
 corrade_add_test(TestSuiteCompareSortedContainerTest SortedContainerTest.cpp)
+
+# Emscripten 3.1.3 changed the way files are bundled, putting them directly to
+# WASM instead of Base64'd to the JS file. However, it broke UTF-8 handling,
+# causing both a compile error (due to a syntax error in the assembly file) and
+# if that's patched, also runtime errors later.
+#   https://github.com/emscripten-core/emscripten/pull/16050
+# TODO: re-add and re-enable the test cases once a fix is made
+if(NOT CORRADE_TARGET_EMSCRIPTEN OR EMSCRIPTEN_VERSION VERSION_LESS 3.1.3)
+    set(TestSuiteCompareFileTest_UTF8_FILES
+        FileTestFiles/hýždě.txt)
+endif()
+
 corrade_add_test(TestSuiteCompareFileTest FileTest.cpp
     FILES
         FileTestFiles/base.txt
         FileTestFiles/different.txt
         FileTestFiles/empty.txt
-        FileTestFiles/hýždě.txt
+        ${TestSuiteCompareFileTest_UTF8_FILES}
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp
@@ -55,7 +67,7 @@ corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp
         FileTestFiles/base.txt
         FileTestFiles/different.txt
         FileTestFiles/empty.txt
-        FileTestFiles/hýždě.txt
+        ${TestSuiteCompareFileTest_UTF8_FILES}
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareFileToStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
@@ -66,6 +78,6 @@ corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp
         FileTestFiles/base.txt
         FileTestFiles/different.txt
         FileTestFiles/empty.txt
-        FileTestFiles/hýždě.txt
+        ${TestSuiteCompareFileTest_UTF8_FILES}
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareStringToFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
