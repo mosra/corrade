@@ -117,6 +117,16 @@
 #include "Corrade/Utility/Unicode.h"
 #endif
 
+/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
+   3.1.4 moved them to a version header and version 3.1.23 dropped the
+   backwards compatibility. To work consistently on all versions, including the
+   header only if the version macros aren't present.
+   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
+   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
+#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
+#include <emscripten/version.h>
+#endif
+
 namespace Corrade { namespace Utility { namespace Path {
 
 using namespace Containers::Literals;
@@ -1129,11 +1139,23 @@ bool copy(const Containers::StringView from, const Containers::StringView to) {
 
     /* 128 kB: https://eklitzke.org/efficient-file-copying-on-linux. The 100 MB
        benchmark agrees, going below is significantly slower and going above is
-       not any faster. */
+       not any faster.
+
+       In Emscripten 3.1.27, the stack size was reduced from 5 MB (!) to 64 kB:
+        https://github.com/emscripten-core/emscripten/pull/18191
+       Which means calling this function with a 128 kB buffer would blow up in
+       strange ways. As file copying on the virtual filesystem makes little
+       sense, there's no need to optimize for speed, but rather for stability.
+       So the stack is just 8 kB there. Oh and OF COURSE even though the stack
+       size is hardcoded, there is NO WAY to query the value. Typical. */
     /** @todo investigate if alignas(32) would make any practical difference
         on any system (on glibc, fwrite() calls into mempcpy_avx_unaligned
         always, regardless of the alignment) */
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30127
+    char buffer[8*1024];
+    #else
     char buffer[128*1024];
+    #endif
     std::size_t count;
     do {
         count = std::fread(buffer, 1, Containers::arraySize(buffer), in);

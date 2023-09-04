@@ -503,6 +503,9 @@ namespace Corrade {
     dependencies without risking breakages when new Emscripten versions make
     more JS API functions optional, and circumvents the need for users to
     specify `-s EXPORTED_FUNCTIONS` on their side.
+-   @ref Utility::Path::copy() now uses an 8 kB buffer instead of 128 kB to not
+    crash on Emscripten 3.1.27+, which reduced the default stack size from
+    5 MB to 64 kB.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
