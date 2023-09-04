@@ -82,6 +82,20 @@ mergeInto(LibraryManager.library, {
         }
         return 0;
     },
+
+    /* Used by Debug. No dependencies so it could have stayed as EM_ASM(),
+       however it's also code that may not be needed for web-only builds and
+       here the content can be easier wrapped in #if !ENVIRONMENT_MAY_BE_SHELL
+       for example. */
+    corradeUtilityIsTty: function(output) {
+        if(typeof process !== 'undefined') {
+            if(output == 1)
+                return process.stdout.isTTY;
+            else if(output == 2)
+                return process.stderr.isTTY;
+        }
+        return false;
+    }
 });
 
 // kate: hl javascript

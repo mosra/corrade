@@ -68,6 +68,13 @@
 #include "Corrade/Utility/Assert.h"
 #endif
 
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+/* Implemented in Utility.js.in */
+extern "C" {
+    bool corradeUtilityIsTty(int output);
+}
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -425,32 +432,15 @@ bool Debug::isTty(std::ostream* const output) {
         #endif
         ;
 
-    /* Emscripten isatty() is kinda broken ATM (1.37.1), until fixed we have to
-       call into Node.js: https://github.com/kripken/emscripten/issues/4920.
-       Originally the code was simply using EM_ASM_INT_V() twice inside the
-       if(output == ) branches, but that was causing crashes in llc (exit code
-       -11) since after 1.37.5, so I had to rewrite the code in a different
-       way to make the linker survive it. It involves passing some parameters
-       to the inline assembly which are using the $ identifier and that is
-       triggering a Clang warning and everything is just fucking ugly. */
+    /* Emscripten isatty() is broken since forever, so we have to call into
+       Node.js: https://github.com/kripken/emscripten/issues/4920 */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     int out = 0;
     if(output == &std::cout)
         out = 1;
     else if(output == &std::cerr)
         out = 2;
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
-    return EM_ASM_INT({
-        if(typeof process !== 'undefined') {
-            if($0 == 1)
-                return process.stdout.isTTY;
-            else if($0 == 2)
-                return process.stderr.isTTY;
-        }
-        return false;
-    }, out);
-    #pragma GCC diagnostic pop
+    return corradeUtilityIsTty(out);
 
     /* Otherwise can't be autodetected, thus disable colkors by default */
     #else
