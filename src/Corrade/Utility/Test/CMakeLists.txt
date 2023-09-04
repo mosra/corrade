@@ -77,62 +77,114 @@ corrade_add_test(UtilityDebugAssertTest
 # times with different arguments, but corrade_add_test() doesn't support that,
 # so I'm doing it at least via an OBJECTS library.
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
-    foreach(debug "" "Debug")
-        corrade_add_test(Utility${debug}AssertTestFailAssert
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-assert true)
-        set_tests_properties(Utility${debug}AssertTestFailAssert PROPERTIES
-            PASS_REGULAR_EXPRESSION "A should be zero")
-        corrade_add_test(Utility${debug}AssertTestFailConstexprAssert
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-constexpr-assert true)
-        set_tests_properties(Utility${debug}AssertTestFailConstexprAssert PROPERTIES
-            PASS_REGULAR_EXPRESSION "b can't be zero")
-        corrade_add_test(Utility${debug}AssertTestFailInternalAssert
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-internal-assert true)
-        set_tests_properties(Utility${debug}AssertTestFailInternalAssert PROPERTIES
-            PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
-        corrade_add_test(Utility${debug}AssertTestFailInternalC___Assert
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-internal-constexpr-assert true)
-        set_tests_properties(Utility${debug}AssertTestFailInternalC___Assert PROPERTIES
-            PASS_REGULAR_EXPRESSION "Assertion b failed at ")
-        corrade_add_test(Utility${debug}AssertTestFailAssertOutput
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-assert-output true)
-        set_tests_properties(Utility${debug}AssertTestFailAssertOutput PROPERTIES
-            PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
-        corrade_add_test(Utility${debug}AssertTestFailInternalA___Output
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-internal-assert-output true)
-        set_tests_properties(Utility${debug}AssertTestFailInternalA___Output PROPERTIES
-            PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
-        corrade_add_test(Utility${debug}AssertTestFailInter___Expression
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-internal-assert-expression true)
-        set_tests_properties(Utility${debug}AssertTestFailInter___Expression PROPERTIES
-            PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
-        corrade_add_test(Utility${debug}AssertTestFailAssertUnreachable
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-assert-unreachable true)
-        set_tests_properties(Utility${debug}AssertTestFailAssertUnreachable PROPERTIES
-            PASS_REGULAR_EXPRESSION "C should be 3")
-        corrade_add_test(Utility${debug}AssertTestFailInte___Unreachable
-            $<TARGET_OBJECTS:${debug}AssertTestObjects>
-            ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
-            ARGUMENTS --fail-on-internal-assert-unreachable true)
-        set_tests_properties(Utility${debug}AssertTestFailInte___Unreachable PROPERTIES
-            PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
-    endforeach()
+    corrade_add_test(UtilityAssertTestFailAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert true)
+    corrade_add_test(UtilityDebugAssertTestFailAssert
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert true)
+    set_tests_properties(
+        UtilityAssertTestFailAssert
+        UtilityDebugAssertTestFailAssert
+        PROPERTIES PASS_REGULAR_EXPRESSION "A should be zero")
+    corrade_add_test(UtilityAssertTestFailConstexprAss___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-constexpr-assert true)
+    corrade_add_test(UtilityDebugAssertTestFailConsAss___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-constexpr-assert true)
+    set_tests_properties(
+        UtilityAssertTestFailConstexprAss___
+        UtilityDebugAssertTestFailConsAss___
+        PROPERTIES PASS_REGULAR_EXPRESSION "b can't be zero")
+    corrade_add_test(UtilityAssertTestFailInternalAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert true)
+    corrade_add_test(UtilityDebugAssertTestFailInteAss___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert true)
+    set_tests_properties(
+        UtilityAssertTestFailInternalAssert
+        UtilityDebugAssertTestFailInteAss___
+        PROPERTIES PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
+    corrade_add_test(UtilityAssertTestFailInternalConA___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-constexpr-assert true)
+    corrade_add_test(UtilityDebugAssertTestFailIntConA___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-constexpr-assert true)
+    set_tests_properties(
+        UtilityAssertTestFailInternalConA___
+        UtilityDebugAssertTestFailIntConA___
+        PROPERTIES PASS_REGULAR_EXPRESSION "Assertion b failed at ")
+    corrade_add_test(UtilityAssertTestFailAssertOutput
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert-output true)
+    corrade_add_test(UtilityDebugAssertTestFailAssOutp___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert-output true)
+    set_tests_properties(
+        UtilityAssertTestFailAssertOutput
+        UtilityDebugAssertTestFailAssOutp___
+        PROPERTIES PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
+    corrade_add_test(UtilityAssertTestFailInternAssOut___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-output true)
+    corrade_add_test(UtilityDebugAssertTestFailIntAssO___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-output true)
+    set_tests_properties(
+        UtilityAssertTestFailInternAssOut___
+        UtilityDebugAssertTestFailIntAssO___
+        PROPERTIES PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
+    corrade_add_test(UtilityAssertTestFailInterAssExpr___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-expression true)
+    corrade_add_test(UtilityDebugAssertTestFailInAssEx___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-expression true)
+    set_tests_properties(
+        UtilityAssertTestFailInterAssExpr___
+        UtilityDebugAssertTestFailInAssEx___
+        PROPERTIES PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
+    corrade_add_test(UtilityAssertTestFailAssertUnreac___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert-unreachable true)
+    corrade_add_test(UtilityDebugAssertTestFailAssUnre___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-assert-unreachable true)
+    set_tests_properties(
+        UtilityAssertTestFailAssertUnreac___
+        UtilityDebugAssertTestFailAssUnre___
+        PROPERTIES PASS_REGULAR_EXPRESSION "C should be 3")
+    corrade_add_test(UtilityAssertTestFailInterAssUnre___
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-unreachable true)
+    corrade_add_test(UtilityDebugAssertTestFailInAssUn___
+        $<TARGET_OBJECTS:DebugAssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ARGUMENTS --fail-on-internal-assert-unreachable true)
+    set_tests_properties(
+        UtilityAssertTestFailInterAssUnre___
+        UtilityDebugAssertTestFailInAssUn___
+        PROPERTIES PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
 endif()
 
 # The same as above, but using CORRADE_STANDARD_ASSERT
