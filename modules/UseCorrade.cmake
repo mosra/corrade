@@ -476,6 +476,9 @@ function(corrade_add_test test_name)
         if(CORRADE_TARGET_EMSCRIPTEN)
             # Emscripten needs to have exceptions enabled for TestSuite to work
             # properly. See TestSuite CMakeLists for further information.
+            # TODO do directly on the TestSuite target and in FindCorrade via
+            #   INTERFACE_COMPILE_OPTIONS and INTERFACE_LINK_OPTIONS and SHELL:
+            #   once we require CMake 3.13 unconditionally
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
