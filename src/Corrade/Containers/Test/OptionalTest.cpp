@@ -129,11 +129,15 @@ struct OptionalTest: TestSuite::Tester {
     void copyNullToSet();
     void copySetToNull();
     void copySetToSet();
+    void copyValueToNull();
+    void copyValueToSet();
 
     void moveNullToNull();
     void moveNullToSet();
     void moveSetToNull();
     void moveSetToSet();
+    void moveValueToNull();
+    void moveValueToSet();
 
     void moveNullOptToNull();
     void moveNullOptToSet();
@@ -190,11 +194,15 @@ OptionalTest::OptionalTest() {
               &OptionalTest::copyNullToSet,
               &OptionalTest::copySetToNull,
               &OptionalTest::copySetToSet,
+              &OptionalTest::copyValueToNull,
+              &OptionalTest::copyValueToSet,
 
               &OptionalTest::moveNullToNull,
               &OptionalTest::moveNullToSet,
               &OptionalTest::moveSetToNull,
               &OptionalTest::moveSetToSet,
+              &OptionalTest::moveValueToNull,
+              &OptionalTest::moveValueToSet,
 
               &OptionalTest::moveNullOptToNull,
               &OptionalTest::moveNullOptToSet,
@@ -773,6 +781,38 @@ void OptionalTest::copySetToSet() {
     CORRADE_COMPARE(Copyable::moved, 0);
 }
 
+void OptionalTest::copyValueToNull() {
+    {
+        Copyable a{32};
+        Optional<Copyable> b;
+        b = a;
+
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 32);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 2);
+    CORRADE_COMPARE(Copyable::destructed, 2);
+    CORRADE_COMPARE(Copyable::copied, 1);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
+void OptionalTest::copyValueToSet() {
+    {
+        Copyable a{32};
+        Optional<Copyable> b{Corrade::InPlaceInit, 78};
+        b = a;
+
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 32);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 3);
+    CORRADE_COMPARE(Copyable::destructed, 3);
+    CORRADE_COMPARE(Copyable::copied, 1);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
 void OptionalTest::moveNullToNull() {
     {
         Optional<Movable> a;
@@ -843,6 +883,54 @@ void OptionalTest::moveSetToSet() {
         b = Utility::move(a);
 
         CORRADE_VERIFY(a);
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 32);
+    }
+
+    /* The local swap() specialization should take effect, no temporary Movable
+       object created and thus just two objects constructed and nothing moved */
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::destructed, 2);
+    CORRADE_COMPARE(Movable::moved, 0);
+}
+
+void OptionalTest::moveValueToNull() {
+    {
+        Movable a{32};
+        Optional<Movable> b;
+        b = Utility::move(a);
+
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 32);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::destructed, 2);
+    CORRADE_COMPARE(Movable::moved, 1);
+}
+
+void OptionalTest::moveValueToSet() {
+    {
+        Copyable a{32};
+        Optional<Copyable> b{Corrade::InPlaceInit, 78};
+        b = Utility::move(a);
+
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 32);
+    }
+
+    /* One extra construction due to the temporary inside std::swap() */
+    CORRADE_COMPARE(Copyable::constructed, 3);
+    CORRADE_COMPARE(Copyable::destructed, 3);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    /* A to temp, B to A, temp to B */
+    CORRADE_COMPARE(Copyable::moved, 3);
+
+    {
+        Movable a{32};
+        Optional<Movable> b{Corrade::InPlaceInit, 78};
+        b = Utility::move(a);
+
         CORRADE_VERIFY(b);
         CORRADE_COMPARE(b->a, 32);
     }
@@ -1081,9 +1169,12 @@ void OptionalTest::copyConstructPlainStruct() {
     CORRADE_COMPARE(b->a, 3);
 
     /* This deletes and then copy-constructs the wrapped value */
-    Optional<ExtremelyTrivial> c;
-    c = b;
-    CORRADE_COMPARE(c->a, 3);
+    Optional<ExtremelyTrivial> c1;
+    Optional<ExtremelyTrivial> c2;
+    c1 = b;     /* the const Optional<T>& overload */
+    c2 = value; /* the const T& overload */
+    CORRADE_COMPARE(c1->a, 3);
+    CORRADE_COMPARE(c2->a, 3);
 }
 
 void OptionalTest::moveConstructPlainStruct() {
@@ -1118,9 +1209,12 @@ void OptionalTest::moveConstructPlainStruct() {
     CORRADE_COMPARE(b->a, 3);
 
     /* This deletes and then copy-constructs the wrapped value */
-    Optional<MoveOnlyStruct> c;
-    c = Utility::move(b);
-    CORRADE_COMPARE(c->a, 3);
+    Optional<MoveOnlyStruct> c1;
+    Optional<MoveOnlyStruct> c2;
+    c1 = Utility::move(b);                  /* the Optional<T>&& overload */
+    c2 = MoveOnlyStruct{3, 'a', nullptr};   /* the T&& overload */
+    CORRADE_COMPARE(c1->a, 3);
+    CORRADE_COMPARE(c2->a, 3);
 }
 
 void OptionalTest::vectorOfMovableOptional() {
