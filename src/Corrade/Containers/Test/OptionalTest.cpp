@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
@@ -142,6 +143,8 @@ struct OptionalTest: TestSuite::Tester {
     void moveNullOptToNull();
     void moveNullOptToSet();
 
+    void assignEmptyInitializerList();
+
     void emplaceNull();
     void emplaceSet();
     void emplaceException();
@@ -206,6 +209,8 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::moveNullOptToNull,
               &OptionalTest::moveNullOptToSet,
+
+              &OptionalTest::assignEmptyInitializerList,
 
               &OptionalTest::emplaceNull,
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
@@ -964,6 +969,30 @@ void OptionalTest::moveNullOptToSet() {
 
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
+}
+
+void OptionalTest::assignEmptyInitializerList() {
+    /* To verify the {} isn't taken as a default-constructed value, leading to
+       the optional becoming non-null */
+
+    Optional<Copyable> noDefaultConstructor;
+    Optional<Containers::Pair<int, int>> copyable;
+    Optional<Containers::Pointer<int>> movable;
+    Optional<int> trivial;
+
+    noDefaultConstructor = {};
+    CORRADE_VERIFY(!noDefaultConstructor);
+
+    #if 0 /* ambiguous due to operator= taking T directly */
+    copyable = {};
+    CORRADE_VERIFY(!copyable);
+
+    movable = {};
+    CORRADE_VERIFY(!movable);
+    #endif
+
+    trivial = {};
+    CORRADE_VERIFY(!trivial);
 }
 
 void OptionalTest::emplaceNull() {
