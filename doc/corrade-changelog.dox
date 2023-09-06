@@ -261,8 +261,6 @@ namespace Corrade {
 -   Added a @ref Containers::EnumSet::EnumSet(UnderlyingType) constructor to
     match how builtin @cpp enum @ce can be explictly constructed from its
     underlying integer representation
--   Added @ref Containers::Optional::operator=() overloads taking the value
-    directly for more convenient initializer list assignments
 -   Added an ability to construct a @ref Containers::StridedArrayView1D from a
     pointer and size, the same way as with contiguous array views
 -   Added a @ref Containers::StridedArrayView constructor from a strided view
@@ -806,13 +804,6 @@ namespace Corrade {
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make
     sense and so it's not assumed any existing code relied on it, nevertheless
     it's a subtle change in behavior that is worth mentioning.
--   Doing @cpp = {} @ce for a @ref Containers::Optional may now be ambiguous
-    for types with a default constructor due to the newly added
-    @ref Containers::Optional::operator=(const T&) and
-    @relativeref{Containers::Optional,operator=(T&&)} overloads. As it's also
-    potentially ambiguous for the reader (unsure whether it makes the optional
-    null or assigns a default-constructed value), explicitly assign
-    @ref Containers::NullOpt instead.
 -   @ref PluginManager::AbstractManager::pluginList() and
     @relativeref{PluginManager::AbstractManager,aliasList()} now return a
     @ref Containers::Array of @ref Containers::String instead of a

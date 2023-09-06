@@ -196,25 +196,15 @@ template<class T> class Optional {
         Optional(Optional<T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value);
 
         /**
-         * @brief Copy assignment of an optional
+         * @brief Copy assignment
          *
          * If the object already contains a value, calls its destructor.
-         * If @p other contains a value, copy-constructs the value from it
-         * using placement-new.
+         * Copy-constructs the value from @p other using placement-new.
          */
         Optional<T>& operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
 
         /**
-         * @brief Copy assignment of a value
-         * @m_since_latest
-         *
-         * If the object already contains a value, calls its destructor.
-         * Copy-constructs from @p other using placement-new.
-         */
-        Optional<T>& operator=(const T& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
-
-        /**
-         * @brief Move assignment of an optional
+         * @brief Move assignment
          *
          * If both objects contain a value, the value is swapped. Otherwise,
          * if the object contains a value, calls its destructor. If @p other
@@ -222,15 +212,6 @@ template<class T> class Optional {
          * new.
          */
         Optional<T>& operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
-
-        /**
-         * @brief Move assignment of a value
-         * @m_since_latest
-         *
-         * If the object contains a value, the value is swapped. Otherwise,
-         * move-constructs from @p other using placement new.
-         */
-        Optional<T>& operator=(T&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
 
         /**
          * @brief Copy-convert the optional to external representation
@@ -544,18 +525,6 @@ template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) 
     return *this;
 }
 
-template<class T> Optional<T>& Optional<T>::operator=(const T& other) noexcept(std::is_nothrow_copy_assignable<T>::value) {
-    if(_set) _value.~T();
-    _set = true;
-    /* Can't use {}, see the GCC 4.8-specific overload for details */
-    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-    Implementation::construct(_value, other);
-    #else
-    new(&_value) T{other};
-    #endif
-    return *this;
-}
-
 template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value) {
     if(_set && other._set) {
         using std::swap;
@@ -569,22 +538,6 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
             #else
             new(&_value) T{Utility::move(other._value)};
             #endif
-    }
-    return *this;
-}
-
-template<class T> Optional<T>& Optional<T>::operator=(T&& other) noexcept(std::is_nothrow_move_assignable<T>::value) {
-    if(_set) {
-        using std::swap;
-        swap(other, _value);
-    } else {
-        _set = true;
-        /* Can't use {}, see the GCC 4.8-specific overload for details */
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
-        Implementation::construct(_value, Utility::move(other));
-        #else
-        new(&_value) T{Utility::move(other)};
-        #endif
     }
     return *this;
 }
