@@ -371,18 +371,18 @@ template<class T> class Optional {
     private:
         union {
             T _value;
-            /* GCC 10+ in optimized builds produces a "warning:
+            /* GCC 10, 11, 12, 13 in optimized builds produces a "warning:
                Optional<T>::<unnamed>.Optional<T>::._anon_34::_value may be
                used uninitialized [-Wmaybe-uninitialized]" at every point an
                Optional with a trivial T (enums, integers...) is accessed due
                to not being able to see that the value is accessed only if it's
-               actually set. The same issue is with std::optional apparently:
+               actually set. The same issue was with std::optional apparently:
                 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
                One of the workarounds mentioned there is to add a second
                volatile member, some comments say it works only for some sizes
                of T so I'm making it the same size as _value. */
-            /** @todo revisit / drop this when the above bug gets finally some
-                progress since 2017 */
+            /** @todo re-check with GCC 14, find a still-open upstream
+                bugreport matching this problem */
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 10 && __OPTIMIZE__
             volatile char _gccStopSayingThisIsMaybeUninitialized[sizeof(T)];
             #endif
