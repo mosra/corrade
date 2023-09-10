@@ -508,6 +508,7 @@ namespace Corrade {
 -   @ref Utility::Path::copy() now uses an 8 kB buffer instead of 128 kB to not
     crash on Emscripten 3.1.27+, which reduced the default stack size from
     5 MB to 64 kB.
+-   New @cpp #pragma ACME forget @ce option in the @ref acme utility
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

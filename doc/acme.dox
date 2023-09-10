@@ -246,6 +246,59 @@ are unconditionally removed. This is useful to for example supply a
 `configure.h.cmake` template to the script instead of a generated `configure.h`
 that may have unwanted build-specific defines baked in.
 
+@section acme-forget Forgetting previous includes or enabled/disabled macros
+
+Sometimes it's desirable to include a certain header multiple times, for
+example if each case where it's included is guarded by a different define. The
+script doesn't interpret the high-level define tree to know that if an include
+may need to be added again, but you can explicitly tell it to forget that a
+certain header was included in order to have it appear again the next time:
+
+@code{.cpp}
+#ifdef MYLIB_STL_COMPATIBILITY
+// {{includes}}
+#include <string>
+
+...
+#endif
+#ifdef MYLIB_IMPLEMENTATION
+// {{ncludes}}
+#pragma ACME forget <string>
+#include <string>
+
+...
+#endif
+@endcode
+
+The above adds @cpp #include <string> @ce to both @cb{.jinja} {{includes}} @ce
+so it's included also if @cpp #define MYLIB_IMPLEMENTATION @ce is present
+without @cpp #define MYLIB_STL_COMPATIBILITY @ce. Note that this only works if
+the next case goes into a different @cb{.jinja} {{includes}} @ce --- putting it
+into the same doesn't make much practical sense anyway, and causes a warning.
+
+This feature works for local includes and enabled/disabled macros as well. For
+example an assert header may be included several times, each time with a
+different predefined macro. In the below example, the contents of `MyAssert.h`
+are processed and pasted twice, once as if `MYLIB_NO_ASSERT` was defined, and
+once as if `MYLIB_NO_ASSERT` wasn't defined, effectively enabling assertions
+only for the implementation:
+
+@code{.cpp}
+#pragma ACME enable MYLIB_NO_ASSERT
+#include "MyAssert.h"
+
+...
+
+#ifdef MYLIB_IMPLEMENTATION
+#pragma ACME forget "MyAssert.h"
+#pragma ACME forget MYLIB_NO_ASSERT
+#pragma ACME disable MYLIB_NO_ASSERT
+#include "MyAssert.h"
+
+...
+#endif
+@endcode
+
 @section acme-copyright Copyright information
 
 Commonly every header has a copyright block on top and it would be wasteful

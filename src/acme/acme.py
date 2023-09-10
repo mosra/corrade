@@ -536,6 +536,28 @@ def acme(toplevel_file, output) -> List[str]:
                         forced_defines[value] = True
                     elif what == 'disable':
                         forced_defines[value] = False
+                    elif what == 'forget':
+                        if value.startswith('"') and value.endswith('"'):
+                            for path in paths:
+                                absolute_file = os.path.join(path, value[1:-1])
+                                if absolute_file in parsed_files:
+                                    parsed_files.remove(absolute_file)
+                                    break
+                            else:
+                                logging.fatal("File to forget not found: %s", value)
+                        elif value.startswith('<') and value.endswith('>'):
+                            value = "#include {}\n".format(value)
+                            if value in new_includes[-1]:
+                                logging.warning("Include to forget in current {{includes}} already, will not be forgotten: %s", value)
+                            if value in all_includes:
+                                all_includes.remove(value)
+                            else:
+                                logging.fatal("Include to forget not found: %s", value)
+                        else:
+                            if value in forced_defines:
+                                del forced_defines[value]
+                            else:
+                                logging.fatal("Define to forget not found: %s", value)
                     elif what == 'path':
                         paths += [os.path.join(base_directory, value)]
                     elif what == 'local':
