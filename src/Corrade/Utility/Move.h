@@ -30,6 +30,10 @@
 
 #include "Corrade/configure.h"
 
+#ifdef CORRADE_MSVC2015_COMPATIBILITY
+#include <utility> /* for std::swap() ambiguity workaround below */
+#endif
+
 /** @file
  * @brief Function @ref Corrade::Utility::forward(), @ref Corrade::Utility::move(), @ref Corrade::Utility::swap()
  * @m_since_latest
@@ -96,6 +100,10 @@ the usage pattern should be similar to the standard utility, i.e. with
 @cpp using Utility::swap @ce:
 
 @snippet Utility.cpp swap
+
+@partialsupport On @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" it's just an
+    alias to @ref std::swap(), as compiler limitations prevent creating an
+    alternative that wouldn't conflict.
 @see @ref forward(), @ref move()
 */
 /* The common_type is to prevent ambiguity with (also unrestricted) std::swap.
@@ -108,13 +116,19 @@ the usage pattern should be similar to the standard utility, i.e. with
    it. */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T> void swap(T& a, T& b) noexcept(...);
-#else
+#elif !defined(CORRADE_MSVC2015_COMPATIBILITY)
 template<class T> void swap(T& a, typename std::common_type<T>::type& b) noexcept(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value) {
     /* "Deinlining" move() for nicer debug perf */
     T tmp = static_cast<T&&>(a);
     a = static_cast<T&&>(b);
     b = static_cast<T&&>(tmp);
 }
+#else
+/* On MSVC 2015 an ambiguous overload is caused even in cases where MSVC 2017+
+   and other compilers don't have the problem. Since support for this compiler
+   isn't really important anymore, the STL variant is simply brought into this
+   namespace. */
+using std::swap;
 #endif
 
 /**
@@ -125,7 +139,7 @@ Does the same as @ref swap(T&, T&), but for every array element.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<std::size_t size, class T> void swap(T(&a)[size], T(&b)[size]) noexcept(...);
-#else
+#elif !defined(CORRADE_MSVC2015_COMPATIBILITY)
 template<std::size_t size, class T> void swap(T(&a)[size], typename std::common_type<T>::type(&b)[size]) noexcept(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value) {
     for(std::size_t i = 0; i != size; ++i) {
         /* "Deinlining" move() for nicer debug perf */
@@ -135,6 +149,7 @@ template<std::size_t size, class T> void swap(T(&a)[size], typename std::common_
     }
 }
 #endif
+/* using std::swap for MSVC 2015 already done above */
 
 }}
 
