@@ -33,7 +33,6 @@
  */
 
 #include <cstddef>
-#include <initializer_list>
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Containers/Containers.h"
