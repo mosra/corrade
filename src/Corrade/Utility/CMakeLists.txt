@@ -52,6 +52,7 @@ if(CORRADE_WITH_UTILITY)
         System.cpp
 
         ../Cpu.cpp
+        ../Containers/StringStl.cpp
 
         Implementation/ErrorString.cpp)
 
@@ -320,6 +321,8 @@ if(NOT CMAKE_CROSSCOMPILING)
 
         ../Cpu.cpp
         ../Containers/String.cpp
+        # TODO remove this once Implementation/ResourceCompile.h is STL-free
+        ../Containers/StringStl.cpp
         ../Containers/StringIterable.cpp
         ../Containers/StringView.cpp)
     if(CORRADE_TARGET_WINDOWS)

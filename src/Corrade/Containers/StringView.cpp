@@ -25,11 +25,9 @@
 */
 
 #include "StringView.h"
-#include "StringStl.h"
 
 #include <cstdint>
 #include <cstring>
-#include <string>
 
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
@@ -39,7 +37,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Math.h"
 
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
@@ -1165,25 +1163,6 @@ ArrayView<const char> ArrayViewConverter<const char, BasicStringView<char>>::fro
 }
 ArrayView<const char> ArrayViewConverter<const char, BasicStringView<const char>>::from(const BasicStringView<const char>& other) {
     return {other.data(), other.size()};
-}
-
-StringView StringViewConverter<const char, std::string>::from(const std::string& other) {
-    return StringView{other.data(), other.size(), StringViewFlag::NullTerminated};
-}
-
-std::string StringViewConverter<const char, std::string>::to(StringView other) {
-    return std::string{other.data(), other.size()};
-}
-
-MutableStringView StringViewConverter<char, std::string>::from(std::string& other) {
-    /* .data() returns a const pointer until C++17, so have to use &other[0].
-       It's guaranteed to return a pointer to a single null character if the
-       string is empty. */
-    return MutableStringView{&other[0], other.size(), StringViewFlag::NullTerminated};
-}
-
-std::string StringViewConverter<char, std::string>::to(MutableStringView other) {
-    return std::string{other.data(), other.size()};
 }
 
 }

@@ -49,9 +49,9 @@ information.
 namespace Corrade { namespace Containers { namespace Implementation {
 
 /** @todo when this file stops getting included for backwards compatibility
-    purposes, include <string> directly and implement the functions inline to
-    avoid bloating our binaries (and especially to avoid having them polluted
-    with STL symbols) */
+    purposes, include <string> directly and inline the contents of
+    StringStl.cpp here to avoid bloating our binaries (and especially to avoid
+    having them polluted with STL symbols) */
 
 template<> struct CORRADE_UTILITY_EXPORT StringConverter<std::string> {
     static String from(const std::string& other);

@@ -25,9 +25,7 @@
 */
 
 #include "String.h"
-#include "StringStl.h"
 
-#include <string>
 #include <cstring>
 
 #include "Corrade/Containers/Array.h"
@@ -908,18 +906,6 @@ char* String::release() {
     _small.data[0] = '\0';
     _small.size = Implementation::SmallStringBit;
     return data;
-}
-
-namespace Implementation {
-
-String StringConverter<std::string>::from(const std::string& other) {
-    return String{other.data(), other.size()};
-}
-
-std::string StringConverter<std::string>::to(const String& other) {
-    return std::string{other.data(), other.size()};
-}
-
 }
 
 }}
