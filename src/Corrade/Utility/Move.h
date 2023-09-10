@@ -140,7 +140,9 @@ Does the same as @ref swap(T&, T&), but for every array element.
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<std::size_t size, class T> void swap(T(&a)[size], T(&b)[size]) noexcept(...);
 #elif !defined(CORRADE_MSVC2015_COMPATIBILITY)
-template<std::size_t size, class T> void swap(T(&a)[size], typename std::common_type<T>::type(&b)[size]) noexcept(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value) {
+/* Using std::common_type<T>::type(&)[size] doesn't work on MSVC 2017 and 2019
+   (possibly also 2022 and /permisive-). This works everywhere. */
+template<std::size_t size, class T> void swap(T(&a)[size], typename std::common_type<T(&)[size]>::type b) noexcept(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value) {
     for(std::size_t i = 0; i != size; ++i) {
         /* "Deinlining" move() for nicer debug perf */
         T tmp = static_cast<T&&>(a[i]);
