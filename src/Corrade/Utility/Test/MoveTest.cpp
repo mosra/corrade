@@ -41,9 +41,13 @@ struct MoveTest: TestSuite::Tester {
     void move();
 
     void swap();
+    void swapArray();
     void swapMoveOnly();
+    void swapMoveOnlyArray();
     void swapStlTypesAdlAmbiguity();
+    void swapStlTypesAdlAmbiguityArray();
     void swapUtilityTypesAdlAmbiguity();
+    void swapUtilityTypesAdlAmbiguityArray();
 };
 
 MoveTest::MoveTest() {
@@ -51,9 +55,13 @@ MoveTest::MoveTest() {
               &MoveTest::move,
 
               &MoveTest::swap,
+              &MoveTest::swapArray,
               &MoveTest::swapMoveOnly,
+              &MoveTest::swapMoveOnlyArray,
               &MoveTest::swapStlTypesAdlAmbiguity,
-              &MoveTest::swapUtilityTypesAdlAmbiguity});
+              &MoveTest::swapStlTypesAdlAmbiguityArray,
+              &MoveTest::swapUtilityTypesAdlAmbiguity,
+              &MoveTest::swapUtilityTypesAdlAmbiguityArray});
 }
 
 struct Foo {
@@ -118,12 +126,38 @@ void MoveTest::swap() {
     CORRADE_COMPARE(b, 3);
 }
 
+void MoveTest::swapArray() {
+    int a[]{3, 16};
+    int b[]{-27, 44};
+    Utility::swap(a, b);
+    CORRADE_COMPARE(a[0], -27);
+    CORRADE_COMPARE(a[1], 44);
+    CORRADE_COMPARE(b[0], 3);
+    CORRADE_COMPARE(b[1], 16);
+}
+
 void MoveTest::swapMoveOnly() {
     Containers::Pointer<int> a{InPlaceInit, 3};
     Containers::Pointer<int> b{InPlaceInit, -27};
     Utility::swap(a, b);
     CORRADE_COMPARE(*a, -27);
     CORRADE_COMPARE(*b, 3);
+}
+
+void MoveTest::swapMoveOnlyArray() {
+    Containers::Pointer<int> a[]{
+        Containers::Pointer<int>{InPlaceInit, 3},
+        Containers::Pointer<int>{InPlaceInit, 16},
+    };
+    Containers::Pointer<int> b[]{
+        Containers::Pointer<int>{InPlaceInit, -27},
+        Containers::Pointer<int>{InPlaceInit, 44}
+    };
+    Utility::swap(a, b);
+    CORRADE_COMPARE(*a[0], -27);
+    CORRADE_COMPARE(*a[1], 44);
+    CORRADE_COMPARE(*b[0], 3);
+    CORRADE_COMPARE(*b[1], 16);
 }
 
 void MoveTest::swapStlTypesAdlAmbiguity() {
@@ -162,6 +196,37 @@ void MoveTest::swapStlTypesAdlAmbiguity() {
         swap(a, b);
         CORRADE_COMPARE(a, &bData);
         CORRADE_COMPARE(b, &aData);
+    }
+}
+
+void MoveTest::swapStlTypesAdlAmbiguityArray() {
+    /* Like swapStlTypesAdlAmbiguity(), but single-item arrays. Should be
+       enough to trigger the same problems. */
+
+    {
+        std::pair<int, int> a[]{{3, -27}};
+        std::pair<int, int> b[]{{-6, 54}};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, std::make_pair(-6, 54));
+        CORRADE_COMPARE(*b, std::make_pair(3, -27));
+    } {
+        std::pair<int, int> aData;
+        std::pair<int, int> bData;
+        std::pair<int, int>* a[]{&aData};
+        std::pair<int, int>* b[]{&bData};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, &bData);
+        CORRADE_COMPARE(*b, &aData);
+    } {
+        std::div_t aData, bData;
+        std::div_t* a[]{&aData};
+        std::div_t* b[]{&bData};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, &bData);
+        CORRADE_COMPARE(*b, &aData);
     }
 }
 
@@ -226,6 +291,41 @@ void MoveTest::swapUtilityTypesAdlAmbiguity() {
         swap(a, b);
         CORRADE_COMPARE(a, Containers::pair(HashDigest<3>{'C', 'B', 'A'}, std::make_pair(2, -4)));
         CORRADE_COMPARE(b, Containers::pair(HashDigest<3>{'a', 'b', 'c'}, std::make_pair(-3, 6)));
+    }
+}
+
+void MoveTest::swapUtilityTypesAdlAmbiguityArray() {
+    /* Like swapUtilityTypesAdlAmbiguity(), but single-item arrays. Should be
+       enough to trigger the same problems. */
+
+    {
+        HashDigest<3> a[]{HashDigest<3>{'a', 'b', 'c'}};
+        HashDigest<3> b[]{HashDigest<3>{'C', 'B', 'A'}};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, (HashDigest<3>{'C', 'B', 'A'}));
+        CORRADE_COMPARE(*b, (HashDigest<3>{'a', 'b', 'c'}));
+    } {
+        HashDigest<3> a[]{HashDigest<3>{'a', 'b', 'c'}};
+        HashDigest<3> b[]{HashDigest<3>{'C', 'B', 'A'}};
+        using std::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, (HashDigest<3>{'C', 'B', 'A'}));
+        CORRADE_COMPARE(*b, (HashDigest<3>{'a', 'b', 'c'}));
+    } {
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> a[]{{HashDigest<3>{'a', 'b', 'c'}, {-3, 6}}};
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> b[]{{HashDigest<3>{'C', 'B', 'A'}, {2, -4}}};
+        using Utility::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, Containers::pair(HashDigest<3>{'C', 'B', 'A'}, std::make_pair(2, -4)));
+        CORRADE_COMPARE(*b, Containers::pair(HashDigest<3>{'a', 'b', 'c'}, std::make_pair(-3, 6)));
+    } {
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> a[]{{HashDigest<3>{'a', 'b', 'c'}, {-3, 6}}};
+        Containers::Pair<HashDigest<3>, std::pair<int, int>> b[]{{HashDigest<3>{'C', 'B', 'A'}, {2, -4}}};
+        using std::swap;
+        swap(a, b);
+        CORRADE_COMPARE(*a, Containers::pair(HashDigest<3>{'C', 'B', 'A'}, std::make_pair(2, -4)));
+        CORRADE_COMPARE(*b, Containers::pair(HashDigest<3>{'a', 'b', 'c'}, std::make_pair(-3, 6)));
     }
 }
 
