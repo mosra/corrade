@@ -45,8 +45,12 @@
 #include <cassert>
 #endif
 
-/* We don't need anything from configure.h here */
+/* We need just CORRADE_MSVC2015_COMPATIBILITY from configure.h. This is
+   equivalent to the version check in UseCorrade.cmake. */
 #pragma ACME enable Corrade_configure_h
+#if defined(_MSC_VER) && _MSC_VER < 1910
+#define CORRADE_MSVC2015_COMPATIBILITY
+#endif
 
 /* Disable asserts that are not used. CORRADE_DEBUG_ASSERT is used, wrapping
    the #include <cassert> above. When enabling additional asserts, be sure to

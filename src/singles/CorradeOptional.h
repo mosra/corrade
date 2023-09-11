@@ -47,8 +47,12 @@
 #include <cassert>
 #endif
 
-/* We don't need much from configure.h here */
+/* We don't need much from configure.h here. The CORRADE_MSVC2015_COMPATIBILITY
+   check is equivalent to the version check in UseCorrade.cmake. */
 #pragma ACME enable Corrade_configure_h
+#if defined(_MSC_VER) && _MSC_VER < 1910
+#define CORRADE_MSVC2015_COMPATIBILITY
+#endif
 #ifdef __GNUC__
 #define CORRADE_TARGET_GCC
 #endif

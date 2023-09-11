@@ -41,5 +41,8 @@
 #include "Corrade/Containers/Pair.h"
 #ifdef CORRADE_PAIR_STL_COMPATIBILITY
 // {{includes}}
+/* The <utility> header is conditionally included for MSVC 2015 from Move.h,
+   which makes the script think it's not needed to be included again. */
+#pragma ACME forget <utility>
 #include "Corrade/Containers/PairStl.h"
 #endif
