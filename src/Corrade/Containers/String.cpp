@@ -28,9 +28,11 @@
 
 #include <cstring>
 
-#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Pair.h"
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -141,9 +143,11 @@ String::String(const StringView view): String{view._data, view._sizePlusFlags & 
 
 String::String(const MutableStringView view): String{view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 String::String(const ArrayView<const char> view): String{view.data(), view.size()} {}
 
 String::String(const ArrayView<char> view): String{view.data(), view.size()} {}
+#endif
 
 String::String(std::nullptr_t, std::nullptr_t, std::nullptr_t, const char* const data): String{data, data ? std::strlen(data) : 0} {}
 
@@ -168,9 +172,11 @@ String::String(AllocatedInitT, const StringView view): String{AllocatedInit, vie
 
 String::String(AllocatedInitT, const MutableStringView view): String{AllocatedInit, view._data, view._sizePlusFlags & ~Implementation::StringViewSizeMask} {}
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 String::String(AllocatedInitT, const ArrayView<const char> view): String{AllocatedInit, view.data(), view.size()} {}
 
 String::String(AllocatedInitT, const ArrayView<char> view): String{AllocatedInit, view.data(), view.size()} {}
+#endif
 
 String::String(AllocatedInitT, const char* const data): String{AllocatedInit, data, data ? std::strlen(data) : 0} {}
 
@@ -350,6 +356,7 @@ String& String::operator=(String&& other) noexcept {
     return *this;
 }
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 String::operator ArrayView<const char>() const noexcept {
     const Pair<const char*, std::size_t> data = dataInternal();
     return {data.first(), data.second()};
@@ -396,6 +403,7 @@ String::operator Array<char>() && {
 
     return out;
 }
+#endif
 
 String::operator bool() const {
     /* The data pointer is guaranteed to be non-null, so no need to check it */
@@ -606,6 +614,7 @@ StringView String::except(const std::size_t size) const {
 }
 #endif
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 Array<MutableStringView> String::split(const char delimiter) {
     return MutableStringView{*this}.split(delimiter);
 }
@@ -689,6 +698,7 @@ String String::join(const StringIterable& strings) const {
 String String::joinWithoutEmptyParts(const StringIterable& strings) const {
     return StringView{*this}.joinWithoutEmptyParts(strings);
 }
+#endif
 
 bool String::hasPrefix(const StringView prefix) const {
     return StringView{*this}.hasPrefix(prefix);

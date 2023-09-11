@@ -333,11 +333,15 @@ class CORRADE_UTILITY_EXPORT String {
          *      @ref String(AllocatedInitT, StringView)
          */
         /*implicit*/ String(StringView view);
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /*implicit*/ String(ArrayView<const char> view); /**< @overload */
+        #endif
         /* Without these there's ambiguity between StringView / ArrayView and
            char* */
         /*implicit*/ String(MutableStringView view); /**< @overload */
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /*implicit*/ String(ArrayView<char> view); /**< @overload */
+        #endif
 
         /**
          * @brief Construct from a null-terminated C string
@@ -380,11 +384,15 @@ class CORRADE_UTILITY_EXPORT String {
          *      @ref Containers-String-usage-c-string-conversion
          */
         explicit String(AllocatedInitT, StringView view);
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         explicit String(AllocatedInitT, ArrayView<const char> view); /**< @overload */
+        #endif
         /* Without these there's ambiguity between StringView / ArrayView and
            char* */
         explicit String(AllocatedInitT, MutableStringView view); /**< @overload */
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         explicit String(AllocatedInitT, ArrayView<char> view); /**< @overload */
+        #endif
 
         /**
          * @brief Create a string instance bypassing SSO
@@ -579,6 +587,7 @@ class CORRADE_UTILITY_EXPORT String {
         /** @brief Move assignment */
         String& operator=(String&& other) noexcept;
 
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /**
          * @brief Convert to a const @ref ArrayView
          *
@@ -612,6 +621,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @see @ref release(), @ref isSmall()
          */
         /*implicit*/ operator Array<char>() &&;
+        #endif
 
         /**
          * @brief Convert the string to external representation
@@ -888,6 +898,7 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_DEPRECATED("use exceptSuffix() instead") StringView except(std::size_t count) const;
         #endif
 
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /**
          * @brief Split on given character
          *
@@ -1002,6 +1013,7 @@ class CORRADE_UTILITY_EXPORT String {
          * Equivalent to @ref BasicStringView::joinWithoutEmptyParts().
          */
         String joinWithoutEmptyParts(const StringIterable& strings) const;
+        #endif
 
         /**
          * @brief Whether the string begins with given prefix

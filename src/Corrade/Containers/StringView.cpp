@@ -30,16 +30,21 @@
 #include <cstring>
 
 #include "Corrade/Cpu.h"
+#include "Corrade/Containers/String.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Math.h"
+#include "Corrade/Utility/Implementation/cpu.h"
+#ifndef CORRADE_SINGLES_NO_DEBUG
+#include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Utility/Debug.h"
+#endif
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/GrowableArray.h"
-#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Math.h"
-#include "Corrade/Utility/Implementation/cpu.h"
+#endif
 
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
@@ -63,6 +68,7 @@ template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: 
    needs an explicit export otherwise the symbol doesn't get exported. */
 template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), string.viewFlags()} {}
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char delimiter) const {
     Array<BasicStringView<T>> parts;
     T* const end = this->end();
@@ -97,6 +103,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
 
     return parts;
 }
+#endif
 
 namespace Implementation {
 
@@ -124,6 +131,7 @@ const char* stringFindString(const char* data, const std::size_t size, const cha
 
 }
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const StringView delimiter) const {
     const char* const delimiterData = delimiter.data();
     const std::size_t delimiterSize = delimiter.size();
@@ -143,6 +151,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const Stri
 
     return parts;
 }
+#endif
 
 namespace Implementation {
 
@@ -778,6 +787,7 @@ const char* stringFindLastNotAny(const char* const data, const std::size_t size,
 
 }
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithoutEmptyParts(const StringView delimiters) const {
     Array<BasicStringView<T>> parts;
     const char* const characters = delimiters._data;
@@ -804,6 +814,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     return splitOnAnyWithoutEmptyParts(delimiters);
 }
 #endif
+#endif
 
 namespace {
     /* If I use an externally defined view in splitWithoutEmptyParts(),
@@ -826,6 +837,7 @@ namespace {
     #endif
 }
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnWhitespaceWithoutEmptyParts() const {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return splitOnAnyWithoutEmptyParts(Whitespace);
@@ -957,6 +969,7 @@ template<> CORRADE_UTILITY_EXPORT String BasicStringView<char>::joinWithoutEmpty
        generated twice */
     return StringView{*this}.joinWithoutEmptyParts(strings);
 }
+#endif
 
 template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
     const std::size_t prefixSize = prefix.size();
@@ -1133,6 +1146,7 @@ String operator*(const std::size_t count, const StringView string) {
     return string*count;
 }
 
+#ifndef CORRADE_SINGLES_NO_DEBUG
 Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
     debug << "Containers::StringViewFlag" << Utility::Debug::nospace;
 
@@ -1153,7 +1167,9 @@ Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlags value) {
         StringViewFlag::Global,
         StringViewFlag::NullTerminated});
 }
+#endif
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 namespace Implementation {
 
 ArrayView<char> ArrayViewConverter<char, BasicStringView<char>>::from(const BasicStringView<char>& other) {
@@ -1167,5 +1183,6 @@ ArrayView<const char> ArrayViewConverter<const char, BasicStringView<const char>
 }
 
 }
+#endif
 
 }}

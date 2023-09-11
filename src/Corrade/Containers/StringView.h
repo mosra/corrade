@@ -39,9 +39,10 @@
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Utility.h"
+#endif
 #include "Corrade/Utility/visibility.h"
-
 #ifdef CORRADE_BUILD_DEPRECATED
 /* For join(), which used to take an ArrayView<StringView> */
 #include "Corrade/Containers/StringIterable.h"
@@ -51,6 +52,7 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
     template<class, class> struct StringViewConverter;
+    #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
     /* So ArrayTuple can update the data pointer */
     template<class T>
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -62,6 +64,7 @@ namespace Implementation {
     T*& dataRef(BasicStringView<T>& view) {
         return view._data;
     }
+    #endif
 }
 
 /**
@@ -109,11 +112,13 @@ typedef EnumSet<StringViewFlag
 
 CORRADE_ENUMSET_OPERATORS(StringViewFlags)
 
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperatorclassenum{BasicStringView,StringViewFlag} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringViewFlag value);
 
 /** @debugoperatorclassenum{BasicStringView,StringViewFlags} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, StringViewFlags value);
+#endif
 
 /**
 @brief Base for string views
@@ -379,6 +384,7 @@ BasicStringView {
          */
         template<class U = T, class = typename std::enable_if<std::is_const<U>::value>::type> /*implicit*/ BasicStringView(const String& data) noexcept;
 
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /**
          * @brief Construct from an @ref ArrayView
          *
@@ -407,6 +413,7 @@ BasicStringView {
         /** @todo even though the implicit copy constructor would be overriden
             without the is_same part, is_trivially_copyable still says yes?! */
         template<class U, class = typename std::enable_if<!std::is_array<typename std::remove_reference<U&&>::type>::value && !std::is_same<typename std::decay<U&&>::type, BasicStringView<T>>::value && !std::is_same<typename std::decay<U&&>::type, std::nullptr_t>::value, decltype(ArrayView<T>{std::declval<U&&>()})>::type> constexpr /*implicit*/ BasicStringView(U&& data, StringViewFlags flags = {}) noexcept: BasicStringView{flags, ArrayView<T>(data)} {}
+        #endif
         #endif
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
@@ -699,6 +706,7 @@ BasicStringView {
         }
         #endif
 
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /**
          * @brief Split on given character
          *
@@ -831,6 +839,7 @@ BasicStringView {
          * of causing multiple repeated delimiters in the output.
          */
         String joinWithoutEmptyParts(const StringIterable& strings) const;
+        #endif
 
         /**
          * @brief Whether the string begins with given prefix
@@ -1229,8 +1238,10 @@ BasicStringView {
         /* Needed for mutable/immutable conversion */
         template<class> friend class BasicStringView;
         friend String;
+        #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
         /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(BasicStringView<T>&);
+        #endif
 
         /* MSVC demands the export macro to be here as well */
         friend CORRADE_UTILITY_EXPORT bool operator==(StringView, StringView);
@@ -1242,11 +1253,13 @@ BasicStringView {
         friend CORRADE_UTILITY_EXPORT String operator+(StringView, StringView);
         friend CORRADE_UTILITY_EXPORT String operator*(StringView, std::size_t);
 
+        #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /* Called from BasicStringView(U&&, StringViewFlags), see its comment
            for details; arguments in a flipped order to avoid accidental
            ambiguity. The ArrayView type is a template to avoid having to
            include ArrayView.h. */
         template<class U, class = typename std::enable_if<std::is_same<T, U>::value>::type> constexpr explicit BasicStringView(StringViewFlags flags, ArrayView<U> data) noexcept: BasicStringView{data.data(), data.size(), flags} {}
+        #endif
 
         /* Used by the char* constructor, delinlined because it calls into
            std::strlen() */
@@ -1515,6 +1528,7 @@ template<class T> inline bool BasicStringView<T>::containsAny(const StringView c
     return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
 }
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 namespace Implementation {
 
 template<class, class> struct ArrayViewConverter;
@@ -1535,6 +1549,7 @@ template<class T> struct ErasedArrayViewConverter<BasicStringView<T>>: ArrayView
 template<class T> struct ErasedArrayViewConverter<const BasicStringView<T>>: ArrayViewConverter<T, BasicStringView<T>> {};
 
 }
+#endif
 
 }}
 
