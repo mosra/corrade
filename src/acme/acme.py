@@ -210,7 +210,9 @@ include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[
 preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^\n]*?[^\s]?)(?P<comment>\s*/[/*].*)?$')
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
 cmakedefine_rx = re.compile(r'\s*#cmakedefine(01)?.*$')
-linecomment_rx = re.compile(r'^\s*(/\*.*\*/|//.*)?\s*$')
+# The ?! is to match the /* comment only until the first */, not until the
+# final */ if a line has both a comment at the start and at the end.
+linecomment_rx = re.compile(r'^\s*(/\*(\*(?!\/)|[^*])*\*/|//.*)?\s*$')
 copyright_rc = re.compile(r'^\s+Copyright © \d{4}.+$')
 blockcomment_start_rx = re.compile(r'^\s*/\*.*\s*$')
 blockcomment_end_rx = re.compile(r'^\s*.*\*/\s*$')

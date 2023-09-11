@@ -43,4 +43,8 @@ extern int a;
 struct Foo {
     /* The following line should be kept */
     /*implicit*/ Foo() = default;
+
+    /* The following line should be kept as well, the comment at the end
+       removed */
+    /*implicit*/ Foo(int); /**< @overload */
 };
