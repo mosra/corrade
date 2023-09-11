@@ -46,9 +46,39 @@
 #pragma ACME enable CORRADE_NO_PYTHON_COMPATIBILITY
 #pragma ACME enable CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
 
-/* Make it possible to include Assert.h and DebugAssert.h multiple times */
+/* Make it possible to include Assert.h, DebugAssert.h and Macros.h multiple
+   times */
 #pragma ACME disable Corrade_Utility_Assert_h
 #pragma ACME disable Corrade_Utility_DebugAssert_h
+#pragma ACME disable Corrade_Utility_Macros_h
+
+/* Excluded all macros by default. The libraries should then whitelist a subset
+   using #pragma ACME disable. */
+#pragma ACME enable _CORRADE_HELPER_PASTE2
+#pragma ACME enable _CORRADE_HELPER_DEFER
+#pragma ACME enable CORRADE_DEPRECATED
+#pragma ACME enable CORRADE_DEPRECATED_ALIAS
+#pragma ACME enable CORRADE_DEPRECATED_NAMESPACE
+#pragma ACME enable CORRADE_DEPRECATED_ENUM
+#pragma ACME enable CORRADE_DEPRECATED_FILE
+#pragma ACME enable CORRADE_DEPRECATED_MACRO
+#pragma ACME enable CORRADE_IGNORE_DEPRECATED_PUSH
+#pragma ACME enable CORRADE_IGNORE_DEPRECATED_POP
+#pragma ACME enable CORRADE_UNUSED
+#pragma ACME enable CORRADE_FALLTHROUGH
+#pragma ACME enable CORRADE_THREAD_LOCAL
+#pragma ACME enable CORRADE_CONSTEXPR14
+#pragma ACME enable CORRADE_ALWAYS_INLINE
+#pragma ACME enable CORRADE_NEVER_INLINE
+#pragma ACME enable CORRADE_ASSUME
+#pragma ACME enable CORRADE_LIKELY
+#pragma ACME enable CORRADE_UNLIKELY
+#pragma ACME enable CORRADE_FUNCTION
+#pragma ACME enable CORRADE_LINE_STRING
+#pragma ACME enable CORRADE_PASSTHROUGH
+#pragma ACME enable CORRADE_NOOP
+#pragma ACME enable CORRADE_AUTOMATIC_INITIALIZER
+#pragma ACME enable CORRADE_AUTOMATIC_FINALIZER
 
 #pragma ACME revision * echo "$(git describe --long --match 'v*' --abbrev=4) ($(date -d @$(git log -1 --format=%at) +%Y-%m-%d))"
 #pragma ACME stats loc wc -l

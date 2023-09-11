@@ -66,27 +66,10 @@
 /* Contains just Cpu::Features forward declaration, which we don't need */
 #pragma ACME enable Corrade_Corrade_h
 
-/* We need just the INLINE macros and _CORRADE_HELPER_PASTE2 */
-#pragma ACME enable Corrade_Utility_Macros_h
-#ifndef CorradeCpu_h
-#define CorradeCpu_h
-#ifdef CORRADE_TARGET_GCC
-#define CORRADE_ALWAYS_INLINE __attribute__((always_inline)) inline
-#elif defined(CORRADE_TARGET_MSVC)
-#define CORRADE_ALWAYS_INLINE __forceinline
-#else
-#define CORRADE_ALWAYS_INLINE inline
-#endif
-
-#ifdef CORRADE_TARGET_GCC
-#define CORRADE_NEVER_INLINE __attribute__((noinline))
-#elif defined(CORRADE_TARGET_MSVC)
-#define CORRADE_NEVER_INLINE __declspec(noinline)
-#else
-#define CORRADE_NEVER_INLINE
-#endif
-
-#define _CORRADE_HELPER_PASTE2(a, b) a ## b
+/* We need just the INLINE macros and _CORRADE_HELPER_PASTE2 from Macros.h */
+#pragma ACME disable _CORRADE_HELPER_PASTE2
+#pragma ACME disable CORRADE_ALWAYS_INLINE
+#pragma ACME disable CORRADE_NEVER_INLINE
 
 /* For the deinlined runtimeFeatures() implementation on ARM. Don't want the
    whole visibility header here, as it contains also Utility-specific CPU
@@ -94,7 +77,6 @@
 #pragma ACME enable Corrade_Utility_visibility_h
 #ifndef CORRADE_UTILITY_EXPORT
 #define CORRADE_UTILITY_EXPORT
-#endif
 #endif
 #include "Corrade/Cpu.h"
 #ifdef CORRADE_CPU_IMPLEMENTATION

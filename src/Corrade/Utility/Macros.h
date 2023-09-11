@@ -336,7 +336,9 @@ feature when compiling as C++11 or C++14.
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
-#define CORRADE_UNUSED
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_UNUSED /*unused*/
 #endif
 #endif
 
@@ -372,7 +374,9 @@ don't warn about the fallthrough, so there's no need to suppress anything.
 #elif defined(CORRADE_TARGET_CLANG)
 #define CORRADE_FALLTHROUGH [[clang::fallthrough]];
 #else
-#define CORRADE_FALLTHROUGH
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_FALLTHROUGH /*fallthrough*/
 #endif
 #endif
 
@@ -435,7 +439,9 @@ that make use of C++14 constexpr.
 #if CORRADE_CXX_STANDARD >= 201402 && !defined(CORRADE_MSVC2015_COMPATIBILITY)
 #define CORRADE_CONSTEXPR14 constexpr
 #else
-#define CORRADE_CONSTEXPR14
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_CONSTEXPR14 /*constexpr*/
 #endif
 #endif
 
@@ -488,7 +494,9 @@ elsewhere. Example usage:
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_NEVER_INLINE __declspec(noinline)
 #else
-#define CORRADE_NEVER_INLINE
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_NEVER_INLINE /*noinline*/
 #endif
 #endif
 
