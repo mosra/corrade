@@ -34,9 +34,13 @@
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Internal macro implementation */
+#ifndef _CORRADE_HELPER_PASTE2
 #define _CORRADE_HELPER_PASTE2(a, b) a ## b
+#endif
+#if !defined(CORRADE_DEPRECATED_FILE) && !defined(CORRADE_DEPRECATED_MACRO) && !defined(CORRADE_LINE_STRING)
 #define _CORRADE_HELPER_PASTE(a, b) _CORRADE_HELPER_PASTE2(a, b)
 #define _CORRADE_HELPER_STR(x) #x
+#endif
 
 /* Deferred macro expansion doesn't work on MSVC and instead of causing an
    error it only emits a warning like
@@ -51,13 +55,15 @@
    https://docs.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview */
 /** @todo when I can be bothered testing this, enable the macro if
     (defined(CORRADE_TARGET_MSVC) && defined(_MSVC_TRADITIONAL) && !_MSVC_TRADITIONAL) */
-#if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL)
+#if !defined(_CORRADE_HELPER_DEFER) && (!defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL))
 #define _CORRADE_HELPER_DEFER(m, ...) m(__VA_ARGS__)
 #endif
 /* On the other hand, THE ONLY place where _CORRADE_HELPER_DEFER() worked on
    MSVC is in CORRADE_LINE_STRING. Provide a specialized macro for that
    instead. */
+#ifndef CORRADE_LINE_STRING
 #define _CORRADE_LINE_STRING_IMPLEMENTATION(...) _CORRADE_HELPER_STR(__VA_ARGS__)
+#endif
 
 #endif
 
@@ -80,12 +86,14 @@ deprecated classes or typedefs, only when the type is instantiated --- i.e.,
 @cpp DeprecatedStruct a; @ce will warn, but @cpp DeprecatedStruct::Value @ce
 will not.
 */
+#if !defined(CORRADE_DEPRECATED) || defined(DOXYGEN_GENERATING_OUTPUT)
 #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
 #else
 #define CORRADE_DEPRECATED(message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -105,12 +113,14 @@ will not.
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
+#if !defined(CORRADE_DEPRECATED_ALIAS) || defined(DOXYGEN_GENERATING_OUTPUT)
 #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
 #elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1910
 #define CORRADE_DEPRECATED_ALIAS(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ALIAS(message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -127,6 +137,7 @@ Note that this doesn't work on namespace aliases (i.e., marking
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
+#if !defined(CORRADE_DEPRECATED_NAMESPACE) || defined(DOXYGEN_GENERATING_OUTPUT)
 #if defined(CORRADE_TARGET_CLANG)
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
    namespace attributes are a C++17 extension and deprecated attribute is a
@@ -142,6 +153,7 @@ Note that this doesn't work on namespace aliases (i.e., marking
 #define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -162,6 +174,7 @@ the annotation, but ignores it for both enums and enum values.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
+#if !defined(CORRADE_DEPRECATED_ENUM) || defined(DOXYGEN_GENERATING_OUTPUT)
 /* Qt's Meta Object Compiler doesn't recognize enum value attributes in older
    Qt. Not sure what version was it fixed in as the bugreports don't tell
    (https://bugreports.qt.io/browse/QTBUG-78820) so disabling it for MOC
@@ -172,6 +185,7 @@ the annotation, but ignores it for both enums and enum values.
 #define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -197,6 +211,7 @@ in any way.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
+#if !defined(CORRADE_DEPRECATED_FILE) || defined(DOXYGEN_GENERATING_OUTPUT)
 #if defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
 #elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
@@ -205,6 +220,7 @@ in any way.
 #define CORRADE_DEPRECATED_FILE(_message) __pragma(message ("warning: " __FILE__ " is deprecated: " _message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -230,6 +246,7 @@ contribute to the warning log or warning count in any way.
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_FILE()
 */
+#ifndef CORRADE_DEPRECATED_MACRO
 #if defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
 #elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
@@ -238,6 +255,7 @@ contribute to the warning log or warning count in any way.
 #define CORRADE_DEPRECATED_MACRO(macro,_message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
 #else
 #define CORRADE_DEPRECATED_MACRO(macro,message)
+#endif
 #endif
 
 /** @hideinitializer
@@ -257,6 +275,7 @@ In particular, warnings from @ref CORRADE_DEPRECATED(),
 @ref CORRADE_DEPRECATED_FILE() and @ref CORRADE_DEPRECATED_MACRO() warnings are
 suppressed only on Clang.
 */
+#ifndef CORRADE_IGNORE_DEPRECATED_PUSH
 #ifdef CORRADE_TARGET_CLANG
 #define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") _Pragma("GCC diagnostic ignored \"-W#pragma-messages\"")
 #elif defined(CORRADE_TARGET_GCC)
@@ -266,18 +285,21 @@ suppressed only on Clang.
 #else
 #define CORRADE_IGNORE_DEPRECATED_PUSH
 #endif
+#endif
 
 /** @hideinitializer
 @brief End code section with deprecation warnings ignored
 
 See @ref CORRADE_IGNORE_DEPRECATED_PUSH for more information.
 */
+#ifndef CORRADE_IGNORE_DEPRECATED_POP
 #ifdef CORRADE_TARGET_GCC
 #define CORRADE_IGNORE_DEPRECATED_POP _Pragma("GCC diagnostic pop")
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_IGNORE_DEPRECATED_POP __pragma(warning(pop))
 #else
 #define CORRADE_IGNORE_DEPRECATED_POP
+#endif
 #endif
 
 /** @hideinitializer
@@ -294,6 +316,7 @@ compiler-specific variant on Clang, MSVC and older GCC. Clang and MSVC have
 their own specific macro always as they otherwise complain about use of a C++17
 feature when compiling as C++11 or C++14.
 */
+#ifndef CORRADE_UNUSED
 /* GCC 7 supports [[maybe_unused]] in some cases (function arguments), but not
    e.g. unused constructors. GCC 10 does, so using that as the min version.
 
@@ -314,6 +337,7 @@ feature when compiling as C++11 or C++14.
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
 #define CORRADE_UNUSED
+#endif
 #endif
 
 /** @hideinitializer
@@ -336,6 +360,7 @@ non-empty only on 2019 16.6+ and only if compiling under C++17, as it warns
 otherwise as well. Defined as empty on older GCC and MSVC --- these versions
 don't warn about the fallthrough, so there's no need to suppress anything.
 */
+#ifndef CORRADE_FALLTHROUGH
 /* Explicitly checking we're not on Clang because certain Clang-based IDEs
    inherit __GNUC__ if GCC is used instead of leaving it at 4 like Clang itself
    does, and thus this macro would cause a warning in the IDE. */
@@ -348,6 +373,7 @@ don't warn about the fallthrough, so there's no need to suppress anything.
 #define CORRADE_FALLTHROUGH [[clang::fallthrough]];
 #else
 #define CORRADE_FALLTHROUGH
+#endif
 #endif
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -377,6 +403,7 @@ Apple Clang, where it's defined as @cpp __thread @ce. Note that the
 pre-standard @cpp __thread @ce has some semantic differences, in particular
 regarding RAII.
 */
+#ifndef CORRADE_THREAD_LOCAL
 #ifdef __has_feature
 #if !__has_feature(cxx_thread_local) /* Apple Clang 7.3 says false here */
 #define CORRADE_THREAD_LOCAL __thread
@@ -384,6 +411,7 @@ regarding RAII.
 #endif
 #ifndef CORRADE_THREAD_LOCAL /* Assume it's supported otherwise */
 #define CORRADE_THREAD_LOCAL thread_local
+#endif
 #endif
 
 /** @hideinitializer
@@ -396,6 +424,7 @@ compiler implements C++14 relaxed constexpr rules (which includes GCC 5+, Clang
 that make use of C++14 constexpr.
 @see @ref CORRADE_CXX_STANDARD
 */
+#ifndef CORRADE_CONSTEXPR14
 /* MSVC2015 reports itself as supporting C++14 in _MSVC_LANG (its variant of
    __cplusplus, see https://stackoverflow.com/a/74193034) but C++14 constexpr
    is only implemented since MSVC2017. The value of __cplusplus is set to
@@ -407,6 +436,7 @@ that make use of C++14 constexpr.
 #define CORRADE_CONSTEXPR14 constexpr
 #else
 #define CORRADE_CONSTEXPR14
+#endif
 #endif
 
 /** @hideinitializer
@@ -427,12 +457,14 @@ always suppresses all inlining. Example usage:
 
 @see @ref CORRADE_NEVER_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
+#ifndef CORRADE_ALWAYS_INLINE
 #ifdef CORRADE_TARGET_GCC
 #define CORRADE_ALWAYS_INLINE __attribute__((always_inline)) inline
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ALWAYS_INLINE __forceinline
 #else
 #define CORRADE_ALWAYS_INLINE inline
+#endif
 #endif
 
 /** @hideinitializer
@@ -450,12 +482,14 @@ elsewhere. Example usage:
 
 @see @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
+#ifndef CORRADE_NEVER_INLINE
 #ifdef CORRADE_TARGET_GCC
 #define CORRADE_NEVER_INLINE __attribute__((noinline))
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_NEVER_INLINE __declspec(noinline)
 #else
 #define CORRADE_NEVER_INLINE
+#endif
 #endif
 
 /** @hideinitializer
@@ -477,6 +511,7 @@ You can override this implementation by placing your own
     @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifndef CORRADE_ASSUME
+#ifndef CORRADE_ASSUME
 #ifdef CORRADE_TARGET_CLANG
 #define CORRADE_ASSUME(condition) __builtin_assume(condition)
 #elif defined(CORRADE_TARGET_MSVC)
@@ -492,6 +527,7 @@ You can override this implementation by placing your own
 #endif
 #else
 #define CORRADE_ASSUME(condition) do {} while(false)
+#endif
 #endif
 #endif
 
@@ -531,6 +567,7 @@ but the behavior is highly dependent on compiler-specific heuristics.
 @see @ref CORRADE_UNLIKELY(), @ref CORRADE_ASSUME(),
     @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE
 */
+#ifndef CORRADE_LIKELY
 /* While the GCC 9 changelog mentions experimental support for [[likely]] and
    [[unlikely]], it warns that "attributes at the beginning of statement are
    ignored" (??). Version 10 treats them properly. For MSVC using > 201703
@@ -547,6 +584,7 @@ but the behavior is highly dependent on compiler-specific heuristics.
 #else
 #define CORRADE_LIKELY(...) (__VA_ARGS__)
 #endif
+#endif
 
 /** @hideinitializer
 @brief Mark an if condition as unlikely to happen
@@ -561,6 +599,7 @@ mark boundary conditions in tight loops, for example:
 @see @ref CORRADE_ASSUME(), @ref CORRADE_ALWAYS_INLINE,
     @ref CORRADE_NEVER_INLINE
 */
+#ifndef CORRADE_UNLIKELY
 /* While the GCC 9 changelog mentions experimental support for [[likely]] and
    [[unlikely]], it warns that "attributes at the beginning of statement are
    ignored" (??). Version 10 treats them properly. For MSVC using > 201703
@@ -577,6 +616,7 @@ mark boundary conditions in tight loops, for example:
 #else
 #define CORRADE_UNLIKELY(...) (__VA_ARGS__)
 #endif
+#endif
 
 /** @hideinitializer
 @brief Function name
@@ -590,6 +630,7 @@ Note that the function name is *not* a string literal, meaning it can't be
 concatenated with other string literals like @cpp __FILE__ @ce or
 @ref CORRADE_LINE_STRING. Details [in this Stack Overflow answer](https://stackoverflow.com/a/18301370).
 */
+#ifndef CORRADE_FUNCTION
 #ifndef CORRADE_TARGET_ANDROID
 #define CORRADE_FUNCTION __func__
 #else
@@ -597,6 +638,7 @@ concatenated with other string literals like @cpp __FILE__ @ce or
    while GCC's __FUNCTION__ does the right thing.. I wonder -- do they have
    *any* tests for libc at all?! */
 #define CORRADE_FUNCTION __FUNCTION__
+#endif
 #endif
 
 /** @hideinitializer
@@ -625,7 +667,9 @@ as applying to the immediately following line, which is why the extra
 
 @see @ref CORRADE_FUNCTION
 */
+#ifndef CORRADE_LINE_STRING
 #define CORRADE_LINE_STRING _CORRADE_LINE_STRING_IMPLEMENTATION(__LINE__)
+#endif
 
 /** @hideinitializer
 @brief Passthrough
@@ -633,7 +677,9 @@ as applying to the immediately following line, which is why the extra
 
 Expands to all arguments passed to it. Inverse of @ref CORRADE_NOOP().
 */
+#ifndef CORRADE_PASSTHROUGH
 #define CORRADE_PASSTHROUGH(...) __VA_ARGS__
+#endif
 
 /** @hideinitializer
 @brief No-op
@@ -644,7 +690,9 @@ on compilers that don't support defining function macros on command line ---
 for example, @cpp -DA_MACRO=CORRADE_NOOP @ce is the same as doing
 @cpp -D'A_MACRO(arg)=' @ce.
 */
+#ifndef CORRADE_NOOP
 #define CORRADE_NOOP(...)
+#endif
 
 /** @hideinitializer
 @brief Automatic initializer
