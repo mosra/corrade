@@ -122,7 +122,7 @@ template<std::size_t alignment> void MemoryTest::allocateAlignedTrivial() {
 
         /* Keep all allocations resident to avoid the allocator returning the
            same (aligned) pointer every time */
-        arrayAppend(allocations, std::move(data));
+        arrayAppend(allocations, Utility::move(data));
     }
 }
 

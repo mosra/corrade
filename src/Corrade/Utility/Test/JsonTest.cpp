@@ -4496,7 +4496,7 @@ void JsonTest::constructMove() {
     Containers::Optional<Json> a = Json::fromString("\"\\\\\"", Json::Option::ParseStrings);
     CORRADE_VERIFY(a);
 
-    Json b = *std::move(a);
+    Json b = *Utility::move(a);
     CORRADE_COMPARE(b.root().type(), JsonToken::Type::String);
     CORRADE_COMPARE(b.root().data(), "\"\\\\\"");
     CORRADE_VERIFY(b.root().isParsed());
@@ -4505,7 +4505,7 @@ void JsonTest::constructMove() {
     Containers::Optional<Json> c = Json::fromString("{}");
     CORRADE_VERIFY(c);
 
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_COMPARE(c->root().type(), JsonToken::Type::String);
     CORRADE_COMPARE(c->root().data(), "\"\\\\\"");
     CORRADE_VERIFY(c->root().isParsed());

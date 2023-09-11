@@ -64,7 +64,7 @@ void TripleStlTest::convertCopy() {
 void TripleStlTest::convertMove() {
     std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> a{pointer(new float{35.0f}), pointer(new int{4}), Pointer<bool>{Corrade::InPlaceInit, true}};
 
-    Triple<Pointer<float>, Pointer<int>, Pointer<bool>> b = std::move(a);
+    Triple<Pointer<float>, Pointer<int>, Pointer<bool>> b = Utility::move(a);
     CORRADE_COMPARE(*b.first(), 35.0f);
     CORRADE_COMPARE(*b.second(), 4);
     CORRADE_COMPARE(*b.third(), true);
@@ -72,7 +72,7 @@ void TripleStlTest::convertMove() {
     CORRADE_VERIFY(!std::get<1>(a));
     CORRADE_VERIFY(!std::get<2>(a));
 
-    std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> c = std::move(b);
+    std::tuple<Pointer<float>, Pointer<int>, Pointer<bool>> c = Utility::move(b);
     CORRADE_COMPARE(*std::get<0>(c), 35.0f);
     CORRADE_COMPARE(*std::get<1>(c), 4);
     CORRADE_COMPARE(*std::get<2>(c), true);
@@ -80,7 +80,7 @@ void TripleStlTest::convertMove() {
     CORRADE_VERIFY(!b.second());
     CORRADE_VERIFY(!b.third());
 
-    auto d = triple(std::move(c));
+    auto d = triple(Utility::move(c));
     CORRADE_VERIFY(std::is_same<decltype(d), Triple<Pointer<float>, Pointer<int>, Pointer<bool>>>::value);
     CORRADE_COMPARE(*d.first(), 35.0f);
     CORRADE_COMPARE(*d.second(), 4);

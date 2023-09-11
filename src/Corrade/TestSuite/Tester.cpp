@@ -32,7 +32,6 @@
 #include <random> /* random device for std::shuffle() */
 #include <sstream>
 #include <typeinfo>
-#include <utility>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
@@ -154,7 +153,7 @@ struct Tester::Printer::Printer::Data {
 };
 
 struct Tester::TesterState {
-    explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
+    explicit TesterState(const TesterConfiguration& configuration): configuration{Utility::move(configuration)} {}
 
     void printFormattedTestCaseName(Debug& out) const {
         if(!testCaseName) {

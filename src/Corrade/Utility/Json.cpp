@@ -685,7 +685,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
     /* All good */
     /* GCC 4.8 needs a bit of help here */
-    return Containers::optional(std::move(json));
+    return Containers::optional(Utility::move(json));
 }
 
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const std::size_t lineOffset, const std::size_t columnOffset, const Containers::StringView string, const Options options) {

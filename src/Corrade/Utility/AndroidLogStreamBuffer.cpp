@@ -26,9 +26,11 @@
 
 #include "AndroidLogStreamBuffer.h"
 
+#include "Corrade/Utility/Move.h"
+
 namespace Corrade { namespace Utility {
 
-AndroidLogStreamBuffer::AndroidLogStreamBuffer(const LogPriority priority, std::string tag): std::stringbuf(std::ios_base::out), _priority(priority), _tag(std::move(tag)) {}
+AndroidLogStreamBuffer::AndroidLogStreamBuffer(const LogPriority priority, std::string tag): std::stringbuf(std::ios_base::out), _priority(priority), _tag(Utility::move(tag)) {}
 
 AndroidLogStreamBuffer::~AndroidLogStreamBuffer() = default;
 

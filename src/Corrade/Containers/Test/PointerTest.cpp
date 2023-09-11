@@ -622,10 +622,10 @@ void PointerTest::moveConstructPlainStruct() {
         Pointer<int> b;
     };
 
-    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
-       to convert MoveOnlyStruct to int to initialize the first argument and
-       fails miserably -- a{InPlaceInit, 3, 'a', nullptr} would in-place
-       initialize them, which is fine and doesn't need workarounds */
+    /* This needs special handling on GCC 4.8, where T{Utility::move(b)}
+       attempts to convert MoveOnlyStruct to int to initialize the first
+       argument and fails miserably -- a{InPlaceInit, 3, 'a', nullptr} would
+       in-place initialize them, which is fine and doesn't need workarounds */
     Pointer<MoveOnlyStruct> a{Corrade::InPlaceInit, MoveOnlyStruct{3, 'a', nullptr}};
     CORRADE_COMPARE(a->a, 3);
 

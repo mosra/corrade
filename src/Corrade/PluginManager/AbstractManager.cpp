@@ -280,7 +280,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
         }
 
         /* If it got successfully inserted, create the actual plugin state */
-        inserted.first->second.emplace(*staticPlugin, std::move(configuration));
+        inserted.first->second.emplace(*staticPlugin, Utility::move(configuration));
 
         Plugin& p = *inserted.first->second;
 
@@ -605,7 +605,7 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
                 _state->plugins.erase(found);
             }
 
-            registerDynamicPlugin(name, std::move(data));
+            registerDynamicPlugin(name, Utility::move(data));
         }
         return state;
     }
@@ -1032,7 +1032,7 @@ void AbstractManager::registerDynamicPlugin(const Containers::StringView name, C
        if it would be global in case of an unlikely scenario of coming from a
        filename as a string view literal passed directly to load(), we won't
        save anything */
-    const auto result = _state->plugins.emplace(name, std::move(plugin));
+    const auto result = _state->plugins.emplace(name, Utility::move(plugin));
     CORRADE_INTERNAL_ASSERT(result.second);
 
     /* The plugin is the best version of itself. If there was already an
@@ -1154,7 +1154,7 @@ AbstractManager::Plugin::Plugin(const Containers::StringView name, const Contain
 }
 #endif
 
-AbstractManager::Plugin::Plugin(const Implementation::StaticPlugin& staticPlugin, Utility::Configuration&& configuration_): loadState{LoadState::Static}, configuration{std::move(configuration_)}, metadata{staticPlugin.plugin, configuration}, instancer{staticPlugin.instancer}, staticPlugin{&staticPlugin} {}
+AbstractManager::Plugin::Plugin(const Implementation::StaticPlugin& staticPlugin, Utility::Configuration&& configuration_): loadState{LoadState::Static}, configuration{Utility::move(configuration_)}, metadata{staticPlugin.plugin, configuration}, instancer{staticPlugin.instancer}, staticPlugin{&staticPlugin} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {

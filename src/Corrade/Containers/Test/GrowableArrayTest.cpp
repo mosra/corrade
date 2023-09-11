@@ -3144,9 +3144,9 @@ void GrowableArrayTest::moveConstructPlainStruct() {
 
     Array<MoveOnlyStruct> a;
 
-    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
-       to convert MoveOnlyStruct to int to initialize the first argument and
-       fails miserably. */
+    /* This needs special handling on GCC 4.8, where T{Utility::move(b)}
+       attempts to convert MoveOnlyStruct to int to initialize the first
+       argument and fails miserably. */
     arrayAppend(a, Corrade::InPlaceInit, 3, 'a', nullptr);
     arrayAppend(a, Corrade::InPlaceInit, 4, 'b', nullptr);
     arrayAppend(a, Corrade::InPlaceInit, 5, 'c', nullptr);

@@ -1346,7 +1346,7 @@ void StringTest::convertArray() {
     String a = "Allocated hello\0for a verbose world"_s;
     CORRADE_VERIFY(!a.isSmall());
 
-    Array<char> array = std::move(a);
+    Array<char> array = Utility::move(a);
     CORRADE_COMPARE(StringView{array}, "Allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
     /* The original allocation includes a null terminator, it should be here as
@@ -1366,7 +1366,7 @@ void StringTest::convertArraySmall() {
     String a = "this\0world"_s;
     CORRADE_VERIFY(a.isSmall());
 
-    Array<char> array = std::move(a);
+    Array<char> array = Utility::move(a);
     CORRADE_COMPARE(StringView{array}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
     /* The original allocation includes a null terminator, it should be here as
@@ -1384,7 +1384,7 @@ void StringTest::convertArraySmall() {
 
 void StringTest::convertArraySmallAllocatedInit() {
     String a{AllocatedInit, "this\0world"_s};
-    Array<char> array = std::move(a);
+    Array<char> array = Utility::move(a);
     CORRADE_COMPARE(StringView{array}, "this\0world"_s);
     CORRADE_COMPARE(array.deleter(), nullptr);
 
@@ -1399,7 +1399,7 @@ void StringTest::convertArrayCustomDeleter() {
     auto deleter = [](char*, std::size_t){};
 
     String a{data, Containers::arraySize(data) - 1, deleter};
-    Array<char> array = std::move(a);
+    Array<char> array = Utility::move(a);
     CORRADE_COMPARE(StringView{array}, "Statically allocated hello\0for a verbose world"_s);
     CORRADE_COMPARE(array.deleter(), deleter);
 
@@ -1417,7 +1417,7 @@ void StringTest::convertArrayNullTerminatedGlobalView() {
     CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
 
     /* The size should be returned with the Global bit cleared */
-    Array<char> array = std::move(a);
+    Array<char> array = Utility::move(a);
     CORRADE_COMPARE(array.size(), view.size());
     CORRADE_COMPARE(StringView{array}, view);
 }
@@ -2861,7 +2861,7 @@ void StringTest::customDeleterMovedOutInstance() {
         }};
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
 
-        String b = std::move(a);
+        String b = Utility::move(a);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
 

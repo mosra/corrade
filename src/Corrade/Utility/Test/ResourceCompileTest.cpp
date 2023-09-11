@@ -138,8 +138,8 @@ void ResourceCompileTest::compile() {
     CORRADE_VERIFY(consequence);
     CORRADE_VERIFY(predisposition);
     const Implementation::FileData input[]{
-        {"consequence.bin", false, 1, *std::move(consequence)},
-        {"predisposition.bin", false, 1, *std::move(predisposition)}
+        {"consequence.bin", false, 1, *Utility::move(consequence)},
+        {"predisposition.bin", false, 1, *Utility::move(predisposition)}
     };
     CORRADE_COMPARE_AS(Implementation::resourceCompile("ResourceTestData", "test", input),
         Path::join(RESOURCE_TEST_DIR, "compiled.cpp"),

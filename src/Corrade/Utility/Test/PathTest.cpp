@@ -513,7 +513,7 @@ void PathTest::fromNativeSeparatorsNonOwned() {
     CORRADE_VERIFY(in.deleter());
 
     /* Will make a copy as it can't touch a potentially immutable data */
-    Containers::String out = Path::fromNativeSeparators(std::move(in));
+    Containers::String out = Path::fromNativeSeparators(Utility::move(in));
     CORRADE_COMPARE(out, "put/ that/somewhere/ else");
     CORRADE_VERIFY(out.data() != data);
 }
@@ -542,7 +542,7 @@ void PathTest::toNativeSeparatorsNonOwned() {
     CORRADE_VERIFY(in.deleter());
 
     /* Will make a copy as it can't touch a potentially immutable data */
-    Containers::String out = Path::toNativeSeparators(std::move(in));
+    Containers::String out = Path::toNativeSeparators(Utility::move(in));
     CORRADE_COMPARE(out, "this\\is a weird\\system\\right");
     CORRADE_VERIFY(out.data() != data);
 }

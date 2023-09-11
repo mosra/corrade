@@ -80,7 +80,7 @@ AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{InPlaceInit} {
     _state->manager = &manager;
 }
 
-AbstractPlugin::AbstractPlugin(AbstractPlugin&& other) noexcept: _state{std::move(other._state)} {
+AbstractPlugin::AbstractPlugin(AbstractPlugin&& other) noexcept: _state{Utility::move(other._state)} {
     /* Reregister the instance if the plugin was instantiated through a plugin
        manager. Note that instantiating using
        AbstractManagingPlugin::AbstractManagingPlugin(AbstractManager&) is

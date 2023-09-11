@@ -335,14 +335,14 @@ void ArgumentsTest::move() {
 
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
 
-    Arguments args2{std::move(args)};
+    Arguments args2{Utility::move(args)};
     CORRADE_COMPARE(args2.value("bar"), "hey");
 
     CORRADE_VERIFY(!args.isParsed());
     CORRADE_COMPARE(args.prefix(), "");
 
     Arguments args3{"another"};
-    args3 = std::move(args2);
+    args3 = Utility::move(args2);
     CORRADE_VERIFY(!args2.isParsed());
     CORRADE_COMPARE(args2.prefix(), "another");
     CORRADE_COMPARE(args3.value("bar"), "hey");

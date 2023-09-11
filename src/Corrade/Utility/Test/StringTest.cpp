@@ -535,13 +535,13 @@ void StringTest::lowercaseUppercaseString() {
     {
         Containers::String in{Containers::AllocatedInit, "YEAh!"};
         const char* data = in.data();
-        Containers::String out = String::lowercase(std::move(in));
+        Containers::String out = String::lowercase(Utility::move(in));
         CORRADE_COMPARE(out, "yeah!");
         CORRADE_VERIFY(out.data() == data);
     } {
         Containers::String in{Containers::AllocatedInit, "Hello!"};
         const char* data = in.data();
-        Containers::String out = String::uppercase(std::move(in));
+        Containers::String out = String::uppercase(Utility::move(in));
         CORRADE_COMPARE(out, "HELLO!");
         CORRADE_VERIFY(out.data() == data);
     }
@@ -569,7 +569,7 @@ void StringTest::lowercaseUppercaseStringNotOwned() {
         CORRADE_VERIFY(!in.isSmall());
         CORRADE_VERIFY(in.deleter());
 
-        Containers::String out = String::lowercase(std::move(in));
+        Containers::String out = String::lowercase(Utility::move(in));
         CORRADE_COMPARE(out, "yeah!");
         CORRADE_VERIFY(out.data() != data);
     } {
@@ -578,7 +578,7 @@ void StringTest::lowercaseUppercaseStringNotOwned() {
         CORRADE_VERIFY(!in.isSmall());
         CORRADE_VERIFY(in.deleter());
 
-        Containers::String out = String::uppercase(std::move(in));
+        Containers::String out = String::uppercase(Utility::move(in));
         CORRADE_COMPARE(out, "HELLO!");
         CORRADE_VERIFY(out.data() != data);
     }

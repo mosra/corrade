@@ -741,12 +741,12 @@ void PairTest::move() {
     {
         Pair<Movable, int> a{Movable{5}, 3};
 
-        Pair<Movable, int> b = std::move(a);
+        Pair<Movable, int> b = Utility::move(a);
         CORRADE_COMPARE(b.first().a, 5);
         CORRADE_COMPARE(b.second(), 3);
 
         Pair<Movable, int> c;
-        c = std::move(a);
+        c = Utility::move(a);
         CORRADE_COMPARE(c.first().a, 5);
         CORRADE_COMPARE(c.second(), 3);
 

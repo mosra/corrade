@@ -1133,13 +1133,13 @@ void TripleTest::move() {
     {
         Triple<float, Movable, int> a{1.5f, Movable{5}, 3};
 
-        Triple<float, Movable, int> b = std::move(a);
+        Triple<float, Movable, int> b = Utility::move(a);
         CORRADE_COMPARE(b.first(), 1.5f);
         CORRADE_COMPARE(b.second().a, 5);
         CORRADE_COMPARE(b.third(), 3);
 
         Triple<float, Movable, int> c;
-        c = std::move(a);
+        c = Utility::move(a);
         CORRADE_COMPARE(c.first(), 1.5f);
         CORRADE_COMPARE(c.second().a, 5);
         CORRADE_COMPARE(c.third(), 3);

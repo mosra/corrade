@@ -236,7 +236,7 @@ Containers::StringView Resource::getString(const Containers::StringView filename
             /* Save the file for later use and return. Use a filename from the
                compiled-in resources which is guaranteed to be global to avoid
                allocating a new string */
-            it = _overrideGroup->data.emplace(Implementation::resourceFilenameAt(_group->positions, _group->filenames, i), *std::move(data)).first;
+            it = _overrideGroup->data.emplace(Implementation::resourceFilenameAt(_group->positions, _group->filenames, i), *Utility::move(data)).first;
             return it->second;
         }
 

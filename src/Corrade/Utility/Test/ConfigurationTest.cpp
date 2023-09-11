@@ -694,7 +694,7 @@ void ConfigurationTest::move() {
     descendent->addGroup("deep");
 
     /* Move constructor for ConfigurationGroup */
-    ConfigurationGroup* constructedMove = new ConfigurationGroup(std::move(*original));
+    ConfigurationGroup* constructedMove = new ConfigurationGroup(Utility::move(*original));
     CORRADE_VERIFY(original->isEmpty());
     CORRADE_VERIFY(!constructedMove->configuration());
     CORRADE_VERIFY(!constructedMove->group("descendent")->configuration());
@@ -703,7 +703,7 @@ void ConfigurationTest::move() {
     /* Move assignment for ConfigurationGroup */
     ConfigurationGroup* assignedMove = conf.addGroup("another");
     CORRADE_COMPARE(assignedMove->configuration(), &conf);
-    *assignedMove = std::move(*constructedMove);
+    *assignedMove = Utility::move(*constructedMove);
     CORRADE_VERIFY(constructedMove->isEmpty());
     CORRADE_COMPARE(assignedMove->configuration(), &conf);
     CORRADE_COMPARE(assignedMove->group("descendent")->configuration(), &conf);
@@ -712,7 +712,7 @@ void ConfigurationTest::move() {
     delete constructedMove;
 
     /* Move constructor for Configuration */
-    Configuration confConstructedMove(std::move(conf));
+    Configuration confConstructedMove(Utility::move(conf));
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_COMPARE(confConstructedMove.configuration(), &confConstructedMove);
     CORRADE_COMPARE(confConstructedMove.group("group")->configuration(), &confConstructedMove);
@@ -720,7 +720,7 @@ void ConfigurationTest::move() {
 
     /* Move assignment for Configuration */
     Configuration confAssignedMove;
-    confAssignedMove = std::move(confConstructedMove);
+    confAssignedMove = Utility::move(confConstructedMove);
     CORRADE_VERIFY(confConstructedMove.isEmpty());
     CORRADE_COMPARE(confAssignedMove.configuration(), &confAssignedMove);
     CORRADE_COMPARE(confAssignedMove.group("group")->configuration(), &confAssignedMove);

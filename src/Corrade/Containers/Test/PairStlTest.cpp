@@ -61,19 +61,19 @@ void PairStlTest::convertCopy() {
 void PairStlTest::convertMove() {
     std::pair<Pointer<float>, Pointer<int>> a{pointer(new float{35.0f}), pointer(new int{4})};
 
-    Pair<Pointer<float>, Pointer<int>> b = std::move(a);
+    Pair<Pointer<float>, Pointer<int>> b = Utility::move(a);
     CORRADE_COMPARE(*b.first(), 35.0f);
     CORRADE_COMPARE(*b.second(), 4);
     CORRADE_VERIFY(!a.first);
     CORRADE_VERIFY(!a.second);
 
-    std::pair<Pointer<float>, Pointer<int>> c = std::move(b);
+    std::pair<Pointer<float>, Pointer<int>> c = Utility::move(b);
     CORRADE_COMPARE(*c.first, 35.0f);
     CORRADE_COMPARE(*c.second, 4);
     CORRADE_VERIFY(!b.first());
     CORRADE_VERIFY(!b.second());
 
-    auto d = pair(std::move(c));
+    auto d = pair(Utility::move(c));
     CORRADE_VERIFY(std::is_same<decltype(d), Pair<Pointer<float>, Pointer<int>>>::value);
     CORRADE_COMPARE(*d.first(), 35.0f);
     CORRADE_COMPARE(*d.second(), 4);

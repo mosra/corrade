@@ -959,14 +959,14 @@ void TesterTest::configurationMove() {
     TesterConfiguration a;
     a.setSkippedArgumentPrefixes({"eyy", "bla"});
 
-    TesterConfiguration b{std::move(a)};
+    TesterConfiguration b{Utility::move(a)};
     CORRADE_VERIFY(a.skippedArgumentPrefixes().isEmpty());
     CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 2);
     CORRADE_COMPARE(b.skippedArgumentPrefixes()[1], "bla");
 
     TesterConfiguration c;
     c.setSkippedArgumentPrefixes({"welp"});
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 1);
     CORRADE_COMPARE(c.skippedArgumentPrefixes().size(), 2);
     CORRADE_COMPARE(c.skippedArgumentPrefixes()[1], "bla");

@@ -851,7 +851,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
         if((flags >= ListFlag::SkipDotAndDotDot) && file == ".."_s)
             continue;
 
-        arrayAppend(list, std::move(file));
+        arrayAppend(list, Utility::move(file));
     }
     #else
     #error
@@ -865,7 +865,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
         std::reverse(list.begin(), list.end());
 
     /* GCC 4.8 needs extra help here */
-    return Containers::optional(std::move(list));
+    return Containers::optional(Utility::move(list));
 
     /* Other not implemented */
     #else
@@ -1005,7 +1005,7 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
         } while(count);
 
         /* GCC 4.8 needs extra help here */
-        return Containers::optional(std::move(out));
+        return Containers::optional(Utility::move(out));
     }
 
     /* Some special files report more bytes than they actually have (such as

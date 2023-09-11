@@ -88,7 +88,7 @@ void AbstractPluginTest::constructMove() {
     {
         Canary a;
         CORRADE_VERIFY(!a.metadata());
-        Canary b{std::move(a)};
+        Canary b{Utility::move(a)};
         CORRADE_VERIFY(!b.metadata());
     }
 
@@ -103,7 +103,7 @@ void AbstractPluginTest::constructMove() {
         CORRADE_COMPARE(a->metadata()->name(), "Canary");
         CORRADE_COMPARE(a->configuration().value("name"), "Achoo");
 
-        Canary b{std::move(*a)};
+        Canary b{Utility::move(*a)};
         CORRADE_COMPARE(b.plugin(), "Canary");
         CORRADE_VERIFY(b.metadata());
         CORRADE_COMPARE(b.metadata()->name(), "Canary");

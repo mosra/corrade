@@ -1331,12 +1331,12 @@ void JsonWriterTest::constructMove() {
     JsonWriter a;
     a.beginArray();
 
-    JsonWriter b = std::move(a);
+    JsonWriter b = Utility::move(a);
     b.write("hey");
     b.endArray();
 
     JsonWriter c;
-    c = std::move(b);
+    c = Utility::move(b);
     CORRADE_COMPARE(c.toString(), "[\"hey\"]");
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<JsonWriter>::value);

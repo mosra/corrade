@@ -1055,7 +1055,7 @@ void ArrayTest::customDeleterMovedOutInstance() {
         }};
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
 
-        Array b = std::move(a);
+        Array b = Utility::move(a);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
 
@@ -1193,7 +1193,7 @@ void ArrayTest::customDeleterTypeMovedOutInstance() {
         CORRADE_COMPARE(deletedCount, 0);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
 
-        Containers::Array<int, CustomDeleter> b = std::move(a);
+        Containers::Array<int, CustomDeleter> b = Utility::move(a);
         CORRADE_COMPARE(deletedCount, 0);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
@@ -1310,9 +1310,9 @@ void ArrayTest::moveConstructPlainStruct() {
         Array b;
     };
 
-    /* This needs special handling on GCC 4.8, where T{std::move(b)} attempts
-       to convert MoveOnlyStruct to int to initialize the first argument and
-       fails miserably. */
+    /* This needs special handling on GCC 4.8, where T{Utility::move(b)}
+       attempts to convert MoveOnlyStruct to int to initialize the first
+       argument and fails miserably. */
     Containers::Array<MoveOnlyStruct> a{Corrade::DirectInit, 2, 3, 'a', nullptr};
     CORRADE_COMPARE(a.size(), 2);
 

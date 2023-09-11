@@ -687,7 +687,7 @@ void BitArrayTest::customDeleterMovedOutInstance() {
         }};
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
 
-        BitArray b = std::move(a);
+        BitArray b = Utility::move(a);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
 

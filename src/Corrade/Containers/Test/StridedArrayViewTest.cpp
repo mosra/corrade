@@ -3464,17 +3464,17 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
                _first member would be unused as well, and that one is vital to
                test proper offset calculation, so leave them. */
             CORRADE_UNUSED float& first() & { return _first; }
-            CORRADE_UNUSED float&& first() && { return std::move(_first); }
+            CORRADE_UNUSED float&& first() && { return Utility::move(_first); }
             CORRADE_UNUSED const float& first() const & { return _first; }
-            CORRADE_UNUSED const float&& first() const && { return std::move(_first); }
+            CORRADE_UNUSED const float&& first() const && { return Utility::move(_first); }
             short& second() & { return _second; }
             /* Clang complains this function is unused. But its presence is
                vital to the test case, so leave it. */
-            CORRADE_UNUSED short&& second() && { return std::move(_second); }
+            CORRADE_UNUSED short&& second() && { return Utility::move(_second); }
             const short& second() const & { return _second; }
             /* Clang complains this function is unused. But its presence is
                vital to the test case, so leave it. */
-            CORRADE_UNUSED const short&& second() const && { return std::move(_second); }
+            CORRADE_UNUSED const short&& second() const && { return Utility::move(_second); }
         private:
             float _first;
             short _second;
