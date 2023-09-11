@@ -28,7 +28,7 @@
 
 #include <type_traits>
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 
@@ -112,7 +112,7 @@ template<class T> class MoveReference {
         T* _reference;
 };
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{MoveReference} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, MoveReference<T> value) {
     return debug << value.get();

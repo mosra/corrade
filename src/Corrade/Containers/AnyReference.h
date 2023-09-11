@@ -28,7 +28,7 @@
 
 #include <type_traits>
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 
@@ -126,7 +126,7 @@ template<class T> class AnyReference {
         bool _isRvalue;
 };
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{AnyReference} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, AnyReference<T> value) {
     return debug << value.get();

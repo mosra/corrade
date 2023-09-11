@@ -29,7 +29,7 @@
 #include <type_traits>
 
 #include "Corrade/Tags.h"
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 #include "Corrade/Utility/Move.h"
@@ -308,7 +308,7 @@ template<class T> inline auto pair(T&& other) -> decltype(Implementation::Deduce
     return Implementation::DeducedPairConverter<typename std::decay<T>::type>::from(Utility::forward<T>(other));
 }
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Pair} */
 template<class F, class S> Utility::Debug& operator<<(Utility::Debug& debug, const Pair<F, S>& value) {
     return debug << "{" << Utility::Debug::nospace << value.first() << Utility::Debug::nospace << "," << value.second() << Utility::Debug::nospace << "}";

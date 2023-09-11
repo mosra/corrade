@@ -37,7 +37,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Utility/DebugAssert.h"
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 
@@ -480,7 +480,7 @@ template<class T> inline auto optional(T&& other) -> decltype(Implementation::De
     return Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(Utility::forward<T>(other));
 }
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{NullOptT} */
 inline Utility::Debug& operator<<(Utility::Debug& debug, NullOptT) {
     return debug << "Containers::NullOpt";

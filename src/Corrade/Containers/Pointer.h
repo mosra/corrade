@@ -36,7 +36,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Move.h"
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 
@@ -442,7 +442,7 @@ template<class T, class ...Args> inline Pointer<T> pointer(Args&&... args) {
     return Pointer<T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...};
 }
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Pointer} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Pointer<T>& value) {
     return debug << value.get();

@@ -35,7 +35,7 @@
 
 /* Use Array, but in a way that doesn't require the whole Utility library
    to be linked */
-#define CORRADE_NO_DEBUG
+#define CORRADE_SINGLES_NO_DEBUG
 #define CORRADE_NO_ASSERT
 #include "Corrade/Containers/Array.h"
 

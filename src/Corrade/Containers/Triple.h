@@ -29,7 +29,7 @@
 #include <type_traits>
 
 #include "Corrade/Tags.h"
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 #include "Corrade/Utility/Move.h"
@@ -355,7 +355,7 @@ template<class T> inline auto triple(T&& other) -> decltype(Implementation::Dedu
     return Implementation::DeducedTripleConverter<typename std::decay<T>::type>::from(Utility::forward<T>(other));
 }
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Triple} */
 template<class F, class S, class T> Utility::Debug& operator<<(Utility::Debug& debug, const Triple<F, S, T>& value) {
     return debug << "{" << Utility::Debug::nospace << value.first() << Utility::Debug::nospace << "," << value.second() << Utility::Debug::nospace << "," << value.third() << Utility::Debug::nospace << "}";

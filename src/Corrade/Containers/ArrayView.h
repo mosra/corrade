@@ -47,7 +47,7 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class, class> struct ArrayViewConverter;
     template<class> struct ErasedArrayViewConverter;
-    #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
+    #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
     /* so ArrayTuple can update the data pointer */
     template<class T>
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -60,7 +60,7 @@ namespace Implementation {
         return view._data;
     }
     #endif
-    #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
+    #ifndef CORRADE_SINGLES_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size member */
     template<class T>
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -660,11 +660,11 @@ template<class T> class ArrayView {
         #endif
 
     private:
-        #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
+        #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
         /* So ArrayTuple can update the data pointer */
         friend T*& Implementation::dataRef<>(ArrayView<T>&);
         #endif
-        #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
+        #ifndef CORRADE_SINGLES_NO_PYTHON_COMPATIBILITY
         /* So Python buffer protocol can point to the size member */
         friend std::size_t& Implementation::sizeRef<>(ArrayView<T>&);
         #endif

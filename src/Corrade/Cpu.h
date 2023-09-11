@@ -35,7 +35,7 @@
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Utility.h"
 #endif
 #include "Corrade/Utility/visibility.h"
@@ -1708,7 +1708,7 @@ template<class T> constexpr Implementation::Tags<~TypeTraits<T>::Index> operator
 }
 #endif
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Features} */
 CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, Features value);
 

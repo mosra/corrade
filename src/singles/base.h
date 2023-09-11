@@ -37,14 +37,14 @@
 #pragma ACME disable CORRADE_NO_ASSERT
 #pragma ACME disable CORRADE_NO_DEBUG_ASSERT
 #pragma ACME enable CORRADE_STANDARD_ASSERT
-#pragma ACME enable CORRADE_NO_DEBUG
+#pragma ACME enable CORRADE_SINGLES_NO_DEBUG
 #pragma ACME disable CORRADE_GRACEFUL_ASSERT
 #pragma ACME disable DOXYGEN_GENERATING_OUTPUT
 
 /* Array views publicize some internals for buffer protocol and for ArrayTuple,
    no need for that here */
-#pragma ACME enable CORRADE_NO_PYTHON_COMPATIBILITY
-#pragma ACME enable CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
+#pragma ACME enable CORRADE_SINGLES_NO_PYTHON_COMPATIBILITY
+#pragma ACME enable CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
 
 /* Make it possible to include Assert.h, DebugAssert.h and Macros.h multiple
    times */

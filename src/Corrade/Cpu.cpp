@@ -26,7 +26,7 @@
 
 #include "Cpu.h"
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 #endif
@@ -136,7 +136,7 @@ Features runtimeFeatures() {
 }
 #endif
 
-#ifndef CORRADE_NO_DEBUG
+#ifndef CORRADE_SINGLES_NO_DEBUG
 Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
     using namespace Containers::Literals;
 

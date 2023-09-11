@@ -48,7 +48,7 @@ namespace Implementation {
     template<unsigned, class> struct StridedBitElement;
     template<int> struct ArrayCastFlattenOrInflate;
 
-    #ifndef CORRADE_NO_ARRAYTUPLE_COMPATIBILITY
+    #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
     /* So ArrayTuple can know the total size without having to include this
        header. It needs it for both StridedArrayView and StridedBitArrayView so
        it's defined here. */
