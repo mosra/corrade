@@ -138,6 +138,7 @@ if(CORRADE_WITH_UTILITY)
         visibility.h)
 
     set(CorradeUtility_PRIVATE_HEADERS
+        Implementation/cpu.h
         Implementation/ErrorString.h
         Implementation/Resource.h)
 

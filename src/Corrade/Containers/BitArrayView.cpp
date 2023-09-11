@@ -35,6 +35,7 @@
 #include "Corrade/Utility/IntrinsicsAvx.h"
 #endif
 #include "Corrade/Utility/Math.h"
+#include "Corrade/Utility/Implementation/cpu.h"
 
 namespace Corrade { namespace Containers {
 

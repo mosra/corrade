@@ -39,6 +39,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Math.h"
+#include "Corrade/Utility/Implementation/cpu.h"
 
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
