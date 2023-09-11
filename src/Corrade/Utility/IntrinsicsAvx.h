@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_IntrinsicsAvx_h
+#define Corrade_Utility_IntrinsicsAvx_h
 /*
     This file is part of Corrade.
 
@@ -92,4 +94,6 @@ it's not handled here.
 #include <avx2intrin.h>
 #pragma pop_macro("__AVX2__")
 #pragma GCC pop_options
+#endif
+
 #endif

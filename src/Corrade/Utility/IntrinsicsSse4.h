@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_IntrinsicsSse4_h
+#define Corrade_Utility_IntrinsicsSse4_h
 /*
     This file is part of Corrade.
 
@@ -92,4 +94,6 @@ together, unlike with other SSE variants.
 #endif
 #if defined(CORRADE_TARGET_CLANG) && __clang_major__ < 7
 #pragma pop_macro("__POPCNT__")
+#endif
+
 #endif

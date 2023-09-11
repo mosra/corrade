@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_IntrinsicsSsse3_h
+#define Corrade_Utility_IntrinsicsSsse3_h
 /*
     This file is part of Corrade.
 
@@ -58,4 +60,6 @@ having to specify `-mssse3` for the whole compilation unit.
 #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ < 409
 #pragma pop_macro("__SSSE3__")
 #pragma GCC pop_options
+#endif
+
 #endif
