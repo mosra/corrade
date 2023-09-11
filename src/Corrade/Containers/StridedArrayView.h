@@ -200,7 +200,8 @@ be.
     @ref StridedArrayView<dimensions, const void> specializations is also
     available as a single-header [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h)
     library in the Magnum Singles repository for easier integration into your
-    projects. See @ref corrade-singles for more information.
+    projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
+    See @ref corrade-singles for more information.
 
 @see @ref StridedArrayView<dimensions, void>,
     @ref StridedArrayView<dimensions, const void>, @ref StridedIterator,

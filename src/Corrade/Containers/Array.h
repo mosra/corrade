@@ -298,7 +298,8 @@ Corrade type                    | ↭ | STL type
     This class, together with @ref StaticArray, is also available as a
     single-header [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h)
     library in the Magnum Singles repository for easier integration into your
-    projects. See @ref corrade-singles for more information.
+    projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
+    See @ref corrade-singles for more information.
 
 @see @ref ArrayTuple, @ref BitArray
 */
