@@ -87,21 +87,10 @@
    above. When enabling additional asserts, be sure to update it above as
    well -- without the _DEBUG variants, as they just delegate to the non-debug
    version of the macro. */
-#pragma ACME enable CORRADE_DEBUG_ASSERT
-#pragma ACME enable CORRADE_ASSERT_OUTPUT
-#pragma ACME enable CORRADE_DEBUG_ASSERT_OUTPUT
-#pragma ACME enable CORRADE_INTERNAL_ASSERT_EXPRESSION
-#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION
-#pragma ACME enable CORRADE_ASSERT_UNREACHABLE
-#pragma ACME enable CORRADE_DEBUG_ASSERT_UNREACHABLE
-#pragma ACME enable CORRADE_INTERNAL_ASSERT
-#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT
-#pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_ASSERT
-#pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT
-#pragma ACME enable CORRADE_INTERNAL_ASSERT_OUTPUT
-#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT
-#pragma ACME enable CORRADE_INTERNAL_ASSERT_UNREACHABLE
-#pragma ACME enable CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE
+#include "assert.h"
+#pragma ACME forget CORRADE_ASSERT
+#pragma ACME forget CORRADE_CONSTEXPR_ASSERT
+#pragma ACME forget CORRADE_CONSTEXPR_DEBUG_ASSERT
 
 #ifndef CorradeArrayView_h
 #define CorradeArrayView_h
