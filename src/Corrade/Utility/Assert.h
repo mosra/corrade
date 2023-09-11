@@ -527,7 +527,8 @@ correctly:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT_EXPRESSION-without
 
-Could be rewritten in a shorter way and without having to use @cpp std::move() @ce
+Could be rewritten in a shorter way and without having to use
+@m_class{m-doc-external} [std::move()](https://en.cppreference.com/w/cpp/utility/move)
 to pass a r-value with @ref CORRADE_INTERNAL_ASSERT_EXPRESSION():
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT_EXPRESSION
