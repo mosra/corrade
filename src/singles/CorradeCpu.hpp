@@ -88,7 +88,10 @@
 
 #define _CORRADE_HELPER_PASTE2(a, b) a ## b
 
-/* For the deinlined runtimeFeatures() implementation on ARM */
+/* For the deinlined runtimeFeatures() implementation on ARM. Don't want the
+   whole visibility header here, as it contains also Utility-specific CPU
+   dispatch macros that would collide with other singles. */
+#pragma ACME enable Corrade_Utility_visibility_h
 #ifndef CORRADE_UTILITY_EXPORT
 #define CORRADE_UTILITY_EXPORT
 #endif

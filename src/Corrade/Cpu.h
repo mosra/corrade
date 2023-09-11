@@ -37,8 +37,8 @@
 #include "Corrade/Utility/Macros.h"
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Utility.h"
-#include "Corrade/Utility/visibility.h"
 #endif
+#include "Corrade/Utility/visibility.h"
 
 /* Because can't use inline assembly when targeting 64bit on MSVC, and because
    <intrin.h> and <immintrin.h> is just too damn heavy to be included in a
