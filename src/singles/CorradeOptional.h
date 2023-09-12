@@ -17,6 +17,8 @@
     `#define CORRADE_OPTIONAL_STL_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1502-g147e (2023-09-11)
+    -   Fixes to the Utility::swap() helper to avoid ambiguity with std::swap()
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   The InPlaceInit tag is moved from Containers to the root namespace
     -   The underlying type is exposed in a new Optional::Type typedef

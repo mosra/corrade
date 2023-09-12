@@ -13,6 +13,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1502-g147e (2023-09-11)
+    -   Fixes to the Utility::swap() helper to avoid ambiguity with std::swap()
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   Ability to construct a NoCreate'd ScopeGuard and then move a complete
         instance over it

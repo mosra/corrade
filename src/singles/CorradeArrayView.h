@@ -20,6 +20,8 @@
     `#define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY` before including the
     file. Including it multiple times with different macros defined works too.
 
+    v2020.06-1502-g147e (2023-09-11)
+    -   Fixes to the Utility::swap() helper to avoid ambiguity with std::swap()
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
         The suffix() API, which took an offset, is removed and will be
