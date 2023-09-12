@@ -300,6 +300,45 @@ making it usable in @ref std::unordered_map and @ref std::unordered_set. It's
 among the heaviest STL headers in existence, and which is only really needed
 when you deal with unordered containers.
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class, together with @ref String, is also available as a single-header
+    [CorradeString.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeString.hpp)
+    library in the Magnum Singles repository for easier integration into your
+    projects. It depends on [CorradeEnumSet.h](https://github.com/mosra/magnum-singles/tree/master/CorradeEnumSet.h).
+    See @ref corrade-singles for more information.
+@par
+    The library has a separate non-inline implementation part which
+    additionally depends on [CorradeCpu.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.hpp)
+    and [CorradePair.h](https://github.com/mosra/magnum-singles/tree/master/CorradePair.h),
+    enable it *just once* like this:
+@par
+    @code{.cpp}
+    #define CORRADE_STRING_IMPLEMENTATION
+    #include <CorradeString.hpp>
+    @endcode
+@par
+    If you need the deinlined symbols to be exported from a shared library,
+    @cpp #define CORRADE_UTILITY_EXPORT @ce and
+    @cpp #define CORRADE_UTILITY_LOCAL @ce as appropriate. Runtime CPU dispatch
+    for the implementation done by the @ref Cpu library is enabled by default,
+    you can disable it with @cpp #define CORRADE_NO_CPU_RUNTIME_DISPATCH @ce
+    before including the file in both the headers and the implementation. To
+    enable the @ref Cpu-usage-automatic-cached-dispatch "IFUNC functionality"
+    for CPU runtime dispatch, @cpp #define CORRADE_CPU_USE_IFUNC @ce before
+    including the file.
+@par
+    The above mentioned STL compatibility is included as well, but disabled by
+    default. Enable it by specifying
+    @cpp #define CORRADE_STRING_STL_COMPATIBILITY @ce and for
+    @ref std::string_view by compiling as C++17 and specifying
+    @cpp #define CORRADE_STRING_STL_VIEW_COMPATIBILITY @ce before including the
+    file in both the headers and the implementation. Including it multiple
+    times with different macros defined works as well.
+
 @experimental
 */
 /* All member functions are const because the view doesn't own the data */

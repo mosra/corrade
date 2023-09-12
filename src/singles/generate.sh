@@ -9,6 +9,7 @@ set -e
 ../acme/acme.py CorradePointer.h --output ../../../magnum-singles
 ../acme/acme.py CorradeReference.h --output ../../../magnum-singles
 ../acme/acme.py CorradeScopeGuard.h --output ../../../magnum-singles
+../acme/acme.py CorradeString.hpp --output ../../../magnum-singles
 ../acme/acme.py CorradeTriple.h --output ../../../magnum-singles
 
 ../acme/acme.py CorradeStlForwardArray.h --output ../../../magnum-singles
