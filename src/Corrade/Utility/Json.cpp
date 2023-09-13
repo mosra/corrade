@@ -2414,7 +2414,7 @@ const JsonToken* JsonToken::find(const std::size_t index) const {
 
 const JsonToken& JsonToken::operator[](const std::size_t index) const {
     const JsonToken* found = find(index);
-    /** @todo something better like "index N out of bounds for M elements",
+    /** @todo something better like "index N out of range for M elements",
         would need an internal helper or some such to get the counter value */
     /** @todo any chance to report file/line here? would need to go upwards
         until the root token to find the start of the token stream, but then it

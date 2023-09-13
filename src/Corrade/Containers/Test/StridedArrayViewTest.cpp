@@ -239,7 +239,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceRvalueOverloadedMemberFunctionPointer();
     void sliceMemberFunctionPointerDerived();
     void sliceMemberFunctionPointerEmptyView();
-    void sliceMemberFunctionPointerReturningOffsetOutOfBounds();
+    void sliceMemberFunctionPointerReturningOffsetOutOfRange();
 
     void sliceBit();
     void sliceBitIndexTooLarge();
@@ -463,7 +463,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceMemberFunctionPointerDerived,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
-              &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds,
+              &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange,
 
               &StridedArrayViewTest::sliceBit,
               &StridedArrayViewTest::sliceBitIndexTooLarge,
@@ -3614,7 +3614,7 @@ void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
     CORRADE_COMPARE(csecond.stride(), 0);
 }
 
-void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfBounds() {
+void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     struct Data {

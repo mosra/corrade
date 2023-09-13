@@ -985,7 +985,7 @@ template<unsigned dimensions, class T> template<unsigned lessDimensions, class> 
 #endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool BasicStridedBitArrayView<dimensions, T>::isContiguous() const {
-    static_assert(dimension < dimensions, "dimension out of bounds");
+    static_assert(dimension < dimensions, "dimension out of range");
     std::size_t nextDimensionSize = 1;
     for(std::size_t i = dimensions; i != dimension; --i) {
         if(std::size_t(_stride._data[i - 1]) != nextDimensionSize)
@@ -1006,7 +1006,7 @@ template<unsigned dimensions, class T> BasicBitArrayView<T> BasicStridedBitArray
 }
 
 template<unsigned dimensions, class T> template<unsigned dimension> BasicStridedBitArrayView<dimension + 1, T> BasicStridedBitArrayView<dimensions, T>::asContiguous() const {
-    static_assert(dimension < dimensions, "dimension out of bounds");
+    static_assert(dimension < dimensions, "dimension out of range");
     CORRADE_DEBUG_ASSERT(isContiguous<dimension>(),
         "Containers::StridedBitArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
 

@@ -218,7 +218,7 @@ This allows the application to reduce the initial processing time and memory
 footprint. Token parsing is a subsequent step, parsing the string range of a
 token as a literal, converting it to a number or interpreting string escape
 sequences. This step can then fail on its own, for example when an invalid
-literal value is encountered, when a Unicode escape is out of bounds or when a
+literal value is encountered, when a Unicode escape is out of range or when a
 parsed integer doesn't fit into the output type size.
 
 Token hierarchy is defined as the following --- object tokens have string keys

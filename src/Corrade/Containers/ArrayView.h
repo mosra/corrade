@@ -1691,7 +1691,7 @@ template<class T> template<std::size_t begin_, std::size_t end_> constexpr Stati
 
 template<std::size_t size_, class T> template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> StaticArrayView<size_, T>::slice() const {
     static_assert(begin_ < end_, "fixed-size slice needs to have a positive size");
-    static_assert(end_ <= size_, "slice out of bounds");
+    static_assert(end_ <= size_, "slice out of range");
     return StaticArrayView<end_ - begin_, T>{_data + begin_};
 }
 

@@ -153,7 +153,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void notParsedYetOnlyHelp();
     void valueNotFound();
     void valueMismatchedUse();
-    void arrayValueOutOfBounds();
+    void arrayValueOutOfRange();
 
     void parseErrorCallback();
     void parseErrorCallbackIgnoreAll();
@@ -275,7 +275,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::notParsedYetOnlyHelp,
               &ArgumentsTest::valueNotFound,
               &ArgumentsTest::valueMismatchedUse,
-              &ArgumentsTest::arrayValueOutOfBounds,
+              &ArgumentsTest::arrayValueOutOfRange,
 
               &ArgumentsTest::parseErrorCallback,
               &ArgumentsTest::parseErrorCallbackIgnoreAll,
@@ -1796,7 +1796,7 @@ void ArgumentsTest::valueMismatchedUse() {
         "Utility::Arguments::isSet(): cannot use this function for a non-boolean option array\n");
 }
 
-void ArgumentsTest::arrayValueOutOfBounds() {
+void ArgumentsTest::arrayValueOutOfRange() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     const char* argv[] = { "", "-X", "first", "--opt", "second", "-X", "last" };

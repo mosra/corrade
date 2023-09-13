@@ -2157,7 +2157,7 @@ template<unsigned dimensions, class T> template<unsigned lessDimensions, class> 
 #endif
 
 template<unsigned dimensions, class T> template<unsigned dimension> bool StridedArrayView<dimensions, T>::isContiguous() const {
-    static_assert(dimension < dimensions, "dimension out of bounds");
+    static_assert(dimension < dimensions, "dimension out of range");
     std::size_t nextDimensionSize = sizeof(T);
     for(std::size_t i = dimensions; i != dimension; --i) {
         if(std::size_t(_stride._data[i - 1]) != nextDimensionSize) return false;
@@ -2176,7 +2176,7 @@ template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions,
 }
 
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimension + 1, T> StridedArrayView<dimensions, T>::asContiguous() const {
-    static_assert(dimension < dimensions, "dimension out of bounds");
+    static_assert(dimension < dimensions, "dimension out of range");
     CORRADE_DEBUG_ASSERT(isContiguous<dimension>(),
         "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension" << dimension, {});
 
