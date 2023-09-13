@@ -17,6 +17,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1506-g43e1c (2023-09-13)
+    -   Preventing a conflict with the Array declaration in Corrade's
+        Containers.h due to default template arguments being used in both
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   New exceptPrefix() API, the except() API is renamed to exceptSuffix().
         The suffix() API, which took an offset, is removed and will be
