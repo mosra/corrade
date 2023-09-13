@@ -38,7 +38,12 @@
 namespace Corrade { namespace Containers {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+/* In case CorradeArray.h from singles is included as well, these two would
+   conflict */
+#ifndef CorradeArray_h
 template<class T, class = void(*)(T*, std::size_t)> class Array;
+#endif
+
 template<class> class ArrayView;
 class ArrayTuple;
 template<std::size_t, class> class StaticArrayView;
@@ -90,7 +95,11 @@ typedef MutableStridedBitArrayView<2> MutableStridedBitArrayView2D;
 typedef MutableStridedBitArrayView<3> MutableStridedBitArrayView3D;
 typedef MutableStridedBitArrayView<4> MutableStridedBitArrayView4D;
 
+/* In case CorradeEnumSet.h from singles is included as well, these two would
+   conflict */
+#ifndef CorradeEnumSet_h
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
+#endif
 
 template<class> class Iterable;
 template<class> class IterableIterator;

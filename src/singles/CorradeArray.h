@@ -76,10 +76,6 @@
 #define CORRADE_TARGET_CLANG
 #endif
 
-/* From Containers.h we need just the array forward declarations, the array
-   view ones are again already in CorradeArrayView.h. */
-#pragma ACME enable Corrade_Containers_Containers_h
-
 /* CorradeArrayView.h has CORRADE_ASSERT, CORRADE_CONSTEXPR_ASSERT and
    CORRADE_CONSTEXPR_DEBUG_ASSERT, we additionally need CORRADE_DEBUG_ASSERT
    here */
@@ -90,7 +86,11 @@
 #define CorradeArray_h
 namespace Corrade { namespace Containers {
 
+/* In case Corrade/Containers/Containers.h is included too, these two would
+   conflict */
+#ifndef Corrade_Containers_Containers_h
 template<class T, class = void(*)(T*, std::size_t)> class Array;
+#endif
 /* Needs to be defined here because it's referenced before its definition */
 template<std::size_t, class> class StaticArray;
 /* These need to be defined here because the other occurence is guarded with
@@ -101,5 +101,8 @@ template<class T> using Array4 = StaticArray<4, T>;
 
 }}
 #endif
+/* From Containers.h we need just the array forward declarations, the array
+   view ones are again already in CorradeArrayView.h. */
+#pragma ACME enable Corrade_Containers_Containers_h
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"

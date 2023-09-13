@@ -30,16 +30,19 @@
 /* We don't need anything from configure.h here */
 #pragma ACME enable Corrade_configure_h
 
-/* From Containers.h we need just the forward declaration with default
-   arguments */
-#pragma ACME enable Corrade_Containers_Containers_h
-
 #ifndef CorradeEnumSet_h
 #define CorradeEnumSet_h
 namespace Corrade { namespace Containers {
 
+/* In case Corrade/Containers/Containers.h is included too, these two would
+   conflict */
+#ifndef Corrade_Containers_Containers_h
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
+#endif
 
 }}
 #endif
+/* From Containers.h we need just the forward declaration with default
+   arguments */
+#pragma ACME enable Corrade_Containers_Containers_h
 #include "Corrade/Containers/EnumSet.h"
