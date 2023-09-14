@@ -300,6 +300,12 @@ Corrade type                    | ↭ | STL type
     library in the Magnum Singles repository for easier integration into your
     projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
     See @ref corrade-singles for more information.
+@par
+    The @ref Containers-Array-growable "growable APIs" are exposed in a
+    separate [CorradeGrowableArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeGrowableArray.h)
+    library. It includes AddressSanitizer annotations as well,
+    @cpp #define CORRADE_CONTAINERS_NO_SANITIZER_ANNOTATIONS @ce to disable
+    them.
 
 @see @ref ArrayTuple, @ref BitArray
 */

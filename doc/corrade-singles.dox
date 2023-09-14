@@ -49,6 +49,7 @@ Class, library or header    | Single-header version
 @ref Containers::ArrayView, \n @ref Containers::ArrayView<void>, \n @ref Containers::ArrayView<const void>, \n @ref Containers::StaticArrayView | [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
 @ref Containers::StridedArrayView, \n @ref Containers::StridedArrayView<dimensions, void>, \n @ref Containers::StridedArrayView<dimensions, const void> | [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h), depends on `CorradeArrayView.h`
 @ref Containers::Array, \n @ref Containers::StaticArray | [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h), depends on `CorradeArrayView.h`
+Growable APIs for @ref Containers::Array | [CorradeGrowableArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeGrowableArray.h), depends on `CorradeArray.h`
 @ref Containers::EnumSet    | [CorradeEnumSet.h](https://github.com/mosra/magnum-singles/tree/master/CorradeEnumSet.h)
 @ref Containers::Optional   | [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
 @ref Containers::Pair       | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePair.h)
