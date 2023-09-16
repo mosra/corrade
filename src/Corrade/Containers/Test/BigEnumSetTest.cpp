@@ -252,7 +252,7 @@ void BigEnumSetTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<Features>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Features>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Features>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Features>::value);
     #endif

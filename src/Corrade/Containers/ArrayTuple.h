@@ -36,7 +36,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Containers {
@@ -518,10 +518,10 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         /* Common code shared by ArrayView, StridedArrayView, BitArrayView and
            StringView variants */
         template<class T, typename std::enable_if<!
-            #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-            std::is_trivially_constructible<T>::value
-            #else
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
             std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_trivially_constructible<T>::value
             #endif
         || !std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
@@ -541,10 +541,10 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
            See the constructTriviallyConstructibleNonTriviallyDestructible()
            test case for details. */
         template<class T, typename std::enable_if<
-            #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-            std::is_trivially_constructible<T>::value
-            #else
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
             std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_trivially_constructible<T>::value
             #endif
         && std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer):
             _elementSize{sizeof(T)*size}, _elementAlignment{alignof(T)},

@@ -1380,7 +1380,7 @@ void StridedArrayViewTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<StridedArrayView1Di>::value);
     CORRADE_VERIFY(std::is_copy_assignable<StridedArrayView1Di>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<StridedArrayView1Di>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<StridedArrayView1Di>::value);
     #endif

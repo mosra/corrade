@@ -207,7 +207,7 @@ void StridedDimensionsTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<Size3D>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Size3D>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Size3D>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Size3D>::value);
     #endif

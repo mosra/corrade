@@ -30,7 +30,7 @@
 #include "Corrade/Containers/Triple.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 namespace {
 
@@ -447,7 +447,7 @@ void TripleTest::constructCopyCopyCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<Triple<int, int, int>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Triple<int, int, int>>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Triple<int, int, int>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Triple<int, int, int>>::value);
     #endif
@@ -1110,7 +1110,7 @@ void TripleTest::copy() {
     CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Triple<int, float, Throwable>>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Triple<int, float, Throwable>>::value);
 
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_copyable<Triple<float, int, bool>>::value);
@@ -1162,7 +1162,7 @@ void TripleTest::move() {
     CORRADE_VERIFY(!std::is_nothrow_move_constructible<Triple<float, int, Throwable>>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_assignable<Triple<float, int, Throwable>>::value);
 
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_move_constructible<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<Triple<float, int, bool>>::value);
     {

@@ -855,7 +855,7 @@ void StridedBitArrayViewTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<StridedBitArrayView1D>::value);
     CORRADE_VERIFY(std::is_copy_assignable<StridedBitArrayView1D>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<StridedBitArrayView1D>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<StridedBitArrayView1D>::value);
     #endif

@@ -38,7 +38,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/TweakableParser.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /* For enable() which used to take a std::string */
@@ -415,7 +415,7 @@ namespace Implementation {
     template<class T> struct TweakableTraits {
         static_assert(sizeof(T) <= TweakableStorageSize,
             "tweakable storage size too small for this type, save it via a Pointer instead");
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         static_assert(std::is_trivially_copyable<T>::value,
             "tweakable type is not trivially copyable, use the advanced parser signature instead");
         static_assert(std::is_trivially_destructible<T>::value,

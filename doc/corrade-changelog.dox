@@ -743,6 +743,13 @@ namespace Corrade {
     tied to @ref Utility::Debug, is deprecated in favor of a more general
     @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED that's defined inside
     @ref Corrade/Utility/TypeTraits.h instead.
+-   The `CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED` macro is deprecated in
+    favor of @ref CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, which is defined only if
+    the traits aren't supported. This solves a recurring problem where
+    forgetting to include @ref Corrade/Utility/TypeTraits.h led to the traits
+    checks being silently skipped, while forgetting to include with the inverse
+    macro would lead to a non-silent compiler error on GCC 4. Additionally it
+    prepares better for future removal of GCC < 5 support.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` CMake variable, needed for
     installations into older Android NDKs, is obsolete and no longer needed for
     NDK r19+. It still does what's expected on builds with
@@ -956,7 +963,7 @@ Released 2020-06-27, tagged as
     condition isn't @cpp true @ce
 -   New @ref CORRADE_FALLTHROUGH macro for suppressing warnings on fall-through
     @cpp switch @ce cases
--   Added a @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro into
+-   Added a `CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED` macro into
     @ref Corrade/Utility/TypeTraits.h denoting if @ref std::is_trivially_copyable
     is available in the standard library
 -   Added a @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro for detecting
@@ -1091,8 +1098,8 @@ Released 2020-06-27, tagged as
 
 -   The @ref CORRADE_TARGET_LIBSTDCXX macro was defined on GCC < 5 only when
     certain headers were included before. That caused problems especially with
-    the new @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro and is now
-    fixed to assume old GCC versions always use libstdc++.
+    the new `CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED` macro and is now fixed
+    to assume old GCC versions always use libstdc++.
 -   Fixed an assertion in @ref Utility::Arguments when a single `-` was passed
     on the command-line
 -   @ref Utility::Endianness::swapInPlace() and other in-place APIs were fixed

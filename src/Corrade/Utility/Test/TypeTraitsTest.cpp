@@ -46,7 +46,7 @@ struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
 
     void longDoubleSize();
-    void isTriviallyTraitsSupported();
+    void noStdIsTriviallyTraits();
 
     void hasType();
     void hasTypeComma();
@@ -63,7 +63,7 @@ struct TypeTraitsTest: TestSuite::Tester {
 
 TypeTraitsTest::TypeTraitsTest() {
     addTests({&TypeTraitsTest::longDoubleSize,
-              &TypeTraitsTest::isTriviallyTraitsSupported,
+              &TypeTraitsTest::noStdIsTriviallyTraits,
 
               &TypeTraitsTest::hasType,
               &TypeTraitsTest::hasTypeComma,
@@ -94,8 +94,15 @@ void TypeTraitsTest::longDoubleSize() {
     #endif
 }
 
-void TypeTraitsTest::isTriviallyTraitsSupported() {
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+void TypeTraitsTest::noStdIsTriviallyTraits() {
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    CORRADE_INFO("std::is_trivially_* traits not supported");
+    /* std::has_trivial_copy_constructor etc. emits a deprecation warning on
+       GCC 5+, so using the builtins instead. See the macro docs for details */
+    CORRADE_VERIFY(__has_trivial_constructor(int));
+    CORRADE_VERIFY(__has_trivial_copy(int));
+    CORRADE_VERIFY(__has_trivial_assign(int));
+    #else
     CORRADE_INFO("std::is_trivially_* traits supported");
     CORRADE_VERIFY(std::is_trivially_constructible<int, int>::value);
     CORRADE_VERIFY(std::is_trivially_default_constructible<int>::value);
@@ -104,13 +111,6 @@ void TypeTraitsTest::isTriviallyTraitsSupported() {
     CORRADE_VERIFY(std::is_trivially_assignable<int&, int>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<int>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<int>::value);
-    #else
-    CORRADE_INFO("std::is_trivially_* traits not supported");
-    /* std::has_trivial_copy_constructor etc. emits a deprecation warning on
-       GCC 5+, so using the builtins instead. See the macro docs for details */
-    CORRADE_VERIFY(__has_trivial_constructor(int));
-    CORRADE_VERIFY(__has_trivial_copy(int));
-    CORRADE_VERIFY(__has_trivial_assign(int));
     #endif
 }
 

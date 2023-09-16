@@ -30,7 +30,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 namespace {
 
@@ -406,7 +406,7 @@ void PairTest::constructCopyCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<Pair<int, int>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Pair<int, int>>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Pair<int, int>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Pair<int, int>>::value);
     #endif
@@ -720,7 +720,7 @@ void PairTest::copy() {
     CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Pair<int, Throwable>>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Pair<int, Throwable>>::value);
 
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Pair<float, int>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Pair<float, int>>::value);
     CORRADE_VERIFY(std::is_trivially_copyable<Pair<float, int>>::value);
@@ -766,7 +766,7 @@ void PairTest::move() {
     CORRADE_VERIFY(!std::is_nothrow_move_constructible<Pair<int, Throwable>>::value);
     CORRADE_VERIFY(!std::is_nothrow_move_assignable<Pair<int, Throwable>>::value);
 
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_move_constructible<Pair<float, int>>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<Pair<float, int>>::value);
     /* Haha */

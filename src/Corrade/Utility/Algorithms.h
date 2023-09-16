@@ -32,6 +32,7 @@
  */
 
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -55,10 +56,10 @@ Expects that @p T is a trivially copyable type.
 */
 template<class T> inline void copy(Containers::ArrayView<const T> src, Containers::ArrayView<T> dst) {
     static_assert(
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<T>::value
-        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #else
+        std::is_trivially_copyable<T>::value
         #endif
         , "types must be trivially copyable");
 
@@ -288,10 +289,10 @@ template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimen
 
 template<unsigned dimensions, class T> void copy(const Containers::StridedArrayView<dimensions, const T>& src, const Containers::StridedArrayView<dimensions, T>& dst) {
     static_assert(
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<T>::value
-        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #else
+        std::is_trivially_copyable<T>::value
         #endif
         , "types must be trivially copyable");
 
@@ -325,10 +326,10 @@ template<unsigned dimensions> void flipSecondToLastDimensionInPlace(const Contai
 template<unsigned dimension, unsigned dimensions, class T> void flipInPlace(const Containers::StridedArrayView<dimensions, T>& view) {
     static_assert(dimension < dimensions, "dimension out of range");
     static_assert(
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<T>::value
-        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #else
+        std::is_trivially_copyable<T>::value
         #endif
         , "types must be trivially copyable");
 

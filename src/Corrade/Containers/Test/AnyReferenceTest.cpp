@@ -29,7 +29,7 @@
 #include "Corrade/Containers/AnyReference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED */
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -144,7 +144,7 @@ void AnyReferenceTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_copy_constructible<AnyReference<int>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<AnyReference<int>>::value);
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_copy_constructible<AnyReference<int>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<AnyReference<int>>::value);
     #endif

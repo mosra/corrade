@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE, @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED, @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED, @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
+ * @brief Macros @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE, @ref CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, @ref CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED, @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 
 #include <type_traits>
@@ -116,8 +116,8 @@ namespace Implementation {
 }
 
 /** @hideinitializer
-@brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library
-@m_since{2020,06}
+@brief If the @ref std::is_trivially_copyable family of type traits is not supported by the standard library
+@m_since_latest
 
 The @ref std::is_trivially_constructible,
 @ref std::is_trivially_default_constructible,
@@ -146,17 +146,29 @@ following:
 error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
 @endcode
 
-This macro is defined if the standard variants are available. Unfortunately,
-when libstdc++ is used through Clang, there's no way to check for its version
-until libstdc++ 7, which added the `_GLIBCXX_RELEASE` macro. That means, when
-using Clang with libstdc++ 5 or 6, it will still report those traits as being
-unavailable. Both libc++ and MSVC STL have these traits in all versions
-supported by Corrade, so there the macro is defined always.
+This macro is defined if the standard variants are *not* available.
+Unfortunately, when libstdc++ is used through Clang, there's no way to check
+for its version until libstdc++ 7, which added the `_GLIBCXX_RELEASE` macro.
+That means, when using Clang with libstdc++ 5 or 6, it will still report those
+traits as being unavailable. Both libc++ and MSVC STL have these traits in all
+versions supported by Corrade, so there the macro is defined always.
 @see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_LIBCXX,
     @ref CORRADE_TARGET_DINKUMWARE
 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_TARGET_LIBSTDCXX) || __GNUC__ >= 5 || _GLIBCXX_RELEASE >= 7
+#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(CORRADE_TARGET_LIBSTDCXX) && __GNUC__ < 5 && _GLIBCXX_RELEASE < 7)
+#define CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+#endif
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/**
+@brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library
+@m_deprecated_since_latest Use the @ref CORRADE_NO_STD_IS_TRIVIALLY_TRAITS,
+    which is defined if the traits are *not* available instead.
+*/
+#if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_NO_STD_IS_TRIVIALLY_TRAITS)
+/* Can't use CORRADE_DEPRECATED_MACRO() for anything here */
 #define CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+#endif
 #endif
 
 /** @hideinitializer

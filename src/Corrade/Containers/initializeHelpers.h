@@ -32,18 +32,19 @@
 
 #include "Corrade/configure.h"
 #include "Corrade/Tags.h"
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 /* Stuff shared by GrowableArray.h */
 
 namespace Corrade { namespace Containers { namespace Implementation {
 
-#ifndef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+#ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 /* The std::has_trivial_default_constructor / std::has_trivial_copy_constructor
    is deprecated in GCC 5+ but we can't detect libstdc++ version when using
    Clang. The builtins aren't deprecated but for those GCC commits suicide with
     error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-   so, well, i'm defining my own! See CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-   for even more fun stories. */
+   so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
+   even more fun stories. */
 template<class T> struct IsTriviallyConstructibleOnOldGcc: std::integral_constant<bool, __has_trivial_constructor(T)> {};
 /* Need also __has_trivial_destructor() otherwise it says true for types with
    deleted copy and non-trivial destructors */
@@ -63,20 +64,20 @@ enum: std::size_t {
 };
 
 template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T*, T*, typename std::enable_if<
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     IsTriviallyConstructibleOnOldGcc<T>::value
+    #else
+    std::is_trivially_constructible<T>::value
     #endif
 >::type* = nullptr) {
     /* Nothing to do */
 }
 
 template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T* const end, typename std::enable_if<!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     IsTriviallyConstructibleOnOldGcc<T>::value
+    #else
+    std::is_trivially_constructible<T>::value
     #endif
 >::type* = nullptr) {
     /* Needs to be < because sometimes begin > end. No {}, we want trivial
@@ -85,20 +86,20 @@ template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T*
 }
 
 template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* const begin, T* const end, typename std::enable_if<
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     IsTriviallyConstructibleOnOldGcc<T>::value
+    #else
+    std::is_trivially_constructible<T>::value
     #endif
 >::type* = nullptr) {
     if(begin < end) std::memset(begin, 0, (end - begin)*sizeof(T));
 }
 
 template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* begin, T* const end, typename std::enable_if<!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<T>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     IsTriviallyConstructibleOnOldGcc<T>::value
+    #else
+    std::is_trivially_constructible<T>::value
     #endif
 >::type* = nullptr) {
     /* Needs to be < because sometimes begin > end */

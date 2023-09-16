@@ -260,17 +260,17 @@ int Movable::moved = 0;
 int Movable::assigned = 0;
 
 static_assert(!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_constructible<Movable>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     Implementation::IsTriviallyConstructibleOnOldGcc<Movable>::value
+    #else
+    std::is_trivially_constructible<Movable>::value
     #endif
     , "Movable should be testing the non-trivial code path");
 static_assert(!
-    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-    std::is_trivially_copyable<Movable>::value
-    #else
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     Implementation::IsTriviallyCopyableOnOldGcc<Movable>::value
+    #else
+    std::is_trivially_copyable<Movable>::value
     #endif
     , "Movable should be testing the non-trivial code path");
 

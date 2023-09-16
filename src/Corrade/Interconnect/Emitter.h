@@ -38,6 +38,7 @@
 
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 namespace Corrade { namespace Interconnect {
 
@@ -70,9 +71,9 @@ enum class ConnectionType: std::uint8_t {
    detect libstdc++ version when using Clang. The builtins aren't deprecated
    but for those GCC commits suicide with
     error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-   so, well, i'm defining my own! See CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-   for even more fun stories. */
-#ifndef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+   so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
+   even more fun stories. */
+#ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T)> {};
 #endif
 
@@ -114,10 +115,10 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
     /* Construct a simple, small enough and trivial functor connection (which
        is not convertible to a function pointer) */
     template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<!std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value && sizeof(typename std::decay<F>::type) <= sizeof(Storage) &&
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<typename std::decay<F>::type>::value
-        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         (IsTriviallyCopyableOnOldGcc<typename std::decay<F>::type>::value && std::is_trivially_destructible<typename std::decay<F>::type>::value)
+        #else
+        std::is_trivially_copyable<typename std::decay<F>::type>::value
         #endif
     >::type* = nullptr) {
         ConnectionData out{ConnectionType::Functor};
@@ -136,10 +137,10 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
            so the call gets ambiguous without the is_convertible check */
         !std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value
         && ((sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !
-            #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-            std::is_trivially_copyable<typename std::decay<F>::type>::value
-            #else
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
             (IsTriviallyCopyableOnOldGcc<typename std::decay<F>::type>::value && std::is_trivially_destructible<typename std::decay<F>::type>::value)
+            #else
+            std::is_trivially_copyable<typename std::decay<F>::type>::value
             #endif
         )
         >::type* = nullptr) {

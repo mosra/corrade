@@ -191,7 +191,7 @@ struct JsonTest: TestSuite::Tester {
         void fromFileParseOptionError();
         void fromFileParseError();
 
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         void tokenConstructCopy();
         #endif
         void constructCopy();
@@ -1443,7 +1443,7 @@ JsonTest::JsonTest() {
               &JsonTest::fromFileParseOptionError,
               &JsonTest::fromFileParseError,
 
-              #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+              #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
               &JsonTest::tokenConstructCopy,
               #endif
               &JsonTest::constructCopy,
@@ -4481,7 +4481,7 @@ void JsonTest::fromFileParseError() {
         "Utility::Json::parseDouble(): invalid floating-point literal -haha at {0}:2:5\n", filename));
 }
 
-#ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+#ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 void JsonTest::tokenConstructCopy() {
     CORRADE_VERIFY(std::is_trivially_copyable<JsonToken>{});
 }

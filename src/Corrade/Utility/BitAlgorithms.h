@@ -33,6 +33,7 @@
 
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -61,10 +62,10 @@ Expects that @p T is a trivially copyable type.
 */
 template<class T> void copyMasked(const Containers::StridedArrayView1D<const T>& src, Containers::BitArrayView srcMask, const Containers::StridedArrayView1D<T>& dst) {
     static_assert(
-        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
-        std::is_trivially_copyable<T>::value
-        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         __has_trivial_copy(T) && __has_trivial_destructor(T)
+        #else
+        std::is_trivially_copyable<T>::value
         #endif
         , "types must be trivially copyable");
 
