@@ -402,7 +402,7 @@ function(corrade_add_test test_name)
             elseif(_DOING_FILES)
                 # If the file is already a pair of file and destination, just
                 # extract them
-                if(${arg} MATCHES ${_corrade_file_pair_match})
+                if(arg MATCHES ${_corrade_file_pair_match})
                     set(input_filename ${CMAKE_MATCH_1})
                     set(output_filename ${CMAKE_MATCH_2})
 
@@ -412,7 +412,7 @@ function(corrade_add_test test_name)
 
                     # Extract only the leaf component from absolute filename
                     # (applies also to paths with ..)
-                    if(IS_ABSOLUTE ${arg} OR ${arg} MATCHES "\\.\\.[\\\\/]")
+                    if(IS_ABSOLUTE ${arg} OR arg MATCHES "\\.\\.[\\\\/]")
                         get_filename_component(output_filename ${arg} NAME)
 
                     # Otherwise use the full relative path as output filename
@@ -422,7 +422,7 @@ function(corrade_add_test test_name)
                 endif()
 
                 # Sanity checks
-                if(${output_filename} MATCHES "(\\.\\.[\\\\/]|@)" OR IS_ABSOLUTE ${output_filename})
+                if(output_filename MATCHES "(\\.\\.[\\\\/]|@)" OR IS_ABSOLUTE ${output_filename})
                     message(SEND_ERROR "Names of files added to corrade_add_test() can't contain .., @ or be absolute")
                 endif()
 
