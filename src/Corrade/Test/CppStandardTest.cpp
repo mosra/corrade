@@ -71,7 +71,7 @@ void CppStandardTest::test() {
         /* If the cxx_std_14 feature is used, it makes the compiler use that
            or any newer. GCC 11 and Clang 16 are the first that default to
            C++17 and the standard isn't downgraded for them. */
-        #if defined(CORRADE_TARGET_GCC) && (!defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 11) || (defined(CORRADE_TARGET_CLANG) && __clang_major__ >= 16)
+        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 11) || (defined(CORRADE_TARGET_CLANG) && !defined(CORRADE_TARGET_CLANG_CL) && __clang_major__ >= 16)
         CORRADE_EXPECT_FAIL_IF(testName() == "Cpp14StandardTestCMakeFeatures",
             "CMake (3.20.4) doesn't properly set -std=c++14 for GCC 11+ / Clang 16+, making it default to C++17 instead.");
         #endif
