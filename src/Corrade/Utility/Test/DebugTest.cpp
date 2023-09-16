@@ -1128,6 +1128,21 @@ void DebugTest::sourceLocation() {
     }
 
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER == 1937
+    /* There's several bugreports related to this, with some even claiming that
+       this exact issue was broken in MSVC 2019 and "fixed in 2022 17.7".
+       Additionally, some reports are saying the __builtin_LINE() only works
+       correctly with /std:c++20, while C++14 and 17 not; some are saying it
+       only works if not used in a constexpr context... What a mess. The last
+       link is currently (2023-09-16) saying "pending release", so I'm assuming
+       17.8 / 1938 will have it fixed again:
+        https://developercommunity.visualstudio.com/t/std::source_location-started-reporting-w/10429484
+        https://developercommunity.visualstudio.com/t/VS2022-177-_MSC_VER--1937-broke-__/10437659
+        https://developercommunity.visualstudio.com/t/Problem-with-inlining-and-constexpr-and-/10417907
+        https://developercommunity.visualstudio.com/t/__builtin_LINE-function-is-reporting-w/10439054 */
+    /** @todo or maybe just undef this macro on 19.37? */
+    CORRADE_EXPECT_FAIL("MSVC 2022 19.37 (17.7) reports broken file/line location.");
+    #endif
     CORRADE_COMPARE(out.str(), Utility::formatString(
         __FILE__ ":{}: hello\n"
         __FILE__ ":{}: and this is from another line\n"

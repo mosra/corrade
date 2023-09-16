@@ -154,6 +154,10 @@ void TestCaseDescriptionSourceLocationTest::test() {
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 12
     CORRADE_EXPECT_FAIL("GCC 11 and older reports all lines the same, pointing to the closing bracket, which is less useful.");
     #endif
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER == 1937
+    /* See Utility's DebugTest::sourceLocation() for details */
+    CORRADE_EXPECT_FAIL("MSVC 2022 19.37 (17.7) reports broken file/line location.");
+    #endif
     CORRADE_COMPARE_AS(out.str(),
         Utility::Path::join(TEST_DIR, "TestCaseDescriptionSourceLocationTestFiles/test.txt"),
         Compare::StringToFile);
