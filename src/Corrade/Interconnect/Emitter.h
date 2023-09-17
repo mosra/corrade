@@ -67,7 +67,7 @@ enum class ConnectionType: std::uint8_t {
     FunctorWithDestructor
 };
 
-/* Thestd::has_trivial_copy_constructor is deprecated in GCC 5+ but we can't
+/* The std::has_trivial_copy_constructor is deprecated in GCC 5+ but we can't
    detect libstdc++ version when using Clang. The builtins aren't deprecated
    but for those GCC commits suicide with
     error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
