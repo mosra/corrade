@@ -814,6 +814,14 @@ namespace Corrade {
     of @ref Containers::LinkedListItem subclasses. This behavior didn't make
     sense and so it's not assumed any existing code relied on it, nevertheless
     it's a subtle change in behavior that is worth mentioning.
+-   @ref Containers::Pointer destructor and
+    @relativeref{Containers::Pointer,reset()} now contain a
+    @cpp static_assert() @ce that checks for the type being complete. This
+    avoids accidentally calling @cpp delete @ce on a pointer to an incomplete
+    type, which doesn't call the type destructors properly and can lead to
+    resource leaks. Existing code where this silently happened will now fail to
+    compile and has to be updated as documented in
+    @ref Containers-Pointer-incomplete-types.
 -   @ref PluginManager::AbstractManager::pluginList() and
     @relativeref{PluginManager::AbstractManager,aliasList()} now return a
     @ref Containers::Array of @ref Containers::String instead of a

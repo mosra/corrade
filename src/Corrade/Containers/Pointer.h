@@ -61,6 +61,37 @@ namespace Implementation {
         return new T(Utility::move(b));
     }
     #endif
+
+    /* Guards delete calls in the destructor, reset() and emplace(). If T is
+       incomplete (forward declared), it picks the get(...) overload as
+       decltype(sizeof(U)) fails for the incomplete type. A
+        static_assert(sizeof(T), "...");
+       would technically achieve the same (failing if the type is incomplete),
+       but with a far worse error message than this type trait. STL unique_ptr
+       in libstdc++ does exactly that, and it's very ugly.
+
+       As definition of this class is different based on whether a type is
+       defined or not (and thus differing between a header and a source file
+       for a PIMPL'd class), it'd be an ODR violation, which could lead to the
+       linker *theoretically* using the wrong definition when discarding
+       duplicates. To avoid that for the most part, the definition is wrapped
+       in an anonymous namespace and thus each compile unit should get a
+       different one. There's still a scenario like
+
+        struct ForwardDeclared;
+        // IsComplete<Incomplete>::value == false
+        struct ForwardDeclared {};
+        // IsComplete<Incomplete>::value == true
+
+       where this would be a problem, but let's just hope nobody tries to abuse
+       it that way. It's in the Implementation namespace for that reason, to be
+       used only in static_assert() inside Pointer and nowhere else. */
+    namespace { template<class T> class IsComplete {
+        template<class U> static char get(U*, decltype(sizeof(U))* = nullptr);
+        static short get(...);
+        public:
+            enum: bool { value = sizeof(get(static_cast<T*>(nullptr))) == sizeof(char) };
+    }; }
 }
 
 /**
@@ -84,6 +115,27 @@ other hand that makes it fairly simple and lightweight. If you need a custom
 deleter, use either @ref ScopeGuard or the standard @ref std::unique_ptr. For
 owning array wrappers use @ref Array, which maintains a size information and
 also supports custom deleters.
+
+@section Containers-Pointer-incomplete-types Usage with incomplete types
+
+The @ref Pointer class can wrap an incomplete (forward-declared) type, for
+example to use it for the [PIMPL idiom](https://en.wikipedia.org/wiki/Opaque_pointer).
+The type is expected to be defined when the destructor is called or when using
+@ref reset(), as otherwise calling @cpp delete @ce on a pointer to an
+incomplete type wouldn't call its destructor, leading to resource leaks. In
+practice it means that a PIMPL class has to define its copy/move constructors,
+assignments and the destructor in the source file as well instead of relying on
+them being added implicitly by the compiler. For example, this is how a header
+with the forward-declared @cpp struct State @ce would have to look like,
+explicitly declaring but *not defining* a move constructor, destructor and move
+assignment:
+
+@snippet Containers.cpp Pointer-pimpl-header
+
+The defaulted move constructor, destructor, and move assignment would then be
+in the source file together with the definition of `State`:
+
+@snippet Containers.cpp Pointer-pimpl-source
 
 @section Containers-Pointer-stl STL compatibility
 
@@ -226,9 +278,15 @@ template<class T> class Pointer {
         /**
          * @brief Destructor
          *
-         * Calls @cpp delete @ce on the stored pointer.
+         * Calls @cpp delete @ce on the stored pointer. In order to avoid
+         * resource leaks when deleting the pointer, the type is expected to be
+         * complete when calling the destructor. See
+         * @ref Containers-Pointer-incomplete-types for more information.
          */
-        ~Pointer() { delete _pointer; }
+        ~Pointer() {
+            static_assert(Implementation::IsComplete<T>::value, "attempting to delete a pointer to an incomplete type");
+            delete _pointer;
+        }
 
         /**
          * @brief Whether the pointer is non-null
@@ -290,10 +348,14 @@ template<class T> class Pointer {
          * @brief Reset the pointer to a new value
          *
          * Calls @cpp delete @ce on the previously stored pointer and replaces
-         * it with @p pointer.
+         * it with @p pointer. In order to avoid resource leaks when deleting
+         * the pointer, the type is expected to be complete when calling this
+         * function. See @ref Containers-Pointer-incomplete-types for more
+         * information.
          * @see @ref emplace(), @ref release()
          */
         void reset(T* pointer = nullptr) {
+            static_assert(Implementation::IsComplete<T>::value, "attempting to delete a pointer to an incomplete type");
             delete _pointer;
             _pointer = pointer;
         }
@@ -305,6 +367,9 @@ template<class T> class Pointer {
          * a new object by passing @p args to its constructor.
          */
         template<class ...Args> T& emplace(Args&&... args) {
+            /* IsComplete<T> isn't checked here as that's guarded well enough
+               by allocate<T>() below, which will fail to compile if the type
+               isn't defined */
             delete _pointer;
             /* This works around a featurebug in C++ where new T{} doesn't work
                for an explicit defaulted constructor. Additionally it works
@@ -322,6 +387,10 @@ template<class T> class Pointer {
          * a new object of type @p U by passing @p args to its constructor.
          */
         template<class U, class ...Args> U& emplace(Args&&... args) {
+            /* IsComplete<T> isn't checked here as that's guarded well enough
+               by allocate<U>() below, which will fail to compile if the type
+               isn't defined. And if U is defined but T isn't, the assignment
+               to _pointer will fail too as they're unrelated. */
             delete _pointer;
             /* This works around a featurebug in C++ where new T{} doesn't work
                for an explicit defaulted constructor. Additionally it works

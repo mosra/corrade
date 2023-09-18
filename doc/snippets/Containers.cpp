@@ -230,6 +230,33 @@ class Object: private Containers::LinkedListItem<Object, ObjectGroup> {
 /* [LinkedList-private-inheritance] */
 }
 
+/* [Pointer-pimpl-header] */
+class Pimpl {
+    public:
+        explicit Pimpl(DOXYGEN_ELLIPSIS());
+
+        Pimpl(const Pimpl&) = delete;
+        Pimpl(Pimpl&&) noexcept;
+        ~Pimpl();
+        Pimpl& operator=(const Pimpl&) = delete;
+        Pimpl& operator=(Pimpl&&) noexcept;
+
+    private:
+        struct State;
+        Containers::Pointer<State> _state;
+};
+/* [Pointer-pimpl-header] */
+
+/* [Pointer-pimpl-source] */
+struct Pimpl::State {
+    DOXYGEN_ELLIPSIS()
+};
+
+Pimpl::Pimpl(Pimpl&&) noexcept = default;
+Pimpl::~Pimpl() = default;
+Pimpl& Pimpl::operator=(Pimpl&&) noexcept = default;
+/* [Pointer-pimpl-source] */
+
 namespace SI {
 using namespace Containers::Literals;
 /* [StringIterable-usage] */

@@ -77,6 +77,8 @@ namespace Test { namespace {
 struct PointerTest: TestSuite::Tester {
     explicit PointerTest();
 
+    void isComplete();
+
     void resetCounters();
 
     void construct();
@@ -89,6 +91,7 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
     void constructDerived();
+    void constructIncomplete();
 
     void constructZeroNullPointerAmbiguity();
 
@@ -115,6 +118,8 @@ struct PointerTest: TestSuite::Tester {
 };
 
 PointerTest::PointerTest() {
+    addTests({&PointerTest::isComplete});
+
     addTests({&PointerTest::construct,
               &PointerTest::constructDefault,
               &PointerTest::constructNullptr}, &PointerTest::resetCounters, &PointerTest::resetCounters);
@@ -128,6 +133,7 @@ PointerTest::PointerTest() {
 
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
               &PointerTest::constructDerived,
+              &PointerTest::constructIncomplete,
 
               &PointerTest::constructZeroNullPointerAmbiguity,
 
@@ -189,6 +195,15 @@ struct Throwable {
 #ifdef CORRADE_TARGET_CLANG
 #pragma GCC diagnostic pop
 #endif
+
+struct Incomplete;
+struct Complete {};
+
+void PointerTest::isComplete() {
+    CORRADE_VERIFY(!Implementation::IsComplete<Incomplete>::value);
+    CORRADE_VERIFY(Implementation::IsComplete<Complete>::value);
+    CORRADE_VERIFY(Implementation::IsComplete<int>::value);
+}
 
 void PointerTest::resetCounters() {
     Immovable::constructed = Immovable::destructed = 0;
@@ -361,6 +376,21 @@ void PointerTest::constructDerived() {
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Base*>::value);
     CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Pointer<Derived>>::value);
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Pointer<Base>>::value);
+}
+
+void PointerTest::constructIncomplete() {
+    /* Declaring with incomplete type should work without errors, making an
+       instance only if the actual destruction is done with the type defined.
+       Remove the * to test the assertion failure in the destructor. */
+    Containers::Pointer<Incomplete>* a = nullptr;
+    /* Uncomment these to test compile or assertion failures in other APIs. The
+       emplace() in particular doesn't need a static_assert, as there will be
+       a compiler failure either when trying to allocate incomplete T, or when
+       trying to assign U to incomplete T. */
+    //a->emplace();
+    //a->emplace<Complete>();
+    //a->reset();
+    CORRADE_VERIFY(!a);
 }
 
 /* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
