@@ -219,10 +219,15 @@ template<class T> class Pointer {
         /**
          * @brief Construct a unique pointer from another of a derived type
          *
-         * Expects that @p T is a base of @p U. For downcasting (base to
-         * derived) use @ref pointerCast(). Calls @ref release() on @p other.
+         * Expects that @p T is a base of @p U. In order to avoid resource
+         * leaks when deleting through the base pointer, either @p U is
+         * expected to be trivially destructible or @p T is expected to have a
+         * virtual destructor. For downcasting (base to derived) use
+         * @ref pointerCast(). Calls @ref release() on @p other.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {}
+        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {
+            static_assert(std::is_trivially_destructible<U>::value || std::has_virtual_destructor<T>::value, "the derived type should be trivially destructible or the base type should have a virtual destructor");
+        }
 
         /**
          * @brief Construct a unique pointer from external representation
@@ -384,9 +389,13 @@ template<class T> class Pointer {
          * @m_since_latest
          *
          * Calls @cpp delete @ce on the previously stored pointer and allocates
-         * a new object of type @p U by passing @p args to its constructor.
+         * a new object of type @p U by passing @p args to its constructor. In
+         * order to avoid resource leaks when deleting through the base
+         * pointer, either @p U is expected to be trivially destructible or
+         * @p T is expected to have a virtual destructor.
          */
         template<class U, class ...Args> U& emplace(Args&&... args) {
+            static_assert(std::is_trivially_destructible<U>::value || std::has_virtual_destructor<T>::value, "the derived type should be trivially destructible or the base type should have a virtual destructor");
             /* IsComplete<T> isn't checked here as that's guarded well enough
                by allocate<U>() below, which will fail to compile if the type
                isn't defined. And if U is defined but T isn't, the assignment

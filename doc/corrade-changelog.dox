@@ -822,6 +822,14 @@ namespace Corrade {
     resource leaks. Existing code where this silently happened will now fail to
     compile and has to be updated as documented in
     @ref Containers-Pointer-incomplete-types.
+-   @ref Containers::Pointer conversion from a derived type and
+    @relativeref{Containers::Pointer,emplace()} with a derived type now contain
+    a @cpp static_assert() @ce that checks for either the base type having a
+    virtual destructor or the derived type being trivially destructible. If
+    neither of these is true, attempting to @cpp delete @ce through the base
+    pointer would lead to resource leaks as the derived type destructor would
+    never get called. Existing code where this silently happened will now fail
+    to compile and has to be updated.
 -   @ref PluginManager::AbstractManager::pluginList() and
     @relativeref{PluginManager::AbstractManager,aliasList()} now return a
     @ref Containers::Array of @ref Containers::String instead of a

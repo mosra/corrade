@@ -90,7 +90,8 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlace();
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
-    void constructDerived();
+    void constructDerivedTriviallyDestructible();
+    void constructDerivedVirtualDestructor();
     void constructIncomplete();
 
     void constructZeroNullPointerAmbiguity();
@@ -105,7 +106,8 @@ struct PointerTest: TestSuite::Tester {
 
     void reset();
     void emplace();
-    void emplaceDerivedType();
+    void emplaceDerivedTriviallyDestructible();
+    void emplaceDerivedVirtualDestructor();
     void release();
 
     void cast();
@@ -132,7 +134,8 @@ PointerTest::PointerTest() {
               &PointerTest::constructInPlaceMake}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
-              &PointerTest::constructDerived,
+              &PointerTest::constructDerivedTriviallyDestructible,
+              &PointerTest::constructDerivedVirtualDestructor,
               &PointerTest::constructIncomplete,
 
               &PointerTest::constructZeroNullPointerAmbiguity,
@@ -147,9 +150,12 @@ PointerTest::PointerTest() {
     addTests({&PointerTest::accessInvalid});
 
     addTests({&PointerTest::reset,
-              &PointerTest::emplace,
-              &PointerTest::emplaceDerivedType,
-              &PointerTest::release}, &PointerTest::resetCounters, &PointerTest::resetCounters);
+              &PointerTest::emplace}, &PointerTest::resetCounters, &PointerTest::resetCounters);
+
+    addTests({&PointerTest::emplaceDerivedTriviallyDestructible,
+              &PointerTest::emplaceDerivedVirtualDestructor});
+
+    addTests({&PointerTest::release}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::cast,
 
@@ -353,22 +359,80 @@ void PointerTest::constructInPlaceMakeAmbiguous() {
     CORRADE_COMPARE(h->parent, nullptr);
 }
 
-void PointerTest::constructDerived() {
-    struct Base { int a; };
+void PointerTest::constructDerivedTriviallyDestructible() {
+    /* Verifies that conversion from a derived type is allowed for trivially
+       destructible type, and disallowed for non-trivially-destructible */
+
+    struct Base {
+        int a;
+        explicit Base(int a): a{a} {}
+    };
     struct Derived: Base {
-        Derived(int a): Base{a} {}
+        explicit Derived(int a, int b): Base{a}, b{b} {}
+        int b;
+        /* Uncomment this to trigger the assertion */
+        //Containers::Pointer<int> a;
     };
 
-    Pointer<Derived> a{Corrade::InPlaceInit, 42};
+    Pointer<Derived> a{Corrade::InPlaceInit, 42, 17};
     Pointer<Base> b = Utility::move(a);
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);
+    CORRADE_COMPARE(static_cast<Derived&>(*b).b, 17);
 
     /* Test assign as well */
-    b = Pointer<Derived>{Corrade::InPlaceInit, 36};
+    b = Pointer<Derived>{Corrade::InPlaceInit, 36, 63};
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 36);
+    CORRADE_COMPARE(static_cast<Derived&>(*b).b, 63);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value);
+
+    CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Derived*>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Base*>::value);
+    CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Pointer<Derived>>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Pointer<Base>>::value);
+}
+
+void PointerTest::constructDerivedVirtualDestructor() {
+    /* Verifies that conversion from a derived type is allowed for base types
+       with virtual destructor, and disallowed for base types without */
+
+    struct Base {
+        int a;
+        explicit Base(int a): a{a} {}
+        /* Comment this out to trigger the assertion */
+        virtual ~Base() = default;
+    };
+    struct Derived: Base {
+        explicit Derived(int a, int& derivedDestructed): Base{a}, derivedDestructed(derivedDestructed) {}
+        /* The virtual here isn't enough, the base class has to have it too */
+        virtual ~Derived() {
+            ++derivedDestructed;
+        }
+        int& derivedDestructed;
+    };
+
+    int aDerivedDestructed = 0;
+    {
+        Pointer<Derived> a{Corrade::InPlaceInit, 42, aDerivedDestructed};
+        Pointer<Base> b = Utility::move(a);
+        CORRADE_VERIFY(!a);
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 42);
+    }
+    CORRADE_COMPARE(aDerivedDestructed, 1);
+
+    /* Test assign as well */
+    int bDerivedDestructed = 0;
+    {
+        Pointer<Base> b;
+        b = Pointer<Derived>{Corrade::InPlaceInit, 36, bDerivedDestructed};
+        CORRADE_VERIFY(b);
+        CORRADE_COMPARE(b->a, 36);
+    }
+    CORRADE_COMPARE(bDerivedDestructed, 1);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value);
 
@@ -548,26 +612,59 @@ void PointerTest::emplace() {
     CORRADE_COMPARE(Immovable::destructed, 2);
 }
 
-void PointerTest::emplaceDerivedType() {
+void PointerTest::emplaceDerivedTriviallyDestructible() {
+    /* Verifies that emplace() with a derived type is allowed for trivially
+       destructible type, and disallowed for non-trivially-destructible */
+
+    struct Base {
+        int a;
+        explicit Base(int a): a{a} {}
+    };
+    struct Derived: Base {
+        explicit Derived(int a, int b, int&&): Base{a}, b{b} {}
+        int b;
+        /* Uncomment this to trigger the assertion */
+        //Containers::Pointer<int> a;
+    };
+
+    /* Using int{} to test perfect forwarding */
+    Pointer<Base> a;
+    Derived& out = a.emplace<Derived>(42, 17, int{});
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(&out, &*a);
+    CORRADE_COMPARE(out.a, 42);
+    CORRADE_COMPARE(static_cast<Derived&>(out).b, 17);
+}
+
+void PointerTest::emplaceDerivedVirtualDestructor() {
+    /* Verifies that emplace() with a derived type is allowed for base types
+       with virtual destructor, and disallowed for base types without */
+
+    struct Base {
+        int a;
+        explicit Base(int a): a{a} {}
+        /* Comment this out to trigger the assertion */
+        virtual ~Base() = default;
+    };
+    struct Derived: Base {
+        explicit Derived(int a, int& derivedDestructed, int&&): Base{a}, derivedDestructed(derivedDestructed) {}
+        /* The virtual here isn't enough, the base class has to have it too */
+        virtual ~Derived() {
+            ++derivedDestructed;
+        }
+        int& derivedDestructed;
+    };
+
+    int derivedDestructed = 0;
     {
-        Pointer<Immovable> a{Corrade::InPlaceInit, 5};
-        CORRADE_VERIFY(a);
-        CORRADE_COMPARE(a->a, 5);
-
-        struct Derived: Immovable {
-            Derived(int a, int&&): Immovable{0}, a{a} {}
-            int a;
-        };
-
         /* Using int{} to test perfect forwarding */
-        Derived& out = a.emplace<Derived>(3, int{});
+        Pointer<Base> a;
+        Derived& out = a.emplace<Derived>(42, derivedDestructed, int{});
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(&out, &*a);
-        CORRADE_COMPARE(out.a, 3);
+        CORRADE_COMPARE(out.a, 42);
     }
-
-    CORRADE_COMPARE(Immovable::constructed, 2);
-    CORRADE_COMPARE(Immovable::destructed, 2);
+    CORRADE_COMPARE(derivedDestructed, 1);
 }
 
 void PointerTest::release() {
