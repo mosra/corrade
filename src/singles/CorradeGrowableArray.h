@@ -33,11 +33,11 @@
 #pragma ACME enable Corrade_Tags_h
 #include "CorradeArray.h"
 
-/* CORRADE_TARGET_LIBSTDCXX needed for CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, and
-   because it's so complex to check for it I can as well pull in the whole
-   thing. CORRADE_TARGET_DINKUMWARE is needed for an ASan forward declaration
-   workaround, additionally we need CORRADE_TARGET_GCC and CORRADE_TARGET_CLANG
-   which are already defined in CorradeArray.h. */
+/* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS (and thus CORRADE_TARGET_LIBSTDCXX)
+   needed, and because it's so complex to check for it I can as well pull in
+   the whole thing. CORRADE_TARGET_DINKUMWARE is needed for an ASan forward
+   declaration workaround, additionally we need CORRADE_TARGET_GCC and
+   CORRADE_TARGET_CLANG which are already defined in CorradeArray.h. */
 #pragma ACME enable Corrade_configure_h
 #ifdef _MSC_VER
 #ifdef _MSVC_LANG
@@ -77,8 +77,6 @@
 /* Otherwise no idea. */
 #endif
 
-/* We don't need anything else from TypeTraits.h */
-#pragma ACME enable Corrade_Utility_TypeTraits_h
 #if defined(CORRADE_TARGET_LIBSTDCXX) && __GNUC__ < 5 && _GLIBCXX_RELEASE < 7
 #define CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 #endif

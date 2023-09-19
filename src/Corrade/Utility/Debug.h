@@ -36,7 +36,7 @@
 #include <utility> /** @todo consider putting this away as well (900 LOC) */
 
 #include "Corrade/Containers/EnumSet.h"
-#include "Corrade/Utility/TypeTraits.h"
+#include "Corrade/Utility/TypeTraits.h" /* IsIterable, IsStringLike, CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED */
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 

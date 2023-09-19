@@ -32,7 +32,6 @@
  */
 
 #include "Corrade/Containers/StridedArrayView.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {

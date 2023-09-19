@@ -36,7 +36,6 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Containers {

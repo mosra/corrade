@@ -31,7 +31,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/TypeTraits.h"
+#include "Corrade/Utility/TypeTraits.h" /* FloatPrecision */
 
 namespace Corrade { namespace Utility { namespace Implementation {
 

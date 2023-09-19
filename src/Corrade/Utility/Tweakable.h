@@ -38,7 +38,6 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/TweakableParser.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /* For enable() which used to take a std::string */

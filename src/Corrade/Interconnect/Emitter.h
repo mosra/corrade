@@ -38,7 +38,6 @@
 
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
 namespace Corrade { namespace Interconnect {
 

@@ -372,6 +372,10 @@
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #endif
 
+#if defined(CORRADE_TARGET_LIBSTDCXX) && __GNUC__ < 5 && _GLIBCXX_RELEASE < 7
+#define CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+#endif
+
 /* Kill switch for when absence of the /permissive- flag is detected and
    CORRADE_MSVC_COMPATIBILITY is not defined. According to
     https://developercommunity.visualstudio.com/t/pre-define-a-macro-when-compiling-under-permissive/1253982

@@ -33,7 +33,7 @@
 #include <cstdint>
 
 #include "Corrade/configure.h"
-#include "Corrade/Utility/TypeTraits.h"
+#include "Corrade/Utility/TypeTraits.h" /* IsIterable */
 #include "Corrade/Utility/utilities.h"
 
 namespace Corrade { namespace Utility {

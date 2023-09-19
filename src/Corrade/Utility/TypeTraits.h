@@ -92,50 +92,6 @@ namespace Implementation {
     };
 }
 
-/** @hideinitializer
-@brief If the @ref std::is_trivially_copyable family of type traits is not supported by the standard library
-@m_since_latest
-
-The @ref std::is_trivially_constructible,
-@ref std::is_trivially_default_constructible,
-@ref std::is_trivially_copy_constructible,
-@ref std::is_trivially_move_constructible,
-@ref std::is_trivially_assignable,
-@ref std::is_trivially_copy_assignable,
-@ref std::is_trivially_move_assignable family of traits is not implemented
-[on libstdc++ below version 5](https://gcc.gnu.org/gcc-5/changes.html).
-Instead, legacy @cpp std::has_trivial_default_constructor @ce,
-@cpp std::has_trivial_copy_constructor @ce and
-@cpp std::has_trivial_copy_assign @ce are available, with slightly different
-semantics (see e.g. https://stackoverflow.com/q/12754886 for more information).
-From libstdc++ 5 onwards these are marked as deprecated and
-[libstdc++ 7 removes them](https://gcc.gnu.org/gcc-7/changes.html), so
-alternatively there are @cpp __has_trivial_constructor() @ce,
-@cpp __has_trivial_copy() @ce and @cpp __has_trivial_assign() @ce builtins that
-don't produce any deprecated warnings and are available until GCC 9 / Clang 10
-at least --- however note that for SFINAE you need to wrap them in
-@ref std::integral_constant as otherwise GCC would throw errors similar to the
-following:
-
-@m_class{m-console-wrap}
-
-@code{.shell-session}
-error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-@endcode
-
-This macro is defined if the standard variants are *not* available.
-Unfortunately, when libstdc++ is used through Clang, there's no way to check
-for its version until libstdc++ 7, which added the `_GLIBCXX_RELEASE` macro.
-That means, when using Clang with libstdc++ 5 or 6, it will still report those
-traits as being unavailable. Both libc++ and MSVC STL have these traits in all
-versions supported by Corrade, so there the macro is defined always.
-@see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_LIBCXX,
-    @ref CORRADE_TARGET_DINKUMWARE
-*/
-#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(CORRADE_TARGET_LIBSTDCXX) && __GNUC__ < 5 && _GLIBCXX_RELEASE < 7)
-#define CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-#endif
-
 #ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether the @ref std::is_trivially_copyable family of type traits is supported by the standard library

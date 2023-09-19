@@ -749,11 +749,12 @@ namespace Corrade {
     @ref Corrade/Utility/TypeTraits.h instead.
 -   The `CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED` macro is deprecated in
     favor of @ref CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, which is defined only if
-    the traits aren't supported. This solves a recurring problem where
-    forgetting to include @ref Corrade/Utility/TypeTraits.h led to the traits
-    checks being silently skipped, while forgetting to include with the inverse
-    macro would lead to a non-silent compiler error on GCC 4. Additionally it
-    prepares better for future removal of GCC < 5 support.
+    the traits aren't supported, and is moved to @ref Corrade/Corrade.h. This
+    solves a recurring problem where forgetting to include
+    @ref Corrade/Utility/TypeTraits.h led to the traits checks being silently
+    skipped, while forgetting to include with the inverse macro would lead to a
+    non-silent compiler error on GCC 4. Additionally it prepares better for
+    future removal of GCC < 5 support.
 -   The `CORRADE_INCLUDE_INSTALL_PREFIX` CMake variable, needed for
     installations into older Android NDKs, is obsolete and no longer needed for
     NDK r19+. It still does what's expected on builds with

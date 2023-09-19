@@ -30,7 +30,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/StringStl.h"
-#include "Corrade/Utility/TypeTraits.h"
+#include "Corrade/Utility/TypeTraits.h" /* FloatPrecision */
 
 namespace Corrade { namespace Utility {
 
