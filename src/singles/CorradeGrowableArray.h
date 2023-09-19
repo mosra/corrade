@@ -31,6 +31,7 @@
 #pragma ACME noexpand CorradeArray.h
 #pragma ACME enable Corrade_Containers_Array_h
 #pragma ACME enable Corrade_Tags_h
+#pragma ACME enable Corrade_Containers_constructHelpers_h
 #include "CorradeArray.h"
 
 /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS (and thus CORRADE_TARGET_LIBSTDCXX)

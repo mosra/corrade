@@ -1065,7 +1065,11 @@ void StaticArrayTest::constructorExplicitInCopyInitialization() {
        non-trivially-constructible initialization that's affected by this
        issue as well, be sure to have it picked in this test. This check
        corresponds to the check in the code itself. */
-    CORRADE_VERIFY(!(std::is_standard_layout<ExplicitDefault>::value && std::is_trivial<ExplicitDefault>::value));
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    CORRADE_VERIFY(!Implementation::IsTriviallyConstructibleOnOldGcc<ExplicitDefault>::value);
+    #else
+    CORRADE_VERIFY(!std::is_trivially_constructible<ExplicitDefault>::value);
+    #endif
 
     struct ContainingExplicitDefaultWithImplicitConstructor {
         ExplicitDefault a;

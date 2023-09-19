@@ -162,7 +162,32 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */
-        explicit StaticArray(Corrade::DefaultInitT): StaticArray{Corrade::DefaultInit, std::integral_constant<bool, std::is_standard_layout<T>::value && std::is_trivial<T>::value>{}} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        explicit StaticArray(Corrade::DefaultInitT);
+        #else
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+        template<class U = T, typename std::enable_if<Implementation::IsTriviallyConstructibleOnOldGcc<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT) {}
+        template<class U = T, typename std::enable_if<!Implementation::IsTriviallyConstructibleOnOldGcc<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT)
+        #else
+        template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT) {}
+        template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT)
+        #endif
+            /* GCC 5.3 is not able to initialize non-movable types inside
+               constructor initializer list. Reported here, fixed on 10.3:
+                https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395
+
+               In both cases, the () instead of {} works around a featurebug in
+               C++ where new T{} doesn't work for an explicit defaulted
+               constructor. For details see constructHelpers.h and
+               StaticArrayTest:: constructorExplicitInCopyInitialization(). */
+            #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
+            : _data() {}
+            #else
+            {
+                for(T& i: _data) new(&i) T();
+            }
+            #endif
+        #endif
 
         /**
          * @brief Construct a value-initialized array
@@ -729,23 +754,6 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
     private:
-        explicit StaticArray(Corrade::DefaultInitT, std::true_type) {}
-        /* GCC 5.3 is not able to initialize non-movable types inside
-           constructor initializer list. Reported here, fixed on 10.3:
-           https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395
-
-           In both cases, the () instead of {} works around a featurebug in C++
-           where new T{} doesn't work for an explicit defaulted constructor.
-           For details see constructHelpers.h and
-           StaticArrayTest:: constructorExplicitInCopyInitialization(). */
-        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
-        explicit StaticArray(Corrade::DefaultInitT, std::false_type): _data() {}
-        #else
-        explicit StaticArray(Corrade::DefaultInitT, std::false_type) {
-            for(T& i: _data) new(&i) T();
-        }
-        #endif
-
         union {
             T _data[size_];
         };
