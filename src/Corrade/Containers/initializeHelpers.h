@@ -102,8 +102,11 @@ template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* begin, T* c
     std::is_trivially_constructible<T>::value
     #endif
 >::type* = nullptr) {
-    /* Needs to be < because sometimes begin > end */
-    for(; begin < end; ++begin) new(begin) T{};
+    /* Needs to be < because sometimes begin > end. The () instead of {} works
+       around a featurebug in C++ where new T{} doesn't work for an explicit
+       defaulted constructor. For details see constructHelpers.h and
+       GrowableArrayTest::constructorExplicitInCopyInitialization(). */
+    for(; begin < end; ++begin) new(begin) T();
 }
 
 }}}

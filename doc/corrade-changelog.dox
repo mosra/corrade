@@ -593,6 +593,10 @@ namespace Corrade {
     [mosra/corrade#135](https://github.com/mosra/corrade/issues/135).
 -   Fixed the library to build and pass tests when @ref CORRADE_NO_ASSERT or
     @ref CORRADE_STANDARD_ASSERT is defined.
+-   Fixed three more cases of a "chosen constructor is explicit in
+    copy-initialization" C++ featurebug when using growable
+    @ref Containers::Array APIs and @ref Containers::StaticArray with
+    a struct that has a member with an explicit default constructor.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

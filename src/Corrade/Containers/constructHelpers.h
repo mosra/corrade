@@ -47,10 +47,12 @@ namespace Corrade { namespace Containers { namespace Implementation {
     new Foo{};
 
    will cause a compile error, saying that "chosen constructor is explicit in
-   copy-initialization". On GCC it would print a different warning, saying that
+   copy-initialization". On GCC it would print a different error, saying that
    "converting to ‘Foo’ from initializer list would use explicit constructor
    ‘ExplicitDefault::ExplicitDefault()’", however in some variants of the above
-   GCC will be happy and Clang not.
+   GCC will be happy and Clang not. In particular, `new Foo{}` may pass on GCC
+   while `new Foo[size]{}` not, and similarly for {} initialization of a
+   non-array vs array member.
 
    Doesn't happen when doing `new Foo` or `new Foo()`, but because the
    containers *deliberately* prefer {} over () in order to catch implicit
