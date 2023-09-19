@@ -1318,9 +1318,9 @@ void PathTest::currentDirectoryNonexistent() {
     {
         /** @todo remove (and <unistd.h>) once Path::setCurrent() exists */
         Containers::ScopeGuard resetCurrent{&*currentDirectory, [](Containers::String* current) {
-            chdir(current->data());
+            CORRADE_COMPARE(chdir(current->data()), 0);
         }};
-        chdir(newCurrent.data());
+        CORRADE_COMPARE(chdir(newCurrent.data()), 0);
         CORRADE_COMPARE(Path::currentDirectory(), newCurrent);
 
         CORRADE_VERIFY(Path::exists("."));
