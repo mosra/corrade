@@ -380,6 +380,9 @@ class Array {
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
          *      @ref array(std::initializer_list<T>), @ref std::is_trivial
          */
+        /* The () instead of {} works around a featurebug in C++ where new T{}
+           doesn't work for an explicit defaulted constructor. For details see
+           constructHelpers.h and ArrayTest::constructorExplicitInCopyInitialization(). */
         explicit Array(Corrade::ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**

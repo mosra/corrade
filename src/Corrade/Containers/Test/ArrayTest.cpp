@@ -1278,8 +1278,10 @@ void ArrayTest::constructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
+    Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> c{Corrade::ValueInit, 5};
     Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DirectInit, 5};
     CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(c.size(), 5);
 }
 
 void ArrayTest::copyConstructPlainStruct() {
