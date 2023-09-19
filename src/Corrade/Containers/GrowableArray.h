@@ -92,6 +92,19 @@ template<class T> struct AllocatorTraits {
     };
 };
 
+#ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+/* The std::has_trivial_copy_constructor is deprecated in GCC 5+ but we can't
+   detect libstdc++ version when using Clang. The builtins aren't deprecated
+   but for those GCC commits suicide with
+    error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
+   so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
+   even more fun stories. The IsTriviallyConstructibleOnOldGcc trait is defined
+   in constructHelpers.h already, this one needs also
+   __has_trivial_destructor() otherwise it says true for types with deleted
+   copy and non-trivial destructors. */
+template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T) && __has_trivial_destructor(T)> {};
+#endif
+
 }
 
 /** @{ @name Growable array utilities

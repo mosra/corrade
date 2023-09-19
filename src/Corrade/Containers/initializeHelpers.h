@@ -45,9 +45,6 @@ namespace Corrade { namespace Containers { namespace Implementation {
    so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
    even more fun stories. */
 template<class T> struct IsTriviallyConstructibleOnOldGcc: std::integral_constant<bool, __has_trivial_constructor(T)> {};
-/* Need also __has_trivial_destructor() otherwise it says true for types with
-   deleted copy and non-trivial destructors */
-template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T) && __has_trivial_destructor(T)> {};
 #endif
 
 enum: std::size_t {
