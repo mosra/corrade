@@ -111,7 +111,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void cast();
     void size();
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
 };
@@ -172,7 +172,7 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::cast,
               &StaticArrayTest::size,
 
-              &StaticArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &StaticArrayTest::constructorExplicitInCopyInitialization,
               &StaticArrayTest::copyConstructPlainStruct,
               &StaticArrayTest::moveConstructPlainStruct});
 }
@@ -1055,7 +1055,7 @@ void StaticArrayTest::size() {
     CORRADE_COMPARE(Containers::arraySize(a), 5);
 }
 
-void StaticArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+void StaticArrayTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;

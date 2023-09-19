@@ -129,7 +129,7 @@ struct PairTest: TestSuite::Tester {
 
     void debug();
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyMoveConstructPlainStruct();
 };
 
@@ -164,7 +164,7 @@ PairTest::PairTest() {
 
               &PairTest::debug,
 
-              &PairTest::emplaceConstructorExplicitInCopyInitialization,
+              &PairTest::constructorExplicitInCopyInitialization,
               &PairTest::copyMoveConstructPlainStruct});
 }
 
@@ -863,7 +863,7 @@ void PairTest::debug() {
     CORRADE_COMPARE(out.str(), "{42.5, 3}\n");
 }
 
-void PairTest::emplaceConstructorExplicitInCopyInitialization() {
+void PairTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;

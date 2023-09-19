@@ -140,7 +140,7 @@ struct TripleTest: TestSuite::Tester {
 
     void debug();
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyMoveConstructPlainStruct();
 };
 
@@ -183,7 +183,7 @@ TripleTest::TripleTest() {
 
               &TripleTest::debug,
 
-              &TripleTest::emplaceConstructorExplicitInCopyInitialization,
+              &TripleTest::constructorExplicitInCopyInitialization,
               &TripleTest::copyMoveConstructPlainStruct});
 }
 
@@ -1281,7 +1281,7 @@ void TripleTest::debug() {
     CORRADE_COMPARE(out.str(), "{42.5, 3, true}\n");
 }
 
-void TripleTest::emplaceConstructorExplicitInCopyInitialization() {
+void TripleTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;

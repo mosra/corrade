@@ -183,7 +183,7 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     /* Here go the "weird unexpected corner cases" tests */
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
 
@@ -435,7 +435,7 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::explicitAllocatorParameter,
 
-              &GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization,
+              &GrowableArrayTest::constructorExplicitInCopyInitialization,
               &GrowableArrayTest::copyConstructPlainStruct,
               &GrowableArrayTest::moveConstructPlainStruct});
 
@@ -3084,7 +3084,7 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_COMPARE(b.size(), 9);
 }
 
-void GrowableArrayTest::emplaceConstructorExplicitInCopyInitialization() {
+void GrowableArrayTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;
@@ -3156,8 +3156,8 @@ void GrowableArrayTest::moveConstructPlainStruct() {
 
     /* Here a move constructor gets called indirectly as the args are forwarded
        to the InPlaceInit version. In this case there's a workaround for
-       the emplaceConstructorExplicitInCopyInitialization() case from above so
-       we're just reusing that to mix in the 4.8-specific variant also */
+       the constructorExplicitInCopyInitialization() case from above so we're
+       just reusing that to mix in the 4.8-specific variant also */
     arrayAppend(a, MoveOnlyStruct{5, 'c', nullptr});
 
     /* Here a move constructor gets called on the last element to shift it

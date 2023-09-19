@@ -112,7 +112,7 @@ struct PointerTest: TestSuite::Tester {
 
     void cast();
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
 
@@ -159,7 +159,7 @@ PointerTest::PointerTest() {
 
     addTests({&PointerTest::cast,
 
-              &PointerTest::emplaceConstructorExplicitInCopyInitialization,
+              &PointerTest::constructorExplicitInCopyInitialization,
               &PointerTest::copyConstructPlainStruct,
               &PointerTest::moveConstructPlainStruct,
 
@@ -699,7 +699,7 @@ void PointerTest::cast() {
     CORRADE_COMPARE(b->a, 42);
 }
 
-void PointerTest::emplaceConstructorExplicitInCopyInitialization() {
+void PointerTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;

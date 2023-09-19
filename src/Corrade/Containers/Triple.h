@@ -128,7 +128,7 @@ template<class F, class S, class T> class Triple {
          */
         constexpr explicit Triple(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value):
             /* Can't use {} here. See constructHelpers.h for details, test in
-               TripleTest::emplaceConstructorExplicitInCopyInitialization(). */
+               TripleTest::constructorExplicitInCopyInitialization(). */
             _first(), _second(), _third() {}
 
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -158,7 +158,8 @@ template<class F, class S, class T> class Triple {
             #ifdef CORRADE_MSVC2015_COMPATIBILITY
             /* Otherwise it complains that _first and _second isn't initialized
                in a constexpr context. Does it not see the delegation?! OTOH
-               MSVC doesn't seem to be affected by the emplaceConstructorExplicitInCopyInitialization() bug in GCC and
+               MSVC 2015 doesn't seem to be affected by the
+               constructorExplicitInCopyInitialization() bug in GCC and
                Clang, so I can use {} here I think. */
             _first{}, _second{}, _third{}
             #else

@@ -154,7 +154,7 @@ struct OptionalTest: TestSuite::Tester {
 
     void debug();
 
-    void emplaceConstructorExplicitInCopyInitialization();
+    void constructorExplicitInCopyInitialization();
     void copyConstructPlainStruct();
     void moveConstructPlainStruct();
     void vectorOfMovableOptional();
@@ -216,7 +216,7 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::debug,
 
-              &OptionalTest::emplaceConstructorExplicitInCopyInitialization,
+              &OptionalTest::constructorExplicitInCopyInitialization,
               &OptionalTest::copyConstructPlainStruct,
               &OptionalTest::moveConstructPlainStruct,
               &OptionalTest::vectorOfMovableOptional});
@@ -1068,7 +1068,7 @@ void OptionalTest::debug() {
     CORRADE_COMPARE(out.str(), "42 Containers::NullOpt Containers::NullOpt\n");
 }
 
-void OptionalTest::emplaceConstructorExplicitInCopyInitialization() {
+void OptionalTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
         explicit ExplicitDefault() = default;

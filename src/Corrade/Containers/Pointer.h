@@ -45,8 +45,13 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class, class> struct PointerConverter;
 
-    /* Same as construct() utils in constructHelpers.h but not in-place. See
-       their docs for more information. */
+    /* Same as construct() utils in constructHelpers.h but not in-place. The ()
+       instead of {} works around a featurebug in C++ where new T{} doesn't
+       work for an explicit defaulted constructor, additionally it works around
+       GCC 4.8 bugs where copy/move construction can't be done with {} for
+       plain structs. For details see constructHelpers.h and the
+       PointerTest::constructorExplicitInCopyInitialization() and following
+       test cases. */
     template<class T, class First, class ...Next> inline T* allocate(First&& first, Next&& ...next) {
         return new T{Utility::forward<First>(first), Utility::forward<Next>(next)...};
     }
