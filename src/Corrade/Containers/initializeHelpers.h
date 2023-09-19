@@ -34,7 +34,7 @@
 #include "Corrade/Tags.h"
 #include "Corrade/Utility/TypeTraits.h" /* CORRADE_NO_STD_IS_TRIVIALLY_TRAITS */
 
-/* Stuff shared by GrowableArray.h */
+/* Stuff shared by GrowableArray.h and Utility/Memory.h */
 
 namespace Corrade { namespace Containers { namespace Implementation {
 
