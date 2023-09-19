@@ -1058,8 +1058,14 @@ void StaticArrayTest::size() {
 void StaticArrayTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
-        explicit ExplicitDefault() = default;
+        explicit ExplicitDefault() {}
     };
+
+    /* The DefaultInit constructor has a special case for
+       non-trivially-constructible initialization that's affected by this
+       issue as well, be sure to have it picked in this test. This check
+       corresponds to the check in the code itself. */
+    CORRADE_VERIFY(!(std::is_standard_layout<ExplicitDefault>::value && std::is_trivial<ExplicitDefault>::value));
 
     struct ContainingExplicitDefaultWithImplicitConstructor {
         ExplicitDefault a;
@@ -1070,8 +1076,12 @@ void StaticArrayTest::constructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
-    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DirectInit};
+    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DefaultInit};
+    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> c{Corrade::ValueInit};
+    Containers::StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> d{Corrade::DirectInit};
     CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(d.size(), 3);
 }
 
 void StaticArrayTest::copyConstructPlainStruct() {

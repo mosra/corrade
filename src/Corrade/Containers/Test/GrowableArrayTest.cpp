@@ -3087,8 +3087,18 @@ void GrowableArrayTest::explicitAllocatorParameter() {
 void GrowableArrayTest::constructorExplicitInCopyInitialization() {
     /* See constructHelpers.h for details about this compiler-specific issue */
     struct ExplicitDefault {
-        explicit ExplicitDefault() = default;
+        explicit ExplicitDefault() {}
     };
+
+    /* The arrayResize(ValueInit) overload has a special case for
+       non-trivially-constructible initialization that's affected by this
+       issue as well, be sure to have it picked in this test. This check
+       corresponds to the check in the code itself. */
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    CORRADE_VERIFY(!Implementation::IsTriviallyConstructibleOnOldGcc<ExplicitDefault>::value);
+    #else
+    CORRADE_VERIFY(!std::is_trivially_constructible<ExplicitDefault>::value);
+    #endif
 
     struct ContainingExplicitDefaultWithImplicitConstructor {
         ExplicitDefault a;
@@ -3100,7 +3110,8 @@ void GrowableArrayTest::constructorExplicitInCopyInitialization() {
 
     /* So this should too */
     Containers::Array<ContainingExplicitDefaultWithImplicitConstructor> b;
-    arrayResize(b, Corrade::DirectInit, 1);
+    arrayResize(b, Corrade::DirectInit, 2);
+    arrayResize(b, Corrade::ValueInit, 1);
     arrayAppend(b, Corrade::InPlaceInit);
     arrayInsert(b, 0, Corrade::InPlaceInit);
     CORRADE_COMPARE(b.size(), 3);
