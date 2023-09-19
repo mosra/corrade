@@ -878,6 +878,26 @@ but isn't actually the final version.
 #undef CORRADE_TARGET_SIMD128
 
 /**
+@brief Whether `long double` has the same precision as `double`
+@m_since{2020,06}
+
+Defined on platforms where the @cpp long double @ce type has a 64-bit precision
+instead of 80-bit, thus same as @cpp double @ce. It's the case for
+@ref CORRADE_TARGET_MSVC "MSVC" ([source](https://docs.microsoft.com/en-us/previous-versions/9cx8xs15(v=vs.140))),
+32-bit @ref CORRADE_TARGET_ANDROID "Android" (no reliable source found,
+sorry), @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
+and @ref CORRADE_TARGET_APPLE "Mac" (but not @ref CORRADE_TARGET_IOS "iOS")
+with @ref CORRADE_TARGET_ARM "ARM" processors. Emscripten is a bit special
+because it's @cpp long double @ce is *sometimes* 80-bit, but its precision
+differs from the 80-bit representation elsewhere, so it's always treated as
+64-bit. Note that even though the type size and precision may be the same,
+these are still two distinct types, similarly to how @cpp int @ce and
+@cpp signed int @ce behave the same but are treated as different types.
+*/
+#define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+#undef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+
+/**
 @brief GNU IFUNC is allowed to be used for runtime dispatch in the Cpu library
 @m_since_latest
 
