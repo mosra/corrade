@@ -214,6 +214,35 @@ template<class F, class S> class Pair {
             #endif
             {}
 
+        /** @brief Copy-construct a pair from another of different type */
+        template<class OtherF, class OtherS, class = typename std::enable_if<std::is_constructible<F, const OtherF&>::value && std::is_constructible<S, const OtherS&>::value>::type> constexpr explicit Pair(const Pair<OtherF, OtherS>& other) noexcept(std::is_nothrow_constructible<F, const OtherF&>::value && std::is_nothrow_constructible<S, const OtherS&>::value):
+            /* Explicit T() to avoid warnings for int-to-float conversion etc.,
+               as that's a desirable use case here (and the constructor is
+               explicit because of that). Using () instead of {} alone doesn't
+               help as Clang still warns for float-to-double conversion.
+
+               Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               PairTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(F(other._first)), _second(S(other._second))
+            #else
+            _first{F(other._first)}, _second{S(other._second)}
+            #endif
+            {}
+
+        /** @brief Move-construct a pair from another of different type */
+        template<class OtherF, class OtherS, class = typename std::enable_if<std::is_constructible<F, OtherF&&>::value && std::is_constructible<S, OtherS&&>::value>::type> constexpr explicit Pair(Pair<OtherF, OtherS>&& other) noexcept(std::is_nothrow_constructible<F, OtherF&&>::value && std::is_nothrow_constructible<S, OtherS&&>::value):
+            /* Explicit T() to avoid conversion warnings, similar to above;
+               GCC 4.8 special case also similarly to above although
+               copyMoveConstructPlainStruct() cannot really test it (see there
+               for details). */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(F(Utility::move(other._first))), _second(S(Utility::move(other._second)))
+            #else
+            _first{F(Utility::move(other._first))}, _second{S(Utility::move(other._second))}
+            #endif
+            {}
+
         /**
          * @brief Copy-construct a pair from external representation
          *
@@ -280,6 +309,9 @@ template<class F, class S> class Pair {
            return a const value, so this isn't handled at the moment. */
 
     private:
+        /* For the conversion constructor */
+        template<class, class> friend class Pair;
+
         F _first;
         S _second;
 };

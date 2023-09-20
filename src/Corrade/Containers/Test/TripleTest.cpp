@@ -123,6 +123,8 @@ struct TripleTest: TestSuite::Tester {
     void constructMoveMoveCopyMake();
     void constructMoveMoveMove();
     void constructMoveMoveMoveMake();
+    void constructDifferentTypeCopy();
+    void constructDifferentTypeMove();
 
     void convertCopy();
     void convertMove();
@@ -165,7 +167,9 @@ TripleTest::TripleTest() {
               &TripleTest::constructMoveMoveCopy,
               &TripleTest::constructMoveMoveCopyMake,
               &TripleTest::constructMoveMoveMove,
-              &TripleTest::constructMoveMoveMoveMake},
+              &TripleTest::constructMoveMoveMoveMake,
+              &TripleTest::constructDifferentTypeCopy,
+              &TripleTest::constructDifferentTypeMove},
         &TripleTest::resetCounters, &TripleTest::resetCounters);
 
     addTests({&TripleTest::convertCopy,
@@ -1014,6 +1018,88 @@ void TripleTest::constructMoveMoveMoveMake() {
     CORRADE_COMPARE(ca.third().a, 9);
 }
 
+void TripleTest::constructDifferentTypeCopy() {
+    Triple<short, char, float> a{-35, 15, 0.5f};
+    Triple<long, int, double> b{a};
+    CORRADE_COMPARE(b.first(), -35);
+    CORRADE_COMPARE(b.second(), 15);
+    CORRADE_COMPARE(b.third(), 0.5);
+
+    constexpr Triple<short, char, float> ca{-35, 15, 0.5f};
+    constexpr Triple<long, int, double> cb{ca};
+    CORRADE_COMPARE(cb.first(), -35);
+    CORRADE_COMPARE(cb.second(), 15);
+    CORRADE_COMPARE(cb.third(), 0.5);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(std::is_convertible<const Triple<long, int, double>&, Triple<long, int, double>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Triple<short, char, float>&, Triple<long, int, double>>::value);
+
+    /* Only possible to construct with types that can be converted */
+    CORRADE_VERIFY(std::is_constructible<Triple<long, int, double>, const Triple<short, char, float>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, const Triple<short*, char, float>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, const Triple<short, char*, float>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, const Triple<short, char, float*>&>::value);
+}
+
+void TripleTest::constructDifferentTypeMove() {
+    struct MovableDerived: Movable {
+        using Movable::Movable;
+    };
+
+    {
+        Triple<short, float, MovableDerived> a1{-35, 0.5f, MovableDerived{15}};
+        Triple<short, MovableDerived, float> a2{-35, MovableDerived{15}, 0.5f};
+        Triple<MovableDerived, char, float> a3{MovableDerived{-35}, 15, 0.5f};
+        Triple<long, double, Movable> b1{Utility::move(a1)};
+        Triple<long, Movable, double> b2{Utility::move(a2)};
+        Triple<Movable, char, double> b3{Utility::move(a3)};
+        CORRADE_COMPARE(b1.first(), -35);
+        CORRADE_COMPARE(b2.first(), -35);
+        CORRADE_COMPARE(b3.first().a, -35);
+        CORRADE_COMPARE(b1.second(), 0.5);
+        CORRADE_COMPARE(b2.second().a, 15);
+        CORRADE_COMPARE(b3.second(), 15);
+        CORRADE_COMPARE(b1.third().a, 15);
+        CORRADE_COMPARE(b2.third(), 0.5);
+        CORRADE_COMPARE(b2.third(), 0.5);
+    }
+
+    /* Constructed three temporaries, move-constructed them to a1, a2, a3, and
+       then move-constructed a1, a2, a3 to b1, b2, b3. Interestingly enough the
+       explicit T() for warning suppression doesn't contribute to this. */
+    CORRADE_COMPARE(Movable::constructed, 9);
+    CORRADE_COMPARE(Movable::destructed, 9);
+    CORRADE_COMPARE(Movable::moved, 6);
+
+    struct Foo { int a; };
+    struct FooDerived: Foo {
+        constexpr explicit FooDerived(int a): Foo{a} {}
+    };
+    constexpr Triple<long, double, Foo> cb1{Triple<short, float, FooDerived>{-35, 0.5f, FooDerived{15}}};
+    constexpr Triple<long, Foo, double> cb2{Triple<short, FooDerived, float>{-35, FooDerived{15}, 0.5f}};
+    constexpr Triple<Foo, char, double> cb3{Triple<FooDerived, char, float>{FooDerived{-35}, 15, 0.5f}};
+    CORRADE_COMPARE(cb1.first(), -35);
+    CORRADE_COMPARE(cb2.first(), -35);
+    CORRADE_COMPARE(cb3.first().a, -35);
+    CORRADE_COMPARE(cb1.second(), 0.5);
+    CORRADE_COMPARE(cb2.second().a, 15);
+    CORRADE_COMPARE(cb3.second(), 15);
+    CORRADE_COMPARE(cb1.third().a, 15);
+    CORRADE_COMPARE(cb2.third(), 0.5);
+    CORRADE_COMPARE(cb3.third(), 0.5);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(std::is_convertible<Triple<long, int, double>&&, Triple<long, int, double>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Triple<short, char, float>&&, Triple<long, int, double>>::value);
+
+    /* Only possible to construct with types that can be converted */
+    CORRADE_VERIFY(std::is_constructible<Triple<long, int, double>, Triple<short, char, float>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, Triple<short*, char, float>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, Triple<short, char*, float>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Triple<long, int, double>, Triple<short, char, float*>&&>::value);
+}
+
 void TripleTest::convertCopy() {
     FloatIntFlag a{35.0f, 7, true};
 
@@ -1304,6 +1390,9 @@ void TripleTest::copyMoveConstructPlainStruct() {
         int a;
         char b;
     };
+    struct DerivedExtremelyTrivial: ExtremelyTrivial {
+        explicit DerivedExtremelyTrivial(int a, char b): ExtremelyTrivial{a, b} {}
+    };
 
     /* Can't make MoveOnlyStruct directly non-copyable because then we'd hit
        another GCC 4.8 bug where it can't be constructed using {} anymore. In
@@ -1361,6 +1450,15 @@ void TripleTest::copyMoveConstructPlainStruct() {
     cMMM = Utility::move(bMMM);
     CORRADE_COMPARE(cCCC.second().a, 3);
     CORRADE_COMPARE(cMMM.second().a, 3);
+
+    /* Same as the initial case but with the copy conversion constructor
+       instead. The move can't be tested as attempting to move the struct hits
+       another GCC 4.8 bug where it attempts to use a copy constructor for
+       some reason. So let's just hope the move conversion constructor won't
+       regress. */
+    Triple<DerivedExtremelyTrivial, DerivedExtremelyTrivial, DerivedExtremelyTrivial> dCopy{DerivedExtremelyTrivial{3, 'a'}, DerivedExtremelyTrivial{4, 'b'}, DerivedExtremelyTrivial{5, 'c'}};
+    Triple<ExtremelyTrivial, ExtremelyTrivial, ExtremelyTrivial> eCopy{dCopy};
+    CORRADE_COMPARE(eCopy.second().a, 4);
 }
 
 }}}}

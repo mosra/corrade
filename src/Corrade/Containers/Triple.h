@@ -252,6 +252,35 @@ template<class F, class S, class T> class Triple {
             #endif
             {}
 
+        /** @brief Copy-construct a triple from another of different type */
+        template<class OtherF, class OtherS, class OtherT, class = typename std::enable_if<std::is_constructible<F, const OtherF&>::value && std::is_constructible<S, const OtherS&>::value && std::is_constructible<T, const OtherT&>::value>::type> constexpr explicit Triple(const Triple<OtherF, OtherS, OtherT>& other) noexcept(std::is_nothrow_constructible<F, const OtherF&>::value && std::is_nothrow_constructible<S, const OtherS&>::value && std::is_nothrow_constructible<T, const OtherT&>::value):
+            /* Explicit T() to avoid warnings for int-to-float conversion etc.,
+               as that's a desirable use case here (and the constructor is
+               explicit because of that). Using () instead of {} alone doesn't
+               help as Clang still warns for float-to-double conversion.
+
+               Can't use {} on GCC 4.8, see constructHelpers.h for details and
+               TripleTest::copyMoveConstructPlainStruct() for a test. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(F(other._first)), _second(S(other._second)), _third(T(other._third))
+            #else
+            _first{F(other._first)}, _second{S(other._second)}, _third{T(other._third)}
+            #endif
+            {}
+
+        /** @brief Move-construct a triple from another of different type */
+        template<class OtherF, class OtherS, class OtherT, class = typename std::enable_if<std::is_constructible<F, OtherF&&>::value && std::is_constructible<S, OtherS&&>::value && std::is_constructible<T, OtherT&&>::value>::type> constexpr explicit Triple(Triple<OtherF, OtherS, OtherT>&& other) noexcept(std::is_nothrow_constructible<F, OtherF&&>::value && std::is_nothrow_constructible<S, OtherS&&>::value && std::is_nothrow_constructible<T, OtherT&&>::value):
+            /* Explicit T() to avoid conversion warnings, similar to above;
+               GCC 4.8 special case also similarly to above although
+               copyMoveConstructPlainStruct() cannot really test it (see there
+               for details). */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            _first(F(Utility::move(other._first))), _second(S(Utility::move(other._second))), _third(T(Utility::move(other._third)))
+            #else
+            _first{F(Utility::move(other._first))}, _second{S(Utility::move(other._second))}, _third{T(Utility::move(other._third))}
+            #endif
+            {}
+
         /**
          * @brief Copy-construct a triple from external representation
          *
@@ -326,6 +355,9 @@ template<class F, class S, class T> class Triple {
            practical reason to return a const value, so this isn't handled. */
 
     private:
+        /* For the conversion constructor */
+        template<class, class, class> friend class Triple;
+
         F _first;
         S _second;
         T _third;

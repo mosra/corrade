@@ -112,6 +112,8 @@ struct PairTest: TestSuite::Tester {
     void constructMoveCopyMake();
     void constructMoveMove();
     void constructMoveMoveMake();
+    void constructDifferentTypeCopy();
+    void constructDifferentTypeMove();
 
     void convertCopy();
     void convertMove();
@@ -146,7 +148,9 @@ PairTest::PairTest() {
               &PairTest::constructMoveCopy,
               &PairTest::constructMoveCopyMake,
               &PairTest::constructMoveMove,
-              &PairTest::constructMoveMoveMake},
+              &PairTest::constructMoveMoveMake,
+              &PairTest::constructDifferentTypeCopy,
+              &PairTest::constructDifferentTypeMove},
         &PairTest::resetCounters, &PairTest::resetCounters);
 
     addTests({&PairTest::convertCopy,
@@ -634,6 +638,71 @@ void PairTest::constructMoveMoveMake() {
     CORRADE_COMPARE(ca.second().a, 7);
 }
 
+void PairTest::constructDifferentTypeCopy() {
+    Pair<short, float> a{-35, 0.5f};
+    Pair<long, double> b{a};
+    CORRADE_COMPARE(b.first(), -35);
+    CORRADE_COMPARE(b.second(), 0.5);
+
+    constexpr Pair<short, float> ca{-35, 0.5f};
+    constexpr Pair<long, double> cb{ca};
+    CORRADE_COMPARE(cb.first(), -35);
+    CORRADE_COMPARE(cb.second(), 0.5);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(std::is_convertible<const Pair<long, double>&, Pair<long, double>>::value);
+    CORRADE_VERIFY(!std::is_convertible<const Pair<short, float>&, Pair<long, double>>::value);
+
+    /* Only possible to construct with types that can be converted */
+    CORRADE_VERIFY(std::is_constructible<Pair<long, double>, const Pair<short, float>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pair<long, double>, const Pair<short*, float>&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pair<long, double>, const Pair<short, float*>&>::value);
+}
+
+void PairTest::constructDifferentTypeMove() {
+    struct MovableDerived: Movable {
+        using Movable::Movable;
+    };
+
+    {
+        Pair<short, MovableDerived> a1{-35, MovableDerived{15}};
+        Pair<MovableDerived, float> a2{MovableDerived{-35}, 0.5f};
+        Pair<long, Movable> b1{Utility::move(a1)};
+        Pair<Movable, double> b2{Utility::move(a2)};
+        CORRADE_COMPARE(b1.first(), -35);
+        CORRADE_COMPARE(b2.first().a, -35);
+        CORRADE_COMPARE(b1.second().a, 15);
+        CORRADE_COMPARE(b2.second(), 0.5);
+    }
+
+    /* Constructed two temporaries, move-constructed them to a1, a2, and then
+       move-constructed a1, a2 to b1, b2. Interestingly enough the explicit T()
+       for warning suppression doesn't contribute to this. */
+    CORRADE_COMPARE(Movable::constructed, 6);
+    CORRADE_COMPARE(Movable::destructed, 6);
+    CORRADE_COMPARE(Movable::moved, 4);
+
+    struct Foo { int a; };
+    struct FooDerived: Foo {
+        constexpr explicit FooDerived(int a): Foo{a} {}
+    };
+    constexpr Pair<long, Foo> cb1{Pair<short, FooDerived>{-35, FooDerived{15}}};
+    constexpr Pair<Foo, double> cb2{Pair<FooDerived, float>{FooDerived{-35}, 0.5f}};
+    CORRADE_COMPARE(cb1.first(), -35);
+    CORRADE_COMPARE(cb2.first().a, -35);
+    CORRADE_COMPARE(cb1.second().a, 15);
+    CORRADE_COMPARE(cb2.second(), 0.5);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(std::is_convertible<Pair<long, double>&&, Pair<long, double>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Pair<short, float>&&, Pair<long, double>>::value);
+
+    /* Only possible to construct with types that can be converted */
+    CORRADE_VERIFY(std::is_constructible<Pair<long, double>, Pair<short, float>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pair<long, double>, Pair<short*, float>&&>::value);
+    CORRADE_VERIFY(!std::is_constructible<Pair<long, double>, Pair<short, float*>&&>::value);
+}
+
 void PairTest::convertCopy() {
     FloatInt a{35.0f, 7};
 
@@ -886,6 +955,9 @@ void PairTest::copyMoveConstructPlainStruct() {
         int a;
         char b;
     };
+    struct DerivedExtremelyTrivial: ExtremelyTrivial {
+        explicit DerivedExtremelyTrivial(int a, char b): ExtremelyTrivial{a, b} {}
+    };
 
     /* Can't make MoveOnlyStruct directly non-copyable because then we'd hit
        another GCC 4.8 bug where it can't be constructed using {} anymore. In
@@ -935,6 +1007,15 @@ void PairTest::copyMoveConstructPlainStruct() {
     cMM = Utility::move(bMM);
     CORRADE_COMPARE(cCC.second().a, 3);
     CORRADE_COMPARE(cMM.second().a, 3);
+
+    /* Same as the initial case but with the copy conversion constructor
+       instead. The move can't be tested as attempting to move the struct hits
+       another GCC 4.8 bug where it attempts to use a copy constructor for
+       some reason. So let's just hope the move conversion constructor won't
+       regress. */
+    Pair<DerivedExtremelyTrivial, DerivedExtremelyTrivial> dCopy{DerivedExtremelyTrivial{3, 'a'}, DerivedExtremelyTrivial{4, 'b'}};
+    Pair<ExtremelyTrivial, ExtremelyTrivial> eCopy{dCopy};
+    CORRADE_COMPARE(eCopy.second().a, 4);
 }
 
 }}}}
