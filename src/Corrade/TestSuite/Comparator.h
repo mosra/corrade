@@ -30,6 +30,10 @@
  * @brief Class @ref Corrade::TestSuite::Comparator, enum @ref Corrade::TestSuite::ComparisonStatusFlag, enum set @ref Corrade::TestSuite::ComparisonStatusFlags
  */
 
+/* std::declval() is said to be in <utility> but libstdc++, libc++ and MSVC STL
+   all have it directly in <type_traits> because it just makes sense */
+#include <type_traits>
+
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"

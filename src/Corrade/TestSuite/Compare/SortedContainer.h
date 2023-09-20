@@ -32,6 +32,9 @@
  */
 
 #include <algorithm> /* std::sort() */
+/* std::declval() is said to be in <utility> but libstdc++, libc++ and MSVC STL
+   all have it directly in <type_traits> because it just makes sense */
+#include <type_traits>
 
 /* Given there's <algorithm> already, it won't really help much if we'd PIMPL
    the Array include */

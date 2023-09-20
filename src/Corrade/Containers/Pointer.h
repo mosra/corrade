@@ -31,6 +31,8 @@
  * @see @ref Corrade/Containers/PointerStl.h
  */
 
+/* std::declval() is said to be in <utility> but libstdc++, libc++ and MSVC STL
+   all have it directly in <type_traits> because it just makes sense */
 #include <type_traits>
 
 #include "Corrade/Tags.h"
