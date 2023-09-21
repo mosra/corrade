@@ -714,18 +714,6 @@ void StringTest::replaceFirst() {
         "this part will get replaced and this will get not",
         "will get", "got"),
         "this part got replaced and this will get not");
-    CORRADE_COMPARE(String::replaceFirst(
-        "this part will get replaced and this will get not",
-        "will get", std::string{"got"}),
-        "this part got replaced and this will get not");
-    CORRADE_COMPARE(String::replaceFirst(
-        "this part will get replaced and this will get not",
-        std::string{"will get"}, "got"),
-        "this part got replaced and this will get not");
-    CORRADE_COMPARE(String::replaceFirst(
-        "this part will get replaced and this will get not",
-        std::string{"will get"}, std::string{"got"}),
-        "this part got replaced and this will get not");
 }
 
 void StringTest::replaceFirstNotFound() {
@@ -747,18 +735,6 @@ void StringTest::replaceAll() {
     CORRADE_COMPARE(String::replaceAll(
         "this part will get replaced and this will get replaced also",
         "will get", "got"),
-        "this part got replaced and this got replaced also");
-    CORRADE_COMPARE(String::replaceAll(
-        "this part will get replaced and this will get replaced also",
-        "will get", std::string{"got"}),
-        "this part got replaced and this got replaced also");
-    CORRADE_COMPARE(String::replaceAll(
-        "this part will get replaced and this will get replaced also",
-        std::string{"will get"}, "got"),
-        "this part got replaced and this got replaced also");
-    CORRADE_COMPARE(String::replaceAll(
-        "this part will get replaced and this will get replaced also",
-        std::string{"will get"}, std::string{"got"}),
         "this part got replaced and this got replaced also");
 }
 

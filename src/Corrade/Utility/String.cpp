@@ -113,23 +113,6 @@ std::string stripSuffix(std::string string, const Containers::ArrayView<const ch
     return string;
 }
 
-std::string replaceFirst(std::string string, const Containers::ArrayView<const char> search, const Containers::ArrayView<const char> replace) {
-    const std::size_t found = string.find(search, 0, search.size());
-    if(found != std::string::npos)
-        string.replace(found, search.size(), replace, replace.size());
-    return string;
-}
-
-std::string replaceAll(std::string string, const Containers::ArrayView<const char> search, const Containers::ArrayView<const char> replace) {
-    CORRADE_ASSERT(!search.isEmpty(), "Utility::String::replaceAll(): empty search string would cause an infinite loop", {});
-    std::size_t found = 0;
-    while((found = string.find(search, found, search.size())) != std::string::npos) {
-        string.replace(found, search.size(), replace, replace.size());
-        found += replace.size();
-    }
-    return string;
-}
-
 }
 
 namespace {
@@ -302,6 +285,49 @@ Containers::String uppercase(Containers::String string) {
 std::string uppercase(std::string string) {
     uppercaseInPlace(string);
     return string;
+}
+
+Containers::String replaceFirst(const Containers::StringView string, const Containers::StringView search, const Containers::StringView replace) {
+    /* Handle also the case when the search string is empty -- find() returns
+       (empty) begin in that case and we just prepend the replace string */
+    const Containers::StringView found = string.find(search);
+    if(!search || found) {
+        Containers::String output{NoInit, string.size() + replace.size() - found.size()};
+        const std::size_t begin = found.begin() - string.begin();
+        /* Not using Utility::copy() to avoid dependency on Algorithms.h */
+        /** @todo might want to have some assign() API on the String itself? */
+        std::memcpy(output.data(), string.data(), begin);
+        std::memcpy(output.data() + begin, replace.data(), replace.size());
+        const std::size_t end = begin + search.size();
+        std::memcpy(output.data() + begin + replace.size(), string.data() + end, string.size() - end);
+        return output;
+    }
+
+    /** @todo would it make sense to have an overload that takes a String as an
+        input to avoid a copy here? it'd however cause an extra unused copy for
+        the (more common) case when the substring is actually found */
+    return string;
+}
+
+Containers::String replaceAll(Containers::StringView string, const Containers::StringView search, const Containers::StringView replace) {
+    CORRADE_ASSERT(!search.isEmpty(),
+        "Utility::String::replaceAll(): empty search string would cause an infinite loop", {});
+    Containers::Array<char> output;
+    while(const Containers::StringView found = string.find(search)) {
+        arrayAppend(output, string.prefix(found.begin()));
+        arrayAppend(output, replace);
+        string = string.slice(found.end(), string.end());
+    }
+    arrayAppend(output, string);
+    arrayAppend(output, '\0');
+    const std::size_t size = output.size();
+    /* This assumes that the growable array uses std::malloc() (which has to be
+       std::free()'d later) in order to be able to std::realloc(). The deleter
+       doesn't use the size argument so it should be fine to transfer it over
+       to a String with the size excluding the null terminator. */
+    void(*const deleter)(char*, std::size_t) = output.deleter();
+    CORRADE_INTERNAL_ASSERT(deleter);
+    return Containers::String{output.release(), size - 1, deleter};
 }
 
 Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {

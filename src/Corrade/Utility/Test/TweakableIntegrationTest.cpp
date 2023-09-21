@@ -150,12 +150,9 @@ void TweakableIntegrationTest::variable() {
     /* Replace the above line with a different number */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_('a'); /* now this */",
-            "_('X'); /* now this */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_('a'); /* now this */",
+        "_('X'); /* now this */")));
 
     /* Now it changes, if enabled */
     {
@@ -165,11 +162,12 @@ void TweakableIntegrationTest::variable() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            CORRADE_COMPARE(out.str(), formatString(
+            CORRADE_COMPARE_AS(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
 "Utility::Tweakable::update(): updating _('X') in {0}:111\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:198\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:268\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:196\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:264\n", __FILE__),
+                TestSuite::Compare::String);
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -219,12 +217,9 @@ void TweakableIntegrationTest::scopeTemplated() {
     /* Replace the above line with a different number */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_(42.0f); /* yes this */",
-            "_(133.7f); /* yes this */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_(42.0f); /* yes this */",
+        "_(133.7f); /* yes this */")));
 
     /* Now it changes, if enabled */
     {
@@ -234,12 +229,13 @@ void TweakableIntegrationTest::scopeTemplated() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            CORRADE_COMPARE(out.str(), formatString(
+            CORRADE_COMPARE_AS(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
 "Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:111\n"
-"Utility::Tweakable::update(): updating _(133.7f) in {0}:198\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:268\n"
-"Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
+"Utility::Tweakable::update(): updating _(133.7f) in {0}:196\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:264\n"
+"Utility::Tweakable::update(): 1 scopes affected\n", __FILE__),
+                TestSuite::Compare::String);
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -289,12 +285,9 @@ void TweakableIntegrationTest::scopeVoid() {
     /* Replace the above line with a different number */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_(22.7f); /* and finally */",
-            "_(-1.44f); /* and finally */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_(22.7f); /* and finally */",
+        "_(-1.44f); /* and finally */")));
 
     /* Now it changes, if enabled */
     {
@@ -304,12 +297,13 @@ void TweakableIntegrationTest::scopeVoid() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            CORRADE_COMPARE(out.str(), formatString(
+            CORRADE_COMPARE_AS(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
 "Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:111\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:198\n"
-"Utility::Tweakable::update(): updating _(-1.44f) in {0}:268\n"
-"Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:196\n"
+"Utility::Tweakable::update(): updating _(-1.44f) in {0}:264\n"
+"Utility::Tweakable::update(): 1 scopes affected\n", __FILE__),
+                TestSuite::Compare::String);
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -340,22 +334,20 @@ void TweakableIntegrationTest::updateNoChange() {
     /* Replace without changing the literal itself */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_('a'); /* now this */",
-            "_('a'); /* now that */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_('a'); /* now this */",
+        "_('a'); /* now that */")));
 
     std::ostringstream out;
     Debug redirectOutput{&out};
     Warning redirectWarning{&out};
     TweakableState state = tweakable.update();
 
-    CORRADE_COMPARE(out.str(), formatString(
+    CORRADE_COMPARE_AS(out.str(), formatString(
 "Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:198\n"
-"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:268\n", __FILE__));
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:196\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:264\n", __FILE__),
+        TestSuite::Compare::String);
     CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
@@ -379,12 +371,9 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
     /* Replace without changing the literal itself */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_('a'); /* now this */",
-            "\n_('a'); /* now this */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_('a'); /* now this */",
+        "\n_('a'); /* now this */")));
 
     std::ostringstream out;
     Warning redirectWarning{&out};
@@ -415,12 +404,9 @@ void TweakableIntegrationTest::updateDifferentType() {
     /* Replace literal to a different type */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_('a'); /* now this */",
-            "_(14.4f); /* now this */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_('a'); /* now this */",
+        "_(14.4f); /* now this */")));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
@@ -491,12 +477,9 @@ void TweakableIntegrationTest::updateParseError() {
     /* Replace literal to a broken value */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "_('a'); /* now this */",
-            "_('\\X'); /* now this */")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "_('a'); /* now this */",
+        "_('\\X'); /* now this */")));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
@@ -529,12 +512,9 @@ void TweakableIntegrationTest::updateNoAlias() {
     /* Comment out the alias definition */
     Containers::Optional<Containers::String> file = Path::readString(_thisWriteableFile);
     CORRADE_VERIFY(file);
-    CORRADE_VERIFY(Path::write(_thisWriteableFile,
-        /** @todo drop the cast once String::replaceFirst() can operate on
-            Containers::String */
-        Containers::StringView{String::replaceFirst(*file,
-            "#define _ CORRADE_TWEAKABLE",
-            "// #define _ CORRADE_TWEAKABLE")}));
+    CORRADE_VERIFY(Path::write(_thisWriteableFile, String::replaceFirst(*file,
+        "#define _ CORRADE_TWEAKABLE",
+        "// #define _ CORRADE_TWEAKABLE")));
 
     /* Now it changes, if enabled */
     std::ostringstream out;

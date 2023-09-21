@@ -76,9 +76,6 @@ namespace Implementation {
 
     CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, Containers::ArrayView<const char> suffix);
     CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, Containers::ArrayView<const char> suffix);
-
-    CORRADE_UTILITY_EXPORT std::string replaceFirst(std::string string, Containers::ArrayView<const char> search, Containers::ArrayView<const char> replace);
-    CORRADE_UTILITY_EXPORT std::string replaceAll(std::string string, Containers::ArrayView<const char> search, Containers::ArrayView<const char> replace);
 }
 
 /**
@@ -618,55 +615,23 @@ inline std::string stripSuffix(std::string string, char suffix) {
 
 /**
 @brief Replace first occurrence in a string
+@m_since_latest
 
 Returns @p string unmodified if it doesn't contain @p search. Having empty
 @p search causes @p replace to be prepended to @p string.
 @see @ref replaceAll()
 */
-inline std::string replaceFirst(std::string string, const std::string& search, const std::string& replace) {
-    return Implementation::replaceFirst(std::move(string), {search.data(), search.size()}, {replace.data(), replace.size()});
-}
-
-/** @overload */
-template<std::size_t searchSize, std::size_t replaceSize> inline std::string replaceFirst(std::string string, const char(&search)[searchSize], const char(&replace)[replaceSize]) {
-    return Implementation::replaceFirst(std::move(string), {search, searchSize - 1}, {replace, replaceSize - 1});
-}
-
-/** @overload */
-template<std::size_t searchSize> inline std::string replaceFirst(std::string string, const char(&search)[searchSize], const std::string& replace) {
-    return Implementation::replaceFirst(std::move(string), {search, searchSize - 1}, {replace.data(), replace.size()});
-}
-
-/** @overload */
-template<std::size_t replaceSize> inline std::string replaceFirst(std::string string, const std::string& search, const char(&replace)[replaceSize]) {
-    return Implementation::replaceFirst(std::move(string), {search.data(), search.size()}, {replace, replaceSize - 1});
-}
+CORRADE_UTILITY_EXPORT Containers::String replaceFirst(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
 
 /**
 @brief Replace all occurrences in a string
+@m_since_latest
 
 Returns @p string unmodified if it doesn't contain @p search. Expects that
 @p search is not empty, as that would cause an infinite loop.
 @see @ref replaceFirst()
 */
-inline std::string replaceAll(std::string string, const std::string& search, const std::string& replace) {
-    return Implementation::replaceAll(std::move(string), {search.data(), search.size()}, {replace.data(), replace.size()});
-}
-
-/** @overload */
-template<std::size_t searchSize, std::size_t replaceSize> inline std::string replaceAll(std::string string, const char(&search)[searchSize], const char(&replace)[replaceSize]) {
-    return Implementation::replaceAll(std::move(string), {search, searchSize - 1}, {replace, replaceSize - 1});
-}
-
-/** @overload */
-template<std::size_t searchSize> inline std::string replaceAll(std::string string, const char(&search)[searchSize], const std::string& replace) {
-    return Implementation::replaceAll(std::move(string), {search, searchSize - 1}, {replace.data(), replace.size()});
-}
-
-/** @overload */
-template<std::size_t replaceSize> inline std::string replaceAll(std::string string, const std::string& search, const char(&replace)[replaceSize]) {
-    return Implementation::replaceAll(std::move(string), {search.data(), search.size()}, {replace, replaceSize - 1});
-}
+CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
 
 /**
 @brief Parse a number sequence

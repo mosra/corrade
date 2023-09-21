@@ -856,6 +856,11 @@ namespace Corrade {
     to it now requires an explicit @cpp #include <Corrade/Utility/DebugStl.h> @ce.
     Alternatively, if string concatenation was used, you can compose the
     message by chaining @ref Utility::Debug output operators instead.
+-   @ref Utility::String::replaceFirst() and @ref Utility::String::replaceAll()
+    is now operating on a @ref Containers::StringView and returns a
+    @ref Containers::String. The original @ref std::string overloads had to be
+    removed as they caused various ambiguities, so using these functions with
+    @ref std::string may now need extra casts.
 -   @ref Utility::String::lowercase() and @ref Utility::String::uppercase()
     now has overloads for both @ref Containers::StringView and
     @ref std::string, which may cause ambiguous overload errors for existing
