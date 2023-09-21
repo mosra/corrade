@@ -32,13 +32,15 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
-#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
+
+using namespace Containers::Literals;
 
 Configuration::Configuration(const Flags flags): ConfigurationGroup(this), _flags(static_cast<InternalFlag>(std::uint32_t(flags))) {}
 
@@ -100,7 +102,7 @@ namespace {
     constexpr const char Bom[] = "\xEF\xBB\xBF";
 }
 
-bool Configuration::parse(Containers::ArrayView<const char> in) {
+bool Configuration::parse(Containers::StringView in) {
     /* Oh, BOM, eww */
     if(in.size() >= 3 && in[0] == Bom[0] && in[1] == Bom[1] && in[2] == Bom[2]) {
         _flags |= InternalFlag::HasBom;
@@ -108,7 +110,7 @@ bool Configuration::parse(Containers::ArrayView<const char> in) {
     }
 
     /* Parse file */
-    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, this, {});
+    std::pair<Containers::StringView, const char*> parsed = parse(in, this, {});
     if(parsed.second) {
         Error() << "Utility::Configuration::Configuration():" << parsed.second;
         clear();
@@ -119,29 +121,28 @@ bool Configuration::parse(Containers::ArrayView<const char> in) {
     return true;
 }
 
-std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath) {
-    CORRADE_INTERNAL_ASSERT(fullPath.empty() || String::endsWith(fullPath, '/'));
-
-    std::string buffer;
+std::pair<Containers::StringView, const char*> Configuration::parse(Containers::StringView in, ConfigurationGroup* group, const Containers::StringView fullPath) {
+    CORRADE_INTERNAL_ASSERT(!fullPath || fullPath.hasSuffix('/'));
 
     /* Parse file */
     bool multiLineValue = false;
     while(!in.isEmpty()) {
-        const Containers::ArrayView<const char> currentLine = in;
+        const Containers::StringView currentLine = in;
 
         /* Extract the line and ignore the newline character after it, if any */
-        const char* end = std::find(in.begin(), in.end(), '\n');
-        buffer.assign(in.begin(), end);
-        in = in.suffix(end == in.end() ? end : end + 1);
+        Containers::StringView buffer = in;
+        const Containers::StringView end = in.findOr('\n', in.end());
+        buffer = in.prefix(end.begin());
+        in = in.suffix(end.end());
 
         /* Windows EOL */
-        if(!buffer.empty() && buffer.back() == '\r')
+        if(buffer.hasSuffix('\r'))
             _flags |= InternalFlag::WindowsEol;
 
         /* Multi-line value */
         if(multiLineValue) {
             /* End of multi-line value */
-            if(String::trim(buffer) == "\"\"\"") {
+            if(Containers::StringView{buffer}.trimmed() == "\"\"\""_s) {
                 /* Remove trailing newline, if present */
                 if(!group->_values.back().value.empty()) {
                     CORRADE_INTERNAL_ASSERT(group->_values.back().value.back() == '\n');
@@ -153,7 +154,7 @@ std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(C
             }
 
             /* Remove Windows EOL, if present */
-            if(!buffer.empty() && buffer.back() == '\r') buffer.resize(buffer.size()-1);
+            if(buffer.hasSuffix('\r')) buffer = buffer.exceptSuffix(1);
 
             /* Append it (with newline) to current value */
             group->_values.back().value += buffer;
@@ -162,58 +163,58 @@ std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(C
         }
 
         /* Trim buffer */
-        String::trimInPlace(buffer);
+        buffer = buffer.trimmed();
 
         /* Empty line */
-        if(buffer.empty()) {
+        if(!buffer) {
             if(_flags & InternalFlag::SkipComments) continue;
 
             /* Save it only if this is not the last one */
             if(in) group->_values.emplace_back();
 
         /* Group header */
-        } else if(buffer[0] == '[') {
+        } else if(buffer.hasPrefix('[')) {
 
             /* Check ending bracket */
-            if(buffer[buffer.size()-1] != ']')
+            if(!buffer.hasSuffix(']'))
                 return {nullptr, "missing closing bracket for a group header"};
 
-            const std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
+            const Containers::StringView nextGroup = buffer.slice(1, buffer.size()-1).trimmed();
 
-            if(nextGroup.empty())
+            if(!nextGroup)
                 return {nullptr, "empty group name"};
 
             /* This is a subgroup of this one, parse recursively */
-            if(String::beginsWith(nextGroup, fullPath)) {
+            if(nextGroup.hasPrefix(fullPath)) {
                 ConfigurationGroup::Group g;
 
                 /* If the subgroup has a shorthand for multiple nesting, call
                    parse() on this same line again but with nested group and
                    larger fullPath */
-                const std::size_t groupEnd = nextGroup.find('/', fullPath.size());
-                if(groupEnd != std::string::npos) {
-                    if(groupEnd == fullPath.size())
+                const Containers::StringView nextSubGroup = nextGroup.exceptPrefix(fullPath);
+                if(const Containers::StringView groupEnd = nextSubGroup.find('/')) {
+                    if(groupEnd.begin() == nextSubGroup.begin())
                         return {nullptr, "empty subgroup name"};
 
-                    g.name = nextGroup.substr(fullPath.size(), groupEnd - fullPath.size());
+                    g.name = nextSubGroup.prefix(groupEnd.begin());
                     g.group = new ConfigurationGroup(_configuration);
                     /* Add the group before attempting any other parsing, as it
                        could throw an exception and the group would otherwise
                        be leaked */
                     group->_groups.push_back(std::move(g));
-                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(currentLine, g.group, nextGroup.substr(0, groupEnd + 1));
+                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(currentLine, g.group, nextGroup.prefix(groupEnd .end()));
                     if(parsed.second) return parsed; /* Error, bubble up */
                     in = parsed.first;
 
                 /* Otherwise call parse() on the next line */
                 } else {
-                    g.name = nextGroup.substr(fullPath.size());
+                    g.name = nextSubGroup;
                     g.group = new ConfigurationGroup(_configuration);
                     /* Add the group before attempting any other parsing, as it
                        could throw an exception and the group would otherwise
                        be leaked */
                     group->_groups.push_back(std::move(g));
-                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, g.group, nextGroup + '/');
+                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, g.group, nextGroup + "/"_s);
                     if(parsed.second) return parsed; /* Error, bubble up */
                     in = parsed.first;
                 }
@@ -232,13 +233,13 @@ std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(C
 
         /* Key/value pair */
         } else {
-            const std::size_t splitter = buffer.find_first_of('=');
-            if(splitter == std::string::npos)
+            const Containers::Array3<Containers::StringView> keyValue = buffer.partition('=');
+            if(!keyValue[1])
                 return {nullptr, "missing equals for a value"};
 
             ConfigurationGroup::Value item;
-            item.key = String::trim(buffer.substr(0, splitter));
-            item.value = String::trim(buffer.substr(splitter+1));
+            item.key = keyValue[0].trimmed();
+            item.value = keyValue[2].trimmed();
 
             /* Start of multi-line value */
             if(item.value == "\"\"\"") {

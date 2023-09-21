@@ -45,7 +45,6 @@ endif()
 if(CORRADE_WITH_UTILITY)
     set(CorradeUtility_SRCS
         Debug.cpp
-        Configuration.cpp
         ConfigurationValue.cpp
         MurmurHash2.cpp
         Sha1.cpp
@@ -80,6 +79,7 @@ if(CORRADE_WITH_UTILITY)
     # CorradeUtility_GracefulAssert_SRCS or CorradeUtility_SRCS below based on
     # whether tests use a different CPU dispatch than the main library.
     set(CorradeUtility_CpuDispatch_SRCS
+        Configuration.cpp
         Path.cpp)
 
     set(CorradeUtility_HEADERS
