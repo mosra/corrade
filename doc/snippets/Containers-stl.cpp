@@ -34,6 +34,7 @@
 #include "Corrade/Containers/PairStl.h"
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/ReferenceStl.h"
 #include "Corrade/Containers/TripleStl.h"
 
@@ -175,6 +176,20 @@ DOXYGEN_ELLIPSIS()
 std::string a = "Hello world!";
 Containers::String b = a.substr(5);
 /* [String] */
+}
+
+{
+/* The includes are already above, so doing it again here should be harmless */
+/* [StringIterable] */
+#include <Corrade/Containers/ArrayViewStl.h>
+#include <Corrade/Containers/StringStl.h>
+
+DOXYGEN_ELLIPSIS()
+
+std::vector<std::string> a{"hello", "world", "!"};
+Containers::StringIterable b = a;
+/* [StringIterable] */
+static_cast<void>(b);
 }
 
 {

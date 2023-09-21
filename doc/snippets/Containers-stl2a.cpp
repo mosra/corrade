@@ -24,10 +24,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string_view>
+
 #include "Corrade/Corrade.h"
 #if __has_include(<span>)
 #include "Corrade/Containers/ArrayViewStlSpan.h"
 #endif
+#include "Corrade/Containers/StringIterable.h"
+#include "Corrade/Containers/StringStlView.h"
 
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
@@ -50,6 +54,20 @@ std::span<float, 3> d = Containers::staticArrayView(c);
 /* [ArrayView] */
 static_cast<void>(b);
 static_cast<void>(d);
+}
+
+{
+/* The includes are already above, so doing it again here should be harmless */
+/* [StringIterable] */
+#include <Corrade/Containers/ArrayViewStlSpan.h>
+#include <Corrade/Containers/StringStlView.h>
+
+DOXYGEN_ELLIPSIS()
+
+std::span<std::string_view> a = DOXYGEN_ELLIPSIS({});
+Containers::StringIterable b = a;
+/* [StringIterable] */
+static_cast<void>(b);
 }
 #endif
 }

@@ -57,6 +57,8 @@ std::string StringConverter<std::string>::to(const String& other) {
     return std::string{other.data(), other.size()};
 }
 
+StringView StringIterableConverter<std::string>::accessor(const void* data, const void*, std::ptrdiff_t, std::size_t) {
+    return *static_cast<const std::string*>(data);
 }
 
-}}
+}}}

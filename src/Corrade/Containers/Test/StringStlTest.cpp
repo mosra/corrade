@@ -24,11 +24,15 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <vector>
 #include <unordered_map>
 
+#include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Containers/StringStlHash.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
@@ -52,6 +56,9 @@ struct StringStlTest: TestSuite::Tester {
     void convertMutableViewFromStlStringEmpty();
 
     template<class T> void hash();
+
+    void iterable();
+    void iterableVector();
 };
 
 StringStlTest::StringStlTest() {
@@ -71,7 +78,10 @@ StringStlTest::StringStlTest() {
 
               &StringStlTest::hash<StringView>,
               &StringStlTest::hash<MutableStringView>,
-              &StringStlTest::hash<String>});
+              &StringStlTest::hash<String>,
+
+              &StringStlTest::iterable,
+              &StringStlTest::iterableVector});
 }
 
 using namespace Literals;
@@ -190,6 +200,26 @@ template<class T> void StringStlTest::hash() {
 
     /* And also non-random and not depending on the data pointer */
     CORRADE_COMPARE(std::hash<T>{}(hello), std::hash<Containers::StringView>{}("hello!"_s.exceptSuffix(1)));
+}
+
+void StringStlTest::iterable() {
+    std::string data[]{"hello", "world", "!"};
+    ArrayView<std::string> a = data;
+
+    StringIterable ai = a;
+    CORRADE_COMPARE_AS(ai, (StringIterable{
+        "hello", "world", "!"
+    }), TestSuite::Compare::Container);
+}
+
+void StringStlTest::iterableVector() {
+    /* What a horrific sight! */
+    std::vector<std::string> a{"hello", "world", "!"};
+
+    StringIterable ai = a;
+    CORRADE_COMPARE_AS(ai, (StringIterable{
+        "hello", "world", "!"
+    }), TestSuite::Compare::Container);
 }
 
 }}}}

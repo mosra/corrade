@@ -43,6 +43,11 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+    template<class> struct ErasedArrayViewConverter;
+    template<class> struct StringIterableConverter;
+}
+
 /**
 @brief Wrapper for any sequential container of strings or string views
 @m_since_latest
@@ -92,6 +97,24 @@ particular @ref isEmpty(), @ref size(), @ref operator[](), @ref front(),
 @ref back() as well as range-for access:
 
 @snippet Containers.cpp StringIterable-usage-implementation
+
+@section Containers-StringIterable-stl STL compatibility
+
+Including @ref Corrade/Containers/StringStl.h will make @ref StringIterable
+accept sequences of @ref std::string instances as well. When combined with
+@ref Corrade/Containers/ArrayViewStl.h, it'll accept also a @ref std::vector or
+@ref std::array of those:
+
+@snippet Containers-stl.cpp StringIterable
+
+On compilers that support C++17, including
+@ref Corrade/Containers/StringStlView.h will make @ref StringIterable accept
+also @ref std::string_view instances; when combined with
+@ref Corrade/Containers/ArrayViewStlSpan.h on compilers supporting C++20
+then also @ref std::string and @ref std::string_view instances contained in a
+@link std::span @endlink:
+
+@snippet Containers-stl2a.cpp StringIterable
 
 @see @ref Iterable
 */
@@ -251,11 +274,14 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         explicit StringIterable(ArrayView<const MutableStringView> view, Implementation::IterableOverloadPriority<1>) noexcept;
         explicit StringIterable(ArrayView<const String> view, Implementation::IterableOverloadPriority<1>) noexcept;
         explicit StringIterable(ArrayView<const char* const> view, Implementation::IterableOverloadPriority<1>) noexcept;
+        template<class T, class = decltype(Implementation::StringIterableConverter<typename std::decay<T>::type>::accessor)> explicit StringIterable(ArrayView<T> view, Implementation::IterableOverloadPriority<1>) noexcept: StringIterable{view.data(), nullptr, view.size(), sizeof(T), Implementation::StringIterableConverter<typename std::decay<T>::type>::accessor} {}
+        template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T>::type>::from(std::declval<T&&>())), class = decltype(Implementation::StringIterableConverter<typename U::Type>::accessor)> explicit StringIterable(T&& view, Implementation::IterableOverloadPriority<1>) noexcept: StringIterable{Implementation::ErasedArrayViewConverter<typename std::decay<T>::type>::from(view)} {}
 
         explicit StringIterable(StridedArrayView1D<const StringView> view, Implementation::IterableOverloadPriority<0>) noexcept;
         explicit StringIterable(StridedArrayView1D<const MutableStringView> view, Implementation::IterableOverloadPriority<0>) noexcept;
         explicit StringIterable(StridedArrayView1D<const String> view, Implementation::IterableOverloadPriority<0>) noexcept;
         explicit StringIterable(StridedArrayView1D<const char* const> view, Implementation::IterableOverloadPriority<0>) noexcept;
+        template<class T, class = decltype(Implementation::StringIterableConverter<typename std::decay<T>::type>::accessor)> explicit StringIterable(StridedArrayView1D<T> view, Implementation::IterableOverloadPriority<0>) noexcept: StringIterable{view.data(), nullptr, view.size(), view.stride(), Implementation::StringIterableConverter<typename std::decay<T>::type>::accessor} {}
 
         const void* _data;
         const void* _context;

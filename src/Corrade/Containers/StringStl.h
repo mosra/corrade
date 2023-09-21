@@ -32,11 +32,14 @@
 
 Including this header allows you to convert a
 @ref Corrade::Containers::String / @ref Corrade::Containers::StringView from
-and to @ref std::string. A separate @ref Corrade/Containers/StringStlView.h
-header provides compatibility with @ref std::string_view from C++17,
-@ref Corrade/Containers/StringStlHash.h then provides a @ref std::hash
-specialization. See @ref Containers-String-stl "String STL compatibility" and
-@ref Containers-BasicStringView-stl "StringView STL compatibility" for more
+and to @ref std::string, and to have sequences of @ref std::string convertible
+to a @ref Corrade::Containers::StringIterable. A separate
+@ref Corrade/Containers/StringStlView.h header provides compatibility with
+@ref std::string_view from C++17, @ref Corrade/Containers/StringStlHash.h then
+provides a @ref std::hash specialization. See
+@ref Containers-String-stl "String STL compatibility" and
+@ref Containers-BasicStringView-stl "StringView STL compatibility" and
+@ref Containers-StringIterable-stl "StringIterable STL compatibility" for more
 information.
 */
 
@@ -66,6 +69,11 @@ template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<const char, std::st
 template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<char, std::string> {
     static MutableStringView from(std::string& other);
     static std::string to(MutableStringView other);
+};
+
+template<class> struct StringIterableConverter;
+template<> struct CORRADE_UTILITY_EXPORT StringIterableConverter<std::string> {
+    static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t);
 };
 
 }}}

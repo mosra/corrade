@@ -24,8 +24,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <vector>
+
+#include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/StringStlView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStlStringView.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -46,6 +50,9 @@ struct StringStlViewTest: TestSuite::Tester {
     void convertViewFromStlStringViewEmpty();
 
     void convertMutableViewFromStlStringView();
+
+    void iterable();
+    void iterableVector();
 };
 
 StringStlViewTest::StringStlViewTest() {
@@ -61,7 +68,10 @@ StringStlViewTest::StringStlViewTest() {
               &StringStlViewTest::convertViewFromStlStringView,
               &StringStlViewTest::convertViewFromStlStringViewEmpty,
 
-              &StringStlViewTest::convertMutableViewFromStlStringView});
+              &StringStlViewTest::convertMutableViewFromStlStringView,
+
+              &StringStlViewTest::iterable,
+              &StringStlViewTest::iterableVector});
 }
 
 using namespace Literals;
@@ -141,6 +151,26 @@ void StringStlViewTest::convertMutableViewFromStlStringView() {
        is_convertible to catch also accidental explicit conversions. */
     CORRADE_VERIFY(std::is_constructible<StringView, std::string_view>::value);
     CORRADE_VERIFY(!std::is_constructible<MutableStringView, std::string_view>::value);
+}
+
+void StringStlViewTest::iterable() {
+    std::string_view data[]{"hello", "world", "!"};
+    ArrayView<std::string_view> a = data;
+
+    StringIterable ai = a;
+    CORRADE_COMPARE_AS(ai, (StringIterable{
+        "hello", "world", "!"
+    }), TestSuite::Compare::Container);
+}
+
+void StringStlViewTest::iterableVector() {
+    /* Slightly better but still awful! */
+    std::vector<std::string_view> a{"hello", "world", "!"};
+
+    StringIterable ai = a;
+    CORRADE_COMPARE_AS(ai, (StringIterable{
+        "hello", "world", "!"
+    }), TestSuite::Compare::Container);
 }
 
 }}}}

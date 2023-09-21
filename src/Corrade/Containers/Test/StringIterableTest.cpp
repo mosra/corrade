@@ -41,7 +41,44 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct StrView {
+    StrView(const char* data = nullptr, std::size_t size = 0): data{data}, size{size} {}
+
+    const char* data;
+    std::size_t size;
+};
+
+struct StrViewView {
+    StrViewView(StrView* data, std::size_t size) :data{data}, size{size} {}
+
+    StrView* data;
+    std::size_t size;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct StringIterableConverter<StrView> {
+    static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t) {
+        const StrView& str = *static_cast<const StrView*>(data);
+        return StringView{str.data, str.size};
+    }
+};
+
+template<> struct ErasedArrayViewConverter<StrViewView> {
+    static ArrayView<StrView> from(StrViewView other) {
+        return {other.data, other.size};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct StringIterableTest: TestSuite::Tester {
     explicit StringIterableTest();
@@ -53,10 +90,13 @@ struct StringIterableTest: TestSuite::Tester {
     template<class T> void arrayView();
     void arrayViewCharArray();
     template<class T> void arrayViewMutable();
+    void arrayViewFromExternal();
+    void externalArrayViewFromExternal();
 
     template<class T> void stridedArrayView();
     void stridedArrayViewCharArray();
     template<class T> void stridedArrayViewMutable();
+    void stridedArrayViewFromExternal();
 
     void initializerList();
     void cArray();
@@ -97,12 +137,15 @@ StringIterableTest::StringIterableTest() {
               &StringIterableTest::arrayViewCharArray,
               &StringIterableTest::arrayViewMutable<MutableStringView>,
               &StringIterableTest::arrayViewMutable<char*>,
+              &StringIterableTest::arrayViewFromExternal,
+              &StringIterableTest::externalArrayViewFromExternal,
 
               &StringIterableTest::stridedArrayView<String>,
               &StringIterableTest::stridedArrayView<StringView>,
               &StringIterableTest::stridedArrayViewCharArray,
               &StringIterableTest::stridedArrayViewMutable<MutableStringView>,
               &StringIterableTest::stridedArrayViewMutable<char*>,
+              &StringIterableTest::stridedArrayViewFromExternal,
 
               &StringIterableTest::initializerList,
               &StringIterableTest::cArray,
@@ -240,6 +283,40 @@ template<class T> void StringIterableTest::arrayViewMutable() {
     CORRADE_COMPARE(ai[2], "!");
 }
 
+void StringIterableTest::arrayViewFromExternal() {
+    /* The ?!s are not included */
+    StrView data[]{{"hello?", 5}, {"yes!", 3}, {"worlds", 6}};
+    ArrayView<StrView> a = data;
+
+    StringIterable ai = a;
+    CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
+    CORRADE_COMPARE(ai.context(), nullptr);
+    CORRADE_COMPARE(ai.size(), 3);
+    CORRADE_COMPARE(ai.stride(), sizeof(StrView));
+    CORRADE_VERIFY(!ai.isEmpty());
+
+    CORRADE_COMPARE(ai[0], "hello");
+    CORRADE_COMPARE(ai[1], "yes");
+    CORRADE_COMPARE(ai[2], "worlds");
+}
+
+void StringIterableTest::externalArrayViewFromExternal() {
+    /* The ?!s are not included */
+    StrView data[]{{"hello?", 5}, {"yes!", 3}, {"worlds", 6}};
+    StrViewView a{data, 3};
+
+    StringIterable ai = a;
+    CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
+    CORRADE_COMPARE(ai.context(), nullptr);
+    CORRADE_COMPARE(ai.size(), 3);
+    CORRADE_COMPARE(ai.stride(), sizeof(StrView));
+    CORRADE_VERIFY(!ai.isEmpty());
+
+    CORRADE_COMPARE(ai[0], "hello");
+    CORRADE_COMPARE(ai[1], "yes");
+    CORRADE_COMPARE(ai[2], "worlds");
+}
+
 template<class T> void StringIterableTest::stridedArrayView() {
     setTestCaseTemplateName(NameTraits<T>::name());
 
@@ -294,6 +371,23 @@ template<class T> void StringIterableTest::stridedArrayViewMutable() {
     CORRADE_COMPARE(ai[0], "hello");
     CORRADE_COMPARE(ai[1], "world");
     CORRADE_COMPARE(ai[2], "!");
+}
+
+void StringIterableTest::stridedArrayViewFromExternal() {
+    /* The ?!s are not included */
+    StrView data[]{{"hello?", 5}, {"yes!", 3}, {"worlds", 6}};
+    StridedArrayView1D<StrView> a = data;
+
+    StringIterable ai = a.flipped<0>();
+    CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
+    CORRADE_COMPARE(ai.context(), nullptr);
+    CORRADE_COMPARE(ai.size(), 3);
+    CORRADE_COMPARE(ai.stride(), -sizeof(StrView));
+    CORRADE_VERIFY(!ai.isEmpty());
+
+    CORRADE_COMPARE(ai[0], "worlds");
+    CORRADE_COMPARE(ai[1], "yes");
+    CORRADE_COMPARE(ai[2], "hello");
 }
 
 void StringIterableTest::initializerList() {
