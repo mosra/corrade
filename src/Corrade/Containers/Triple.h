@@ -125,7 +125,7 @@ template<class F, class S, class T> class Triple {
          * @brief Construct a value-initialized triple
          *
          * Trivial types are zero-initialized, default constructor called
-         * otherwise. This is the same as @ref Triple().
+         * otherwise. This is the same as the default constructor.
          * @see @ref ValueInit, @ref Triple(DefaultInitT)
          */
         constexpr explicit Triple(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value):

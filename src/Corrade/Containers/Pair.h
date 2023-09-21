@@ -125,7 +125,7 @@ template<class F, class S> class Pair {
          * @brief Construct a value-initialized pair
          *
          * Trivial types are zero-initialized, default constructor called
-         * otherwise. This is the same as @ref Pair().
+         * otherwise. This is the same as the default constructor.
          * @see @ref ValueInit, @ref Pair(DefaultInitT)
          */
         constexpr explicit Pair(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value):
