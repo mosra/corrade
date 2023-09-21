@@ -39,6 +39,7 @@
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StringIterable.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
@@ -748,18 +749,17 @@ void Tester::printFileLineInfo(Debug& out, std::size_t line) {
     #endif
 
     /* If we have checks annotated with an iteration macro, print those. These
-       are linked in reverse order so we have to reverse the vector before
+       are linked in reverse order so we have to reverse the array before
        printing. */
     if(_state->iterationPrinter) {
-        /** @todo remove std::string once Debug doesn't rely on streams;
-            remove std::vector once we can use StringView::join() or when
-            StringIterable can work with std::string */
-        std::vector<std::string> iterations;
+        /** @todo remove std::string once Debug doesn't rely on streams */
+        Containers::Array<std::string> iterations;
         for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_parent) {
-            iterations.push_back(iterationPrinter->_data->out.str());
+            arrayAppend(iterations, iterationPrinter->_data->out.str());
         }
+        /** @todo could also use a flipped StridedArrayView here instead */
         std::reverse(iterations.begin(), iterations.end());
-        out << "(iteration" << Utility::String::join(iterations, ", ") << Debug::nospace << ")";
+        out << "(iteration" << ", "_s.join(arrayView(iterations)) << Debug::nospace << ")";
     }
 
     out << Debug::newline;
