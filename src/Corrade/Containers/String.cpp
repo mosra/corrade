@@ -691,6 +691,22 @@ Array3<StringView> String::partition(const StringView separator) const {
     return StringView{*this}.partition(separator);
 }
 
+Array3<MutableStringView> String::partitionLast(const char separator) {
+    return MutableStringView{*this}.partitionLast(separator);
+}
+
+Array3<StringView> String::partitionLast(const char separator) const {
+    return StringView{*this}.partitionLast(separator);
+}
+
+Array3<MutableStringView> String::partitionLast(const StringView separator) {
+    return MutableStringView{*this}.partitionLast(separator);
+}
+
+Array3<StringView> String::partitionLast(const StringView separator) const {
+    return StringView{*this}.partitionLast(separator);
+}
+
 String String::join(const StringIterable& strings) const {
     return StringView{*this}.join(strings);
 }

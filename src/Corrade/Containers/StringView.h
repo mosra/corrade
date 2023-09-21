@@ -846,7 +846,7 @@ BasicStringView {
          * @ref flags() as appropriate. Additionally, the resulting views are
          * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
          * the view always points to existing memory.
-         * @see @ref split(char) const
+         * @see @ref partitionLast(char) const, @ref split(char) const
          */
         Array3<BasicStringView<T>> partition(char separator) const;
 
@@ -855,9 +855,36 @@ BasicStringView {
          *
          * Like @ref partition(char) const, but looks for a whole substring
          * instead of a single character.
-         * @see @ref split(StringView) const
+         * @see @ref partitionLast(StringView) const,
+         *      @ref split(StringView) const
          */
         Array3<BasicStringView<T>> partition(StringView separator) const;
+
+        /**
+         * @brief Partition on a last occurence of a character
+         *
+         * Equivalent to Python's @m_class{m-doc-external} [str.rpartition()](https://docs.python.org/3/library/stdtypes.html#str.rpartition).
+         * Splits @p string at the last occurrence of @p separator. First
+         * returned value is the part before the separator, second the
+         * separator, third a part after the separator. If the separator is not
+         * found, returns two empty strings followed by the input string.
+         *
+         * The function uses @ref slice() internally, meaning it propagates the
+         * @ref flags() as appropriate. Additionally, the resulting views are
+         * @cpp nullptr @ce only if the input is @cpp nullptr @ce, otherwise
+         * the view always points to existing memory.
+         * @see @ref partition(char) const, @ref split(char) const
+         */
+        Array3<BasicStringView<T>> partitionLast(char separator) const;
+
+        /**
+         * @brief Partition on a last occurence of a substring
+         *
+         * Like @ref partitionLast(char) const, but looks for a whole substring
+         * instead of a single character.
+         * @see @ref partition(StringView) const, @ref split(StringView) const
+         */
+        Array3<BasicStringView<T>> partitionLast(StringView separator) const;
 
         /** @todo change these to return a Triple? it's a smaller header */
 

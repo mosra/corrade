@@ -2197,19 +2197,28 @@ void StringTest::partitionCharacter() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    const String ca = "ab=c";
+    const String ca = "ab=c=d";
     {
-        Array3<StringView> p = ca.partition('=');
-        CORRADE_COMPARE_AS(p, (StringIterable{"ab", "=", "c"}),
+        Array3<StringView> p1 = ca.partition('=');
+        Array3<StringView> p2 = ca.partitionLast('=');
+        CORRADE_COMPARE_AS(p1, (StringIterable{"ab", "=", "c=d"}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(p[0].flags(), StringViewFlags{});
-        CORRADE_COMPARE(p[1].flags(), StringViewFlags{});
-        CORRADE_COMPARE(p[2].flags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(p2, (StringIterable{"ab=c", "=", "d"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(p1[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p2[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p1[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p2[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p1[2].flags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(p2[2].flags(), StringViewFlag::NullTerminated);
     }
 
-    String a = "ab=c";
+    String a = "ab=c=d";
     CORRADE_COMPARE_AS(a.partition('='),
-        (StringIterable{"ab", "=", "c"}),
+        (StringIterable{"ab", "=", "c=d"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(a.partitionLast('='),
+        (StringIterable{"ab=c", "=", "d"}),
         TestSuite::Compare::Container);
 }
 
@@ -2217,19 +2226,28 @@ void StringTest::partitionString() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    const String ca = "ab::c";
+    const String ca = "ab::c::d";
     {
-        Array3<StringView> p = ca.partition("::");
-        CORRADE_COMPARE_AS(p, (StringIterable{"ab", "::", "c"}),
+        Array3<StringView> p1 = ca.partition("::");
+        Array3<StringView> p2 = ca.partitionLast("::");
+        CORRADE_COMPARE_AS(p1, (StringIterable{"ab", "::", "c::d"}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(p[0].flags(), StringViewFlags{});
-        CORRADE_COMPARE(p[1].flags(), StringViewFlags{});
-        CORRADE_COMPARE(p[2].flags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(p2, (StringIterable{"ab::c", "::", "d"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(p1[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p2[0].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p1[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p2[1].flags(), StringViewFlags{});
+        CORRADE_COMPARE(p1[2].flags(), StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(p2[2].flags(), StringViewFlag::NullTerminated);
     }
 
-    String a = "ab::c";
+    String a = "ab::c::d";
     CORRADE_COMPARE_AS(a.partition("::"),
-        (StringIterable{"ab", "::", "c"}),
+        (StringIterable{"ab", "::", "c::d"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(a.partitionLast("::"),
+        (StringIterable{"ab::c", "::", "d"}),
         TestSuite::Compare::Container);
 }
 

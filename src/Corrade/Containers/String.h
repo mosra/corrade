@@ -1020,7 +1020,7 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
-         * @brief Partition
+         * @brief Partition on a character
          *
          * Equivalent to @ref BasicStringView::partition(char) const. The last
          * returned value has always @ref StringViewFlag::NullTerminated set.
@@ -1029,7 +1029,7 @@ class CORRADE_UTILITY_EXPORT String {
         Array3<StringView> partition(char separator) const; /**< @overload */
 
         /**
-         * @brief Partition
+         * @brief Partition on a substring
          *
          * Equivalent to @ref BasicStringView::partition(StringView) const. The
          * last returned value has always @ref StringViewFlag::NullTerminated
@@ -1037,6 +1037,25 @@ class CORRADE_UTILITY_EXPORT String {
          */
         Array3<MutableStringView> partition(StringView separator);
         Array3<StringView> partition(StringView separator) const; /**< @overload */
+
+        /**
+         * @brief Partition on a last occurence of a character
+         *
+         * Equivalent to @ref BasicStringView::partition(char) const. The last
+         * returned value has always @ref StringViewFlag::NullTerminated set.
+         */
+        Array3<MutableStringView> partitionLast(char separator);
+        Array3<StringView> partitionLast(char separator) const; /**< @overload */
+
+        /**
+         * @brief Partition on a last occurence of a substring
+         *
+         * Equivalent to @ref BasicStringView::partition(StringView) const. The
+         * last returned value has always @ref StringViewFlag::NullTerminated
+         * set.
+         */
+        Array3<MutableStringView> partitionLast(StringView separator);
+        Array3<StringView> partitionLast(StringView separator) const; /**< @overload */
 
         /** @todo change these to return a Triple? it's a smaller header */
 

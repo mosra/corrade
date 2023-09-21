@@ -1468,9 +1468,15 @@ void StringViewTest::partitionCharacter() {
     CORRADE_COMPARE_AS(""_s.partition('='),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(""_s.partitionLast('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
 
     /* Happy case */
     CORRADE_COMPARE_AS("ab=c"_s.partition('='),
+        (Array3<StringView>{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab=c"_s.partitionLast('='),
         (Array3<StringView>{"ab", "=", "c"}),
         TestSuite::Compare::Container);
 
@@ -1478,10 +1484,16 @@ void StringViewTest::partitionCharacter() {
     CORRADE_COMPARE_AS("ab=c=d"_s.partition('='),
         (Array3<StringView>{"ab", "=", "c=d"}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab=c=d"_s.partitionLast('='),
+        (Array3<StringView>{"ab=c", "=", "d"}),
+        TestSuite::Compare::Container);
 
     /* Not found */
     CORRADE_COMPARE_AS("abc"_s.partition('='),
         (Array3<StringView>{"abc", "", ""}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("abc"_s.partitionLast('='),
+        (Array3<StringView>{"", "", "abc"}),
         TestSuite::Compare::Container);
 }
 
@@ -1490,9 +1502,15 @@ void StringViewTest::partitionString() {
     CORRADE_COMPARE_AS("abc"_s.partition(""),
         (Array3<StringView>{"", "", "abc"}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("abc"_s.partitionLast(""),
+        (Array3<StringView>{"abc", "", ""}),
+        TestSuite::Compare::Container);
 
     /* Empty string */
     CORRADE_COMPARE_AS(""_s.partition("::"),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(""_s.partitionLast("::"),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
 
@@ -1500,15 +1518,24 @@ void StringViewTest::partitionString() {
     CORRADE_COMPARE_AS("ab::c"_s.partition("::"),
         (Array3<StringView>{"ab", "::", "c"}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab::c"_s.partitionLast("::"),
+        (Array3<StringView>{"ab", "::", "c"}),
+        TestSuite::Compare::Container);
 
     /* Two occurrences */
     CORRADE_COMPARE_AS("ab::c::d"_s.partition("::"),
         (Array3<StringView>{"ab", "::", "c::d"}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("ab::c::d"_s.partitionLast("::"),
+        (Array3<StringView>{"ab::c", "::", "d"}),
+        TestSuite::Compare::Container);
 
     /* Not found */
     CORRADE_COMPARE_AS("abc"_s.partition("::"),
         (Array3<StringView>{"abc", "", ""}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS("abc"_s.partitionLast("::"),
+        (Array3<StringView>{"", "", "abc"}),
         TestSuite::Compare::Container);
 }
 
@@ -1518,48 +1545,78 @@ void StringViewTest::partitionFlagsCharacter() {
 
     /* Usual case -- all global, only the last null-terminated */
     {
-        Array3<StringView> a = "ab=c"_s.partition('=');
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "=", "c"}),
+        Array3<StringView> a1 = "ab=c"_s.partition('=');
+        Array3<StringView> a2 = "ab=c"_s.partitionLast('=');
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "=", "c"}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "=", "c"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Found at the end -- last two null-terminated */
     } {
-        Array3<StringView> a = "ab="_s.partition('=');
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "=", ""}),
+        Array3<StringView> a1 = "ab="_s.partition('=');
+        Array3<StringView> a2 = "ab="_s.partitionLast('=');
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "=", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "=", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found -- all three null-terminated */
     } {
-        Array3<StringView> a = "ab"_s.partition('=');
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "", ""}),
+        Array3<StringView> a1 = "ab"_s.partition('=');
+        Array3<StringView> a2 = "ab"_s.partitionLast('=');
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", "ab"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Empty -- all three null-terminated as well */
     } {
-        Array3<StringView> a = ""_s.partition('=');
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+        Array3<StringView> a1 = ""_s.partition('=');
+        Array3<StringView> a2 = ""_s.partitionLast('=');
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
-        Array3<StringView> a = StringView{nullptr}.partition('=');
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+        Array3<StringView> a1 = StringView{nullptr}.partition('=');
+        Array3<StringView> a2 = StringView{nullptr}.partitionLast('=');
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global);
     }
 }
 
@@ -1569,48 +1626,78 @@ void StringViewTest::partitionFlagsString() {
 
     /* Usual case -- all global, only the last null-terminated */
     {
-        Array3<StringView> a = "ab::c"_s.partition("::");
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "::", "c"}),
+        Array3<StringView> a1 = "ab::c"_s.partition("::");
+        Array3<StringView> a2 = "ab::c"_s.partitionLast("::");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "::", "c"}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "::", "c"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Found at the end -- last two null-terminated */
     } {
-        Array3<StringView> a = "ab::"_s.partition("::");
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "::", ""}),
+        Array3<StringView> a1 = "ab::"_s.partition("::");
+        Array3<StringView> a2 = "ab::"_s.partitionLast("::");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "::", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "::", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found -- all three null-terminated */
     } {
-        Array3<StringView> a = "ab"_s.partition("::");
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"ab", "", ""}),
+        Array3<StringView> a1 = "ab"_s.partition("::");
+        Array3<StringView> a2 = "ab"_s.partitionLast("::");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", "ab"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Empty -- all three null-terminated as well */
     } {
-        Array3<StringView> a = ""_s.partition("::");
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+        Array3<StringView> a1 = ""_s.partition("::");
+        Array3<StringView> a2 = ""_s.partitionLast("::");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
-        Array3<StringView> a = StringView{nullptr}.partition("::");
-        CORRADE_COMPARE_AS(a, (Array3<StringView>{"", "", ""}),
+        Array3<StringView> a1 = StringView{nullptr}.partition("::");
+        Array3<StringView> a2 = StringView{nullptr}.partitionLast("::");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a[2].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global);
     }
 }
 
@@ -1619,14 +1706,24 @@ void StringViewTest::partitionNullViewCharacter() {
     CORRADE_COMPARE_AS(""_s.partition('='),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(""_s.partitionLast('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
     for(StringView a: ""_s.partition('='))
+        CORRADE_VERIFY(a.data());
+    for(StringView a: ""_s.partitionLast('='))
         CORRADE_VERIFY(a.data());
 
     /* Nullptr string -- all are null */
     CORRADE_COMPARE_AS(StringView{}.partition('='),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(StringView{}.partitionLast('='),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
     for(StringView a: StringView{}.partition('='))
+        CORRADE_VERIFY(!a.data());
+    for(StringView a: StringView{}.partitionLast('='))
         CORRADE_VERIFY(!a.data());
 }
 
@@ -1635,14 +1732,24 @@ void StringViewTest::partitionNullViewString() {
     CORRADE_COMPARE_AS(""_s.partition("::"),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(""_s.partitionLast("::"),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
     for(StringView a: ""_s.partition("::"))
+        CORRADE_VERIFY(a.data());
+    for(StringView a: ""_s.partitionLast("::"))
         CORRADE_VERIFY(a.data());
 
     /* Nullptr string -- all are null */
     CORRADE_COMPARE_AS(StringView{}.partition("::"),
         (Array3<StringView>{"", "", ""}),
         TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(StringView{}.partitionLast("::"),
+        (Array3<StringView>{"", "", ""}),
+        TestSuite::Compare::Container);
     for(StringView a: StringView{}.partition("::"))
+        CORRADE_VERIFY(!a.data());
+    for(StringView a: StringView{}.partitionLast("::"))
         CORRADE_VERIFY(!a.data());
 }
 
