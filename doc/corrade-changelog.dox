@@ -890,16 +890,20 @@ namespace Corrade {
 -   As part of the ongoing STL usage cleanup,
     @ref Utility::TweakableParser is now expected to return a
     @ref Containers::Pair instead of @ref std::pair
--   With the ongoing process to make the APIs less STL dependent,
-    @ref Utility::Unicode::narrow() and @relativeref{Utility::Unicode,widen()}
-    variants taking a view or a char pointer now return either a
-    @ref Containers::String or a @ref Containers::Array "Containers::Array<wchar_t>"
-    instead of @ref std::string or @ref std::wstring.
+-   As part of the ongoing STL usage cleanup, the @ref Utility::Unicode
+    namespace now uses @ref Containers::Pair and @ref Containers::StringView,
+    all uses of @ref std::pair and @ref std::string were removed. The
+    @ref Utility::Unicode::utf32() API now returns a
+    @ref Containers::Array "Containers::Array<char32_t>" wrapped in a
+    @ref Containers::Optional. @ref Utility::Unicode::narrow() and
+    @relativeref{Utility::Unicode,widen()} variants taking a view or a char
+    pointer now return either a @ref Containers::String or a
+    @ref Containers::Array "Containers::Array<wchar_t>" instead of
+    @ref std::string or @ref std::wstring. @ref Corrade/Containers/PairStl.h
+    is included for implicit conversions to a @ref std::pair and
     @ref Corrade/Containers/StringStl.h is included for implicit conversions
-    from/to a @ref std::string, but there's no implicit conversion for the
-    @ref std::wstring side. The overloads taking a @ref std::string /
-    @ref std::wstring are kept, use them explicitly if you want to have a STL
-    type returned as well.
+    from/to a @ref std::string, but there's no implicit conversion for
+    @ref std::wstring or @ref std::u32string.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

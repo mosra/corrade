@@ -27,22 +27,24 @@
 #include "Unicode.h"
 
 #include <cstdint>
-#include <string>
 
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StringView.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <windows.h>
 
-#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/String.h"
 #endif
 
 namespace Corrade { namespace Utility { namespace Unicode {
 
-std::pair<char32_t, std::size_t> nextChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
+Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView text, const std::size_t cursor) {
     CORRADE_ASSERT(cursor < text.size(),
         "Utility::Unicode::nextChar(): cursor out of range", {});
 
@@ -86,11 +88,7 @@ std::pair<char32_t, std::size_t> nextChar(const Containers::ArrayView<const char
     return {result, end};
 }
 
-std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
-    return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-}
-
-std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
+Containers::Pair<char32_t, std::size_t> prevChar(const Containers::StringView text, const std::size_t cursor) {
     CORRADE_ASSERT(cursor > 0,
         "Utility::Unicode::prevChar(): cursor already at the beginning", {});
 
@@ -130,11 +128,7 @@ std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char
     return {result, begin};
 }
 
-std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
-    return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-}
-
-std::size_t utf8(const char32_t character, const Containers::StaticArrayView<4, char> result) {
+std::size_t utf8(const char32_t character, const Containers::ArrayView4<char> result) {
     if(character < U'\x00000080') {
         result[0] = 0x00 | ((character >>  0) & 0x7f);
         return 1;
@@ -165,17 +159,20 @@ std::size_t utf8(const char32_t character, const Containers::StaticArrayView<4, 
     return 0;
 }
 
-std::u32string utf32(const std::string& text) {
-    std::u32string result;
-    result.reserve(text.size());
+Containers::Optional<Containers::Array<char32_t>> utf32(const Containers::StringView text) {
+    Containers::Array<char32_t> result;
+    arrayReserve(result, text.size());
 
     for(std::size_t i = 0; i != text.size(); ) {
-        const std::pair<char32_t, std::size_t> next = Utility::Unicode::nextChar(text, i);
-        result.push_back(next.first);
-        i = next.second;
+        const Containers::Pair<char32_t, std::size_t> next = nextChar(text, i);
+        if(next.first() == U'\xffffffff')
+            return {};
+        arrayAppend(result, next.first());
+        i = next.second();
     }
 
-    return result;
+    /* GCC 4.8 needs extra help here */
+    return Containers::optional(Utility::move(result));
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -217,24 +214,8 @@ Containers::Array<wchar_t> widen(const Containers::StringView text) {
     return Implementation::widen(text.data(), text.size());
 }
 
-std::wstring widen(const std::string& text) {
-    /* Yes, this is nasty as it makes an extra copy. You're suffering by using
-       a std::string already anyway, so this won't hurt that much extra. Plus
-       you've most probably made another allocation just by passing the text
-       in. Haha. */
-    const Containers::Array<wchar_t> widened = Implementation::widen(text.data(), text.size());
-    return {widened.begin(), widened.end()};
-}
-
 Containers::String narrow(const Containers::ArrayView<const wchar_t> text) {
     return Implementation::narrow(text.data(), text.size());
-}
-
-std::string narrow(const std::wstring& text) {
-    /* Yes, this is nasty as it makes an extra copy. You're suffering by using
-       a std::string already anyway, so this won't hurt that much extra. */
-    const Containers::String narrowed = Implementation::narrow(text.data(), text.size());
-    return {narrowed.begin(), narrowed.end()};
 }
 #endif
 

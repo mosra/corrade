@@ -25,16 +25,17 @@
 */
 
 #include <sstream>
-#include <string>
 
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StringView.h"
-#include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Unicode.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
-#include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #endif
 
@@ -58,10 +59,8 @@ struct UnicodeTest: TestSuite::Tester {
     #ifdef CORRADE_TARGET_WINDOWS
     void widen();
     void widenEmpty();
-    void widenStl();
     void narrow();
     void narrowEmpty();
-    void narrowStl();
     #endif
 };
 
@@ -81,10 +80,8 @@ UnicodeTest::UnicodeTest() {
               #ifdef CORRADE_TARGET_WINDOWS
               &UnicodeTest::widen,
               &UnicodeTest::widenEmpty,
-              &UnicodeTest::widenStl,
               &UnicodeTest::narrow,
               &UnicodeTest::narrowEmpty,
-              &UnicodeTest::narrowStl
               #endif
               });
 }
@@ -93,31 +90,34 @@ using namespace Containers::Literals;
 
 void UnicodeTest::nextUtf8() {
     /* One-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \x7f", 3), std::make_pair(127, 4));
+    CORRADE_COMPARE(Unicode::nextChar("   \x7f", 3),
+        (Containers::Pair<char32_t, std::size_t>{127, 4}));
 
     /* Two byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xce\xac", 3), std::make_pair(940, 5));
+    CORRADE_COMPARE(Unicode::nextChar("   \xce\xac", 3),
+        (Containers::Pair<char32_t, std::size_t>{940, 5}));
 
     /* Three-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xea\xb8\x89", 3), std::make_pair(44553, 6));
+    CORRADE_COMPARE(Unicode::nextChar("   \xea\xb8\x89", 3),
+        (Containers::Pair<char32_t, std::size_t>{44553, 6}));
 
     /* Four-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80", 3), std::make_pair(1070592, 7));
-
-    /* std::string argument */
-    CORRADE_COMPARE(Unicode::nextChar(std::string{"   \xea\xb8\x89"}, 3),
-        std::make_pair(44553, 6));
+    CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80", 3),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 7}));
 }
 
 void UnicodeTest::nextUtf8Error() {
     /* Wrong start of a sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xb0", 3), std::make_pair(0xffffffffu, 4));
+    CORRADE_COMPARE(Unicode::nextChar("   \xb0", 3),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 
     /* Garbage in multibyte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xea\x40\xb8", 3), std::make_pair(0xffffffffu, 4));
+    CORRADE_COMPARE(Unicode::nextChar("   \xea\x40\xb8", 3),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 
     /* Too small string for mulibyte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xce", 3), std::make_pair(0xffffffffu, 4));
+    CORRADE_COMPARE(Unicode::nextChar("   \xce", 3),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 }
 
 void UnicodeTest::nextUtf8Empty() {
@@ -126,49 +126,55 @@ void UnicodeTest::nextUtf8Empty() {
     std::ostringstream out;
     Error redirectError{&out};
     Unicode::nextChar("", 0);
-
     CORRADE_COMPARE(out.str(), "Utility::Unicode::nextChar(): cursor out of range\n");
 }
 
 void UnicodeTest::prevUtf8() {
     /* One-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x7f", 4), std::make_pair(127, 3));
+    CORRADE_COMPARE(Unicode::prevChar("   \x7f", 4),
+        (Containers::Pair<char32_t, std::size_t>{127, 3}));
 
     /* Two byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac", 5), std::make_pair(940, 3));
+    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac", 5),
+        (Containers::Pair<char32_t, std::size_t>{940, 3}));
 
     /* Three-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89", 6), std::make_pair(44553, 3));
+    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89", 6),
+        (Containers::Pair<char32_t, std::size_t>{44553, 3}));
 
     /* Four-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80", 7), std::make_pair(1070592, 3));
-
-    /* std::string argument */
-    CORRADE_COMPARE(Unicode::prevChar(std::string{"   \xea\xb8\x89"}, 6),
-        std::make_pair(44553, 3));
+    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80", 7),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 3}));
 }
 
 void UnicodeTest::prevUtf8Error() {
     /* Wrong start of a sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xb0", 4), std::make_pair(0xffffffffu, 3));
+    CORRADE_COMPARE(Unicode::prevChar("   \xb0", 4),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 3}));
 
     /* Garbage in two-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x40\xac", 5), std::make_pair(0xffffffffu, 4));
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\xac", 5),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 
     /* Garbage in three-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x40\xb8\xb8", 6), std::make_pair(0xffffffffu, 5));
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\xb8\xb8", 6),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 5}));
 
     /* Garbage in four-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x40\x85\x98\x80", 7), std::make_pair(0xffffffffu, 6));
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\x85\x98\x80", 7),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 6}));
 
     /* Too small string for two-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("\xac", 1), std::make_pair(0xffffffffu, 0));
+    CORRADE_COMPARE(Unicode::prevChar("\xac", 1),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 0}));
 
     /* Too small string for three-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("\xb8\x89", 2), std::make_pair(0xffffffffu, 1));
+    CORRADE_COMPARE(Unicode::prevChar("\xb8\x89", 2),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 1}));
 
     /* Too small string for four-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("\x85\x98\x80", 3), std::make_pair(0xffffffffu, 2));
+    CORRADE_COMPARE(Unicode::prevChar("\x85\x98\x80", 3),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 2}));
 }
 
 void UnicodeTest::prevUtf8Empty() {
@@ -177,16 +183,30 @@ void UnicodeTest::prevUtf8Empty() {
     std::ostringstream out;
     Error redirectError{&out};
     Unicode::prevChar("hello", 0);
-
     CORRADE_COMPARE(out.str(), "Utility::Unicode::prevChar(): cursor already at the beginning\n");
 }
 
 void UnicodeTest::utf8utf32() {
-    CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
-                    U"\U0000017elu\U00000165ou\U0000010dk\U000000fd k\U0000016f\U00000148");
+    {
+        Containers::Optional<Containers::Array<char32_t>> utf32 = Unicode::utf32("žluťoučký kůň");
+        CORRADE_VERIFY(utf32);
+        CORRADE_COMPARE_AS(*utf32,
+            Containers::arrayView(U"\U0000017elu\U00000165ou\U0000010dk\U000000fd k\U0000016f\U00000148").exceptSuffix(1),
+            TestSuite::Compare::Container);
+
+    /* Invalid characters return a null Optional */
+    } {
+        Containers::Optional<Containers::Array<char32_t>> utf32 = Unicode::utf32("he\xff\xffo");
+        CORRADE_VERIFY(!utf32);
 
     /* Empty string shouldn't crash */
-    CORRADE_COMPARE(Unicode::utf32(""), U"");
+    } {
+        Containers::Optional<Containers::Array<char32_t>> utf32 = Unicode::utf32("");
+        CORRADE_VERIFY(utf32);
+        CORRADE_COMPARE_AS(*utf32,
+            Containers::ArrayView<const char32_t>{},
+            TestSuite::Compare::Container);
+    }
 }
 
 void UnicodeTest::utf32utf8() {
@@ -196,22 +216,22 @@ void UnicodeTest::utf32utf8() {
     /* One-byte sequence */
     size = Unicode::utf8(127, result);
     CORRADE_COMPARE(size, 1);
-    CORRADE_COMPARE((std::string{result, size}), "\x7f");
+    CORRADE_COMPARE((Containers::StringView{result, size}), "\x7f");
 
     /* Two-byte sequence */
     size = Unicode::utf8(940, result);
     CORRADE_COMPARE(size, 2);
-    CORRADE_COMPARE((std::string{result, size}), "\xce\xac");
+    CORRADE_COMPARE((Containers::StringView{result, size}), "\xce\xac");
 
     /* Three-byte sequence */
     size = Unicode::utf8(44553, result);
     CORRADE_COMPARE(size, 3);
-    CORRADE_COMPARE((std::string{result, size}), "\xea\xb8\x89");
+    CORRADE_COMPARE((Containers::StringView{result, size}), "\xea\xb8\x89");
 
     /* Four-byte sequence */
     size = Unicode::utf8(1070592, result);
     CORRADE_COMPARE(size, 4);
-    CORRADE_COMPARE((std::string{result, size}), "\xf4\x85\x98\x80");
+    CORRADE_COMPARE((Containers::StringView{result, size}), "\xf4\x85\x98\x80");
 }
 
 void UnicodeTest::utf32utf8Error() {
@@ -265,12 +285,6 @@ void UnicodeTest::widenEmpty() {
     CORRADE_COMPARE(b.data()[0], 0);
 }
 
-void UnicodeTest::widenStl() {
-    CORRADE_COMPARE(Unicode::widen(std::string{TextNarrow}),
-        (std::wstring{TextWide, TextWide.size()}));
-    /* std::wstring takes care of null termination, no need to test */
-}
-
 void UnicodeTest::narrow() {
     CORRADE_COMPARE(Unicode::narrow(TextWide), TextNarrow);
     /* Containers::String takes care of null termination, no need to test */
@@ -285,12 +299,6 @@ void UnicodeTest::narrowEmpty() {
 
     /* With implicit size */
     CORRADE_COMPARE(Unicode::narrow(L""), "");
-}
-
-void UnicodeTest::narrowStl() {
-    CORRADE_COMPARE(Unicode::narrow(std::wstring{TextWide, TextWide.size()}),
-        std::string{TextNarrow});
-    /* std::string takes care of null termination, no need to test */
 }
 #endif
 
