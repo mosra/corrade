@@ -31,11 +31,20 @@
  */
 
 #include <cstdint>
-#include <string>
 
 #include "Corrade/Containers/EnumSet.h"
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+#include "Corrade/Containers/String.h"
+#else
+#include "Corrade/Containers/Array.h"
+#endif
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* The constructor took a std::string before */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace Utility {
 
@@ -84,7 +93,7 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
          * @brief Watch behavior flag
          * @m_since{2019,10}
          *
-         * @see @ref Flags, @ref FileWatcher(const std::string&, Flags),
+         * @see @ref Flags, @ref FileWatcher(Containers::StringView, Flags),
          *      @ref flags()
          */
         enum class Flag: std::uint8_t {
@@ -112,43 +121,34 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
          * @brief Watch behavior flags
          * @m_since{2019,10}
          *
-         * @see @ref FileWatcher(const std::string&, Flags), @ref flags()
+         * @see @ref FileWatcher(Containers::StringView, Flags), @ref flags()
          */
         typedef Containers::EnumSet<Flag> Flags;
 
-        /** @brief Constructor */
-        explicit FileWatcher(const std::string& filename, Flags flags = {});
+        /**
+         * @brief Constructor
+         *
+         * Expects that the @p filename is in UTF-8. If it's already
+         * @ref Containers::StringViewFlag::Global and
+         * @relativeref{Containers::StringViewFlag,NullTerminated}, it's stored
+         * and passed to system APIs directly, otherwise a null-terminated copy
+         * is allocated first. On Windows the path is instead first converted
+         * to UTF-16 using @ref Unicode::widen() and then passed to system
+         * APIs.
+         */
+        explicit FileWatcher(Containers::StringView filename, Flags flags = {});
 
         /** @brief Copying is not allowed */
         FileWatcher(const FileWatcher&) = delete;
 
         /** @brief Move constructor */
-        FileWatcher(FileWatcher&&)
-            #ifdef CORRADE_TARGET_GCC
-            noexcept(std::is_nothrow_move_constructible<std::string>::value)
-            #else
-            noexcept
-            #endif
-            ;
+        FileWatcher(FileWatcher&&) noexcept;
 
         /** @brief Copying is not allowed */
         FileWatcher& operator=(const FileWatcher&) = delete;
 
         /** @brief Move assignment */
-        FileWatcher& operator=(FileWatcher&&)
-            /* std::string move assignment in libstdc++ before 5.5 is not
-               noexcept: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58265
-               It went through on GCC 4.7, but apparently only because it
-               doesn't care; it causes build failure on Clang in case it's
-               using libstdc++ < 5.5. Since it's impossible to check for a
-               libstdc++ version when using Clang (the version number is A
-               RELEASE DATE, wtf!), I'm checking for it this way. */
-            #ifdef CORRADE_TARGET_GCC
-            noexcept(std::is_nothrow_move_assignable<std::string>::value)
-            #else
-            noexcept
-            #endif
-            ;
+        FileWatcher& operator=(FileWatcher&&) noexcept;
 
         ~FileWatcher();
 
@@ -181,9 +181,9 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
         #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-        std::string _filename;
+        Containers::String _filename;
         #elif defined(CORRADE_TARGET_WINDOWS)
-        std::wstring _filename;
+        Containers::Array<wchar_t> _filename;
         #else
         #error
         #endif

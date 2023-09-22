@@ -32,7 +32,8 @@
 #include <sys/stat.h>
 
 #include "Corrade/Containers/EnumSet.hpp"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Containers/StringView.h"
+#include "Corrade/Utility/Debug.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include "Corrade/Utility/Unicode.h"
@@ -52,9 +53,9 @@ enum class FileWatcher::InternalFlag: std::uint8_t {
 };
 #endif
 
-FileWatcher::FileWatcher(const std::string& filename, Flags flags):
+FileWatcher::FileWatcher(const Containers::StringView filename, Flags flags):
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    _filename{filename},
+    _filename{Containers::String::nullTerminatedGlobalView(filename)},
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     _filename{Unicode::widen(filename)},
     #else
@@ -67,13 +68,7 @@ FileWatcher::FileWatcher(const std::string& filename, Flags flags):
     hasChanged();
 }
 
-FileWatcher::FileWatcher(FileWatcher&&)
-    #ifdef CORRADE_TARGET_GCC
-    noexcept(std::is_nothrow_move_constructible<std::string>::value)
-    #else
-    noexcept
-    #endif
-    = default;
+FileWatcher::FileWatcher(FileWatcher&&) noexcept = default;
 
 FileWatcher::~FileWatcher() = default;
 
@@ -85,14 +80,7 @@ bool FileWatcher::isValid() const {
     return _flags >= InternalFlag::Valid;
 }
 
-FileWatcher& FileWatcher::operator=(FileWatcher&&)
-    /* See the header for details */
-    #ifdef CORRADE_TARGET_GCC
-    noexcept(std::is_nothrow_move_assignable<std::string>::value)
-    #else
-    noexcept
-    #endif
-    = default;
+FileWatcher& FileWatcher::operator=(FileWatcher&&) noexcept = default;
 
 bool FileWatcher::hasChanged() {
     if(!(_flags & InternalFlag::Valid)) return false;
