@@ -30,7 +30,6 @@
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
-#include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 
 #include "Corrade/Utility/Implementation/tweakable.h"
@@ -247,7 +246,10 @@ void TweakableTest::findTweakableAlias() {
     auto&& data = TweakableAliasData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
     {
-        CORRADE_EXPECT_FAIL_IF(data.expectFail, String::fromArray(data.expectFail));
+        /* libc++ std::cout asserts if passed a nullptr char pointer, wrap in a
+           String in that case */
+        /** @todo clean up once Debug is stream-free */
+        CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::String{data.expectFail});
         CORRADE_COMPARE(Implementation::findTweakableAlias(data.data), data.alias);
     }
 }

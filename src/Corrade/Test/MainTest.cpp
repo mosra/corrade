@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
-#include <string>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -74,15 +72,13 @@ void MainTest::arguments() {
     #ifdef CORRADE_TESTSUITE_TARGET_XCTEST
     CORRADE_SKIP("Command-line arguments are currently ignored under XCTest.");
     #endif
+    auto args = Containers::arrayView(Tester::arguments().second, Tester::arguments().first).exceptPrefix(1);
     Debug{} << "Arguments expected: {--arg-utf, hýždě, --arg-another, šňůra}";
-    Debug{} << "Arguments passed:  " << Containers::arrayView(
-        Tester::arguments().second, Tester::arguments().first).exceptPrefix(1);
+    Debug{} << "Arguments passed:  " << args;
 
-    CORRADE_COMPARE_AS((std::vector<std::string>{
-        Tester::arguments().second + 1, Tester::arguments().second + Tester::arguments().first}),
-        (std::vector<std::string>{"--arg-utf", "hýždě", "--arg-another", "šňůra"
-        }),
-        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(args, (Containers::StringIterable{
+        "--arg-utf", "hýždě", "--arg-another", "šňůra"
+    }), TestSuite::Compare::Container);
 }
 
 }}}

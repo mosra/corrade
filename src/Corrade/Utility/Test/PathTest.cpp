@@ -2539,7 +2539,8 @@ void PathTest::append() {
 
     CORRADE_VERIFY(Path::write(file, "hello"_s));
     CORRADE_VERIFY(Path::append(file, Containers::arrayView(Data)));
-    CORRADE_COMPARE_AS(file, (std::string{expected, Containers::arraySize(expected)}),
+    CORRADE_COMPARE_AS(file,
+        Containers::arrayView(expected),
         TestSuite::Compare::FileToString);
 }
 
@@ -2660,7 +2661,8 @@ void PathTest::appendNonNullTerminated() {
 
     CORRADE_VERIFY(Path::write(file, "hello"_s));
     CORRADE_VERIFY(Path::append(Path::join(_writeTestDir, "fileX").exceptSuffix(1), Containers::arrayView(Data)));
-    CORRADE_COMPARE_AS(file, (std::string{expected, Containers::arraySize(expected)}),
+    CORRADE_COMPARE_AS(file,
+        Containers::arrayView(expected),
         TestSuite::Compare::FileToString);
 }
 
@@ -2947,7 +2949,7 @@ void PathTest::map() {
 
     /* Here --------------------vv--vv- the file should be changed */
     CORRADE_COMPARE_AS(file,
-        (std::string{"\xCA\xFE\xCA\xFE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11}),
+        "\xCA\xFE\xCA\xFE\x0D\x0A\x00\xDE\xAD\xBE\xEF"_s,
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -3147,7 +3149,7 @@ void PathTest::mapWrite() {
         Utility::copy(Data, *mappedFile);
     }
     CORRADE_COMPARE_AS(Path::join(_writeTestDir, "mappedWriteFile"),
-        (std::string{Data, Containers::arraySize(Data)}),
+        Containers::arrayView(Data),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -3246,7 +3248,7 @@ void PathTest::mapWriteNonNullTerminated() {
         Utility::copy(Data, *mappedFile);
     }
     CORRADE_COMPARE_AS(Path::join(_writeTestDir, "mappedWriteFile"),
-        (std::string{Data, Containers::arraySize(Data)}),
+        Containers::arrayView(Data),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -3264,7 +3266,7 @@ void PathTest::mapWriteUtf8() {
         Utility::copy(Data, *mappedFile);
     }
     CORRADE_COMPARE_AS(Path::join(_writeTestDir, "hýždě chlípníka"),
-        (std::string{Data, Containers::arraySize(Data)}),
+        Containers::arrayView(Data),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");

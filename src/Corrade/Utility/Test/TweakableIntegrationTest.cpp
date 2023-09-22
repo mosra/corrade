@@ -35,7 +35,7 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
-#include "Corrade/Utility/String.h"
+#include "Corrade/Utility/String.h" /* replaceFirst() */
 #include "Corrade/Utility/System.h"
 #include "Corrade/Utility/Tweakable.h"
 

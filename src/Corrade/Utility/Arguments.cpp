@@ -37,7 +37,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Math.h"
-#include "Corrade/Utility/String.h"
+#include "Corrade/Utility/String.h" /* uppercase() */
 
 /* For Arguments::environment() */
 #ifdef CORRADE_TARGET_APPLE
@@ -551,7 +551,9 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
 
         if(entry.type == Type::BooleanOption) {
             CORRADE_INTERNAL_ASSERT(entry.id < _booleans.size());
-            _booleans[entry.id] = String::uppercase(std::string{
+            /** @todo drop the StringView cast once uppercase(std::string) is
+                removed */
+            _booleans[entry.id] = String::uppercase(Containers::StringView{
                 #ifndef CORRADE_TARGET_EMSCRIPTEN
                 env
                 #else

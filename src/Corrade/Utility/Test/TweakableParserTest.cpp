@@ -33,7 +33,7 @@
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/String.h"
+#include "Corrade/Utility/String.h" /* uppercase() */
 #include "Corrade/Utility/Tweakable.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {

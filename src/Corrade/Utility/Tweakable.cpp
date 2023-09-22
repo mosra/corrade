@@ -36,7 +36,6 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FileWatcher.h"
 #include "Corrade/Utility/Path.h"
-#include "Corrade/Utility/String.h"
 
 #include "Corrade/Utility/Implementation/tweakable.h"
 

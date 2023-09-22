@@ -42,7 +42,7 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/StlMath.h"
-#include "Corrade/Utility/String.h"
+#include "Corrade/Utility/String.h" /* replaceAll() */
 
 #include "configure.h"
 

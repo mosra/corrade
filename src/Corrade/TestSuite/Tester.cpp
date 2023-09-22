@@ -46,7 +46,7 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
-#include "Corrade/Utility/String.h"
+#include "Corrade/Utility/String.h" /* parseNumberSequence() */
 
 #ifdef __linux__ /* for getting processor count */
 #include <unistd.h>

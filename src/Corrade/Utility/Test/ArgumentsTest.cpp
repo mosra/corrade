@@ -26,11 +26,11 @@
 
 #include <algorithm> /* std::find_if() */
 #include <sstream>
+#include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
@@ -289,7 +289,7 @@ bool hasEnv(const std::string& value) {
 
     std::vector<std::string> list = Arguments::environment();
     return std::find_if(list.begin(), list.end(),
-    [&value](const std::string& v){ return String::beginsWith(v, value); }) != list.end();
+    [&value](const std::string& v){ return Containers::StringView{v}.hasPrefix(value); }) != list.end();
 }
 
 void ArgumentsTest::environment() {
@@ -317,7 +317,7 @@ void ArgumentsTest::environmentUtf8() {
     /* Verify that it doesn't crash, at least */
     std::vector<std::string> list = Arguments::environment();
     auto found = std::find_if(list.begin(), list.end(),
-        [](const std::string& v){ return String::beginsWith(v, "ARGUMENTSTEST_UNICODE="); });
+        [](const std::string& v){ return Containers::StringView{v}.hasPrefix("ARGUMENTSTEST_UNICODE="); });
     CORRADE_VERIFY(found != list.end());
     CORRADE_COMPARE(*found, "ARGUMENTSTEST_UNICODE=hýždě");
 }
