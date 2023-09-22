@@ -72,15 +72,9 @@ struct PathTest: TestSuite::Tester {
     explicit PathTest();
 
     void fromNativeSeparators();
-    #ifdef CORRADE_TARGET_WINDOWS
-    void fromNativeSeparatorsSmall();
-    void fromNativeSeparatorsNonOwned();
-    #endif
+    void fromNativeSeparatorsRvalue();
     void toNativeSeparators();
-    #ifdef CORRADE_TARGET_WINDOWS
-    void toNativeSeparatorsSmall();
-    void toNativeSeparatorsNonOwned();
-    #endif
+    void toNativeSeparatorsRvalue();
 
     void split();
     void splitFlags();
@@ -265,15 +259,9 @@ struct PathTest: TestSuite::Tester {
 
 PathTest::PathTest() {
     addTests({&PathTest::fromNativeSeparators,
-              #ifdef CORRADE_TARGET_WINDOWS
-              &PathTest::fromNativeSeparatorsSmall,
-              &PathTest::fromNativeSeparatorsNonOwned,
-              #endif
+              &PathTest::fromNativeSeparatorsRvalue,
               &PathTest::toNativeSeparators,
-              #ifdef CORRADE_TARGET_WINDOWS
-              &PathTest::toNativeSeparatorsSmall,
-              &PathTest::toNativeSeparatorsNonOwned,
-              #endif
+              &PathTest::toNativeSeparatorsRvalue,
 
               &PathTest::split,
               &PathTest::splitFlags,
@@ -499,25 +487,26 @@ void PathTest::fromNativeSeparators() {
     #endif
 }
 
-#ifdef CORRADE_TARGET_WINDOWS
-void PathTest::fromNativeSeparatorsSmall() {
-    Containers::String in = "C:\\foo/";
-    CORRADE_VERIFY(in.isSmall());
-    CORRADE_COMPARE(Path::fromNativeSeparators(in), "C:/foo/");
-}
+void PathTest::fromNativeSeparatorsRvalue() {
+    /* Make sure the string is not SSO'd, as that would also not preserve the
+       same pointer */
+    Containers::String input{Containers::AllocatedInit, "foo\\bar/"};
+    const void* inputData = input.data();
+    CORRADE_VERIFY(!input.isSmall());
 
-void PathTest::fromNativeSeparatorsNonOwned() {
-    const char* data = "put\\ that/somewhere\\ else";
-    Containers::String in = Containers::String::nullTerminatedView(data);
-    CORRADE_VERIFY(!in.isSmall());
-    CORRADE_VERIFY(in.deleter());
+    /* On Windows it's passing through a String instance, elsewhere it's a
+       StringView (and by using String we'd get a copy) */
+    #ifdef CORRADE_TARGET_WINDOWS
+    Containers::String nativeSeparators = Path::fromNativeSeparators(Utility::move(input));
+    CORRADE_COMPARE(nativeSeparators, "foo/bar/");
+    #else
+    Containers::StringView nativeSeparators = Path::fromNativeSeparators(input);
+    CORRADE_COMPARE(nativeSeparators, "foo\\bar/");
+    #endif
 
-    /* Will make a copy as it can't touch a potentially immutable data */
-    Containers::String out = Path::fromNativeSeparators(Utility::move(in));
-    CORRADE_COMPARE(out, "put/ that/somewhere/ else");
-    CORRADE_VERIFY(out.data() != data);
+    /* It should pass the data through if possible */
+    CORRADE_COMPARE(nativeSeparators.data(), inputData);
 }
-#endif
 
 void PathTest::toNativeSeparators() {
     Containers::String nativeSeparators = Path::toNativeSeparators("this\\is a weird/system\\right");
@@ -528,25 +517,25 @@ void PathTest::toNativeSeparators() {
     #endif
 }
 
-#ifdef CORRADE_TARGET_WINDOWS
-void PathTest::toNativeSeparatorsSmall() {
-    Containers::String in = "C:\\foo/";
-    CORRADE_VERIFY(in.isSmall());
-    CORRADE_COMPARE(Path::toNativeSeparators(in), "C:\\foo\\");
-}
+void PathTest::toNativeSeparatorsRvalue() {
+    /* Make sure the string is not SSO'd, as that would also not preserve the
+       same pointer */
+    Containers::String input{Containers::AllocatedInit, "foo\\bar/"};
+    const void* inputData = input.data();
+    CORRADE_VERIFY(!input.isSmall());
 
-void PathTest::toNativeSeparatorsNonOwned() {
-    const char* data = "this\\is a weird/system\\right";
-    Containers::String in = Containers::String::nullTerminatedView(data);
-    CORRADE_VERIFY(!in.isSmall());
-    CORRADE_VERIFY(in.deleter());
-
-    /* Will make a copy as it can't touch a potentially immutable data */
-    Containers::String out = Path::toNativeSeparators(Utility::move(in));
-    CORRADE_COMPARE(out, "this\\is a weird\\system\\right");
-    CORRADE_VERIFY(out.data() != data);
+    /* On Windows it's passing through a String instance, elsewhere it's a
+       StringView (and by using String we'd get a copy) */
+    #ifdef CORRADE_TARGET_WINDOWS
+    Containers::String nativeSeparators = Path::toNativeSeparators(Utility::move(input));
+    CORRADE_COMPARE(nativeSeparators, "foo\\bar\\");
+    #else
+    Containers::StringView nativeSeparators = Path::toNativeSeparators(input);
+    CORRADE_COMPARE(nativeSeparators, "foo\\bar/");
+    #endif
+    /* It should pass the data through if possible */
+    CORRADE_COMPARE(nativeSeparators.data(), inputData);
 }
-#endif
 
 void PathTest::split() {
     /* In case you're not sure about the behavior, cross-check with Python's

@@ -79,6 +79,10 @@ struct StringTest: TestSuite::Tester {
     void replaceAllEmptySearch();
     void replaceAllEmptyReplace();
     void replaceAllCycle();
+    void replaceAllCharacter();
+    void replaceAllCharacterSmall();
+    void replaceAllCharacterNonOwned();
+    void replaceAllCharacterInPlace();
 
     void parseNumberSequence();
     void parseNumberSequenceOverflow();
@@ -192,7 +196,11 @@ StringTest::StringTest() {
               &StringTest::replaceAllNotFound,
               &StringTest::replaceAllEmptySearch,
               &StringTest::replaceAllEmptyReplace,
-              &StringTest::replaceAllCycle});
+              &StringTest::replaceAllCycle,
+              &StringTest::replaceAllCharacter,
+              &StringTest::replaceAllCharacterSmall,
+              &StringTest::replaceAllCharacterNonOwned,
+              &StringTest::replaceAllCharacterInPlace});
 
     addInstancedTests({&StringTest::parseNumberSequence},
         Containers::arraySize(ParseNumberSequenceData));
@@ -760,6 +768,49 @@ void StringTest::replaceAllEmptyReplace() {
 void StringTest::replaceAllCycle() {
     CORRADE_COMPARE(String::replaceAll("lalala",
         "la", "lala"), "lalalalalala");
+}
+
+void StringTest::replaceAllCharacter() {
+    /* No occurences */
+    CORRADE_COMPARE(String::replaceAll("we?? are? loud??", '!', '?'),
+        "we?? are? loud??");
+
+    /* Multiple occurences */
+    CORRADE_COMPARE(String::replaceAll("we?? are? loud??", '?', '!'),
+        "we!! are! loud!!");
+
+    /* Just that character alone */
+    CORRADE_COMPARE(String::replaceAll(Containers::String{Containers::AllocatedInit, "?"}, '?', '!'),
+        "!");
+
+    /* Empty string */
+    CORRADE_COMPARE(String::replaceAll({}, '?', '!'),
+        {});
+}
+
+void StringTest::replaceAllCharacterSmall() {
+    /* Shouldn't attempt to call deleter() on the string */
+    Containers::String in = "hello";
+    CORRADE_VERIFY(in.isSmall());
+    CORRADE_COMPARE(String::replaceAll(Utility::move(in), 'e', 'a'), "hallo");
+}
+
+void StringTest::replaceAllCharacterNonOwned() {
+    const char* data = "we?? are? loud??";
+    Containers::String in = Containers::String::nullTerminatedView(data);
+    CORRADE_VERIFY(!in.isSmall());
+    CORRADE_VERIFY(in.deleter());
+
+    /* Will make a copy as it can't touch a potentially immutable data */
+    Containers::String out = String::replaceAll(Utility::move(in), '?', '!');
+    CORRADE_COMPARE(out, "we!! are! loud!!");
+    CORRADE_VERIFY(out.data() != data);
+}
+
+void StringTest::replaceAllCharacterInPlace() {
+    char data[] = "we? are? loud??";
+    String::replaceAllInPlace(data, '?', '!');
+    CORRADE_COMPARE(data, "we! are! loud!!"_s);
 }
 
 void StringTest::parseNumberSequence() {

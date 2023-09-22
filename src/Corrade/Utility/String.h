@@ -628,10 +628,36 @@ CORRADE_UTILITY_EXPORT Containers::String replaceFirst(Containers::StringView st
 @m_since_latest
 
 Returns @p string unmodified if it doesn't contain @p search. Expects that
-@p search is not empty, as that would cause an infinite loop.
+@p search is not empty, as that would cause an infinite loop. For substituting
+a single character with another the @ref replaceAll(Containers::String, char, char)
+variant is more optimal.
 @see @ref replaceFirst()
 */
 CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
+
+/**
+@brief Replace all occurrences of a character in a string with another character
+@m_since_latest
+
+The @p string is passed through unmodified if it doesn't contain @p search.
+Otherwise the operation is performed in-place if @p string is owned,
+transferring the data ownership to the returned instance. An owned copy is made
+if not. See also @ref replaceAllInPlace() for a variant that operates on string
+views.
+@see @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
+    @ref replaceFirst()
+*/
+CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::String string, char search, char replace);
+
+/**
+@brief Replace all occurrences of a character in a string with another character in-place
+@m_since_latest
+
+@see @ref replaceAll(Containers::String, char, char),
+    @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
+    @ref replaceFirst()
+*/
+CORRADE_UTILITY_EXPORT void replaceAllInPlace(Containers::MutableStringView string, char search, char replace);
 
 /**
 @brief Parse a number sequence

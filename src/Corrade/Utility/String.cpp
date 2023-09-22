@@ -330,6 +330,36 @@ Containers::String replaceAll(Containers::StringView string, const Containers::S
     return Containers::String{output.release(), size - 1, deleter};
 }
 
+Containers::String replaceAll(Containers::String string, const char search, const char replace) {
+    /* If not even a single character is found, pass the argument through
+       unchanged */
+    const Containers::MutableStringView found = string.find(search);
+    if(!found) return Utility::move(string);
+
+    /* Convert the found pointer to an index to be able to replace even after a
+       potential reallocation below */
+    const std::size_t firstFoundPosition = found.begin() - string.begin();
+
+    /* Otherwise, in the rare scenario where we'd get a non-owned string (such
+       as String::nullTerminatedView() passed right into the function), make it
+       owned first. Usually it'll get copied however, which already makes it
+       owned. */
+    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+
+    /* Replace the already-found occurence and delegate the rest further */
+    string[firstFoundPosition] = replace;
+    replaceAllInPlace(string.exceptPrefix(firstFoundPosition + 1), search, replace);
+    return string;
+}
+
+void replaceAllInPlace(const Containers::MutableStringView string, const char search, const char replace) {
+    /** @todo SIMD, could use something similar to what's in find(char)
+        internals but instead of the complicated/slow way of converting
+        the mask to a position and then replacing the byte at given position
+        (and losing all other matches) simply just replace the mask */
+    for(char& c: string) if(c == search) c = replace;
+}
+
 Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {
     Containers::Array<std::uint32_t> out;
 

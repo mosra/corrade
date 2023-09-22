@@ -99,8 +99,8 @@
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Debug.h"
 
-#if defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN)
-#include "Corrade/Utility/String.h" /* lowercase() */
+#if defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
+#include "Corrade/Utility/String.h" /* lowercase(), replaceAll() on Windows */
 #endif
 
 #ifdef CORRADE_TARGET_APPLE
@@ -133,16 +133,7 @@ using namespace Containers::Literals;
 
 #ifdef CORRADE_TARGET_WINDOWS
 Containers::String fromNativeSeparators(Containers::String path) {
-    /* In the rare scenario where we'd get a non-owned string (such as
-       String::nullTerminatedView() passed right into the function), make it
-       owned first. Usually it'll get copied however, which already makes it
-       owned. */
-    if(!path.isSmall() && path.deleter()) path = Containers::String{path};
-
-    /* Since this replaces just single bytes, I don't think we need any fancy
-       library function to do the job */
-    for(char& c: path) if(c == '\\') c = '/';
-    return path;
+    return String::replaceAll(Utility::move(path), '\\', '/');
 }
 #else
 Containers::StringView fromNativeSeparators(const Containers::StringView path) {
@@ -152,16 +143,7 @@ Containers::StringView fromNativeSeparators(const Containers::StringView path) {
 
 #ifdef CORRADE_TARGET_WINDOWS
 Containers::String toNativeSeparators(Containers::String path) {
-    /* In the rare scenario where we'd get a non-owned string (such as
-       String::nullTerminatedView() passed right into the function), make it
-       owned first. Usually it'll get copied however, which already makes it
-       owned. */
-    if(!path.isSmall() && path.deleter()) path = Containers::String{path};
-
-    /* Since this replaces just single bytes, I don't think we need any fancy
-       library function to do the job */
-    for(char& c: path) if(c == '/') c = '\\';
-    return path;
+    return String::replaceAll(Utility::move(path), '/', '\\');
 }
 #else
 Containers::StringView toNativeSeparators(const Containers::StringView path) {

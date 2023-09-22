@@ -381,6 +381,10 @@ namespace Corrade {
 -   @ref Utility::String::split() and
     @ref Utility::String::splitWithoutEmptyParts() now have
     @ref Containers::StringView overloads that allocate much less
+-   Added a @ref Utility::String::replaceAll(Containers::String, char, char)
+    overload for more optimal single-character replacement and a
+    @ref Utility::String::replaceAllInPlace(Containers::MutableStringView, char, char)
+    variant that can work on existing memory
 -   Ability to print @ref Containers::BasicStringView and
     @ref Containers::String using @ref Utility::format()
 -   Creating an empty path with @ref Utility::Path::make() now succeeds because
