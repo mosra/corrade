@@ -120,7 +120,9 @@ struct StringViewTest: TestSuite::Tester {
     void constructCopy();
     void constructLiteral();
     void constructLiteralEmpty();
+    #ifdef CORRADE_TARGET_32BIT
     void constructTooLarge();
+    #endif
     void constructNullptrNullTerminated();
 
     void constructZeroNullPointerAmbiguity();
@@ -268,7 +270,9 @@ StringViewTest::StringViewTest() {
               &StringViewTest::constructCopy,
               &StringViewTest::constructLiteral,
               &StringViewTest::constructLiteralEmpty,
+              #ifdef CORRADE_TARGET_32BIT
               &StringViewTest::constructTooLarge,
+              #endif
               &StringViewTest::constructNullptrNullTerminated,
 
               &StringViewTest::constructZeroNullPointerAmbiguity,
@@ -642,20 +646,17 @@ void StringViewTest::constructLiteralEmpty() {
     CORRADE_COMPARE(view.data()[0], '\0');
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringViewTest::constructTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     StringView{nullptr, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::StringView: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::StringView: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringViewTest::constructNullptrNullTerminated() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();

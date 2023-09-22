@@ -40,8 +40,13 @@ BitArray::BitArray(Corrade::ValueInitT, std::size_t size):
     #endif
     _sizeOffset{size << 3}, _deleter{}
 {
+    #ifdef CORRADE_TARGET_32BIT
+    /* It makes little sense to check the size constraint on 64-bit, if 64-bit
+       code happens to go over then it's got bigger problems than this
+       assert. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
         "Containers::BitArray: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size, );
+    #endif
     _data = size ? new char[(size + 7) >> 3]{} : nullptr;
 }
 

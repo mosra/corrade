@@ -394,12 +394,17 @@ BasicStringView {
          * use the @link operator""_s() @endlink literal instead.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
-        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{
+        constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{(
             /* This ends up being called from BasicStringView(T*, Flags), so
                basically on every implicit conversion from a C string, thus
-               the release build perf aspect wins over safety */
-            (CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
+               the release build perf aspect wins over safety. Additionally,
+               it makes little sense to check the size constraint on 64-bit, if
+               64-bit code happens to go over then it's got bigger problems
+               than this assert. */
+            #ifdef CORRADE_TARGET_32BIT
+            CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
+            #endif
             CORRADE_CONSTEXPR_DEBUG_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
                 "Containers::StringView: can't use StringViewFlag::NullTerminated with null data"),
             size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}

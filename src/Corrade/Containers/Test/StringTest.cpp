@@ -81,7 +81,9 @@ struct StringTest: TestSuite::Tester {
     void constructTakeOwnershipImplicitSize();
     void constructTakeOwnershipNull();
     void constructTakeOwnershipNotNullTerminated();
+    #ifdef CORRADE_TARGET_32BIT
     void constructTakeOwnershipTooLarge();
+    #endif
     void constructPointer();
     void constructPointerSmall();
     void constructPointerSmallAllocatedInit();
@@ -94,20 +96,28 @@ struct StringTest: TestSuite::Tester {
     void constructPointerSizeNullZero();
     void constructPointerSizeNullZeroAllocatedInit();
     void constructPointerSizeNullNonZero();
+    #ifdef CORRADE_TARGET_32BIT
     void constructPointerSizeTooLarge();
+    #endif
 
     void constructValueInit();
     void constructValueInitSmall();
     void constructValueInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructValueInitTooLarge();
+    #endif
     void constructDirectInit();
     void constructDirectInitSmall();
     void constructDirectInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructDirectInitTooLarge();
+    #endif
     void constructNoInit();
     void constructNoInitSmall();
     void constructNoInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructNoInitTooLarge();
+    #endif
 
     void constructNullTerminatedGlobalView();
     void constructNullTerminatedGlobalViewAllocatedInit();
@@ -233,7 +243,9 @@ StringTest::StringTest() {
               &StringTest::constructTakeOwnershipImplicitSize,
               &StringTest::constructTakeOwnershipNull,
               &StringTest::constructTakeOwnershipNotNullTerminated,
+              #ifdef CORRADE_TARGET_32BIT
               &StringTest::constructTakeOwnershipTooLarge,
+              #endif
               &StringTest::constructPointer,
               &StringTest::constructPointerSmall,
               &StringTest::constructPointerSmallAllocatedInit,
@@ -246,20 +258,28 @@ StringTest::StringTest() {
               &StringTest::constructPointerSizeNullZero,
               &StringTest::constructPointerSizeNullZeroAllocatedInit,
               &StringTest::constructPointerSizeNullNonZero,
+              #ifdef CORRADE_TARGET_32BIT
               &StringTest::constructPointerSizeTooLarge,
+              #endif
 
               &StringTest::constructValueInit,
               &StringTest::constructValueInitSmall,
               &StringTest::constructValueInitZeroSize,
+              #ifdef CORRADE_TARGET_32BIT
               &StringTest::constructValueInitTooLarge,
+              #endif
               &StringTest::constructDirectInit,
               &StringTest::constructDirectInitSmall,
               &StringTest::constructDirectInitZeroSize,
+              #ifdef CORRADE_TARGET_32BIT
               &StringTest::constructDirectInitTooLarge,
+              #endif
               &StringTest::constructNoInit,
               &StringTest::constructNoInitSmall,
               &StringTest::constructNoInitZeroSize,
+              #ifdef CORRADE_TARGET_32BIT
               &StringTest::constructNoInitTooLarge,
+              #endif
 
               &StringTest::constructNullTerminatedGlobalView,
               &StringTest::constructNullTerminatedGlobalViewAllocatedInit,
@@ -516,6 +536,7 @@ void StringTest::constructTakeOwnershipNotNullTerminated() {
     CORRADE_COMPARE(out.str(), "Containers::String: can only take ownership of a non-null null-terminated array\n");
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringTest::constructTakeOwnershipTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -525,14 +546,10 @@ void StringTest::constructTakeOwnershipTooLarge() {
     Error redirectError{&out};
     String a{data, std::size_t{1} << (sizeof(std::size_t)*8 - 2), [](char*, std::size_t) {}};
     /* Can't really test this with the size-less constructor */
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringTest::constructPointer() {
     String a = "Allocated hello for a verbose world\0that rules";
@@ -674,6 +691,7 @@ void StringTest::constructPointerSizeNullNonZero() {
         "Containers::String: received a null string of size 3\n");
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringTest::constructPointerSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
@@ -681,16 +699,11 @@ void StringTest::constructPointerSizeTooLarge() {
     Error redirectError{&out};
     String a{"abc", std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
     String aa{AllocatedInit, "abc", std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n"
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n"
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringTest::constructValueInit() {
     String a{Corrade::ValueInit, 35};
@@ -734,20 +747,17 @@ void StringTest::constructValueInitZeroSize() {
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringTest::constructValueInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::ValueInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringTest::constructDirectInit() {
     String a{Corrade::DirectInit, 35, 'X'};
@@ -791,20 +801,17 @@ void StringTest::constructDirectInitZeroSize() {
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringTest::constructDirectInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::DirectInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2), 'X'};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringTest::constructNoInit() {
     String a{Corrade::NoInit, 35};
@@ -846,20 +853,17 @@ void StringTest::constructNoInitZeroSize() {
     CORRADE_VERIFY(a.data() < reinterpret_cast<char*>(&a + 1));
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StringTest::constructNoInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     String a{Corrade::NoInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
-        "Containers::String: string expected to be smaller than 2^62 bytes, got 4611686018427387904\n");
-    #else
     CORRADE_COMPARE(out.str(),
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
-    #endif
 }
+#endif
 
 void StringTest::constructNullTerminatedGlobalView() {
     /* For a local non-null-terminated string, both convert it to an owning

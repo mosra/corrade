@@ -54,7 +54,9 @@ struct BitArrayViewTest: TestSuite::Tester {
     void constructNullptrSize();
 
     void constructOffsetTooLarge();
+    #ifdef CORRADE_TARGET_32BIT
     void constructSizeTooLarge();
+    #endif
 
     void constructFromMutable();
     void constructCopy();
@@ -157,7 +159,9 @@ BitArrayViewTest::BitArrayViewTest() {
               &BitArrayViewTest::constructNullptrSize,
 
               &BitArrayViewTest::constructOffsetTooLarge,
+              #ifdef CORRADE_TARGET_32BIT
               &BitArrayViewTest::constructSizeTooLarge,
+              #endif
 
               &BitArrayViewTest::constructFromMutable,
               &BitArrayViewTest::constructCopy,
@@ -370,18 +374,16 @@ void BitArrayViewTest::constructOffsetTooLarge() {
     CORRADE_COMPARE(out.str(), "Containers::BitArrayView: offset expected to be smaller than 8 bits, got 8\n");
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void BitArrayViewTest::constructSizeTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     BitArrayView{nullptr, 0, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: size expected to be smaller than 2^61 bits, got 2305843009213693952\n");
-    #else
     CORRADE_COMPARE(out.str(), "Containers::BitArrayView: size expected to be smaller than 2^29 bits, got 536870912\n");
-    #endif
 }
+#endif
 
 void BitArrayViewTest::constructFromMutable() {
     std::uint64_t data[1]{};

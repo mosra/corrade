@@ -157,11 +157,15 @@ String::String(const char* const data, const std::size_t size)
     : _large{}
     #endif
 {
+    #ifdef CORRADE_TARGET_32BIT
     /* Compared to StringView construction which happens a lot this shouldn't,
        and the chance of strings > 1 GB on 32-bit is rare but possible and thus
-       worth checking even in release */
+       worth checking even in release. OTOH it makes little sense to test for
+       this on 64-bit, if 64-bit code happens to go over then it's got bigger
+       problems than this assert. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    #endif
     CORRADE_ASSERT(data || !size,
         "Containers::String: received a null string of size" << size, );
 

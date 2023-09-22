@@ -39,16 +39,24 @@ struct BitArrayTest: TestSuite::Tester {
     void constructDefault();
     void constructValueInit();
     void constructValueInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructValueInitSizeTooLarge();
+    #endif
     void constructDirectInit();
     void constructDirectInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructDirectInitSizeTooLarge();
+    #endif
     void constructNoInit();
     void constructNoInitZeroSize();
+    #ifdef CORRADE_TARGET_32BIT
     void constructNoInitSizeTooLarge();
+    #endif
     void constructTakeOwnership();
     void constructTakeOwnershipOffsetTooLarge();
+    #ifdef CORRADE_TARGET_32BIT
     void constructTakeOwnershipSizeTooLarge();
+    #endif
     void constructMove();
 
     void constructZeroNullPointerAmbiguity();
@@ -132,19 +140,28 @@ BitArrayTest::BitArrayTest() {
     addTests({&BitArrayTest::constructDefault,
               &BitArrayTest::constructValueInit,
               &BitArrayTest::constructValueInitZeroSize,
-              &BitArrayTest::constructValueInitSizeTooLarge});
+              #ifdef CORRADE_TARGET_32BIT
+              &BitArrayTest::constructValueInitSizeTooLarge
+              #endif
+              });
 
     addInstancedTests({&BitArrayTest::constructDirectInit},
         Containers::arraySize(ConstructDirectInitData));
 
     addTests({&BitArrayTest::constructDirectInitZeroSize,
+              #ifdef CORRADE_TARGET_32BIT
               &BitArrayTest::constructDirectInitSizeTooLarge,
+              #endif
               &BitArrayTest::constructNoInit,
               &BitArrayTest::constructNoInitZeroSize,
+              #ifdef CORRADE_TARGET_32BIT
               &BitArrayTest::constructNoInitSizeTooLarge,
+              #endif
               &BitArrayTest::constructTakeOwnership,
               &BitArrayTest::constructTakeOwnershipOffsetTooLarge,
+              #ifdef CORRADE_TARGET_32BIT
               &BitArrayTest::constructTakeOwnershipSizeTooLarge,
+              #endif
               &BitArrayTest::constructMove,
 
               &BitArrayTest::constructZeroNullPointerAmbiguity,
@@ -222,18 +239,16 @@ void BitArrayTest::constructValueInitZeroSize() {
     CORRADE_VERIFY(!a.data());
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void BitArrayTest::constructValueInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     BitArray{Corrade::ValueInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^61 bits, got 2305843009213693952\n");
-    #else
     CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
-    #endif
 }
+#endif
 
 void BitArrayTest::constructDirectInit() {
     auto&& data = ConstructDirectInitData[testCaseInstanceId()];
@@ -259,18 +274,16 @@ void BitArrayTest::constructDirectInitZeroSize() {
     CORRADE_VERIFY(!a.data());
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void BitArrayTest::constructDirectInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     BitArray{Corrade::DirectInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3), true};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^61 bits, got 2305843009213693952\n");
-    #else
     CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
-    #endif
 }
+#endif
 
 void BitArrayTest::constructNoInit() {
     BitArray a{Corrade::NoInit, 97};
@@ -289,18 +302,16 @@ void BitArrayTest::constructNoInitZeroSize() {
     CORRADE_VERIFY(!a.data());
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void BitArrayTest::constructNoInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     BitArray{Corrade::NoInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^61 bits, got 2305843009213693952\n");
-    #else
     CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
-    #endif
 }
+#endif
 
 void BitArrayTest::constructTakeOwnership() {
     /* Arguments passed to deleter and cases when deleter is called tested more
@@ -331,18 +342,16 @@ void BitArrayTest::constructTakeOwnershipOffsetTooLarge() {
     CORRADE_COMPARE(out.str(), "Containers::BitArray: offset expected to be smaller than 8 bits, got 8\n");
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void BitArrayTest::constructTakeOwnershipSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     BitArray{nullptr, 0, std::size_t{1} << (sizeof(std::size_t)*8 - 3), [](char*, std::size_t) {}};
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^61 bits, got 2305843009213693952\n");
-    #else
     CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
-    #endif
 }
+#endif
 
 void BitArrayTest::constructMove() {
     auto myDeleter = [](char* data, std::size_t) {
