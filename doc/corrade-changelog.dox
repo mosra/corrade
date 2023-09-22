@@ -716,7 +716,7 @@ namespace Corrade {
         wrapped in an @ref Containers::Optional
 -   The @ref Utility::Resource class was ported to use
     @ref Containers::StringView instead of @ref std::string,
--   @cpp Utility::Resource::get() @ce is deprecated in favor of
+    @cpp Utility::Resource::get() @ce is deprecated in favor of
     @ref Utility::Resource::getString(). The @cpp get() @ce API is scheduled to
     be reintroduced --- with a @ref Containers::ArrayView return type
     consistent with @ref Utility::Path::read() and
