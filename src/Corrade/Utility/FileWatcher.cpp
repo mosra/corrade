@@ -36,6 +36,7 @@
 #include "Corrade/Utility/Debug.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Unicode.h"
 #endif
 

@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "Corrade/Containers/ArrayViewStl.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStlView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
