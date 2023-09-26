@@ -45,15 +45,13 @@ struct BenchmarkStatsTest: Tester {
     void print();
 };
 
-enum: std::size_t { MultiplierDataCount = 14 };
-
 constexpr const struct {
     const char* name;
     double multiplierMean;
     double multiplierStddev;
     TestSuite::Tester::BenchmarkUnits units;
     const char* expected;
-} MultiplierData[MultiplierDataCount]{
+} PrintData[]{
     {"ones", 1.0, 1.0, TestSuite::Tester::BenchmarkUnits::Count,
         "153.70 ± 42.10    "},
     {"bytes", 1.0, 10.0, TestSuite::Tester::BenchmarkUnits::Bytes,
@@ -94,7 +92,8 @@ BenchmarkStatsTest::BenchmarkStatsTest() {
               &BenchmarkStatsTest::calculateZeroBatchSize,
               &BenchmarkStatsTest::calculateSingleValue});
 
-    addInstancedTests({&BenchmarkStatsTest::print}, MultiplierDataCount);
+    addInstancedTests({&BenchmarkStatsTest::print},
+        Containers::arraySize(PrintData));
 }
 
 /* Stolen from https://en.wikipedia.org/wiki/Standard_deviation */
@@ -162,16 +161,16 @@ void BenchmarkStatsTest::calculateSingleValue() {
 }
 
 void BenchmarkStatsTest::print() {
-    setTestCaseDescription(MultiplierData[testCaseInstanceId()].name);
+    auto&& data = PrintData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
     std::ostringstream str;
     Debug out{&str, Debug::Flag::DisableColors};
 
-    Implementation::printStats(out, 153.70*MultiplierData[testCaseInstanceId()].multiplierMean,
-        42.10*MultiplierData[testCaseInstanceId()].multiplierStddev, Utility::Debug::Color::Default, MultiplierData[testCaseInstanceId()].units);
+    Implementation::printStats(out, 153.70*data.multiplierMean,
+        42.10*data.multiplierStddev, Utility::Debug::Color::Default, data.units);
 
-    CORRADE_COMPARE(str.str(),
-        MultiplierData[testCaseInstanceId()].expected);
+    CORRADE_COMPARE(str.str(), data.expected);
 }
 
 }}}}
