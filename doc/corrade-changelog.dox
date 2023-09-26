@@ -332,6 +332,9 @@ namespace Corrade {
 -   @ref TestSuite::Compare::SortedContainer can now work with non-copyable
     containers (such as @ref Containers::Array) and containers without random
     access (such as @ref std::list or @ref std::unordered_map).
+-   Added @ref TestSuite::Tester::BenchmarkUnits::RatioThousandths and
+    @relativeref{TestSuite::Tester::BenchmarkUnits,PercentageThousandths} for
+    benchmarks that output fractional values and percentages
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

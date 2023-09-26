@@ -762,7 +762,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *      @ref addCustomBenchmarks(), @ref addCustomInstancedBenchmarks()
          */
         enum class BenchmarkUnits {
-            /* Values should not overlap with BenchmarkType */
+            /* Values should not overlap with BenchmarkType. When adding more,
+               be sure to expand the internal TestCaseType enum as well. */
 
             /**
              * Time in nanoseconds. Depending on the magnitude, the value is
@@ -795,6 +796,23 @@ class CORRADE_TESTSUITE_EXPORT Tester {
              * 1000).
              */
             Count = 104,
+
+            /**
+             * Ratio expressed in 1/1000s. The value is shown divided by 1000
+             * and depending on the magnitude it's shown with no suffix or with
+             * `k`, `M` or `G` (with a multiplier of 1000).
+             * @m_since_latest
+             */
+            RatioThousandths = 105,
+
+            /**
+             * Percentage expressed in 1/1000s. The value is shown divided by
+             * 1000 and with a `%` suffix. In the unfortunate scenario where
+             * the magnitude reaches 1000 and more, it's shown with `k`, `M` or
+             * `G` (with a multiplier of 1000).
+             * @m_since_latest
+             */
+            PercentageThousandths = 106
         };
 
         /**
@@ -1494,7 +1512,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             CustomCycleBenchmark = int(BenchmarkUnits::Cycles),
             CustomInstructionBenchmark = int(BenchmarkUnits::Instructions),
             CustomMemoryBenchmark = int(BenchmarkUnits::Bytes),
-            CustomCountBenchmark = int(BenchmarkUnits::Count)
+            CustomCountBenchmark = int(BenchmarkUnits::Count),
+            CustomRatioThousandthsBenchmark = int(BenchmarkUnits::RatioThousandths),
+            CustomPercentageThousandthsBenchmark = int(BenchmarkUnits::PercentageThousandths),
         };
 
         struct TestCase {

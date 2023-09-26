@@ -481,7 +481,7 @@ benchmark types:
             testCase.type = defaultBenchmarkType;
 
         /* Select benchmark function */
-        BenchmarkUnits benchmarkUnits = BenchmarkUnits::Count;
+        BenchmarkUnits benchmarkUnits{};
         switch(testCase.type) {
             /* LCOV_EXCL_START */
             case TestCaseType::DefaultBenchmark:
@@ -489,6 +489,7 @@ benchmark types:
             /* LCOV_EXCL_STOP */
 
             case TestCaseType::Test:
+                benchmarkUnits = BenchmarkUnits::Count;
                 break;
 
             case TestCaseType::WallTimeBenchmark:
@@ -510,15 +511,22 @@ benchmark types:
                 break;
 
             /* These have begin/end provided by the user */
+            /** @todo invent some more robust way to automatically handle all
+                these without having to expand the TestCaseType enum */
             case TestCaseType::CustomTimeBenchmark:
             case TestCaseType::CustomCycleBenchmark:
             case TestCaseType::CustomInstructionBenchmark:
             case TestCaseType::CustomMemoryBenchmark:
             case TestCaseType::CustomCountBenchmark:
+            case TestCaseType::CustomRatioThousandthsBenchmark:
+            case TestCaseType::CustomPercentageThousandthsBenchmark:
                 benchmarkUnits = BenchmarkUnits(int(testCase.type));
                 _state->benchmarkName = "";
                 break;
         }
+
+        /* If this fires, the TestCaseType isn't in sync with BenchmarkUnits */
+        CORRADE_INTERNAL_ASSERT(benchmarkUnits != BenchmarkUnits{});
 
         _state->testCaseId = usedTestCase;
         _state->testCaseInstanceId = testCase.instanceId;

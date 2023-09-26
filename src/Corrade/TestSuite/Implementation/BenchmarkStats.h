@@ -139,6 +139,12 @@ inline void printStats(Utility::Debug& out, const double mean, const double stdd
         case Tester::BenchmarkUnits::Count:
             printCount(out, mean, stddev, color, 1000.0, " ");
             return;
+        case Tester::BenchmarkUnits::RatioThousandths:
+            printCount(out, mean/1000.0, stddev/1000.0, color, 1000.0, " ");
+            return;
+        case Tester::BenchmarkUnits::PercentageThousandths:
+            printCount(out, mean/1000.0, stddev/1000.0, color, 1000.0, "%");
+            return;
     }
 
     CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
