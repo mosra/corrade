@@ -367,16 +367,13 @@ standard deviation, calculated as: @f[
     \end{array}
 @f]
 
-Different benchmark type have different units, time values are displayed in
-`ns`, `µs`, `ms` and `s`, dimensionless count is suffixed by `k`, `M` or `G`
-indicating thousands, millions and billions, instructions with `I`, `kI`, `MI`
-and `GI`, cycles with `C`, `kC`, `MC` and `GC` and memory in `B`, `kB`, `MB`
-and `GB`. In case of memory the prefixes are multiples of 1024 instead of 1000.
-For easier visual recognition of the values, by default the sample standard
-deviation is colored yellow if it is larger than 5% of the absolute value of
-the mean and red if it is larger than 25% of the absolute value of the mean.
-This can be overridden @ref TestSuite-Tester-command-line "on the command-line"
-via `--benchmark-yellow` and `--benchmark-red`.
+Different benchmark type have different units. Depending on value magnitude,
+larger units may be used as documented in @ref BenchmarkUnits. For easier
+visual recognition of the values, by default the sample standard deviation is
+colored yellow if it is larger than 5% of the absolute value of the mean and
+red if it  is larger than 25% of the absolute value of the mean. This can be
+overridden @ref TestSuite-Tester-command-line "on the command-line" via
+`--benchmark-yellow` and `--benchmark-red`.
 
 It's possible to have instanced benchmarks as well, see
 @ref addInstancedBenchmarks().
@@ -767,11 +764,37 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         enum class BenchmarkUnits {
             /* Values should not overlap with BenchmarkType */
 
-            Nanoseconds = 100,      /**< Time in nanoseconds */
-            Cycles = 101,           /**< Processor cycle count */
-            Instructions = 102,     /**< Processor instruction count */
-            Bytes = 103,            /**< Memory (in bytes) */
-            Count = 104             /**< Generic count */
+            /**
+             * Time in nanoseconds. Depending on the magnitude, the value is
+             * shown as `ns`, `µs`, `ms` and `s`.
+             */
+            Nanoseconds = 100,
+
+            /**
+             * Processor cycle count. Depending on the magnitude, the value is
+             * shown as `C`, `kC`, `MC` and `GC` (with a multiplier of 1000).
+             */
+            Cycles = 101,
+
+            /**
+             * Processor instruction count. Depending on the magnitude, the
+             * value is shown as `I`, `kI`, `MI` and `GI` (with a multiplier of
+             * 1000).
+             */
+            Instructions = 102,
+
+            /**
+             * Memory (in bytes). Depending on the magnitude, the value is
+             * shown as `B`, `kB`, `MB` and `GB` (with a multiplier of 1024).
+             */
+            Bytes = 103,
+
+            /**
+             * Generic count. Depending on the magnitude, the value is shown
+             * with no suffix or with `k`, `M` or `G` (with a multiplier of
+             * 1000).
+             */
+            Count = 104,
         };
 
         /**
