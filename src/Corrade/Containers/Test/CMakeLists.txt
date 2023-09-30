@@ -56,9 +56,11 @@ corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 
 corrade_add_test(ContainersGrowableArrayTest GrowableArrayTest.cpp)
 if(CORRADE_TARGET_EMSCRIPTEN)
-    # We need to append to avoid overwriting -s DISABLE_EXCEPTION_CATCHING=0
+    if(CMAKE_VERSION VERSION_LESS 3.13)
+        message(FATAL_ERROR "CMake 3.13+ is required in order to specify Emscripten linker options")
+    endif()
     # TODO: somehow, for std::vector the available memory is enough?
-    set_property(TARGET ContainersGrowableArrayTest APPEND_STRING PROPERTY LINK_FLAGS " -s ALLOW_MEMORY_GROWTH=1")
+    target_link_options(ContainersGrowableArrayTest PRIVATE "SHELL:-s ALLOW_MEMORY_GROWTH=1")
 endif()
 corrade_add_test(ContainersGrowableArraySa___FailTest GrowableArraySanitizerFailTest.cpp)
 # While Clang and GCC use -fsanitize=whatever, MSVC allows also /fsanitize=,
