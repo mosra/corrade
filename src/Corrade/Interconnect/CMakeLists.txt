@@ -58,8 +58,9 @@ endif()
 
 target_link_libraries(CorradeInterconnect PUBLIC CorradeUtility)
 # Disable /OPT:ICF on MSVC, which merges functions with identical contents and
-# thus breaks signal comparison
-if(CORRADE_TARGET_WINDOWS AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+# thus breaks signal comparison. Same case is for clang-cl which uses the MSVC
+# linker by default.
+if(CORRADE_TARGET_WINDOWS AND (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
     if(CMAKE_VERSION VERSION_LESS 3.13)
         target_link_libraries(CorradeInterconnect INTERFACE "-OPT:NOICF,REF")
     else()

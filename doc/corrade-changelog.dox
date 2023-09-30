@@ -516,6 +516,8 @@ namespace Corrade {
     crash on Emscripten 3.1.27+, which reduced the default stack size from
     5 MB to 64 kB.
 -   New @cpp #pragma ACME forget @ce option in the @ref acme utility
+-   `/OPT:NOICF` is now added for the @ref Interconnect library for clang-cl
+    as well (see [mosra/corrade#178](https://github.com/mosra/corrade/issues/178))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
