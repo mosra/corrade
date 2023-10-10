@@ -26,6 +26,7 @@
 
 #include <cstdint>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Endianness.h"
@@ -43,6 +44,8 @@ struct EndiannessTest: TestSuite::Tester {
     void inPlaceList();
     void inPlaceListUnaligned();
     void enumClass();
+
+    void fourCC();
 };
 
 EndiannessTest::EndiannessTest() {
@@ -52,7 +55,9 @@ EndiannessTest::EndiannessTest() {
               &EndiannessTest::inPlaceUnaligned,
               &EndiannessTest::inPlaceList,
               &EndiannessTest::inPlaceListUnaligned,
-              &EndiannessTest::enumClass});
+              &EndiannessTest::enumClass,
+
+              &EndiannessTest::fourCC});
 }
 
 void EndiannessTest::endianness() {
@@ -269,6 +274,17 @@ void EndiannessTest::enumClass() {
 
     #undef other
     #undef otherInPlace
+}
+
+void EndiannessTest::fourCC() {
+    std::uint32_t a = Endianness::fourCC('C', 'a', 'f', 'e');
+    CORRADE_COMPARE((Containers::StringView{reinterpret_cast<const char*>(&a), 4}), "Cafe");
+
+    constexpr std::uint32_t ca = Endianness::fourCC('C', 'a', 'f', 'e');
+    CORRADE_COMPARE((Containers::StringView{reinterpret_cast<const char*>(&ca), 4}), "Cafe");
+
+    /* Non-ASCII characters shouldn't cause any strange overflows */
+    CORRADE_COMPARE(Endianness::fourCC('\xca', '\xfe', '\xba', '\xbe'), *reinterpret_cast<const std::uint32_t*>("\xca\xfe\xba\xbe"));
 }
 
 }}}}

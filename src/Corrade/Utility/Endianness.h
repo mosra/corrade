@@ -239,15 +239,15 @@ portable alternative to multi-character literals:
    least complicated way to go about it */
 constexpr std::uint32_t fourCC(char a, char b, char c, char d) {
     #ifdef CORRADE_TARGET_BIG_ENDIAN
-    return (std::uint32_t(a) << 24 |
-            std::uint32_t(b) << 16 |
-            std::uint32_t(c) <<  8 |
-            std::uint32_t(d));
+    return (std::uint32_t(std::uint8_t(a)) << 24 |
+            std::uint32_t(std::uint8_t(b)) << 16 |
+            std::uint32_t(std::uint8_t(c)) <<  8 |
+            std::uint32_t(std::uint8_t(d)));
     #else
-    return (std::uint32_t(d) << 24 |
-            std::uint32_t(c) << 16 |
-            std::uint32_t(b) <<  8 |
-            std::uint32_t(a));
+    return (std::uint32_t(std::uint8_t(d)) << 24 |
+            std::uint32_t(std::uint8_t(c)) << 16 |
+            std::uint32_t(std::uint8_t(b)) <<  8 |
+            std::uint32_t(std::uint8_t(a)));
     #endif
 }
 
