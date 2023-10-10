@@ -32,7 +32,7 @@
 
 #include <type_traits>
 
-#include "Corrade/configure.h"
+#include "Corrade/Containers/Containers.h" /* String[View] declarations */
 
 namespace Corrade { namespace Utility {
 
