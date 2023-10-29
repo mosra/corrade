@@ -47,11 +47,15 @@ CORRADE_CONSTEXPR14 int sumInAStupidWay(int number) {
 }
 
 void MacrosCpp14Test::constexpr14() {
+    /* This should pass always */
+    CORRADE_CONSTEXPR14 int sum = sumInAStupidWay(17);
+    CORRADE_COMPARE(sum, 136);
+
     #ifdef CORRADE_MSVC2015_COMPATIBILITY
     CORRADE_SKIP("CORRADE_CONSTEXPR14 not available on MSVC2015.");
     #else
-    constexpr int sum = sumInAStupidWay(17);
-    CORRADE_COMPARE(sum, 136);
+    constexpr int csum = sumInAStupidWay(17);
+    CORRADE_COMPARE(csum, 136);
     #endif
 }
 
