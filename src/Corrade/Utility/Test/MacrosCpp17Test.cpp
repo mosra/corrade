@@ -32,11 +32,32 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct MacrosCpp17Test: TestSuite::Tester {
     explicit MacrosCpp17Test();
 
+    void constexpr20();
     void fallthrough();
 };
 
 MacrosCpp17Test::MacrosCpp17Test() {
-    addTests({&MacrosCpp17Test::fallthrough});
+    addTests({&MacrosCpp17Test::constexpr20,
+              &MacrosCpp17Test::fallthrough});
+}
+
+struct ConstexprNoInit {
+    CORRADE_CONSTEXPR20 explicit ConstexprNoInit(NoInitT) {}
+
+    int a;
+};
+
+CORRADE_CONSTEXPR20 ConstexprNoInit constexprNoInit(int a) {
+    ConstexprNoInit s{NoInit};
+    s.a = a;
+    return s;
+}
+
+void MacrosCpp17Test::constexpr20() {
+    /* Compared to MacrosCpp20Test::constexpr20(), here the macro should
+       compile to nothing, making it behave like a regular function */
+    CORRADE_CONSTEXPR20 ConstexprNoInit a = constexprNoInit(42);
+    CORRADE_COMPARE(a.a, 42);
 }
 
 void MacrosCpp17Test::fallthrough() {

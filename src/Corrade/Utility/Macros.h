@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_PASSTHROUGH(), @ref CORRADE_NOOP(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_CONSTEXPR20, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_PASSTHROUGH(), @ref CORRADE_NOOP(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -426,7 +426,7 @@ Expands to @cpp constexpr @ce if C++14 or newer standard is enabled and if the
 compiler implements C++14 relaxed constexpr rules (which includes GCC 5+, Clang
 3.5+ and MSVC 2017+), empty otherwise. Useful for selectively marking functions
 that make use of C++14 constexpr.
-@see @ref CORRADE_CXX_STANDARD
+@see @ref CORRADE_CXX_STANDARD, @ref CORRADE_CONSTEXPR20
 */
 #ifndef CORRADE_CONSTEXPR14
 /* MSVC2015 reports itself as supporting C++14 in _MSVC_LANG (its variant of
@@ -442,6 +442,38 @@ that make use of C++14 constexpr.
 /* Needs to have non-empty contents to avoid acme.py removing the #define if
    #pragma ACME disable is used */
 #define CORRADE_CONSTEXPR14 /*constexpr*/
+#endif
+#endif
+
+/** @hideinitializer
+@brief C++20 constexpr
+@m_since_latest
+
+Expands to @cpp constexpr @ce if C++20 or newer standard is enabled and if the
+compiler implements *all* C++20 constexpr *language* additions such as trivial
+default initialization (which includes GCC 10+, Clang 10+ and MSVC 2019
+19.29+), empty otherwise. Useful for selectively marking functions that make
+use of C++20 constexpr.
+@see @ref CORRADE_CXX_STANDARD, @ref CORRADE_CONSTEXPR14
+*/
+#ifndef CORRADE_CONSTEXPR20
+/* Changing an active member of a union is __cpp_constexpr == 202002, but Clang
+   16 reports only 201907 even though that feature is said to be available
+   since Clang 9 already; same case is with GCC where it reports 202002 only
+   since 12 while this is said to be supported since 10. So we use just 201907,
+   hopefully that won't bite back. MSVC then reports 201603 in 19.28 but 201907
+   in 19.29, so while 19.28 should have everything needed and 19.29 is only
+   adding constinit, to not have to add a MSVC-specific special case we ignore
+   19.28 and enable this on 19.29+ only for consistency.
+    https://en.cppreference.com/w/cpp/compiler_support#cpp20
+   This doesn't compare __cplusplus / CORRADE_CXX_STANDARD to 202002 because
+   that's only set since Clang 11, GCC 11 and MSVC 19.30. */
+#if __cpp_constexpr >= 201907
+#define CORRADE_CONSTEXPR20 constexpr
+#else
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_CONSTEXPR20 /*constexpr*/
 #endif
 #endif
 

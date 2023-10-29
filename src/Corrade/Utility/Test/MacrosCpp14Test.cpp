@@ -33,10 +33,12 @@ struct MacrosCpp14Test: TestSuite::Tester {
     explicit MacrosCpp14Test();
 
     void constexpr14();
+    void constexpr20();
 };
 
 MacrosCpp14Test::MacrosCpp14Test() {
-    addTests({&MacrosCpp14Test::constexpr14});
+    addTests({&MacrosCpp14Test::constexpr14,
+              &MacrosCpp14Test::constexpr20});
 }
 
 CORRADE_CONSTEXPR14 int sumInAStupidWay(int number) {
@@ -44,6 +46,18 @@ CORRADE_CONSTEXPR14 int sumInAStupidWay(int number) {
     for(int i = 0; i != number; ++i)
         sum += i;
     return sum;
+}
+
+struct ConstexprNoInit {
+    CORRADE_CONSTEXPR20 explicit ConstexprNoInit(NoInitT) {}
+
+    int a;
+};
+
+CORRADE_CONSTEXPR20 ConstexprNoInit constexprNoInit(int a) {
+    ConstexprNoInit s{NoInit};
+    s.a = a;
+    return s;
 }
 
 void MacrosCpp14Test::constexpr14() {
@@ -57,6 +71,13 @@ void MacrosCpp14Test::constexpr14() {
     constexpr int csum = sumInAStupidWay(17);
     CORRADE_COMPARE(csum, 136);
     #endif
+}
+
+void MacrosCpp14Test::constexpr20() {
+    /* Compared to MacrosCpp20Test::constexpr20(), here the macro should
+       compile to nothing, making it behave like a regular function */
+    CORRADE_CONSTEXPR20 ConstexprNoInit a = constexprNoInit(42);
+    CORRADE_COMPARE(a.a, 42);
 }
 
 }}}}

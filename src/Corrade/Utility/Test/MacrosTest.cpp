@@ -47,6 +47,7 @@ struct MacrosTest: TestSuite::Tester {
     void unused();
     void fallthrough();
     void constexpr14();
+    void constexpr20();
     void alwaysNeverInline();
     void assume();
     void likelyUnlikely();
@@ -65,6 +66,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::unused,
               &MacrosTest::fallthrough,
               &MacrosTest::constexpr14,
+              &MacrosTest::constexpr20,
               &MacrosTest::alwaysNeverInline,
               &MacrosTest::assume,
               &MacrosTest::likelyUnlikely,
@@ -180,6 +182,25 @@ void MacrosTest::constexpr14() {
        compile to nothing, making it behave like a regular function */
     CORRADE_CONSTEXPR14 int sum = sumInAStupidWay(17);
     CORRADE_COMPARE(sum, 136);
+}
+
+struct ConstexprNoInit {
+    CORRADE_CONSTEXPR20 explicit ConstexprNoInit(NoInitT) {}
+
+    int a;
+};
+
+CORRADE_CONSTEXPR20 ConstexprNoInit constexprNoInit(int a) {
+    ConstexprNoInit s{NoInit};
+    s.a = a;
+    return s;
+}
+
+void MacrosTest::constexpr20() {
+    /* Compared to MacrosCpp20Test::constexpr20(), here the macro should
+       compile to nothing, making it behave like a regular function */
+    CORRADE_CONSTEXPR20 ConstexprNoInit a = constexprNoInit(42);
+    CORRADE_COMPARE(a.a, 42);
 }
 
 void MacrosTest::fallthrough() {
