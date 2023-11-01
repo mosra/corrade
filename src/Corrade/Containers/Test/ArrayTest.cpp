@@ -365,7 +365,8 @@ void ArrayTest::constructInPlaceInit() {
     CORRADE_COMPARE(a1[2], 127);
     CORRADE_COMPARE(a1[3], -48);
 
-    Array a2 = array<int>({1, 3, 127, -48});
+    int data[]{1, 3, 127, -48};
+    Array a2{Corrade::InPlaceInit, data};
     CORRADE_VERIFY(a2);
     CORRADE_COMPARE(a2.size(), 4);
     CORRADE_COMPARE(a2[0], 1);
@@ -373,17 +374,33 @@ void ArrayTest::constructInPlaceInit() {
     CORRADE_COMPARE(a2[2], 127);
     CORRADE_COMPARE(a2[3], -48);
 
-    Array b1{Corrade::InPlaceInit, {}};
-    CORRADE_VERIFY(!b1);
+    Array a3 = array<int>({1, 3, 127, -48});
+    CORRADE_VERIFY(a3);
+    CORRADE_COMPARE(a3.size(), 4);
+    CORRADE_COMPARE(a3[0], 1);
+    CORRADE_COMPARE(a3[1], 3);
+    CORRADE_COMPARE(a3[2], 127);
+    CORRADE_COMPARE(a3[3], -48);
 
-    Array b2 = array<int>({});
-    CORRADE_VERIFY(!b2);
+    Array a4 = array<int>(data);
+    CORRADE_VERIFY(a4);
+    CORRADE_COMPARE(a4.size(), 4);
+    CORRADE_COMPARE(a4[0], 1);
+    CORRADE_COMPARE(a4[1], 3);
+    CORRADE_COMPARE(a4[2], 127);
+    CORRADE_COMPARE(a4[3], -48);
 }
 
 void ArrayTest::constructInPlaceInitZeroSize() {
-    Array a{Corrade::InPlaceInit, {}};
-    CORRADE_VERIFY(!a.data());
-    CORRADE_COMPARE(a.size(), 0);
+    Array a1{Corrade::InPlaceInit, {}};
+    CORRADE_VERIFY(!a1);
+    CORRADE_VERIFY(!a1.data());
+    CORRADE_COMPARE(a1.size(), 0);
+
+    Array a2 = array<int>({});
+    CORRADE_VERIFY(!a2);
+    CORRADE_VERIFY(!a2.data());
+    CORRADE_COMPARE(a2.size(), 0);
 }
 
 void ArrayTest::constructMove() {

@@ -117,12 +117,13 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments. In other words,
     @cpp new T[size]{T{args...}, T{args...}, …} @ce.
+-   @ref Array(InPlaceInitT, ArrayView<const T>) /
 -   @ref Array(InPlaceInitT, std::initializer_list<T>) or the
-    @ref array(std::initializer_list<T>) shorthand allocates unitialized memory
-    and then copy-constructs all elements from the initializer list. In other
-    words, @cpp new T[size]{args...} @ce. The class deliberately *doesn't*
-    provide an implicit @ref std::initializer_list constructor due to
-    @ref Containers-Array-initializer-list "reasons described below".
+    @ref array(ArrayView<const T>) / @ref array(std::initializer_list<T>)
+    shorthand allocates unitialized memory and then copy-constructs all
+    elements from the list. In other words, @cpp new T[size]{args...} @ce. The
+    class deliberately *doesn't* provide an implicit @ref std::initializer_list
+    constructor due to @ref Containers-Array-initializer-list "reasons described below".
 -   @ref Array(NoInitT, std::size_t) does not initialize anything. Useful for
     trivial types when you'll be overwriting the contents anyway, for
     non-trivial types this is the dangerous option and you need to call the
@@ -433,11 +434,13 @@ class Array {
 
         /**
          * @brief Construct a list-initialized array
+         * @m_since_latest
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then copy-initializes each element with placement
          * new using values from @p list. To save typing you can also use the
-         * @ref array(std::initializer_list<T>) shorthand.
+         * @ref array(ArrayView<const T>) /
+         * @ref array(std::initializer_list<T>) shorthands.
          *
          * Not present as an implicit constructor in order to avoid the same
          * usability issues as with @ref std::vector --- see the
@@ -448,6 +451,9 @@ class Array {
          *      @ref Array(ValueInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args)
          */
+        /*implicit*/ Array(Corrade::InPlaceInitT, ArrayView<const T> list);
+
+        /** @overload */
         /*implicit*/ Array(Corrade::InPlaceInitT, std::initializer_list<T> list);
 
         /**
@@ -963,6 +969,20 @@ class Array {
 
 /** @relatesalso Array
 @brief Construct a list-initialized array
+@m_since_latest
+
+Convenience shortcut to the @ref Array::Array(InPlaceInitT, ArrayView<const T>)
+constructor. Not present as an implicit constructor in order to avoid the same
+usability issues as with @ref std::vector --- see the
+@ref Containers-Array-initializer-list "class documentation" for more
+information.
+*/
+template<class T> inline Array<T> array(ArrayView<const T> list) {
+    return Array<T>{Corrade::InPlaceInit, list};
+}
+
+/** @relatesalso Array
+@brief Construct a list-initialized array
 @m_since{2020,06}
 
 Convenience shortcut to the @ref Array::Array(InPlaceInitT, std::initializer_list<T>)
@@ -1037,7 +1057,7 @@ template<class T, class D> template<class ...Args> Array<T, D>::Array(Corrade::D
         Implementation::construct(_data[i], Utility::forward<Args>(args)...);
 }
 
-template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initializer_list<T> list): Array{Corrade::NoInit, list.size()} {
+template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, const ArrayView<const T> list): Array{Corrade::NoInit, list.size()} {
     std::size_t i = 0;
     for(const T& item: list)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
@@ -1047,6 +1067,8 @@ template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initia
         new(_data + i++) T{item};
         #endif
 }
+
+template<class T, class D> Array<T, D>::Array(Corrade::InPlaceInitT, std::initializer_list<T> list): Array{Corrade::InPlaceInit, arrayView(list)} {}
 
 template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {
     using Utility::swap;
