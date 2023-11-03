@@ -35,20 +35,19 @@ namespace Corrade {
 The [src/debuggers/gdb](https://github.com/mosra/corrade/tree/master/src/debuggers/gdb)
 directory contains [GDB pretty printers](https://sourceware.org/gdb/onlinedocs/gdb/Pretty-Printing.html)
 for most @ref Containers classes. Contents of this directory are also copied
-into @cb{.sh} ${CMAKE_PREFIX_PATH}/share/corrade/debuggers/gdb @ce during
-installation, where the prefix is usually `/usr` or `/usr/local`.
+into @cb{.sh} ${CMAKE_INSTALL_PREFIX}/share/gdb/python @ce during installation,
+where the prefix is usually `/usr` or `/usr/local`.
 
 Easiest is to auto-load them on startup, by putting the following snippet into
 the user-specific `~/.gdbinit` or `~/.config/gdb/gdbinit` file:
 
 @code{.py}
 python
-import sys
-# Adapt this path to the actual install location (or Corrade's src/ directory).
-# Not pointing to the debuggers subdirectory here because it could conflict
-# with the built-in GDB module.
-sys.path.insert(0, '/usr/share')
-from corrade.debuggers.gdb import register_corrade_printers
+# If not installing into /usr, you'll need to insert the install location (or
+# the src/debuggers/gdb/ directory inside Corrade sources) to Python's path:
+#import sys
+#sys.path.insert(0, '/corrade/install/prefix/share/gdb/python')
+from corrade import register_corrade_printers
 register_corrade_printers(gdb.current_objfile())
 end
 @endcode
@@ -69,7 +68,7 @@ for more information.
 The [src/debuggers/natvis](https://github.com/mosra/corrade/tree/master/src/debuggers/natvis)
 directory contains MSVC natvis files for most @ref Containers APIs. Contents of
 this directory are also copied into
-@cb{.sh} ${CMAKE_PREFIX_PATH}/share/corrade/debuggers/natvis @ce during
+@cb{.sh} ${CMAKE_INSTALL_PREFIX}/share/corrade/debuggers/natvis @ce during
 installation.
 
 Easiest way to use is to copy them to the user-specific Natvis directory for
