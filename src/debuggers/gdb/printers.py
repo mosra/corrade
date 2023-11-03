@@ -386,7 +386,8 @@ class CorradeString(CorradeStringTypePrinter):
     """Prints a Containers::String"""
 
     def to_string(self):
-        if bool(self.val['_small']['size'] & 0x80) is True:
+        # 0x40 is Implementation::SmallStringBit
+        if bool(self.val['_small']['size'] & 0x40) is True:
             return self.val['_small']['data'].string(length=int(self.val['_small']['size'] & ~0xc0))
         return self.val['_large']['data'].string(length=int(self.val['_large']['size']))
 
