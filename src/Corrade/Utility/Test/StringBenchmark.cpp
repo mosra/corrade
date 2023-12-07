@@ -40,10 +40,14 @@ struct StringBenchmark: TestSuite::Tester {
     explicit StringBenchmark();
 
     void lowercase();
+    void lowercaseBranchless32();
+    void lowercaseNaive();
     void lowercaseStl();
     void lowercaseStlFacet();
 
     void uppercase();
+    void uppercaseBranchless32();
+    void uppercaseNaive();
     void uppercaseStl();
     void uppercaseStlFacet();
 };
@@ -59,10 +63,14 @@ constexpr Containers::StringView loremIpsum =
 
 StringBenchmark::StringBenchmark() {
     addBenchmarks({&StringBenchmark::lowercase,
+                   &StringBenchmark::lowercaseBranchless32,
+                   &StringBenchmark::lowercaseNaive,
                    &StringBenchmark::lowercaseStl,
                    &StringBenchmark::lowercaseStlFacet,
 
                    &StringBenchmark::uppercase,
+                   &StringBenchmark::uppercaseBranchless32,
+                   &StringBenchmark::uppercaseNaive,
                    &StringBenchmark::uppercaseStl,
                    &StringBenchmark::uppercaseStlFacet}, 100);
 }
@@ -76,11 +84,46 @@ void StringBenchmark::lowercase() {
     CORRADE_VERIFY(!string.contains('L'));
 }
 
+/* Compared to the implementation in String::lowercaseInPlace(), this uses
+   `unsigned` instead of `std::uint8_t`, making it almost 8x slower. Not sure
+   why, heh. */
+CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless32(Containers::MutableStringView string) {
+    for(char& c: string)
+        c += (unsigned(c - 'A') < 26) << 5;
+}
+
+void StringBenchmark::lowercaseBranchless32() {
+    Containers::String string = loremIpsum;
+
+    CORRADE_BENCHMARK(1)
+        lowercaseInPlaceBranchless32(string);
+
+    CORRADE_VERIFY(!string.contains('L'));
+}
+
+/* This is the original implementation that used to be in
+   String::lowercaseInPlace() */
+CORRADE_NEVER_INLINE void lowercaseInPlaceNaive(Containers::MutableStringView string) {
+    for(char& c: string)
+        if(c >= 'A' && c <= 'Z') c |= 0x20;
+}
+
+void StringBenchmark::lowercaseNaive() {
+    Containers::String string = loremIpsum;
+
+    CORRADE_BENCHMARK(1)
+        lowercaseInPlaceNaive(string);
+
+    CORRADE_VERIFY(!string.contains('L'));
+}
+
 void StringBenchmark::lowercaseStl() {
     std::string string = loremIpsum;
 
-    /* C++ experts recommend using a lambda here, even, but that's even more
-       stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
+    /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
+       std::tolower() / std::toupper() causes a mutex lock and a virtual
+       dispatch per character (!!). C++ experts recommend using a lambda here,
+       even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
     CORRADE_BENCHMARK(1)
         std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
 
@@ -106,11 +149,46 @@ void StringBenchmark::uppercase() {
     CORRADE_VERIFY(!string.contains('a'));
 }
 
+/* Compared to the implementation in String::lowercaseInPlace(), this uses
+   `unsigned` instead of `std::uint8_t`, making it almost 8x slower. Not sure
+   why, heh. */
+CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless32(Containers::MutableStringView string) {
+    for(char& c: string)
+        c -= (unsigned(c - 'a') < 26) << 5;
+}
+
+void StringBenchmark::uppercaseBranchless32() {
+    Containers::String string = loremIpsum;
+
+    CORRADE_BENCHMARK(1)
+        uppercaseInPlaceBranchless32(string);
+
+    CORRADE_VERIFY(!string.contains('a'));
+}
+
+/* This is the original implementation that used to be in
+   String::uppercaseInPlace() */
+CORRADE_NEVER_INLINE void uppercaseInPlaceNaive(Containers::MutableStringView string) {
+    for(char& c: string)
+        if(c >= 'a' && c <= 'z') c &= ~0x20;
+}
+
+void StringBenchmark::uppercaseNaive() {
+    Containers::String string = loremIpsum;
+
+    CORRADE_BENCHMARK(1)
+        uppercaseInPlaceNaive(string);
+
+    CORRADE_VERIFY(!string.contains('a'));
+}
+
 void StringBenchmark::uppercaseStl() {
     std::string string = loremIpsum;
 
-    /* C++ experts recommend using a lambda here, even, but that's even more
-       stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
+    /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
+       std::tolower() / std::toupper() causes a mutex lock and a virtual
+       dispatch per character (!!). C++ experts recommend using a lambda here,
+       even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
     CORRADE_BENCHMARK(1)
         std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
 

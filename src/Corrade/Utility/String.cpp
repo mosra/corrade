@@ -217,18 +217,27 @@ Containers::StaticArray<3, std::string> rpartition(const std::string& string, co
 }
 
 void lowercaseInPlace(const Containers::MutableStringView string) {
-    /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
-       std::tolower() / std::toupper() causes a mutex lock and a virtual
-       dispatch per character (!!). A proper Unicode-aware *and* locale-aware
-       solution would involve far more than iterating over bytes anyway --
-       multi-byte characters, composed characters (ä formed from ¨ and a),
-       SS -> ß in German but not elsewhere etc... */
-    for(char& c: string) if(c >= 'A' && c <= 'Z') c |= 0x20;
+    /* A proper Unicode-aware *and* locale-aware solution would involve far
+       more than iterating over bytes -- multi-byte characters, composed
+       characters (ä formed from ¨ and a), SS -> ß in German but not elsewhere
+       etc... */
+
+    /* Branchless idea from https://stackoverflow.com/a/3884737, what it does
+       is adding (1 << 5) for 'A' and all 26 letters after, and (0 << 5) for
+       anything after (and before as well, which is what the unsigned cast
+       does). The (1 << 5) bit (0x20) is what differs between lowercase and
+       uppercase characters. See Test/StringBenchmark.cpp for other alternative
+       implementations leading up to this point. In particular, the
+       std::uint8_t() is crucial, unsigned() is 6x to 8x slower. */
+    for(char& c: string)
+        c += (std::uint8_t(c - 'A') < 26) << 5;
 }
 
 void uppercaseInPlace(const Containers::MutableStringView string) {
-    /* See above for why std::toupper() is banned here */
-    for(char& c: string) if(c >= 'a' && c <= 'z') c &= ~0x20;
+    /* Same as above, except that (1 << 5) is subtracted for 'a' and all 26
+       letters after. */
+    for(char& c: string)
+        c -= (std::uint8_t(c - 'a') < 26) << 5;
 }
 
 Containers::String lowercase(const Containers::StringView string) {
