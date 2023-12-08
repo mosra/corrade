@@ -127,6 +127,7 @@ if(CORRADE_WITH_UTILITY)
         StlForwardArray.h
         StlForwardString.h
         StlForwardTuple.h
+        StlForwardTupleSizeElement.h
         StlForwardVector.h
         StlMath.h
         System.h

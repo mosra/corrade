@@ -377,6 +377,7 @@ corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStlForwardArrayTest StlForwardArrayTest.cpp)
 corrade_add_test(UtilityStlForwardStringTest StlForwardStringTest.cpp)
 corrade_add_test(UtilityStlForwardTupleTest StlForwardTupleTest.cpp)
+corrade_add_test(UtilityStlForwardTupleSizeEle___Test StlForwardTupleSizeElementTest.cpp)
 corrade_add_test(UtilityStlForwardVectorTest StlForwardVectorTest.cpp)
 
 # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync

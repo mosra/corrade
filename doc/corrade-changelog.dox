@@ -233,6 +233,11 @@ namespace Corrade {
     @ref CORRADE_NOOP()
 -   New @ref CORRADE_CONSTEXPR20 macro, a variant of @ref CORRADE_CONSTEXPR14
     for C++20
+-   New @ref Corrade/Utility/StlForwardTupleSizeElement.h header for
+    forward-declaring @m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
+    and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)
+    without having to @cpp #include <utility> @ce or other heavy STL headers.
+    See also [mosra/corrade#127](https://github.com/mosra/corrade/pull/127).
 -   Added a `--single` option to the @ref corrade-rc "corrade-rc" executable as
     well as @ref corrade-cmake-add-resource "corrade_add_resource(... SINGLE)"
     for compiling a single input file into a C++ file containing its binary
