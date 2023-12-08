@@ -133,7 +133,12 @@ void StridedDimensionsCpp17Test::structuredBindingsRvalueReference() {
     CORRADE_COMPARE(&y, size.begin());
     CORRADE_COMPARE(&x, size.begin() + 1);
 
-    constexpr StridedDimensions<2, float> csize = structuredBindingsRvalueReferenceConstexpr(32.5f, -2.25f);
+    /* MSVC 2017 doesn't seem to like the move in a constexpr context.
+       Everything else works, MSVC 2019 works as well, so just ignore it. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    constexpr
+    #endif
+    StridedDimensions<2, float> csize = structuredBindingsRvalueReferenceConstexpr(32.5f, -2.25f);
     CORRADE_COMPARE(csize, (StridedDimensions<2, float>{32.5f, -2.25f}));
 }
 

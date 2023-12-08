@@ -139,7 +139,12 @@ void TripleCpp17Test::structuredBindingsRvalueReference() {
     CORRADE_COMPARE(&second, &triple.second());
     CORRADE_COMPARE(&third, &triple.third());
 
-    constexpr Triple<int, float, bool> ctriple = structuredBindingsRvalueReferenceConstexpr(13, 67.0f, true);
+    /* MSVC 2017 doesn't seem to like the move in a constexpr context.
+       Everything else works, MSVC 2019 works as well, so just ignore it. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    constexpr
+    #endif
+    Triple<int, float, bool> ctriple = structuredBindingsRvalueReferenceConstexpr(13, 67.0f, true);
     CORRADE_COMPARE(ctriple, Containers::triple(13, 67.0f, true));
 }
 

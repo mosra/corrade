@@ -126,7 +126,12 @@ void PairCpp17Test::structuredBindingsRvalueReference() {
     CORRADE_COMPARE(&first, &pair.first());
     CORRADE_COMPARE(&second, &pair.second());
 
-    constexpr Pair<int, float> ctriple = structuredBindingsRvalueReferenceConstexpr(13, 67.0f);
+    /* MSVC 2017 doesn't seem to like rvalues in a constexpr context.
+       Everything else works, MSVC 2019 works as well, so just ignore it. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    constexpr
+    #endif
+    Pair<int, float> ctriple = structuredBindingsRvalueReferenceConstexpr(13, 67.0f);
     CORRADE_COMPARE(ctriple, Containers::pair(13, 67.0f));
 }
 

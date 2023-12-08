@@ -135,7 +135,12 @@ void StaticArrayViewCpp17Test::structuredBindingsRvalueReference() {
     CORRADE_COMPARE(&a0, &data[0]);
     CORRADE_COMPARE(&a1, &data[1]);
 
-    constexpr float carray = structuredBindingsRvalueReferenceConstexpr(32.5f, -2.25f);
+    /* MSVC 2017 doesn't seem to like the move in a constexpr context.
+       Everything else works, MSVC 2019 works as well, so just ignore it. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    constexpr
+    #endif
+    float carray = structuredBindingsRvalueReferenceConstexpr(32.5f, -2.25f);
     CORRADE_COMPARE(carray, 34.75f);
 }
 
