@@ -142,6 +142,19 @@ Main property compared to a plain C array of value is convertibility from/to
 @ref StaticArrayView, implicit conversion from/to a scalar type in the
 one-dimensional case and element-wise equality comparison. See
 @ref StridedArrayView and @ref StridedBitArrayView for actual usage examples.
+
+@section Containers-StridedDimensions-structured-bindings C++17 structured bindings
+
+If @ref Corrade/Containers/StructuredBindings.h is included, the class can be
+used in C++17 structured bindings. While the @cpp get<i>() @ce overloads are
+defined inside @ref StridedDimensions itself, a separate header is used for the
+@m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
+and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)
+template specializations, as those may require @cpp #include <utility> @ce on
+some STL implementations. Example:
+
+@snippet Containers-cpp17.cpp StridedDimensions-structured-bindings
+
 @see @ref Size, @ref Size1D, @ref Size2D, @ref Size3D, @ref Size4D,
     @ref Stride, @ref Stride1D, @ref Stride2D, @ref Stride3D, @ref Stride4D
 */
@@ -250,6 +263,25 @@ template<unsigned dimensions, class T> class StridedDimensions {
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
         template<unsigned newDimensions, class U, unsigned dimensions_> StridedArrayView<newDimensions, U> friend arrayCast(const StridedArrayView<dimensions_, void>&, std::size_t);
         template<unsigned newDimensions, class U, unsigned dimensions_> StridedArrayView<newDimensions, U> friend arrayCast(const StridedArrayView<dimensions_, const void>&, std::size_t);
+
+        #if CORRADE_CXX_STANDARD > 201402
+        /* For C++17 structured bindings, if StructuredBindings.h is included
+           as well. There doesn't seem to be a way to call those directly, and
+           I can't find any practical use of std::tuple_size, tuple_element etc
+           on C++11 and C++14, so this is defined only for newer standards. */
+        template<std::size_t index> constexpr friend const T& get(const StridedDimensions<dimensions, T>& value) {
+            return value._data[index];
+        }
+        template<std::size_t index> CORRADE_CONSTEXPR14 friend T& get(StridedDimensions<dimensions, T>& value) {
+            return value._data[index];
+        }
+        /* This has to be here as otherwise it tries to pass certain cases
+           through the const T& overload, subsequently complaining that
+           const T& can't be bound to T& (?!) */
+        template<std::size_t index> CORRADE_CONSTEXPR14 friend T&& get(StridedDimensions<dimensions, T>&& value) {
+            return Utility::move(value._data[index]);
+        }
+        #endif
 
         template<class U, std::size_t ...sequence> constexpr explicit StridedDimensions(const U* values, Implementation::Sequence<sequence...>) noexcept: _data{T(values[sequence])...} {}
 

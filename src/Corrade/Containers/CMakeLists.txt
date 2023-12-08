@@ -69,6 +69,7 @@ set(CorradeContainers_HEADERS
     StringStlHash.h
     StringStlView.h
     StringView.h
+    StructuredBindings.h
     Triple.h
     TripleStl.h)
 

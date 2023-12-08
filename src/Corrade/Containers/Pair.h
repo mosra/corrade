@@ -6,6 +6,7 @@
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019, 2020, 2021, 2022, 2023
               Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2022 Stanislaw Halik <sthalik@misaki.pl>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -70,6 +71,18 @@ the members directly. This is done in order to future-proof the design and have
 extra flexibility in how the internals are defined.
 
 There's also a three-element variant, called a @ref Triple.
+
+@section Containers-Pair-structured-bindings C++17 structured bindings
+
+If @ref Corrade/Containers/StructuredBindings.h is included, the class can be
+used in C++17 structured bindings. While the @cpp get<i>() @ce overloads are
+defined inside @ref Pair itself, a separate header is used for the
+@m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
+and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)
+template specializations, as those may require @cpp #include <utility> @ce on
+some STL implementations. Example:
+
+@snippet Containers-cpp17.cpp Pair-structured-bindings
 
 @section Containers-Pair-stl STL compatibility
 
@@ -313,6 +326,31 @@ template<class F, class S> class Pair {
     private:
         /* For the conversion constructor */
         template<class, class> friend class Pair;
+
+        #if CORRADE_CXX_STANDARD > 201402
+        /* For C++17 structured bindings, if StructuredBindings.h is included
+           as well. There doesn't seem to be a way to call those directly, and
+           I can't find any practical use of std::tuple_size, tuple_element etc
+           on C++11 and C++14, so this is defined only for newer standards. */
+        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> constexpr friend const F& get(const Pair<F, S>& value) {
+            return value._first;
+        }
+        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> CORRADE_CONSTEXPR14 friend F& get(Pair<F, S>& value) {
+            return value._first;
+        }
+        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> CORRADE_CONSTEXPR14 friend F&& get(Pair<F, S>&& value) {
+            return Utility::move(value._first);
+        }
+        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> constexpr friend const S& get(const Pair<F, S>& value) {
+            return value._second;
+        }
+        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> CORRADE_CONSTEXPR14 friend S& get(Pair<F, S>& value) {
+            return value._second;
+        }
+        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> CORRADE_CONSTEXPR14 friend S&& get(Pair<F, S>&& value) {
+            return Utility::move(value._second);
+        }
+        #endif
 
         F _first;
         S _second;

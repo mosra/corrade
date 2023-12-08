@@ -1103,6 +1103,18 @@ additional compile-time overloads of @ref slice(), @ref sliceSize(),
 
 @snippet Containers.cpp StaticArrayView-usage
 
+@section Containers-StaticArrayView-structured-bindings C++17 structured bindings
+
+If @ref Corrade/Containers/StructuredBindings.h is included, the class can be
+used in C++17 structured bindings. While the @cpp get<i>() @ce overloads are
+defined inside @ref StaticArrayView itself, a separate header is used for the
+@m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
+and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)
+template specializations, as those may require @cpp #include <utility> @ce on
+some STL implementations. Example:
+
+@snippet Containers-cpp17.cpp StaticArrayView-structured-bindings
+
 @section Containers-StaticArrayView-stl STL compatibility
 
 See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
@@ -1494,6 +1506,20 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
 
     private:
+        #if CORRADE_CXX_STANDARD > 201402
+        /* For C++17 structured bindings, if StructuredBindings.h is included
+           as well. There doesn't seem to be a way to call those directly, and
+           I can't find any practical use of std::tuple_size, tuple_element etc
+           on C++11 and C++14, so this is defined only for newer standards. */
+        template<std::size_t index> constexpr friend T& get(StaticArrayView<size_, T> value) {
+            return value._data[index];
+        }
+        /* As the view is non-owning, a rvalue doesn't imply that its contents
+           are able to be moved out. Thus, unlike StaticArray or Pair/Triple,
+           it takes the view by value and has no difference in behavior
+           depending on whether the input is T&, const T& or T&&. */
+        #endif
+
         T* _data;
 };
 

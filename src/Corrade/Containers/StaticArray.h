@@ -112,6 +112,18 @@ Owning array type               | ↭ | Non-owning view type
 @ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
 @ref StaticArray "const Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
 
+@section Containers-StaticArray-structured-bindings C++17 structured bindings
+
+If @ref Corrade/Containers/StructuredBindings.h is included, the class can be
+used in C++17 structured bindings. While the @cpp get<i>() @ce overloads are
+defined inside @ref StaticArray itself, a separate header is used for the
+@m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
+and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)
+template specializations, as those may require @cpp #include <utility> @ce on
+some STL implementations. Example:
+
+@snippet Containers-cpp17.cpp StaticArray-structured-bindings
+
 @section Containers-StaticArray-stl STL compatibility
 
 On compilers that support C++2a and @ref std::span, implicit conversion of an
@@ -756,6 +768,22 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
     private:
+        #if CORRADE_CXX_STANDARD > 201402
+        /* For C++17 structured bindings, if StructuredBindings.h is included
+           as well. There doesn't seem to be a way to call those directly, and
+           I can't find any practical use of std::tuple_size, tuple_element etc
+           on C++11 and C++14, so this is defined only for newer standards. */
+        template<std::size_t index> friend T& get(StaticArray<size_, T>& value) {
+            return value._data[index];
+        }
+        template<std::size_t index> friend const T& get(const StaticArray<size_, T>& value) {
+            return value._data[index];
+        }
+        template<std::size_t index> friend T&& get(StaticArray<size_, T>&& value) {
+            return Utility::move(value._data[index]);
+        }
+        #endif
+
         union {
             T _data[size_];
         };

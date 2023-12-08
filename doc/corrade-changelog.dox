@@ -130,6 +130,11 @@ namespace Corrade {
 -   Added a family of @ref Containers::arrayInsert(),
     @ref Containers::arrayRemove() and @ref Containers::arrayRemoveUnordered()
     functions for arbitrary insertion into and deletion from growable arrays
+-   Support for C++17 structured bindings for @ref Containers::Pair,
+    @ref Containers::Triple, @ref Containers::StaticArray,
+    @ref Containers::StaticArrayView and @ref Containers::StridedDimensions.
+    See also [mosra/corrade#127](https://github.com/mosra/corrade/pull/127) and
+    [mosra/corrade#157](https://github.com/mosra/corrade/issues/157).
 
 @subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
 

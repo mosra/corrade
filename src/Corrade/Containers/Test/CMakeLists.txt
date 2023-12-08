@@ -132,10 +132,20 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
         corrade_add_test(ContainersOptionalStlTest OptionalStlTest.cpp)
+        corrade_add_test(ContainersPairCpp17Test PairCpp17Test.cpp)
+        corrade_add_test(ContainersStaticArrayCpp17Test StaticArrayCpp17Test.cpp)
+        corrade_add_test(ContainersStaticArrayViewCpp17Test StaticArrayViewCpp17Test.cpp)
+        corrade_add_test(ContainersStridedDimensionsCpp17Test StridedDimensionsCpp17Test.cpp)
         corrade_add_test(ContainersStringStlViewTest StringStlViewTest.cpp)
+        corrade_add_test(ContainersTripleCpp17Test TripleCpp17Test.cpp)
         set_target_properties(
             ContainersOptionalStlTest
+            ContainersPairCpp17Test
+            ContainersStaticArrayViewCpp17Test
+            ContainersStaticArrayCpp17Test
+            ContainersStridedDimensionsCpp17Test
             ContainersStringStlViewTest
+            ContainersTripleCpp17Test
             PROPERTIES CORRADE_CXX_STANDARD 17)
     endif()
 

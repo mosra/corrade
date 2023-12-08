@@ -71,6 +71,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
         add_library(snippets-cpp17 STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET}
             Corrade-cpp17.cpp
+            Containers-cpp17.cpp
             Containers-stl17.cpp)
         target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
         set_target_properties(snippets-cpp17 PROPERTIES
