@@ -93,6 +93,9 @@ const struct {
     #ifdef CORRADE_ENABLE_SSE2
     {Cpu::Sse2},
     #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    {Cpu::Avx2},
+    #endif
 };
 
 const struct {
@@ -107,6 +110,16 @@ const struct {
     {Cpu::Sse2, 16},
     /* This should do two overlapping vector operations */
     {Cpu::Sse2, 17},
+    #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    /* This should fall back to the SSE2 and then the scalar case */
+    {Cpu::Avx2, 15},
+    /* This should fall back to the SSE2 case */
+    {Cpu::Avx2, 31},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Avx2, 32},
+    /* This should do two overlapping vector operations */
+    {Cpu::Avx2, 33},
     #endif
 };
 

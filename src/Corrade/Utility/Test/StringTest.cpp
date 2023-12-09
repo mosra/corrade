@@ -114,6 +114,9 @@ const struct {
     #ifdef CORRADE_ENABLE_SSE2
     {Cpu::Sse2, 16},
     #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    {Cpu::Avx2, 32},
+    #endif
 };
 
 const struct {

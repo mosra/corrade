@@ -38,6 +38,9 @@
 #ifdef CORRADE_ENABLE_SSE2
 #include "Corrade/Utility/IntrinsicsSse2.h"
 #endif
+#ifdef CORRADE_ENABLE_AVX2
+#include "Corrade/Utility/IntrinsicsAvx.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace String {
 
@@ -420,6 +423,134 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltyp
         i = end - 16;
         const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
         _mm_storeu_si128(reinterpret_cast<__m128i*>(i), uppercaseOneVector(chars));
+    }
+  };
+}
+#endif
+
+#ifdef CORRADE_ENABLE_AVX2
+/* Trivial extension of the SSE2 code to AVX2. Nothing else worth
+   mentioning. */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::Avx2T) {
+  return [](char* const data, const std::size_t size) CORRADE_ENABLE_AVX2 {
+    char* const end = data + size;
+
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
+    if(size < 32)
+        return lowercaseInPlaceImplementation(Cpu::Sse2)(data, size);
+
+    /* Core algorithm */
+    const __m256i aAndAbove = _mm256_set1_epi8(char(256u - std::uint8_t('A')));
+    const __m256i lowest25 = _mm256_set1_epi8(25);
+    const __m256i lowercaseBit = _mm256_set1_epi8(0x20);
+    const auto lowercaseOneVector = [&](const __m256i chars) CORRADE_ENABLE_AVX2 {
+        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const __m256i uppercaseInLowest25 = _mm256_add_epi8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
+           (now 0 to 25) zero and everything else non-zero */
+        const __m256i lowest25IsZero = _mm256_subs_epu8(uppercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const __m256i maskUppercase = _mm256_cmpeq_epi8(lowest25IsZero, _mm256_setzero_si256());
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           added to the original chars, making the uppercase chars lowercase */
+        return _mm256_add_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), lowercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 32 <= end; i += 32) {
+        const __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), lowercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        i = end - 32;
+        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), lowercaseOneVector(chars));
+    }
+  };
+}
+
+/* Again just trivial extension to AVX2 */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::Avx2T) {
+  return [](char* const data, const std::size_t size) CORRADE_ENABLE_AVX2 {
+    char* const end = data + size;
+
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
+    if(size < 32)
+        return uppercaseInPlaceImplementation(Cpu::Sse2)(data, size);
+
+    /* Core algorithm */
+    const __m256i aAndAbove = _mm256_set1_epi8(char(256u - std::uint8_t('a')));
+    const __m256i lowest25 = _mm256_set1_epi8(25);
+    const __m256i lowercaseBit = _mm256_set1_epi8(0x20);
+    const auto uppercaseOneVector = [&](const __m256i chars) CORRADE_ENABLE_AVX2 {
+        /* Moves 'a' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const __m256i lowercaseInLowest25 = _mm256_add_epi8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'a' to 'z'
+           (now 0 to 25) zero and everything else non-zero */
+        const __m256i lowest25IsZero = _mm256_subs_epu8(lowercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const __m256i maskUppercase = _mm256_cmpeq_epi8(lowest25IsZero, _mm256_setzero_si256());
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           subtracted from the original chars, making the lowercase chars
+           uppercase */
+        return _mm256_sub_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), uppercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, uppercasing
+       already-uppercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 32 <= end; i += 32) {
+        const __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), uppercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        i = end - 32;
+        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), uppercaseOneVector(chars));
     }
   };
 }
