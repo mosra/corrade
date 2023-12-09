@@ -83,6 +83,7 @@ struct StringViewBenchmark: TestSuite::Tester {
     void findLastCharacterRareStlString();
 
     private:
+        Containers::Optional<Containers::String> _text;
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
         decltype(Implementation::stringFindCharacter) _findCharacterImplementation;
         #endif
@@ -166,6 +167,8 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacterRareNaive,
                    &StringViewBenchmark::findLastCharacterRareMemrchr,
                    &StringViewBenchmark::findLastCharacterRareStlString}, 100);
+
+    _text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
 }
 
 void StringViewBenchmark::captureImplementations() {
@@ -196,12 +199,11 @@ void StringViewBenchmark::findCharacterCommon() {
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
 
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = *_text;
         while(StringView found = a.find(' ')) {
             ++count;
             a = a.suffix(found.end());
@@ -237,13 +239,12 @@ void StringViewBenchmark::findCharacterCommonNaive() {
 }
 
 void StringViewBenchmark::findCharacterCommonMemchr() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = text->data();
-        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', text->end() - a))) {
+        const char* a = _text->data();
+        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', _text->end() - a))) {
             ++count;
             a = found + 1;
         }
@@ -253,11 +254,10 @@ void StringViewBenchmark::findCharacterCommonMemchr() {
 }
 
 void StringViewBenchmark::findCharacterCommonStlString() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
-    std::string a = *text;
+    std::string a = *_text;
     CORRADE_BENCHMARK(CharacterRepeats) {
         std::size_t pos = 0;
         std::size_t found;
@@ -282,12 +282,11 @@ void StringViewBenchmark::findCharacterCommonSmall() {
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
 
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = *_text;
         while(StringView found = a.prefix(Utility::min(data.size, a.size())).find(' ')) {
             ++count;
             a = a.suffix(found.end());
@@ -298,13 +297,12 @@ void StringViewBenchmark::findCharacterCommonSmall() {
 }
 
 void StringViewBenchmark::findCharacterCommonSmallMemchr() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = text->data();
-        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', Utility::min(std::ptrdiff_t{15}, text->end() - a)))) {
+        const char* a = _text->data();
+        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', Utility::min(std::ptrdiff_t{15}, _text->end() - a)))) {
             ++count;
             a = found + 1;
         }
@@ -325,13 +323,12 @@ void StringViewBenchmark::findCharacterRare() {
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
 
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = string;
         while(StringView found = a.find('\n')) {
             ++count;
             a = a.suffix(found.end());
@@ -342,16 +339,15 @@ void StringViewBenchmark::findCharacterRare() {
 }
 
 void StringViewBenchmark::findCharacterRareNaive() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = text->data();
+        const char* a = string.data();
         for(;;) {
             const char* found = nullptr;
-            for(const char* i = a; i != text->end(); ++i) {
+            for(const char* i = a; i != string.end(); ++i) {
                 if(*i == '\n') {
                     found = i;
                     break;
@@ -368,14 +364,13 @@ void StringViewBenchmark::findCharacterRareNaive() {
 }
 
 void StringViewBenchmark::findCharacterRareMemchr() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = text->data();
-        while(const char* found = static_cast<const char*>(std::memchr(a, '\n', text->end() - a))) {
+        const char* a = string.data();
+        while(const char* found = static_cast<const char*>(std::memchr(a, '\n', string.end() - a))) {
             ++count;
             a = found + 1;
         }
@@ -385,12 +380,10 @@ void StringViewBenchmark::findCharacterRareMemchr() {
 }
 
 void StringViewBenchmark::findCharacterRareStlString() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
-    std::string a = *text;
+    std::string a = *_text*10;
     CORRADE_BENCHMARK(CharacterRepeats) {
         std::size_t pos = 0;
         std::size_t found;
@@ -404,12 +397,11 @@ void StringViewBenchmark::findCharacterRareStlString() {
 }
 
 void StringViewBenchmark::findLastCharacterCommon() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = *_text;
         while(StringView found = a.findLast(' ')) {
             ++count;
             a = a.prefix(found.begin());
@@ -420,15 +412,14 @@ void StringViewBenchmark::findLastCharacterCommon() {
 }
 
 void StringViewBenchmark::findLastCharacterCommonNaive() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
+        std::size_t end = _text->size();
         for(;;) {
             const char* found = nullptr;
-            for(const char* i = text->begin() + end; i != text->begin(); --i) {
+            for(const char* i = _text->begin() + end; i != _text->begin(); --i) {
                 if(*(i - 1) == ' ') {
                     found = i - 1;
                     break;
@@ -437,7 +428,7 @@ void StringViewBenchmark::findLastCharacterCommonNaive() {
             if(!found) break;
 
             ++count;
-            end = found - text->begin();
+            end = found - _text->begin();
         }
     }
 
@@ -448,15 +439,14 @@ void StringViewBenchmark::findLastCharacterCommonMemrchr() {
     #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("memrchr() not available");
     #else
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
-        while(const char* found = static_cast<const char*>(memrchr(text->begin(), ' ', end))) {
+        std::size_t end = _text->size();
+        while(const char* found = static_cast<const char*>(memrchr(_text->begin(), ' ', end))) {
             ++count;
-            end = found - text->begin();
+            end = found - _text->begin();
         }
     }
 
@@ -465,13 +455,12 @@ void StringViewBenchmark::findLastCharacterCommonMemrchr() {
 }
 
 void StringViewBenchmark::findLastCharacterCommonStlString() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
-    std::string a = *text;
+    std::string a = *_text;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
+        std::size_t end = _text->size();
         std::size_t found;
         while((found = a.rfind(' ', end)) != std::string::npos) {
             ++count;
@@ -483,12 +472,11 @@ void StringViewBenchmark::findLastCharacterCommonStlString() {
 }
 
 void StringViewBenchmark::findLastCharacterCommonSmall() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = *_text;
         /** @todo use suffix() once it takes suffix size */
         while(StringView found = a.exceptPrefix(Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(a.size()) - 15)).findLast(' ')) {
             ++count;
@@ -503,15 +491,14 @@ void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
     #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("memrchr() not available");
     #else
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
-        while(const char* found = static_cast<const char*>(memrchr(text->begin() + Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15), ' ', end - Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15)))) {
+        std::size_t end = _text->size();
+        while(const char* found = static_cast<const char*>(memrchr(_text->begin() + Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15), ' ', end - Utility::max(std::ptrdiff_t{0}, std::ptrdiff_t(end) - 15)))) {
             ++count;
-            end = found - text->begin();
+            end = found - _text->begin();
         }
     }
 
@@ -520,13 +507,12 @@ void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
 }
 
 void StringViewBenchmark::findLastCharacterRare() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = *text;
+        StringView a = string;
         while(StringView found = a.findLast('\n')) {
             ++count;
             a = a.prefix(found.begin());
@@ -537,16 +523,15 @@ void StringViewBenchmark::findLastCharacterRare() {
 }
 
 void StringViewBenchmark::findLastCharacterRareNaive() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
+        std::size_t end = string.size();
         for(;;) {
             const char* found = nullptr;
-            for(const char* i = text->begin() + end; i != text->begin(); --i) {
+            for(const char* i = string.begin() + end; i != string.begin(); --i) {
                 if(*(i - 1) == '\n') {
                     found = i - 1;
                     break;
@@ -555,7 +540,7 @@ void StringViewBenchmark::findLastCharacterRareNaive() {
             if(!found) break;
 
             ++count;
-            end = found - text->begin();
+            end = found - string.begin();
         }
     }
 
@@ -566,16 +551,15 @@ void StringViewBenchmark::findLastCharacterRareMemrchr() {
     #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("memrchr() not available");
     #else
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
-        while(const char* found = static_cast<const char*>(memrchr(text->begin(), '\n', end))) {
+        std::size_t end = string.size();
+        while(const char* found = static_cast<const char*>(memrchr(string.begin(), '\n', end))) {
             ++count;
-            end = found - text->begin();
+            end = found - string.begin();
         }
     }
 
@@ -584,14 +568,13 @@ void StringViewBenchmark::findLastCharacterRareMemrchr() {
 }
 
 void StringViewBenchmark::findLastCharacterRareStlString() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
-    *text = *text*10;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     std::size_t count = 0;
-    std::string a = *text;
+    std::string a = string;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = text->size();
+        std::size_t end = string.size();
         std::size_t found;
         while((found = a.rfind('\n', end)) != std::string::npos) {
             ++count;
