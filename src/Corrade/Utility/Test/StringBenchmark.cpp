@@ -24,12 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cctype>
+#include <cctype> /* std::ctype */
 #include <algorithm> /* std::transform() */
-#include <locale>
-#include <string>
+#include <locale> /* std::locale::classic() */
 
-#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/String.h"
@@ -82,6 +80,7 @@ void StringBenchmark::lowercase() {
         String::lowercaseInPlace(string);
 
     CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
 }
 
 /* Compared to the implementation in String::lowercaseInPlace(), this uses
@@ -99,6 +98,7 @@ void StringBenchmark::lowercaseBranchless32() {
         lowercaseInPlaceBranchless32(string);
 
     CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
 }
 
 /* This is the original implementation that used to be in
@@ -115,10 +115,11 @@ void StringBenchmark::lowercaseNaive() {
         lowercaseInPlaceNaive(string);
 
     CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::lowercaseStl() {
-    std::string string = loremIpsum;
+    Containers::String string = loremIpsum;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
@@ -127,17 +128,19 @@ void StringBenchmark::lowercaseStl() {
     CORRADE_BENCHMARK(1)
         std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
 
-    CORRADE_VERIFY(!Containers::StringView{string}.contains('L'));
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::lowercaseStlFacet() {
-    std::string string = loremIpsum;
+    Containers::String string = loremIpsum;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
     CORRADE_BENCHMARK(1)
-        std::use_facet<std::ctype<char>>(std::locale::classic()).tolower(&string[0], &string[string.size()]);
+        std::use_facet<std::ctype<char>>(std::locale::classic()).tolower(string.begin(), string.end());
 
-    CORRADE_VERIFY(!Containers::StringView{string}.contains('L'));
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::uppercase() {
@@ -147,6 +150,7 @@ void StringBenchmark::uppercase() {
         String::uppercaseInPlace(string);
 
     CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
 }
 
 /* Compared to the implementation in String::lowercaseInPlace(), this uses
@@ -164,6 +168,7 @@ void StringBenchmark::uppercaseBranchless32() {
         uppercaseInPlaceBranchless32(string);
 
     CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
 }
 
 /* This is the original implementation that used to be in
@@ -180,10 +185,11 @@ void StringBenchmark::uppercaseNaive() {
         uppercaseInPlaceNaive(string);
 
     CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
 }
 
 void StringBenchmark::uppercaseStl() {
-    std::string string = loremIpsum;
+    Containers::String string = loremIpsum;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
@@ -192,17 +198,19 @@ void StringBenchmark::uppercaseStl() {
     CORRADE_BENCHMARK(1)
         std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
 
-    CORRADE_VERIFY(!Containers::StringView{string}.contains('a'));
+    CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
 }
 
 void StringBenchmark::uppercaseStlFacet() {
-    std::string string = loremIpsum;
+    Containers::String string = loremIpsum;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
     CORRADE_BENCHMARK(1)
         std::use_facet<std::ctype<char>>(std::locale::classic()).toupper(&string[0], &string[string.size()]);
 
-    CORRADE_VERIFY(!Containers::StringView{string}.contains('a'));
+    CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
 }
 
 }}}}
