@@ -33,6 +33,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
+#include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 #include "configure.h"
 
@@ -40,6 +41,9 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct StringBenchmark: TestSuite::Tester {
     explicit StringBenchmark();
+
+    void captureImplementations();
+    void restoreImplementations();
 
     void lowercase();
     void lowercaseBranchless32();
@@ -55,19 +59,37 @@ struct StringBenchmark: TestSuite::Tester {
 
     private:
         Containers::Optional<Containers::String> _text;
+        #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
+        decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
+        #endif
 };
 
 using namespace Containers::Literals;
 
+const struct {
+    Cpu::Features features;
+} LowercaseUppercaseData[]{
+    {Cpu::Scalar},
+};
+
 StringBenchmark::StringBenchmark() {
-    addBenchmarks({&StringBenchmark::lowercase,
-                   &StringBenchmark::lowercaseBranchless32,
+    addInstancedBenchmarks({&StringBenchmark::lowercase}, 10,
+        cpuVariantCount(LowercaseUppercaseData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::lowercaseBranchless32,
                    &StringBenchmark::lowercaseNaive,
                    &StringBenchmark::lowercaseStl,
-                   &StringBenchmark::lowercaseStlFacet,
+                   &StringBenchmark::lowercaseStlFacet}, 10);
 
-                   &StringBenchmark::uppercase,
-                   &StringBenchmark::uppercaseBranchless32,
+    addInstancedBenchmarks({&StringBenchmark::uppercase}, 10,
+        cpuVariantCount(LowercaseUppercaseData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::uppercaseBranchless32,
                    &StringBenchmark::uppercaseNaive,
                    &StringBenchmark::uppercaseStl,
                    &StringBenchmark::uppercaseStlFacet}, 10);
@@ -75,7 +97,32 @@ StringBenchmark::StringBenchmark() {
     _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
 }
 
+void StringBenchmark::captureImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
+    _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
+    #endif
+}
+
+void StringBenchmark::restoreImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
+    String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
+    #endif
+}
+
 void StringBenchmark::lowercase() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     CORRADE_VERIFY(_text);
     Containers::String string = *_text*10;
 
@@ -160,6 +207,17 @@ void StringBenchmark::lowercaseStlFacet() {
 }
 
 void StringBenchmark::uppercase() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     CORRADE_VERIFY(_text);
     Containers::String string = *_text*10;
 

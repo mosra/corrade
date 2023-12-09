@@ -34,6 +34,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h"
+#include "Corrade/Utility/Implementation/cpu.h"
 
 namespace Corrade { namespace Utility { namespace String {
 
@@ -216,7 +217,12 @@ Containers::StaticArray<3, std::string> rpartition(const std::string& string, co
     return rpartitionInternal(string, {separator.data(), separator.size()});
 }
 
-void lowercaseInPlace(const Containers::MutableStringView string) {
+namespace Implementation {
+
+namespace {
+
+typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::ScalarT) {
+  return [](char* data, const std::size_t size) {
     /* A proper Unicode-aware *and* locale-aware solution would involve far
        more than iterating over bytes -- multi-byte characters, composed
        characters (ä formed from ¨ and a), SS -> ß in German but not elsewhere
@@ -229,15 +235,33 @@ void lowercaseInPlace(const Containers::MutableStringView string) {
        uppercase characters. See Test/StringBenchmark.cpp for other alternative
        implementations leading up to this point. In particular, the
        std::uint8_t() is crucial, unsigned() is 6x to 8x slower. */
-    for(char& c: string)
-        c += (std::uint8_t(c - 'A') < 26) << 5;
+    const char* const end = data + size;
+    for(char* c = data; c != end; ++c)
+        *c += (std::uint8_t(*c - 'A') < 26) << 5;
+  };
 }
 
-void uppercaseInPlace(const Containers::MutableStringView string) {
+typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::ScalarT) {
+  return [](char* data, const std::size_t size) {
     /* Same as above, except that (1 << 5) is subtracted for 'a' and all 26
        letters after. */
-    for(char& c: string)
-        c -= (std::uint8_t(c - 'a') < 26) << 5;
+    const char* const end = data + size;
+    for(char* c = data; c != end; ++c)
+        *c -= (std::uint8_t(*c - 'a') < 26) << 5;
+  };
+}
+
+}
+
+CORRADE_UTILITY_CPU_DISPATCHER_BASE(lowercaseInPlaceImplementation)
+CORRADE_UTILITY_CPU_DISPATCHER_BASE(uppercaseInPlaceImplementation)
+CORRADE_UTILITY_CPU_DISPATCHED(lowercaseInPlaceImplementation, void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size))({
+    return lowercaseInPlaceImplementation(Cpu::DefaultBase)(data, size);
+})
+CORRADE_UTILITY_CPU_DISPATCHED(uppercaseInPlaceImplementation, void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size))({
+    return uppercaseInPlaceImplementation(Cpu::DefaultBase)(data, size);
+})
+
 }
 
 Containers::String lowercase(const Containers::StringView string) {

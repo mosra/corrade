@@ -37,6 +37,7 @@
 
 #include "Corrade/configure.h"
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -421,6 +422,15 @@ inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings
     return Implementation::joinWithoutEmptyParts(strings, {delimiter.data(), delimiter.size()});
 }
 
+namespace Implementation {
+
+CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
+CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
+CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)
+CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(uppercaseInPlace)
+
+}
+
 /**
 @brief Convert ASCII characters in a string to lowercase, in place
 @m_since_latest
@@ -430,7 +440,9 @@ character from `abcdefghijklmnopqrstuvwxyz`. Deliberately supports only ASCII
 as Unicode-aware case conversion is a much more complex topic.
 @see @ref lowercase()
 */
-CORRADE_UTILITY_EXPORT void lowercaseInPlace(Containers::MutableStringView string);
+inline void lowercaseInPlace(Containers::MutableStringView string) {
+    Implementation::lowercaseInPlace(string.data(), string.size());
+}
 
 /**
 @brief Convert ASCII characters in a string to lowercase
@@ -465,7 +477,9 @@ character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately supports only ASCII
 as Unicode-aware case conversion is a much more complex topic.
 @see @ref uppercase()
 */
-CORRADE_UTILITY_EXPORT void uppercaseInPlace(Containers::MutableStringView string);
+inline void uppercaseInPlace(Containers::MutableStringView string) {
+    Implementation::uppercaseInPlace(string.data(), string.size());
+}
 
 /**
 @brief Convert ASCII characters in a string to uppercase, in place

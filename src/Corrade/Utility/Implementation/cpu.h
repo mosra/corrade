@@ -32,6 +32,7 @@
 /* Function-pointer-based CPU dispatch definitions for the implementation */
 #if defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH) || (defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH) && !defined(CORRADE_CPU_USE_IFUNC))
     #define CORRADE_UTILITY_CPU_DISPATCHER(...) CORRADE_CPU_DISPATCHER(__VA_ARGS__)
+    #define CORRADE_UTILITY_CPU_DISPATCHER_BASE(...) CORRADE_CPU_DISPATCHER_BASE(__VA_ARGS__)
     #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)                 \
         CORRADE_CPU_DISPATCHED_POINTER(dispatcher, __VA_ARGS__) CORRADE_NOOP
     #define CORRADE_UTILITY_CPU_MAYBE_UNUSED
@@ -42,11 +43,14 @@
     #if defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH) && defined(CORRADE_CPU_USE_IFUNC)
         #define CORRADE_UTILITY_CPU_DISPATCHER(...)                         \
             namespace { CORRADE_CPU_DISPATCHER(__VA_ARGS__) }
+        #define CORRADE_UTILITY_CPU_DISPATCHER_BASE(...)                    \
+            namespace { CORRADE_CPU_DISPATCHER_BASE(__VA_ARGS__) }
         #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)             \
             CORRADE_CPU_DISPATCHED_IFUNC(dispatcher, __VA_ARGS__) CORRADE_NOOP
         #define CORRADE_UTILITY_CPU_MAYBE_UNUSED
     #elif !defined(CORRADE_BUILD_CPU_RUNTIME_DISPATCH)
         #define CORRADE_UTILITY_CPU_DISPATCHER(...)
+        #define CORRADE_UTILITY_CPU_DISPATCHER_BASE(...)
         #define CORRADE_UTILITY_CPU_DISPATCHED(dispatcher, ...)             \
             __VA_ARGS__ CORRADE_PASSTHROUGH
         #define CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_UNUSED

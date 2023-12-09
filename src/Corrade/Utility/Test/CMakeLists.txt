@@ -395,6 +395,7 @@ endif()
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 
 corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp
+    LIBRARIES CorradeTestSuiteTestLib
     FILES ${PROJECT_SOURCE_DIR}/src/Corrade/Containers/Test/StringTestFiles/lorem-ipsum.txt)
 target_include_directories(UtilityStringBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

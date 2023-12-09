@@ -35,11 +35,15 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
+#include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct StringTest: TestSuite::Tester {
     explicit StringTest();
+
+    void captureImplementations();
+    void restoreImplementations();
 
     void fromArray();
     void trim();
@@ -87,6 +91,19 @@ struct StringTest: TestSuite::Tester {
     void parseNumberSequence();
     void parseNumberSequenceOverflow();
     void parseNumberSequenceError();
+
+    private:
+        #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
+        decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
+        #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} LowercaseUppercaseData[]{
+    {Cpu::Scalar, 16},
 };
 
 const struct {
@@ -165,9 +182,14 @@ StringTest::StringTest() {
               &StringTest::split,
               &StringTest::splitMultipleCharacters,
               &StringTest::partition,
-              &StringTest::join,
-              &StringTest::lowercaseUppercase,
-              &StringTest::lowercaseUppercaseString,
+              &StringTest::join});
+
+    addInstancedTests({&StringTest::lowercaseUppercase},
+        cpuVariantCount(LowercaseUppercaseData),
+        &StringTest::captureImplementations,
+        &StringTest::restoreImplementations);
+
+    addTests({&StringTest::lowercaseUppercaseString,
               &StringTest::lowercaseUppercaseStringSmall,
               &StringTest::lowercaseUppercaseStringNotOwned,
               &StringTest::lowercaseUppercaseStl,
@@ -212,6 +234,20 @@ StringTest::StringTest() {
 }
 
 using namespace Containers::Literals;
+
+void StringTest::captureImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
+    _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
+    #endif
+}
+
+void StringTest::restoreImplementations() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
+    String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
+    #endif
+}
 
 void StringTest::fromArray() {
     CORRADE_COMPARE(String::fromArray(nullptr), "");
@@ -585,6 +621,18 @@ constexpr char AllBytesLowercase[]{
 };
 
 void StringTest::lowercaseUppercase() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
     /* Because the conversion is done using a bit operation on a range, check
        that the conversion is done on all characters and there's no off-by-one
        error at the bounds or other characters changed randomly */
