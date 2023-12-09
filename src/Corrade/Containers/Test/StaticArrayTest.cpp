@@ -471,6 +471,17 @@ void StaticArrayTest::constructArrayRvalue() {
 }
 
 void StaticArrayTest::constructArrayMove() {
+    #ifdef CORRADE_MSVC2017_COMPATIBILITY
+    /* MSVC 2015 and 2017 fails with
+        error C2440: 'return': cannot convert from 'T [3]' to 'T (&&)[3]'
+        Corrade/Utility/Move.h(88): note: You cannot bind an lvalue to an rvalue reference
+       on the Utility::move() call inside the r-value constructor, std::move()
+       behaves the same. Because of that, only the copying constructor can be
+       enabled, as otherwise it would pick it for the constructArrayRvalue()
+       above as well and fail even in the case where nothing needs to be
+       moved. */
+    CORRADE_SKIP("MSVC 2015 and 2017 isn't able to move arrays.");
+    #else
     struct IntPointerInt {
         Containers::Pointer<int> a;
         int b;
@@ -498,6 +509,7 @@ void StaticArrayTest::constructArrayMove() {
     CORRADE_COMPARE(*a2[2].a, 5);
     CORRADE_COMPARE(a1[2].b, 6);
     CORRADE_COMPARE(a2[2].b, 6);
+    #endif
 }
 
 void StaticArrayTest::copy() {

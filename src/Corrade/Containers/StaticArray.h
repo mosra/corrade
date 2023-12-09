@@ -84,7 +84,8 @@ is possible to initialize the array in a different way using so-called *tags*:
     the array using provided arguments. In other words,
     @cpp T array[size]{T{args...}, T{args...}, …} @ce.
 -   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to
-    @ref StaticArray(Args&&... args) shown in the example snippet above. Again useful when you want to make the choice appear explicit). In other words,
+    @ref StaticArray(Args&&... args) shown in the example snippet above. Again
+    useful when you want to make the choice appear explicit). In other words,
     @cpp T array[size]{args...} @ce. Note that the variadic template means you
     can't use @cpp {} @ce for nested type initializers but have to specify the
     types explicitly. An alternative is directly passing an array, i.e. with
@@ -297,6 +298,9 @@ template<std::size_t size_, class T> class StaticArray {
          */
         explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
 
+        /* See StaticArrayTest::constructArrayMove() for details why it has to
+           be disabled */
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /**
          * @brief In-place construct an array by moving the elements from a fixed-size array
          * @m_since_latest
@@ -304,9 +308,14 @@ template<std::size_t size_, class T> class StaticArray {
          * Compared to @ref StaticArray(InPlaceInitT, Args&&... args) doesn't
          * require the elements to have explicitly specified type. Same as
          * @ref StaticArray(T(&&)[size_]).
+         * @partialsupport Not available on
+         *      @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" and
+         *      @ref CORRADE_MSVC2017_COMPATIBILITY "MSVC 2017" as these
+         *      compilers don't support moving arrays.
          * @see @ref StaticArray(InPlaceInitT, const T(&)[size_])
          */
         explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        #endif
 
         /**
          * @brief Construct a value-initialized array
@@ -338,15 +347,23 @@ template<std::size_t size_, class T> class StaticArray {
          */
         explicit StaticArray(const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, data} {}
 
+        /* See StaticArrayTest::constructArrayMove() for details why it has to
+           be disabled */
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /**
          * @brief In-place construct an array by moving the elements from a fixed-size array
          * @m_since_latest
          *
          * Alias to @ref StaticArray(InPlaceInitT, T(&&)[size_]).
+         * @partialsupport Not available on
+         *      @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" and
+         *      @ref CORRADE_MSVC2017_COMPATIBILITY "MSVC 2017" as these
+         *      compilers don't support moving arrays.
          * @see @ref StaticArray(const T(&)[size_]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
         explicit StaticArray(T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, Utility::move(data)} {}
+        #endif
 
         /** @brief Copy constructor */
         StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
@@ -846,7 +863,11 @@ template<std::size_t size_, class T> class StaticArray {
         #endif
 
         template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
+        /* See StaticArrayTest::constructArrayMove() for details why it has to
+           be disabled */
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
+        #endif
 
         union {
             T _data[size_];
