@@ -28,9 +28,13 @@
 #include <algorithm> /* std::transform() */
 #include <locale> /* std::locale::classic() */
 
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
+
+#include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -48,16 +52,12 @@ struct StringBenchmark: TestSuite::Tester {
     void uppercaseNaive();
     void uppercaseStl();
     void uppercaseStlFacet();
+
+    private:
+        Containers::Optional<Containers::String> _text;
 };
 
 using namespace Containers::Literals;
-
-constexpr Containers::StringView loremIpsum =
-    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis viverra diam non justo. Integer pellentesque quam vel velit. Pellentesque pretium lectus id turpis. Fusce suscipit libero eget elit. Vestibulum fermentum tortor id mi. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Nullam sit amet magna in magna gravida vehicula. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. Nam sed tellus id magna elementum tincidunt.\n"
-    "Aliquam erat volutpat. Vivamus ac leo pretium faucibus. Etiam commodo dui eget wisi. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Maecenas ipsum velit, consectetuer eu lobortis ut, dictum at dui. Integer imperdiet lectus quis justo. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Integer tempor. Integer rutrum, orci vestibulum ullamcorper ultricies, lacus quam ultricies odio, vitae placerat pede sem sit amet enim. Pellentesque pretium lectus id turpis.\n"
-    "Etiam commodo dui eget wisi. Aenean id metus id velit ullamcorper pulvinar. Etiam commodo dui eget wisi. Nullam sit amet magna in magna gravida vehicula. Nulla est. Duis sapien nunc, commodo et, interdum suscipit, sollicitudin et, dolor. Nullam lectus justo, vulputate eget mollis sed, tempor sed magna. Aliquam erat volutpat. Integer rutrum, orci vestibulum ullamcorper ultricies, lacus quam ultricies odio, vitae placerat pede sem sit amet enim. Proin in tellus sit amet nibh dignissim sagittis. Cras elementum. In enim a arcu imperdiet malesuada. Nulla turpis magna, cursus sit amet, suscipit a, interdum id, felis. Nam sed tellus id magna elementum tincidunt. Et harum quidem rerum facilis est et expedita distinctio. Nunc auctor. Aliquam erat volutpat. Pellentesque sapien. Nulla quis diam. Pellentesque arcu.\n"
-    "Fusce wisi. Mauris elementum mauris vitae tortor. Etiam bibendum elit eget erat. Curabitur sagittis hendrerit ante. Fusce tellus. Aenean vel massa quis mauris vehicula lacinia. Aenean id metus id velit ullamcorper pulvinar. Etiam posuere lacus quis dolor. Fusce tellus odio, dapibus id fermentum quis, suscipit id erat. Duis bibendum, lectus ut viverra rhoncus, dolor nunc faucibus libero, eget facilisis enim ipsum id lacus. Integer lacinia. Pellentesque sapien. Duis bibendum, lectus ut viverra rhoncus, dolor nunc faucibus libero, eget facilisis enim ipsum id lacus. Curabitur bibendum justo non orci.\n"
-    "Praesent id justo in neque elementum ultrices. Proin mattis lacinia justo. Duis viverra diam non justo. Mauris dictum facilisis augue. Mauris elementum mauris vitae tortor. Integer malesuada. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Praesent dapibus. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nam quis nulla.\n"_s;
 
 StringBenchmark::StringBenchmark() {
     addBenchmarks({&StringBenchmark::lowercase,
@@ -70,14 +70,18 @@ StringBenchmark::StringBenchmark() {
                    &StringBenchmark::uppercaseBranchless32,
                    &StringBenchmark::uppercaseNaive,
                    &StringBenchmark::uppercaseStl,
-                   &StringBenchmark::uppercaseStlFacet}, 100);
+                   &StringBenchmark::uppercaseStlFacet}, 10);
+
+    _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
 }
 
 void StringBenchmark::lowercase() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        String::lowercaseInPlace(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        String::lowercaseInPlace(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
@@ -92,10 +96,12 @@ CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless32(Containers::MutableString
 }
 
 void StringBenchmark::lowercaseBranchless32() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        lowercaseInPlaceBranchless32(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        lowercaseInPlaceBranchless32(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
@@ -109,45 +115,57 @@ CORRADE_NEVER_INLINE void lowercaseInPlaceNaive(Containers::MutableStringView st
 }
 
 void StringBenchmark::lowercaseNaive() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        lowercaseInPlaceNaive(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        lowercaseInPlaceNaive(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::lowercaseStl() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
        dispatch per character (!!). C++ experts recommend using a lambda here,
        even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
-    CORRADE_BENCHMARK(1)
-        std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10) {
+        Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
+        std::transform(slice.begin(), slice.end(), slice.begin(), static_cast<int (*)(int)>(std::tolower));
+    }
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::lowercaseStlFacet() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
-    CORRADE_BENCHMARK(1)
-        std::use_facet<std::ctype<char>>(std::locale::classic()).tolower(string.begin(), string.end());
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10) {
+        Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
+        std::use_facet<std::ctype<char>>(std::locale::classic()).tolower(slice.begin(), slice.end());
+    }
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
 }
 
 void StringBenchmark::uppercase() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        String::uppercaseInPlace(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        String::uppercaseInPlace(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));
@@ -162,10 +180,12 @@ CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless32(Containers::MutableString
 }
 
 void StringBenchmark::uppercaseBranchless32() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        uppercaseInPlaceBranchless32(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        uppercaseInPlaceBranchless32(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));
@@ -179,35 +199,45 @@ CORRADE_NEVER_INLINE void uppercaseInPlaceNaive(Containers::MutableStringView st
 }
 
 void StringBenchmark::uppercaseNaive() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
-    CORRADE_BENCHMARK(1)
-        uppercaseInPlaceNaive(string);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        uppercaseInPlaceNaive(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));
 }
 
 void StringBenchmark::uppercaseStl() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
        dispatch per character (!!). C++ experts recommend using a lambda here,
        even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
-    CORRADE_BENCHMARK(1)
-        std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10) {
+        Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
+        std::transform(slice.begin(), slice.end(), slice.begin(), static_cast<int (*)(int)>(std::toupper));
+    }
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));
 }
 
 void StringBenchmark::uppercaseStlFacet() {
-    Containers::String string = loremIpsum;
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
-    CORRADE_BENCHMARK(1)
-        std::use_facet<std::ctype<char>>(std::locale::classic()).toupper(&string[0], &string[string.size()]);
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10) {
+        Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
+        std::use_facet<std::ctype<char>>(std::locale::classic()).toupper(slice.begin(), slice.end());
+    }
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));

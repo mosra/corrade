@@ -29,9 +29,11 @@
 set(CMAKE_FOLDER "Corrade/Utility/Test")
 
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(CONTAINERS_STRING_TEST_DIR ".")
     set(UTILITY_TEST_DIR ".")
     set(UTILITY_BINARY_TEST_DIR "write")
 else()
+    set(CONTAINERS_STRING_TEST_DIR ${PROJECT_SOURCE_DIR}/src/Corrade/Containers/Test/StringTestFiles)
     set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 endif()
@@ -391,7 +393,11 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
 endif()
 
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
-corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp)
+
+corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp
+    FILES ${PROJECT_SOURCE_DIR}/src/Corrade/Containers/Test/StringTestFiles/lorem-ipsum.txt)
+target_include_directories(UtilityStringBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
