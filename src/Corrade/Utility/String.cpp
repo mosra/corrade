@@ -35,6 +35,9 @@
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Implementation/cpu.h"
+#ifdef CORRADE_ENABLE_SSE2
+#include "Corrade/Utility/IntrinsicsSse2.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace String {
 
@@ -221,7 +224,7 @@ namespace Implementation {
 
 namespace {
 
-typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::ScalarT) {
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::ScalarT) {
   return [](char* data, const std::size_t size) {
     /* A proper Unicode-aware *and* locale-aware solution would involve far
        more than iterating over bytes -- multi-byte characters, composed
@@ -241,7 +244,7 @@ typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementa
   };
 }
 
-typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::ScalarT) {
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::ScalarT) {
   return [](char* data, const std::size_t size) {
     /* Same as above, except that (1 << 5) is subtracted for 'a' and all 26
        letters after. */
@@ -250,6 +253,177 @@ typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementa
         *c -= (std::uint8_t(*c - 'a') < 26) << 5;
   };
 }
+
+#ifdef CORRADE_ENABLE_SSE2
+/* The core vector algorithm was reverse-engineered from what GCC (and
+   apparently also Clang) does for the scalar case with SSE2 optimizations
+   enabled. It's the same count of instructions as the "obvious" case of doing
+   two comparisons per character, ORing that, and then applying a bitmask, but
+   considerably faster. The obvious case is implemented and benchmarked in
+   StringBenchmark::lowercaseSse2TwoCompares() for comparison. */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::Sse2T) {
+  return [](char* const data, const std::size_t size) CORRADE_ENABLE_SSE2 {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const __m128i aAndAbove = _mm_set1_epi8(char(256u - std::uint8_t('A')));
+    const __m128i lowest25 = _mm_set1_epi8(25);
+    const __m128i lowercaseBit = _mm_set1_epi8(0x20);
+    const auto lowercaseOneVector = [&](const __m128i chars) CORRADE_ENABLE_SSE2 {
+        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const __m128i uppercaseInLowest25 = _mm_add_epi8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
+           (now 0 to 25) zero and everything else non-zero */
+        const __m128i lowest25IsZero = _mm_subs_epu8(uppercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const __m128i maskUppercase = _mm_cmpeq_epi8(lowest25IsZero, _mm_setzero_si128());
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           added to the original chars, making the uppercase chars lowercase */
+        return _mm_add_epi8(chars, _mm_and_si128(maskUppercase, lowercaseBit));
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), lowercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 16 <= end; i += 16) {
+        const __m128i chars = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_store_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+  };
+}
+
+/* Compared to the lowercase implementation it (obviously) uses the scalar
+   uppercasing code in the less-than-16 case. In the vector case zeroes out the
+   a-z range instead of A-Z, and subtracts the lowercase bit instead of
+   adding. */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::Sse2T) {
+  return [](char* const data, const std::size_t size) CORRADE_ENABLE_SSE2 {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const __m128i aAndAbove = _mm_set1_epi8(char(256u - std::uint8_t('a')));
+    const __m128i lowest25 = _mm_set1_epi8(25);
+    const __m128i lowercaseBit = _mm_set1_epi8(0x20);
+    const auto uppercaseOneVector = [&](const __m128i chars) CORRADE_ENABLE_SSE2 {
+        /* Moves 'a' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const __m128i lowercaseInLowest25 = _mm_add_epi8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'a' to 'z'
+           (now 0 to 25) zero and everything else non-zero */
+        const __m128i lowest25IsZero = _mm_subs_epu8(lowercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const __m128i maskUppercase = _mm_cmpeq_epi8(lowest25IsZero, _mm_setzero_si128());
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           subtracted from the original chars, making the lowercase chars
+           uppercase */
+        return _mm_sub_epi8(chars, _mm_and_si128(maskUppercase, lowercaseBit));
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), uppercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, uppercasing
+       already-uppercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 16 <= end; i += 16) {
+        const __m128i chars = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_store_si128(reinterpret_cast<__m128i*>(i), uppercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), uppercaseOneVector(chars));
+    }
+  };
+}
+#endif
 
 }
 

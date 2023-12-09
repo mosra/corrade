@@ -31,9 +31,13 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
+#ifdef CORRADE_ENABLE_SSE2
+#include "Corrade/Utility/IntrinsicsSse2.h"
+#endif
 
 #include "configure.h"
 
@@ -46,16 +50,31 @@ struct StringBenchmark: TestSuite::Tester {
     void restoreImplementations();
 
     void lowercase();
+    #ifdef CORRADE_ENABLE_SSE2
+    void lowercaseSse2TwoCompares();
+    #endif
+    void lowercaseBranchless();
     void lowercaseBranchless32();
     void lowercaseNaive();
     void lowercaseStl();
     void lowercaseStlFacet();
 
     void uppercase();
+    void uppercaseBranchless();
     void uppercaseBranchless32();
     void uppercaseNaive();
     void uppercaseStl();
     void uppercaseStlFacet();
+
+    void lowercaseSmall();
+    /* Comparing the "small" case only to the scalar variant that was fastest
+       of the above, not all */
+    void lowercaseSmallBranchless();
+
+    void uppercaseSmall();
+    /* Comparing the "small" case only to the scalar variant that was fastest
+       of the above, not all */
+    void uppercaseSmallBranchless();
 
     private:
         Containers::Optional<Containers::String> _text;
@@ -71,6 +90,24 @@ const struct {
     Cpu::Features features;
 } LowercaseUppercaseData[]{
     {Cpu::Scalar},
+    #ifdef CORRADE_ENABLE_SSE2
+    {Cpu::Sse2},
+    #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} LowercaseUppercaseSmallData[]{
+    {Cpu::Scalar, 15},
+    #ifdef CORRADE_ENABLE_SSE2
+    /* This should fall back to the scalar case */
+    {Cpu::Sse2, 15},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Sse2, 16},
+    /* This should do two overlapping vector operations */
+    {Cpu::Sse2, 17},
+    #endif
 };
 
 StringBenchmark::StringBenchmark() {
@@ -79,20 +116,40 @@ StringBenchmark::StringBenchmark() {
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringBenchmark::lowercaseBranchless32,
-                   &StringBenchmark::lowercaseNaive,
-                   &StringBenchmark::lowercaseStl,
-                   &StringBenchmark::lowercaseStlFacet}, 10);
+    addBenchmarks({
+        #ifdef CORRADE_ENABLE_SSE2
+        &StringBenchmark::lowercaseSse2TwoCompares,
+        #endif
+        &StringBenchmark::lowercaseBranchless,
+        &StringBenchmark::lowercaseBranchless32,
+        &StringBenchmark::lowercaseNaive,
+        &StringBenchmark::lowercaseStl,
+        &StringBenchmark::lowercaseStlFacet}, 10);
 
     addInstancedBenchmarks({&StringBenchmark::uppercase}, 10,
         cpuVariantCount(LowercaseUppercaseData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringBenchmark::uppercaseBranchless32,
+    addBenchmarks({&StringBenchmark::uppercaseBranchless,
+                   &StringBenchmark::uppercaseBranchless32,
                    &StringBenchmark::uppercaseNaive,
                    &StringBenchmark::uppercaseStl,
                    &StringBenchmark::uppercaseStlFacet}, 10);
+
+    addInstancedBenchmarks({&StringBenchmark::lowercaseSmall}, 10,
+        cpuVariantCount(LowercaseUppercaseSmallData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::lowercaseSmallBranchless}, 10);
+
+    addInstancedBenchmarks({&StringBenchmark::uppercaseSmall}, 10,
+        cpuVariantCount(LowercaseUppercaseSmallData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::uppercaseSmallBranchless}, 10);
 
     _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
 }
@@ -134,9 +191,101 @@ void StringBenchmark::lowercase() {
     CORRADE_VERIFY(string.contains('l'));
 }
 
-/* Compared to the implementation in String::lowercaseInPlace(), this uses
-   `unsigned` instead of `std::uint8_t`, making it almost 8x slower. Not sure
-   why, heh. */
+#ifdef CORRADE_ENABLE_SSE2
+/* An "obvious" variant of the actual SSE2 implementation in
+   String::lowercaseInPlace(). It's the same count of instructions but runs
+   considerably slower for some reason -- maybe because the two compares, or
+   all the bit ops can't be pipelined, compared to bit ops + arithmetic + one
+   compare in the other? I know too little to be sure what's going on so this
+   just records the state. */
+CORRADE_ENABLE_SSE2 CORRADE_NEVER_INLINE void lowercaseInPlaceSse2TwoCompares(Containers::MutableStringView string) {
+    const std::size_t size = string.size();
+    char* const data = string.data();
+    char* const end = data + size;
+
+    /* Omitting the less-than-a-vector fallback here */
+    CORRADE_INTERNAL_DEBUG_ASSERT(size >= 16);
+
+    /* Core algorithm */
+    const __m128i a = _mm_set1_epi8('A');
+    const __m128i z = _mm_set1_epi8('Z');
+    const __m128i lowercaseBit = _mm_set1_epi8(0x20);
+    const auto lowercaseOneVector = [&](const __m128i chars) CORRADE_ENABLE_SSE2 {
+        /* Mark all bytes that aren't A-Z */
+        const __m128i notUppercase = _mm_or_si128(_mm_cmpgt_epi8(a, chars),
+                                                  _mm_cmpgt_epi8(chars, z));
+        /* Inverse the mask, thus only bytes that are A-Z, and for them OR the
+           lowercase bit with the input */
+        return _mm_or_si128(_mm_andnot_si128(notUppercase, lowercaseBit), chars);
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), lowercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 16 <= end; i += 16) {
+        const __m128i chars = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_store_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+}
+
+void StringBenchmark::lowercaseSse2TwoCompares() {
+    if(!(Cpu::runtimeFeatures() >= Cpu::Sse2))
+        CORRADE_SKIP(Cpu::Sse2 << "not supported");
+
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text;
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(1)
+        lowercaseInPlaceSse2TwoCompares(string.sliceSize((i++)*_text->size(), _text->size()));
+
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
+}
+#endif
+
+CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless(Containers::MutableStringView string) {
+    for(char& c: string)
+        c += (std::uint8_t(c - 'A') < 26) << 5;
+}
+
+void StringBenchmark::lowercaseBranchless() {
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        lowercaseInPlaceBranchless(string.sliceSize((i++)*_text->size(), _text->size()));
+
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
+}
+
+/* Compared to lowercaseInPlaceBranchless() above it has `unsigned` instead of
+   `std::uint8_t`, making it almost 8x slower because it seems to prevent
+   autovectorization. */
 CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless32(Containers::MutableStringView string) {
     for(char& c: string)
         c += (unsigned(c - 'A') < 26) << 5;
@@ -229,9 +378,26 @@ void StringBenchmark::uppercase() {
     CORRADE_VERIFY(string.contains('A'));
 }
 
-/* Compared to the implementation in String::lowercaseInPlace(), this uses
-   `unsigned` instead of `std::uint8_t`, making it almost 8x slower. Not sure
-   why, heh. */
+CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless(Containers::MutableStringView string) {
+    for(char& c: string)
+        c -= (std::uint8_t(c - 'a') < 26) << 5;
+}
+
+void StringBenchmark::uppercaseBranchless() {
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text*10;
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(10)
+        uppercaseInPlaceBranchless(string.sliceSize((i++)*_text->size(), _text->size()));
+
+    CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
+}
+
+/* Compared to uppercaseInPlaceBranchless() above it has `unsigned` instead of
+   `std::uint8_t`, making it almost 8x slower because it seems to prevent
+   autovectorization. */
 CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless32(Containers::MutableStringView string) {
     for(char& c: string)
         c -= (unsigned(c - 'a') < 26) << 5;
@@ -296,6 +462,84 @@ void StringBenchmark::uppercaseStlFacet() {
         Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
         std::use_facet<std::ctype<char>>(std::locale::classic()).toupper(slice.begin(), slice.end());
     }
+
+    CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
+}
+
+void StringBenchmark::lowercaseSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Stripping to a whole number of blocks for simpler code */
+    CORRADE_VERIFY(_text);
+    std::size_t repeatCount = _text->size()/data.size;
+    Containers::String string = _text->prefix(data.size*repeatCount);
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(repeatCount)
+        String::lowercaseInPlace(string.sliceSize((i++)*data.size, data.size));
+
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
+}
+
+void StringBenchmark::lowercaseSmallBranchless() {
+    /* Stripping to a whole number of blocks for simpler code */
+    CORRADE_VERIFY(_text);
+    std::size_t repeatCount = _text->size()/15;
+    Containers::String string = _text->prefix(15*repeatCount);
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(repeatCount)
+        lowercaseInPlaceBranchless(string.sliceSize((i++)*15, 15));
+
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
+}
+
+void StringBenchmark::uppercaseSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Stripping to a whole number of blocks for simpler code */
+    CORRADE_VERIFY(_text);
+    std::size_t repeatCount = _text->size()/data.size;
+    Containers::String string = _text->prefix(data.size*repeatCount);
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(repeatCount)
+        String::uppercaseInPlace(string.sliceSize((i++)*data.size, data.size));
+
+    CORRADE_VERIFY(!string.contains('a'));
+    CORRADE_VERIFY(string.contains('A'));
+}
+
+void StringBenchmark::uppercaseSmallBranchless() {
+    /* Stripping to a whole number of blocks for simpler code */
+    CORRADE_VERIFY(_text);
+    std::size_t repeatCount = _text->size()/15;
+    Containers::String string = _text->prefix(15*repeatCount);
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(repeatCount)
+        uppercaseInPlaceBranchless(string.sliceSize((i++)*15, 15));
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));

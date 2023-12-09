@@ -33,7 +33,10 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
@@ -53,6 +56,10 @@ struct StringTest: TestSuite::Tester {
     void partition();
     void join();
     void lowercaseUppercase();
+    void lowercaseUppercaseAligned();
+    void lowercaseUppercaseUnaligned();
+    void lowercaseUppercaseLessThanTwoVectors();
+    void lowercaseUppercaseLessThanOneVector();
     void lowercaseUppercaseString();
     void lowercaseUppercaseStringSmall();
     void lowercaseUppercaseStringNotOwned();
@@ -104,6 +111,9 @@ const struct {
     std::size_t vectorSize;
 } LowercaseUppercaseData[]{
     {Cpu::Scalar, 16},
+    #ifdef CORRADE_ENABLE_SSE2
+    {Cpu::Sse2, 16},
+    #endif
 };
 
 const struct {
@@ -184,7 +194,11 @@ StringTest::StringTest() {
               &StringTest::partition,
               &StringTest::join});
 
-    addInstancedTests({&StringTest::lowercaseUppercase},
+    addInstancedTests({&StringTest::lowercaseUppercase,
+                       &StringTest::lowercaseUppercaseAligned,
+                       &StringTest::lowercaseUppercaseUnaligned,
+                       &StringTest::lowercaseUppercaseLessThanTwoVectors,
+                       &StringTest::lowercaseUppercaseLessThanOneVector},
         cpuVariantCount(LowercaseUppercaseData),
         &StringTest::captureImplementations,
         &StringTest::restoreImplementations);
@@ -644,11 +658,28 @@ void StringTest::lowercaseUppercase() {
         for(std::size_t i = 0; i != 256; ++i)
             CORRADE_COMPARE(std::uint8_t(AllBytes[i]), i);
 
-        /* The conversion should only change alpha characters, nothing else */
-        CORRADE_COMPARE(String::uppercase(Containers::StringView{AllBytes, 256}), (Containers::StringView{AllBytesUppercase, 256}));
-        CORRADE_COMPARE(String::lowercase(Containers::StringView{AllBytes, 256}), (Containers::StringView{AllBytesLowercase, 256}));
-        CORRADE_COMPARE(String::uppercase(Containers::StringView{AllBytesLowercase, 256}), (Containers::StringView{AllBytesUppercase, 256}));
-        CORRADE_COMPARE(String::lowercase(Containers::StringView{AllBytesUppercase, 256}), (Containers::StringView{AllBytesLowercase, 256}));
+        /* The conversion should only change alpha characters, nothing else.
+           To ensure the vectorized variants don't treat certain bytes
+           differently, shift it gradually by 0 to vectorSize - 1 bytes. */
+        for(std::size_t i = 0; i != data.vectorSize; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(String::uppercase(
+                " "_s*i + Containers::StringView{AllBytes, 256}),
+                " "_s*i + (Containers::StringView{AllBytesUppercase, 256}));
+            CORRADE_COMPARE(String::lowercase(
+                " "_s*i + Containers::StringView{AllBytes, 256}),
+                " "_s*i + (Containers::StringView{AllBytesLowercase, 256}));
+            CORRADE_COMPARE(String::uppercase(
+                " "_s*i + Containers::StringView{AllBytesLowercase, 256}),
+                " "_s*i + (Containers::StringView{AllBytesUppercase, 256}));
+            CORRADE_COMPARE(String::lowercase(
+                " "_s*i + Containers::StringView{AllBytesUppercase, 256}),
+                " "_s*i + (Containers::StringView{AllBytesLowercase, 256}));
+        }
+
+    /* The rest is just a basic verification of the scalar fallback. See the
+       other test cases below for verifying actual corner cases of the vector
+       implementations. */
 
     /* No-op */
     } {
@@ -683,6 +714,235 @@ void StringTest::lowercaseUppercase() {
         String::uppercaseInPlace(hello);
         CORRADE_COMPARE(hello, "HELLO!");
     }
+}
+
+void StringTest::lowercaseUppercaseAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, with 4 vectors
+       in total, corresponding to the code paths:
+        - the first vector before the aligned block, handled by the unaligned
+          preamble
+        - then three aligned blocks
+        - nothing left to be handled by the unaligned postamble
+
+        +----+  +----+----+----+
+        |    |  |    |    |    |
+        +----+  +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 3));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 3));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = arrayView(a);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* Test variants are copied to the view to preserve the above mem layout */
+    /** @todo remove the casts once std::string overloads are dropped */
+    const std::size_t count = data.vectorSize/4;
+
+    /* All uppercase */
+    Utility::copy("HELLOWORLDTODAYS"_s*count, string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "helloworldtodays"_s*count);
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "HELLOWORLDTODAYS"_s*count);
+
+    /* All lowercase */
+    Utility::copy("awesomefancypant"_s*count, string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "awesomefancypant"_s*count);
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "AWESOMEFANCYPANT"_s*count);
+
+    /* Mixed case, every even uppercase */
+    Utility::copy("ThIsIsArAnSoMyEs"_s*count, string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "thisisaransomyes"_s*count);
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "THISISARANSOMYES"_s*count);
+
+    /* Mixed case, every odd uppercase */
+    Utility::copy("tHiSiSaRaNsOmYeS"_s*count, string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "thisisaransomyes"_s*count);
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "THISISARANSOMYES"_s*count);
+}
+
+void StringTest::lowercaseUppercaseUnaligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing:
+        - the first unaligned vector having all bytes but one overlapping with
+          the aligned block
+        - there being three aligned blocks (the if() branch that skips
+          the block was sufficiently tested in lowercaseUppercaseAligned())
+        - the last unaligned vector overlapping with all but one byte with it
+
+        +----+      +----+
+        |    |      |    |
+        +----+      +----+
+         +----+----+----+
+         |    |    |    |
+         +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 3 + 1));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 3 + 1));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
+    CORRADE_COMPARE(string.size(), data.vectorSize*3 + 2);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test variants are copied to the view to preserve the above mem layout */
+    /** @todo remove the casts once std::string overloads are dropped */
+    const std::size_t count = data.vectorSize/4;
+
+    /* All uppercase */
+    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+
+    /* All lowercase */
+    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every even uppercase */
+    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every odd uppercase */
+    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+}
+
+void StringTest::lowercaseUppercaseLessThanTwoVectors() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
+       so there's just two unaligned blocks overlapping in a single byte:
+
+           +----+
+           |    |
+           +----+
+        | .. | .. | .. |
+               +----+
+               |    |
+               +----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test variants are copied to the view to preserve the above mem layout */
+    /** @todo remove the casts once std::string overloads are dropped */
+    const std::size_t count = data.vectorSize/8;
+
+    /* All uppercase */
+    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+
+    /* All lowercase */
+    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every even uppercase */
+    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every odd uppercase */
+    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+}
+
+void StringTest::lowercaseUppercaseLessThanOneVector() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
+       pointer even though it shouldn't matter here. */
+    Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
+    Containers::MutableStringView string = a.exceptPrefix(1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test variants are copied to the view to preserve the above mem layout */
+    /** @todo remove the casts once std::string overloads are dropped */
+    const std::size_t count = data.vectorSize/16;
+
+    /* All uppercase */
+    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+
+    /* All lowercase */
+    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every even uppercase */
+    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+
+    /* Mixed case, every odd uppercase */
+    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
 }
 
 void StringTest::lowercaseUppercaseString() {
