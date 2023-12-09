@@ -26,7 +26,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/configure.h"
+#include "Corrade/Cpu.h"
 #include "Corrade/Utility/Macros.h"
 
 /* Function-pointer-based CPU dispatch definitions for the implementation */
