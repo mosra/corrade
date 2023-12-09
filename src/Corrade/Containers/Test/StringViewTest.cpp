@@ -226,7 +226,9 @@ struct StringViewTest: TestSuite::Tester {
     void debug();
 
     private:
-        decltype(Implementation::stringFindCharacter) findCharacterImplementation;
+        #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(Implementation::stringFindCharacter) _findCharacterImplementation;
+        #endif
 };
 
 const struct {
@@ -389,13 +391,13 @@ template<> struct NameFor<char> {
 
 void StringViewTest::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    findCharacterImplementation = Implementation::stringFindCharacter;
+    _findCharacterImplementation = Implementation::stringFindCharacter;
     #endif
 }
 
 void StringViewTest::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    Implementation::stringFindCharacter = findCharacterImplementation;
+    Implementation::stringFindCharacter = _findCharacterImplementation;
     #endif
 }
 
@@ -2132,9 +2134,14 @@ void StringViewTest::findCharacterAligned() {
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, with 12 vectors
        in total, corresponding to the code paths:
+        - the first vector before the aligned four-at-a-time block, handled by
+          the unaligned preamble
+        - then one four-at-a-time block
+        - then three more blocks after, handled by the aligned postamble
+        - nothing left to be handled by the unaligned postamble
 
         +----+    +----+----+----+----+    +----+----+----+
-        |deef|    ! gg : hh :i  i: jj |    |k   | ll |   m|
+        |deef|    | gg : hh :i  i: jj |    |k   | ll |   m|
         +----+    +----+----+----+----+    +----+----+----+
     */
     Containers::Array<char> a;
@@ -2210,12 +2217,12 @@ void StringViewTest::findCharacterUnaligned() {
         - there being just one full vector after, and the last unaligned vector
           again overlapping with all but one byte with it
 
-        +----+                +----+
-        |f   |                |   j|
-        +----+                +----+
-         +----+----+----+----+----+
-         |g   :    :    :   h|i   |
-         +----+----+----+----+----+
+            +----+                +----+
+            |f   |                |   j|
+            +----+                +----+
+             +----+----+----+----+----+
+        | .. |g   :    :    :   h|i   | .. |
+             +----+----+----+----+----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -2274,12 +2281,14 @@ void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
        so there's just two unaligned blocks overlapping in a single byte:
 
-        +----+
-        |f   |
-        +----+
-         +----+
-         |g   !
-         +----+ */
+           +----+
+           |f   |
+           +----+
+        | .. | .. | .. |
+               +----+
+               |   g|
+               +----+
+    */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
@@ -2316,14 +2325,15 @@ void StringViewTest::findCharacterUnalignedLessThanOneVector() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
-       pointer even though it shouldn't matter here. It should pick the first
-       found of the two. */
+       pointer even though it shouldn't matter here. */
     Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
     MutableStringView string = a.exceptPrefix(1);
-    string[7] = 'f';
-    string[data.vectorSize/2 + 1] = 'f';
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+
+    /* It should pick the first found of the two */
+    string[7] = 'f';
+    string[data.vectorSize/2 + 1] = 'f';
     CORRADE_COMPARE(string.find('f').data() - string.data(), 7);
 
     /* A character that's not found should be handled properly here as well */

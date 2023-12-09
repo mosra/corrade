@@ -84,7 +84,7 @@ struct StringViewBenchmark: TestSuite::Tester {
 
     private:
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-        decltype(Implementation::stringFindCharacter) findCharacterImplementation;
+        decltype(Implementation::stringFindCharacter) _findCharacterImplementation;
         #endif
 };
 
@@ -170,13 +170,13 @@ StringViewBenchmark::StringViewBenchmark() {
 
 void StringViewBenchmark::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    findCharacterImplementation = Implementation::stringFindCharacter;
+    _findCharacterImplementation = Implementation::stringFindCharacter;
     #endif
 }
 
 void StringViewBenchmark::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    Implementation::stringFindCharacter = findCharacterImplementation;
+    Implementation::stringFindCharacter = _findCharacterImplementation;
     #endif
 }
 
