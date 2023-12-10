@@ -41,6 +41,9 @@
 #ifdef CORRADE_ENABLE_AVX2
 #include "Corrade/Utility/IntrinsicsAvx.h"
 #endif
+#ifdef CORRADE_ENABLE_SIMD128
+#include <wasm_simd128.h>
+#endif
 
 namespace Corrade { namespace Utility { namespace String {
 
@@ -270,6 +273,10 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltyp
 
     /* If we have less than 16 bytes, do it the stupid way, equivalent to the
        scalar variant and just unrolled. */
+    /** @todo investigate perf implications of putting this into a helper
+        function that's reused across all SSE / NEON / WASM SIMD variants --
+        the way it is now there's just one jump into the switch, with the
+        helper it'd be another if() around */
     {
         char* j = data;
         switch(size) {
@@ -353,6 +360,10 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltyp
 
     /* If we have less than 16 bytes, do it the stupid way, equivalent to the
        scalar variant and just unrolled. */
+    /** @todo investigate perf implications of putting this into a helper
+        function that's reused across all SSE / NEON / WASM SIMD variants --
+        the way it is now there's just one jump into the switch, with the
+        helper it'd be another if() around */
     {
         char* j = data;
         switch(size) {
@@ -567,6 +578,172 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
         __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
         uppercaseOneVectorInPlace(chars);
         _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), chars);
+    }
+  };
+}
+#endif
+
+#ifdef CORRADE_ENABLE_SIMD128
+/* Trivial port of the SSE2 code to WASM SIMD. As WASM SIMD doesn't
+   differentiate between aligned and unaligned load, the load/store code is the
+   same for both aligned and unaligned case, making everything slightly
+   shorter. The high-level operation stays the same as with SSE2 tho, even if
+   just for memory access patterns I think it still makes sense to do as much
+   as possible aligned. */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SIMD128 typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::Simd128T) {
+  return [](char* data, const std::size_t size) CORRADE_ENABLE_SIMD128 {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    /** @todo this doesn't seem to perform any differently from the
+        non-unrolled scalar case, turn into a plain loop? */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const v128_t aAndAbove = wasm_i8x16_const_splat(char(256u - std::uint8_t('A')));
+    const v128_t lowest25 = wasm_i8x16_const_splat(25);
+    const v128_t lowercaseBit = wasm_i8x16_const_splat(0x20);
+    const v128_t zero = wasm_i8x16_const_splat(0);
+    const auto lowercaseOneVectorInPlace = [&](v128_t* const data) CORRADE_ENABLE_SIMD128 {
+        const v128_t chars = wasm_v128_load(data);
+        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const v128_t uppercaseInLowest25 = wasm_i8x16_add(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
+           (now 0 to 25) zero and everything else non-zero */
+        const v128_t lowest25IsZero = wasm_u8x16_sub_sat(uppercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const v128_t maskUppercase = wasm_i8x16_eq(lowest25IsZero, zero);
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           added to the original chars, making the uppercase chars lowercase */
+        wasm_v128_store(data, wasm_i8x16_add(chars, wasm_v128_and(maskUppercase, lowercaseBit)));
+    };
+
+    /* Unconditionally convert the first unaligned vector */
+    lowercaseOneVectorInPlace(reinterpret_cast<v128_t*>(data));
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors */
+    for(; i + 16 <= end; i += 16)
+        lowercaseOneVectorInPlace(reinterpret_cast<v128_t*>(i));
+
+    /* Handle remaining less than a vector, again overlapping back with the
+       previous already-converted elements, in an unaligned way */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        lowercaseOneVectorInPlace(reinterpret_cast<v128_t*>(i));
+    }
+  };
+}
+
+/* Again just a trivial port of the SSE2 code to WASM SIMD, with the same
+   "aligned load/store is the same as unaligned" simplification as the
+   lowercase variant above */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SIMD128 typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::Simd128T) {
+  return [](char* data, const std::size_t size) CORRADE_ENABLE_SIMD128 {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    /** @todo this doesn't seem to perform any differently from the
+        non-unrolled scalar case, turn into a plain loop? */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j -= (std::uint8_t(*j - 'a') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const v128_t aAndAbove = wasm_i8x16_const_splat(char(256u - std::uint8_t('a')));
+    const v128_t lowest25 = wasm_i8x16_const_splat(25);
+    const v128_t lowercaseBit = wasm_i8x16_const_splat(0x20);
+    const v128_t zero = wasm_i8x16_const_splat(0);
+    const auto uppercaseOneVectorInPlace = [&](v128_t* const data) CORRADE_ENABLE_SIMD128 {
+        const v128_t chars = wasm_v128_load(data);
+        /* Moves 'a' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const v128_t lowercaseInLowest25 = wasm_i8x16_add(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'a' to 'z'
+           (now 0 to 25) zero and everything else non-zero */
+        const v128_t lowest25IsZero = wasm_u8x16_sub_sat(lowercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const v128_t maskUppercase = wasm_i8x16_eq(lowest25IsZero, zero);
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           subtracted from the original chars, making the lowercase chars
+           uppercase */
+        wasm_v128_store(data, wasm_i8x16_sub(chars, wasm_v128_and(maskUppercase, lowercaseBit)));
+    };
+
+    /* Unconditionally convert the first unaligned vector. WASM doesn't
+       differentiate between aligned and unaligned load, it's always unaligned,
+       however even if just for memory access patterns I think it still makes
+       sense to do as much as possible aligned, so this matches what the SSE2
+       code does. */
+    uppercaseOneVectorInPlace(reinterpret_cast<v128_t*>(data));
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, uppercasing
+       already-uppercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors */
+    for(; i + 16 <= end; i += 16)
+        uppercaseOneVectorInPlace(reinterpret_cast<v128_t*>(i));
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        uppercaseOneVectorInPlace(reinterpret_cast<v128_t*>(i));
     }
   };
 }
