@@ -455,11 +455,13 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
 }
 #endif
 
-#ifdef CORRADE_ENABLE_NEON
+/* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
+   nowadays, so there it uses scalar code. */
+#if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
 /* AArch64 doesn't differentiate between aligned and unaligned loads. ARM32
    does, but it's not exposed in the intrinsics, only in compiler-specific
-   ways. Since 32-bit ARM is increasingly rare, not bothering at all.
-   https://stackoverflow.com/a/53245244 */
+   ways. Since 32-bit ARM is increasingly rare (and this code doesn't work on
+   it anyway), not bothering at all. https://stackoverflow.com/a/53245244 */
 CORRADE_ENABLE(NEON) CORRADE_ALWAYS_INLINE const char* findCharacterSingleVectorUnaligned(Cpu::NeonT, const char* at, const uint8x16_t vn1) {
     const uint8x16_t chunk = vld1q_u8(reinterpret_cast<const std::uint8_t*>(at));
 

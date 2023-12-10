@@ -101,7 +101,9 @@ const struct {
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
     {Cpu::Avx2|Cpu::Bmi1},
     #endif
-    #ifdef CORRADE_ENABLE_NEON
+    /* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
+       nowadays, so there it uses scalar code */
+    #if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
     {Cpu::Neon},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
@@ -121,7 +123,9 @@ const struct {
     {Cpu::Avx2|Cpu::Bmi1, 15},
     {Cpu::Avx2|Cpu::Bmi1, 31},
     #endif
-    #ifdef CORRADE_ENABLE_NEON
+    /* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
+       nowadays, so there it uses scalar code */
+    #if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
     {Cpu::Neon, 15},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
