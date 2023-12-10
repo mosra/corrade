@@ -117,20 +117,52 @@ const struct {
 } FindCharacterSmallData[]{
     {Cpu::Scalar, 15},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    /* This should fall back to the scalar case */
     {Cpu::Sse2|Cpu::Bmi1, 15},
+    /* This should do one vector operation, skipping the four-vector block and
+       the postamble */
+    {Cpu::Sse2|Cpu::Bmi1, 16},
+    /* This should do two overlapping vector operations, skipping the
+       four-vector block and the single-vector aligned postamble */
+    {Cpu::Sse2|Cpu::Bmi1, 17},
     #endif
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+    /* This should fall back to the SSE2 and then the scalar case */
     {Cpu::Avx2|Cpu::Bmi1, 15},
+    /* This should fall back to the SSE2 case */
     {Cpu::Avx2|Cpu::Bmi1, 31},
+    /* This should do one vector operation, skipping the four-vector block and
+       the postamble */
+    {Cpu::Avx2|Cpu::Bmi1, 32},
+    /* This should do two overlapping vector operations, skipping the
+       four-vector block and the single-vector aligned postamble */
+    {Cpu::Avx2|Cpu::Bmi1, 33},
     #endif
     /* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
        nowadays, so there it uses scalar code */
     #if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
+    /* This should fall back to the scalar case */
     {Cpu::Neon, 15},
+    /* This should do one vector operation, skipping the four-vector block and
+       the postamble */
+    {Cpu::Neon, 16},
+    /* This should do two overlapping vector operations, skipping the
+       four-vector block and the single-vector aligned postamble */
+    {Cpu::Neon, 17},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
+    /* This should fall back to the scalar case */
     {Cpu::Simd128, 15},
+    /* This should do one vector operation, skipping the four-vector block and
+       the postamble */
+    {Cpu::Simd128, 16},
+    /* This should do two overlapping vector operations, skipping the
+       four-vector block and the single-vector aligned postamble */
+    {Cpu::Simd128, 17},
     #endif
+    /** @todo also the cases with either one aligned four-vector block or four
+        aligned single-vector postambles, needs to figure out how it would
+        behave re alignment tho */
 };
 
 StringViewBenchmark::StringViewBenchmark() {
