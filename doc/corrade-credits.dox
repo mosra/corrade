@@ -151,12 +151,15 @@ Is the below list missing your name or something's wrong?
 -   **Pascal Thomet** ([\@pthom](https://github.com/pthom)) --- Hunter package
 -   **[\@pkubaj](https://github.com/pkubaj)**  --- fixes for big-endian
     platforms
+-   **Robert Clausecker** ([\@clausecker](https://github.com/clausecker) ---
+    FreeBSD feature porting
 -   **Sergey Fedorov** ([\@barracuda156](https://github.com/barracuda156)) ---
     macOS build fixes
 -   **[\@sigman78](https://github.com/sigman78)** --- initial MSVC 2017 port,
     Vcpkg packages
 -   **Stanislaw Halik** ([\@sthalik](https://github.com/sthalik)) ---
-    usability and API cleanliness improvements, MSVC warning fixes
+    usability and API cleanliness improvements, structured bindings, MSVC
+    warning fixes
 -   **Tracy Ma** ([\@linuxaged](https://github.com/linuxaged)) --- UWP build
     fixes
 -   **Vincent Le Garrec** ([\@bansan85](https://github.com/bansan85)) ---

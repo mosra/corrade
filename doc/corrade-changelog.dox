@@ -66,8 +66,9 @@ namespace Corrade {
     detection of 32-bit builds
 -   New @ref Cpu namespace that provides building blocks for compile-time and
     runtime CPU feature detection and dispatch on x86, ARM and WebAssembly. See
-    [mosra/corrade#115](https://github.com/mosra/corrade/pull/115) and also
-    [mosra/corrade#154](https://github.com/mosra/corrade/pull/154).
+    [mosra/corrade#115](https://github.com/mosra/corrade/pull/115),
+    [mosra/corrade#154](https://github.com/mosra/corrade/pull/154) and
+    [mosra/corrade#171](https://github.com/mosra/corrade/issues/171).
 -   Added MSVC Natvis files and pretty-printers for GDB. See
     @ref corrade-debuggers,
     [mosra/corrade#111](https://github.com/mosra/corrade/issues/111),
@@ -391,6 +392,8 @@ namespace Corrade {
     @relativeref{Utility::Path,copy()} now explicitly check if the path is a
     directory and fail in that case, instead of returning nonsense, crashing on
     an allocation failure or silently doing the wrong thing
+-   Implemented @ref Utility::Path::executableLocation() on FreeBSD (see
+    [mosra/corrade#171](https://github.com/mosra/corrade/issues/171))
 -   Added @ref Utility::Resource::hasFile() as a counterpart to
     @ref Utility::Resource::hasGroup() for querying whether a filename is
     contained in a resource group
