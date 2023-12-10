@@ -39,6 +39,10 @@
 #include "Corrade/Utility/IntrinsicsSse2.h"
 #endif
 
+#ifdef CORRADE_ENABLE_NEON
+#include <arm_neon.h>
+#endif
+
 #include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -52,6 +56,9 @@ struct StringBenchmark: TestSuite::Tester {
     void lowercase();
     #ifdef CORRADE_ENABLE_SSE2
     void lowercaseSse2TwoCompares();
+    #endif
+    #ifdef CORRADE_ENABLE_NEON
+    void lowercaseNeon();
     #endif
     void lowercaseBranchless();
     void lowercaseBranchless32();
@@ -143,6 +150,9 @@ StringBenchmark::StringBenchmark() {
     addBenchmarks({
         #ifdef CORRADE_ENABLE_SSE2
         &StringBenchmark::lowercaseSse2TwoCompares,
+        #endif
+        #ifdef CORRADE_ENABLE_NEON
+        &StringBenchmark::lowercaseNeon,
         #endif
         &StringBenchmark::lowercaseBranchless,
         &StringBenchmark::lowercaseBranchless32,
@@ -284,6 +294,79 @@ void StringBenchmark::lowercaseSse2TwoCompares() {
     std::size_t i = 0;
     CORRADE_BENCHMARK(1)
         lowercaseInPlaceSse2TwoCompares(string.sliceSize((i++)*_text->size(), _text->size()));
+
+    CORRADE_VERIFY(!string.contains('L'));
+    CORRADE_VERIFY(string.contains('l'));
+}
+#endif
+
+#ifdef CORRADE_ENABLE_NEON
+/* Trivial port of the SSE2 code to NEON, with the same "aligned load/store is
+   the same as unaligned" simplification as the WASM code. Included just to
+   have baseline comparison to the scalar code because the compiler seems to
+   autovectorize better than what this function does. */
+CORRADE_ENABLE_NEON void lowercaseInPlaceNeon(Containers::MutableStringView string) {
+    const std::size_t size = string.size();
+    char* const data = string.data();
+    char* const end = data + size;
+
+    /* Omitting the less-than-a-vector fallback here */
+    CORRADE_INTERNAL_DEBUG_ASSERT(size >= 16);
+
+    /* Core algorithm */
+    const uint8x16_t aAndAbove = vdupq_n_u8(char(256u - std::uint8_t('A')));
+    const uint8x16_t lowest25 = vdupq_n_u8(25);
+    const uint8x16_t lowercaseBit = vdupq_n_u8(0x20);
+    const uint8x16_t zero = vdupq_n_u8(0);
+    const auto lowercaseOneVectorInPlace = [&](std::uint8_t* const data) CORRADE_ENABLE_NEON {
+        const uint8x16_t chars = vld1q_u8(data);
+        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const uint8x16_t uppercaseInLowest25 = vaddq_u8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
+           (now 0 to 25) zero and everything else non-zero */
+        const uint8x16_t lowest25IsZero = vqsubq_u8(uppercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const uint8x16_t maskUppercase = vceqq_u8(lowest25IsZero, zero);
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           added to the original chars, making the uppercase chars lowercase */
+        vst1q_u8(data, vaddq_u8(chars, vandq_u8(maskUppercase, lowercaseBit)));
+    };
+
+    /* Unconditionally convert the first unaligned vector */
+    lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(data));
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors */
+    for(; i + 16 <= end; i += 16)
+        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
+
+    /* Handle remaining less than a vector, again overlapping back with the
+       previous already-converted elements, in an unaligned way */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
+    }
+}
+
+void StringBenchmark::lowercaseNeon() {
+    if(!(Cpu::runtimeFeatures() >= Cpu::Neon))
+        CORRADE_SKIP(Cpu::Neon << "not supported");
+
+    CORRADE_VERIFY(_text);
+    Containers::String string = *_text;
+
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(1)
+        lowercaseInPlaceNeon(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
