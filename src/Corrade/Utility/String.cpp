@@ -429,8 +429,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE2 typename std::decay<decltyp
 #endif
 
 #ifdef CORRADE_ENABLE_AVX2
-/* Trivial extension of the SSE2 code to AVX2. Nothing else worth
-   mentioning. */
+/* Trivial extension of the SSE2 code to AVX2. The only significant difference
+   is a workaround for MinGW, see the comment below. */
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::Avx2T) {
   return [](char* const data, const std::size_t size) CORRADE_ENABLE_AVX2 {
     char* const end = data + size;
@@ -445,7 +445,15 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
     const __m256i aAndAbove = _mm256_set1_epi8(char(256u - std::uint8_t('A')));
     const __m256i lowest25 = _mm256_set1_epi8(25);
     const __m256i lowercaseBit = _mm256_set1_epi8(0x20);
-    const auto lowercaseOneVector = [&](const __m256i chars) CORRADE_ENABLE_AVX2 {
+    /* Compared to the SSE2 case, this performs the operation in-place on a
+       __m256i reference instead of taking and returning it by value. This is
+       in order to work around a MinGW / Windows GCC bug, where it doesn't
+       align __m256i instances passed to or returned from functions to 32 bytes
+       but still uses aligned load/store for them. Reported back in 2011, still
+       not fixed even in late 2023:
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=49001
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54412 */
+    const auto lowercaseOneVectorInPlace = [&](__m256i& chars) CORRADE_ENABLE_AVX2 {
         /* Moves 'A' and everything above to 0 and up (it overflows and wraps
            around) */
         const __m256i uppercaseInLowest25 = _mm256_add_epi8(chars, aAndAbove);
@@ -457,15 +465,16 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
         const __m256i maskUppercase = _mm256_cmpeq_epi8(lowest25IsZero, _mm256_setzero_si256());
         /* For the masked chars a lowercase bit is set, and the bit is then
            added to the original chars, making the uppercase chars lowercase */
-        return _mm256_add_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
+        chars = _mm256_add_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
     };
 
     /* Unconditionally convert the first vector in a slower, unaligned way. Any
        extra branching to avoid the unaligned load & store if already aligned
        would be most probably more expensive than the actual operation. */
     {
-        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), lowercaseOneVector(chars));
+        __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        lowercaseOneVectorInPlace(chars);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), chars);
     }
 
     /* Go to the next aligned position. If the pointer was already aligned,
@@ -477,8 +486,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
 
     /* Convert all aligned vectors using aligned load/store */
     for(; i + 32 <= end; i += 32) {
-        const __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
-        _mm256_store_si256(reinterpret_cast<__m256i*>(i), lowercaseOneVector(chars));
+        __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        lowercaseOneVectorInPlace(chars);
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), chars);
     }
 
     /* Handle remaining less than a vector with an unaligned load & store,
@@ -486,13 +496,14 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
     if(i < end) {
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
         i = end - 32;
-        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), lowercaseOneVector(chars));
+        __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        lowercaseOneVectorInPlace(chars);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), chars);
     }
   };
 }
 
-/* Again just trivial extension to AVX2 */
+/* Again just trivial extension to AVX2, and the MinGW workaround */
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltype(lowercaseInPlace)>::type uppercaseInPlaceImplementation(Cpu::Avx2T) {
   return [](char* const data, const std::size_t size) CORRADE_ENABLE_AVX2 {
     char* const end = data + size;
@@ -507,7 +518,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
     const __m256i aAndAbove = _mm256_set1_epi8(char(256u - std::uint8_t('a')));
     const __m256i lowest25 = _mm256_set1_epi8(25);
     const __m256i lowercaseBit = _mm256_set1_epi8(0x20);
-    const auto uppercaseOneVector = [&](const __m256i chars) CORRADE_ENABLE_AVX2 {
+    /* See the comment next to lowercaseOneVectorInPlace() above for why this
+       is done in-place */
+    const auto uppercaseOneVectorInPlace = [&](__m256i& chars) CORRADE_ENABLE_AVX2 {
         /* Moves 'a' and everything above to 0 and up (it overflows and wraps
            around) */
         const __m256i lowercaseInLowest25 = _mm256_add_epi8(chars, aAndAbove);
@@ -520,15 +533,16 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
         /* For the masked chars a lowercase bit is set, and the bit is then
            subtracted from the original chars, making the lowercase chars
            uppercase */
-        return _mm256_sub_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
+        chars = _mm256_sub_epi8(chars, _mm256_and_si256(maskUppercase, lowercaseBit));
     };
 
     /* Unconditionally convert the first vector in a slower, unaligned way. Any
        extra branching to avoid the unaligned load & store if already aligned
        would be most probably more expensive than the actual operation. */
     {
-        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), uppercaseOneVector(chars));
+        __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        uppercaseOneVectorInPlace(chars);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), chars);
     }
 
     /* Go to the next aligned position. If the pointer was already aligned,
@@ -540,8 +554,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
 
     /* Convert all aligned vectors using aligned load/store */
     for(; i + 32 <= end; i += 32) {
-        const __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
-        _mm256_store_si256(reinterpret_cast<__m256i*>(i), uppercaseOneVector(chars));
+        __m256i chars = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        uppercaseOneVectorInPlace(chars);
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), chars);
     }
 
     /* Handle remaining less than a vector with an unaligned load & store,
@@ -549,8 +564,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
     if(i < end) {
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
         i = end - 32;
-        const __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), uppercaseOneVector(chars));
+        __m256i chars = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        uppercaseOneVectorInPlace(chars);
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), chars);
     }
   };
 }
