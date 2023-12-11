@@ -40,6 +40,8 @@ struct AlgorithmsTest: TestSuite::Tester {
     explicit AlgorithmsTest();
 
     void copy();
+    void copyConstVoidToVoid();
+    void copyVoidToVoid();
     void copyZeroSize();
     template<class T> void copyStrided1D();
     template<class T> void copyStrided2D();
@@ -201,6 +203,8 @@ struct Struct {
 
 AlgorithmsTest::AlgorithmsTest() {
     addTests({&AlgorithmsTest::copy,
+              &AlgorithmsTest::copyConstVoidToVoid,
+              &AlgorithmsTest::copyVoidToVoid,
               &AlgorithmsTest::copyZeroSize});
 
     addInstancedTests<AlgorithmsTest>({
@@ -282,6 +286,43 @@ void AlgorithmsTest::copy() {
     for(int& i: src) i = ++n;
 
     Utility::copy(Containers::arrayView(src), Containers::arrayView(dst));
+
+    CORRADE_COMPARE_AS(Containers::arrayView(dst),
+        Containers::arrayView(src),
+        TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyConstVoidToVoid() {
+    /* Same as copy(), except that the arrays are cast to a void (and passed as
+       a rvalue). Shouldn't cause ambiguity with the std::initializer_list
+       constructor. */
+
+    int src[5];
+    int dst[5];
+
+    int n = 0;
+    for(int& i: src) i = ++n;
+
+    Utility::copy(Containers::ArrayView<const void>{src},
+                  Containers::ArrayView<void>{dst});
+
+    CORRADE_COMPARE_AS(Containers::arrayView(dst),
+        Containers::arrayView(src),
+        TestSuite::Compare::Container);
+}
+
+void AlgorithmsTest::copyVoidToVoid() {
+    /* Compared to the above, both arguments are void. While the above works on
+       GCC 11+ without any special-casing, this doesn't. */
+
+    int src[5];
+    int dst[5];
+
+    int n = 0;
+    for(int& i: src) i = ++n;
+
+    Utility::copy(Containers::ArrayView<void>{src},
+                  Containers::ArrayView<void>{dst});
 
     CORRADE_COMPARE_AS(Containers::arrayView(dst),
         Containers::arrayView(src),
