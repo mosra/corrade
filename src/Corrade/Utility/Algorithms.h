@@ -190,13 +190,17 @@ neither C nor C++ allows array assignment:
 @snippet Utility.cpp Algorithms-copy-C-array
 */
 template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))
-    /* On MSVC's STL, this overload is somehow getting picked for a
-       Containers::ArrayView<const void> argument, attempting to materialize
-       std::initializer_list<void> and dying with "forming a reference to
-       void". Happens with clang-cl as well, so I suspect the STL
-       implementation is to blame... but why? There's no catch-all constructor,
-       just a two-pointer one. */
-    #ifdef CORRADE_TARGET_DINKUMWARE
+    /* On Clang, MSVC and GCC 5 to 10, this overload is somehow getting picked
+       for a Containers::ArrayView<const void> argument, attempting to
+       materialize std::initializer_list<void> and dying with "forming a
+       reference to void". Doesn't happen on GCC 4.8 and 11+, however GCC 11+
+       fails the same way if the source is Containers::ArrayView<void> instead.
+       Why? There's no catch-all constructor, just a two-pointer one in case of
+       MSVC, and a pointer + size in libc++ / libstdc++.
+
+       Important: keep this expression in sync with the actual implementation
+       below, otherwise you'll get linker errors. */
+    #if defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 5)
     , class = typename std::enable_if<!std::is_same<typename std::remove_const<typename ToView::Type>::type, void>::value>::type
     #endif
 > void copy(std::initializer_list<typename ToView::Type> src, To&& dst);
@@ -261,7 +265,8 @@ template<class From, class To, class FromView = decltype(Implementation::arrayVi
 #endif
 
 template<class To, class ToView
-    #ifdef CORRADE_TARGET_DINKUMWARE
+    /* Make sure to keep this branch in sync with the declaration above */
+    #if defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 5)
     , class
     #endif
 > void copy(std::initializer_list<typename ToView::Type> src, To&& dst) {
