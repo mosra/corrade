@@ -35,6 +35,7 @@
 #ifndef CORRADE_SINGLES_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
+#include "Corrade/Utility/Macros.h" /* CORRADE_CONSTEXPR14 */
 #include "Corrade/Utility/Move.h"
 
 /** @file

@@ -40,6 +40,7 @@
 #include "Corrade/Containers/sequenceHelpers.h"
 #include "Corrade/Utility/DebugAssert.h"
 #include "Corrade/Utility/Math.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_CONSTEXPR14 */
 #include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Containers {
