@@ -178,23 +178,8 @@ Containers::Optional<Containers::Array<char32_t>> utf32(const Containers::String
 #ifdef CORRADE_TARGET_WINDOWS
 namespace Implementation {
 
-Containers::Array<wchar_t> widen(const char* const text, const int size) {
-    /* MBtoWC counts the trailing \0 into the size, which we have to cut. It
-       also can't be called with a zero size for some stupid reason, in that
-       case just set the result size to zero. We can't just `return {}` because
-       the output array is guaranteed to be a pointer to a null-terminated
-       string. */
-    const std::size_t resultSize = size == 0 ? 0 : MultiByteToWideChar(CP_UTF8, 0, text, size, nullptr, 0) - (size == -1 ? 1 : 0);
-    /* Create the array with a sentinel null terminator. If size is zero, this
-       is just a single null terminator. */
-    Containers::Array<wchar_t> result{NoInit, resultSize + 1};
-    result[resultSize] = L'\0';
-    /* Again, this function doesn't like to be called if size is zero */
-    if(size) MultiByteToWideChar(CP_UTF8, 0, text, size, result.data(), resultSize);
-    /* Return the size without the null terminator */
-    return Containers::Array<wchar_t>{result.release(), resultSize};
-}
-
+/* Called directly from the header to work around some C++ crap, widen()
+   doesn't need any similar treatment so it's implemented inline */
 Containers::String narrow(const wchar_t* const text, const int size) {
     /* Compared to the above case with an Array, if size is zero, we can just
        do an early return -- the String constructor takes care of the
@@ -211,7 +196,21 @@ Containers::String narrow(const wchar_t* const text, const int size) {
 }
 
 Containers::Array<wchar_t> widen(const Containers::StringView text) {
-    return Implementation::widen(text.data(), text.size());
+    const std::size_t size = text.size();
+    /* MBtoWC counts the trailing \0 into the size, which we have to cut. It
+       also can't be called with a zero size for some stupid reason, in that
+       case just set the result size to zero. We can't just `return {}` because
+       the output array is guaranteed to be a pointer to a null-terminated
+       string. */
+    const std::size_t resultSize = size == 0 ? 0 : MultiByteToWideChar(CP_UTF8, 0, text.data(), size, nullptr, 0) - (size == -1 ? 1 : 0);
+    /* Create the array with a sentinel null terminator. If size is zero, this
+       is just a single null terminator. */
+    Containers::Array<wchar_t> result{NoInit, resultSize + 1};
+    result[resultSize] = L'\0';
+    /* Again, this function doesn't like to be called if size is zero */
+    if(size) MultiByteToWideChar(CP_UTF8, 0, text.data(), size, result.data(), resultSize);
+    /* Return the size without the null terminator */
+    return Containers::Array<wchar_t>{result.release(), resultSize};
 }
 
 Containers::String narrow(const Containers::ArrayView<const wchar_t> text) {
