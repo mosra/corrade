@@ -197,12 +197,11 @@ Containers::String narrow(const wchar_t* const text, const int size) {
 
 Containers::Array<wchar_t> widen(const Containers::StringView text) {
     const std::size_t size = text.size();
-    /* MBtoWC counts the trailing \0 into the size, which we have to cut. It
-       also can't be called with a zero size for some stupid reason, in that
+    /* MBtoWC can't be called with a zero size for some stupid reason, in that
        case just set the result size to zero. We can't just `return {}` because
        the output array is guaranteed to be a pointer to a null-terminated
        string. */
-    const std::size_t resultSize = size == 0 ? 0 : MultiByteToWideChar(CP_UTF8, 0, text.data(), size, nullptr, 0) - (size == -1 ? 1 : 0);
+    const std::size_t resultSize = size == 0 ? 0 : MultiByteToWideChar(CP_UTF8, 0, text.data(), size, nullptr, 0);
     /* Create the array with a sentinel null terminator. If size is zero, this
        is just a single null terminator. */
     Containers::Array<wchar_t> result{NoInit, resultSize + 1};
