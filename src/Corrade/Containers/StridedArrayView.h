@@ -729,12 +729,12 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @overload
          * @m_since_latest
          */
-        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const) const;
+        template<class U> StridedArrayView<dimensions, U> slice(U&(T::*memberFunction)() &) const;
         /**
          * @overload
          * @m_since_latest
          */
-        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() &) const;
+        template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const) const;
         /**
          * @overload
          * @m_since_latest
