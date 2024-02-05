@@ -65,7 +65,10 @@ Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Cont
     /* Allocate the argument array, make the relative offsets absolute */
     storage = Containers::Array<char>{totalSize};
     for(std::size_t i = 0; i != argv.size(); ++i)
-        argv[i] += reinterpret_cast<std::ptrdiff_t>(storage.data());
+        /* Was `argv[i] += reinterpret_cast<std::ptrdiff_t>(storage.data());`
+           originally, but that makes UBSan complain about "applying non-zero
+           offset 19905242071312 to null pointer" */
+        argv[i] = storage.data() + reinterpret_cast<std::size_t>(argv[i]);
 
     /* Convert the arguments to sane UTF-8 */
     for(std::size_t i = 0; i != argc; ++i)
