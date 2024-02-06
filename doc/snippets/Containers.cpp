@@ -277,6 +277,12 @@ void foo(const Containers::StringIterable& strings) {
 /* [StringIterable-usage-implementation] */
 
 int main() {
+{
+/* [Literals-using] */
+using namespace Containers::Literals;
+using namespace Containers::Literals::StringLiterals;
+/* [Literals-using] */
+}
 
 {
 /* [Array-usage] */

@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::BasicStringView, typedef @ref Corrade::Containers::StringView, @ref Corrade::Containers::MutableStringView, literal @link Corrade::Containers::Literals::operator""_s() @endlink
+ * @brief Class @ref Corrade::Containers::BasicStringView, typedef @ref Corrade::Containers::StringView, @ref Corrade::Containers::MutableStringView, literal @link Corrade::Containers::Literals::StringLiterals::operator""_s() @endlink
  * @m_since_latest
  * @experimental
  */
@@ -137,7 +137,7 @@ allocations. An owning version of this container is a @ref String.
 
 The class is meant to be used through either the @ref StringView or
 @ref MutableStringView typedefs. It's implicitly convertible from C string
-literals, but the recommended way is using the @link operator""_s() @endlink
+literals, but the recommended way is using the @link Literals::StringLiterals::operator""_s() @endlink
 literal:
 
 @snippet Containers.cpp StringView-usage-literal
@@ -391,7 +391,8 @@ BasicStringView {
          * If you're unsure about data origin, the safe bet is to keep flags at
          * their default. On the other hand, C string literals are always
          * global and null-terminated --- for those, the recommended way is to
-         * use the @link operator""_s() @endlink literal instead.
+         * use the @link Literals::StringLiterals::operator""_s() @endlink
+         * literal instead.
          * @see @ref BasicStringView(T*, StringViewFlags)
          */
         constexpr /*implicit*/ BasicStringView(T* data, std::size_t size, StringViewFlags flags = {}) noexcept: _data{data}, _sizePlusFlags{(
@@ -1429,7 +1430,23 @@ CORRADE_UTILITY_EXPORT String operator*(std::size_t count, StringView string);
 
 /* operator<<(Debug&, StringView) implemented directly in Debug */
 
+/* Unlike STL, where there's e.g. std::literals::string_literals with both
+   being inline, here's just the second inline because making both would cause
+   the literals to be implicitly available to all code in Containers. Which
+   isn't great if there are eventually going to be conflicts. In case of STL
+   the expected use case was that literals are available to anybody who does
+   `using namespace std;`, that doesn't apply here as most APIs are in
+   subnamespaces that *should not* be pulled in via `using` as a whole. */
 namespace Literals {
+    /** @todoc The inline causes "error: non-const getClassDef() called on
+        aliased member. Please report as a bug." on Doxygen 1.8.18, plus the
+        fork I have doesn't even mark them as inline in the XML output yet. And
+        it also duplicates the literal reference to parent namespace, adding
+        extra noise. Revisit once upgrading to a newer version. */
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    inline
+    #endif
+    namespace StringLiterals {
 
 /** @relatesalso Corrade::Containers::BasicStringView
 @brief String view literal
@@ -1445,7 +1462,7 @@ constexpr StringView operator"" _s(const char* data, std::size_t size) {
     return StringView{data, size, StringViewFlag(std::size_t(StringViewFlag::Global)|std::size_t(StringViewFlag::NullTerminated))};
 }
 
-}
+}}
 
 template<class T> constexpr T& BasicStringView<T>::operator[](const std::size_t i) const {
     /* Accessing the null terminator is fine, if it's there */

@@ -115,7 +115,12 @@ Corrade type            | STL equivalent
 @brief Container literals
 @m_since_latest
 
-Literals for easy construction of string views.
+Literals for easy construction of string views. The namespace is further split
+to prevent potential ambiguity and conflicts with literals defined by other
+code, but the second namespace level is @cpp inline @ce so to get the string
+literals you can do either of these two:
+
+@snippet Containers.cpp Literals-using
 
 This library is built if `CORRADE_WITH_UTILITY` is enabled when building
 Corrade. To use this library with CMake, request the `Containers` component of
@@ -131,6 +136,12 @@ target_link_libraries(your-app PRIVATE Corrade::Containers)
 Parts of this library are additionally available in a form of
 @ref corrade-singles "single-header libraries". See also
 @ref building-corrade and @ref corrade-cmake for more information.
+*/
+/** @namespace Corrade::Containers::Literals::StringLiterals
+@brief Container string literals
+@m_since_latest
+
+See the @ref Literals namespace for more information.
 */
 
 /** @dir Corrade/Utility
