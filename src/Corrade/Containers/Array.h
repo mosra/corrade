@@ -117,8 +117,8 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments. In other words,
     @cpp new T[size]{T{args...}, T{args...}, …} @ce.
--   @ref Array(InPlaceInitT, ArrayView<const T>) /
--   @ref Array(InPlaceInitT, std::initializer_list<T>) or the
+-   @ref Array(InPlaceInitT, ArrayView<const T>)
+    @ref Array(InPlaceInitT, std::initializer_list<T>) or the
     @ref array(ArrayView<const T>) / @ref array(std::initializer_list<T>)
     shorthand allocates unitialized memory and then copy-constructs all
     elements from the list. In other words, @cpp new T[size]{args...} @ce. The
