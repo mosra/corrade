@@ -890,9 +890,10 @@ and @ref CORRADE_TARGET_APPLE "Mac" (but not @ref CORRADE_TARGET_IOS "iOS")
 with @ref CORRADE_TARGET_ARM "ARM" processors. Emscripten is a bit special
 because it's @cpp long double @ce is *sometimes* 80-bit, but its precision
 differs from the 80-bit representation elsewhere, so it's always treated as
-64-bit. Note that even though the type size and precision may be the same,
-these are still two distinct types, similarly to how @cpp int @ce and
-@cpp signed int @ce behave the same but are treated as different types.
+64-bit. Note that even though the size and precision of @cpp double @ce and
+@cpp long double @ce may be the same, these are still two distinct types,
+similarly to how @cpp int @ce and @cpp signed int @ce behave the same but are
+treated as different types.
 */
 #define CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
 #undef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
