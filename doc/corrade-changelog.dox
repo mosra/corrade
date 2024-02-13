@@ -64,6 +64,10 @@ namespace Corrade {
     x86, ARM and WebAssembly
 -   New @ref CORRADE_TARGET_32BIT preprocessor variable for cross-platform
     detection of 32-bit builds
+-   New @ref CORRADE_TARGET_CXX14, @ref CORRADE_TARGET_CXX17 and
+    @ref CORRADE_TARGET_CXX20 convenience macros that provide an easier way to
+    detect used C++ standard than comparing @ref CORRADE_CXX_STANDARD to some
+    arbitrary value
 -   New @ref Cpu namespace that provides building blocks for compile-time and
     runtime CPU feature detection and dispatch on x86, ARM and WebAssembly. See
     [mosra/corrade#115](https://github.com/mosra/corrade/pull/115),

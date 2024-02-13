@@ -174,6 +174,9 @@ Note that compilers that don't have full support for given standard may not
 return the exact value, in which case it's recommended to check that the
 reported value is *greater* than the previous standard, for example
 @cpp #if CORRADE_CXX_STANDARD > 201703 @ce to test whether compiling as C++20.
+See also the @ref CORRADE_TARGET_CXX14, @ref CORRADE_TARGET_CXX17 and
+@ref CORRADE_TARGET_CXX20 convenience macros that are defined if given standard
+is used.
 
 Unlike most other `CORRADE_*` variables, this macro is not exposed to CMake as
 because the meaning is unclear in projects that combine more different C++
@@ -183,6 +186,39 @@ standards in a single project.
 */
 #define CORRADE_CXX_STANDARD
 #undef CORRADE_CXX_STANDARD
+
+/**
+@brief C++14 target
+@m_since_latest
+
+Defined if the value of @ref CORRADE_CXX_STANDARD is greater or equal to
+@cpp 201402 @ce.
+@see @ref CORRADE_TARGET_CXX17, @ref CORRADE_TARGET_CXX20
+*/
+#define CORRADE_TARGET_CXX14
+#undef CORRADE_TARGET_CXX14
+
+/**
+@brief C++17 target
+@m_since_latest
+
+Defined if the value of @ref CORRADE_CXX_STANDARD is greater or equal to
+@cpp 201703 @ce.
+@see @ref CORRADE_TARGET_CXX14, @ref CORRADE_TARGET_CXX20
+*/
+#define CORRADE_TARGET_CXX17
+#undef CORRADE_TARGET_CXX17
+
+/**
+@brief C++20 target
+@m_since_latest
+
+Defined if the value of @ref CORRADE_CXX_STANDARD is greater or equal to
+@cpp 202002 @ce.
+@see @ref CORRADE_TARGET_CXX14, @ref CORRADE_TARGET_CXX17
+*/
+#define CORRADE_TARGET_CXX20
+#undef CORRADE_TARGET_CXX20
 
 /**
 @brief Unix target

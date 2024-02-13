@@ -53,8 +53,9 @@ CppStandardTest::CppStandardTest() {
 }
 
 void CppStandardTest::test() {
-    Debug{} << "Standard version using __cplusplus:" << __cplusplus;
-    Debug{} << "Standard version using CORRADE_CXX_STANDARD:" << CORRADE_CXX_STANDARD;
+    CORRADE_INFO(
+        "Standard version using __cplusplus:" << __cplusplus << Debug::newline <<
+        "        Standard version using CORRADE_CXX_STANDARD:" << CORRADE_CXX_STANDARD);
 
     #ifdef COMPILING_AS_CPP11
     {
@@ -62,11 +63,18 @@ void CppStandardTest::test() {
         CORRADE_EXPECT_FAIL("MSVC always compiles at least as C++14.");
         #endif
         CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201103L);
+        #ifdef CORRADE_TARGET_CXX14
+        CORRADE_FAIL("CORRADE_TARGET_CXX14 defined for C++11.");
+        #endif
     }
     #ifdef CORRADE_TARGET_MSVC
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
     #endif
+
     #elif defined(COMPILING_AS_CPP14)
+    #ifndef CORRADE_TARGET_CXX14
+    CORRADE_FAIL("CORRADE_TARGET_CXX14 not defined for C++14.");
+    #endif
     {
         /* If the cxx_std_14 feature is used, it makes the compiler use that
            or any newer. GCC 11 and Clang 16 are the first that default to
@@ -76,12 +84,36 @@ void CppStandardTest::test() {
             "CMake (3.20.4) doesn't properly set -std=c++14 for GCC 11+ / Clang 16+, making it default to C++17 instead.");
         #endif
         CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
+        #ifdef CORRADE_TARGET_CXX17
+        CORRADE_FAIL("CORRADE_TARGET_CXX17 defined for C++14.");
+        #endif
     }
+
     #elif defined(COMPILING_AS_CPP17)
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201703L);
+    #ifndef CORRADE_TARGET_CXX14
+    CORRADE_FAIL("CORRADE_TARGET_CXX14 not defined for C++17.");
+    #endif
+    #ifndef CORRADE_TARGET_CXX17
+    CORRADE_FAIL("CORRADE_TARGET_CXX17 not defined for C++17.");
+    #endif
+    #ifdef CORRADE_TARGET_CXX20
+    CORRADE_FAIL("CORRADE_TARGET_CXX20 defined for C++17.");
+    #endif
+
     #elif defined(COMPILING_AS_CPP2A)
     CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201703L,
         TestSuite::Compare::Greater);
+    #ifndef CORRADE_TARGET_CXX14
+    CORRADE_FAIL("CORRADE_TARGET_CXX14 not defined for C++20.");
+    #endif
+    #ifndef CORRADE_TARGET_CXX17
+    CORRADE_FAIL("CORRADE_TARGET_CXX17 not defined for C++20.");
+    #endif
+    #if !defined(CORRADE_TARGET_CXX20) && CORRADE_CXX_STANDARD == 202002
+    CORRADE_FAIL("CORRADE_TARGET_CXX20 not defined for C++20.");
+    #endif
+
     #else
     #error no standard version macro passed from the buildsystem
     #endif

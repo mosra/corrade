@@ -98,6 +98,15 @@
 #else
 #define CORRADE_CXX_STANDARD __cplusplus
 #endif
+#if CORRADE_CXX_STANDARD >= 201402
+#define CORRADE_TARGET_CXX14
+#endif
+#if CORRADE_CXX_STANDARD >= 201703
+#define CORRADE_TARGET_CXX17
+#endif
+#if CORRADE_CXX_STANDARD >= 202002
+#define CORRADE_TARGET_CXX20
+#endif
 
 /* Standard library edition. Keep in sync with CorradeStl* singles. References:
    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65473
