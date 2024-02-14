@@ -150,13 +150,17 @@ struct StringTest: TestSuite::Tester {
     void compareLargeToSmall();
 
     void copyConstructLarge();
-    void copyConstructLargeAllocatedInit();
+    void copyConstructLargeToAllocatedInit();
     void copyLargeToLarge();
     void copyLargeToSmall();
     void copyConstructSmall();
-    void copyConstructSmallAllocatedInit();
+    void copyConstructSmallFromAllocatedInit();
+    void copyConstructSmallToAllocatedInit();
     void copySmallToLarge();
     void copySmallToSmall();
+    void copySmallToSmallAllocatedInit();
+    void copySmallAllocatedInitToLarge();
+    void copySmallAllocatedInitToSmall();
 
     void moveConstructLarge();
     void moveConstructLargeNullTerminatedGlobalView();
@@ -312,13 +316,17 @@ StringTest::StringTest() {
               &StringTest::compareLargeToSmall,
 
               &StringTest::copyConstructLarge,
-              &StringTest::copyConstructLargeAllocatedInit,
+              &StringTest::copyConstructLargeToAllocatedInit,
               &StringTest::copyLargeToLarge,
               &StringTest::copyLargeToSmall,
               &StringTest::copyConstructSmall,
-              &StringTest::copyConstructSmallAllocatedInit,
+              &StringTest::copyConstructSmallFromAllocatedInit,
+              &StringTest::copyConstructSmallToAllocatedInit,
               &StringTest::copySmallToLarge,
               &StringTest::copySmallToSmall,
+              &StringTest::copySmallToSmallAllocatedInit,
+              &StringTest::copySmallAllocatedInitToLarge,
+              &StringTest::copySmallAllocatedInitToSmall,
 
               &StringTest::moveConstructLarge,
               &StringTest::moveConstructLargeNullTerminatedGlobalView,
@@ -1548,7 +1556,7 @@ void StringTest::copyConstructLarge() {
     CORRADE_COMPARE(aData[0], 'B');
 }
 
-void StringTest::copyConstructLargeAllocatedInit() {
+void StringTest::copyConstructLargeToAllocatedInit() {
     /* Same as above, for already-large strings it should have no difference */
 
     char aData[] = "Allocated hello for a verbose world";
@@ -1638,7 +1646,18 @@ void StringTest::copyConstructSmall() {
     CORRADE_VERIFY(b.isSmall());
 }
 
-void StringTest::copyConstructSmallAllocatedInit() {
+void StringTest::copyConstructSmallFromAllocatedInit() {
+    String a{AllocatedInit, "hello"};
+    CORRADE_VERIFY(!a.isSmall());
+
+    /* A copy is made using a SSO even though the original wasn't SSO */
+    String b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(b.isSmall());
+}
+
+void StringTest::copyConstructSmallToAllocatedInit() {
     String a = "hello";
     CORRADE_VERIFY(a.isSmall());
 
@@ -1677,6 +1696,56 @@ void StringTest::copySmallToSmall() {
     CORRADE_VERIFY(b.isSmall());
 
     /* A copy is made using a SSO, original data overwritten */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(b.isSmall());
+}
+
+void StringTest::copySmallToSmallAllocatedInit() {
+    String a = "hello";
+    CORRADE_VERIFY(a.isSmall());
+
+    String b{AllocatedInit, "HELLO!!!"};
+    CORRADE_VERIFY(!b.isSmall());
+
+    /* A copy is made using a SSO, b is deallocated, i.e. basically the same as
+       copySmallToLarge() */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(b.isSmall());
+}
+
+void StringTest::copySmallAllocatedInitToLarge() {
+    String a{AllocatedInit, "hello"};
+    CORRADE_VERIFY(!a.isSmall());
+
+    char bData[] = "ALLOCATED HELLO FOR A VERBOSE WORLD!!!";
+    String b{bData, sizeof(bData) - 1, [](char* data, std::size_t){
+        ++data[1];
+    }};
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_VERIFY(b.deleter());
+
+    /* A copy is made using a SSO even though the original wasn't SSO, b is
+       deallocated */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(b.isSmall());
+    CORRADE_COMPARE(bData[1], 'M');
+}
+
+void StringTest::copySmallAllocatedInitToSmall() {
+    String a{AllocatedInit, "hello"};
+    CORRADE_VERIFY(!a.isSmall());
+
+    String b = "HELLO!!!";
+    CORRADE_VERIFY(b.isSmall());
+
+    /* A copy is made using a SSO even though the original wasn't SSO, original
+       data overwritten */
     b = a;
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
