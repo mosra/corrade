@@ -1371,6 +1371,16 @@ static_cast<void>(b);
 }
 
 {
+/* [String-usage-sso-copy] */
+Containers::String a{Containers::AllocatedInit, "hi!"}; // a.isSmall() == false
+Containers::String b = std::move(a);                    // b.isSmall() == false
+Containers::String c = b;                               // c.isSmall() == false
+
+Containers::String d = Containers::StringView{c};       // d.isSmall() == true
+/* [String-usage-sso-copy] */
+}
+
+{
 std::size_t size{};
 /* [String-usage-wrapping] */
 {

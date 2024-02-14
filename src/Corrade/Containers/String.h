@@ -127,15 +127,25 @@ by default stored inside the class.
 Such optimization is completely transparent to the user, the only difference is
 that @ref deleter() and @ref release() can't be called on SSO strings, as there
 is nothing to delete / release. Presence of SSO on an instance can be queried
-using @ref isSmall(). In cases where SSO isn't desired, the string can be
-constructed with @ref String(AllocatedInitT, const char*) and related APIs
-using the @ref AllocatedInit tag, which bypasses this optimization and always
-allocates.
+using @ref isSmall().
 
 @attention For consistency with @ref StringView and in order to allow the small
     string optimization, on 32-bit systems the size is limited to 1 GB. That
     should be more than enough for real-world strings (as opposed to arbitrary
     binary data), if you need more please use an @ref Array instead.
+
+In cases where SSO isn't desired --- for example when strings are stored in a
+growable array, are externally referenced via @ref StringView instances or
+@cpp char* @ce and pointer stability is required after a reallocation --- the
+string can be constructed with @ref String(AllocatedInitT, const char*) and
+related APIs using the @ref AllocatedInit tag, which bypasses this optimization
+and always allocates. This property is then also preserved on all moves and
+copies regardless of the actual string size, i.e., small strings don't suddenly
+become SSO instances if the growable array gets reallocated. An
+@ref AllocatedInit small string can be turned into an SSO instance again by
+explicitly using the @ref String(StringView) constructor:
+
+@snippet Containers.cpp String-usage-sso-copy
 
 @subsection Containers-String-usage-initialization String initialization
 
@@ -617,13 +627,27 @@ class CORRADE_UTILITY_EXPORT String {
          */
         ~String();
 
-        /** @brief Copy constructor */
+        /**
+         * @brief Copy constructor
+         *
+         * If @p other is a SSO instance, the copy is as well, otherwise a copy
+         * is allocated using the default @cpp operator new[] @ce. The actual
+         * string size isn't taken into account. See
+         * @ref Containers-String-usage-sso for more information.
+         */
         String(const String& other);
 
         /** @brief Move constructor */
         String(String&& other) noexcept;
 
-        /** @brief Copy assignment */
+        /**
+         * @brief Copy assignment
+         *
+         * If @p other is a SSO instance, the copy is as well, otherwise a copy
+         * is allocated using the default @cpp operator new[] @ce. The actual
+         * string size isn't taken into account. See
+         * @ref Containers-String-usage-sso for more information.
+         */
         String& operator=(const String& other);
 
         /** @brief Move assignment */

@@ -155,12 +155,16 @@ struct StringTest: TestSuite::Tester {
     void copyLargeToSmall();
     void copyConstructSmall();
     void copyConstructSmallFromAllocatedInit();
+    void copyConstructSmallFromGlobal();
     void copyConstructSmallToAllocatedInit();
     void copySmallToLarge();
     void copySmallToSmall();
     void copySmallToSmallAllocatedInit();
+    void copySmallToSmallGlobal();
     void copySmallAllocatedInitToLarge();
     void copySmallAllocatedInitToSmall();
+    void copySmallGlobalToLarge();
+    void copySmallGlobalToSmall();
 
     void moveConstructLarge();
     void moveConstructLargeNullTerminatedGlobalView();
@@ -321,12 +325,16 @@ StringTest::StringTest() {
               &StringTest::copyLargeToSmall,
               &StringTest::copyConstructSmall,
               &StringTest::copyConstructSmallFromAllocatedInit,
+              &StringTest::copyConstructSmallFromGlobal,
               &StringTest::copyConstructSmallToAllocatedInit,
               &StringTest::copySmallToLarge,
               &StringTest::copySmallToSmall,
               &StringTest::copySmallToSmallAllocatedInit,
+              &StringTest::copySmallToSmallGlobal,
               &StringTest::copySmallAllocatedInitToLarge,
               &StringTest::copySmallAllocatedInitToSmall,
+              &StringTest::copySmallGlobalToLarge,
+              &StringTest::copySmallGlobalToSmall,
 
               &StringTest::moveConstructLarge,
               &StringTest::moveConstructLargeNullTerminatedGlobalView,
@@ -1650,11 +1658,25 @@ void StringTest::copyConstructSmallFromAllocatedInit() {
     String a{AllocatedInit, "hello"};
     CORRADE_VERIFY(!a.isSmall());
 
-    /* A copy is made using a SSO even though the original wasn't SSO */
+    /* The original wasn't a SSO so the new one isn't either */
     String b = a;
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
-    CORRADE_VERIFY(b.isSmall());
+    CORRADE_VERIFY(!b.isSmall());
+}
+
+void StringTest::copyConstructSmallFromGlobal() {
+    String a = String::nullTerminatedGlobalView("hello"_s);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    /* The original wasn't a SSO so the new one isn't either. But it also isn't
+       global, it's a local copy. */
+    String b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::copyConstructSmallToAllocatedInit() {
@@ -1717,6 +1739,24 @@ void StringTest::copySmallToSmallAllocatedInit() {
     CORRADE_VERIFY(b.isSmall());
 }
 
+void StringTest::copySmallToSmallGlobal() {
+    String a = "hello";
+    CORRADE_VERIFY(a.isSmall());
+
+    String b = String::nullTerminatedGlobalView("HELLO!!!"_s);
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    /* A copy is made using a SSO, b is deallocated, i.e. basically the same as
+       copySmallToLarge(). Since it's a copy, the global flag is lost as
+       well. */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(b.isSmall());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+}
+
 void StringTest::copySmallAllocatedInitToLarge() {
     String a{AllocatedInit, "hello"};
     CORRADE_VERIFY(!a.isSmall());
@@ -1728,12 +1768,12 @@ void StringTest::copySmallAllocatedInitToLarge() {
     CORRADE_VERIFY(!b.isSmall());
     CORRADE_VERIFY(b.deleter());
 
-    /* A copy is made using a SSO even though the original wasn't SSO, b is
+    /* The original wasn't a SSO so the new one isn't either, b is
        deallocated */
     b = a;
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
-    CORRADE_VERIFY(b.isSmall());
+    CORRADE_VERIFY(!b.isSmall());
     CORRADE_COMPARE(bData[1], 'M');
 }
 
@@ -1744,12 +1784,51 @@ void StringTest::copySmallAllocatedInitToSmall() {
     String b = "HELLO!!!";
     CORRADE_VERIFY(b.isSmall());
 
-    /* A copy is made using a SSO even though the original wasn't SSO, original
+    /* The original wasn't a SSO so the new one isn't either, original
        data overwritten */
     b = a;
     CORRADE_COMPARE(b, "hello"_s);
     CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+}
+
+void StringTest::copySmallGlobalToLarge() {
+    String a = String::nullTerminatedGlobalView("hello"_s);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    char bData[] = "ALLOCATED HELLO FOR A VERBOSE WORLD!!!";
+    String b{bData, sizeof(bData) - 1, [](char* data, std::size_t){
+        ++data[1];
+    }};
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_VERIFY(b.deleter());
+
+    /* The original wasn't a SSO so the new one isn't either. But it also isn't
+       global, it's a local copy. The b is deallocated. */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(bData[1], 'M');
+}
+
+void StringTest::copySmallGlobalToSmall() {
+    String a = String::nullTerminatedGlobalView("hello"_s);
+    CORRADE_VERIFY(!a.isSmall());
+    CORRADE_COMPARE(a.viewFlags(), StringViewFlag::NullTerminated|StringViewFlag::Global);
+
+    String b = "HELLO!!!";
     CORRADE_VERIFY(b.isSmall());
+
+    /* The original wasn't a SSO so the new one isn't either. But it also isn't
+       global, it's a local copy. The original data are overwritten. */
+    b = a;
+    CORRADE_COMPARE(b, "hello"_s);
+    CORRADE_VERIFY(b.data() != a.data());
+    CORRADE_VERIFY(!b.isSmall());
+    CORRADE_COMPARE(b.viewFlags(), StringViewFlag::NullTerminated);
 }
 
 void StringTest::moveConstructLarge() {
