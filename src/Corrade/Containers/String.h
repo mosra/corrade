@@ -1377,6 +1377,7 @@ class CORRADE_UTILITY_EXPORT String {
 
         CORRADE_UTILITY_LOCAL void construct(Corrade::NoInitT, std::size_t size);
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
+        CORRADE_UTILITY_LOCAL void copyConstruct(const String& other);
         CORRADE_UTILITY_LOCAL void destruct();
         CORRADE_UTILITY_LOCAL Pair<const char*, std::size_t> dataInternal() const;
 

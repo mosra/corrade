@@ -315,9 +315,13 @@ String::String(Corrade::DirectInitT, const std::size_t size, const char c): Stri
 
 String::~String() { destruct(); }
 
-String::String(const String& other) {
+inline void String::copyConstruct(const String& other) {
     const Pair<const char*, std::size_t> data = other.dataInternal();
     construct(data.first(), data.second());
+}
+
+String::String(const String& other) {
+    copyConstruct(other);
 }
 
 String::String(String&& other) noexcept {
@@ -334,9 +338,7 @@ String::String(String&& other) noexcept {
 
 String& String::operator=(const String& other) {
     destruct();
-
-    const Pair<const char*, std::size_t> data = other.dataInternal();
-    construct(data.first(), data.second());
+    copyConstruct(other);
     return *this;
 }
 
