@@ -73,8 +73,10 @@ struct StaticArrayTest: TestSuite::Tester {
     void constructNoInit();
     void constructInPlaceInit();
     void constructInPlaceInitOneArgument();
+    void constructInPlaceInitMoveOnly();
     void constructDirectInit();
-    void constructNonCopyable();
+    void constructDirectInitMoveOnly();
+    void constructImmovable();
     void constructNoImplicitConstructor();
     void constructDirectReferences();
     void constructArray();
@@ -127,10 +129,15 @@ StaticArrayTest::StaticArrayTest() {
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::constructInPlaceInit,
-              &StaticArrayTest::constructInPlaceInitOneArgument,
-              &StaticArrayTest::constructDirectInit});
+              &StaticArrayTest::constructInPlaceInitOneArgument});
 
-    addTests({&StaticArrayTest::constructNonCopyable},
+    addTests({&StaticArrayTest::constructInPlaceInitMoveOnly},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests({&StaticArrayTest::constructDirectInit});
+
+    addTests({&StaticArrayTest::constructDirectInitMoveOnly,
+              &StaticArrayTest::constructImmovable},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::constructNoImplicitConstructor,
@@ -316,14 +323,23 @@ void StaticArrayTest::resetCounters() {
 
 void StaticArrayTest::constructNoInit() {
     {
-        const StaticArray<5, Copyable> a{Corrade::NoInit};
-        CORRADE_COMPARE(Copyable::constructed, 0);
+        StaticArray<3, Copyable> a{Corrade::InPlaceInit, 57, 39, 78};
+        CORRADE_COMPARE(Copyable::constructed, 3);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
 
-        const StaticArray<5, Copyable> b{Corrade::DefaultInit};
-        CORRADE_COMPARE(Copyable::constructed, 5);
+        new(&a) StaticArray<3, Copyable>{Corrade::NoInit};
+        CORRADE_COMPARE(Copyable::constructed, 3);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
     }
 
-    CORRADE_COMPARE(Copyable::destructed, 10);
+    CORRADE_COMPARE(Copyable::constructed, 3);
+    CORRADE_COMPARE(Copyable::destructed, 3);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
 
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, StaticArray<5, Copyable>>::value);
@@ -350,6 +366,29 @@ void StaticArrayTest::constructInPlaceInitOneArgument() {
     CORRADE_COMPARE(a[0], 17);
 }
 
+void StaticArrayTest::constructInPlaceInitMoveOnly() {
+    {
+        const StaticArray<3, Movable> a{Movable{1}, Movable{2}, Movable{3}};
+        const StaticArray<3, Movable> b{Corrade::InPlaceInit, Movable{1}, Movable{2}, Movable{3}};
+
+        CORRADE_COMPARE(a[0].a, 1);
+        CORRADE_COMPARE(b[0].a, 1);
+        CORRADE_COMPARE(a[1].a, 2);
+        CORRADE_COMPARE(b[1].a, 2);
+        CORRADE_COMPARE(a[2].a, 3);
+        CORRADE_COMPARE(b[2].a, 3);
+
+        /* 6 temporaries that were moved to the concrete places 6 times */
+        CORRADE_COMPARE(Movable::constructed, 6 + 6);
+        CORRADE_COMPARE(Movable::destructed, 6);
+        CORRADE_COMPARE(Movable::moved, 6);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 6 + 6);
+    CORRADE_COMPARE(Movable::destructed, 6 + 6);
+    CORRADE_COMPARE(Movable::moved, 6);
+}
+
 void StaticArrayTest::constructDirectInit() {
     const StaticArray<5, int> a{Corrade::DirectInit, -37};
     CORRADE_COMPARE(a[0], -37);
@@ -359,7 +398,27 @@ void StaticArrayTest::constructDirectInit() {
     CORRADE_COMPARE(a[4], -37);
 }
 
-void StaticArrayTest::constructNonCopyable() {
+void StaticArrayTest::constructDirectInitMoveOnly() {
+    {
+        /* This one is weird as it moves one argument 3 times, but should work
+           nevertheless */
+        const StaticArray<3, Movable> a{Corrade::DirectInit, Movable{-37}};
+        CORRADE_COMPARE(a[0].a, -37);
+        CORRADE_COMPARE(a[1].a, -37);
+        CORRADE_COMPARE(a[2].a, -37);
+
+        /* 1 temporary that was moved to the concrete places 3 times */
+        CORRADE_COMPARE(Movable::constructed, 1 + 3);
+        CORRADE_COMPARE(Movable::destructed, 1);
+        CORRADE_COMPARE(Movable::moved, 3);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 1 + 3);
+    CORRADE_COMPARE(Movable::destructed, 1 + 3);
+    CORRADE_COMPARE(Movable::moved, 3);
+}
+
+void StaticArrayTest::constructImmovable() {
     /* Can't use ValueInit because that apparently copy-constructs the array
        elements (huh?) */
     const StaticArray<5, Immovable> a{Corrade::DefaultInit};
@@ -474,33 +533,44 @@ void StaticArrayTest::constructArrayMove() {
        moved. */
     CORRADE_SKIP("MSVC 2015 and 2017 isn't able to move arrays.");
     #else
-    struct IntPointerInt {
-        Pointer<int> a;
+    struct MovableInt {
+        Movable a;
         int b;
     };
 
-    StaticArray<3, IntPointerInt> a1{{
-        {Pointer<int>{Corrade::InPlaceInit, 1}, 2},
-        {Pointer<int>{Corrade::InPlaceInit, 3}, 4},
-        {Pointer<int>{Corrade::InPlaceInit, 5}, 6}
-    }};
-    StaticArray<3, IntPointerInt> a2{Corrade::InPlaceInit, {
-        {Pointer<int>{Corrade::InPlaceInit, 1}, 2},
-        {Pointer<int>{Corrade::InPlaceInit, 3}, 4},
-        {Pointer<int>{Corrade::InPlaceInit, 5}, 6}
-    }};
-    CORRADE_COMPARE(*a1[0].a, 1);
-    CORRADE_COMPARE(*a2[0].a, 1);
-    CORRADE_COMPARE(a1[0].b, 2);
-    CORRADE_COMPARE(a2[0].b, 2);
-    CORRADE_COMPARE(*a1[1].a, 3);
-    CORRADE_COMPARE(*a2[1].a, 3);
-    CORRADE_COMPARE(a1[1].b, 4);
-    CORRADE_COMPARE(a2[1].b, 4);
-    CORRADE_COMPARE(*a1[2].a, 5);
-    CORRADE_COMPARE(*a2[2].a, 5);
-    CORRADE_COMPARE(a1[2].b, 6);
-    CORRADE_COMPARE(a2[2].b, 6);
+    {
+        StaticArray<3, MovableInt> a1{{
+            {Movable{1}, 2},
+            {Movable{3}, 4},
+            {Movable{5}, 6}
+        }};
+        StaticArray<3, MovableInt> a2{Corrade::InPlaceInit, {
+            {Movable{1}, 2},
+            {Movable{3}, 4},
+            {Movable{5}, 6}
+        }};
+        CORRADE_COMPARE(a1[0].a.a, 1);
+        CORRADE_COMPARE(a2[0].a.a, 1);
+        CORRADE_COMPARE(a1[0].b, 2);
+        CORRADE_COMPARE(a2[0].b, 2);
+        CORRADE_COMPARE(a1[1].a.a, 3);
+        CORRADE_COMPARE(a2[1].a.a, 3);
+        CORRADE_COMPARE(a1[1].b, 4);
+        CORRADE_COMPARE(a2[1].b, 4);
+        CORRADE_COMPARE(a1[2].a.a, 5);
+        CORRADE_COMPARE(a2[2].a.a, 5);
+        CORRADE_COMPARE(a1[2].b, 6);
+        CORRADE_COMPARE(a2[2].b, 6);
+
+        /* 6 temporaries that were moved to the concrete places 6 times */
+        CORRADE_COMPARE(Movable::constructed, 6 + 6);
+        CORRADE_COMPARE(Movable::destructed, 6);
+        CORRADE_COMPARE(Movable::moved, 6);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 6 + 6);
+    CORRADE_COMPARE(Movable::destructed, 6 + 6);
+    CORRADE_COMPARE(Movable::moved, 6);
     #endif
 }
 

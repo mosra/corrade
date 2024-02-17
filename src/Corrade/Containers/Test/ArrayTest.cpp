@@ -71,6 +71,8 @@ namespace Test { namespace {
 struct ArrayTest: TestSuite::Tester {
     explicit ArrayTest();
 
+    void resetCounters();
+
     void constructDefault();
     void constructEmpty();
     void construct();
@@ -85,8 +87,10 @@ struct ArrayTest: TestSuite::Tester {
     void constructNoInitNonTrivialZeroSize();
     void constructDirectInit();
     void constructDirectInitZeroSize();
+    void constructDirectInitMoveOnly();
     void constructInPlaceInit();
     void constructInPlaceInitZeroSize();
+    void constructInPlaceInitMoveOnly();
     void constructFromExisting();
     void constructMove();
     void constructDirectReferences();
@@ -158,10 +162,18 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructNoInitNonTrivial,
               &ArrayTest::constructNoInitNonTrivialZeroSize,
               &ArrayTest::constructDirectInit,
-              &ArrayTest::constructDirectInitZeroSize,
-              &ArrayTest::constructInPlaceInit,
-              &ArrayTest::constructInPlaceInitZeroSize,
-              &ArrayTest::constructFromExisting,
+              &ArrayTest::constructDirectInitZeroSize});
+
+    addTests({&ArrayTest::constructDirectInitMoveOnly},
+        &ArrayTest::resetCounters, &ArrayTest::resetCounters);
+
+    addTests({&ArrayTest::constructInPlaceInit,
+              &ArrayTest::constructInPlaceInitZeroSize});
+
+    addTests({&ArrayTest::constructInPlaceInitMoveOnly},
+        &ArrayTest::resetCounters, &ArrayTest::resetCounters);
+
+    addTests({&ArrayTest::constructFromExisting,
               &ArrayTest::constructMove,
               &ArrayTest::constructDirectReferences,
 
@@ -210,6 +222,36 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructorExplicitInCopyInitialization,
               &ArrayTest::copyConstructPlainStruct,
               &ArrayTest::moveConstructPlainStruct});
+}
+
+struct Movable {
+    static int constructed;
+    static int destructed;
+    static int moved;
+
+    /*implicit*/ Movable(int a = 0) noexcept: a{a} { ++constructed; }
+    Movable(const Movable&) = delete;
+    Movable(Movable&& other) noexcept: a(other.a) {
+        ++constructed;
+        ++moved;
+    }
+    ~Movable() { ++destructed; }
+    Movable& operator=(const Movable&) = delete;
+    Movable& operator=(Movable&& other) noexcept {
+        a = other.a;
+        ++moved;
+        return *this;
+    }
+
+    int a;
+};
+
+int Movable::constructed = 0;
+int Movable::destructed = 0;
+int Movable::moved = 0;
+
+void ArrayTest::resetCounters() {
+    Movable::constructed = Movable::destructed = Movable::moved = 0;
 }
 
 void ArrayTest::constructDefault() {
@@ -356,6 +398,26 @@ void ArrayTest::constructDirectInitZeroSize() {
     CORRADE_COMPARE(a.size(), 0);
 }
 
+void ArrayTest::constructDirectInitMoveOnly() {
+    {
+        /* This one is weird as it moves one argument 3 times, but should work
+           nevertheless */
+        Containers::Array<Movable> a{Corrade::DirectInit, 3, Movable{-37}};
+        CORRADE_COMPARE(a[0].a, -37);
+        CORRADE_COMPARE(a[1].a, -37);
+        CORRADE_COMPARE(a[2].a, -37);
+
+        /* 1 temporary that was moved to the concrete places 3 times */
+        CORRADE_COMPARE(Movable::constructed, 1 + 3);
+        CORRADE_COMPARE(Movable::destructed, 1);
+        CORRADE_COMPARE(Movable::moved, 3);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 1 + 3);
+    CORRADE_COMPARE(Movable::destructed, 1 + 3);
+    CORRADE_COMPARE(Movable::moved, 3);
+}
+
 void ArrayTest::constructInPlaceInit() {
     Array a1{Corrade::InPlaceInit, {1, 3, 127, -48}};
     CORRADE_VERIFY(a1);
@@ -401,6 +463,30 @@ void ArrayTest::constructInPlaceInitZeroSize() {
     CORRADE_VERIFY(!a2);
     CORRADE_VERIFY(!a2.data());
     CORRADE_COMPARE(a2.size(), 0);
+}
+
+void ArrayTest::constructInPlaceInitMoveOnly() {
+    #if 0
+    {
+        /* This one is weird as it moves one argument 3 times, but should work
+           nevertheless */
+        Containers::Array<Movable> a{Corrade::InPlaceInit, {Movable{1}, Movable{2}, Movable{3}}};
+        CORRADE_COMPARE(a[0].a, -37);
+        CORRADE_COMPARE(a[1].a, -37);
+        CORRADE_COMPARE(a[2].a, -37);
+
+        /* 6 temporaries that were moved to the concrete places 6 times */
+        CORRADE_COMPARE(Movable::constructed, 6 + 6);
+        CORRADE_COMPARE(Movable::destructed, 6);
+        CORRADE_COMPARE(Movable::moved, 6);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 6 + 6);
+    CORRADE_COMPARE(Movable::destructed, 6 + 6);
+    CORRADE_COMPARE(Movable::moved, 6);
+    #else
+    CORRADE_SKIP("Impossible with the std::initializer_list argument, needs to wait until InPlaceInit with T(&&)[size] exists.");
+    #endif
 }
 
 void ArrayTest::constructMove() {
