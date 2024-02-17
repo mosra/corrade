@@ -55,6 +55,17 @@ void StaticArrayCpp17Test::structuredBindings() {
     CORRADE_VERIFY(std::is_same<decltype(a1), float>::value);
     CORRADE_COMPARE(a0, 32.5f);
     CORRADE_COMPARE(a1, -2.25f);
+
+    /* Constexpr behavior tested for each case (&, const&, &&) below */
+}
+
+/* Verifies the & variant behavior with constexpr */
+constexpr Array2<float> structuredBindingsReferenceConstexpr(float first, float second) {
+    Array2<float> out;
+    auto& [outSecond, outFirst] = out;
+    outFirst = first;
+    outSecond = second;
+    return out;
 }
 
 void StaticArrayCpp17Test::structuredBindingsReference() {
@@ -68,6 +79,16 @@ void StaticArrayCpp17Test::structuredBindingsReference() {
     /* Verify it's indeed references and not a copy bound to a reference */
     CORRADE_COMPARE(&a0, &array[0]);
     CORRADE_COMPARE(&a1, &array[1]);
+
+    constexpr Array2<float> carray = structuredBindingsReferenceConstexpr(32.5f, -2.25f);
+    CORRADE_COMPARE(carray[0], -2.25f);
+    CORRADE_COMPARE(carray[1], 32.5f);
+}
+
+/* Verifies the const& variant behavior with constexpr */
+constexpr Array2<float> structuredBindingsConstReferenceConstexpr(const Array2<float>& pair) {
+    auto& [first, second] = pair;
+    return {second, first};
 }
 
 void StaticArrayCpp17Test::structuredBindingsConstReference() {
@@ -81,6 +102,19 @@ void StaticArrayCpp17Test::structuredBindingsConstReference() {
     /* Verify it's indeed references and not a copy bound to a reference */
     CORRADE_COMPARE(&a0, &array[0]);
     CORRADE_COMPARE(&a1, &array[1]);
+
+    constexpr Array2<float> carray = structuredBindingsConstReferenceConstexpr({32.5f, -2.25f});
+    CORRADE_COMPARE(carray[0], -2.25f);
+    CORRADE_COMPARE(carray[1], 32.5f);
+}
+
+/* Verifies the && variant behavior with constexpr, although not really well */
+constexpr Array2<float> structuredBindingsRvalueReferenceConstexpr(float first, float second) {
+    Array2<float> out;
+    auto&& [outSecond, outFirst] = Utility::move(out);
+    outFirst = first;
+    outSecond = second;
+    return out;
 }
 
 void StaticArrayCpp17Test::structuredBindingsRvalueReference() {
@@ -94,6 +128,15 @@ void StaticArrayCpp17Test::structuredBindingsRvalueReference() {
     /* Verify it's indeed references and not a copy bound to a reference */
     CORRADE_COMPARE(&a0, &array[0]);
     CORRADE_COMPARE(&a1, &array[1]);
+
+    /* MSVC 2017 doesn't seem to like rvalues in a constexpr context.
+       Everything else works, MSVC 2019 works as well, so just ignore it. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    constexpr
+    #endif
+    Array2<float> carray = structuredBindingsRvalueReferenceConstexpr(32.5f, -2.25f);
+    CORRADE_COMPARE(carray[0], -2.25f);
+    CORRADE_COMPARE(carray[1], 32.5f);
 }
 
 void StaticArrayCpp17Test::structuredBindingsMove() {

@@ -321,6 +321,10 @@ namespace Corrade {
 -   All classes that have a constructor taking a single pointer or
     @ref std::nullptr_t argument now prevent ambiguity when used in function
     overloads together with an integer argument and called with @cpp 0 @ce
+-   @ref Containers::StaticArray of types that are either trivially
+    constructible or have a @ref NoInit constructor are now usable in
+    @cpp constexpr @ce contexts and trivially copyable if the underlying type
+    is
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

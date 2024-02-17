@@ -418,6 +418,33 @@ template<class T> void StaticArrayTest::constructValueInitTrivial() {
     CORRADE_COMPARE(a1[4], 0);
     CORRADE_COMPARE(a2[4], 0);
 
+    constexpr StaticArray<5, T> ca1;
+    constexpr StaticArray<5, T> ca2{Corrade::ValueInit};
+    constexpr bool bool1 = !!ca1;
+    constexpr bool bool2 = !!ca2;
+    constexpr bool empty1 = ca1.isEmpty();
+    constexpr bool empty2 = ca2.isEmpty();
+    constexpr std::size_t size1 = ca1.size();
+    constexpr std::size_t size2 = ca2.size();
+    CORRADE_VERIFY(bool1);
+    CORRADE_VERIFY(bool2);
+    CORRADE_VERIFY(!empty1);
+    CORRADE_VERIFY(!empty2);
+    CORRADE_COMPARE(size1, 5);
+    CORRADE_COMPARE(size2, 5);
+
+    /* Values should be zero-initialized (same as ValueInit) */
+    CORRADE_COMPARE(ca1[0], 0);
+    CORRADE_COMPARE(ca2[0], 0);
+    CORRADE_COMPARE(ca1[1], 0);
+    CORRADE_COMPARE(ca2[1], 0);
+    CORRADE_COMPARE(ca1[2], 0);
+    CORRADE_COMPARE(ca2[2], 0);
+    CORRADE_COMPARE(ca1[3], 0);
+    CORRADE_COMPARE(ca2[3], 0);
+    CORRADE_COMPARE(ca1[4], 0);
+    CORRADE_COMPARE(ca2[4], 0);
+
     /* Size should be the same as a plain array, even with all the extra craze
        with base classes */
     CORRADE_COMPARE(sizeof(StaticArray<5, T>), 5*sizeof(T));
@@ -470,6 +497,13 @@ void StaticArrayTest::constructDefaultInitDefaultConstructor() {
     CORRADE_COMPARE(a[2], 0);
     CORRADE_COMPARE(a[3], 0);
     CORRADE_COMPARE(a[4], 0);
+
+    constexpr StaticArray<5, NoInitConstructible> ca{Corrade::DefaultInit};
+    CORRADE_COMPARE(ca[0], 0);
+    CORRADE_COMPARE(ca[1], 0);
+    CORRADE_COMPARE(ca[2], 0);
+    CORRADE_COMPARE(ca[3], 0);
+    CORRADE_COMPARE(ca[4], 0);
 
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, NoInitConstructible>>::value);
@@ -563,6 +597,19 @@ template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
     CORRADE_COMPARE(b[3], 40);
     CORRADE_COMPARE(a[4], 50);
     CORRADE_COMPARE(b[4], 50);
+
+    constexpr StaticArray<5, T> ca{10, 20, 30, 40, 50};
+    constexpr StaticArray<5, T> cb{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
+    CORRADE_COMPARE(ca[0], 10);
+    CORRADE_COMPARE(cb[0], 10);
+    CORRADE_COMPARE(ca[1], 20);
+    CORRADE_COMPARE(cb[1], 20);
+    CORRADE_COMPARE(ca[2], 30);
+    CORRADE_COMPARE(cb[2], 30);
+    CORRADE_COMPARE(ca[3], 40);
+    CORRADE_COMPARE(cb[3], 40);
+    CORRADE_COMPARE(ca[4], 50);
+    CORRADE_COMPARE(cb[4], 50);
 }
 
 void StaticArrayTest::constructInPlaceInitOneArgument() {
@@ -587,6 +634,9 @@ template<class T> void StaticArrayTest::constructInPlaceInitOneArgumentTrivial()
 
     const StaticArray<1, int> a{17};
     CORRADE_COMPARE(a[0], 17);
+
+    constexpr StaticArray<1, int> ca{17};
+    CORRADE_COMPARE(ca[0], 17);
 }
 
 void StaticArrayTest::constructInPlaceInitMoveOnly() {
@@ -642,6 +692,8 @@ template<class T> void StaticArrayTest::constructDirectInitTrivial() {
     CORRADE_COMPARE(a[2], -37);
     CORRADE_COMPARE(a[3], -37);
     CORRADE_COMPARE(a[4], -37);
+
+    /* DirectInit delegates to NoInit, so it can't be constexpr */
 }
 
 void StaticArrayTest::constructDirectInitMoveOnly() {
@@ -756,20 +808,27 @@ void StaticArrayTest::constructArray() {
     CORRADE_COMPARE(Copyable::moved, 0);
 }
 
+template<class> struct PairOfInts;
+template<> struct PairOfInts<int> {
+    int a, b;
+};
+template<> struct PairOfInts<NoInitConstructible> {
+    constexpr PairOfInts(int a = 0, int b = 0): a{a}, b{b} {}
+    PairOfInts(Corrade::NoInitT): a{Corrade::NoInit}, b{Corrade::NoInit} {}
+
+    NoInitConstructible a, b;
+};
+
 template<class T> void StaticArrayTest::constructArrayTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    struct PairOfInts {
-        T a, b;
-    };
-
-    const PairOfInts data[]{
+    const PairOfInts<T> data[]{
         {1, 2},
         {3, 4},
         {5, 6}
     };
-    StaticArray<3, PairOfInts> a1{data};
-    StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, data};
+    StaticArray<3, PairOfInts<T>> a1{data};
+    StaticArray<3, PairOfInts<T>> a2{Corrade::InPlaceInit, data};
     CORRADE_COMPARE(a1[0].a, 1);
     CORRADE_COMPARE(a2[0].a, 1);
     CORRADE_COMPARE(a1[0].b, 2);
@@ -782,6 +841,26 @@ template<class T> void StaticArrayTest::constructArrayTrivial() {
     CORRADE_COMPARE(a2[2].a, 5);
     CORRADE_COMPARE(a1[2].b, 6);
     CORRADE_COMPARE(a2[2].b, 6);
+
+    constexpr PairOfInts<T> cdata[]{
+        {1, 2},
+        {3, 4},
+        {5, 6}
+    };
+    constexpr StaticArray<3, PairOfInts<T>> ca1{cdata};
+    constexpr StaticArray<3, PairOfInts<T>> ca2{Corrade::InPlaceInit, cdata};
+    CORRADE_COMPARE(ca1[0].a, 1);
+    CORRADE_COMPARE(ca2[0].a, 1);
+    CORRADE_COMPARE(ca1[0].b, 2);
+    CORRADE_COMPARE(ca2[0].b, 2);
+    CORRADE_COMPARE(ca1[1].a, 3);
+    CORRADE_COMPARE(ca2[1].a, 3);
+    CORRADE_COMPARE(ca1[1].b, 4);
+    CORRADE_COMPARE(ca2[1].b, 4);
+    CORRADE_COMPARE(ca1[2].a, 5);
+    CORRADE_COMPARE(ca2[2].a, 5);
+    CORRADE_COMPARE(ca1[2].b, 6);
+    CORRADE_COMPARE(ca2[2].b, 6);
 }
 
 void StaticArrayTest::constructArrayRvalue() {
@@ -928,6 +1007,12 @@ template<class T> void StaticArrayTest::copyTrivial() {
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
+    constexpr StaticArray<3, T> ca{Corrade::InPlaceInit, 1, 2, 3};
+    constexpr StaticArray<3, T> cb = ca;
+    CORRADE_COMPARE(cb[0], 1);
+    CORRADE_COMPARE(cb[1], 2);
+    CORRADE_COMPARE(cb[2], 3);
+
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<T>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<StaticArray<3, T>>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<T>::value);
@@ -986,10 +1071,15 @@ void StaticArrayTest::move() {
 void StaticArrayTest::convertBool() {
     CORRADE_VERIFY(StaticArray<5, int>{});
 
+    constexpr StaticArray<5, int> ca;
+    CORRADE_VERIFY(ca);
+
     /* Explicit conversion to bool is allowed, but not to int */
     CORRADE_VERIFY(std::is_constructible<bool, StaticArray<5, int>>::value);
     CORRADE_VERIFY(!std::is_constructible<int, StaticArray<5, int>>::value);
 }
+
+constexpr StaticArray<5, int> Array5{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
 void StaticArrayTest::convertPointer() {
     StaticArray<5, int> a;
@@ -1004,6 +1094,9 @@ void StaticArrayTest::convertPointer() {
     const StaticArray<5, int> e;
     const int* f = e + 2;
     CORRADE_COMPARE(f, &e[2]);
+
+    constexpr const int* cd = Array5;
+    CORRADE_COMPARE(cd, Array5.begin());
 
     /* Verify that we can't convert rvalues. Not using is_convertible to catch
        also accidental explicit conversions. */
@@ -1023,6 +1116,8 @@ void StaticArrayTest::convertPointer() {
         CORRADE_VERIFY(!std::is_constructible<const int*, const StaticArray<5, int>&&>::value);
     }
 }
+
+constexpr StaticArray<5, const int> Array5C;
 
 void StaticArrayTest::convertView() {
     StaticArray<5, int> a;
@@ -1044,6 +1139,13 @@ void StaticArrayTest::convertView() {
         CORRADE_COMPARE(bc.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     } {
+        constexpr ArrayView<const int> cb = Array5;
+        constexpr ArrayView<const int> cbc = Array5C;
+        CORRADE_VERIFY(cb.begin() == Array5.begin());
+        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.size(), 5);
+        CORRADE_COMPARE(cbc.size(), 5);
+    } {
         const auto b = arrayView(a);
         const auto cb = arrayView(ca);
         const auto bc = arrayView(ac);
@@ -1060,22 +1162,38 @@ void StaticArrayTest::convertView() {
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
+    } {
+        constexpr auto cb = arrayView(Array5);
+        constexpr auto cbc = arrayView(Array5C);
+        CORRADE_VERIFY(std::is_same<decltype(cb), const ArrayView<const int>>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cbc), const ArrayView<const int>>::value);
+        CORRADE_VERIFY(cb.begin() == Array5.begin());
+        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.size(), 5);
+        CORRADE_COMPARE(cbc.size(), 5);
     }
 }
 
-void StaticArrayTest::convertViewDerived() {
-    struct A { int i; };
-    struct B: A {};
+struct A { int i; };
+struct B: A {
+    explicit B(Corrade::NoInitT) {}
+    constexpr B(int i = 0): A{i} {}
+};
+constexpr StaticArray<5, B> ArrayB5;
 
+void StaticArrayTest::convertViewDerived() {
     /* Valid use case: constructing Containers::ArrayView<Math::Vector<3, Float>>
        from Containers::ArrayView<Color3> because the data have the same size
        and data layout */
 
     StaticArray<5, B> b;
     ArrayView<A> a = b;
-
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
+
+    constexpr ArrayView<const A> ca = ArrayB5;
+    CORRADE_VERIFY(ca == ArrayB5);
+    CORRADE_COMPARE(ca.size(), 5);
 }
 
 bool takesAView(ArrayView<int>) { return true; }
@@ -1113,38 +1231,37 @@ void StaticArrayTest::convertStaticView() {
         CORRADE_COMPARE(bc.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     } {
-        const auto b = staticArrayView(a);
-        const auto cb = staticArrayView(ca);
-        const auto bc = staticArrayView(ac);
-        const auto cbc = staticArrayView(cac);
-        CORRADE_VERIFY(std::is_same<decltype(b), const StaticArrayView<5, int>>::value);
-        CORRADE_VERIFY(std::is_same<decltype(cb), const StaticArrayView<5, const int>>::value);
-        CORRADE_VERIFY(std::is_same<decltype(bc), const StaticArrayView<5, const int>>::value);
-        CORRADE_VERIFY(std::is_same<decltype(cbc), const StaticArrayView<5, const int>>::value);
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
-        CORRADE_COMPARE(b.size(), 5);
+        constexpr StaticArrayView<5, const int> cb = Array5;
+        constexpr StaticArrayView<5, const int> cbc = Array5C;
+        CORRADE_VERIFY(cb.begin() == Array5.begin());
+        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
         CORRADE_COMPARE(cb.size(), 5);
-        CORRADE_COMPARE(bc.size(), 5);
+        CORRADE_COMPARE(cbc.size(), 5);
+    } {
+        constexpr auto cb = staticArrayView(Array5);
+        constexpr auto cbc = staticArrayView(Array5C);
+        CORRADE_VERIFY(std::is_same<decltype(cb), const StaticArrayView<5, const int>>::value);
+        CORRADE_VERIFY(std::is_same<decltype(cbc), const StaticArrayView<5, const int>>::value);
+        CORRADE_VERIFY(cb.begin() == Array5.begin());
+        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     }
 }
 
 void StaticArrayTest::convertStaticViewDerived() {
-    struct A { int i; };
-    struct B: A {};
-
     /* Valid use case: constructing Containers::ArrayView<Math::Vector<3, Float>>
        from Containers::ArrayView<Color3> because the data have the same size
        and data layout */
 
     StaticArray<5, B> b;
     StaticArrayView<5, A> a = b;
-
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
+
+    constexpr StaticArrayView<5, const A> ca = ArrayB5;
+    CORRADE_VERIFY(ca == ArrayB5);
+    CORRADE_COMPARE(ca.size(), 5);
 }
 
 bool takesAStaticView(StaticArrayView<5, int>) { return true; }
@@ -1171,13 +1288,20 @@ void StaticArrayTest::convertVoid() {
 
 void StaticArrayTest::convertConstVoid() {
     StaticArray<5, int> a;
-    const StaticArray<5, int> ca;
-    ArrayView<const void> b = a;
-    ArrayView<const void> cb = ca;
-    CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(cb == ca);
-    CORRADE_COMPARE(b.size(), 5*sizeof(int));
-    CORRADE_COMPARE(cb.size(), 5*sizeof(int));
+    constexpr StaticArray<5, int> ca;
+
+    {
+        ArrayView<const void> b = a;
+        ArrayView<const void> cb = ca;
+        CORRADE_VERIFY(b == a);
+        CORRADE_VERIFY(cb == ca);
+        CORRADE_COMPARE(b.size(), 5*sizeof(int));
+        CORRADE_COMPARE(cb.size(), 5*sizeof(int));
+    } {
+        constexpr ArrayView<const void> cb = Array5;
+        CORRADE_VERIFY(cb == Array5);
+        CORRADE_COMPARE(cb.size(), 5*sizeof(int));
+    }
 }
 
 void StaticArrayTest::convertToExternalView() {
@@ -1206,6 +1330,11 @@ void StaticArrayTest::convertToConstExternalView() {
 
     ConstIntView5 b = a;
     CORRADE_COMPARE(b.data, a.data());
+
+    constexpr StaticArray<5, int> ca{1, 2, 3, 4, 5};
+
+    ConstIntView5 cb = ca;
+    CORRADE_COMPARE(cb.data, ca.data());
 
     /* Conversion to a different size or type is not allowed */
     /** @todo For some reason I can't use is_constructible here because it
@@ -1251,6 +1380,23 @@ void StaticArrayTest::accessConst() {
     CORRADE_COMPARE(a.end() - a.begin(), 5);
     CORRADE_COMPARE(a.cbegin(), a.begin());
     CORRADE_COMPARE(a.cend(), a.end());
+
+    constexpr const int* data = Array5.data();
+    constexpr const int& front = Array5.front();
+    constexpr const int& back = Array5.back();
+    constexpr const int* begin = Array5.begin();
+    constexpr const int* cbegin = Array5.cbegin();
+    constexpr const int* end = Array5.end();
+    constexpr const int* cend = Array5.cend();
+    constexpr const int& fourth = Array5[4];
+    CORRADE_COMPARE(data, static_cast<const int*>(Array5));
+    CORRADE_COMPARE(front, 1);
+    CORRADE_COMPARE(back, 5);
+    CORRADE_COMPARE(*(begin + 2), 3);
+    CORRADE_COMPARE(fourth, 5);
+    CORRADE_COMPARE(end - begin, 5);
+    CORRADE_COMPARE(cbegin, begin);
+    CORRADE_COMPARE(cend, end);
 }
 
 void StaticArrayTest::rvalueArrayAccess() {
@@ -1337,6 +1483,36 @@ void StaticArrayTest::slice() {
     CORRADE_COMPARE(ec[0], 1);
     CORRADE_COMPARE(ec[1], 2);
     CORRADE_COMPARE(ec[2], 3);
+
+    constexpr ArrayView<const int> cbc1 = Array5.slice(1, 4);
+    CORRADE_COMPARE(cbc1.size(), 3);
+    CORRADE_COMPARE(cbc1[0], 2);
+    CORRADE_COMPARE(cbc1[1], 3);
+    CORRADE_COMPARE(cbc1[2], 4);
+
+    constexpr ArrayView<const int> cbc2 = Array5.sliceSize(1, 3);
+    CORRADE_COMPARE(cbc2.size(), 3);
+    CORRADE_COMPARE(cbc2[0], 2);
+    CORRADE_COMPARE(cbc2[1], 3);
+    CORRADE_COMPARE(cbc2[2], 4);
+
+    constexpr ArrayView<const int> ccc = Array5.prefix(3);
+    CORRADE_COMPARE(ccc.size(), 3);
+    CORRADE_COMPARE(ccc[0], 1);
+    CORRADE_COMPARE(ccc[1], 2);
+    CORRADE_COMPARE(ccc[2], 3);
+
+    constexpr ArrayView<const int> cdc = Array5.exceptPrefix(2);
+    CORRADE_COMPARE(cdc.size(), 3);
+    CORRADE_COMPARE(cdc[0], 3);
+    CORRADE_COMPARE(cdc[1], 4);
+    CORRADE_COMPARE(cdc[2], 5);
+
+    constexpr ArrayView<const int> cec = Array5.exceptSuffix(2);
+    CORRADE_COMPARE(cec.size(), 3);
+    CORRADE_COMPARE(cec[0], 1);
+    CORRADE_COMPARE(cec[1], 2);
+    CORRADE_COMPARE(cec[2], 3);
 }
 
 void StaticArrayTest::slicePointer() {
@@ -1390,6 +1566,30 @@ void StaticArrayTest::slicePointer() {
     CORRADE_COMPARE(dc[0], 3);
     CORRADE_COMPARE(dc[1], 4);
     CORRADE_COMPARE(dc[2], 5);
+
+    constexpr ArrayView<const int> cbc1 = Array5.slice(Array5 + 1, Array5 + 4);
+    CORRADE_COMPARE(cbc1.size(), 3);
+    CORRADE_COMPARE(cbc1[0], 2);
+    CORRADE_COMPARE(cbc1[1], 3);
+    CORRADE_COMPARE(cbc1[2], 4);
+
+    constexpr ArrayView<const int> cbc2 = Array5.sliceSize(Array5 + 1, 3);
+    CORRADE_COMPARE(cbc2.size(), 3);
+    CORRADE_COMPARE(cbc2[0], 2);
+    CORRADE_COMPARE(cbc2[1], 3);
+    CORRADE_COMPARE(cbc2[2], 4);
+
+    constexpr ArrayView<const int> ccc = Array5.prefix(Array5 + 3);
+    CORRADE_COMPARE(ccc.size(), 3);
+    CORRADE_COMPARE(ccc[0], 1);
+    CORRADE_COMPARE(ccc[1], 2);
+    CORRADE_COMPARE(ccc[2], 3);
+
+    constexpr ArrayView<const int> cdc = Array5.suffix(Array5 + 2);
+    CORRADE_COMPARE(cdc.size(), 3);
+    CORRADE_COMPARE(cdc[0], 3);
+    CORRADE_COMPARE(cdc[1], 4);
+    CORRADE_COMPARE(cdc[2], 5);
 }
 
 void StaticArrayTest::sliceToStatic() {
@@ -1456,6 +1656,35 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(ce[1], 2);
     CORRADE_COMPARE(ce[2], 3);
 
+    constexpr StaticArrayView<3, const int> cbc1 = Array5.slice<3>(1);
+    CORRADE_COMPARE(cbc1[0], 2);
+    CORRADE_COMPARE(cbc1[1], 3);
+    CORRADE_COMPARE(cbc1[2], 4);
+
+    constexpr StaticArrayView<3, const int> cbc2 = Array5.slice<1, 4>();
+    CORRADE_COMPARE(cbc2[0], 2);
+    CORRADE_COMPARE(cbc2[1], 3);
+    CORRADE_COMPARE(cbc2[2], 4);
+
+    constexpr StaticArrayView<3, const int> cbc3 = Array5.sliceSize<1, 3>();
+    CORRADE_COMPARE(cbc3[0], 2);
+    CORRADE_COMPARE(cbc3[1], 3);
+    CORRADE_COMPARE(cbc3[2], 4);
+
+    constexpr StaticArrayView<3, const int> ccc = Array5.prefix<3>();
+    CORRADE_COMPARE(ccc[0], 1);
+    CORRADE_COMPARE(ccc[1], 2);
+    CORRADE_COMPARE(ccc[2], 3);
+
+    constexpr StaticArrayView<3, const int> ccd = Array5.exceptPrefix<2>();
+    CORRADE_COMPARE(ccd[0], 3);
+    CORRADE_COMPARE(ccd[1], 4);
+    CORRADE_COMPARE(ccd[2], 5);
+
+    constexpr StaticArrayView<3, const int> cce = Array5.exceptSuffix<2>();
+    CORRADE_COMPARE(cce[0], 1);
+    CORRADE_COMPARE(cce[1], 2);
+    CORRADE_COMPARE(cce[2], 3);
 }
 
 void StaticArrayTest::sliceToStaticPointer() {
@@ -1471,6 +1700,11 @@ void StaticArrayTest::sliceToStaticPointer() {
     CORRADE_COMPARE(bc[0], 2);
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
+
+    constexpr StaticArrayView<3, const int> cbc = Array5.slice<3>(Array5 + 1);
+    CORRADE_COMPARE(cbc[0], 2);
+    CORRADE_COMPARE(cbc[1], 3);
+    CORRADE_COMPARE(cbc[2], 4);
 }
 
 void StaticArrayTest::sliceZeroNullPointerAmbiguity() {
@@ -1553,8 +1787,11 @@ void StaticArrayTest::cast() {
 
 void StaticArrayTest::size() {
     StaticArray<5, int> a;
-
     CORRADE_COMPARE(arraySize(a), 5);
+
+    constexpr StaticArray<5, int> ca;
+    constexpr std::size_t size = arraySize(ca);
+    CORRADE_COMPARE(size, 5);
 }
 
 void StaticArrayTest::constructorExplicitInCopyInitialization() {

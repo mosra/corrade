@@ -53,22 +53,22 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
 
     /* Compared to StaticArrayData<size_, T, false> it does the right thing by
        default */
-    explicit StaticArrayData(Corrade::DefaultInitT) {}
+    constexpr explicit StaticArrayData(Corrade::DefaultInitT) {}
 
     /* Compared to StaticArrayData<size_, T, false>, there's no way to trigger
        the featurebug in C++ where new T{} doesn't work for an explicit
        defaulted constructor in trivially constructible or NoInit-constructible
        types, so this uses a {}. For details see constructHelpers.h and
        StaticArrayTest::constructorExplicitInCopyInitialization(). */
-    explicit StaticArrayData(Corrade::ValueInitT): _data{} {}
+    constexpr explicit StaticArrayData(Corrade::ValueInitT): _data{} {}
 
     /* Same as in StaticArrayData<size_, T, false> */
-    template<class ...Args> explicit StaticArrayData(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {}
-    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
+    template<class ...Args> constexpr explicit StaticArrayData(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {}
+    template<std::size_t ...sequence> constexpr explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
     /* See StaticArrayTest::constructArrayMove() for details why it has to be
        disabled */
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
-    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
+    template<std::size_t ...sequence> constexpr explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
     #endif
 
     T _data[size_];
@@ -197,6 +197,17 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 @snippet Containers.cpp StaticArray-usage-initialization
 
+@subsection Containers-StaticArray-constexpr Usage in constexpr contexts
+
+In order to implement the @ref StaticArray(NoInitT) constructor for arbitrary
+types, internally the data has to be a @cpp union @ce array. That would however
+lose trivial copyability and possibility to use the type in @cpp constexpr @ce
+contexts, so to solve that, types that have a trivial default constructor or a
+constructor taking @ref Corrade::NoInitT use a specialized internal
+representation without a @cpp union @ce. @ref StaticArray of such types is then
+a @cpp constexpr @ce type and is trivially copyable if the underlying type is
+trivially copyable.
+
 @section Containers-StaticArray-views Conversion to array views
 
 Arrays are implicitly convertible to @ref ArrayView / @ref StaticArrayView as
@@ -280,7 +291,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */
-        explicit StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
+        constexpr explicit StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
 
         /**
          * @brief Construct a value-initialized array
@@ -297,7 +308,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
          *      @ref std::is_trivial
          */
-        explicit StaticArray(Corrade::ValueInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
+        constexpr explicit StaticArray(Corrade::ValueInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an array without initializing its contents
@@ -336,6 +347,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
          *      @ref StaticArray(InPlaceInitT, T(&&)[size_])
          */
+        /* Not constexpr as it delegates to a NoInit constructor */
         template<class ...Args> explicit StaticArray(Corrade::DirectInitT, Args&&... args);
 
         /**
@@ -348,7 +360,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * alternative. Same as @ref StaticArray(Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
-        template<class ...Args> explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...} {
+        template<class ...Args> constexpr explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...} {
             static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
         }
 
@@ -363,7 +375,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @ref StaticArray(InPlaceInitT, T(&&)[size_]) instead. Same as
          * @ref StaticArray(const T(&)[size_]).
          */
-        explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        constexpr explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -381,7 +393,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      compilers don't support moving arrays.
          * @see @ref StaticArray(InPlaceInitT, const T(&)[size_])
          */
-        explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        constexpr explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
 
         /**
@@ -390,7 +402,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * Alias to @ref StaticArray(ValueInitT).
          * @see @ref StaticArray(DefaultInitT)
          */
-        explicit StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
+        constexpr explicit StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an in-place-initialized array
@@ -399,9 +411,9 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class ...Args> /*implicit*/ StaticArray(Args&&... args);
+        template<class ...Args> constexpr /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
+        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> constexpr /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
         #endif
 
         /**
@@ -412,7 +424,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref StaticArray(T(&&)[size_]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
-        explicit StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        constexpr explicit StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -429,7 +441,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref StaticArray(const T(&)[size_]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
-        explicit StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        constexpr explicit StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
 
         /* The following view conversion is *not* restricted to this& because
@@ -454,6 +466,13 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
             return Implementation::StaticArrayViewConverter<size_, const T, U>::to(*this);
         }
 
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /** @brief Whether the array is non-empty */
+        /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
+           when doing pointer arithmetic. */
+        constexpr explicit operator bool() const { return true; }
+        #endif
+
         /* `char* a = Containers::StaticArray<char>(5); a[3] = 5;` would result
            in instant segfault, disallowing it in the following conversion
            operators */
@@ -462,11 +481,11 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /*implicit*/ operator T*() & { return this->_data; }
 
         /** @overload */
-        /*implicit*/ operator const T*() const & { return this->_data; }
+        constexpr /*implicit*/ operator const T*() const & { return this->_data; }
 
         /** @brief Array data */
         T* data() { return this->_data; }
-        const T* data() const { return this->_data; }      /**< @overload */
+        constexpr const T* data() const { return this->_data; }      /**< @overload */
 
         /**
          * @brief Array size
@@ -499,8 +518,10 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref front(), @ref operator[]()
          */
         T* begin() { return this->_data; }
-        const T* begin() const { return this->_data; }        /**< @overload */
-        const T* cbegin() const { return this->_data; }       /**< @overload */
+        /** @overload */
+        constexpr const T* begin() const { return this->_data; }
+        /** @overload */
+        constexpr const T* cbegin() const { return this->_data; }
 
         /**
          * @brief Pointer to (one item after) the last element
@@ -508,8 +529,10 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref back(), @ref operator[]()
          */
         T* end() { return this->_data + size_; }
-        const T* end() const { return this->_data + size_; }  /**< @overload */
-        const T* cend() const { return this->_data + size_; } /**< @overload */
+        /** @overload */
+        constexpr const T* end() const { return this->_data + size_; }
+        /** @overload */
+        constexpr const T* cend() const { return this->_data + size_; }
 
         /**
          * @brief First element
@@ -517,7 +540,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref begin(), @ref operator[]()
          */
         T& front() { return this->_data[0]; }
-        const T& front() const { return this->_data[0]; }     /**< @overload */
+        /** @overload */
+        constexpr const T& front() const { return this->_data[0]; }
 
         /**
          * @brief Last element
@@ -525,7 +549,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref end(), @ref operator[]()
          */
         T& back() { return this->_data[size_ - 1]; }
-        const T& back() const { return this->_data[size_ - 1]; } /**< @overload */
+        /** @overload */
+        constexpr const T& back() const { return this->_data[size_ - 1]; }
 
         /**
          * @brief Element access
@@ -536,14 +561,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         T& operator[](std::size_t i);
-        const T& operator[](std::size_t i) const; /**< @overload */
+        constexpr const T& operator[](std::size_t i) const; /**< @overload */
         #else
         /* Has to be done this way because otherwise it causes ambiguity with a
            builtin operator[] for pointers if an int or ssize_t is used due to
            the implicit pointer conversion. Sigh. */
         /** @todo clean up once implicit pointer conversion is removed */
         template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> T& operator[](U i);
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> const T& operator[](U i) const;
+        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr const T& operator[](U i) const;
         #endif
 
         /**
@@ -559,7 +584,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
             return ArrayView<T>(*this).slice(begin, end);
         }
         /** @overload */
-        ArrayView<const T> slice(const T* begin, const T* end) const {
+        constexpr ArrayView<const T> slice(const T* begin, const T* end) const {
             return ArrayView<const T>(*this).slice(begin, end);
         }
         /** @overload */
@@ -567,7 +592,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
             return ArrayView<T>(*this).slice(begin, end);
         }
         /** @overload */
-        ArrayView<const T> slice(std::size_t begin, std::size_t end) const {
+        constexpr ArrayView<const T> slice(std::size_t begin, std::size_t end) const {
             return ArrayView<const T>(*this).slice(begin, end);
         }
 
@@ -593,12 +618,12 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @m_since_latest
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        ArrayView<const T> sliceSize(const T* begin, std::size_t size) const;
+        constexpr ArrayView<const T> sliceSize(const T* begin, std::size_t size) const;
         #else
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
+        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
             return ArrayView<const T>{*this}.sliceSize(begin, size);
         }
         #endif
@@ -613,7 +638,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> sliceSize(std::size_t begin, std::size_t size) const {
+        constexpr ArrayView<const T> sliceSize(std::size_t begin, std::size_t size) const {
             return ArrayView<const T>{*this}.sliceSize(begin, size);
         }
 
@@ -634,12 +659,12 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #endif
         /** @overload */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<std::size_t size__> StaticArrayView<size__, const T> slice(const T* begin) const;
+        template<std::size_t size__> constexpr StaticArrayView<size__, const T> slice(const T* begin) const;
         #else
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size__, class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size__, const T> slice(U begin) const {
+        template<std::size_t size__, class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr StaticArrayView<size__, const T> slice(U begin) const {
             return ArrayView<const T>(*this).template slice<size__>(begin);
         }
         #endif
@@ -648,7 +673,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
             return ArrayView<T>(*this).template slice<size__>(begin);
         }
         /** @overload */
-        template<std::size_t size__> StaticArrayView<size__, const T> slice(std::size_t begin) const {
+        template<std::size_t size__> constexpr StaticArrayView<size__, const T> slice(std::size_t begin) const {
             return ArrayView<const T>(*this).template slice<size__>(begin);
         }
 
@@ -666,7 +691,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since{2019,10}
          */
-        template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
+        template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, const T> slice() const {
             return StaticArrayView<size_, const T>(*this).template slice<begin_, end_>();
         }
 
@@ -684,7 +709,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since_latest
          */
-        template<std::size_t begin_, std::size_t size__> StaticArrayView<size__, const T> sliceSize() const {
+        template<std::size_t begin_, std::size_t size__> constexpr StaticArrayView<size__, const T> sliceSize() const {
             return StaticArrayView<size_, const T>(*this).template sliceSize<begin_, size__>();
         }
 
@@ -698,19 +723,17 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
-        ArrayView<T> prefix(U end) {
+        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<T> prefix(U end) {
             return ArrayView<T>(*this).prefix(end);
         }
         #endif
         /** @overload */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        ArrayView<const T> prefix(const T* end) const;
+        constexpr ArrayView<const T> prefix(const T* end) const;
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
-        ArrayView<const T> prefix(U end) const {
+        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<const T> prefix(U end) const {
             return ArrayView<const T>(*this).prefix(end);
         }
         #endif
@@ -730,7 +753,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @todo once non-deprecated suffix(std::size_t size) is a thing, add
          *      the ambiguity-preventing template here as well
          */
-        ArrayView<const T> suffix(const T* begin) const {
+        constexpr ArrayView<const T> suffix(const T* begin) const {
             return ArrayView<const T>(*this).suffix(begin);
         }
 
@@ -743,7 +766,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
             return ArrayView<T>(*this).prefix(size);
         }
         /** @overload */
-        ArrayView<const T> prefix(std::size_t size) const {
+        constexpr ArrayView<const T> prefix(std::size_t size) const {
             return ArrayView<const T>(*this).prefix(size);
         }
 
@@ -757,7 +780,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * Equivalent to @ref StaticArrayView::prefix() const and overloads.
          */
         template<std::size_t size__> StaticArrayView<size__, T> prefix();
-        template<std::size_t size__> StaticArrayView<size__, const T> prefix() const; /**< @overload */
+        template<std::size_t size__> constexpr StaticArrayView<size__, const T> prefix() const; /**< @overload */
 
         /* Here will be suffix<size__>(), view on the last size__ items, once
            the deprecated suffix<begin_>() is gone and enough time passes to
@@ -776,7 +799,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> exceptPrefix(std::size_t size) const {
+        constexpr ArrayView<const T> exceptPrefix(std::size_t size) const {
             return ArrayView<const T>(*this).exceptPrefix(size);
         }
 
@@ -809,7 +832,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
           * @overload
           * @m_since_latest
           */
-        template<std::size_t size__> StaticArrayView<size_ - size__, const T> exceptPrefix() const {
+        template<std::size_t size__> constexpr StaticArrayView<size_ - size__, const T> exceptPrefix() const {
             return StaticArrayView<size_, const T>(*this).template exceptPrefix<size__>();
         }
 
@@ -843,7 +866,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since_latest
          */
-        ArrayView<const T> exceptSuffix(std::size_t size) const {
+        constexpr ArrayView<const T> exceptSuffix(std::size_t size) const {
             return ArrayView<const T>(*this).exceptSuffix(size);
         }
 
@@ -877,7 +900,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @overload
          * @m_since_latest
          */
-        template<std::size_t size__> StaticArrayView<size_ - size__, const T> exceptSuffix() const {
+        template<std::size_t size__> constexpr StaticArrayView<size_ - size__, const T> exceptSuffix() const {
             return StaticArrayView<size_, const T>(*this).template exceptSuffix<size__>();
         }
 
@@ -904,13 +927,13 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
            as well. There doesn't seem to be a way to call those directly, and
            I can't find any practical use of std::tuple_size, tuple_element etc
            on C++11 and C++14, so this is defined only for newer standards. */
-        template<std::size_t index> friend T& get(StaticArray<size_, T>& value) {
+        template<std::size_t index> constexpr friend const T& get(const StaticArray<size_, T>& value) {
             return value._data[index];
         }
-        template<std::size_t index> friend const T& get(const StaticArray<size_, T>& value) {
+        template<std::size_t index> CORRADE_CONSTEXPR14 friend T& get(StaticArray<size_, T>& value) {
             return value._data[index];
         }
-        template<std::size_t index> friend T&& get(StaticArray<size_, T>&& value) {
+        template<std::size_t index> CORRADE_CONSTEXPR14 friend T&& get(StaticArray<size_, T>&& value) {
             return Utility::move(value._data[index]);
         }
         #endif
@@ -1095,10 +1118,9 @@ template<std::size_t size_, class T> StaticArrayData<size_, T, false>& StaticArr
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<std::size_t size_, class T> template<class U, class> const T& StaticArray<size_, T>::operator[](const U i) const {
-    CORRADE_DEBUG_ASSERT(std::size_t(i) < size_,
-        "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements", this->_data[0]);
-    return this->_data[i];
+template<std::size_t size_, class T> template<class U, class> constexpr const T& StaticArray<size_, T>::operator[](const U i) const {
+    return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < size_,
+        "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements"), this->_data[i];
 }
 
 template<std::size_t size_, class T> template<class U, class> T& StaticArray<size_, T>::operator[](const U i) {
@@ -1111,7 +1133,7 @@ template<std::size_t size_, class T> template<std::size_t size__> StaticArrayVie
     return StaticArrayView<size__, T>{this->_data};
 }
 
-template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, const T> StaticArray<size_, T>::prefix() const {
+template<std::size_t size_, class T> template<std::size_t size__> constexpr StaticArrayView<size__, const T> StaticArray<size_, T>::prefix() const {
     static_assert(size__ <= size_, "prefix size too large");
     return StaticArrayView<size__, const T>{this->_data};
 }
@@ -1125,19 +1147,19 @@ namespace Implementation {
 template<class U, std::size_t size, class T> struct ArrayViewConverter<U, StaticArray<size, T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(StaticArray<size, T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const StaticArray<size, T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, const T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const StaticArray<size, const T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<std::size_t size, class T> struct ErasedArrayViewConverter<StaticArray<size, T>>: ArrayViewConverter<T, StaticArray<size, T>> {};
@@ -1150,19 +1172,19 @@ template<std::size_t size, class T> struct ErasedArrayViewConverter<const Static
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, U, StaticArray<size, T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, U>>::type from(StaticArray<size, T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return StaticArrayView<size, T>{&other[0]};
+        return StaticArrayView<size, T>{other.data()};
     }
 };
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, const U>>::type from(const StaticArray<size, T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return StaticArrayView<size, const T>(&other[0]);
+        return StaticArrayView<size, const T>(other.data());
     }
 };
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, const T>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, const U>>::type from(const StaticArray<size, const T>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
-        return StaticArrayView<size, const T>(&other[0]);
+        return StaticArrayView<size, const T>(other.data());
     }
 };
 template<std::size_t size, class T> struct ErasedStaticArrayViewConverter<StaticArray<size, T>>: StaticArrayViewConverter<size, T, StaticArray<size, T>> {};
