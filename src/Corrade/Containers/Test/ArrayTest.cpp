@@ -725,38 +725,41 @@ void ArrayTest::convertToConstExternalView() {
 }
 
 void ArrayTest::access() {
-    Array a(7);
-    for(std::size_t i = 0; i != 7; ++i)
-        a[i] = i;
+    Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     CORRADE_COMPARE(a.data(), static_cast<int*>(a));
-    CORRADE_COMPARE(a.front(), 0);
-    CORRADE_COMPARE(a.back(), 6);
-    CORRADE_COMPARE(*(a.begin()+2), 2);
-    CORRADE_COMPARE(a[4], 4);
-    CORRADE_COMPARE(a.end()-a.begin(), a.size());
+    CORRADE_COMPARE(a.front(), 1);
+    CORRADE_COMPARE(a.back(), 5);
+    CORRADE_COMPARE(*(a.begin() + 2), 3);
+    CORRADE_COMPARE(a[4], 5);
+    CORRADE_COMPARE(a.end() - a.begin(), a.size());
     CORRADE_COMPARE(a.cbegin(), a.begin());
     CORRADE_COMPARE(a.cend(), a.end());
 
-    const Array b{Corrade::InPlaceInit, {7, 3, 5, 4}};
-    CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
-    CORRADE_COMPARE(b[2], 5);
+    /* Mutable access */
+    a.front() += 100;
+    a.back() *= 10;
+    *(a.begin() + 1) -= 10;
+    *(a.end() - 3) += 1000;
+    ++a[3];
+    CORRADE_COMPARE(a[0], 101);
+    CORRADE_COMPARE(a[1], -8);
+    CORRADE_COMPARE(a[2], 1003);
+    CORRADE_COMPARE(a[3], 5);
+    CORRADE_COMPARE(a[4], 50);
 }
 
 void ArrayTest::accessConst() {
-    Array a(7);
-    for(std::size_t i = 0; i != 7; ++i)
-        a[i] = i;
+    const Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
-    const Array& ca = a;
-    CORRADE_COMPARE(ca.data(), static_cast<int*>(a));
-    CORRADE_COMPARE(ca.front(), 0);
-    CORRADE_COMPARE(ca.back(), 6);
-    CORRADE_COMPARE(*(ca.begin()+2), 2);
-    CORRADE_COMPARE(ca[4], 4);
-    CORRADE_COMPARE(ca.end() - ca.begin(), ca.size());
-    CORRADE_COMPARE(ca.cbegin(), ca.begin());
-    CORRADE_COMPARE(ca.cend(), ca.end());
+    CORRADE_COMPARE(a.data(), static_cast<const int*>(a));
+    CORRADE_COMPARE(a.front(), 1);
+    CORRADE_COMPARE(a.back(), 5);
+    CORRADE_COMPARE(*(a.begin() + 2), 3);
+    CORRADE_COMPARE(a[4], 5);
+    CORRADE_COMPARE(a.end() - a.begin(), a.size());
+    CORRADE_COMPARE(a.cbegin(), a.begin());
+    CORRADE_COMPARE(a.cend(), a.end());
 }
 
 void ArrayTest::accessInvalid() {
