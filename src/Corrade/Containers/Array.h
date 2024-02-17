@@ -638,7 +638,11 @@ class Array {
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         T& operator[](std::size_t i);
-        const T& operator[](std::size_t i) const; /**< @overload */
+        /**
+         * @overload
+         * @m_since_latest
+         */
+        const T& operator[](std::size_t i) const;
         #else
         /* Has to be done this way because otherwise it causes ambiguity with a
            builtin operator[] for pointers if an int or ssize_t is used due to
