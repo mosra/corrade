@@ -1191,7 +1191,10 @@ void StaticArrayTest::convertViewDerived() {
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
 
-    constexpr ArrayView<const A> ca = ArrayB5;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const A> ca = ArrayB5;
     CORRADE_VERIFY(ca == ArrayB5);
     CORRADE_COMPARE(ca.size(), 5);
 }
@@ -1259,7 +1262,10 @@ void StaticArrayTest::convertStaticViewDerived() {
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
 
-    constexpr StaticArrayView<5, const A> ca = ArrayB5;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<5, const A> ca = ArrayB5;
     CORRADE_VERIFY(ca == ArrayB5);
     CORRADE_COMPARE(ca.size(), 5);
 }
@@ -1386,8 +1392,14 @@ void StaticArrayTest::accessConst() {
     constexpr const int& back = Array5.back();
     constexpr const int* begin = Array5.begin();
     constexpr const int* cbegin = Array5.cbegin();
-    constexpr const int* end = Array5.end();
-    constexpr const int* cend = Array5.cend();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* This causes an ICE */
+    #endif
+    const int* end = Array5.end();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* This causes an ICE */
+    #endif
+    const int* cend = Array5.cend();
     constexpr const int& fourth = Array5[4];
     CORRADE_COMPARE(data, static_cast<const int*>(Array5));
     CORRADE_COMPARE(front, 1);
@@ -1484,13 +1496,19 @@ void StaticArrayTest::slice() {
     CORRADE_COMPARE(ec[1], 2);
     CORRADE_COMPARE(ec[2], 3);
 
-    constexpr ArrayView<const int> cbc1 = Array5.slice(1, 4);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cbc1 = Array5.slice(1, 4);
     CORRADE_COMPARE(cbc1.size(), 3);
     CORRADE_COMPARE(cbc1[0], 2);
     CORRADE_COMPARE(cbc1[1], 3);
     CORRADE_COMPARE(cbc1[2], 4);
 
-    constexpr ArrayView<const int> cbc2 = Array5.sliceSize(1, 3);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cbc2 = Array5.sliceSize(1, 3);
     CORRADE_COMPARE(cbc2.size(), 3);
     CORRADE_COMPARE(cbc2[0], 2);
     CORRADE_COMPARE(cbc2[1], 3);
@@ -1502,7 +1520,10 @@ void StaticArrayTest::slice() {
     CORRADE_COMPARE(ccc[1], 2);
     CORRADE_COMPARE(ccc[2], 3);
 
-    constexpr ArrayView<const int> cdc = Array5.exceptPrefix(2);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cdc = Array5.exceptPrefix(2);
     CORRADE_COMPARE(cdc.size(), 3);
     CORRADE_COMPARE(cdc[0], 3);
     CORRADE_COMPARE(cdc[1], 4);
@@ -1567,25 +1588,37 @@ void StaticArrayTest::slicePointer() {
     CORRADE_COMPARE(dc[1], 4);
     CORRADE_COMPARE(dc[2], 5);
 
-    constexpr ArrayView<const int> cbc1 = Array5.slice(Array5 + 1, Array5 + 4);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cbc1 = Array5.slice(Array5 + 1, Array5 + 4);
     CORRADE_COMPARE(cbc1.size(), 3);
     CORRADE_COMPARE(cbc1[0], 2);
     CORRADE_COMPARE(cbc1[1], 3);
     CORRADE_COMPARE(cbc1[2], 4);
 
-    constexpr ArrayView<const int> cbc2 = Array5.sliceSize(Array5 + 1, 3);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cbc2 = Array5.sliceSize(Array5 + 1, 3);
     CORRADE_COMPARE(cbc2.size(), 3);
     CORRADE_COMPARE(cbc2[0], 2);
     CORRADE_COMPARE(cbc2[1], 3);
     CORRADE_COMPARE(cbc2[2], 4);
 
-    constexpr ArrayView<const int> ccc = Array5.prefix(Array5 + 3);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> ccc = Array5.prefix(Array5 + 3);
     CORRADE_COMPARE(ccc.size(), 3);
     CORRADE_COMPARE(ccc[0], 1);
     CORRADE_COMPARE(ccc[1], 2);
     CORRADE_COMPARE(ccc[2], 3);
 
-    constexpr ArrayView<const int> cdc = Array5.suffix(Array5 + 2);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    ArrayView<const int> cdc = Array5.suffix(Array5 + 2);
     CORRADE_COMPARE(cdc.size(), 3);
     CORRADE_COMPARE(cdc[0], 3);
     CORRADE_COMPARE(cdc[1], 4);
@@ -1656,17 +1689,26 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(ce[1], 2);
     CORRADE_COMPARE(ce[2], 3);
 
-    constexpr StaticArrayView<3, const int> cbc1 = Array5.slice<3>(1);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<3, const int> cbc1 = Array5.slice<3>(1);
     CORRADE_COMPARE(cbc1[0], 2);
     CORRADE_COMPARE(cbc1[1], 3);
     CORRADE_COMPARE(cbc1[2], 4);
 
-    constexpr StaticArrayView<3, const int> cbc2 = Array5.slice<1, 4>();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<3, const int> cbc2 = Array5.slice<1, 4>();
     CORRADE_COMPARE(cbc2[0], 2);
     CORRADE_COMPARE(cbc2[1], 3);
     CORRADE_COMPARE(cbc2[2], 4);
 
-    constexpr StaticArrayView<3, const int> cbc3 = Array5.sliceSize<1, 3>();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<3, const int> cbc3 = Array5.sliceSize<1, 3>();
     CORRADE_COMPARE(cbc3[0], 2);
     CORRADE_COMPARE(cbc3[1], 3);
     CORRADE_COMPARE(cbc3[2], 4);
@@ -1676,7 +1718,10 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(ccc[1], 2);
     CORRADE_COMPARE(ccc[2], 3);
 
-    constexpr StaticArrayView<3, const int> ccd = Array5.exceptPrefix<2>();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<3, const int> ccd = Array5.exceptPrefix<2>();
     CORRADE_COMPARE(ccd[0], 3);
     CORRADE_COMPARE(ccd[1], 4);
     CORRADE_COMPARE(ccd[2], 5);
@@ -1701,7 +1746,10 @@ void StaticArrayTest::sliceToStaticPointer() {
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
 
-    constexpr StaticArrayView<3, const int> cbc = Array5.slice<3>(Array5 + 1);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* No idea, and who cares */
+    #endif
+    StaticArrayView<3, const int> cbc = Array5.slice<3>(Array5 + 1);
     CORRADE_COMPARE(cbc[0], 2);
     CORRADE_COMPARE(cbc[1], 3);
     CORRADE_COMPARE(cbc[2], 4);
