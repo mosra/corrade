@@ -52,8 +52,19 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
     template<std::size_t... sequence, class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT noInit, Sequence<sequence...>): _data{(&noInit)[0*sequence]...} {}
 
     /* Compared to StaticArrayData<size_, T, false> it does the right thing by
-       default */
+       default. MSVC 2015, 2019 and 2022 (but not 2017, _MSC_VER=191x)
+       complains that the constexpr constructor doesn't initialize all members
+       when used with a non-trivially-constructible type, so there has to be a
+       non-constexpr variant that doesn't initialize trivially constructible
+       types (and MSVC 2015 would complain if it would be constexpr), and a
+       constexpr variant that initializes types with a constructor. Not fixable
+       with /permissive- either. */
+    #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG) || (_MSC_VER >= 1910 && _MSC_VER < 1920)
     constexpr explicit StaticArrayData(Corrade::DefaultInitT) {}
+    #else
+    template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value>::type* = nullptr> explicit StaticArrayData(Corrade::DefaultInitT) {}
+    template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value>::type* = nullptr> constexpr explicit StaticArrayData(Corrade::DefaultInitT): _data{} {}
+    #endif
 
     /* Compared to StaticArrayData<size_, T, false>, there's no way to trigger
        the featurebug in C++ where new T{} doesn't work for an explicit
