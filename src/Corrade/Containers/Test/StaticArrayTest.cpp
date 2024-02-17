@@ -69,17 +69,25 @@ struct StaticArrayTest: TestSuite::Tester {
     void resetCounters();
 
     void constructValueInit();
+    template<class T> void constructValueInitTrivial();
     void constructDefaultInit();
+    void constructDefaultInitTrivialConstructor();
+    void constructDefaultInitDefaultConstructor();
     void constructNoInit();
+    template<class T> void constructNoInitTrivial();
     void constructInPlaceInit();
+    template<class T> void constructInPlaceInitTrivial();
     void constructInPlaceInitOneArgument();
+    template<class T> void constructInPlaceInitOneArgumentTrivial();
     void constructInPlaceInitMoveOnly();
     void constructDirectInit();
+    template<class T> void constructDirectInitTrivial();
     void constructDirectInitMoveOnly();
     void constructImmovable();
     void constructNoImplicitConstructor();
     void constructDirectReferences();
     void constructArray();
+    template<class T> void constructArrayTrivial();
     void constructArrayRvalue();
     void constructArrayMove();
 
@@ -87,6 +95,7 @@ struct StaticArrayTest: TestSuite::Tester {
        empty, thus never null, thus std::nullptr_t constructor makes no sense */
 
     void copy();
+    template<class T> void copyTrivial();
     void move();
 
     void convertBool();
@@ -121,33 +130,81 @@ struct StaticArrayTest: TestSuite::Tester {
     void moveConstructPlainStruct();
 };
 
+struct NoInitConstructible {
+    constexpr NoInitConstructible(int a = 0): a{a} {}
+    explicit NoInitConstructible(Corrade::NoInitT) {}
+    operator int() const { return a; }
+    int a;
+};
+
 StaticArrayTest::StaticArrayTest() {
-    addTests({&StaticArrayTest::constructValueInit,
-              &StaticArrayTest::constructDefaultInit});
+    addTests({&StaticArrayTest::constructValueInit},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructValueInitTrivial<int>,
+        &StaticArrayTest::constructValueInitTrivial<NoInitConstructible>});
+
+    addTests({&StaticArrayTest::constructDefaultInit},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests({&StaticArrayTest::constructDefaultInitTrivialConstructor,
+              &StaticArrayTest::constructDefaultInitDefaultConstructor});
 
     addTests({&StaticArrayTest::constructNoInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
-    addTests({&StaticArrayTest::constructInPlaceInit,
-              &StaticArrayTest::constructInPlaceInitOneArgument});
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructNoInitTrivial<int>,
+        &StaticArrayTest::constructNoInitTrivial<NoInitConstructible>});
 
-    addTests({&StaticArrayTest::constructInPlaceInitMoveOnly},
+    addTests({&StaticArrayTest::constructInPlaceInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
-    addTests({&StaticArrayTest::constructDirectInit});
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructInPlaceInitTrivial<int>,
+        &StaticArrayTest::constructInPlaceInitTrivial<NoInitConstructible>});
+
+    addTests({&StaticArrayTest::constructInPlaceInitOneArgument},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructInPlaceInitOneArgumentTrivial<int>,
+        &StaticArrayTest::constructInPlaceInitOneArgumentTrivial<NoInitConstructible>});
+
+    addTests({&StaticArrayTest::constructInPlaceInitMoveOnly,
+              &StaticArrayTest::constructDirectInit},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructDirectInitTrivial<int>,
+        &StaticArrayTest::constructDirectInitTrivial<NoInitConstructible>});
 
     addTests({&StaticArrayTest::constructDirectInitMoveOnly,
               &StaticArrayTest::constructImmovable},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::constructNoImplicitConstructor,
-              &StaticArrayTest::constructDirectReferences,
-              &StaticArrayTest::constructArray,
-              &StaticArrayTest::constructArrayRvalue,
+              &StaticArrayTest::constructDirectReferences});
+
+    addTests({&StaticArrayTest::constructArray},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::constructArrayTrivial<int>,
+        &StaticArrayTest::constructArrayTrivial<NoInitConstructible>});
+
+    addTests({&StaticArrayTest::constructArrayRvalue,
               &StaticArrayTest::constructArrayMove});
 
-    addTests({&StaticArrayTest::copy,
-              &StaticArrayTest::move},
+    addTests({&StaticArrayTest::copy},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests<StaticArrayTest>({
+        &StaticArrayTest::copyTrivial<int>,
+        &StaticArrayTest::copyTrivial<NoInitConstructible>});
+
+    addTests({&StaticArrayTest::move},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::convertBool,
@@ -181,54 +238,6 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::copyConstructPlainStruct,
               &StaticArrayTest::moveConstructPlainStruct});
 }
-
-void StaticArrayTest::constructValueInit() {
-    const StaticArray<5, int> a1;
-    const StaticArray<5, int> a2{Corrade::ValueInit};
-    CORRADE_VERIFY(a1);
-    CORRADE_VERIFY(a2);
-    CORRADE_VERIFY(!a1.isEmpty());
-    CORRADE_VERIFY(!a2.isEmpty());
-    CORRADE_COMPARE(a1.size(), (StaticArray<5, int>::Size));
-    CORRADE_COMPARE(a2.size(), (StaticArray<5, int>::Size));
-    CORRADE_COMPARE(a1.size(), 5);
-    CORRADE_COMPARE(a2.size(), 5);
-
-    /* Values should be zero-initialized (same as ValueInit) */
-    CORRADE_COMPARE(a1[0], 0);
-    CORRADE_COMPARE(a2[0], 0);
-    CORRADE_COMPARE(a1[1], 0);
-    CORRADE_COMPARE(a2[1], 0);
-    CORRADE_COMPARE(a1[2], 0);
-    CORRADE_COMPARE(a2[2], 0);
-    CORRADE_COMPARE(a1[3], 0);
-    CORRADE_COMPARE(a2[3], 0);
-    CORRADE_COMPARE(a1[4], 0);
-    CORRADE_COMPARE(a2[4], 0);
-
-    /* Implicit construction is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, int>>::value);
-}
-
-void StaticArrayTest::constructDefaultInit() {
-    const StaticArray<5, int> a{Corrade::DefaultInit};
-    CORRADE_VERIFY(a);
-
-    /* Values are random memory */
-
-    /* Implicit construction is not allowed */
-    CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, int>>::value);
-}
-
-struct Throwable {
-    /* Clang complains this function is unused. But removing it may have
-       unintended consequences, so don't. */
-    explicit Throwable(int) CORRADE_UNUSED {}
-    Throwable(const Throwable&) {}
-    Throwable(Throwable&&) {}
-    Throwable& operator=(const Throwable&) { return *this; }
-    Throwable& operator=(Throwable&&) { return *this; }
-};
 
 struct Copyable {
     static int constructed;
@@ -266,6 +275,16 @@ int Copyable::constructed = 0;
 int Copyable::destructed = 0;
 int Copyable::copied = 0;
 int Copyable::moved = 0;
+
+struct Throwable {
+    /* Clang complains this function is unused. But removing it may have
+       unintended consequences, so don't. */
+    explicit Throwable(int) CORRADE_UNUSED {}
+    Throwable(const Throwable&) {}
+    Throwable(Throwable&&) {}
+    Throwable& operator=(const Throwable&) { return *this; }
+    Throwable& operator=(Throwable&&) { return *this; }
+};
 
 struct Movable {
     static int constructed;
@@ -321,6 +340,141 @@ void StaticArrayTest::resetCounters() {
             Immovable::constructed = Immovable::destructed = 0;
 }
 
+void StaticArrayTest::constructValueInit() {
+    {
+        const StaticArray<5, Copyable> a1;
+        const StaticArray<5, Copyable> a2{Corrade::ValueInit};
+        CORRADE_VERIFY(a1);
+        CORRADE_VERIFY(a2);
+        CORRADE_VERIFY(!a1.isEmpty());
+        CORRADE_VERIFY(!a2.isEmpty());
+        CORRADE_COMPARE(a1.size(), (StaticArray<5, Copyable>::Size));
+        CORRADE_COMPARE(a2.size(), (StaticArray<5, Copyable>::Size));
+        CORRADE_COMPARE(a1.size(), 5);
+        CORRADE_COMPARE(a2.size(), 5);
+
+        /* Values should be zero-initialized (same as ValueInit) */
+        CORRADE_COMPARE(a1[0].a, 0);
+        CORRADE_COMPARE(a2[0].a, 0);
+        CORRADE_COMPARE(a1[1].a, 0);
+        CORRADE_COMPARE(a2[1].a, 0);
+        CORRADE_COMPARE(a1[2].a, 0);
+        CORRADE_COMPARE(a2[2].a, 0);
+        CORRADE_COMPARE(a1[3].a, 0);
+        CORRADE_COMPARE(a2[3].a, 0);
+        CORRADE_COMPARE(a1[4].a, 0);
+        CORRADE_COMPARE(a2[4].a, 0);
+
+        CORRADE_COMPARE(Copyable::constructed, 10);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 10);
+    CORRADE_COMPARE(Copyable::destructed, 10);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+
+    /* Size should be the same as a plain array, even with all the extra craze
+       with base classes */
+    CORRADE_COMPARE(sizeof(StaticArray<5, Copyable>), 5*sizeof(Copyable));
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, Copyable>>::value);
+}
+
+template<class> struct TrivialTraits;
+template<> struct TrivialTraits<int> {
+    static const char* name() { return "int"; }
+};
+template<> struct TrivialTraits<NoInitConstructible> {
+    static const char* name() { return "NoInitConstructible"; }
+};
+
+template<class T> void StaticArrayTest::constructValueInitTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
+    const StaticArray<5, T> a1;
+    const StaticArray<5, T> a2{Corrade::ValueInit};
+    CORRADE_VERIFY(a1);
+    CORRADE_VERIFY(a2);
+    CORRADE_VERIFY(!a1.isEmpty());
+    CORRADE_VERIFY(!a2.isEmpty());
+    CORRADE_COMPARE(a1.size(), (StaticArray<5, T>::Size));
+    CORRADE_COMPARE(a2.size(), (StaticArray<5, T>::Size));
+    CORRADE_COMPARE(a1.size(), 5);
+    CORRADE_COMPARE(a2.size(), 5);
+
+    /* Values should be zero-initialized (same as ValueInit) */
+    CORRADE_COMPARE(a1[0], 0);
+    CORRADE_COMPARE(a2[0], 0);
+    CORRADE_COMPARE(a1[1], 0);
+    CORRADE_COMPARE(a2[1], 0);
+    CORRADE_COMPARE(a1[2], 0);
+    CORRADE_COMPARE(a2[2], 0);
+    CORRADE_COMPARE(a1[3], 0);
+    CORRADE_COMPARE(a2[3], 0);
+    CORRADE_COMPARE(a1[4], 0);
+    CORRADE_COMPARE(a2[4], 0);
+
+    /* Size should be the same as a plain array, even with all the extra craze
+       with base classes */
+    CORRADE_COMPARE(sizeof(StaticArray<5, T>), 5*sizeof(T));
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, T>>::value);
+}
+
+void StaticArrayTest::constructDefaultInit() {
+    {
+        const StaticArray<5, Copyable> a{Corrade::DefaultInit};
+
+        /* Values should be default-constructed for non-trivial types */
+        CORRADE_COMPARE(a[0].a, 0);
+        CORRADE_COMPARE(a[1].a, 0);
+        CORRADE_COMPARE(a[2].a, 0);
+        CORRADE_COMPARE(a[3].a, 0);
+        CORRADE_COMPARE(a[4].a, 0);
+
+        CORRADE_COMPARE(Copyable::constructed, 5);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 5);
+    CORRADE_COMPARE(Copyable::destructed, 5);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, Copyable>>::value);
+}
+
+void StaticArrayTest::constructDefaultInitTrivialConstructor() {
+    const StaticArray<5, int> a{Corrade::DefaultInit};
+
+    /* Values are random memory */
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, int>>::value);
+}
+
+void StaticArrayTest::constructDefaultInitDefaultConstructor() {
+    const StaticArray<5, NoInitConstructible> a{Corrade::DefaultInit};
+
+    /* Values are default-constructed */
+    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a[1], 0);
+    CORRADE_COMPARE(a[2], 0);
+    CORRADE_COMPARE(a[3], 0);
+    CORRADE_COMPARE(a[4], 0);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, NoInitConstructible>>::value);
+}
+
 void StaticArrayTest::constructNoInit() {
     {
         StaticArray<3, Copyable> a{Corrade::InPlaceInit, 57, 39, 78};
@@ -345,23 +499,92 @@ void StaticArrayTest::constructNoInit() {
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, StaticArray<5, Copyable>>::value);
 }
 
-void StaticArrayTest::constructInPlaceInit() {
-    const StaticArray<5, int> a{1, 2, 3, 4, 5};
-    const StaticArray<5, int> b{Corrade::InPlaceInit, 1, 2, 3, 4, 5};
+template<class T> void StaticArrayTest::constructNoInitTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(b[0], 1);
-    CORRADE_COMPARE(a[1], 2);
-    CORRADE_COMPARE(b[1], 2);
-    CORRADE_COMPARE(a[2], 3);
-    CORRADE_COMPARE(b[2], 3);
-    CORRADE_COMPARE(a[3], 4);
-    CORRADE_COMPARE(b[3], 4);
-    CORRADE_COMPARE(a[4], 5);
-    CORRADE_COMPARE(b[4], 5);
+    StaticArray<3, int> a{Corrade::InPlaceInit, 57, 39, 78};
+    new(&a) StaticArray<3, int>{Corrade::NoInit};
+    {
+        /* Explicitly check we're not on Clang because certain Clang-based IDEs
+           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
+           Clang itself does */
+        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
+        CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
+        #endif
+        CORRADE_COMPARE(a[0], 57);
+        CORRADE_COMPARE(a[1], 39);
+        CORRADE_COMPARE(a[2], 78);
+    }
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, StaticArray<5, T>>::value);
+}
+
+void StaticArrayTest::constructInPlaceInit() {
+    {
+        const StaticArray<5, Copyable> a{10, 20, 30, 40, 50};
+        const StaticArray<5, Copyable> b{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
+
+        CORRADE_COMPARE(a[0].a, 10);
+        CORRADE_COMPARE(b[0].a, 10);
+        CORRADE_COMPARE(a[1].a, 20);
+        CORRADE_COMPARE(b[1].a, 20);
+        CORRADE_COMPARE(a[2].a, 30);
+        CORRADE_COMPARE(b[2].a, 30);
+        CORRADE_COMPARE(a[3].a, 40);
+        CORRADE_COMPARE(b[3].a, 40);
+        CORRADE_COMPARE(a[4].a, 50);
+        CORRADE_COMPARE(b[4].a, 50);
+
+        CORRADE_COMPARE(Copyable::constructed, 10);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 10);
+    CORRADE_COMPARE(Copyable::destructed, 10);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
+template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
+    const StaticArray<5, T> a{10, 20, 30, 40, 50};
+    const StaticArray<5, T> b{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
+    CORRADE_COMPARE(a[0], 10);
+    CORRADE_COMPARE(b[0], 10);
+    CORRADE_COMPARE(a[1], 20);
+    CORRADE_COMPARE(b[1], 20);
+    CORRADE_COMPARE(a[2], 30);
+    CORRADE_COMPARE(b[2], 30);
+    CORRADE_COMPARE(a[3], 40);
+    CORRADE_COMPARE(b[3], 40);
+    CORRADE_COMPARE(a[4], 50);
+    CORRADE_COMPARE(b[4], 50);
 }
 
 void StaticArrayTest::constructInPlaceInitOneArgument() {
+    {
+        const StaticArray<1, Copyable> a{17};
+        CORRADE_COMPARE(a[0].a, 17);
+
+        CORRADE_COMPARE(Copyable::constructed, 1);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 1);
+    CORRADE_COMPARE(Copyable::destructed, 1);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
+template<class T> void StaticArrayTest::constructInPlaceInitOneArgumentTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
     const StaticArray<1, int> a{17};
     CORRADE_COMPARE(a[0], 17);
 }
@@ -390,6 +613,29 @@ void StaticArrayTest::constructInPlaceInitMoveOnly() {
 }
 
 void StaticArrayTest::constructDirectInit() {
+    {
+        const StaticArray<5, Copyable> a{Corrade::DirectInit, -37};
+        CORRADE_COMPARE(a[0].a, -37);
+        CORRADE_COMPARE(a[1].a, -37);
+        CORRADE_COMPARE(a[2].a, -37);
+        CORRADE_COMPARE(a[3].a, -37);
+        CORRADE_COMPARE(a[4].a, -37);
+
+        CORRADE_COMPARE(Copyable::constructed, 5);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 0);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 5);
+    CORRADE_COMPARE(Copyable::destructed, 5);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
+template<class T> void StaticArrayTest::constructDirectInitTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
     const StaticArray<5, int> a{Corrade::DirectInit, -37};
     CORRADE_COMPARE(a[0], -37);
     CORRADE_COMPARE(a[1], -37);
@@ -468,7 +714,53 @@ void StaticArrayTest::constructDirectReferences() {
 
 void StaticArrayTest::constructArray() {
     struct PairOfInts {
-        int a, b;
+        Copyable a, b;
+    };
+
+    const PairOfInts data[]{
+        {1, 2},
+        {3, 4},
+        {5, 6}
+    };
+
+    CORRADE_COMPARE(Copyable::constructed, 6);
+    CORRADE_COMPARE(Copyable::destructed, 0);
+    CORRADE_COMPARE(Copyable::copied, 0);
+    CORRADE_COMPARE(Copyable::moved, 0);
+
+    {
+        StaticArray<3, PairOfInts> a1{data};
+        StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, data};
+        CORRADE_COMPARE(a1[0].a.a, 1);
+        CORRADE_COMPARE(a2[0].a.a, 1);
+        CORRADE_COMPARE(a1[0].b.a, 2);
+        CORRADE_COMPARE(a2[0].b.a, 2);
+        CORRADE_COMPARE(a1[1].a.a, 3);
+        CORRADE_COMPARE(a2[1].a.a, 3);
+        CORRADE_COMPARE(a1[1].b.a, 4);
+        CORRADE_COMPARE(a2[1].b.a, 4);
+        CORRADE_COMPARE(a1[2].a.a, 5);
+        CORRADE_COMPARE(a2[2].a.a, 5);
+        CORRADE_COMPARE(a1[2].b.a, 6);
+        CORRADE_COMPARE(a2[2].b.a, 6);
+
+        CORRADE_COMPARE(Copyable::constructed, 6 + 12);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 12);
+        CORRADE_COMPARE(Copyable::moved, 0);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 6 + 12);
+    CORRADE_COMPARE(Copyable::destructed, 12);
+    CORRADE_COMPARE(Copyable::copied, 12);
+    CORRADE_COMPARE(Copyable::moved, 0);
+}
+
+template<class T> void StaticArrayTest::constructArrayTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
+    struct PairOfInts {
+        T a, b;
     };
 
     const PairOfInts data[]{
@@ -577,8 +869,7 @@ void StaticArrayTest::constructArrayMove() {
 void StaticArrayTest::copy() {
     {
         StaticArray<3, Copyable> a{Corrade::InPlaceInit, 1, 2, 3};
-
-        StaticArray<3, Copyable> b{a};
+        StaticArray<3, Copyable> b = a;
         CORRADE_COMPARE(b[0].a, 1);
         CORRADE_COMPARE(b[1].a, 2);
         CORRADE_COMPARE(b[2].a, 3);
@@ -588,6 +879,11 @@ void StaticArrayTest::copy() {
         CORRADE_COMPARE(c[0].a, 1);
         CORRADE_COMPARE(c[1].a, 2);
         CORRADE_COMPARE(c[2].a, 3);
+
+        CORRADE_COMPARE(Copyable::constructed, 9);
+        CORRADE_COMPARE(Copyable::destructed, 0);
+        CORRADE_COMPARE(Copyable::copied, 6);
+        CORRADE_COMPARE(Copyable::moved, 0);
     }
 
     CORRADE_COMPARE(Copyable::constructed, 9);
@@ -606,6 +902,42 @@ void StaticArrayTest::copy() {
     CORRADE_VERIFY(std::is_copy_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Throwable>::value);
     CORRADE_VERIFY(!std::is_nothrow_copy_assignable<StaticArray<3, Throwable>>::value);
+
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    CORRADE_VERIFY(!std::is_trivially_copy_constructible<StaticArray<3, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_trivially_copy_assignable<StaticArray<3, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_trivially_copyable<StaticArray<3, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_trivially_copy_constructible<StaticArray<3, Throwable>>::value);
+    CORRADE_VERIFY(!std::is_trivially_copy_assignable<StaticArray<3, Throwable>>::value);
+    CORRADE_VERIFY(!std::is_trivially_copyable<StaticArray<3, Throwable>>::value);
+    #endif
+}
+
+template<class T> void StaticArrayTest::copyTrivial() {
+    setTestCaseTemplateName(TrivialTraits<T>::name());
+
+    StaticArray<3, T> a{Corrade::InPlaceInit, 1, 2, 3};
+    StaticArray<3, T> b = a;
+    CORRADE_COMPARE(b[0], 1);
+    CORRADE_COMPARE(b[1], 2);
+    CORRADE_COMPARE(b[2], 3);
+
+    StaticArray<3, T> c;
+    c = b;
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<T>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<StaticArray<3, T>>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<T>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<StaticArray<3, T>>::value);
+
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<StaticArray<3, T>>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<StaticArray<3, T>>::value);
+    CORRADE_VERIFY(std::is_trivially_copyable<StaticArray<3, T>>::value);
+    #endif
 }
 
 void StaticArrayTest::move() {
@@ -1225,10 +1557,12 @@ void StaticArrayTest::constructorExplicitInCopyInitialization() {
         explicit ExplicitDefault() {}
     };
 
-    /* The DefaultInit constructor has a special case for
-       non-trivially-constructible initialization that's affected by this
-       issue as well, be sure to have it picked in this test. This check
-       corresponds to the check in the code itself. */
+    /* This should check the StaticArray internals for
+       non-trivially-constructible types. There's no known way to trigger this
+       for trivially constructible types (those can't have members with
+       explicit constructors), nor for types with a NoInit constructor (which
+       then would need an explicit default constructor, not an implicit
+       one). */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(!Implementation::IsTriviallyConstructibleOnOldGcc<ExplicitDefault>::value);
     #else

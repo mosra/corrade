@@ -42,6 +42,101 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+
+template<std::size_t size_, class T, bool trivial> struct StaticArrayData;
+template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
+    /* Here we additionally deal with types that have a NoInit constructor */
+    template<class U = T, typename std::enable_if<!std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT) {}
+    template<class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT): StaticArrayData{Corrade::NoInit, typename GenerateSequence<size_>::Type{}} {}
+    template<std::size_t... sequence, class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT noInit, Sequence<sequence...>): _data{(&noInit)[0*sequence]...} {}
+
+    /* Compared to StaticArrayData<size_, T, false> it does the right thing by
+       default */
+    explicit StaticArrayData(Corrade::DefaultInitT) {}
+
+    /* Compared to StaticArrayData<size_, T, false>, there's no way to trigger
+       the featurebug in C++ where new T{} doesn't work for an explicit
+       defaulted constructor in trivially constructible or NoInit-constructible
+       types, so this uses a {}. For details see constructHelpers.h and
+       StaticArrayTest::constructorExplicitInCopyInitialization(). */
+    explicit StaticArrayData(Corrade::ValueInitT): _data{} {}
+
+    /* Same as in StaticArrayData<size_, T, false> */
+    template<class ...Args> explicit StaticArrayData(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {}
+    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
+    /* See StaticArrayTest::constructArrayMove() for details why it has to be
+       disabled */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
+    #endif
+
+    T _data[size_];
+};
+
+template<std::size_t size_, class T> struct StaticArrayData<size_, T, false> {
+    /* Compared to StaticArrayData<size_, T, true> it does the right thing by
+       default */
+    explicit StaticArrayData(Corrade::NoInitT) {}
+
+    /* Compared to StaticArrayData<size_, T, true> a default constructor has to
+       be called on the union members. If the default constructor is trivial,
+       the StaticArrayData<size_, T, true> base was picked instead. */
+    explicit StaticArrayData(Corrade::DefaultInitT)
+        /* GCC 5.3 is not able to initialize non-movable types inside
+           constructor initializer list. Reported here, fixed on 10.3:
+            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395
+
+           In both cases, the () instead of {} works around a featurebug in C++
+           where new T{} doesn't work for an explicit defaulted constructor.
+           For details see constructHelpers.h and
+           StaticArrayTest::constructorExplicitInCopyInitialization(). */
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
+        : _data() {}
+        #else
+        {
+            for(T& i: _data) new(&i) T();
+        }
+        #endif
+
+    /* The () instead of {} works around a featurebug in C++ where new T{}
+       doesn't work for an explicit defaulted constructor. Doesn't apply to
+       StaticArrayData<size_, T, true>. For details see constructHelpers.h and
+       StaticArrayTest::constructorExplicitInCopyInitialization(). */
+    explicit StaticArrayData(Corrade::ValueInitT): _data() {}
+
+    /* Same as in StaticArrayData<size_, T, true> */
+    template<class ...Args> explicit StaticArrayData(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {}
+    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
+    /* See StaticArrayTest::constructArrayMove() for details why it has to be
+       disabled */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
+    #endif
+
+    /* Compared to StaticArrayData<size_, T, true> we need to explicitly
+       copy/move the union members */
+    StaticArrayData(const StaticArrayData<size_, T, false>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
+    StaticArrayData(StaticArrayData<size_, T, false>&& other) noexcept(std::is_nothrow_move_constructible<T>::value);
+    ~StaticArrayData();
+    StaticArrayData<size_, T, false>& operator=(const StaticArrayData<size_, T, false>&) noexcept(std::is_nothrow_copy_constructible<T>::value);
+    StaticArrayData<size_, T, false>& operator=(StaticArrayData<size_, T, false>&&) noexcept(std::is_nothrow_move_constructible<T>::value);
+
+    union {
+        T _data[size_];
+    };
+};
+
+template<std::size_t size_, class T> using StaticArrayDataFor = StaticArrayData<size_, T,
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    Implementation::IsTriviallyConstructibleOnOldGcc<T>::value
+    #else
+    std::is_trivially_constructible<T>::value
+    #endif
+    || std::is_constructible<T, Corrade::NoInitT>::value>;
+
+}
+
 /**
 @brief Compile-time-sized array
 @tparam size_   Array size
@@ -159,7 +254,7 @@ Corrade type                    | ↭ | STL type
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
-template<std::size_t size_, class T> class StaticArray {
+template<std::size_t size_, class T> class StaticArray: Implementation::StaticArrayDataFor<size_, T> {
     /* Ideally this could be derived from StaticArrayView<size_, T>, avoiding a
        lot of redundant code, however I'm unable to find a way to add
        const/non-const overloads of all slicing functions and also prevent
@@ -185,32 +280,7 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        explicit StaticArray(Corrade::DefaultInitT);
-        #else
-        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        template<class U = T, typename std::enable_if<Implementation::IsTriviallyConstructibleOnOldGcc<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT) {}
-        template<class U = T, typename std::enable_if<!Implementation::IsTriviallyConstructibleOnOldGcc<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT)
-        #else
-        template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT) {}
-        template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArray(Corrade::DefaultInitT)
-        #endif
-            /* GCC 5.3 is not able to initialize non-movable types inside
-               constructor initializer list. Reported here, fixed on 10.3:
-                https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395
-
-               In both cases, the () instead of {} works around a featurebug in
-               C++ where new T{} doesn't work for an explicit defaulted
-               constructor. For details see constructHelpers.h and
-               StaticArrayTest:: constructorExplicitInCopyInitialization(). */
-            #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
-            : _data() {}
-            #else
-            {
-                for(T& i: _data) new(&i) T();
-            }
-            #endif
-        #endif
+        explicit StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
 
         /**
          * @brief Construct a value-initialized array
@@ -227,10 +297,7 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
          *      @ref std::is_trivial
          */
-        /* The () instead of {} works around a featurebug in C++ where new T{}
-           doesn't work for an explicit defaulted constructor. For details see
-           constructHelpers.h and ArrayTest::constructorExplicitInCopyInitialization(). */
-        explicit StaticArray(Corrade::ValueInitT): _data() {}
+        explicit StaticArray(Corrade::ValueInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an array without initializing its contents
@@ -257,7 +324,7 @@ template<std::size_t size_, class T> class StaticArray {
          *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
          *      @ref std::is_trivial
          */
-        explicit StaticArray(Corrade::NoInitT) {}
+        explicit StaticArray(Corrade::NoInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::NoInit} {}
 
         /**
          * @brief Construct a direct-initialized array
@@ -281,7 +348,7 @@ template<std::size_t size_, class T> class StaticArray {
          * alternative. Same as @ref StaticArray(Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
-        template<class ...Args> explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {
+        template<class ...Args> explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...} {
             static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
         }
 
@@ -296,7 +363,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @ref StaticArray(InPlaceInitT, T(&&)[size_]) instead. Same as
          * @ref StaticArray(const T(&)[size_]).
          */
-        explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -314,7 +381,7 @@ template<std::size_t size_, class T> class StaticArray {
          *      compilers don't support moving arrays.
          * @see @ref StaticArray(InPlaceInitT, const T(&)[size_])
          */
-        explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
 
         /**
@@ -323,7 +390,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Alias to @ref StaticArray(ValueInitT).
          * @see @ref StaticArray(DefaultInitT)
          */
-        explicit StaticArray(): StaticArray{Corrade::ValueInit} {}
+        explicit StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an in-place-initialized array
@@ -334,7 +401,7 @@ template<std::size_t size_, class T> class StaticArray {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
+        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
         #endif
 
         /**
@@ -345,7 +412,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref StaticArray(T(&&)[size_]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
-        explicit StaticArray(const T(&data)[size_]): StaticArray{Corrade::InPlaceInit, data} {}
+        explicit StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -362,22 +429,8 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref StaticArray(const T(&)[size_]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
-        explicit StaticArray(T(&&data)[size_]): StaticArray{Corrade::InPlaceInit, Utility::move(data)} {}
+        explicit StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
-
-        /** @brief Copy constructor */
-        StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
-
-        /** @brief Move constructor */
-        StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value);
-
-        ~StaticArray();
-
-        /** @brief Copy assignment */
-        StaticArray<size_, T>& operator=(const StaticArray<size_, T>&) noexcept(std::is_nothrow_copy_constructible<T>::value);
-
-        /** @brief Move assignment */
-        StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) noexcept(std::is_nothrow_move_constructible<T>::value);
 
         /* The following view conversion is *not* restricted to this& because
            that would break uses like `consume(foo());`, where `consume()`
@@ -406,14 +459,14 @@ template<std::size_t size_, class T> class StaticArray {
            operators */
 
         /** @brief Conversion to array type */
-        /*implicit*/ operator T*() & { return _data; }
+        /*implicit*/ operator T*() & { return this->_data; }
 
         /** @overload */
-        /*implicit*/ operator const T*() const & { return _data; }
+        /*implicit*/ operator const T*() const & { return this->_data; }
 
         /** @brief Array data */
-        T* data() { return _data; }
-        const T* data() const { return _data; }             /**< @overload */
+        T* data() { return this->_data; }
+        const T* data() const { return this->_data; }      /**< @overload */
 
         /**
          * @brief Array size
@@ -445,34 +498,34 @@ template<std::size_t size_, class T> class StaticArray {
          *
          * @see @ref front(), @ref operator[]()
          */
-        T* begin() { return _data; }
-        const T* begin() const { return _data; }            /**< @overload */
-        const T* cbegin() const { return _data; }           /**< @overload */
+        T* begin() { return this->_data; }
+        const T* begin() const { return this->_data; }        /**< @overload */
+        const T* cbegin() const { return this->_data; }       /**< @overload */
 
         /**
          * @brief Pointer to (one item after) the last element
          *
          * @see @ref back(), @ref operator[]()
          */
-        T* end() { return _data + size_; }
-        const T* end() const { return _data + size_; }      /**< @overload */
-        const T* cend() const { return _data + size_; }     /**< @overload */
+        T* end() { return this->_data + size_; }
+        const T* end() const { return this->_data + size_; }  /**< @overload */
+        const T* cend() const { return this->_data + size_; } /**< @overload */
 
         /**
          * @brief First element
          *
          * @see @ref begin(), @ref operator[]()
          */
-        T& front() { return _data[0]; }
-        const T& front() const { return _data[0]; }         /**< @overload */
+        T& front() { return this->_data[0]; }
+        const T& front() const { return this->_data[0]; }     /**< @overload */
 
         /**
          * @brief Last element
          *
          * @see @ref end(), @ref operator[]()
          */
-        T& back() { return _data[size_ - 1]; }
-        const T& back() const { return _data[size_ - 1]; }  /**< @overload */
+        T& back() { return this->_data[size_ - 1]; }
+        const T& back() const { return this->_data[size_ - 1]; } /**< @overload */
 
         /**
          * @brief Element access
@@ -861,17 +914,6 @@ template<std::size_t size_, class T> class StaticArray {
             return Utility::move(value._data[index]);
         }
         #endif
-
-        template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
-        /* See StaticArrayTest::constructArrayMove() for details why it has to
-           be disabled */
-        #ifndef CORRADE_MSVC2017_COMPATIBILITY
-        template<std::size_t ...sequence> explicit StaticArray(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
-        #endif
-
-        union {
-            T _data[size_];
-        };
 };
 
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
@@ -997,7 +1039,7 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(const Stati
 }
 
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(Corrade::DirectInitT, Args&&... args): StaticArray{Corrade::NoInit} {
-    for(T& i: _data)
+    for(T& i: this->_data)
         /* This works around a featurebug in C++ where new T{} doesn't work for
            an explicit defaulted constructor. Additionally it works around GCC
            4.8 bugs where copy/move construction can't be done with {} for
@@ -1005,8 +1047,10 @@ template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, 
         Implementation::construct(i, Utility::forward<Args>(args)...);
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{Corrade::NoInit} {
-    for(std::size_t i = 0; i != other.size(); ++i)
+namespace Implementation {
+
+template<std::size_t size_, class T> StaticArrayData<size_, T, false>::StaticArrayData(const StaticArrayData<size_, T, false>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArrayData{Corrade::NoInit} {
+    for(std::size_t i = 0; i != size_; ++i)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
         Implementation::construct(_data[i], other._data[i]);
@@ -1015,8 +1059,8 @@ template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const St
         #endif
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArray{Corrade::NoInit} {
-    for(std::size_t i = 0; i != other.size(); ++i)
+template<std::size_t size_, class T> StaticArrayData<size_, T, false>::StaticArrayData(StaticArrayData<size_, T, false>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArrayData{Corrade::NoInit} {
+    for(std::size_t i = 0; i != size_; ++i)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
         Implementation::construct(_data[i], Utility::move(other._data[i]));
@@ -1025,7 +1069,7 @@ template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticAr
         #endif
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
+template<std::size_t size_, class T> StaticArrayData<size_, T, false>::~StaticArrayData() {
     for(T& i: _data) {
         i.~T();
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
@@ -1035,24 +1079,26 @@ template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
     }
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value) {
-    for(std::size_t i = 0; i != other.size(); ++i)
+template<std::size_t size_, class T> StaticArrayData<size_, T, false>& StaticArrayData<size_, T, false>::operator=(const StaticArrayData<size_, T, false>& other) noexcept(std::is_nothrow_copy_constructible<T>::value) {
+    for(std::size_t i = 0; i != size_; ++i)
         _data[i] = other._data[i];
     return *this;
 }
 
-template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value) {
+template<std::size_t size_, class T> StaticArrayData<size_, T, false>& StaticArrayData<size_, T, false>::operator=(StaticArrayData<size_, T, false>&& other) noexcept(std::is_nothrow_move_constructible<T>::value) {
     using Utility::swap;
-    for(std::size_t i = 0; i != other.size(); ++i)
+    for(std::size_t i = 0; i != size_; ++i)
         swap(_data[i], other._data[i]);
     return *this;
+}
+
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<std::size_t size_, class T> template<class U, class> const T& StaticArray<size_, T>::operator[](const U i) const {
     CORRADE_DEBUG_ASSERT(std::size_t(i) < size_,
-        "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements", _data[0]);
-    return _data[i];
+        "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements", this->_data[0]);
+    return this->_data[i];
 }
 
 template<std::size_t size_, class T> template<class U, class> T& StaticArray<size_, T>::operator[](const U i) {
@@ -1062,12 +1108,12 @@ template<std::size_t size_, class T> template<class U, class> T& StaticArray<siz
 
 template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, T> StaticArray<size_, T>::prefix() {
     static_assert(size__ <= size_, "prefix size too large");
-    return StaticArrayView<size__, T>{_data};
+    return StaticArrayView<size__, T>{this->_data};
 }
 
 template<std::size_t size_, class T> template<std::size_t size__> StaticArrayView<size__, const T> StaticArray<size_, T>::prefix() const {
     static_assert(size__ <= size_, "prefix size too large");
-    return StaticArrayView<size__, const T>{_data};
+    return StaticArrayView<size__, const T>{this->_data};
 }
 
 namespace Implementation {
