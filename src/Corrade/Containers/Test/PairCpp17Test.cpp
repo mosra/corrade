@@ -56,6 +56,8 @@ void PairCpp17Test::structuredBindings() {
     CORRADE_VERIFY(std::is_same<decltype(second), float*>::value);
     CORRADE_COMPARE(first, 13);
     CORRADE_COMPARE(second, &a);
+
+    /* Constexpr behavior tested for each case (&, const&, &&) below */
 }
 
 /* Verifies the & variant behavior with constexpr */
@@ -131,8 +133,8 @@ void PairCpp17Test::structuredBindingsRvalueReference() {
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
     constexpr
     #endif
-    Pair<int, float> ctriple = structuredBindingsRvalueReferenceConstexpr(13, 67.0f);
-    CORRADE_COMPARE(ctriple, Containers::pair(13, 67.0f));
+    Pair<int, float> cpair = structuredBindingsRvalueReferenceConstexpr(13, 67.0f);
+    CORRADE_COMPARE(cpair, Containers::pair(13, 67.0f));
 }
 
 void PairCpp17Test::structuredBindingsMove() {

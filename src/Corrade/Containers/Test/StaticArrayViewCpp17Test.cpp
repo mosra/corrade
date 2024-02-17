@@ -58,6 +58,8 @@ void StaticArrayViewCpp17Test::structuredBindings() {
     CORRADE_VERIFY(std::is_same<decltype(a1), float>::value);
     CORRADE_COMPARE(a0, 32.5f);
     CORRADE_COMPARE(a1, -2.25f);
+
+    /* Constexpr behavior tested for each case (&, const&, &&) below */
 }
 
 /* Verifies the & variant behavior with constexpr */

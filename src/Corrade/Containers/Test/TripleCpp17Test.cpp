@@ -58,6 +58,8 @@ void TripleCpp17Test::structuredBindings() {
     CORRADE_COMPARE(first, 13);
     CORRADE_COMPARE(second, &a);
     CORRADE_COMPARE(third, true);
+
+    /* Constexpr behavior tested for each case (&, const&, &&) below */
 }
 
 /* Verifies the & variant behavior with constexpr */
