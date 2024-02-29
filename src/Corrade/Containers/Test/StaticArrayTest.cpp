@@ -536,8 +536,8 @@ void StaticArrayTest::constructNoInit() {
 template<class T> void StaticArrayTest::constructNoInitTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    StaticArray<3, int> a{Corrade::InPlaceInit, 57, 39, 78};
-    new(&a) StaticArray<3, int>{Corrade::NoInit};
+    StaticArray<3, T> a{Corrade::InPlaceInit, 57, 39, 78};
+    new(&a) StaticArray<3, T>{Corrade::NoInit};
     {
         /* Explicitly check we're not on Clang because certain Clang-based IDEs
            inherit __GNUC__ if GCC is used instead of leaving it at 4 like
