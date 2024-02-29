@@ -551,7 +551,6 @@ You can override this implementation by placing your own
     @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY()
 */
 #ifndef CORRADE_ASSUME
-#ifndef CORRADE_ASSUME
 #ifdef CORRADE_TARGET_CLANG
 #define CORRADE_ASSUME(condition) __builtin_assume(condition)
 #elif defined(CORRADE_TARGET_MSVC)
@@ -567,7 +566,6 @@ You can override this implementation by placing your own
 #endif
 #else
 #define CORRADE_ASSUME(condition) do {} while(false)
-#endif
 #endif
 #endif
 
