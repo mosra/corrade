@@ -775,6 +775,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         InternalFlags _flags;
         InternalFlags _immediateFlags;
 
+        /* 2 / 6 bytes free */
+
     private:
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         friend Implementation::DebugSourceLocation;
@@ -794,9 +796,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         Color _previousColor;
         bool _previousColorBold, _previousColorInverted;
         #endif
+        /* 1 byte free */
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
-        const char* _sourceLocationFile{};
         int _sourceLocationLine{};
+        const char* _sourceLocationFile{};
         #endif
 };
 
