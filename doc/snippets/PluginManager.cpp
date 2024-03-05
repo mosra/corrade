@@ -68,7 +68,11 @@ static int corradeZipFilesystemStaticImport() {
 } CORRADE_AUTOMATIC_INITIALIZER(corradeZipFilesystemStaticImport)
 /* [CORRADE_PLUGIN_IMPORT] */
 
-int main() {
+/* Make sure the name doesn't conflict with any other snippets to avoid linker
+   warnings, unlike with `int main()` there now has to be a declaration to
+   avoid -Wmisssing-prototypes */
+void mainPluginManager();
+void mainPluginManager() {
 /* Needed to verify the AbstractFilesystem definition is actually usable */
 PluginManager::Manager<AbstractFilesystem> manager;
 

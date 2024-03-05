@@ -168,7 +168,11 @@ int lookup(DOXYGEN_ELLIPSIS(int)) {
 
 inline void foo(Cpu::ScalarT) {}
 
-int main() {
+/* Make sure the name doesn't conflict with any other snippets to avoid linker
+   warnings, unlike with `int main()` there now has to be a declaration to
+   avoid -Wmisssing-prototypes */
+void mainCorrade();
+void mainCorrade() {
 #ifdef CORRADE_TARGET_X86
 {
 Containers::ArrayView<float> data;

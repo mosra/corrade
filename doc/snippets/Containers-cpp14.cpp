@@ -31,7 +31,11 @@
 
 using namespace Corrade;
 
-int main() {
+/* Make sure the name doesn't conflict with any other snippets to avoid linker
+   warnings, unlike with `int main()` there now has to be a declaration to
+   avoid -Wmisssing-prototypes */
+void mainContainersCpp14();
+void mainContainersCpp14() {
 {
 /* [BitArrayView-operator<<] */
 const std::uint64_t data[]{0b00'0101'0101'0011'0011'0000'1111 << 5};

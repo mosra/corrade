@@ -62,5 +62,9 @@ static_assert(Implementation::CanSaveDiagnostic<Comparator<FileContents>>::value
 
 }}
 
-/* To prevent macOS ranlib complaining that there are no symbols */
-int main() {}
+/* To prevent macOS ranlib from complaining that there are no symbols. OTOH
+   also make sure the name doesn't conflict with any other snippets to avoid
+   linker warnings, AND unlike with `int main()` there now has to be a
+   declaration to avoid -Wmisssing-prototypes */
+void mainTestSuite3();
+void mainTestSuite3() {}

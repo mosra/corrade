@@ -31,8 +31,12 @@
 
 using namespace Corrade;
 
+/* Make sure the name doesn't conflict with any other snippets to avoid linker
+   warnings, unlike with `int main()` there now has to be a declaration to
+   avoid -Wmisssing-prototypes */
+void mainCorradeCpp17();
+void mainCorradeCpp17() {
 #ifdef CORRADE_TARGET_X86
-int main() {
 /* [Cpu-usage-compile-time] */
 Utility::Debug{} << "Base compiled instruction set:" << Cpu::DefaultBase;
 
@@ -52,5 +56,5 @@ if constexpr(Cpu::Default >= (Cpu::Avx2|Cpu::AvxFma)) {
     // scalar code
 }
 /* [Cpu-usage-extra-compile-time] */
-}
 #endif
+}
