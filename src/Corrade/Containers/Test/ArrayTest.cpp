@@ -237,7 +237,9 @@ struct Movable {
     }
     ~Movable() { ++destructed; }
     Movable& operator=(const Movable&) = delete;
-    Movable& operator=(Movable&& other) noexcept {
+    /* Clang complains this one is unused. I want it to record moves, *if* it
+       ever gets used, tho. */
+    CORRADE_UNUSED Movable& operator=(Movable&& other) noexcept {
         a = other.a;
         ++moved;
         return *this;
