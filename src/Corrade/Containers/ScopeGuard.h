@@ -157,7 +157,21 @@ template<class T, class Deleter> ScopeGuard::ScopeGuard(T handle, Deleter delete
     #else
     reinterpret_cast<void(*)()>(static_cast<void(*)(T)>(deleter)) /* Details why below */
     #endif
-}, _handle{reinterpret_cast<void*>(handle)} {
+}, _handle{
+    /* On MSVC, if handle is of a smaller type than a pointer (such as int on
+       64bit builds, this prints an ANNOYING "reinterpret_cast: conversion from
+       T to void * of greater size" warning (C4312). I don't see how this can
+       be fixed without introducing a lot of extra casting code that deals with
+       both integers and pointers, so just suppress the warning here. */
+    #ifdef CORRADE_TARGET_MSVC
+    #pragma warning(push)
+    #pragma warning(disable: 4312)
+    #endif
+    reinterpret_cast<void*>(handle)
+    #ifdef CORRADE_TARGET_MSVC
+    #pragma warning(pop)
+    #endif
+} {
     static_assert(sizeof(T) <= sizeof(void*), "handle too big to store");
     _deleterWrapper = [](void(**deleter)(), void** handle) {
         (*reinterpret_cast<Deleter*>(deleter))(*reinterpret_cast<T*>(handle));
