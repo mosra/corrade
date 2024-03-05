@@ -1058,7 +1058,7 @@ auto someComplexOperation = []() { return 0.0f; };
 float* data = DOXYGEN_ELLIPSIS(nullptr);
 unsigned* indices = DOXYGEN_ELLIPSIS(nullptr);
 unsigned previousIndex = ~unsigned{};
-float factor;
+float factor = DOXYGEN_ELLIPSIS(0.0f);
 for(std::size_t i = 0; i != size; ++i) {
     if CORRADE_UNLIKELY(indices[i] != previousIndex) {
         factor = someComplexOperation();
