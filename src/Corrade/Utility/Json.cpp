@@ -2717,8 +2717,8 @@ Containers::StringView JsonObjectItem::key() const {
     return _token->asString();
 }
 
-Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::Type value) {
-    debug << "Utility::JsonToken::Type" << Utility::Debug::nospace;
+Debug& operator<<(Debug& debug, const JsonToken::Type value) {
+    debug << "Utility::JsonToken::Type" << Debug::nospace;
 
     switch(value) {
         /* LCOV_EXCL_START */
@@ -2733,11 +2733,11 @@ Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::Type value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Utility::Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Utility::Debug::nospace << ")";
+    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Debug::nospace << ")";
 }
 
-Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::ParsedType value) {
-    debug << "Utility::JsonToken::ParsedType" << Utility::Debug::nospace;
+Debug& operator<<(Debug& debug, const JsonToken::ParsedType value) {
+    debug << "Utility::JsonToken::ParsedType" << Debug::nospace;
 
     switch(value) {
         /* LCOV_EXCL_START */
@@ -2754,7 +2754,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const JsonToken::ParsedType va
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Utility::Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Utility::Debug::nospace << ")";
+    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Utility::Debug::nospace << ")";
 }
 
 }}
