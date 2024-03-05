@@ -365,26 +365,26 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
-namespace { enum: unsigned char { PublicFlagMask = 0x1f }; }
+namespace { enum: unsigned short { PublicFlagMask = 0x00ff }; }
 
 auto Debug::flags() const -> Flags {
-    return Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
+    return Flag(static_cast<unsigned short>(_flags) & PublicFlagMask);
 }
 
 void Debug::setFlags(Flags flags) {
-    _flags = InternalFlag(static_cast<unsigned char>(flags)) |
-        InternalFlag(static_cast<unsigned char>(_flags) & ~PublicFlagMask);
+    _flags = InternalFlag(static_cast<unsigned short>(flags)) |
+        InternalFlag(static_cast<unsigned short>(_flags) & ~PublicFlagMask);
 }
 
 auto Debug::immediateFlags() const -> Flags {
-    return Flag(static_cast<unsigned char>(_immediateFlags) & PublicFlagMask) |
-        Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
+    return Flag(static_cast<unsigned short>(_immediateFlags) & PublicFlagMask) |
+        Flag(static_cast<unsigned short>(_flags) & PublicFlagMask);
 }
 
 void Debug::setImmediateFlags(Flags flags) {
     /* unlike _flags, _immediateFlags doesn't contain any internal flags so
        no need to preserve these */
-    _immediateFlags = InternalFlag(static_cast<unsigned char>(flags));
+    _immediateFlags = InternalFlag(static_cast<unsigned short>(flags));
 }
 
 std::ostream* Debug::defaultOutput() { return &std::cout; }
@@ -452,7 +452,7 @@ bool Debug::isTty() { return isTty(debugGlobals.output); }
 bool Warning::isTty() { return Debug::isTty(debugGlobals.warningOutput); }
 bool Error::isTty() { return Debug::isTty(debugGlobals.errorOutput); }
 
-Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))}, _immediateFlags{InternalFlag::NoSpace} {
+Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned short>(flags))}, _immediateFlags{InternalFlag::NoSpace} {
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = debugGlobals.output;
     debugGlobals.output = _output = output;
@@ -565,21 +565,30 @@ template<class T> Debug& Debug::print(const T& value) {
     }
     #endif
 
-    /* Separate values with spaces if enabled; reset all internal flags after */
+    /* Separate values with spaces if enabled */
     if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))
         *_output << ' ';
-    _immediateFlags = {};
+    /* Print the next value as hexadecimal if enabled */
+    /** @todo this does strange crap for negative values (printing them as
+        unsigned), revisit once iostreams are not used anymore */
+    if(((_immediateFlags|_flags) & InternalFlag::Hex) && std::is_integral<T>::value)
+        *_output << "0x" << std::hex;
 
     toStream(*_output, value);
+
+    /* Reset the hexadecimal printing back if it was enabled */
+    if(((_immediateFlags|_flags) & InternalFlag::Hex) && std::is_integral<T>::value)
+        *_output << std::dec;
+
+    /* Reset all internal flags after */
+    _immediateFlags = {};
 
     _flags |= InternalFlag::ValueWritten;
     return *this;
 }
 
 Debug& Debug::operator<<(const void* const value) {
-    std::ostringstream o;
-    o << "0x" << std::hex << reinterpret_cast<std::uintptr_t>(value);
-    return print(o.str());
+    return *this << hex << reinterpret_cast<std::uintptr_t>(value);
 }
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
@@ -698,11 +707,13 @@ Debug& operator<<(Debug& debug, Debug::Flag value) {
         _c(NoSpace)
         _c(Packed)
         _c(Color)
+        /* Space reserved for Bin and Oct */
+        _c(Hex)
         #undef _c
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "Utility::Debug::Flag(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+    return debug << "Utility::Debug::Flag(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned short>(value)) << Debug::nospace << ")";
 }
 
 Debug& operator<<(Debug& debug, Debug::Flags value) {
@@ -711,7 +722,9 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
         Debug::Flag::DisableColors,
         Debug::Flag::NoSpace,
         Debug::Flag::Packed,
-        Debug::Flag::Color});
+        Debug::Flag::Color,
+        /* Space reserved for Bin and Oct */
+        Debug::Flag::Hex});
 }
 #endif
 

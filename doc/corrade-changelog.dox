@@ -208,6 +208,8 @@ namespace Corrade {
     and @relativeref{Utility::ConfigurationGroup,groups()}
 -   New @ref Utility::Debug::invertedColor() output modifier for printing
     colored text with the foreground and background colors inverted
+-   New @ref Utility::Debug::hex output modifier for printing integers as
+    hexadecimal
 -   New @ref Corrade::Utility::Json class for tokenizing and parsing JSON files
     into an immutable memory-efficient representation. See also
     [mosra/corrade#174](https://github.com/mosra/corrade/issues/174).

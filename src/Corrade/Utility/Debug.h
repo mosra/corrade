@@ -115,6 +115,14 @@ modifier:
 
 @snippet Utility.cpp Debug-modifiers-whitespace
 
+@subsection Utility-Debug-modifiers-base Printing numbers in a different base
+
+With @ref Flag::Hex or the @ref hex modifier, integers will be printed as
+hexadecimal. Pointer values are printed as hexadecimal always, cast them to an
+integer type to print them as decimal.
+
+@snippet Utility.cpp Debug-modifiers-base
+
 @subsection Utility-Debug-modifiers-colors Colored output
 
 It is possible to color the output using @ref color(), @ref boldColor() and
@@ -207,7 +215,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref Flags, @ref Debug(Flags)
          */
-        enum class Flag: unsigned char {
+        enum class Flag: unsigned short {
             /** Don't put newline at the end on destruction */
             NoNewlineAtTheEnd = 1 << 0,
 
@@ -237,7 +245,18 @@ class CORRADE_UTILITY_EXPORT Debug {
              * Print colored values as colored squares in the terminal.
              * @see @ref color, @ref operator<<(unsigned char)
              */
-            Color = 1 << 4
+            Color = 1 << 4,
+
+            /* Bit 5 and 6 reserved for Bin and Oct */
+
+            /**
+             * Print integer values as lowercase hexadecimal prefixed with
+             * `0x`, e.g. @cb{.shell-session} 0xc0ffee @ce instead of
+             * @cb{.shell-session} 12648430 @ce.
+             * @see @ref hex, @ref operator<<(const void*)
+             * @m_since_latest
+             */
+            Hex = 1 << 7
 
             /* When adding values, don't forget to adapt InternalFlag as well
                and update PublicFlagMask in Debug.cpp */
@@ -464,6 +483,19 @@ class CORRADE_UTILITY_EXPORT Debug {
         }
 
         /**
+         * @brief Print the next value as hexadecimal
+         * @m_since_latest
+         *
+         * If the next value is integer, it's printed as lowercase hexadecimal
+         * prefixed with `0x` e.g. @cb{.shell-session} 0xc0ffee @ce instead of
+         * @cb{.shell-session} 12648430 @ce.
+         * @see @ref Flag::Hex, @ref operator<<(const void*)
+         */
+        static void hex(Debug& debug) {
+            debug._immediateFlags |= InternalFlag::Hex;
+        }
+
+        /**
          * @brief Debug output modification
          *
          * See @ref Utility-Debug-modifiers for more information.
@@ -646,10 +678,13 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print a pointer value to debug output
          *
-         * The value is printed in lowercase hexadecimal, for example
-         * @cb{.shell-session} 0xdeadbeef @ce.
+         * The value is printed in lowercase hexadecimal prefixed with `0x`,
+         * for example @cb{.shell-session} 0xdeadbeef @ce. Equivalent to
+         * enabling @ref Flag::Hex or using the @ref hex modifier and printing
+         * @cpp reinterpret_cast<std::uintptr_t>(value) @ce instead of
+         * @cpp value @ce.
          */
-        Debug& operator<<(const void* value);            /**< @overload */
+        Debug& operator<<(const void* value);
 
         /**
          * @brief Print a boolean value to debug output
@@ -756,15 +791,18 @@ class CORRADE_UTILITY_EXPORT Debug {
     #endif
         std::ostream* _output;
 
-        enum class InternalFlag: unsigned char {
-            /* Values compatible with Flag enum */
+        enum class InternalFlag: unsigned short {
+            /* Values matching the Flag enum */
             NoNewlineAtTheEnd = 1 << 0,
             DisableColors = 1 << 1,
             NoSpace = 1 << 2,
             Packed = 1 << 3,
             Color = 1 << 4,
-            ValueWritten = 1 << 5,
-            ColorWritten = 1 << 6
+            /* Bit 5 and 6 reserved for Bin and Oct */
+            Hex = 1 << 7,
+
+            ValueWritten = 1 << 8,
+            ColorWritten = 1 << 9
         };
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
@@ -775,7 +813,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         InternalFlags _flags;
         InternalFlags _immediateFlags;
 
-        /* 2 / 6 bytes free */
+        /* 0 / 4 bytes free */
 
     private:
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED

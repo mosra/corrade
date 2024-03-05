@@ -4518,29 +4518,13 @@ void JsonTest::constructMove() {
 void JsonTest::debugTokenType() {
     std::ostringstream out;
     Debug{&out} << JsonToken::Type::Number << JsonToken::Type(0xdeadbabedeadbabe);
-    {
-        #ifdef CORRADE_TARGET_32BIT
-        CORRADE_EXPECT_FAIL("Debug has shitty hex printing currently, using just the low 32 bits on 32-bit platforms.");
-        #endif
-        CORRADE_COMPARE(out.str(), "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabedeadbabe)\n");
-    }
-    #ifdef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabe)\n");
-    #endif
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabedeadbabe)\n");
 }
 
 void JsonTest::debugTokenParsedType() {
     std::ostringstream out;
     Debug{&out} << JsonToken::ParsedType::UnsignedInt << JsonToken::ParsedType(0xdeadbabedeadbabeull);
-    {
-        #ifdef CORRADE_TARGET_32BIT
-        CORRADE_EXPECT_FAIL("Debug has shitty hex printing currently, using just the low 32 bits on 32-bit platforms.");
-        #endif
-        CORRADE_COMPARE(out.str(), "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabedeadbabe)\n");
-    }
-    #ifdef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabe)\n");
-    #endif
+    CORRADE_COMPARE(out.str(), "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabedeadbabe)\n");
 }
 
 }}}}

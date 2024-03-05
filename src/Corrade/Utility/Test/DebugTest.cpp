@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -78,6 +79,8 @@ struct DebugTest: TestSuite::Tester {
     void colorsNospace();
     void colorsNoOutput();
     void colorsScoped();
+
+    void hex();
 
     void valueAsColor();
     void valueAsColorColorsDisabled();
@@ -151,6 +154,8 @@ DebugTest::DebugTest() {
         &DebugTest::colorsNospace,
         &DebugTest::colorsNoOutput,
         &DebugTest::colorsScoped,
+
+        &DebugTest::hex,
 
         &DebugTest::valueAsColor,
         &DebugTest::valueAsColorColorsDisabled,
@@ -809,6 +814,88 @@ void DebugTest::colorsScoped() {
     #endif
 }
 
+void DebugTest::hex() {
+    /* Local hex modifier, applied once */
+    {
+        std::ostringstream out;
+
+        {
+            Debug d{&out};
+            d << "Values";
+            CORRADE_VERIFY(!(d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY(!(d.immediateFlags() & Debug::Flag::Hex));
+
+            d << Debug::hex;
+            CORRADE_VERIFY(!(d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::Hex));
+
+            d << 0xc0ffee;
+            CORRADE_VERIFY(!(d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY(!(d.immediateFlags() & Debug::Flag::Hex));
+
+            d << "and" << 16;
+        }
+
+        CORRADE_COMPARE(out.str(), "Values 0xc0ffee and 16\n");
+    }
+
+    /* Global hex modifier, applied always */
+    {
+        std::ostringstream out;
+        {
+            Debug d{&out, Debug::Flag::Hex};
+            CORRADE_VERIFY((d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::Hex));
+
+            /* Should work for any integer type without truncating, 0x should
+               be printed for 0 as well */
+            d << 0xfedcba9876543210ull << 0xcdu << static_cast<signed char>(0x13) << 0x0;
+            CORRADE_VERIFY((d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::Hex));
+
+            /* Shouldn't be applied to non-integer types but should still stay
+               present for any that may come after */
+            d << "yes" << 3.5f << false << 0xabc << U'\xabc';
+            CORRADE_VERIFY((d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::Hex));
+
+            /* Printing pointers applies it implicitly, check it doesn't
+               cause 0x to be printed twice or the flag reset after */
+            d << nullptr << reinterpret_cast<const void*>(std::size_t{0xc0ffee}) << 0x356;
+            CORRADE_VERIFY((d.flags() & Debug::Flag::Hex));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::Hex));
+        }
+
+        CORRADE_COMPARE(out.str(),
+            "0xfedcba9876543210 0xcd 0x13 0x0 "
+            "yes 3.5 false 0xabc U+0ABC "
+            "nullptr 0xc0ffee 0x356\n");
+    }
+
+    /* Negative values should have - before the 0x. Well, ideally, if iostreams
+       weren't irreparably broken in the first place, printing everything as
+       unsigned. */
+    {
+        std::ostringstream out;
+        Debug{&out, Debug::Flag::Hex} << -0x356 << -0x1ll;
+
+        {
+            CORRADE_EXPECT_FAIL("This doesn't work as expected with std::hex anyway, won't bother fixing until iostreams are dropped.");
+            CORRADE_COMPARE(out.str(), "-0x356 -0x1\n");
+        }
+
+        CORRADE_COMPARE(out.str(), "0xfffffcaa 0xffffffffffffffff\n");
+    }
+
+    /* Nested values should be printed as hex too, but it should be reset
+       after */
+    {
+        std::ostringstream out;
+        Debug{&out} << Debug::hex << Containers::pair(0xab, Containers::arrayView({0xcd, 0x13})) << 1234;
+        CORRADE_COMPARE(out.str(), "{0xab, {0xcd, 0x13}} 1234\n");
+    }
+}
+
 void DebugTest::valueAsColor() {
     Debug{} << "The following should be shades of gray:";
 
@@ -1066,15 +1153,15 @@ void DebugTest::debugColor() {
 void DebugTest::debugFlag() {
     std::ostringstream out;
 
-    Debug(&out) << Debug::Flag::NoNewlineAtTheEnd << Debug::Flag(0xde);
-    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd Utility::Debug::Flag(0xde)\n");
+    Debug(&out) << Debug::Flag::NoNewlineAtTheEnd << Debug::Flag(0xcafe);
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd Utility::Debug::Flag(0xcafe)\n");
 }
 
 void DebugTest::debugFlags() {
     std::ostringstream out;
 
-    Debug(&out) << (Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::Packed) << Debug::Flags{};
-    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd|Utility::Debug::Flag::Packed Utility::Debug::Flags{}\n");
+    Debug(&out) << (Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::Packed|Debug::Flag(0xb000)) << Debug::Flags{};
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd|Utility::Debug::Flag::Packed|Utility::Debug::Flag(0xb000) Utility::Debug::Flags{}\n");
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN

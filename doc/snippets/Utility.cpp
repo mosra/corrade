@@ -550,6 +550,13 @@ Utility::Debug{Utility::Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
 }
 
 {
+/* [Debug-modifiers-base] */
+// Prints 0xc0ffee
+Utility::Debug{} << Utility::Debug::hex << 0xc0ffee;
+/* [Debug-modifiers-base] */
+}
+
+{
 /* [Debug-modifiers-colors] */
 Utility::Debug{}
     << Utility::Debug::boldColor(Utility::Debug::Color::Green) << "Success!"
