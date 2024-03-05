@@ -950,6 +950,13 @@ struct Vec3 {
 };
 Containers::StaticArray<5, Vec3> d{DirectInit, 5.2f, 0.4f, 1.0f};
 /* [StaticArray-usage-initialization] */
+/* Unlike `d`, these are trivially copyable internally, so the compiler may
+   warn that they are unused */
+static_cast<void>(a1);
+static_cast<void>(a2);
+static_cast<void>(b);
+static_cast<void>(c1);
+static_cast<void>(c2);
 }
 
 {
