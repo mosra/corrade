@@ -1161,7 +1161,11 @@ template<unsigned int value> struct Tags {
     constexpr Tags<~value> operator~() const {
         return Tags<~value>{Init};
     }
-    constexpr explicit operator bool() const { return value; }
+    constexpr explicit operator bool() const {
+        /* An explicit cast to avoid "C4305: 'return': truncation from
+           'unsigned int' to 'bool'" on MSVC */
+        return bool(value);
+    }
     constexpr operator unsigned int() const { return value; }
 };
 

@@ -82,9 +82,12 @@ void Sha1Test::twoBlockPadding() {
 
 void Sha1Test::zeroInLeftover() {
     Sha1 sha;
+    /* It's imposssible to say \0134, that eats the 1 as well. Using \000134
+       causes a "decimal digit terminates octal escape sequence" warning on
+       MSVC. FFS, C++. */
     sha << std::string(
-        "123456789a123456789b123456789c123456789d123456789e123456789f12341\000134", 69);
-    sha << std::string("\0001", 2);
+        "123456789a123456789b123456789c123456789d123456789e123456789f12341" "\0" "134", 69);
+    sha << std::string("\0" "1", 2);
     CORRADE_COMPARE(sha.digest(),
         Sha1::Digest::fromHexString("5fdc3d8c862c3c3f86735c536824aee668f89967"));
 }

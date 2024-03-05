@@ -395,7 +395,11 @@ const struct {
        because apparently if 64 "full bits" get parsed into an int and then
        expanded back to 64bits, you get the correct number. Sigh. */
     {"min value, full bit width", "-2000000000", false, -2000000000},
-    {"min value, all bits set", "-2147483648", false, -2147483648},
+    /* -2147483648 causes an "unary minus operator applied to unsigned type,
+       result still unsigned" warning on MSVC, there's simply no way to enter
+       that value as a literal. Don't ask how it's with a min negative 64bit
+       value, even more terrible. */
+    {"min value, all bits set", "-2147483648", false, -2147483647 - 1},
     {"max value, full bit width", "2000000000", false, 2000000000},
     {"max value, all bits set", "2147483647", false, 2147483647},
     {"127 characters",

@@ -382,7 +382,9 @@ void StringIterableTest::stridedArrayViewFromExternal() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
-    CORRADE_COMPARE(ai.stride(), -sizeof(StrView));
+    /* Causes "C4146: unary minus operator applied to unsigned type, result
+       still unsigned" on MSVC without the cast */
+    CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(StrView)));
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "worlds");

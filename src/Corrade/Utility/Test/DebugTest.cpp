@@ -236,7 +236,9 @@ template<> struct IntsData<char> {
             return -123;
         /* Android has unsigned char */
         CORRADE_INFO("char is unsigned");
-        return char(223);
+        /* static_cast is needed to avoid "cast truncates constant value" on
+           (x86) MSVC, sigh */
+        return char(static_cast<unsigned char>(223));
     }
     static const char* expected() {
         /* Android has unsigned char */
@@ -1146,7 +1148,9 @@ void DebugTest::scopedOutput() {
 void DebugTest::debugColor() {
     std::ostringstream out;
 
-    Debug(&out) << Debug::Color::White << Debug::Color(0xde);
+    /* static_cast is needed to avoid "cast truncates constant value" on (x86)
+       MSVC, sigh */
+    Debug(&out) << Debug::Color::White << Debug::Color(char(static_cast<unsigned char>(0xde)));
     CORRADE_COMPARE(out.str(), "Utility::Debug::Color::White Utility::Debug::Color(0xde)\n");
 }
 
