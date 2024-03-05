@@ -130,6 +130,7 @@ struct PairTest: TestSuite::Tester {
     void accessRvalueLifetimeExtension();
 
     void debug();
+    void debugPropagateFlags();
 
     void constructorExplicitInCopyInitialization();
     void copyMoveConstructPlainStruct();
@@ -167,6 +168,7 @@ PairTest::PairTest() {
               &PairTest::accessRvalueLifetimeExtension,
 
               &PairTest::debug,
+              &PairTest::debugPropagateFlags,
 
               &PairTest::constructorExplicitInCopyInitialization,
               &PairTest::copyMoveConstructPlainStruct});
@@ -930,6 +932,14 @@ void PairTest::debug() {
     std::stringstream out;
     Debug{&out} << pair(42.5f, 3);
     CORRADE_COMPARE(out.str(), "{42.5, 3}\n");
+}
+
+void PairTest::debugPropagateFlags() {
+    std::stringstream out;
+    /* The modifier shouldn't become persistent for values after. The nospace
+       modifier shouldn't get propagated. */
+    Debug{&out} << ">" << Debug::nospace << Debug::packed << pair(Containers::arrayView({3, 4, 5}), Containers::arrayView({"A", "B"})) << Containers::arrayView({"a", "b", "c"});
+    CORRADE_COMPARE(out.str(), ">{345, AB} {a, b, c}\n");
 }
 
 void PairTest::constructorExplicitInCopyInitialization() {

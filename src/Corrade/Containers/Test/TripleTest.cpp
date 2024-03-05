@@ -140,6 +140,7 @@ struct TripleTest: TestSuite::Tester {
     void accessRvalueLifetimeExtension();
 
     void debug();
+    void debugPropagateFlags();
 
     void constructorExplicitInCopyInitialization();
     void copyMoveConstructPlainStruct();
@@ -185,6 +186,7 @@ TripleTest::TripleTest() {
               &TripleTest::accessRvalueLifetimeExtension,
 
               &TripleTest::debug,
+              &TripleTest::debugPropagateFlags,
 
               &TripleTest::constructorExplicitInCopyInitialization,
               &TripleTest::copyMoveConstructPlainStruct});
@@ -1364,6 +1366,14 @@ void TripleTest::debug() {
     std::stringstream out;
     Debug{&out} << triple(42.5f, 3, true);
     CORRADE_COMPARE(out.str(), "{42.5, 3, true}\n");
+}
+
+void TripleTest::debugPropagateFlags() {
+    std::stringstream out;
+    /* The modifier shouldn't become persistent for values after. The nospace
+       modifier shouldn't get propagated. */
+    Debug{&out} << ">" << Debug::nospace << Debug::packed << triple(Containers::arrayView({3, 4, 5}), false, Containers::arrayView({"A", "B"})) << Containers::arrayView({"a", "b", "c"});
+    CORRADE_COMPARE(out.str(), ">{345, false, AB} {a, b, c}\n");
 }
 
 void TripleTest::constructorExplicitInCopyInitialization() {

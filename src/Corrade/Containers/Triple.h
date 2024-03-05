@@ -441,7 +441,18 @@ template<class T> inline auto triple(T&& other) -> decltype(Implementation::Dedu
 #ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Triple} */
 template<class F, class S, class T> Utility::Debug& operator<<(Utility::Debug& debug, const Triple<F, S, T>& value) {
-    return debug << "{" << Utility::Debug::nospace << value.first() << Utility::Debug::nospace << "," << value.second() << Utility::Debug::nospace << "," << value.third() << Utility::Debug::nospace << "}";
+    /* Nested values should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Utility::Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Utility::Debug::Flag::NoSpace));
+
+    debug << "{" << Utility::Debug::nospace << value.first() << Utility::Debug::nospace << "," << value.second() << Utility::Debug::nospace << "," << value.third() << Utility::Debug::nospace << "}";
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
+
+    return debug;
 }
 #endif
 
