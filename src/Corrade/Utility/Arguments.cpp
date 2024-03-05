@@ -1224,7 +1224,7 @@ Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint8_t(value)) << Debug::nospace << ")";
+    return debug << "(" << Debug::nospace << Debug::hex << std::uint8_t(value) << Debug::nospace << ")";
 }
 #endif
 

@@ -45,7 +45,7 @@ void VersionTest::test() {
     Debug{} << "CORRADE_VERSION_MONTH:" << CORRADE_VERSION_MONTH;
     #ifdef CORRADE_VERSION_COMMIT
     Debug{} << "CORRADE_VERSION_COMMIT:" << CORRADE_VERSION_COMMIT;
-    Debug{} << "CORRADE_VERSION_HASH:" << reinterpret_cast<void*>(CORRADE_VERSION_HASH);
+    Debug{} << "CORRADE_VERSION_HASH:" << Debug::hex << CORRADE_VERSION_HASH;
     Debug{} << "CORRADE_VERSION_STRING:" << CORRADE_VERSION_STRING;
     #else
     Debug{} << "No Git version information available.";

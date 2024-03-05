@@ -73,7 +73,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Feature value) {
         #undef _c
     }
 
-    return debug << "Feature(" << Utility::Debug::nospace << reinterpret_cast<void*>(int(value)) << Utility::Debug::nospace << ")";
+    return debug << "Feature(" << Utility::Debug::nospace << Utility::Debug::hex << int(value) << Utility::Debug::nospace << ")";
 }
 
 typedef EnumSet<Feature, 15> Features;

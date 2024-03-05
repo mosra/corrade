@@ -1181,7 +1181,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "PluginManager::LoadState(" << Utility::Debug::nospace << reinterpret_cast<void*>(std::uint16_t(value)) << Utility::Debug::nospace << ")";
+    return debug << "PluginManager::LoadState(" << Utility::Debug::nospace << Utility::Debug::hex << std::uint16_t(value) << Utility::Debug::nospace << ")";
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const LoadStates value) {

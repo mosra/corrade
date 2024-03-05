@@ -44,7 +44,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const ComparisonStatusFlag val
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "TestSuite::ComparisonStatusFlag(" << Utility::Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(value)) << Utility::Debug::nospace << ")";
+    return debug << "TestSuite::ComparisonStatusFlag(" << Utility::Debug::nospace << Utility::Debug::hex << static_cast<unsigned char>(value) << Utility::Debug::nospace << ")";
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const ComparisonStatusFlags value) {

@@ -209,7 +209,7 @@ namespace Corrade {
 -   New @ref Utility::Debug::invertedColor() output modifier for printing
     colored text with the foreground and background colors inverted
 -   New @ref Utility::Debug::hex output modifier for printing integers as
-    hexadecimal
+    hexadecimal. See also [mosra/magnum#544](https://github.com/mosra/magnum/issues/544).
 -   New @ref Corrade::Utility::Json class for tokenizing and parsing JSON files
     into an immutable memory-efficient representation. See also
     [mosra/corrade#174](https://github.com/mosra/corrade/issues/174).
@@ -553,6 +553,9 @@ namespace Corrade {
     libraries, as that breaks builds with version 3.1.52+. See
     [mosra/magnum#633](https://github.com/mosra/magnum/issues/633) for more
     information.
+-   Fixed most remaining warnings on MSVC, in particular those related to
+    "conversion from T to void * of greater size". See also
+    [mosra/magnum#544](https://github.com/mosra/magnum/issues/544).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

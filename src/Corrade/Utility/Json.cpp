@@ -2733,7 +2733,7 @@ Debug& operator<<(Debug& debug, const JsonToken::Type value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Debug::nospace << ")";
+    return debug << "(" << Debug::nospace << Debug::hex << std::uint64_t(value) << Debug::nospace << ")";
 }
 
 Debug& operator<<(Debug& debug, const JsonToken::ParsedType value) {
@@ -2754,7 +2754,7 @@ Debug& operator<<(Debug& debug, const JsonToken::ParsedType value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Debug::nospace << reinterpret_cast<void*>(std::uint64_t(value)) << Utility::Debug::nospace << ")";
+    return debug << "(" << Debug::nospace << Debug::hex << std::uint64_t(value) << Utility::Debug::nospace << ")";
 }
 
 }}

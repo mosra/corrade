@@ -673,7 +673,7 @@ Debug& operator<<(Debug& debug, const TweakableState value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "Utility::TweakableState(" << Debug::nospace << reinterpret_cast<void*>(std::uint8_t(value)) << Debug::nospace << ")";
+    return debug << "Utility::TweakableState(" << Debug::nospace << Debug::hex << std::uint8_t(value) << Debug::nospace << ")";
 }
 #endif
 

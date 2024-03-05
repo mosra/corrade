@@ -191,7 +191,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 
     if(value) {
         if(written) debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace;
-        debug << (packed ? "" : "Features(") << Utility::Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned int>(value)) << Utility::Debug::nospace << (packed ? "" : ")");
+        debug << (packed ? "" : "Features(") << Utility::Debug::nospace << Utility::Debug::hex << static_cast<unsigned int>(value) << Utility::Debug::nospace << (packed ? "" : ")");
     }
 
     return debug;

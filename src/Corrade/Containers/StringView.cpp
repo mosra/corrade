@@ -1187,7 +1187,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "(" << Utility::Debug::nospace << reinterpret_cast<void*>(std::size_t(value)) << Utility::Debug::nospace << ")";
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::size_t(value) << Utility::Debug::nospace << ")";
 }
 
 Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlags value) {
