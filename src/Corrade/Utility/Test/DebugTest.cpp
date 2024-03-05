@@ -385,7 +385,7 @@ void DebugTest::chars() {
 
 void DebugTest::pointer() {
     std::ostringstream out;
-    Debug{&out} << reinterpret_cast<void*>(0xdeadbabeu) << nullptr;
+    Debug{&out} << reinterpret_cast<void*>(std::size_t(0xdeadbabeu)) << nullptr;
     CORRADE_COMPARE(out.str(), "0xdeadbabe nullptr\n");
 }
 

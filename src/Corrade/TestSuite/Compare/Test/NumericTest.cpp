@@ -381,7 +381,7 @@ void NumericTest::notDivisible() {
 }
 
 void NumericTest::aligned() {
-    float* a = reinterpret_cast<float*>(0xdeadbe14);
+    float* a = reinterpret_cast<float*>(std::size_t(0xdeadbe14));
     int b = 4;
     int c = 8;
     CORRADE_COMPARE(Comparator<Aligned>{}(a, b), ComparisonStatusFlags{});
@@ -400,7 +400,7 @@ void NumericTest::aligned() {
 }
 
 void NumericTest::notAligned() {
-    float* a = reinterpret_cast<float*>(0xdeadbe14);
+    float* a = reinterpret_cast<float*>(std::size_t(0xdeadbe14));
     int b = 8;
     int c = 4;
     CORRADE_COMPARE(Comparator<NotAligned>{}(a, b), ComparisonStatusFlags{});

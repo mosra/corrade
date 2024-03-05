@@ -340,13 +340,13 @@ void ArrayViewTest::construct() {
 }
 
 void ArrayViewTest::constructVoid() {
-    void* a = reinterpret_cast<void*>(0xdeadbeef);
+    void* a = reinterpret_cast<void*>(std::size_t(0xdeadbeef));
     VoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 
-    int* c = reinterpret_cast<int*>(0xdeadbeef);
+    int* c = reinterpret_cast<int*>(std::size_t(0xdeadbeef));
     VoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
     CORRADE_VERIFY(!d.isEmpty());
@@ -358,13 +358,13 @@ void ArrayViewTest::constructVoid() {
 }
 
 void ArrayViewTest::constructConstVoid() {
-    void* a = reinterpret_cast<void*>(0xdeadbeef);
+    void* a = reinterpret_cast<void*>(std::size_t(0xdeadbeef));
     ConstVoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 
-    int* c = reinterpret_cast<int*>(0xdeadbeef);
+    int* c = reinterpret_cast<int*>(std::size_t(0xdeadbeef));
     ConstVoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
     CORRADE_VERIFY(!d.isEmpty());
