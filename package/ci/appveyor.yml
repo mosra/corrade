@@ -94,8 +94,11 @@ environment:
   - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: ON
-    # Not playing with fire and using /EHsc on 2022 as well
-    COMPILER_EXTRA: -DCMAKE_CXX_FLAGS="/permissive- /EHsc" -DCORRADE_MSVC_COMPATIBILITY=OFF
+    # Not playing with fire and using /EHsc on 2022 as well. Testing with the
+    # conformant preprocessor also, but just on one of the two permissive
+    # builds to avoid a false impression that the differences are depending on
+    # /permissiv
+    COMPILER_EXTRA: -DCMAKE_CXX_FLAGS="/permissive- /EHsc /Zc:preprocessor" -DCORRADE_MSVC_COMPATIBILITY=OFF
     PLATFORM: x64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     APPVEYOR_JOB_NAME: windows-conforming-msvc2022
