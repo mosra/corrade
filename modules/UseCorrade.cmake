@@ -193,8 +193,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         # "conversion from 'size_t' to '<smaller int type>', possible loss of
         # data", fixing this would add too much noise. Equivalent to
         # -Wshorten-64-to-32 on Clang.
-        "/wd4244"
-        "/wd4267"
+        # "/wd4244"
+        # "/wd4267"
 
         # "structure was padded due to alignment specifier". YES. THAT'S
         # EXACTLY AS INTENDED.
