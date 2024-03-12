@@ -169,6 +169,7 @@ Resource::Resource(const Containers::StringView group): _group{findGroup(group)}
                 << "Utility::Resource: group '" << Debug::nospace << group << Debug::nospace << "' overridden with '" << Debug::nospace << overridden->second << Debug::nospace << "\'";
             _overrideGroup = new OverrideData(overridden->second);
 
+            // TODO this gets printed also if the overriden file didn't even exist, FFS
             if(_overrideGroup->conf.value<Containers::StringView>("group") != group) Warning{}
                 << "Utility::Resource: overridden with different group, found '"
                 << Debug::nospace << _overrideGroup->conf.value<Containers::StringView>("group")
@@ -221,6 +222,27 @@ Containers::StringView Resource::getString(const Containers::StringView filename
 
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
+
+        /* Loose filenames first */
+        const std::vector<Containers::StringView> filenames = _overrideGroup->conf.values<Containers::StringView>("filename");
+        for(const Containers::StringView name: filenames) {
+            if(name != filename) continue;
+
+            /* Load the file */
+            Containers::Optional<Containers::Array<char>> data = Path::read(Path::join(Path::split(_overrideGroup->conf.filename()).first(), filename));
+            if(!data) {
+                Error{} << "Utility::Resource::get(): cannot open file" << name << "from overridden group";
+                break;
+            }
+
+            /* Save the file for later use and return. Use a filename from the
+               compiled-in resources which is guaranteed to be global to avoid
+               allocating a new string */
+            it = _overrideGroup->data.emplace(Implementation::resourceFilenameAt(_group->positions, _group->filenames, i), *std::move(data)).first;
+            return Containers::ArrayView<const char>{it->second};
+        }
+
+        /* Then [file] groups */
         const std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
         for(const ConfigurationGroup* const file: files) {
             const Containers::StringView name = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : file->value<Containers::StringView>("filename");
