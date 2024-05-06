@@ -196,9 +196,9 @@ is possible to initialize the array in a different way using so-called *tags*:
     can't use @cpp {} @ce for nested type initializers but have to specify the
     types explicitly. An alternative is directly passing an array, i.e. with
     the items wrapped in an additional @cpp {} @ce, with
-    @ref StaticArray(InPlaceInitT, const T(&)[size_]) or
-    @ref StaticArray(InPlaceInitT, T(&&)[size_]), or using the implicit
-    @ref StaticArray(const T(&)[size_]) and @ref StaticArray(T(&&)[size_])
+    @ref StaticArray(InPlaceInitT, const T(&)[size]) or
+    @ref StaticArray(InPlaceInitT, T(&&)[size]), or using the implicit
+    @ref StaticArray(const T(&)[size]) and @ref StaticArray(T(&&)[size])
     variants.
 -   @ref StaticArray(NoInitT) does not initialize anything. Useful for trivial
     types when you'll be overwriting the contents anyway, for non-trivial types
@@ -315,8 +315,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(NoInitT),
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
-         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
-         *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size]),
          *      @ref std::is_trivial
          */
         constexpr explicit StaticArray(Corrade::ValueInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
@@ -342,8 +342,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(ValueInitT),
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
-         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
-         *      @ref StaticArray(InPlaceInitT, T(&&)[size_]),
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size]),
          *      @ref std::is_trivial
          */
         explicit StaticArray(Corrade::NoInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::NoInit} {}
@@ -355,8 +355,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * and then initializes each element with placement new using forwarded
          * @p args.
          * @see @ref StaticArray(InPlaceInitT, Args&&... args),
-         *      @ref StaticArray(InPlaceInitT, const T(&)[size_]),
-         *      @ref StaticArray(InPlaceInitT, T(&&)[size_])
+         *      @ref StaticArray(InPlaceInitT, const T(&)[size]),
+         *      @ref StaticArray(InPlaceInitT, T(&&)[size])
          */
         /* Not constexpr as it delegates to a NoInit constructor */
         template<class ...Args> explicit StaticArray(Corrade::DirectInitT, Args&&... args);
@@ -366,9 +366,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *
          * The arguments are forwarded to the array constructor. Note that the
          * variadic template means you can't use @cpp {} @ce for nested type
-         * initializers --- see @ref StaticArray(InPlaceInitT, const T(&)[size_])
-         * or @ref StaticArray(InPlaceInitT, T(&&)[size_]) for an
+         * initializers --- see @ref StaticArray(InPlaceInitT, const T(&)[size])
+         * or @ref StaticArray(InPlaceInitT, T(&&)[size]) for an
          * alternative. Same as @ref StaticArray(Args&&... args).
+         *
+         * To prevent accidents, compared to regular C array initialization the
+         * constructor expects the number of arguments to match the size
+         * *exactly*. I.e., it's not possible to omit a suffix of the array to
+         * implicitly value-initialize it.
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         template<class ...Args> constexpr explicit StaticArray(Corrade::InPlaceInitT, Args&&... args): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<Args>(args)...} {
@@ -383,10 +388,24 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * require the elements to have explicitly specified type. The array
          * elements are copied to the array constructor, if you have a
          * non-copyable type or want to move the elements, use
-         * @ref StaticArray(InPlaceInitT, T(&&)[size_]) instead. Same as
-         * @ref StaticArray(const T(&)[size_]).
+         * @ref StaticArray(InPlaceInitT, T(&&)[size]) instead. Same as
+         * @ref StaticArray(const T(&)[size]).
+         *
+         * To prevent accidents, compared to regular C array initialization the
+         * constructor expects the number of arguments to match the size
+         * *exactly*. I.e., it's not possible to omit a suffix of the array to
+         * implicitly value-initialize it.
          */
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
+        template<std::size_t size> constexpr explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
+            static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
+        }
+        #else
+        /* GCC 4.8 isn't able to figure out the size on its own. Which means
+           there we use the type-provided size and lose the check for element
+           count, but at least it compiles. */
         constexpr explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        #endif
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -396,15 +415,24 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @m_since_latest
          *
          * Compared to @ref StaticArray(InPlaceInitT, Args&&... args) doesn't
-         * require the elements to have explicitly specified type. Same as
-         * @ref StaticArray(T(&&)[size_]).
+         * require the elements to have an explicitly specified type. Same as
+         * @ref StaticArray(T(&&)[size]).
          * @partialsupport Not available on
          *      @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" and
          *      @ref CORRADE_MSVC2017_COMPATIBILITY "MSVC 2017" as these
          *      compilers don't support moving arrays.
-         * @see @ref StaticArray(InPlaceInitT, const T(&)[size_])
+         * @see @ref StaticArray(InPlaceInitT, const T(&)[size])
          */
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
+        template<std::size_t size> constexpr explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
+            static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
+        }
+        #else
+        /* GCC 4.8 isn't able to figure out the size on its own. Which means
+           there we use the type-provided size and lose the check for element
+           count, but at least it compiles. */
         constexpr explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        #endif
         #endif
 
         /**
@@ -424,18 +452,29 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> constexpr /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> constexpr /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {}
+        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> constexpr /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {
+            static_assert(sizeof...(next) + 1 == size_, "Containers::StaticArray: wrong number of initializers");
+        }
         #endif
 
         /**
          * @brief In-place construct an array by copying the elements from a fixed-size array
          * @m_since_latest
          *
-         * Alias to @ref StaticArray(InPlaceInitT, const T(&)[size_]).
-         * @see @ref StaticArray(T(&&)[size_]),
+         * Alias to @ref StaticArray(InPlaceInitT, const T(&)[size]).
+         * @see @ref StaticArray(T(&&)[size]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
+        template<std::size_t size> constexpr explicit StaticArray(const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
+            static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
+        }
+        #else
+        /* GCC 4.8 isn't able to figure out the size on its own. Which means
+           there we use the type-provided size and lose the check for element
+           count, but at least it compiles. */
         constexpr explicit StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        #endif
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
            be disabled */
@@ -444,15 +483,24 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @brief In-place construct an array by moving the elements from a fixed-size array
          * @m_since_latest
          *
-         * Alias to @ref StaticArray(InPlaceInitT, T(&&)[size_]).
+         * Alias to @ref StaticArray(InPlaceInitT, T(&&)[size]).
          * @partialsupport Not available on
          *      @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" and
          *      @ref CORRADE_MSVC2017_COMPATIBILITY "MSVC 2017" as these
          *      compilers don't support moving arrays.
-         * @see @ref StaticArray(const T(&)[size_]),
+         * @see @ref StaticArray(const T(&)[size]),
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
+        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
+        template<std::size_t size> constexpr explicit StaticArray(T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
+            static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
+        }
+        #else
+        /* GCC 4.8 isn't able to figure out the size on its own. Which means
+           there we use the type-provided size and lose the check for element
+           count, but at least it compiles. */
         constexpr explicit StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        #endif
         #endif
 
         /* The following view conversion is *not* restricted to this& because

@@ -287,8 +287,8 @@ namespace Corrade {
     underlying integer representation
 -   Added an ability to construct a @ref Containers::StridedArrayView1D from a
     pointer and size, the same way as with contiguous array views
--   Added @ref Containers::StaticArray::StaticArray(InPlaceInitT, const T(&)[size_])
-    and @ref Containers::StaticArray::StaticArray(InPlaceInitT, T(&&)[size_])
+-   Added @ref Containers::StaticArray::StaticArray(InPlaceInitT, const T(&)[size])
+    and @ref Containers::StaticArray::StaticArray(InPlaceInitT, T(&&)[size])
     for more convenience with in-place creation of arrays of complex types.
 -   Added a @ref Containers::StridedArrayView constructor from a strided view
     with less dimensions

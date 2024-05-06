@@ -610,6 +610,22 @@ template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
     CORRADE_COMPARE(cb[3], 40);
     CORRADE_COMPARE(ca[4], 50);
     CORRADE_COMPARE(cb[4], 50);
+
+    /* It should always be constructible only with exactly the matching number
+       of elements. As that's checked with a static_assert(), it's impossible
+       to verify with std::is_constructible unfortunately and the only way to
+       test that is manually, thus uncomment the code below to test the error
+       behavior.
+
+       Additionally, to avoid noise in the compiler output, the first two
+       should only produce "excess elements in array initializer" and a static
+       assert, the second two just a static assert, no other compiler error. */
+    #if 0
+    StaticArray<3, T> a3{1, 2, 3, 4};
+    StaticArray<3, T> a4{Corrade::InPlaceInit, 1, 2, 3, 4};
+    StaticArray<3, T> a5{1, 2};
+    StaticArray<3, T> a6{Corrade::InPlaceInit, 1, 2};
+    #endif
 }
 
 void StaticArrayTest::constructInPlaceInitOneArgument() {
@@ -861,6 +877,26 @@ template<class T> void StaticArrayTest::constructArrayTrivial() {
     CORRADE_COMPARE(ca2[2].a, 5);
     CORRADE_COMPARE(ca1[2].b, 6);
     CORRADE_COMPARE(ca2[2].b, 6);
+
+    /* It should always be constructible only with exactly the matching number
+       of elements. As that's checked with a static_assert(), it's impossible
+       to verify with std::is_constructible unfortunately and the only way to
+       test that is manually, thus uncomment the code below to test the error
+       behavior.
+
+       Additionally, to avoid noise in the compiler output, the first two
+       should only produce "excess elements in array initializer" and a static
+       assert, the second two just a static assert, no other compiler error.
+
+       Unlike the rvalue case below, the second two cases don't compile on GCC
+       4.8 --- it picks the variadic constructor instead, failing in a
+       different way. */
+    #if 0
+    StaticArray<2, PairOfInts<T>> a3{data};
+    StaticArray<2, PairOfInts<T>> a4{Corrade::InPlaceInit, data};
+    StaticArray<4, PairOfInts<T>> a5{data};
+    StaticArray<4, PairOfInts<T>> a6{Corrade::InPlaceInit, data};
+    #endif
 }
 
 void StaticArrayTest::constructArrayRvalue() {
@@ -890,6 +926,41 @@ void StaticArrayTest::constructArrayRvalue() {
     CORRADE_COMPARE(a2[2].a, 5);
     CORRADE_COMPARE(a1[2].b, 6);
     CORRADE_COMPARE(a2[2].b, 6);
+
+    /* It should always be constructible only with exactly the matching number
+       of elements. As that's checked with a static_assert(), it's impossible
+       to verify with std::is_constructible unfortunately and the only way to
+       test that is manually, thus uncomment the code below to test the error
+       behavior.
+
+       Additionally, to avoid noise in the compiler output, the first two
+       should only produce "excess elements in array initializer" and a static
+       assert, the second two just a static assert, no other compiler error. */
+    #if 0
+    StaticArray<3, PairOfInts> a3{{
+        {1, 2},
+        {3, 4},
+        {5, 6},
+        {7, 8}
+    }};
+    StaticArray<3, PairOfInts> a4{Corrade::InPlaceInit, {
+        {1, 2},
+        {3, 4},
+        {5, 6},
+        {7, 8}
+    }};
+    #endif
+    #if 0 || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5)
+    CORRADE_WARN("Creating a StaticArray from a smaller array isn't an error on GCC 4.8.");
+    StaticArray<3, PairOfInts> a5{{
+        {1, 2},
+        {3, 4}
+    }};
+    StaticArray<3, PairOfInts> a6{Corrade::InPlaceInit, {
+        {1, 2},
+        {3, 4}
+    }};
+    #endif
 }
 
 void StaticArrayTest::constructArrayMove() {
