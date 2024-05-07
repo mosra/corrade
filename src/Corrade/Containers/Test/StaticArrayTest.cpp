@@ -1606,6 +1606,9 @@ void StaticArrayTest::slicePointer() {
     CORRADE_COMPARE(cbc2[1], 3);
     CORRADE_COMPARE(cbc2[2], 4);
 
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 5
+    CORRADE_WARN("prefix() with a calculated pointer isn't constexpr on GCC 5");
+    #else
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, and who cares */
     #endif
@@ -1623,6 +1626,7 @@ void StaticArrayTest::slicePointer() {
     CORRADE_COMPARE(cdc[0], 3);
     CORRADE_COMPARE(cdc[1], 4);
     CORRADE_COMPARE(cdc[2], 5);
+    #endif
 }
 
 void StaticArrayTest::sliceToStatic() {
