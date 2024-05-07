@@ -1161,9 +1161,9 @@ void StringViewTest::slicePointer() {
     CORRADE_COMPARE(a.prefix(data + 3), "hel"_s);
     CORRADE_COMPARE(a.suffix(data + 2), "llo"_s);
 
-    /* Not constexpr on MSVC 2015; not constexpr on GCC 4.8, 4.9 or 5 (probably
-       because of arithmetic on the C string literal) */
-    #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER <= 1900) && !(defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 6)
+    #if (defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER <= 1900) || (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7)
+    CORRADE_WARN("Not constexpr on MSVC 2015, GCC 4.8, 4.9, 5 or 6 probably because of arithmetic on the C string literal");
+    #else
     constexpr const char* cdata = "hello";
     constexpr StringView ca{cdata, 5};
     constexpr StringView cb1 = ca.slice(cdata + 1, cdata + 4);

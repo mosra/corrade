@@ -3487,18 +3487,17 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
     Containers::StridedArrayView1D<Data> view = data;
     Containers::StridedArrayView1D<const Data> cview = data;
 
+    #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7) || defined(CORRADE_MSVC2015_COMPATIBILITY)
+    CORRADE_WARN("GCC 4.8, 4.9, 5, 6 and MSVC 2015 need an explicit template parameter to disambiguate for rvalue overloads");
+    #endif
     /* It should prefer the & overload and ignore the && */
     auto second = view.slice
-        /* GCC 4.8, 4.9, 5 and MSVC 2015 need an explicit template parameter to
-          disambiguate for rvalue overloads */
-        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 6) || defined(CORRADE_MSVC2015_COMPATIBILITY)
+        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7) || defined(CORRADE_MSVC2015_COMPATIBILITY)
         <short>
         #endif
         (&Data::second);
     auto csecond = cview.slice
-        /* GCC 4.8, 4.9, 5 and MSVC 2015 need an explicit template parameter to
-           disambiguate for rvalue overloads */
-        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 6) || defined(CORRADE_MSVC2015_COMPATIBILITY)
+        #if (defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7) || defined(CORRADE_MSVC2015_COMPATIBILITY)
         <short>
         #endif
         (&Data::second);
