@@ -114,6 +114,8 @@ template<class> class Reference;
 template<class> class MoveReference;
 template<class> class AnyReference;
 
+class FunctionData;
+template<class> class Function;
 class ScopeGuard;
 
 enum class StringViewFlag: std::size_t;

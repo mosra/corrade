@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cmath>
 #include <cstdio>
 #include <string>
 #ifdef __linux__
@@ -37,6 +38,7 @@
 #include "Corrade/Containers/BitArray.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/Function.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Iterable.h"
 #include "Corrade/Containers/LinkedList.h"
@@ -735,6 +737,89 @@ std::uint64_t data = DOXYGEN_ELLIPSIS({});
 Containers::MutableBitArrayView b{&data, 7, 27};
 /* [BitArrayView-usage] */
 static_cast<void>(a);
+}
+
+{
+/* [Function-usage] */
+Containers::Function<int(int)> a = std::abs;
+
+Containers::Function<int(int)> b = [](int value) { return value*2; };
+
+struct Accumulator {
+    int sum = 1337;
+    int add(int value) { return sum += value; }
+} accumulator;
+
+Containers::Function<int(int)> c{accumulator, &Accumulator::add};
+/* [Function-usage] */
+
+/* [Function-usage-call] */
+a(-16);                                                             // 16
+b(376);                                                             // 752
+c(110);                                                             // 1447
+/* [Function-usage-call] */
+}
+
+{
+/* [Function-usage-matching-signature] */
+double degreesToRadians(double);
+
+//Containers::Function<float(float)> a = degreesToRadians;          // error
+
+Containers::Function<float(float)> b = [](float radians) -> float {
+    return float(degreesToRadians(double(radians)));
+};
+/* [Function-usage-matching-signature] */
+}
+
+/* MSVC 2015 cannot capture arrays by value, skip this snippet there */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY
+{
+/* [Function-usage-stateful] */
+/* Small enough, stored inline */
+int seed = DOXYGEN_ELLIPSIS(0);
+Containers::Function<int(int)> hash = [seed](int value) {
+    return seed ^ value;
+};
+
+/* Too large, allocated */
+int state[8]{DOXYGEN_ELLIPSIS()};
+Containers::Function<int()> random = [state]() mutable {
+    DOXYGEN_ELLIPSIS(return state[0];)
+};
+
+/* Small enough but non-trivial, allocated */
+Containers::String salt = DOXYGEN_ELLIPSIS({});
+Containers::Function<int(int)> checksum = [salt](int value) {
+    DOXYGEN_ELLIPSIS(return int(salt.size()) + value;)
+};
+/* [Function-usage-stateful] */
+}
+#endif
+
+/* All lambdas are non-trivially-copyable on MSVC 2015 and 2017, skip there */
+#ifndef CORRADE_MSVC2017_COMPATIBILITY
+{
+int seed = DOXYGEN_ELLIPSIS(0);
+CORRADE_UNUSED int state[8]{DOXYGEN_ELLIPSIS()};
+/* [Function-usage-stateful-no-allocate] */
+Containers::Function<int(int)> hash{Containers::NoAllocateInit,
+    [seed](int value) { DOXYGEN_ELLIPSIS(return seed ^ value;) }};
+
+// Containers::Function<int()> random{Containers::NoAllocateInit,   // error
+//    [state]() mutable { DOXYGEN_ELLIPSIS(return state[0];) }};
+/* [Function-usage-stateful-no-allocate] */
+}
+#endif
+
+{
+/* [Function-usage-type-erased] */
+Containers::FunctionData a = Containers::Function<int(int)>{std::abs};
+Containers::FunctionData b = Containers::Function<float(float)>{std::round};
+
+static_cast<Containers::Function<int(int)>&>(a)(-15);               // 15
+static_cast<Containers::Function<float(float)>&>(b)(3.56f);         // 4.0f
+/* [Function-usage-type-erased] */
 }
 
 {

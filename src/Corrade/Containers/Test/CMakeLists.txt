@@ -53,6 +53,8 @@ corrade_add_test(ContainersBitArrayTest BitArrayTest.cpp LIBRARIES CorradeTestSu
 corrade_add_test(ContainersBitArrayViewTest BitArrayViewTest.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersBitArrayViewBenchmark BitArrayViewBenchmark.cpp LIBRARIES CorradeTestSuiteTestLib)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
+corrade_add_test(ContainersFunctionTest FunctionTest.cpp)
+corrade_add_test(ContainersFunctionBenchmark FunctionBenchmark.cpp)
 
 corrade_add_test(ContainersGrowableArrayTest GrowableArrayTest.cpp)
 if(CORRADE_TARGET_EMSCRIPTEN)

@@ -43,6 +43,7 @@ set(CorradeContainers_HEADERS
     Containers.h
     EnumSet.h
     EnumSet.hpp
+    Function.h
     GrowableArray.h
     initializeHelpers.h
     iterableHelpers.h

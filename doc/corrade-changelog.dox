@@ -103,6 +103,8 @@ namespace Corrade {
     classes for owning and non-owning containers of bits, and a new
     @ref Containers::StridedArrayView::sliceBit() helper for easily creating
     bit views on complex data
+-   New @ref Containers::Function<R(Args...)> "Containers::Function" class for
+    generic function wrappers
 -   New @ref Containers::Iterable helper to provide an indirection for
     iterating over both containers of values and containers of references in
     a single code path, and a @ref Containers::StringIterable doing the same
