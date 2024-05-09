@@ -102,6 +102,8 @@ template<class T> struct AllocatorTraits {
    in constructHelpers.h already, this one needs also
    __has_trivial_destructor() otherwise it says true for types with deleted
    copy and non-trivial destructors. */
+/** @todo may not be needed anymore if the SFINAE gets put to templates instead
+    of signatures */
 template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T) && __has_trivial_destructor(T)> {};
 #endif
 
