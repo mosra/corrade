@@ -135,13 +135,12 @@ class FunctionData {
         /**
          * @brief Whether the instance contains heap-allocated state
          *
-         * Returns @cpp true @ce if the instance was created using
-         * @ref Function<R(Args...)>::Function(F&&) from a capturing lambda or
-         * a functor with a large or non-trivially copyable state,
+         * Returns @cpp true @ce if the instance was created from a capturing
+         * lambda or a functor with a large or non-trivially copyable state,
          * @cpp false @ce otherwise. In other words, always returns
          * @cpp false @ce for default-constructed instances, free and member
-         * function pointers and instances constructed with
-         * @ref Function<R(Args...)>::Function(NoAllocateInitT, F&&).
+         * function pointers and instances constructed with the
+         * @ref NoAllocateInitT constructor.
          */
         bool isAllocated() const { return !_call && _storage.functor.call; }
 
