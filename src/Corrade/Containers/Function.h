@@ -465,7 +465,7 @@ template<class R, class ...Args> class Function<R(Args...)>: public FunctionData
         ), int>::type = 0> explicit Function(std::nullptr_t, F&& f);
 };
 
-FunctionData::FunctionData(FunctionData&& other) noexcept:
+inline FunctionData::FunctionData(FunctionData&& other) noexcept:
     /* GCC 4.8 attempts to initialize the first member (the char array) instead
        of performing a copy if {} is used */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
@@ -480,13 +480,13 @@ FunctionData::FunctionData(FunctionData&& other) noexcept:
         other._storage.functor.call = nullptr;
 }
 
-FunctionData:: ~FunctionData() {
+inline FunctionData:: ~FunctionData() {
     /* If it's heap-allocated data, delete */
     if(!_call && _storage.functor.call)
         _storage.functor.free(_storage);
 }
 
-FunctionData& FunctionData::operator=(FunctionData&& other) noexcept {
+inline FunctionData& FunctionData::operator=(FunctionData&& other) noexcept {
     using Utility::swap;
     swap(other._storage, _storage);
     swap(other._call, _call);
