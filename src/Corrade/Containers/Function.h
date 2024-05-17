@@ -440,10 +440,7 @@ template<class R, class ...Args> class Function<R(Args...)>: public FunctionData
         , int>::type = 0> explicit Function(std::nullptr_t, F&& f) noexcept:
             /* Note that, as this is a trivially copyable functor, it doesn't
                need Utility::forward<F>(f) */
-            Function{NoAllocateInit, f} {
-                static_assert(Implementation::IsFunctor<typename std::decay<F>::type, R(Args...)>::value,
-                    "functor not callable with expected signature");
-            }
+            Function{NoAllocateInit, f} {}
 
         /* Non-trivially-destructible/-copyable or too large functor. MSVC 2015
            and 2017 has all lambdas not trivially copyable, so it has to
@@ -523,8 +520,6 @@ template<class R, class ...Args> Function<R(Args...)>::Function(R(*f)(Args...)) 
 /* Simple, small enough and trivial functor which is not convertible to a
    function pointer */
 template<class R, class ...Args> template<class F, typename std::enable_if<Implementation::IsFunctor<typename std::decay<F>::type, R(Args...)>::value, int>::type> Function<R(Args...)>::Function(NoAllocateInitT, F&& f) noexcept {
-    static_assert(Implementation::IsFunctor<typename std::decay<F>::type, R(Args...)>::value,
-        "functor not callable with expected signature");
     static_assert(sizeof(typename std::decay<F>::type) <= sizeof(FunctionData::Storage) &&
         #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         std::is_trivially_copyable<typename std::decay<F>::type>::value
@@ -576,8 +571,6 @@ template<class R, class ...Args> template<class F, typename std::enable_if<
     !__has_trivial_copy(typename std::decay<F>::type) || !__has_trivial_destructor(typename std::decay<F>::type)
     #endif
 ), int>::type> Function<R(Args...)>::Function(std::nullptr_t, F&& f) {
-    static_assert(Implementation::IsFunctor<typename std::decay<F>::type, R(Args...)>::value,
-        "functor not callable with expected signature");
     /* GCC 4.8 attempts to initialize the first member instead of performing a
        copy if {} is used. See the constructFunctorPlainStruct() for a repro
        case. */
