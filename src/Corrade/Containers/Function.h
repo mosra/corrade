@@ -321,6 +321,16 @@ containers for example. Cast the instance back to a concrete
 @ref Function<R(Args...)> "Function" in order to use it.
 
 @snippet Containers.cpp Function-usage-type-erased
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradeFunction.h](https://github.com/mosra/magnum-singles/tree/master/CorradeFunction.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
 */
 template<class R, class ...Args> class Function<R(Args...)>: public FunctionData {
     public:

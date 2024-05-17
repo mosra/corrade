@@ -51,6 +51,7 @@ Class, library or header    | Single-header version
 @ref Containers::Array, \n @ref Containers::StaticArray | [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h), depends on `CorradeArrayView.h`
 Growable APIs for @ref Containers::Array | [CorradeGrowableArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeGrowableArray.h), depends on `CorradeArray.h`
 @ref Containers::EnumSet    | [CorradeEnumSet.h](https://github.com/mosra/magnum-singles/tree/master/CorradeEnumSet.h)
+@ref Containers::Function<R(Args...)> "Containers::Function" | [CorradeFunction.h](https://github.com/mosra/magnum-singles/tree/master/CorradeFunction.h)
 @ref Containers::Optional   | [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
 @ref Containers::Pair       | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePair.h)
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)

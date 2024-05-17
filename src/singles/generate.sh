@@ -4,6 +4,7 @@ set -e
 ../acme/acme.py CorradeStridedArrayView.h --output ../../../magnum-singles
 ../acme/acme.py CorradeArray.h --output ../../../magnum-singles
 ../acme/acme.py CorradeEnumSet.h --output ../../../magnum-singles
+../acme/acme.py CorradeFunction.h --output ../../../magnum-singles
 ../acme/acme.py CorradeGrowableArray.h --output ../../../magnum-singles
 ../acme/acme.py CorradeOptional.h --output ../../../magnum-singles
 ../acme/acme.py CorradePair.h --output ../../../magnum-singles
