@@ -50,13 +50,13 @@ namespace Implementation {
 
 Equivalent to @ref std::reference_wrapper from C++11, provides a copyable
 non-owning wrapper over l-value references to allow storing them in containers.
-Unlike @ref std::reference_wrapper, this class does not provide
-@cpp operator() @ce and there are no equivalents to @ref std::ref() /
-@ref std::cref() as they are not deemed necessary --- in most contexts where
-@ref Reference is used, passing a plain reference works just as well. This
-class is trivially copyable (@ref std::reference_wrapper is guaranteed to be so
-only since C++17) and also works on incomplete types, which
-@ref std::reference_wrapper knows since C++20.
+The @ref reference() convenience function provides an equivalent to
+@ref std::ref(), see its documentation for a potential use case. An equivalent
+to @ref std::cref() is not deemed necessary --- in most contexts where
+@ref Reference is used, passing a plain reference works just as well, with no
+need to explicitly wrap it first. This class is trivially copyable
+(@ref std::reference_wrapper is guaranteed to be so only since C++17) and also
+works on incomplete types, which @ref std::reference_wrapper knows since C++20.
 
 This class is exclusively for l-value references. If you want to accept r-value
 references instead, use a @ref MoveReference; if you want to accept both, use
@@ -86,7 +86,7 @@ Example:
     before including the file. Including it multiple times with different
     macros defined works as well.
 
-@see @ref Pointer, @ref Optional
+@see @ref reference(T&), @ref Pointer, @ref Optional
 */
 template<class T> class Reference {
     public:
@@ -158,6 +158,25 @@ template<class T> class Reference {
 
         T* _reference;
 };
+
+/** @relatesalso Reference
+@brief Make a reference wrapper
+@m_since_latest
+
+Convenience alternative to @ref Reference::Reference(T&). Thw following two
+lines are equivalent:
+
+@snippet Containers.cpp reference
+
+Useful for example when iterating a list of variables that need to be modified
+in-place, and where the code would otherwise have to be extra verbose or would
+fall back to raw pointers and risk them getting @cpp nullptr @ce:
+
+@snippet Containers.cpp reference-iterating
+*/
+template<class T> constexpr Reference<T> reference(T& reference) {
+    return Reference<T>{reference};
+}
 
 #ifndef CORRADE_SINGLES_NO_DEBUG
 /** @debugoperator{Reference} */

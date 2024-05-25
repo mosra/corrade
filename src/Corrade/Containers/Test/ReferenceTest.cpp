@@ -65,6 +65,7 @@ struct ReferenceTest: TestSuite::Tester {
     void constructConst();
     void constructDefault();
     void constructCopy();
+    void constructMake();
     void constructFromRvalue();
     void constructIncomplete();
     void constructDerived();
@@ -84,6 +85,7 @@ ReferenceTest::ReferenceTest() {
               &ReferenceTest::constructConst,
               &ReferenceTest::constructDefault,
               &ReferenceTest::constructCopy,
+              &ReferenceTest::constructMake,
               &ReferenceTest::constructFromRvalue,
               &ReferenceTest::constructIncomplete,
               &ReferenceTest::constructDerived,
@@ -158,6 +160,19 @@ void ReferenceTest::constructCopy() {
     #endif
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Reference<int>>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Reference<int>>::value);
+}
+
+void ReferenceTest::constructMake() {
+    int a = 3;
+    auto b = reference(a);
+    CORRADE_VERIFY(b);
+    CORRADE_COMPARE(b, 3);
+    CORRADE_VERIFY(std::is_same<decltype(b), Reference<int>>::value);
+
+    constexpr auto cb = reference(Int);
+    CORRADE_VERIFY(cb);
+    CORRADE_COMPARE(cb, 3);
+    CORRADE_VERIFY(std::is_same<decltype(cb), const Reference<const int>>::value);
 }
 
 void ReferenceTest::constructFromRvalue() {

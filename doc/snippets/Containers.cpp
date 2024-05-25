@@ -944,6 +944,27 @@ auto b = Containers::pointer<std::string>('a', 'b');
 /* [pointer-inplace] */
 }
 
+{
+/* [reference] */
+float target = DOXYGEN_ELLIPSIS({});
+
+auto a = Containers::Reference<float>{target};
+auto b = Containers::reference(target);
+/* [reference] */
+static_cast<void>(a);
+static_cast<void>(b);
+}
+
+{
+int a{}, b{}, c{};
+/* [reference-iterating] */
+for(int& i: {Containers::reference(a),
+             Containers::reference(b),
+             Containers::reference(c)})
+    i = i*i;
+/* [reference-iterating] */
+}
+
 #ifdef __linux__
 /* [ScopeGuard-usage] */
 {
