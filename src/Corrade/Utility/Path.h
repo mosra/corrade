@@ -114,9 +114,9 @@ calling @ref join() on the result will give back the original argument.
 Equivalent to Python @m_class{m-doc-external} [os.path.split()](https://docs.python.org/3/library/os.path.html#os.path.split).
 For example:
 
--   @cpp "path/to/file" @ce results in @cpp {"path/to/", "file"} @ce
+-   @cpp "path/to/file" @ce results in @cpp {"path/to", "file"} @ce
 -   @cpp "file.txt" @ce results in @cpp {"", "file.txt"} @ce
--   @cpp "/home/user/ @ce results in @cpp {"/home/user/", ""} @ce
+-   @cpp "/home/user/ @ce results in @cpp {"/home/user", ""} @ce
 -   @cpp "/root" @ce results in @cpp {"/", "root"} @ce
 -   @cpp "//" @ce results in @cpp {"//", ""} @ce
 
