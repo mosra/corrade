@@ -579,7 +579,7 @@ void StringBenchmark::lowercaseSmall() {
     auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
     String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseSmallData);
     #endif
     setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
 
@@ -618,7 +618,7 @@ void StringBenchmark::uppercaseSmall() {
     auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
     String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    auto&& data = cpuVariantCompiled(LowercaseUppercaseSmallData);
     #endif
     setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
 
