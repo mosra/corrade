@@ -190,6 +190,9 @@ const struct {
     Cpu::Features features;
 } CountCharacterData[]{
     {Cpu::Scalar},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+    {Cpu::Sse2|Cpu::Popcnt},
+    #endif
 };
 
 const struct {
@@ -197,6 +200,15 @@ const struct {
     std::size_t size;
 } CountCharacterSmallData[]{
     {Cpu::Scalar, 15},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+    /* This should fall back to the scalar case */
+    {Cpu::Sse2|Cpu::Popcnt, 15},
+    /* This should do one unaligned vector operation, skipping the rest */
+    {Cpu::Sse2|Cpu::Popcnt, 16},
+    /* This should do two unaligned vector operations, skipping the aligned
+       run */
+    {Cpu::Sse2|Cpu::Popcnt, 17},
+    #endif
 };
 
 StringViewBenchmark::StringViewBenchmark() {

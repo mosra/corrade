@@ -224,6 +224,10 @@ struct StringViewTest: TestSuite::Tester {
     void findLastAnyOr();
 
     void countCharacter();
+    void countCharacterAligned();
+    void countCharacterUnaligned();
+    void countCharacterUnalignedLessThanTwoVectors();
+    void countCharacterUnalignedLessThanOneVector();
 
     void debugFlag();
     void debugFlags();
@@ -270,6 +274,9 @@ const struct {
     std::size_t vectorSize;
 } CountCharacterData[]{
     {Cpu::Scalar, 16},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+    {Cpu::Sse2|Cpu::Popcnt, 16},
+    #endif
 };
 
 StringViewTest::StringViewTest() {
@@ -396,7 +403,11 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findLastAnyFlags,
               &StringViewTest::findLastAnyOr});
 
-    addInstancedTests({&StringViewTest::countCharacter},
+    addInstancedTests({&StringViewTest::countCharacter,
+                       &StringViewTest::countCharacterAligned,
+                       &StringViewTest::countCharacterUnaligned,
+                       &StringViewTest::countCharacterUnalignedLessThanTwoVectors,
+                       &StringViewTest::countCharacterUnalignedLessThanOneVector},
         Utility::Test::cpuVariantCount(CountCharacterData),
         &StringViewTest::captureImplementations,
         &StringViewTest::restoreImplementations);
@@ -3153,6 +3164,227 @@ void StringViewTest::countCharacter() {
     /* Multiple occurences */
     CORRADE_COMPARE(a.count('l'), 3);
     CORRADE_COMPARE(a.count('o'), 2);
+}
+
+void StringViewTest::countCharacterAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, with 12 vectors
+       in total, corresponding to the code paths:
+        - the first vector before the aligned run, handled by the unaligned
+          preamble
+        - then one-vector aligned run
+        - nothing left to be handled by the unaligned postamble
+
+        +----+    +----+
+        |    |    |    |
+        +----+    +----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 1));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = arrayView(a);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* Fill each character different and verify it's found just once each
+       time */
+    for(std::size_t i = 0; i != string.size(); ++i)
+        string[i] = i;
+    for(std::size_t i = 0; i != string.size(); ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(string.count(i), 1);
+    }
+
+    /* Then fill everything with the same character and verify it's found in
+       all positions */
+    for(char& i: string)
+        i = 'E';
+    CORRADE_COMPARE(string.count('E'), string.size());
+}
+
+void StringViewTest::countCharacterUnaligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing:
+        - the first unaligned vector having gradually one byte up to all but
+          one byte overlapping with the aligned run, to verify those bytes
+          don't get counted twice
+        - then there being two vectors in the aligned run
+        - the last unaligned vector the again having gradually one byte up to
+          all but one byte overlapping with the aligned run
+
+         +----+       +----+
+         |    |... ...|    |
+         +----+       +----+
+            +----+ +----+
+         ...|    | |    |...
+            +----+ +----+
+             +----+----+
+        | .. |    |    | .. |
+             +----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 2 + 1));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = a.slice(1, a.size() - 1);
+    CORRADE_COMPARE(string.size(), data.vectorSize*4 - 2);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Fill the first aligned vector with consecutive characters */
+    for(std::size_t i = 0; i != data.vectorSize - 1; ++i) {
+        /* Accessing second vector in the original aligned array, + 1 to avoid
+           colliding with zero-filled default values */
+        a[data.vectorSize + i] = i + 1;
+    }
+    /* The first vector should stay not filled */
+    for(std::size_t i = 0; i != data.vectorSize; ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(a[i], 0);
+    }
+    /* With the string gradually getting cut from the beginning those should
+       get found in both the initial unaligned vector and the first aligned
+       vector, but counted just once */
+    for(std::size_t i = 0; i != data.vectorSize - 1; ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(string.exceptPrefix(i).count(i + 1), 1);
+    }
+
+    /* Then do the same for the last aligned vector, but in reverse */
+    for(std::size_t i = 0; i != data.vectorSize - 1; ++i) {
+        /* Accessing third vector in the original aligned array, + 1 to avoid
+           colliding with zero-filled default values */
+        a[data.vectorSize*3 - i - 1] = i + 1;
+    }
+    /* The last vector should stay not filled */
+    for(std::size_t i = 0; i != data.vectorSize; ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(a[data.vectorSize*3 + i], 0);
+    }
+    /* The count of found characters should be 2 now, because the same are at
+       the front as well */
+    for(std::size_t i = 0; i != data.vectorSize - 1; ++i) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(string.exceptSuffix(i).count(i + 1), 2);
+    }
+
+    /* Fill everything with the same character and verify it's found in all
+       positions in all possible unaligned variants */
+    for(char& i: string)
+        i = 'H';
+    for(std::size_t i = 0; i != data.vectorSize - 1; ++i) {
+        CORRADE_COMPARE(string.exceptPrefix(i).count('H'), string.size() - i);
+        CORRADE_COMPARE(string.exceptSuffix(i).count('H'), string.size() - i);
+        CORRADE_COMPARE(string.exceptPrefix(i)
+                              .exceptSuffix(i).count('H'), string.size() - i*2);
+    }
+}
+
+void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
+       so there's just one byte for both the initial and final unaligned block:
+
+            +----+
+            |    |
+            +----+
+             +----+
+        | .. |    | .. |
+             +----+
+              +----+
+              |    |
+              +----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    MutableStringView string = a.slice(data.vectorSize - 1, data.vectorSize*2 + 1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Fill the string with consecutive characters, each should be found
+       exactly once even though it's matched in up to all three vectors. The
+       countCharacterUnaligned() case above tested other misalignments of both
+       the initial and final vector sufficiently so there's no slicing here. */
+    for(std::size_t i = 0; i != string.size(); ++i)
+        string[i] = i;
+    for(std::size_t i = 0; i != string.size(); ++i)
+        CORRADE_COMPARE(string.count(i), 1);
+
+    /* Then fill everything with the same character and verify it's found in
+       all positions */
+    for(char& i: string)
+        i = '#';
+    CORRADE_COMPARE(string.count('#'), string.size());
+}
+
+void StringViewTest::countCharacterUnalignedLessThanOneVector() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
+       pointer even though it shouldn't matter here. */
+    Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
+    MutableStringView string = a.exceptPrefix(1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Fill the string with consecutive characters, each should be found
+       exactly once by the switch case. */
+    for(std::size_t i = 0; i != string.size(); ++i)
+        string[i] = i;
+    for(std::size_t i = 0; i != string.size(); ++i)
+        CORRADE_COMPARE(string.count(i), 1);
+
+    /* Then fill everything with the same character and verify it's found in
+       all positions */
+    for(char& i: string)
+        i = 'X';
+    CORRADE_COMPARE(string.count('X'), string.size());
 }
 
 void StringViewTest::debugFlag() {

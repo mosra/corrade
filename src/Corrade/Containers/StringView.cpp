@@ -46,8 +46,14 @@
 #include "Corrade/Containers/StringIterable.h"
 #endif
 
+/* clang-cl has CORRADE_ENABLE_BMI1 enabled only when explicitly specified
+   on command line, so the includes have to be complicated like this to still
+   include the headers for count() implementation which needs just POPCNT and
+   not BMI1 */
 #if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
+#elif defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+#include "Corrade/Utility/IntrinsicsSse4.h"
 #endif
 #ifdef CORRADE_ENABLE_NEON
 #include <arm_neon.h>
@@ -776,7 +782,88 @@ const char* stringFindLastNotAny(const char* const data, const std::size_t size,
 
 namespace {
 
-CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(Cpu::ScalarT) {
+/* SIMD implementation of character counting, which is basically just a simpler
+   variant of stringFindCharacterImplementation() -- we don't need the extra
+   branching logic with tzcnt for getting the first found position, instead
+   just counting the matches. On the other hand have to ensure that the
+   overlaps aren't counted twice. */
+
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,POPCNT) typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2|Cpu::Popcnt)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,POPCNT) {
+    std::size_t count = 0;
+
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo that this worked best for stringFindCharacterImplementation()
+        doesn't mean it's the best variant here as well */
+    {
+        const char* j = data;
+        switch(size) {
+            case 15: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  0: return count;
+        }
+    }
+
+    const __m128i vn1 = _mm_set1_epi8(character);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Unconditionally load the first vector a slower, unaligned way, and mask
+       out the part that overlaps with the next aligned position to not count
+       it twice */
+    {
+        const __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        const std::uint32_t found = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1));
+        /* Masking the bytes before the aligned `i`, so if `data` is 12 and `i`
+           16, it creates a mask for the low 4 bits, 0x...01111 */
+        /** @todo use BMI1 to avoid a shift with a variable amount? */
+        count += _mm_popcnt_u32(found & ((1 << (i - data)) - 1));
+    }
+
+    /* Go one vector at a time and add each to the count */
+    const char* const end = data + size;
+    for(; i + 16 <= end; i += 16) {
+        const __m128i chunk = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        count += _mm_popcnt_u32(_mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1)));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again with
+       the overlapping part masked out to not count it twice */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        const __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(end - 16));
+        const std::uint32_t found = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1));
+        /* Masking the bytes after the aligned `i`, so if `end` is 20 and `i`
+           16, it creates a mask for the low 12 bits and then inverts it,
+           ending up with just the high 4 bits, 0x11110... */
+        /** @todo use BMI1 to avoid a shift with a variable amount? */
+        count += _mm_popcnt_u32(found & ~((1 << (i + 16 - end)) - 1));
+    }
+
+    return count;
+  };
+}
+#endif
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
   return [](const char* const data, const std::size_t size, const char character) -> std::size_t {
     std::size_t count = 0;
     for(const char* i = data, *end = data + size; i != end; ++i)
@@ -787,9 +874,13 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharact
 
 }
 
-CORRADE_UTILITY_CPU_DISPATCHER_BASE(stringCountCharacterImplementation)
+#ifdef CORRADE_TARGET_X86
+CORRADE_UTILITY_CPU_DISPATCHER(stringCountCharacterImplementation, Cpu::Popcnt)
+#else
+CORRADE_UTILITY_CPU_DISPATCHER(stringCountCharacterImplementation)
+#endif
 CORRADE_UTILITY_CPU_DISPATCHED(stringCountCharacterImplementation, std::size_t CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringCountCharacter)(const char* data, std::size_t size, char character))({
-    return stringCountCharacterImplementation(Cpu::DefaultBase)(data, size, character);
+    return stringCountCharacterImplementation(CORRADE_CPU_SELECT(Cpu::Default))(data, size, character);
 })
 
 }
