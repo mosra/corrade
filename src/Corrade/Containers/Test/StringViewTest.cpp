@@ -2138,12 +2138,12 @@ void StringViewTest::findCharacterAligned() {
        in total, corresponding to the code paths:
         - the first vector before the aligned four-at-a-time block, handled by
           the unaligned preamble
-        - then one four-at-a-time block
+        - then two four-at-a-time blocks
         - then three more blocks after, handled by the aligned postamble
         - nothing left to be handled by the unaligned postamble
 
         +----+    +----+----+----+----+    +----+----+----+
-        |deef|    | gg : hh :i  i: jj |    |k   | ll |   m|
+        |deef|    | gg : hh :i  i: jj |x2  |k   | ll |   m|
         +----+    +----+----+----+----+    +----+----+----+
     */
     Containers::Array<char> a;

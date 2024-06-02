@@ -29,7 +29,7 @@
 /* Contains additional variants of BitArrayView algorithms that are included
    just for historical / testing / benchmark comparison purposes; referenced
    explicitly via function pointers from the respective test case and benchmark
-   instances */
+   instances. Used by BitArrayViewTest.cpp and BitArrayViewBenchmark.cpp. */
 
 #include <cstdint>
 

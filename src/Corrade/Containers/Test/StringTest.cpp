@@ -222,6 +222,7 @@ struct StringTest: TestSuite::Tester {
     template<class T> void findLast();
     template<class T> void findLastOr();
 
+    /* Tests also containsAny() */
     template<class T> void findAny();
     template<class T> void findAnyOr();
     template<class T> void findLastAny();
