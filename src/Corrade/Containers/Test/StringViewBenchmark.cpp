@@ -250,15 +250,14 @@ void StringViewBenchmark::findCharacterCommon() {
 }
 
 void StringViewBenchmark::findCharacterCommonNaive() {
-    Containers::Optional<Containers::String> text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
-    CORRADE_VERIFY(text);
+    CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = text->data();
+        const char* a = _text->data();
         for(;;) {
             const char* found = nullptr;
-            for(const char* i = a; i != text->end(); ++i) {
+            for(const char* i = a; i != _text->end(); ++i) {
                 if(*i == ' ') {
                     found = i;
                     break;
