@@ -1094,7 +1094,8 @@ BasicStringView {
          * variants. Those algorithms on the other hand have to perform certain
          * preprocessing of the input and keep extra state and due to that
          * overhead aren't generally suited for one-time searches. Consider
-         * using @ref find(char) const instead for single-byte substrings.
+         * using @ref find(char) const instead for single-byte substrings, see
+         * also @ref count(char) const for counting the number of occurences.
          *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
@@ -1116,7 +1117,7 @@ BasicStringView {
          * Faster than @ref find(StringView) const if the string has just one
          * byte.
          * @see @ref contains(char) const, @ref findOr(char, T*) const,
-         *      @ref findLast(char) const
+         *      @ref findLast(char) const, @ref count(char) const
          */
         /* Technically it would be enough to have just one overload with a
            default value for the fail parameter, see above why it's not */
@@ -1219,7 +1220,8 @@ BasicStringView {
          *
          * A slightly lighter variant of @ref find() useful when you only want
          * to know if a substring was found or not. Consider using
-         * @ref contains(char) const for single-byte substrings.
+         * @ref contains(char) const for single-byte substrings, see also
+         * @ref count(char) const for counting the number of occurences.
          * @see @ref containsAny()
          */
         bool contains(StringView substring) const;
@@ -1229,6 +1231,7 @@ BasicStringView {
          *
          * Faster than @ref contains(StringView) const if the string has just
          * one byte.
+         * @see @ref count(char) const
          */
         bool contains(char character) const;
 
@@ -1308,6 +1311,15 @@ BasicStringView {
          * @see @ref contains()
          */
         bool containsAny(StringView substring) const;
+
+        /**
+         * @brief Count of occurences of given character
+         *
+         * If it's only needed to know whether a character is contained in a
+         * string at all, consider using @ref contains(char) const instead.
+         * @see @ref find(char) const
+         */
+        std::size_t count(char character) const;
 
     private:
         /* Needed for mutable/immutable conversion */
@@ -1543,6 +1555,8 @@ CORRADE_UTILITY_EXPORT const char* stringFindAny(const char* data, std::size_t s
 CORRADE_UTILITY_EXPORT const char* stringFindLastAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
 CORRADE_UTILITY_EXPORT const char* stringFindNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
 CORRADE_UTILITY_EXPORT const char* stringFindLastNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+CORRADE_UTILITY_EXPORT extern std::size_t CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringCountCharacter)(const char* data, std::size_t size, char character);
+CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(stringCountCharacter)
 
 }
 
@@ -1631,6 +1645,10 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAnyOr(co
 
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {
     return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
+}
+
+template<class T> inline std::size_t BasicStringView<T>::count(const char character) const {
+    return Implementation::stringCountCharacter(_data, size(), character);
 }
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS

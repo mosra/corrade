@@ -774,6 +774,24 @@ const char* stringFindLastNotAny(const char* const data, const std::size_t size,
     return {};
 }
 
+namespace {
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(Cpu::ScalarT) {
+  return [](const char* const data, const std::size_t size, const char character) -> std::size_t {
+    std::size_t count = 0;
+    for(const char* i = data, *end = data + size; i != end; ++i)
+        if(*i == character) ++count;
+    return count;
+  };
+}
+
+}
+
+CORRADE_UTILITY_CPU_DISPATCHER_BASE(stringCountCharacterImplementation)
+CORRADE_UTILITY_CPU_DISPATCHED(stringCountCharacterImplementation, std::size_t CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringCountCharacter)(const char* data, std::size_t size, char character))({
+    return stringCountCharacterImplementation(Cpu::DefaultBase)(data, size, character);
+})
+
 }
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS

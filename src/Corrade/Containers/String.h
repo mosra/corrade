@@ -1376,6 +1376,13 @@ class CORRADE_UTILITY_EXPORT String {
         bool containsAny(StringView substring) const;
 
         /**
+         * @brief Count of occurences of given character
+         *
+         * Equivalent to @ref BasicStringView::count(char) const.
+         */
+        std::size_t count(char character) const;
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets data pointer, size and deleter

@@ -223,6 +223,8 @@ struct StringViewTest: TestSuite::Tester {
     void findLastAnyFlags();
     void findLastAnyOr();
 
+    void countCharacter();
+
     void debugFlag();
     void debugFlags();
     void debug();
@@ -230,6 +232,7 @@ struct StringViewTest: TestSuite::Tester {
     private:
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
         decltype(Implementation::stringFindCharacter) _findCharacterImplementation;
+        decltype(Implementation::stringCountCharacter) _countCharacterImplementation;
         #endif
 };
 
@@ -260,6 +263,13 @@ const struct {
     #ifdef CORRADE_ENABLE_SIMD128
     {Cpu::Simd128, 16, nullptr, nullptr},
     #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} CountCharacterData[]{
+    {Cpu::Scalar, 16},
 };
 
 StringViewTest::StringViewTest() {
@@ -384,9 +394,14 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findLastAny,
               &StringViewTest::findLastAnyEmpty,
               &StringViewTest::findLastAnyFlags,
-              &StringViewTest::findLastAnyOr,
+              &StringViewTest::findLastAnyOr});
 
-              &StringViewTest::debugFlag,
+    addInstancedTests({&StringViewTest::countCharacter},
+        Utility::Test::cpuVariantCount(CountCharacterData),
+        &StringViewTest::captureImplementations,
+        &StringViewTest::restoreImplementations);
+
+    addTests({&StringViewTest::debugFlag,
               &StringViewTest::debugFlags,
               &StringViewTest::debug});
 }
@@ -404,12 +419,14 @@ template<> struct NameFor<char> {
 void StringViewTest::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     _findCharacterImplementation = Implementation::stringFindCharacter;
+    _countCharacterImplementation = Implementation::stringCountCharacter;
     #endif
 }
 
 void StringViewTest::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     Implementation::stringFindCharacter = _findCharacterImplementation;
+    Implementation::stringCountCharacter = _countCharacterImplementation;
     #endif
 }
 
@@ -3107,6 +3124,35 @@ void StringViewTest::findLastAnyOr() {
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
+}
+
+void StringViewTest::countCharacter() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    StringView a = "hello cursed\0world!"_s;
+
+    /* No occurence */
+    CORRADE_COMPARE(a.count('H'), 0);
+
+    /* The trailing \0 shouldn't be counted, but the other should */
+    CORRADE_COMPARE(a.count('\0'), 1);
+
+    /* Right at the start / end */
+    CORRADE_COMPARE(a.count('h'), 1);
+    CORRADE_COMPARE(a.count('!'), 1);
+
+    /* Multiple occurences */
+    CORRADE_COMPARE(a.count('l'), 3);
+    CORRADE_COMPARE(a.count('o'), 2);
 }
 
 void StringViewTest::debugFlag() {

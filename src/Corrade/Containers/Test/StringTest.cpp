@@ -228,6 +228,8 @@ struct StringTest: TestSuite::Tester {
     template<class T> void findLastAny();
     template<class T> void findLastAnyOr();
 
+    void count();
+
     void release();
     void releaseDeleterSmall();
 
@@ -410,6 +412,8 @@ StringTest::StringTest() {
               &StringTest::findLastAny<const String>,
               &StringTest::findLastAnyOr<String>,
               &StringTest::findLastAnyOr<const String>,
+
+              &StringTest::count,
 
               &StringTest::release,
               &StringTest::releaseDeleterSmall,
@@ -2936,6 +2940,16 @@ template<class T> void StringTest::findLastAnyOr() {
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
+}
+
+void StringTest::count() {
+    /* It relies on StringView conversion and then delegates there so we don't
+       need to verify SSO behavior, only the basics */
+
+    String a{"hello world"};
+    CORRADE_COMPARE(a.count('\0'), 0);
+    CORRADE_COMPARE(a.count('d'), 1);
+    CORRADE_COMPARE(a.count('l'), 3);
 }
 
 void StringTest::release() {

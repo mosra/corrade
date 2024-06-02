@@ -25,6 +25,7 @@
 */
 
 #include <cstring>
+#include <algorithm> /* std::count() */
 #include <string>
 
 #include "Corrade/Cpu.h"
@@ -75,10 +76,19 @@ struct StringViewBenchmark: TestSuite::Tester {
     /* No std::string variant as the overhead from slicing would make this
        useless (and no, rfind() has no end position) */
 
+    template<char character> void countCharacter();
+    template<char character> void countCharacterNaive();
+    template<char character> void countCharacterMemchrLoop();
+    template<char character> void countCharacterStl();
+
+    void countCharacterCommonSmall();
+    void countCharacterCommonSmallStl();
+
     private:
         Containers::Optional<Containers::String> _text;
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
         decltype(Implementation::stringFindCharacter) _findCharacterImplementation;
+        decltype(Implementation::stringCountCharacter) _countCharacterImplementation;
         #endif
 };
 
@@ -176,6 +186,19 @@ const struct {
         behave re alignment tho */
 };
 
+const struct {
+    Cpu::Features features;
+} CountCharacterData[]{
+    {Cpu::Scalar},
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} CountCharacterSmallData[]{
+    {Cpu::Scalar, 15},
+};
+
 StringViewBenchmark::StringViewBenchmark() {
     addInstancedBenchmarks({&StringViewBenchmark::findCharacter<' '>}, 100,
         Utility::Test::cpuVariantCount(FindCharacterData),
@@ -218,18 +241,47 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacterStrrchr<'\n'>,
                    &StringViewBenchmark::findLastCharacterStlString<'\n'>}, 20);
 
+    addInstancedBenchmarks({&StringViewBenchmark::countCharacter<' '>}, 100,
+        Utility::Test::cpuVariantCount(CountCharacterData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
+
+    addBenchmarks<StringViewBenchmark>({
+        &StringViewBenchmark::countCharacterNaive<' '>,
+        &StringViewBenchmark::countCharacterMemchrLoop<' '>,
+        &StringViewBenchmark::countCharacterStl<' '>}, 20);
+
+    addInstancedBenchmarks({&StringViewBenchmark::countCharacterCommonSmall}, 100,
+        Utility::Test::cpuVariantCount(CountCharacterSmallData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringViewBenchmark::countCharacterCommonSmallStl}, 20);
+
+    addInstancedBenchmarks({&StringViewBenchmark::countCharacter<'\n'>}, 100,
+        Utility::Test::cpuVariantCount(CountCharacterData),
+        &StringViewBenchmark::captureImplementations,
+        &StringViewBenchmark::restoreImplementations);
+
+    addBenchmarks<StringViewBenchmark>({
+        &StringViewBenchmark::countCharacterNaive<'\n'>,
+        &StringViewBenchmark::countCharacterMemchrLoop<'\n'>,
+        &StringViewBenchmark::countCharacterStl<'\n'>}, 20);
+
     _text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
 }
 
 void StringViewBenchmark::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     _findCharacterImplementation = Implementation::stringFindCharacter;
+    _countCharacterImplementation = Implementation::stringCountCharacter;
     #endif
 }
 
 void StringViewBenchmark::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     Implementation::stringFindCharacter = _findCharacterImplementation;
+    Implementation::stringCountCharacter = _countCharacterImplementation;
     #endif
 }
 
@@ -513,6 +565,132 @@ void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
 
     CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
     #endif
+}
+
+template<char character> void StringViewBenchmark::countCharacter() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {}",
+        CharacterTraits<character>::name(),
+        Utility::Test::cpuVariantName(data)));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats)
+        count += _text->count(character);
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+template<char character> void StringViewBenchmark::countCharacterNaive() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        for(char i: *_text) {
+            if(i == character)
+                ++count;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+template<char character> void StringViewBenchmark::countCharacterMemchrLoop() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    /* A copy of findCharacterCommonMemchr(), because right now they
+       effectively do the same, count the occurences of a character, but they
+       might get out of sync and then delegating / comparing the two wouldn't
+       make sense anymore */
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        const char* a = _text->data();
+        while(const char* found = static_cast<const char*>(std::memchr(a, character, _text->end() - a))) {
+            ++count;
+            a = found + 1;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+template<char character> void StringViewBenchmark::countCharacterStl() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    /* Yes, making a std::string copy, to have it perform VERY NICE with the
+       STL iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string a = *_text;
+    CORRADE_BENCHMARK(CharacterRepeats)
+        count += std::count(a.begin(), a.end(), character);
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+void StringViewBenchmark::countCharacterCommonSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CountCharacterSmallData[testCaseInstanceId()];
+    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    #else
+    auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterSmallData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        StringView a = *_text;
+        while(a) {
+            StringView prefix = a.prefix(Utility::min(data.size, a.size()));
+            count += prefix.count(' ');
+            a = a.suffix(prefix.end());
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
+}
+
+void StringViewBenchmark::countCharacterCommonSmallStl() {
+    #if defined(CORRADE_TARGET_DINKUMWARE) && defined(CORRADE_IS_DEBUG_BUILD)
+    CORRADE_SKIP("Takes too long on MSVC's STL in debug mode.");
+    #endif
+
+    CORRADE_VERIFY(_text);
+
+    std::size_t count = 0;
+    /* Yes, making a std::string copy, to have it perform VERY NICE with the
+       STL iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string a = *_text;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        auto offset = a.begin();
+        while(offset != a.end()) {
+            auto end = Utility::min(offset + 15, a.end());
+            count += std::count(offset, end, ' ');
+            offset = end;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
 }
 
 }}}}

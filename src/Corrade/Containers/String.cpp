@@ -940,6 +940,10 @@ bool String::containsAny(const StringView substring) const {
     return StringView{*this}.containsAny(substring);
 }
 
+std::size_t String::count(const char character) const {
+    return StringView{*this}.count(character);
+}
+
 char* String::release() {
     /* Unlikely to be called very often, so a non-debug assert is fine */
     CORRADE_ASSERT(!(_small.size & Implementation::SmallStringBit),
