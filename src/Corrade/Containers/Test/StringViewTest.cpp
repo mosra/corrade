@@ -272,10 +272,37 @@ const struct {
 const struct {
     Cpu::Features features;
     std::size_t vectorSize;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    std::size_t(*function)(const char*, std::size_t, char);
 } CountCharacterData[]{
-    {Cpu::Scalar, 16},
+    {Cpu::Scalar, 16, nullptr, nullptr},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
-    {Cpu::Sse2|Cpu::Popcnt, 16},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16, "16bit popcnt",
+        stringCountCharacterImplementationSse2Popcnt16},
+    {Cpu::Sse2|Cpu::Popcnt, 16, "32bit popcnt + 32bit postamble",
+        stringCountCharacterImplementationSse2Popcnt32},
+    #endif
+    /* The 64-bit variants of POPCNT instructions aren't exposed on 32-bit
+       systems for some reason, skipping there. */
+    #ifndef CORRADE_TARGET_32BIT
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16, "64bit popcnt + 16bit postamble",
+        stringCountCharacterImplementationSse2PostamblePopcnt16},
+    #endif
+    {Cpu::Sse2|Cpu::Popcnt, 16, "64bit popcnt + 32bit postamble (default)",
+        nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16, "64bit popcnt + 64bit postamble, if cascade",
+        stringCountCharacterImplementationSse2PostamblePopcnt64},
+    {Cpu::Sse2|Cpu::Popcnt, 16, "64bit popcnt + 64bit postamble, switch",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Switch},
+    {Cpu::Sse2|Cpu::Popcnt, 16, "64bit popcnt + 64bit postamble, loop",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
+    #endif
+    #endif
     #endif
 };
 
@@ -3140,11 +3167,14 @@ void StringViewTest::findLastAnyOr() {
 void StringViewTest::countCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -3169,11 +3199,14 @@ void StringViewTest::countCharacter() {
 void StringViewTest::countCharacterAligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -3183,23 +3216,27 @@ void StringViewTest::countCharacterAligned() {
        in total, corresponding to the code paths:
         - the first vector before the aligned run, handled by the unaligned
           preamble
-        - then one-vector aligned run
+        - then two four-at-a-time blocks
+        - then three more blocks after, handled by the aligned postamble
         - nothing left to be handled by the unaligned postamble
 
-        +----+    +----+
-        |    |    |    |
-        +----+    +----+
+        +----+    +----+----+----+----+    +----+----+----+
+        |    |    |    :    :    :    |x2  |    |    |    |
+        +----+    +----+----+----+----+    +----+----+----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
-        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 1));
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     MutableStringView string = arrayView(a);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::Aligned);
 
     /* Fill each character different and verify it's found just once each
-       time */
+       time. Assume there's not more than 256 bytes, otherwise we'd have some
+       characters more than once. */
+    CORRADE_COMPARE_AS(string.size(), 256,
+        TestSuite::Compare::LessOrEqual);
     for(std::size_t i = 0; i != string.size(); ++i)
         string[i] = i;
     for(std::size_t i = 0; i != string.size(); ++i) {
@@ -3217,11 +3254,14 @@ void StringViewTest::countCharacterAligned() {
 void StringViewTest::countCharacterUnaligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -3231,7 +3271,8 @@ void StringViewTest::countCharacterUnaligned() {
         - the first unaligned vector having gradually one byte up to all but
           one byte overlapping with the aligned run, to verify those bytes
           don't get counted twice
-        - then there being two vectors in the aligned run
+        - no four-at-a-time blocks
+        - then there being two vectors in the aligned less-than-four run
         - the last unaligned vector the again having gradually one byte up to
           all but one byte overlapping with the aligned run
 
@@ -3306,11 +3347,14 @@ void StringViewTest::countCharacterUnaligned() {
 void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -3356,11 +3400,14 @@ void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
 void StringViewTest::countCharacterUnalignedLessThanOneVector() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");

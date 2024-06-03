@@ -188,26 +188,92 @@ const struct {
 
 const struct {
     Cpu::Features features;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    std::size_t(*function)(const char*, std::size_t, char);
 } CountCharacterData[]{
-    {Cpu::Scalar},
+    {Cpu::Scalar, nullptr, nullptr},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
-    {Cpu::Sse2|Cpu::Popcnt},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, "16bit popcnt",
+        stringCountCharacterImplementationSse2Popcnt16},
+    {Cpu::Sse2|Cpu::Popcnt, "32bit popcnt",
+        stringCountCharacterImplementationSse2Popcnt32},
+    #endif
+    /* The 64-bit variants of POPCNT instructions aren't exposed on 32-bit
+       systems for some reason, skipping there. */
+    #ifndef CORRADE_TARGET_32BIT
+    {Cpu::Sse2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
+    #endif
     #endif
 };
 
 const struct {
     Cpu::Features features;
     std::size_t size;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    std::size_t(*function)(const char*, std::size_t, char);
 } CountCharacterSmallData[]{
-    {Cpu::Scalar, 15},
-    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+    {Cpu::Scalar, 15, nullptr, nullptr},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
     /* This should fall back to the scalar case */
-    {Cpu::Sse2|Cpu::Popcnt, 15},
+    {Cpu::Sse2|Cpu::Popcnt, 15, nullptr, nullptr},
     /* This should do one unaligned vector operation, skipping the rest */
-    {Cpu::Sse2|Cpu::Popcnt, 16},
-    /* This should do two unaligned vector operations, skipping the aligned
-       run */
-    {Cpu::Sse2|Cpu::Popcnt, 17},
+    {Cpu::Sse2|Cpu::Popcnt, 16, nullptr, nullptr},
+    /* This should do two unaligned vector operations, skipping all the
+       aligned parts */
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 17, "16bit popcnt postamble",
+        stringCountCharacterImplementationSse2PostamblePopcnt16},
+    #endif
+    {Cpu::Sse2|Cpu::Popcnt, 17, "32bit popcnt postamble (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 17, "64bit popcnt postamble, if cascade",
+        stringCountCharacterImplementationSse2PostamblePopcnt64},
+    {Cpu::Sse2|Cpu::Popcnt, 17, "64bit popcnt postamble, switch",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Switch},
+    {Cpu::Sse2|Cpu::Popcnt, 17, "64bit popcnt postamble, loop",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
+    /* This should do two unaligned vector operations, and one aligned
+       single-vector operation; and one aligned two-vector operation; and one
+       aligned two-vector operation + one aligned single-vector operation */
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 1*16 + 1, "16bit popcnt postamble",
+        stringCountCharacterImplementationSse2PostamblePopcnt16},
+    #endif
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 1*16 + 1, "32bit popcnt postamble (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 1*16 + 1, "64bit popcnt postamble, if cascade",
+        stringCountCharacterImplementationSse2PostamblePopcnt64},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 1*16 + 1, "64bit popcnt postamble, switch",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Switch},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 1*16 + 1, "64bit popcnt postamble, loop",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 2*16 + 1, "16bit popcnt postamble",
+        stringCountCharacterImplementationSse2PostamblePopcnt16},
+    #endif
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 2*16 + 1, "32bit popcnt postamble (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 2*16 + 1, "64bit popcnt postamble, if cascade",
+        stringCountCharacterImplementationSse2PostamblePopcnt64},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 2*16 + 1, "64bit popcnt postamble, switch",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Switch},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 2*16 + 1, "64bit popcnt postamble, loop",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "16bit popcnt postamble",
+        stringCountCharacterImplementationSse2PostamblePopcnt16},
+    #endif
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "32bit popcnt postamble (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "64bit popcnt postamble, if cascade",
+        stringCountCharacterImplementationSse2PostamblePopcnt64},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "64bit popcnt postamble, switch",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Switch},
+    {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "64bit popcnt postamble, loop",
+        stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
+    #endif
     #endif
 };
 
@@ -582,13 +648,15 @@ void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
 template<char character> void StringViewBenchmark::countCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterData);
     #endif
-    setTestCaseDescription(Utility::format("{}, {}",
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}, {}" : "{}, {}",
         CharacterTraits<character>::name(),
-        Utility::Test::cpuVariantName(data)));
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -658,11 +726,14 @@ template<char character> void StringViewBenchmark::countCharacterStl() {
 void StringViewBenchmark::countCharacterCommonSmall() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = CountCharacterSmallData[testCaseInstanceId()];
-    Implementation::stringCountCharacter = Implementation::stringCountCharacterImplementation(data.features);
+    Implementation::stringCountCharacter = data.function ? data.function :
+        Implementation::stringCountCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(CountCharacterSmallData);
     #endif
-    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {} bytes, {}" : "{}, {} bytes",
+        Utility::Test::cpuVariantName(data), data.size, data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");

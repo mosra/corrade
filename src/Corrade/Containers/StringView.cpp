@@ -788,7 +788,10 @@ namespace {
    just counting the matches. On the other hand have to ensure that the
    overlaps aren't counted twice. */
 
-#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+/* The 64-bit variants of POPCNT instructions aren't exposed on 32-bit systems
+   for some reason. 32-bit x86 isn't that important nowadays so there it uses
+   just the scalar code, I won't bother making a 32-bit variant. */
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
 CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,POPCNT) typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2|Cpu::Popcnt)) {
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,POPCNT) {
     std::size_t count = 0;
@@ -838,11 +841,44 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,POPCNT) typename std::decay
         count += _mm_popcnt_u32(found & ((1 << (i - data)) - 1));
     }
 
-    /* Go one vector at a time and add each to the count */
+    /* Go four vectors at a time to make use of the full 64-bit popcnt
+       instruction. This is significantly faster than calling popcnt for each
+       16-bit vector, and slightly faster than going just two vectors at a
+       time -- see the stringCountCharacterImplementationSse2Popcnt{16,32}()
+       variants in StringViewTest.h. */
     const char* const end = data + size;
-    for(; i + 16 <= end; i += 16) {
-        const __m128i chunk = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
-        count += _mm_popcnt_u32(_mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1)));
+    for(; i + 4*16 <= end; i += 4*16) {
+        const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
+        const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
+        const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
+        const __m128i d = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 3);
+        count += _mm_popcnt_u64(
+            (std::uint64_t(_mm_movemask_epi8(_mm_cmpeq_epi8(a, vn1))) <<  0) |
+            (std::uint64_t(_mm_movemask_epi8(_mm_cmpeq_epi8(b, vn1))) << 16) |
+            (std::uint64_t(_mm_movemask_epi8(_mm_cmpeq_epi8(c, vn1))) << 32) |
+            (std::uint64_t(_mm_movemask_epi8(_mm_cmpeq_epi8(d, vn1))) << 48));
+    }
+
+    /* Handle remaining less than four aligned vectors. Try to make use of the
+       full 32-bit width for popcnt if possible, as that's faster than calling
+       popcnt separately for each 16-bit vector (see the
+       stringCountCharacterImplementationSse2PostamblePopcnt16() variant in
+       StringViewTest.h). Conversely, accumulating everything into a 64-bit
+       integer to call popcnt just once doesn't make it faster either -- see
+       the stringCountCharacterImplementationSse2PostamblePopcnt64*() variants
+       in StringViewTest.h. */
+    if(i + 2*16 <= end) {
+        const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
+        const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
+        count += _mm_popcnt_u32(
+            (_mm_movemask_epi8(_mm_cmpeq_epi8(a, vn1)) << 0) |
+            (_mm_movemask_epi8(_mm_cmpeq_epi8(b, vn1)) << 16));
+        i += 2*16;
+    }
+    if(i + 16 <= end) {
+        const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        count += _mm_popcnt_u32(_mm_movemask_epi8(_mm_cmpeq_epi8(c, vn1)));
+        i += 16;
     }
 
     /* Handle remaining less than a vector with an unaligned load, again with
