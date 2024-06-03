@@ -214,6 +214,9 @@ const struct {
     #endif
     {Cpu::Avx2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
     #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    {Cpu::Simd128, nullptr, nullptr},
+    #endif
 };
 
 const struct {
@@ -295,6 +298,21 @@ const struct {
     /* This should do two unaligned vector operations, and one aligned
        single-vector operation */
     {Cpu::Avx2|Cpu::Popcnt, 32 + 1*32 + 1, nullptr, nullptr},
+    #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    /* This should fall back to the scalar case */
+    {Cpu::Simd128, 15, nullptr, nullptr},
+    /* This should do one unaligned vector operation, skipping the rest */
+    {Cpu::Simd128, 16, nullptr, nullptr},
+    /* This should do two unaligned vector operations, skipping all the
+       aligned parts */
+    {Cpu::Simd128, 17, nullptr, nullptr},
+    /* This should do two unaligned vector operations, and one aligned
+       single-vector operation; and one aligned two-vector operation; and one
+       aligned two-vector operation + one aligned single-vector operation */
+    {Cpu::Simd128, 16 + 1*16 + 1, nullptr, nullptr},
+    {Cpu::Simd128, 16 + 2*16 + 1, nullptr, nullptr},
+    {Cpu::Simd128, 16 + 3*16 + 1, nullptr, nullptr},
     #endif
 };
 

@@ -980,6 +980,107 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,POPCNT) typename std::decay
 }
 #endif
 
+/* Basically just a straight translation of the SSE2 code right now, see the
+   TODOs for potential improvement opportunities */
+#ifdef CORRADE_ENABLE_SIMD128
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SIMD128 typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE_SIMD128 {
+    std::size_t count = 0;
+
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo that this worked best for stringFindCharacterImplementation()
+        doesn't mean it's the best variant here as well; also check the
+        pre-/post-increment differences between x86 and WASM like in the find
+        variant */
+    {
+        const char* j = data;
+        switch(size) {
+            case 15: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == character) ++count; CORRADE_FALLTHROUGH
+            case  0: return count;
+        }
+    }
+
+    const v128_t vn1 = wasm_i8x16_splat(character);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Unconditionally load the first vector a slower, unaligned way and mask
+       out the part that overlaps with the next aligned position to not count
+       it twice. WASM doesn't differentiate between aligned and unaligned load,
+       it's always unaligned, but the hardware might behave better if we try to
+       avoid unaligned loads. */
+    {
+        const v128_t chunk = wasm_v128_load(reinterpret_cast<const v128_t*>(data));
+        const std::uint32_t found = wasm_i8x16_bitmask(wasm_i8x16_eq(chunk, vn1));
+        count += __builtin_popcount(found & ((1 << (i - data)) - 1));
+    }
+
+    /* Go four vectors at a time to make use of the full 64-bit popcnt
+       instruction */
+    const char* const end = data + size;
+    for(; i + 4*16 <= end; i += 4*16) {
+        const v128_t a = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
+        const v128_t b = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
+        const v128_t c = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 2);
+        const v128_t d = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 3);
+        count += __builtin_popcountll(
+            /** @todo same as in find, revisit use of wasm_i8x16_bitmask once
+                runtime dispatch overhead gets better or once compile-time
+                tuning such as CORRADE_TARGET_WASM_SIMD128_ARM / _X86 exists */
+            (std::uint64_t(wasm_i8x16_bitmask(wasm_i8x16_eq(a, vn1))) <<  0) |
+            (std::uint64_t(wasm_i8x16_bitmask(wasm_i8x16_eq(b, vn1))) << 16) |
+            (std::uint64_t(wasm_i8x16_bitmask(wasm_i8x16_eq(c, vn1))) << 32) |
+            (std::uint64_t(wasm_i8x16_bitmask(wasm_i8x16_eq(d, vn1))) << 48));
+    }
+
+    /* Handle remaining less than four aligned vectors */
+    if(i + 2*16 <= end) {
+        const v128_t a = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
+        const v128_t b = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
+        count += __builtin_popcount(
+            (wasm_i8x16_bitmask(wasm_i8x16_eq(a, vn1)) << 0) |
+            (wasm_i8x16_bitmask(wasm_i8x16_eq(b, vn1)) << 16));
+        i += 2*16;
+    }
+    if(i + 16 <= end) {
+        const v128_t c = wasm_v128_load(reinterpret_cast<const v128_t*>(i));
+        count += __builtin_popcount(wasm_i8x16_bitmask(wasm_i8x16_eq(c, vn1)));
+        i += 16;
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again with
+       the overlapping part masked out to not count it twice. Again WASM
+       doesn't have any dedicated unaligned load instruction. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        const v128_t chunk = wasm_v128_load(reinterpret_cast<const v128_t*>(end - 16));
+        const std::uint32_t found = wasm_i8x16_bitmask(wasm_i8x16_eq(chunk, vn1));
+        count += __builtin_popcount(found & ~((1 << (i + 16 - end)) - 1));
+    }
+
+    return count;
+  };
+}
+#endif
+
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
   return [](const char* const data, const std::size_t size, const char character) -> std::size_t {
     std::size_t count = 0;

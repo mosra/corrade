@@ -311,6 +311,9 @@ const struct {
     #endif
     {Cpu::Avx2|Cpu::Popcnt, 32, "64bit popcnt (default)", nullptr},
     #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    {Cpu::Simd128, 16, nullptr, nullptr},
+    #endif
 };
 
 StringViewTest::StringViewTest() {
