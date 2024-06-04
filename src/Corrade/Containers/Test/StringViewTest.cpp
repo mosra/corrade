@@ -304,6 +304,13 @@ const struct {
     #endif
     #endif
     #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Avx2|Cpu::Popcnt, 32, "32bit popcnt",
+        stringCountCharacterImplementationAvx2Popcnt32},
+    #endif
+    {Cpu::Avx2|Cpu::Popcnt, 32, "64bit popcnt (default)", nullptr},
+    #endif
 };
 
 StringViewTest::StringViewTest() {
@@ -3216,17 +3223,24 @@ void StringViewTest::countCharacterAligned() {
        in total, corresponding to the code paths:
         - the first vector before the aligned run, handled by the unaligned
           preamble
-        - then two four-at-a-time blocks
-        - then three more blocks after, handled by the aligned postamble
+        - then two 64-bytes-at-a-time blocks
+        - then 64-bytes-minus-one-vector after, handled by the aligned
+          postamble
         - nothing left to be handled by the unaligned postamble
 
         +----+    +----+----+----+----+    +----+----+----+
-        |    |    |    :    :    :    |x2  |    |    |    |
+        |    |    |    :    :    :    |x2  |    |    |    |  for 128b vectors
         +----+    +----+----+----+----+    +----+----+----+
+
+        +----+    +----+----+    +----+
+        |    |    |    :    |x2  |    | for 256b vectors
+        +----+    +----+----+    +----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
-        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize + 64*2 + (64 - data.vectorSize));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize + 64*2 + (64 - data.vectorSize));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     MutableStringView string = arrayView(a);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
@@ -3289,6 +3303,8 @@ void StringViewTest::countCharacterUnaligned() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 2 + 1));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 2 + 1));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     MutableStringView string = a.slice(1, a.size() - 1);
     CORRADE_COMPARE(string.size(), data.vectorSize*4 - 2);
@@ -3376,6 +3392,8 @@ void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     MutableStringView string = a.slice(data.vectorSize - 1, data.vectorSize*2 + 1);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,

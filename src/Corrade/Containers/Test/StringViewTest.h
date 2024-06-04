@@ -35,7 +35,8 @@
 #include <cstdint>
 
 #include "Corrade/Cpu.h"
-#if defined(CORRADE_ENABLE_SSE41) && defined(CORRADE_ENABLE_BMI1)
+#include "Corrade/Containers/StringView.h" /* stringCountCharacterImplementation() */
+#if (defined(CORRADE_ENABLE_SSE41) && defined(CORRADE_ENABLE_BMI1)) || (defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT))
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
 #endif
 #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
@@ -263,6 +264,48 @@ CORRADE_ENABLE(SSE2,POPCNT) CORRADE_NEVER_INLINE std::size_t stringCountCharacte
         const __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(end - 16));
         const std::uint32_t found = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1));
         count += _mm_popcnt_u32(found & ~((1 << (i + 16 - end)) - 1));
+    }
+
+    return count;
+}
+#endif
+
+#if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT)
+CORRADE_ENABLE(AVX2,POPCNT) CORRADE_NEVER_INLINE std::size_t stringCountCharacterImplementationAvx2Popcnt32(const char* const data, const std::size_t size, const char character) {
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    if(size < 32)
+        return Implementation::stringCountCharacterImplementation(Cpu::Sse2|Cpu::Popcnt)(data, size, character);
+
+    std::size_t count = 0;
+    const __m256i vn1 = _mm256_set1_epi8(character);
+
+    /* Calculate the next aligned position */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Unconditionally load the first vector a slower, unaligned way, and mask
+       out the part that overlaps with the next aligned position to not count
+       it twice */
+    {
+        const __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        const std::uint32_t found = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1));
+        count += _mm_popcnt_u32(found & ((1ull << (i - data)) - 1));
+    }
+
+    /* Go one vector at a time */
+    const char* const end = data + size;
+    for(; i + 32 <= end; i += 32) {
+        const __m256i chunk = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        count += _mm_popcnt_u32(_mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1)));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again with
+       the overlapping part masked out to not count it twice */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        const __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(end - 32));
+        const std::uint32_t found = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1));
+        count += _mm_popcnt_u32(found & ~((1u << (i + 32 - end)) - 1));
     }
 
     return count;

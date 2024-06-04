@@ -50,7 +50,7 @@
    on command line, so the includes have to be complicated like this to still
    include the headers for count() implementation which needs just POPCNT and
    not BMI1 */
-#if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
+#if ((defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)) || (defined(CORRADE_ENABLE_AVX) && defined(CORRADE_ENABLE_POPCNT))
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
 #elif defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
 #include "Corrade/Utility/IntrinsicsSse4.h"
@@ -892,6 +892,87 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,POPCNT) typename std::decay
            ending up with just the high 4 bits, 0x11110... */
         /** @todo use BMI1 to avoid a shift with a variable amount? */
         count += _mm_popcnt_u32(found & ~((1 << (i + 16 - end)) - 1));
+    }
+
+    return count;
+  };
+}
+#endif
+
+/* The 64-bit variants of POPCNT instructions aren't exposed on 32-bit systems
+   for some reason. 32-bit x86 isn't that important nowadays so there it uses
+   just the scalar code, I won't bother making a 32-bit variant. */
+#if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,POPCNT) typename std::decay<decltype(stringCountCharacter)>::type stringCountCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Popcnt)) {
+  return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(AVX2,POPCNT) {
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
+    if(size < 32)
+        return stringCountCharacterImplementation(CORRADE_CPU_SELECT(Cpu::Sse2|Cpu::Popcnt))(data, size, character);
+
+    std::size_t count = 0;
+    const __m256i vn1 = _mm256_set1_epi8(character);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll check some bytes twice. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Unconditionally load the first vector a slower, unaligned way, and mask
+       out the part that overlaps with the next aligned position to not count
+       it twice */
+    {
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        const std::uint32_t found = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1));
+        /* Masking the bytes before the aligned `i`, so if `data` is 28 and `i`
+           32, it creates a mask for the low 4 bits, 0x...01111. Have to use a
+           64-bit integer because otherwise `(1u << 32) - 1` is undefined
+           behavior and evaluates to 0 or just whatever else. */
+        /** @todo use BMI1 to avoid a shift with a variable amount? */
+        count += _mm_popcnt_u32(found & ((1ull << (i - data)) - 1));
+    }
+
+    /* Go two vectors at a time to make use of the full 64-bit popcnt
+       instruction. Similarly as in the SSE2 case, this is significantly faster
+       than calling popcnt for each 32-bit vector -- see the countCharacterCommonAvx2Popcnt32() variant in StringViewBenchmark. */
+    const char* const end = data + size;
+    for(; i + 2*32 <= end; i += 2*32) {
+        const __m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
+        const __m256i b = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
+        count += _mm_popcnt_u64(
+            /* Movemask returns a *signed* int, which means if the highest bit
+               is set, it gets sign-extended to 64-bit. Cast to an unsigned
+               type first to avoid that. FFS. */
+            (std::uint64_t(std::uint32_t(_mm256_movemask_epi8(_mm256_cmpeq_epi8(a, vn1)))) <<  0) |
+            (std::uint64_t(std::uint32_t(_mm256_movemask_epi8(_mm256_cmpeq_epi8(b, vn1)))) << 32));
+    }
+
+    /* Handle remaining less than two aligned vectors, i.e. just one vector */
+    if(i + 32 <= end) {
+        const __m256i chunk = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        count += _mm_popcnt_u32(_mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1)));
+        i += 32;
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again with
+       the overlapping part masked out to not count it twice */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(end - 32));
+        const std::uint32_t found = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1));
+        /* Masking the bytes after the aligned `i`, so if `end` is 36 and `i`
+           32, it creates a mask for the low 28 bits and then inverts it,
+           ending up with just the high 4 bits, 0x11110... Here don't need to
+           use a 64-bit integer because the distance between i and end is never
+           more than 32. */
+        /** @todo use BMI1 to avoid a shift with a variable amount? */
+        count += _mm_popcnt_u32(found & ~((1u << (i + 32 - end)) - 1));
     }
 
     return count;

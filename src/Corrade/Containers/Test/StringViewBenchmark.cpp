@@ -207,6 +207,13 @@ const struct {
     {Cpu::Sse2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
     #endif
     #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Avx2|Cpu::Popcnt, "32bit popcnt",
+        stringCountCharacterImplementationAvx2Popcnt32},
+    #endif
+    {Cpu::Avx2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
+    #endif
 };
 
 const struct {
@@ -274,6 +281,20 @@ const struct {
     {Cpu::Sse2|Cpu::Popcnt, 16 + 3*16 + 1, "64bit popcnt postamble, loop",
         stringCountCharacterImplementationSse2PostamblePopcnt64Loop},
     #endif
+    #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+    /* This should fall back to the SSE2 and then the scalar case */
+    {Cpu::Avx2|Cpu::Popcnt, 15, nullptr, nullptr},
+    /* This should fall back to the SSE2 case */
+    {Cpu::Avx2|Cpu::Popcnt, 31, nullptr, nullptr},
+    /* This should do one unaligned vector operation, skipping the rest */
+    {Cpu::Avx2|Cpu::Popcnt, 32, nullptr, nullptr},
+    /* This should do two unaligned vector operations, skipping all the aligned
+       parts */
+    {Cpu::Avx2|Cpu::Popcnt, 33, nullptr, nullptr},
+    /* This should do two unaligned vector operations, and one aligned
+       single-vector operation */
+    {Cpu::Avx2|Cpu::Popcnt, 32 + 1*32 + 1, nullptr, nullptr},
     #endif
 };
 
