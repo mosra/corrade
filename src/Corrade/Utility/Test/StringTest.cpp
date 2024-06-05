@@ -95,7 +95,8 @@ struct StringTest: TestSuite::Tester {
     void replaceAllCharacter();
     void replaceAllCharacterSmall();
     void replaceAllCharacterNonOwned();
-    void replaceAllCharacterInPlace();
+
+    void replaceAllInPlaceCharacter();
 
     void parseNumberSequence();
     void parseNumberSequenceOverflow();
@@ -105,6 +106,7 @@ struct StringTest: TestSuite::Tester {
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
         decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
         decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
+        decltype(String::Implementation::replaceAllInPlaceCharacter) _replaceAllInPlaceCharacterImplementation;
         #endif
 };
 
@@ -135,6 +137,13 @@ const struct {
     #ifdef CORRADE_ENABLE_SIMD128
     {Cpu::Simd128, 16, nullptr, nullptr},
     #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} ReplaceAllInPlaceCharacterData[]{
+    {Cpu::Scalar, 16},
 };
 
 const struct {
@@ -256,8 +265,12 @@ StringTest::StringTest() {
               &StringTest::replaceAllCycle,
               &StringTest::replaceAllCharacter,
               &StringTest::replaceAllCharacterSmall,
-              &StringTest::replaceAllCharacterNonOwned,
-              &StringTest::replaceAllCharacterInPlace});
+              &StringTest::replaceAllCharacterNonOwned});
+
+    addInstancedTests({&StringTest::replaceAllInPlaceCharacter},
+        cpuVariantCount(ReplaceAllInPlaceCharacterData),
+        &StringTest::captureImplementations,
+        &StringTest::restoreImplementations);
 
     addInstancedTests({&StringTest::parseNumberSequence},
         Containers::arraySize(ParseNumberSequenceData));
@@ -274,6 +287,7 @@ void StringTest::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
     _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
+    _replaceAllInPlaceCharacterImplementation = String::Implementation::replaceAllInPlaceCharacter;
     #endif
 }
 
@@ -281,6 +295,7 @@ void StringTest::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
     String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
+    String::Implementation::replaceAllInPlaceCharacter = _replaceAllInPlaceCharacterImplementation;
     #endif
 }
 
@@ -1263,10 +1278,21 @@ void StringTest::replaceAllCharacterNonOwned() {
     CORRADE_VERIFY(out.data() != data);
 }
 
-void StringTest::replaceAllCharacterInPlace() {
-    char data[] = "we? are? loud??";
-    String::replaceAllInPlace(data, '?', '!');
-    CORRADE_COMPARE(data, "we! are! loud!!"_s);
+void StringTest::replaceAllInPlaceCharacter() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    char string[] = "we? are? loud??";
+    String::replaceAllInPlace(string, '?', '!');
+    CORRADE_COMPARE(string, "we! are! loud!!"_s);
 }
 
 void StringTest::parseNumberSequence() {

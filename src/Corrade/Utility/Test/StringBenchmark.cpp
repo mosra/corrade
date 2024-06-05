@@ -25,13 +25,15 @@
 */
 
 #include <cctype> /* std::ctype */
-#include <algorithm> /* std::transform() */
+#include <cstring> /* std::memchr */
+#include <algorithm> /* std::transform(), std::replace() */
 #include <locale> /* std::locale::classic() */
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
@@ -71,15 +73,32 @@ struct StringBenchmark: TestSuite::Tester {
        of the above, not all */
     void uppercaseSmallBranchless();
 
+    template<char character> void replaceAllInPlaceCharacter();
+    template<char character> void replaceAllInPlaceCharacterNaive();
+    template<char character> void replaceAllInPlaceCharacterMemchrLoop();
+    template<char character> void replaceAllInPlaceCharacterStl();
+
+    void replaceAllInPlaceCharacterCommonSmall();
+    void replaceAllInPlaceCharacterCommonSmallStl();
+
     private:
         Containers::Optional<Containers::String> _text;
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
         decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
         decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
+        decltype(String::Implementation::replaceAllInPlaceCharacter) _replaceAllInPlaceCharacterImplementation;
         #endif
 };
 
 using namespace Containers::Literals;
+
+template<char> struct CharacterTraits;
+template<> struct CharacterTraits<' '> {
+    static const char* name() { return "common"; }
+};
+template<> struct CharacterTraits<'\n'> {
+    static const char* name() { return "rare"; }
+};
 
 const struct {
     Cpu::Features features;
@@ -209,6 +228,19 @@ const struct {
     #endif
 };
 
+const struct {
+    Cpu::Features features;
+} ReplaceAllInPlaceCharacterData[]{
+    {Cpu::Scalar},
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} ReplaceAllInPlaceCharacterSmallData[]{
+    {Cpu::Scalar, 15},
+};
+
 StringBenchmark::StringBenchmark() {
     addInstancedBenchmarks({&StringBenchmark::lowercase}, 100,
         cpuVariantCount(LowercaseData),
@@ -246,6 +278,33 @@ StringBenchmark::StringBenchmark() {
 
     addBenchmarks({&StringBenchmark::uppercaseSmallBranchless}, 20);
 
+    addInstancedBenchmarks({&StringBenchmark::replaceAllInPlaceCharacter<' '>}, 100,
+        cpuVariantCount(ReplaceAllInPlaceCharacterData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks<StringBenchmark>({
+        &StringBenchmark::replaceAllInPlaceCharacterNaive<' '>,
+        &StringBenchmark::replaceAllInPlaceCharacterMemchrLoop<' '>,
+        &StringBenchmark::replaceAllInPlaceCharacterStl<' '>}, 20);
+
+    addInstancedBenchmarks({&StringBenchmark::replaceAllInPlaceCharacterCommonSmall}, 100,
+        cpuVariantCount(ReplaceAllInPlaceCharacterSmallData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::replaceAllInPlaceCharacterCommonSmallStl}, 20);
+
+    addInstancedBenchmarks({&StringBenchmark::replaceAllInPlaceCharacter<'\n'>}, 100,
+        cpuVariantCount(ReplaceAllInPlaceCharacterData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks<StringBenchmark>({
+        &StringBenchmark::replaceAllInPlaceCharacterNaive<'\n'>,
+        &StringBenchmark::replaceAllInPlaceCharacterMemchrLoop<'\n'>,
+        &StringBenchmark::replaceAllInPlaceCharacterStl<'\n'>}, 20);
+
     _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
 }
 
@@ -253,6 +312,7 @@ void StringBenchmark::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
     _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
+    _replaceAllInPlaceCharacterImplementation = String::Implementation::replaceAllInPlaceCharacter;
     #endif
 }
 
@@ -260,6 +320,7 @@ void StringBenchmark::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
     String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
+    String::Implementation::replaceAllInPlaceCharacter = _replaceAllInPlaceCharacterImplementation;
     #endif
 }
 
@@ -571,6 +632,139 @@ void StringBenchmark::uppercaseSmallBranchless() {
 
     CORRADE_VERIFY(!string.contains('a'));
     CORRADE_VERIFY(string.contains('A'));
+}
+
+template<char character> void StringBenchmark::replaceAllInPlaceCharacter() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format( "{}, {}",
+        CharacterTraits<character>::name(),
+        Utility::Test::cpuVariantName(data)));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    Containers::String string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats)
+        String::replaceAllInPlace(string.sliceSize((i++)*_text->size(), _text->size()), character, '_');
+
+    CORRADE_VERIFY(!string.contains(character));
+    CORRADE_VERIFY(string.contains('_'));
+}
+
+template<char character> void StringBenchmark::replaceAllInPlaceCharacterNaive() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    Containers::String string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        for(char& j: string.sliceSize((i++)*_text->size(), _text->size()))
+            if(j == character) j = '_';
+    }
+
+    CORRADE_VERIFY(!string.contains(character));
+    CORRADE_VERIFY(string.contains('_'));
+}
+
+template<char character> void StringBenchmark::replaceAllInPlaceCharacterMemchrLoop() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    Containers::String string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        char* a = string.data() + (i++)*_text->size();
+        char* end = a + _text->size();
+        while(char* found = static_cast<char*>(std::memchr(a, character, end - a))) {
+            *found = '_';
+            a = found + 1;
+        }
+    }
+
+    CORRADE_VERIFY(!string.contains(character));
+    CORRADE_VERIFY(string.contains('_'));
+}
+
+template<char character> void StringBenchmark::replaceAllInPlaceCharacterStl() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    /* Yes, making a std::string, to have it perform VERY NICE with the STL
+       iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        auto begin = string.begin() + (i++)*_text->size();
+        std::replace(begin, begin + _text->size(), character, '_');
+    }
+
+    CORRADE_VERIFY(!Containers::StringView{string}.contains(character));
+    CORRADE_VERIFY(Containers::StringView{string}.contains('_'));
+}
+
+void StringBenchmark::replaceAllInPlaceCharacterCommonSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterSmallData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterSmallData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    Containers::String string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::MutableStringView a = string.sliceSize((i++)*_text->size(), _text->size());
+        while(a) {
+            Containers::MutableStringView prefix = a.prefix(Utility::min(data.size, a.size()));
+            String::replaceAllInPlace(prefix, ' ', '_');
+            a = a.suffix(prefix.end());
+        }
+    }
+
+    CORRADE_VERIFY(!string.contains(' '));
+    CORRADE_VERIFY(string.contains('_'));
+}
+
+void StringBenchmark::replaceAllInPlaceCharacterCommonSmallStl() {
+    #if defined(CORRADE_TARGET_DINKUMWARE) && defined(CORRADE_IS_DEBUG_BUILD)
+    CORRADE_SKIP("Takes too long on MSVC's STL in debug mode.");
+    #endif
+
+    CORRADE_VERIFY(_text);
+
+    /* Yes, making a std::string, to have it perform VERY NICE with the STL
+       iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string string = *_text*CharacterRepeats;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        auto offset = string.begin() + (i++)*_text->size();
+        auto sliceEnd = offset + _text->size();
+        while(offset != sliceEnd) {
+            auto end = Utility::min(offset + 15, sliceEnd);
+            std::replace(offset, end, ' ', '_');
+            offset = end;
+        }
+    }
+
+    CORRADE_VERIFY(!Containers::StringView{string}.contains(' '));
+    CORRADE_VERIFY(Containers::StringView{string}.contains('_'));
 }
 
 }}}}

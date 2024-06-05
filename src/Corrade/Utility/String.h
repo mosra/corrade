@@ -661,6 +661,11 @@ views.
 */
 CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::String string, char search, char replace);
 
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(replaceAllInPlaceCharacter)(char* data, std::size_t size, char search, char replace);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(replaceAllInPlaceCharacter)
+}
+
 /**
 @brief Replace all occurrences of a character in a string with another character in-place
 @m_since_latest
@@ -669,7 +674,9 @@ CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::String string, 
     @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
     @ref replaceFirst()
 */
-CORRADE_UTILITY_EXPORT void replaceAllInPlace(Containers::MutableStringView string, char search, char replace);
+inline void replaceAllInPlace(const Containers::MutableStringView string, const char search, const char replace) {
+    Implementation::replaceAllInPlaceCharacter(string.data(), string.size(), search, replace);
+}
 
 /**
 @brief Parse a number sequence

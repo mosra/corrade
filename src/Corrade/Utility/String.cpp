@@ -883,12 +883,24 @@ Containers::String replaceAll(Containers::String string, const char search, cons
     return string;
 }
 
-void replaceAllInPlace(const Containers::MutableStringView string, const char search, const char replace) {
-    /** @todo SIMD, could use something similar to what's in find(char)
-        internals but instead of the complicated/slow way of converting
-        the mask to a position and then replacing the byte at given position
-        (and losing all other matches) simply just replace the mask */
-    for(char& c: string) if(c == search) c = replace;
+namespace Implementation {
+
+namespace {
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::ScalarT) {
+    return [](char* const data, const std::size_t size, const char search, const char replace) {
+        for(char* i = data, *end = data + size; i != end; ++i)
+            if(*i == search) *i = replace;
+    };
+}
+
+}
+
+CORRADE_UTILITY_CPU_DISPATCHER_BASE(replaceAllInPlaceCharacterImplementation)
+CORRADE_UTILITY_CPU_DISPATCHED(replaceAllInPlaceCharacterImplementation, void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(replaceAllInPlaceCharacter)(char* data, std::size_t size, char search, char replace))({
+    return replaceAllInPlaceCharacterImplementation(Cpu::DefaultBase)(data, size, search, replace);
+})
+
 }
 
 Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {
