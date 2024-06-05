@@ -233,6 +233,29 @@ namespace Implementation {
 
 namespace {
 
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(Cpu::ScalarT) {
+  return [](const char* const a, const char* const b, const std::size_t sizeA, const std::size_t sizeB) {
+    const std::size_t size = Utility::min(sizeA, sizeB);
+    const char* const endA = a + size;
+    for(const char *i = a, *j = b; i != endA; ++i, ++j)
+        if(*i != *j) return i;
+    return endA;
+  };
+}
+
+}
+
+CORRADE_UTILITY_CPU_DISPATCHER_BASE(commonPrefixImplementation)
+CORRADE_UTILITY_CPU_DISPATCHED(commonPrefixImplementation, const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB))({
+    return commonPrefixImplementation(Cpu::DefaultBase)(a, b, sizeA, sizeB);
+})
+
+}
+
+namespace Implementation {
+
+namespace {
+
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(lowercaseInPlace)>::type lowercaseInPlaceImplementation(Cpu::ScalarT) {
   return [](char* data, const std::size_t size) {
     /* A proper Unicode-aware *and* locale-aware solution would involve far

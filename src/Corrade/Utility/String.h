@@ -423,6 +423,22 @@ inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings
 }
 
 namespace Implementation {
+    CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(commonPrefix)
+}
+
+/**
+@brief Longest common prefix of two strings
+@m_since_latest
+
+The returned view is a prefix of @p a.
+@see @ref Containers::StringView::prefix()
+*/
+inline Containers::StringView commonPrefix(Containers::StringView a, Containers::StringView b) {
+    return a.prefix(Implementation::commonPrefix(a.data(), b.data(), a.size(), b.size()));
+}
+
+namespace Implementation {
     CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
     CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
     CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)

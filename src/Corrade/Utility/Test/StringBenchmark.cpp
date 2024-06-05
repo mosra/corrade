@@ -53,6 +53,14 @@ struct StringBenchmark: TestSuite::Tester {
     void captureImplementations();
     void restoreImplementations();
 
+    template<char character> void commonPrefix();
+    template<char character> void commonPrefixNaive();
+    template<char character> void commonPrefixStl();
+
+    void commonPrefixCommonSmall();
+    void commonPrefixCommonSmallStl();
+    void commonPrefixRareMemcmp();
+
     void lowercase();
     void lowercaseBranchless();
     void lowercaseBranchless32();
@@ -88,6 +96,7 @@ struct StringBenchmark: TestSuite::Tester {
     private:
         Containers::Optional<Containers::String> _text;
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(String::Implementation::commonPrefix) _commonPrefixImplementation;
         decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
         decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
         decltype(String::Implementation::replaceAllInPlaceCharacter) _replaceAllInPlaceCharacterImplementation;
@@ -98,10 +107,25 @@ using namespace Containers::Literals;
 
 template<char> struct CharacterTraits;
 template<> struct CharacterTraits<' '> {
+    enum: std::size_t { Count = 500 };
     static const char* name() { return "common"; }
 };
 template<> struct CharacterTraits<'\n'> {
+    enum: std::size_t { Count = 9 };
     static const char* name() { return "rare"; }
+};
+
+const struct {
+    Cpu::Features features;
+} CommonPrefixData[]{
+    {Cpu::Scalar},
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} CommonPrefixSmallData[]{
+    {Cpu::Scalar, 15},
 };
 
 const struct {
@@ -301,6 +325,33 @@ const struct {
 };
 
 StringBenchmark::StringBenchmark() {
+    addInstancedBenchmarks({&StringBenchmark::commonPrefix<' '>}, 100,
+        cpuVariantCount(CommonPrefixData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks<StringBenchmark>({
+        &StringBenchmark::commonPrefixNaive<' '>,
+        &StringBenchmark::commonPrefixStl<' '>}, 20);
+
+    addInstancedBenchmarks({&StringBenchmark::commonPrefixCommonSmall}, 100,
+        cpuVariantCount(CommonPrefixSmallData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks({&StringBenchmark::commonPrefixCommonSmallStl}, 20);
+
+    addInstancedBenchmarks({&StringBenchmark::commonPrefix<'\n'>}, 100,
+        cpuVariantCount(CommonPrefixData),
+        &StringBenchmark::captureImplementations,
+        &StringBenchmark::restoreImplementations);
+
+    addBenchmarks<StringBenchmark>({
+        &StringBenchmark::commonPrefixRareMemcmp,
+
+        &StringBenchmark::commonPrefixNaive<'\n'>,
+        &StringBenchmark::commonPrefixStl<'\n'>}, 100);
+
     addInstancedBenchmarks({&StringBenchmark::lowercase}, 100,
         cpuVariantCount(LowercaseData),
         &StringBenchmark::captureImplementations,
@@ -369,6 +420,7 @@ StringBenchmark::StringBenchmark() {
 
 void StringBenchmark::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    _commonPrefixImplementation = String::Implementation::commonPrefix;
     _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
     _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
     _replaceAllInPlaceCharacterImplementation = String::Implementation::replaceAllInPlaceCharacter;
@@ -377,6 +429,7 @@ void StringBenchmark::captureImplementations() {
 
 void StringBenchmark::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    String::Implementation::commonPrefix = _commonPrefixImplementation;
     String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
     String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
     String::Implementation::replaceAllInPlaceCharacter = _replaceAllInPlaceCharacterImplementation;
@@ -384,6 +437,203 @@ void StringBenchmark::restoreImplementations() {
 }
 
 constexpr std::size_t CharacterRepeats = 100;
+
+template<char character> void StringBenchmark::commonPrefix() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {}",
+        CharacterTraits<character>::name(),
+        Utility::Test::cpuVariantName(data)));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    /* This works similarly to StringViewBenchmark::findCharacterCommon(),
+       except that while there it was finding the next space, here the common
+       prefix is until the next space that got changed to an underscore. */
+
+    Containers::String string = *_text;
+    String::replaceAllInPlace(string, character, '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::StringView a = string;
+        Containers::StringView b = *_text;
+        for(;;) {
+            Containers::StringView prefix = String::commonPrefix(a, b);
+            if(prefix.end() == a.end())
+                break;
+            ++count;
+            a = a.exceptPrefix(prefix.size() + 1);
+            b = b.exceptPrefix(prefix.size() + 1);
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+template<char character> void StringBenchmark::commonPrefixNaive() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    /* This works similarly to StringViewBenchmark::findCharacterCommonNaive(),
+       except that while there it was finding the next space, here the common
+       prefix is until the next space that got changed to an underscore. */
+
+    Containers::String string = *_text;
+    String::replaceAllInPlace(string, character, '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::StringView a = string;
+        Containers::StringView b = *_text;
+        for(;;) {
+            std::size_t j = 0;
+            for(; j != a.size(); ++j) {
+                if(a[j] != b[j])
+                    break;
+            }
+            if(j == a.size())
+                break;
+
+            ++count;
+            a = a.exceptPrefix(j + 1);
+            b = b.exceptPrefix(j + 1);
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+template<char character> void StringBenchmark::commonPrefixStl() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    CORRADE_VERIFY(_text);
+
+    /* Yes, making a std::string, to have it perform VERY NICE with the STL
+       iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string string = *_text;
+    String::replaceAllInPlace(string, character, '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        auto beginA = string.begin();
+        auto beginB = _text->begin();
+        auto endA = string.end();
+        for(;;) {
+            auto mismatch = std::mismatch(beginA, endA, beginB);
+            if(mismatch.first == endA)
+                break;
+            ++count;
+            beginA = mismatch.first + 1;
+            beginB = mismatch.second + 1;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
+}
+
+void StringBenchmark::commonPrefixCommonSmall() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixSmallData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixSmallData);
+    #endif
+    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* This works similarly to StringViewBenchmark::findCharacterCommonSmall(),
+       except that while there it was finding the next space, here the common
+       prefix is until the next space that got changed to an underscore. */
+
+    Containers::String string = *_text;
+    String::replaceAllInPlace(string, ' ', '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::StringView a = string;
+        Containers::StringView b = *_text;
+        for(;;) {
+            Containers::StringView prefix = String::commonPrefix(a.prefix(Utility::min(data.size, a.size())), b);
+            if(prefix.end() == a.end())
+                break;
+            ++count;
+            a = a.exceptPrefix(prefix.size() + 1);
+            b = b.exceptPrefix(prefix.size() + 1);
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
+}
+
+void StringBenchmark::commonPrefixCommonSmallStl() {
+    #if defined(CORRADE_TARGET_DINKUMWARE) && defined(CORRADE_IS_DEBUG_BUILD)
+    CORRADE_SKIP("Takes too long on MSVC's STL in debug mode.");
+    #endif
+
+    CORRADE_VERIFY(_text);
+
+    /* Yes, making a std::string, to have it perform VERY NICE with the STL
+       iterators -- it'd be cheating to pass a pair of pointers there */
+    std::string string = *_text;
+    String::replaceAllInPlace(string, ' ', '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        auto beginA = string.begin();
+        auto beginB = _text->begin();
+        auto endA = string.end();
+        for(;;) {
+            auto mismatch = std::mismatch(beginA, Utility::min(beginA + 15, endA), beginB);
+            if(mismatch.first == endA)
+                break;
+            ++count;
+            beginA = mismatch.first + 1;
+            beginB = mismatch.second + 1;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
+}
+
+void StringBenchmark::commonPrefixRareMemcmp() {
+    CORRADE_VERIFY(_text);
+
+    /* Mainly to have a comparison for the tight loop performance in our
+       implementation. As memcmp doesn't give back the position of the
+       difference but just *how* they're different, call it explicitly on all
+       subslices that have the last byte different to make the operation as
+       close as possible to what commonPrefix() does */
+    std::size_t offsets[CharacterTraits<'\n'>::Count + 1];
+    offsets[0] = 0;
+    for(std::size_t i = 1; i != Containers::arraySize(offsets); ++i)
+        offsets[i] = _text->exceptPrefix(offsets[i - 1]).find('\n').begin() - _text->begin() + 1;
+    CORRADE_VERIFY(!_text->exceptPrefix(offsets[Containers::arraySize(offsets) - 1]).find('\n'));
+
+    Containers::String string = *_text;
+    String::replaceAllInPlace(string, '\n', '_');
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::StringView a = string;
+        Containers::StringView b = *_text;
+        for(std::size_t i = 0; i != Containers::arraySize(offsets); ++i) {
+            count += std::memcmp(a.data() + offsets[i], b.data() + offsets[i], _text->size() - offsets[i]) ? 1 : 0;
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<'\n'>::Count*CharacterRepeats);
+}
 
 void StringBenchmark::lowercase() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH

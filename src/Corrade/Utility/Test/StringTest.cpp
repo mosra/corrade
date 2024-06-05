@@ -57,6 +57,9 @@ struct StringTest: TestSuite::Tester {
     void splitMultipleCharacters();
     void partition();
     void join();
+
+    void commonPrefix();
+
     void lowercaseUppercase();
     void lowercaseUppercaseAligned();
     void lowercaseUppercaseUnaligned();
@@ -108,10 +111,18 @@ struct StringTest: TestSuite::Tester {
 
     private:
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+        decltype(String::Implementation::commonPrefix) _commonPrefixImplementation;
         decltype(String::Implementation::lowercaseInPlace) _lowercaseInPlaceImplementation;
         decltype(String::Implementation::uppercaseInPlace) _uppercaseInPlaceImplementation;
         decltype(String::Implementation::replaceAllInPlaceCharacter) _replaceAllInPlaceCharacterImplementation;
         #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t vectorSize;
+} CommonPrefixData[]{
+    {Cpu::Scalar, 16}
 };
 
 const struct {
@@ -253,6 +264,11 @@ StringTest::StringTest() {
               &StringTest::partition,
               &StringTest::join});
 
+    addInstancedTests({&StringTest::commonPrefix},
+        cpuVariantCount(CommonPrefixData),
+        &StringTest::captureImplementations,
+        &StringTest::restoreImplementations);
+
     addInstancedTests({&StringTest::lowercaseUppercase,
                        &StringTest::lowercaseUppercaseAligned,
                        &StringTest::lowercaseUppercaseUnaligned,
@@ -318,6 +334,7 @@ using namespace Containers::Literals;
 
 void StringTest::captureImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    _commonPrefixImplementation = String::Implementation::commonPrefix;
     _lowercaseInPlaceImplementation = String::Implementation::lowercaseInPlace;
     _uppercaseInPlaceImplementation = String::Implementation::uppercaseInPlace;
     _replaceAllInPlaceCharacterImplementation = String::Implementation::replaceAllInPlaceCharacter;
@@ -326,6 +343,7 @@ void StringTest::captureImplementations() {
 
 void StringTest::restoreImplementations() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    String::Implementation::commonPrefix = _commonPrefixImplementation;
     String::Implementation::lowercaseInPlace = _lowercaseInPlaceImplementation;
     String::Implementation::uppercaseInPlace = _uppercaseInPlaceImplementation;
     String::Implementation::replaceAllInPlaceCharacter = _replaceAllInPlaceCharacterImplementation;
@@ -596,6 +614,79 @@ void StringTest::join() {
         "ab//c/def//");
     CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}, '/'),
         "ab/c/def");
+}
+
+void StringTest::commonPrefix() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    Containers::StringView a = "path/to/somewhere!"_s.exceptSuffix(1);
+    CORRADE_COMPARE(a.flags(), Containers::StringViewFlag::Global);
+
+    /* Usual case. The returned view should be a slice of the first argument,
+       preserving its flags as well. */
+    {
+        Containers::StringView b = "path/to/someother/location";
+        CORRADE_COMPARE(b.flags(), Containers::StringViewFlag::NullTerminated);
+
+        Containers::StringView prefix1 = String::commonPrefix(a, b);
+        Containers::StringView prefix2 = String::commonPrefix(b, a);
+        CORRADE_COMPARE(prefix1, "path/to/some");
+        CORRADE_COMPARE(prefix2, "path/to/some");
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(b.data()));
+        CORRADE_COMPARE(prefix1.flags(), Containers::StringViewFlag::Global);
+        /* Slicing a null-terminated array loses that flag */
+        CORRADE_COMPARE(prefix2.flags(), Containers::StringViewFlags{});
+
+    /* The whole string matches, thus null-termination is preserved as well */
+    } {
+        Containers::StringView b = "path/to/somewhere";
+        CORRADE_COMPARE(b.flags(), Containers::StringViewFlag::NullTerminated);
+
+        Containers::StringView prefix1 = String::commonPrefix(a, b);
+        Containers::StringView prefix2 = String::commonPrefix(b, a);
+        CORRADE_COMPARE(prefix1, "path/to/somewhere");
+        CORRADE_COMPARE(prefix2, "path/to/somewhere");
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(b.data()));
+        CORRADE_COMPARE(prefix1.flags(), Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(prefix2.flags(), Containers::StringViewFlag::NullTerminated);
+
+    /* Difference at the first letter already, should return an empty prefix
+       but still preserve the data pointer and flags */
+    } {
+        Containers::StringView prefix = String::commonPrefix(a, "/path");
+        CORRADE_COMPARE(prefix, "");
+        CORRADE_COMPARE(prefix.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(prefix.flags(), Containers::StringViewFlag::Global);
+
+    /* Empty strings, should still preserve the data pointer and flags as
+       well */
+    } {
+        Containers::StringView empty = "!"_s.exceptSuffix(1);
+        Containers::StringView b = "";
+        CORRADE_COMPARE(empty.flags(), Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(b.flags(), Containers::StringViewFlag::NullTerminated);
+
+        Containers::StringView prefix1 = String::commonPrefix(a, b);
+        Containers::StringView prefix2 = String::commonPrefix(b, a);
+        CORRADE_COMPARE(prefix1, "");
+        CORRADE_COMPARE(prefix2, "");
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(b.data()));
+        CORRADE_COMPARE(prefix1.flags(), Containers::StringViewFlag::Global);
+        CORRADE_COMPARE(prefix2.flags(), Containers::StringViewFlag::NullTerminated);
+
+    /* Null terminator in the middle shouldn't break things */
+    } {
+        CORRADE_COMPARE(String::commonPrefix("abc\0de"_s, "abc\0df"_s), "abc\0d"_s);
+    }
 }
 
 constexpr char AllBytes[]{

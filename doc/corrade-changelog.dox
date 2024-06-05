@@ -228,6 +228,8 @@ namespace Corrade {
     together with @ref Utility::String::lowercase() and
     @relativeref{Utility::String,uppercase()} overloads taking a
     @ref Containers::StringView
+.   New @ref Utility::String::commonPrefix() utility to return the longest
+    common prefix of two strings
 -   New @ref Utility::String::parseNumberSequence() utility for parsing number
     sequences such as `1-3,5,17`, useful especially for convenient command-line
     APIs
