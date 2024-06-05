@@ -230,15 +230,39 @@ const struct {
 
 const struct {
     Cpu::Features features;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*function)(char*, std::size_t, char, char);
 } ReplaceAllInPlaceCharacterData[]{
-    {Cpu::Scalar},
+    {Cpu::Scalar, nullptr, nullptr},
+    #ifdef CORRADE_ENABLE_SSE41
+    {Cpu::Sse41, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse41, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationSse41Unconditional},
+    #endif
+    #endif
 };
 
 const struct {
     Cpu::Features features;
     std::size_t size;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*function)(char*, std::size_t, char, char);
 } ReplaceAllInPlaceCharacterSmallData[]{
-    {Cpu::Scalar, 15},
+    {Cpu::Scalar, 15, nullptr, nullptr},
+    #ifdef CORRADE_ENABLE_SSE41
+    /* This should fall back to the scalar case */
+    {Cpu::Sse41, 15, nullptr, nullptr},
+    /* This should do one unaligned vector operation, skipping the rest */
+    {Cpu::Sse41, 16, nullptr, nullptr},
+    /* This should do two overlapping unaligned vector operations */
+    {Cpu::Sse41, 17, nullptr, nullptr},
+    #endif
+    #endif
 };
 
 StringBenchmark::StringBenchmark() {
@@ -637,13 +661,15 @@ void StringBenchmark::uppercaseSmallBranchless() {
 template<char character> void StringBenchmark::replaceAllInPlaceCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
-    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
     #endif
-    setTestCaseDescription(Utility::format( "{}, {}",
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}, {}" : "{}, {}",
         CharacterTraits<character>::name(),
-        Utility::Test::cpuVariantName(data)));
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -716,11 +742,14 @@ template<char character> void StringBenchmark::replaceAllInPlaceCharacterStl() {
 void StringBenchmark::replaceAllInPlaceCharacterCommonSmall() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = ReplaceAllInPlaceCharacterSmallData[testCaseInstanceId()];
-    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterSmallData);
     #endif
-    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {} bytes, {}" : "{}, {} bytes",
+        Utility::Test::cpuVariantName(data), data.size, data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");

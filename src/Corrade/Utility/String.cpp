@@ -38,6 +38,9 @@
 #ifdef CORRADE_ENABLE_SSE2
 #include "Corrade/Utility/IntrinsicsSse2.h"
 #endif
+#ifdef CORRADE_ENABLE_SSE41
+#include "Corrade/Utility/IntrinsicsSse4.h"
+#endif
 #ifdef CORRADE_ENABLE_AVX2
 #include "Corrade/Utility/IntrinsicsAvx.h"
 #endif
@@ -886,6 +889,115 @@ Containers::String replaceAll(Containers::String string, const char search, cons
 namespace Implementation {
 
 namespace {
+
+/* SIMD implementation of character replacement. All tricks inherited from
+   stringFindCharacterImplementation(), in particular the unaligned preamble
+   and postamble, as well as reducing the branching overhead by going through
+   four vectors at a time. See its documentation for more background info. */
+#ifdef CORRADE_ENABLE_SSE41
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE41 typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::Sse41T) {
+  return [](char* const data, const std::size_t size, const char search, const char replace) CORRADE_ENABLE_SSE41 {
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo that this worked best for stringFindCharacterImplementation()
+        doesn't mean it's the best variant here as well */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    const __m128i vsearch = _mm_set1_epi8(search);
+    const __m128i vreplace = _mm_set1_epi8(replace);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll process some bytes twice. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Unconditionally process the first vector a slower, unaligned way. Do the
+       replacement unconditionally because it's faster than checking first. */
+    {
+        const __m128i in = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        const __m128i out = _mm_blendv_epi8(in, vreplace, _mm_cmpeq_epi8(in, vsearch));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), out);
+    }
+
+    /* Go four aligned vectors at a time. Bytes overlapping with the previous
+       unaligned load will be processed twice, but as everything is already
+       replaced there, it'll be a no-op for those. Similarly to the find()
+       implementation, this reduces the branching overhead compared to
+       branching on every vector, making it comparable to an unconditional
+       replace with a character that occurs often, but significantly faster for
+       characters that are rare. For comparison see StringTest.h and the
+       replaceAllInPlaceCharacterImplementationSse41Unconditional() variant. */
+    char* const end = data + size;
+    for(; i + 4*16 <= end; i += 4*16) {
+        const __m128i inA = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
+        const __m128i inB = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
+        const __m128i inC = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
+        const __m128i inD = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 3);
+
+        const __m128i eqA = _mm_cmpeq_epi8(inA, vsearch);
+        const __m128i eqB = _mm_cmpeq_epi8(inB, vsearch);
+        const __m128i eqC = _mm_cmpeq_epi8(inC, vsearch);
+        const __m128i eqD = _mm_cmpeq_epi8(inD, vsearch);
+
+        const __m128i or1 = _mm_or_si128(eqA, eqB);
+        const __m128i or2 = _mm_or_si128(eqC, eqD);
+        const __m128i or3 = _mm_or_si128(or1, or2);
+        /* If any of the four vectors contained the character, replace all of
+           them -- branching again on each would hurt the "common character"
+           case */
+        if(_mm_movemask_epi8(or3)) {
+            const __m128i outA = _mm_blendv_epi8(inA, vreplace, eqA);
+            const __m128i outB = _mm_blendv_epi8(inB, vreplace, eqB);
+            const __m128i outC = _mm_blendv_epi8(inC, vreplace, eqC);
+            const __m128i outD = _mm_blendv_epi8(inD, vreplace, eqD);
+
+            _mm_store_si128(reinterpret_cast<__m128i*>(i) + 0, outA);
+            _mm_store_si128(reinterpret_cast<__m128i*>(i) + 1, outB);
+            _mm_store_si128(reinterpret_cast<__m128i*>(i) + 2, outC);
+            _mm_store_si128(reinterpret_cast<__m128i*>(i) + 3, outD);
+        }
+    }
+
+    /* Handle remaining less than four aligned vectors. Again do the
+       replacement unconditionally. */
+    for(; i + 16 <= end; i += 16) {
+        const __m128i in = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        const __m128i out = _mm_blendv_epi8(in, vreplace, _mm_cmpeq_epi8(in, vsearch));
+        _mm_store_si128(reinterpret_cast<__m128i*>(i), out);
+    }
+
+    /* Handle remaining less than a vector in an unaligned way, again
+       unconditionally and again overlapping bytes are no-op. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const __m128i in = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        const __m128i out = _mm_blendv_epi8(in, vreplace, _mm_cmpeq_epi8(in, vsearch));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), out);
+    }
+  };
+}
+#endif
 
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::ScalarT) {
     return [](char* const data, const std::size_t size, const char search, const char replace) {

@@ -97,6 +97,10 @@ struct StringTest: TestSuite::Tester {
     void replaceAllCharacterNonOwned();
 
     void replaceAllInPlaceCharacter();
+    void replaceAllInPlaceCharacterAligned();
+    void replaceAllInPlaceCharacterUnaligned();
+    void replaceAllInPlaceCharacterLessThanTwoVectors();
+    void replaceAllInPlaceCharacterLessThanOneVector();
 
     void parseNumberSequence();
     void parseNumberSequenceOverflow();
@@ -142,8 +146,19 @@ const struct {
 const struct {
     Cpu::Features features;
     std::size_t vectorSize;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*function)(char*, std::size_t, char, char);
 } ReplaceAllInPlaceCharacterData[]{
-    {Cpu::Scalar, 16},
+    {Cpu::Scalar, 16, nullptr, nullptr},
+    #ifdef CORRADE_ENABLE_SSE41
+    {Cpu::Sse41, 16, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse41, 16, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationSse41Unconditional},
+    #endif
+    #endif
 };
 
 const struct {
@@ -267,7 +282,11 @@ StringTest::StringTest() {
               &StringTest::replaceAllCharacterSmall,
               &StringTest::replaceAllCharacterNonOwned});
 
-    addInstancedTests({&StringTest::replaceAllInPlaceCharacter},
+    addInstancedTests({&StringTest::replaceAllInPlaceCharacter,
+                       &StringTest::replaceAllInPlaceCharacterAligned,
+                       &StringTest::replaceAllInPlaceCharacterUnaligned,
+                       &StringTest::replaceAllInPlaceCharacterLessThanTwoVectors,
+                       &StringTest::replaceAllInPlaceCharacterLessThanOneVector},
         cpuVariantCount(ReplaceAllInPlaceCharacterData),
         &StringTest::captureImplementations,
         &StringTest::restoreImplementations);
@@ -1281,11 +1300,14 @@ void StringTest::replaceAllCharacterNonOwned() {
 void StringTest::replaceAllInPlaceCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
-    String::Implementation::replaceAllInPlaceCharacter = String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -1293,6 +1315,181 @@ void StringTest::replaceAllInPlaceCharacter() {
     char string[] = "we? are? loud??";
     String::replaceAllInPlace(string, '?', '!');
     CORRADE_COMPARE(string, "we! are! loud!!"_s);
+}
+
+void StringTest::replaceAllInPlaceCharacterAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, with 4 vectors
+       in total, corresponding to the code paths:
+        - the first vector before the aligned block, handled by the unaligned
+          preamble
+        - then two four-at-a-time blocks
+        - then three more blocks after, handled by the aligned postamble
+        - nothing left to be handled by the unaligned postamble
+
+        +----+    +----+----+----+----+    +----+----+----+
+        |    |    |    |    |    |    |x2  |    |    |    |
+        +----+    +----+----+----+----+    +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = arrayView(a);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. The extra characters are then cut
+       off. */
+    const std::size_t count = data.vectorSize*3/4;
+
+    Utility::copy(("H e ll o w or ld!"_s*count).exceptSuffix(count), string);
+    String::replaceAllInPlace(string, ' ', '-');
+    CORRADE_COMPARE(string, ("H-e-ll-o-w-or-ld!"_s*count).exceptSuffix(count));
+}
+
+void StringTest::replaceAllInPlaceCharacterUnaligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing:
+        - the first unaligned vector having all bytes but one overlapping with
+          the aligned block
+        - there being three aligned blocks (the if() branch that skips
+          the block was sufficiently tested in
+          replaceAllInPlaceCharacterAligned())
+        - the last unaligned vector overlapping with all but one byte with it
+
+        +----+      +----+
+        |    |      |    |
+        +----+      +----+
+         +----+----+----+
+         |    |    |    |
+         +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 3 + 1));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
+    CORRADE_COMPARE(string.size(), data.vectorSize*3 + 2);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
+    const std::size_t count = data.vectorSize/4;
+
+    Utility::copy(("H e ll o w or ld!"_s*count).prefix(string.size()), string);
+    String::replaceAllInPlace(string, ' ', '-');
+    CORRADE_COMPARE(string, ("H-e-ll-o-w-or-ld!"_s*count).prefix(string.size()));
+}
+
+void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
+       so there's just two unaligned blocks overlapping in a single byte:
+
+           +----+
+           |    |
+           +----+
+        | .. | .. | .. |
+               +----+
+               |    |
+               +----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
+    const std::size_t count = data.vectorSize/8;
+
+    Utility::copy(("H e ll o w or ld!"_s*count).prefix(string.size()), string);
+    String::replaceAllInPlace(string, ' ', '-');
+    CORRADE_COMPARE(string, ("H-e-ll-o-w-or-ld!"_s*count).prefix(string.size()));
+}
+
+void StringTest::replaceAllInPlaceCharacterLessThanOneVector() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = ReplaceAllInPlaceCharacterData[testCaseInstanceId()];
+    String::Implementation::replaceAllInPlaceCharacter = data.function ? data.function :
+        String::Implementation::replaceAllInPlaceCharacterImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(ReplaceAllInPlaceCharacterData);
+    #endif
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
+       pointer even though it shouldn't matter here. */
+    Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
+    Containers::MutableStringView string = a.exceptPrefix(1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
+    const std::size_t count = data.vectorSize/16;
+
+    Utility::copy(("H e ll o w or ld!"_s*count).prefix(string.size()), string);
+    String::replaceAllInPlace(string, ' ', '-');
+    CORRADE_COMPARE(string, ("H-e-ll-o-w-or-ld!"_s*count).prefix(string.size()));
 }
 
 void StringTest::parseNumberSequence() {
