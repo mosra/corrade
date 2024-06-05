@@ -135,7 +135,7 @@ const struct {
     /* The 64-bit variants of POPCNT and BMI1 instructions aren't exposed on
        32-bit systems, and no 32-bit fallback is implemented. See the source
        for details. */
-    #if defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+    #if defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT) && defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH)
     {Cpu::Popcnt, bitCountSetImplementationPopcnt},
     #endif
     #if defined(CORRADE_ENABLE_POPCNT) && defined(CORRADE_ENABLE_BMI1) && !defined(CORRADE_TARGET_32BIT)

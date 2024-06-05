@@ -26,6 +26,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
 /* Contains additional variants of BitArrayView algorithms that are included
    just for historical / testing / benchmark comparison purposes; referenced
    explicitly via function pointers from the respective test case and benchmark
@@ -140,5 +141,6 @@ CORRADE_NEVER_INLINE CORRADE_ENABLE_POPCNT typename std::size_t bitCountSetImple
 #endif
 
 }}}}
+#endif
 
 #endif
