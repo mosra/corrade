@@ -210,7 +210,7 @@ const struct {
 };
 
 StringBenchmark::StringBenchmark() {
-    addInstancedBenchmarks({&StringBenchmark::lowercase}, 10,
+    addInstancedBenchmarks({&StringBenchmark::lowercase}, 100,
         cpuVariantCount(LowercaseData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
@@ -219,9 +219,9 @@ StringBenchmark::StringBenchmark() {
                    &StringBenchmark::lowercaseBranchless32,
                    &StringBenchmark::lowercaseNaive,
                    &StringBenchmark::lowercaseStl,
-                   &StringBenchmark::lowercaseStlFacet}, 10);
+                   &StringBenchmark::lowercaseStlFacet}, 20);
 
-    addInstancedBenchmarks({&StringBenchmark::uppercase}, 10,
+    addInstancedBenchmarks({&StringBenchmark::uppercase}, 100,
         cpuVariantCount(UppercaseData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
@@ -230,21 +230,21 @@ StringBenchmark::StringBenchmark() {
                    &StringBenchmark::uppercaseBranchless32,
                    &StringBenchmark::uppercaseNaive,
                    &StringBenchmark::uppercaseStl,
-                   &StringBenchmark::uppercaseStlFacet}, 10);
+                   &StringBenchmark::uppercaseStlFacet}, 20);
 
-    addInstancedBenchmarks({&StringBenchmark::lowercaseSmall}, 10,
+    addInstancedBenchmarks({&StringBenchmark::lowercaseSmall}, 100,
         cpuVariantCount(LowercaseSmallData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringBenchmark::lowercaseSmallBranchless}, 10);
+    addBenchmarks({&StringBenchmark::lowercaseSmallBranchless}, 20);
 
-    addInstancedBenchmarks({&StringBenchmark::uppercaseSmall}, 10,
+    addInstancedBenchmarks({&StringBenchmark::uppercaseSmall}, 100,
         cpuVariantCount(UppercaseSmallData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringBenchmark::uppercaseSmallBranchless}, 10);
+    addBenchmarks({&StringBenchmark::uppercaseSmallBranchless}, 20);
 
     _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
 }
@@ -263,6 +263,8 @@ void StringBenchmark::restoreImplementations() {
     #endif
 }
 
+constexpr std::size_t CharacterRepeats = 100;
+
 void StringBenchmark::lowercase() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseData[testCaseInstanceId()];
@@ -279,10 +281,10 @@ void StringBenchmark::lowercase() {
         CORRADE_SKIP("CPU features not supported");
 
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         String::lowercaseInPlace(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
@@ -296,10 +298,10 @@ CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless(Containers::MutableStringVi
 
 void StringBenchmark::lowercaseBranchless() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         lowercaseInPlaceBranchless(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
@@ -316,10 +318,10 @@ CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless32(Containers::MutableString
 
 void StringBenchmark::lowercaseBranchless32() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         lowercaseInPlaceBranchless32(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
@@ -335,10 +337,10 @@ CORRADE_NEVER_INLINE void lowercaseInPlaceNaive(Containers::MutableStringView st
 
 void StringBenchmark::lowercaseNaive() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         lowercaseInPlaceNaive(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('L'));
@@ -347,14 +349,14 @@ void StringBenchmark::lowercaseNaive() {
 
 void StringBenchmark::lowercaseStl() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
        dispatch per character (!!). C++ experts recommend using a lambda here,
        even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10) {
+    CORRADE_BENCHMARK(CharacterRepeats) {
         Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
         std::transform(slice.begin(), slice.end(), slice.begin(), static_cast<int (*)(int)>(std::tolower));
     }
@@ -365,11 +367,11 @@ void StringBenchmark::lowercaseStl() {
 
 void StringBenchmark::lowercaseStlFacet() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10) {
+    CORRADE_BENCHMARK(CharacterRepeats) {
         Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
         std::use_facet<std::ctype<char>>(std::locale::classic()).tolower(slice.begin(), slice.end());
     }
@@ -391,10 +393,10 @@ void StringBenchmark::uppercase() {
         CORRADE_SKIP("CPU features not supported");
 
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         String::uppercaseInPlace(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
@@ -408,10 +410,10 @@ CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless(Containers::MutableStringVi
 
 void StringBenchmark::uppercaseBranchless() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         uppercaseInPlaceBranchless(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
@@ -428,10 +430,10 @@ CORRADE_NEVER_INLINE void uppercaseInPlaceBranchless32(Containers::MutableString
 
 void StringBenchmark::uppercaseBranchless32() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         uppercaseInPlaceBranchless32(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
@@ -447,10 +449,10 @@ CORRADE_NEVER_INLINE void uppercaseInPlaceNaive(Containers::MutableStringView st
 
 void StringBenchmark::uppercaseNaive() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10)
+    CORRADE_BENCHMARK(CharacterRepeats)
         uppercaseInPlaceNaive(string.sliceSize((i++)*_text->size(), _text->size()));
 
     CORRADE_VERIFY(!string.contains('a'));
@@ -459,14 +461,14 @@ void StringBenchmark::uppercaseNaive() {
 
 void StringBenchmark::uppercaseStl() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     /* According to https://twitter.com/MalwareMinigun/status/1087767603647377408,
        std::tolower() / std::toupper() causes a mutex lock and a virtual
        dispatch per character (!!). C++ experts recommend using a lambda here,
        even, but that's even more stupider: https://twitter.com/cjdb_ns/status/1087754367367827456 */
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10) {
+    CORRADE_BENCHMARK(CharacterRepeats) {
         Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
         std::transform(slice.begin(), slice.end(), slice.begin(), static_cast<int (*)(int)>(std::toupper));
     }
@@ -477,11 +479,11 @@ void StringBenchmark::uppercaseStl() {
 
 void StringBenchmark::uppercaseStlFacet() {
     CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
+    Containers::String string = *_text*CharacterRepeats;
 
     /* https://twitter.com/MalwareMinigun/status/1087768362912862208 OMG FFS */
     std::size_t i = 0;
-    CORRADE_BENCHMARK(10) {
+    CORRADE_BENCHMARK(CharacterRepeats) {
         Containers::MutableStringView slice = string.sliceSize((i++)*_text->size(), _text->size());
         std::use_facet<std::ctype<char>>(std::locale::classic()).toupper(slice.begin(), slice.end());
     }
