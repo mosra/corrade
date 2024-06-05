@@ -423,12 +423,10 @@ inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings
 }
 
 namespace Implementation {
-
-CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
-CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
-CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)
-CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(uppercaseInPlace)
-
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(uppercaseInPlace)
 }
 
 /**
