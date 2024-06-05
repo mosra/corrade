@@ -36,9 +36,11 @@
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
+#include "Corrade/Utility/Test/StringTest.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -109,16 +111,29 @@ struct StringTest: TestSuite::Tester {
 const struct {
     Cpu::Features features;
     std::size_t vectorSize;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*lowercaseFunction)(char*, std::size_t);
+    /* uppercase function has no extra variants */
 } LowercaseUppercaseData[]{
-    {Cpu::Scalar, 16},
+    {Cpu::Scalar, 16, nullptr, nullptr},
     #ifdef CORRADE_ENABLE_SSE2
-    {Cpu::Sse2, 16},
+    {Cpu::Sse2, 16, "overflow + compare (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2, 16, "two compares",
+        lowercaseInPlaceImplementationSse2TwoCompares},
+    #endif
     #endif
     #ifdef CORRADE_ENABLE_AVX2
-    {Cpu::Avx2, 32},
+    {Cpu::Avx2, 32, nullptr, nullptr},
+    #endif
+    #if defined(CORRADE_ENABLE_NEON) && defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH)
+    {Cpu::Neon, 16, "trivial port (unused)",
+        lowercaseInPlaceImplementationNeon},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
-    {Cpu::Simd128, 16},
+    {Cpu::Simd128, 16, nullptr, nullptr},
     #endif
 };
 
@@ -643,12 +658,16 @@ constexpr char AllBytesLowercase[]{
 void StringTest::lowercaseUppercase() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
-    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    String::Implementation::lowercaseInPlace = data.lowercaseFunction ? data.lowercaseFunction :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace =
+        String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -725,12 +744,16 @@ void StringTest::lowercaseUppercase() {
 void StringTest::lowercaseUppercaseAligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
-    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    String::Implementation::lowercaseInPlace = data.lowercaseFunction ? data.lowercaseFunction :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace =
+        String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -785,12 +808,16 @@ void StringTest::lowercaseUppercaseAligned() {
 void StringTest::lowercaseUppercaseUnaligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
-    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    String::Implementation::lowercaseInPlace = data.lowercaseFunction ? data.lowercaseFunction :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace =
+        String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -849,12 +876,16 @@ void StringTest::lowercaseUppercaseUnaligned() {
 void StringTest::lowercaseUppercaseLessThanTwoVectors() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
-    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    String::Implementation::lowercaseInPlace = data.lowercaseFunction ? data.lowercaseFunction :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace =
+        String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -909,12 +940,17 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
 void StringTest::lowercaseUppercaseLessThanOneVector() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
-    String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
+    String::Implementation::lowercaseInPlace = data.lowercaseFunction ? data.lowercaseFunction :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
+    String::Implementation::uppercaseInPlace =
+        String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
     auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
+
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
 

@@ -35,13 +35,7 @@
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
-#ifdef CORRADE_ENABLE_SSE2
-#include "Corrade/Utility/IntrinsicsSse2.h"
-#endif
-
-#ifdef CORRADE_ENABLE_NEON
-#include <arm_neon.h>
-#endif
+#include "Corrade/Utility/Test/StringTest.h"
 
 #include "configure.h"
 
@@ -54,12 +48,6 @@ struct StringBenchmark: TestSuite::Tester {
     void restoreImplementations();
 
     void lowercase();
-    #ifdef CORRADE_ENABLE_SSE2
-    void lowercaseSse2TwoCompares();
-    #endif
-    #ifdef CORRADE_ENABLE_NEON
-    void lowercaseNeon();
-    #endif
     void lowercaseBranchless();
     void lowercaseBranchless32();
     void lowercaseNaive();
@@ -95,7 +83,34 @@ using namespace Containers::Literals;
 
 const struct {
     Cpu::Features features;
-} LowercaseUppercaseData[]{
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*function)(char*, std::size_t);
+} LowercaseData[]{
+    {Cpu::Scalar, nullptr, nullptr},
+    #ifdef CORRADE_ENABLE_SSE2
+    {Cpu::Sse2, "overflow + compare (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2, "two compares",
+        lowercaseInPlaceImplementationSse2TwoCompares},
+    #endif
+    #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    {Cpu::Avx2, nullptr, nullptr},
+    #endif
+    #if defined(CORRADE_ENABLE_NEON) && defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH)
+    {Cpu::Neon, "trivial port (unused)",
+        lowercaseInPlaceImplementationNeon},
+    #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    {Cpu::Simd128, nullptr, nullptr},
+    #endif
+};
+
+const struct {
+    Cpu::Features features;
+} UppercaseData[]{
     {Cpu::Scalar},
     #ifdef CORRADE_ENABLE_SSE2
     {Cpu::Sse2},
@@ -111,7 +126,60 @@ const struct {
 const struct {
     Cpu::Features features;
     std::size_t size;
-} LowercaseUppercaseSmallData[]{
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    void(*function)(char*, std::size_t);
+} LowercaseSmallData[]{
+    {Cpu::Scalar, 15, nullptr, nullptr},
+    #ifdef CORRADE_ENABLE_SSE2
+    /* This should fall back to the scalar case */
+    {Cpu::Sse2, 15, "overflow + compare (default)", nullptr},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Sse2, 16, "overflow + compare (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2, 16, "two compares",
+        lowercaseInPlaceImplementationSse2TwoCompares},
+    #endif
+    /* This should do two overlapping vector operations */
+    {Cpu::Sse2, 17, "overflow + compare (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse2, 17, "two compares",
+        lowercaseInPlaceImplementationSse2TwoCompares},
+    #endif
+    #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    /* This should fall back to the SSE2 and then the scalar case */
+    {Cpu::Avx2, 15, nullptr, nullptr},
+    /* This should fall back to the SSE2 case */
+    {Cpu::Avx2, 31, nullptr, nullptr},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Avx2, 32, nullptr, nullptr},
+    /* This should do two overlapping vector operations */
+    {Cpu::Avx2, 33, nullptr, nullptr},
+    #endif
+    #if defined(CORRADE_ENABLE_NEON) && defined(CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH)
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Neon, 16, "trivial port (unused)",
+        lowercaseInPlaceImplementationNeon},
+    /* This should do two overlapping vector operations */
+    {Cpu::Neon, 17, "trivial port (unused)",
+        lowercaseInPlaceImplementationNeon},
+    #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    /* This should fall back to the scalar case */
+    {Cpu::Simd128, 15, nullptr, nullptr},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Simd128, 16, nullptr, nullptr},
+    /* This should do two overlapping vector operations */
+    {Cpu::Simd128, 17, nullptr, nullptr},
+    #endif
+};
+
+const struct {
+    Cpu::Features features;
+    std::size_t size;
+} UppercaseSmallData[]{
     {Cpu::Scalar, 15},
     #ifdef CORRADE_ENABLE_SSE2
     /* This should fall back to the scalar case */
@@ -143,25 +211,18 @@ const struct {
 
 StringBenchmark::StringBenchmark() {
     addInstancedBenchmarks({&StringBenchmark::lowercase}, 10,
-        cpuVariantCount(LowercaseUppercaseData),
+        cpuVariantCount(LowercaseData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
-    addBenchmarks({
-        #ifdef CORRADE_ENABLE_SSE2
-        &StringBenchmark::lowercaseSse2TwoCompares,
-        #endif
-        #ifdef CORRADE_ENABLE_NEON
-        &StringBenchmark::lowercaseNeon,
-        #endif
-        &StringBenchmark::lowercaseBranchless,
-        &StringBenchmark::lowercaseBranchless32,
-        &StringBenchmark::lowercaseNaive,
-        &StringBenchmark::lowercaseStl,
-        &StringBenchmark::lowercaseStlFacet}, 10);
+    addBenchmarks({&StringBenchmark::lowercaseBranchless,
+                   &StringBenchmark::lowercaseBranchless32,
+                   &StringBenchmark::lowercaseNaive,
+                   &StringBenchmark::lowercaseStl,
+                   &StringBenchmark::lowercaseStlFacet}, 10);
 
     addInstancedBenchmarks({&StringBenchmark::uppercase}, 10,
-        cpuVariantCount(LowercaseUppercaseData),
+        cpuVariantCount(UppercaseData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
@@ -172,14 +233,14 @@ StringBenchmark::StringBenchmark() {
                    &StringBenchmark::uppercaseStlFacet}, 10);
 
     addInstancedBenchmarks({&StringBenchmark::lowercaseSmall}, 10,
-        cpuVariantCount(LowercaseUppercaseSmallData),
+        cpuVariantCount(LowercaseSmallData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
     addBenchmarks({&StringBenchmark::lowercaseSmallBranchless}, 10);
 
     addInstancedBenchmarks({&StringBenchmark::uppercaseSmall}, 10,
-        cpuVariantCount(LowercaseUppercaseSmallData),
+        cpuVariantCount(UppercaseSmallData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
 
@@ -204,12 +265,15 @@ void StringBenchmark::restoreImplementations() {
 
 void StringBenchmark::lowercase() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    auto&& data = LowercaseData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = data.function ? data.function :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    auto&& data = cpuVariantCompiled(LowercaseData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -224,154 +288,6 @@ void StringBenchmark::lowercase() {
     CORRADE_VERIFY(!string.contains('L'));
     CORRADE_VERIFY(string.contains('l'));
 }
-
-#ifdef CORRADE_ENABLE_SSE2
-/* An "obvious" variant of the actual SSE2 implementation in
-   String::lowercaseInPlace(). It's the same count of instructions but runs
-   considerably slower for some reason -- maybe because the two compares, or
-   all the bit ops can't be pipelined, compared to bit ops + arithmetic + one
-   compare in the other? I know too little to be sure what's going on so this
-   just records the state. */
-CORRADE_ENABLE_SSE2 CORRADE_NEVER_INLINE void lowercaseInPlaceSse2TwoCompares(Containers::MutableStringView string) {
-    const std::size_t size = string.size();
-    char* const data = string.data();
-    char* const end = data + size;
-
-    /* Omitting the less-than-a-vector fallback here */
-    CORRADE_INTERNAL_DEBUG_ASSERT(size >= 16);
-
-    /* Core algorithm */
-    const __m128i a = _mm_set1_epi8('A');
-    const __m128i z = _mm_set1_epi8('Z');
-    const __m128i lowercaseBit = _mm_set1_epi8(0x20);
-    const auto lowercaseOneVector = [&](const __m128i chars) CORRADE_ENABLE_SSE2 {
-        /* Mark all bytes that aren't A-Z */
-        const __m128i notUppercase = _mm_or_si128(_mm_cmpgt_epi8(a, chars),
-                                                  _mm_cmpgt_epi8(chars, z));
-        /* Inverse the mask, thus only bytes that are A-Z, and for them OR the
-           lowercase bit with the input */
-        return _mm_or_si128(_mm_andnot_si128(notUppercase, lowercaseBit), chars);
-    };
-
-    /* Unconditionally convert the first vector in a slower, unaligned way. Any
-       extra branching to avoid the unaligned load & store if already aligned
-       would be most probably more expensive than the actual operation. */
-    {
-        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), lowercaseOneVector(chars));
-    }
-
-    /* Go to the next aligned position. If the pointer was already aligned,
-       we'll go to the next aligned vector; if not, there will be an overlap
-       and we'll convert some bytes twice. Which is fine, lowercasing
-       already-lowercased data is a no-op. */
-    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
-    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
-
-    /* Convert all aligned vectors using aligned load/store */
-    for(; i + 16 <= end; i += 16) {
-        const __m128i chars = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
-        _mm_store_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
-    }
-
-    /* Handle remaining less than a vector with an unaligned load & store,
-       again overlapping back with the previous already-converted elements */
-    if(i < end) {
-        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
-        i = end - 16;
-        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
-    }
-}
-
-void StringBenchmark::lowercaseSse2TwoCompares() {
-    if(!(Cpu::runtimeFeatures() >= Cpu::Sse2))
-        CORRADE_SKIP(Cpu::Sse2 << "not supported");
-
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text;
-
-    std::size_t i = 0;
-    CORRADE_BENCHMARK(1)
-        lowercaseInPlaceSse2TwoCompares(string.sliceSize((i++)*_text->size(), _text->size()));
-
-    CORRADE_VERIFY(!string.contains('L'));
-    CORRADE_VERIFY(string.contains('l'));
-}
-#endif
-
-#ifdef CORRADE_ENABLE_NEON
-/* Trivial port of the SSE2 code to NEON, with the same "aligned load/store is
-   the same as unaligned" simplification as the WASM code. Included just to
-   have baseline comparison to the scalar code because the compiler seems to
-   autovectorize better than what this function does. */
-CORRADE_ENABLE_NEON void lowercaseInPlaceNeon(Containers::MutableStringView string) {
-    const std::size_t size = string.size();
-    char* const data = string.data();
-    char* const end = data + size;
-
-    /* Omitting the less-than-a-vector fallback here */
-    CORRADE_INTERNAL_DEBUG_ASSERT(size >= 16);
-
-    /* Core algorithm */
-    const uint8x16_t aAndAbove = vdupq_n_u8(char(256u - std::uint8_t('A')));
-    const uint8x16_t lowest25 = vdupq_n_u8(25);
-    const uint8x16_t lowercaseBit = vdupq_n_u8(0x20);
-    const uint8x16_t zero = vdupq_n_u8(0);
-    const auto lowercaseOneVectorInPlace = [&](std::uint8_t* const data) CORRADE_ENABLE_NEON {
-        const uint8x16_t chars = vld1q_u8(data);
-        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
-           around) */
-        const uint8x16_t uppercaseInLowest25 = vaddq_u8(chars, aAndAbove);
-        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
-           (now 0 to 25) zero and everything else non-zero */
-        const uint8x16_t lowest25IsZero = vqsubq_u8(uppercaseInLowest25, lowest25);
-        /* Mask indicating where uppercase letters where, i.e. which values are
-           now zero */
-        const uint8x16_t maskUppercase = vceqq_u8(lowest25IsZero, zero);
-        /* For the masked chars a lowercase bit is set, and the bit is then
-           added to the original chars, making the uppercase chars lowercase */
-        vst1q_u8(data, vaddq_u8(chars, vandq_u8(maskUppercase, lowercaseBit)));
-    };
-
-    /* Unconditionally convert the first unaligned vector */
-    lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(data));
-
-    /* Go to the next aligned position. If the pointer was already aligned,
-       we'll go to the next aligned vector; if not, there will be an overlap
-       and we'll convert some bytes twice. Which is fine, lowercasing
-       already-lowercased data is a no-op. */
-    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
-    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
-
-    /* Convert all aligned vectors */
-    for(; i + 16 <= end; i += 16)
-        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
-
-    /* Handle remaining less than a vector, again overlapping back with the
-       previous already-converted elements, in an unaligned way */
-    if(i < end) {
-        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
-        i = end - 16;
-        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
-    }
-}
-
-void StringBenchmark::lowercaseNeon() {
-    if(!(Cpu::runtimeFeatures() >= Cpu::Neon))
-        CORRADE_SKIP(Cpu::Neon << "not supported");
-
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text;
-
-    std::size_t i = 0;
-    CORRADE_BENCHMARK(1)
-        lowercaseInPlaceNeon(string.sliceSize((i++)*_text->size(), _text->size()));
-
-    CORRADE_VERIFY(!string.contains('L'));
-    CORRADE_VERIFY(string.contains('l'));
-}
-#endif
 
 CORRADE_NEVER_INLINE void lowercaseInPlaceBranchless(Containers::MutableStringView string) {
     for(char& c: string)
@@ -464,10 +380,10 @@ void StringBenchmark::lowercaseStlFacet() {
 
 void StringBenchmark::uppercase() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = LowercaseUppercaseData[testCaseInstanceId()];
+    auto&& data = UppercaseData[testCaseInstanceId()];
     String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseData);
+    auto&& data = cpuVariantCompiled(UppercaseData);
     #endif
     setTestCaseDescription(Utility::Test::cpuVariantName(data));
 
@@ -576,12 +492,15 @@ void StringBenchmark::uppercaseStlFacet() {
 
 void StringBenchmark::lowercaseSmall() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
-    String::Implementation::lowercaseInPlace = String::Implementation::lowercaseInPlaceImplementation(data.features);
+    auto&& data = LowercaseSmallData[testCaseInstanceId()];
+    String::Implementation::lowercaseInPlace = data.function ? data.function :
+        String::Implementation::lowercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseSmallData);
+    auto&& data = cpuVariantCompiled(LowercaseSmallData);
     #endif
-    setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {} bytes, {}" : "{}, {} bytes",
+        Utility::Test::cpuVariantName(data), data.size, data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -615,10 +534,10 @@ void StringBenchmark::lowercaseSmallBranchless() {
 
 void StringBenchmark::uppercaseSmall() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = LowercaseUppercaseSmallData[testCaseInstanceId()];
+    auto&& data = UppercaseSmallData[testCaseInstanceId()];
     String::Implementation::uppercaseInPlace = String::Implementation::uppercaseInPlaceImplementation(data.features);
     #else
-    auto&& data = cpuVariantCompiled(LowercaseUppercaseSmallData);
+    auto&& data = cpuVariantCompiled(UppercaseSmallData);
     #endif
     setTestCaseDescription(Utility::format("{}, {} bytes", Utility::Test::cpuVariantName(data), data.size));
 

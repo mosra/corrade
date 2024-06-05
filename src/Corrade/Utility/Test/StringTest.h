@@ -1,0 +1,207 @@
+#ifndef Corrade_Utility_Test_StringTest_h
+#define Corrade_Utility_Test_StringTest_h
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018, 2019, 2020, 2021, 2022, 2023
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+#ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+/* Contains additional variants of Utility::String algorithms that are included
+   just for historical / testing / benchmark comparison purposes; referenced
+   explicitly via function pointers from the respective test case and benchmark
+   instances. Used by StringTest.cpp and StringBenchmark.cpp. */
+
+#include <cstddef>
+
+#include "Corrade/Cpu.h"
+#ifdef CORRADE_ENABLE_SSE2
+#include "Corrade/Utility/IntrinsicsSse2.h"
+#endif
+
+#ifdef CORRADE_ENABLE_NEON
+#include <arm_neon.h>
+#endif
+
+namespace Corrade { namespace Utility { namespace Test { namespace {
+
+#ifdef CORRADE_ENABLE_SSE2
+/* An "obvious" variant of the actual SSE2 implementation in
+   String::lowercaseInPlace(). It's the same count of instructions but runs
+   considerably slower for some reason -- maybe because the two compares, or
+   all the bit ops can't be pipelined, compared to bit ops + arithmetic + one
+   compare in the other? I know too little to be sure what's going on so this
+   just records the state. */
+CORRADE_ENABLE_SSE2 CORRADE_NEVER_INLINE void lowercaseInPlaceImplementationSse2TwoCompares(char* data, std::size_t size) {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const __m128i a = _mm_set1_epi8('A');
+    const __m128i z = _mm_set1_epi8('Z');
+    const __m128i lowercaseBit = _mm_set1_epi8(0x20);
+    const auto lowercaseOneVector = [&](const __m128i chars) CORRADE_ENABLE_SSE2 {
+        /* Mark all bytes that aren't A-Z */
+        const __m128i notUppercase = _mm_or_si128(_mm_cmpgt_epi8(a, chars),
+                                                  _mm_cmpgt_epi8(chars, z));
+        /* Inverse the mask, thus only bytes that are A-Z, and for them OR the
+           lowercase bit with the input */
+        return _mm_or_si128(_mm_andnot_si128(notUppercase, lowercaseBit), chars);
+    };
+
+    /* Unconditionally convert the first vector in a slower, unaligned way. Any
+       extra branching to avoid the unaligned load & store if already aligned
+       would be most probably more expensive than the actual operation. */
+    {
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(data), lowercaseOneVector(chars));
+    }
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors using aligned load/store */
+    for(; i + 16 <= end; i += 16) {
+        const __m128i chars = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_store_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+
+    /* Handle remaining less than a vector with an unaligned load & store,
+       again overlapping back with the previous already-converted elements */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const __m128i chars = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        _mm_storeu_si128(reinterpret_cast<__m128i*>(i), lowercaseOneVector(chars));
+    }
+}
+#endif
+
+#ifdef CORRADE_ENABLE_NEON
+/* Trivial port of the SSE2 code to NEON, with the same "aligned load/store is
+   the same as unaligned" simplification as the WASM code. Included just to
+   have baseline comparison to the scalar code because the compiler seems to
+   autovectorize better than what this function does. */
+CORRADE_ENABLE_NEON CORRADE_NEVER_INLINE void lowercaseInPlaceImplementationNeon(char* data, std::size_t size) {
+    char* const end = data + size;
+
+    /* If we have less than 16 bytes, do it the stupid way, equivalent to the
+       scalar variant and just unrolled. */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 14: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 13: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 12: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 11: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case 10: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  9: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  8: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  7: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  6: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  5: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  4: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  3: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  2: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  1: *j += (std::uint8_t(*j - 'A') < 26) << 5; ++j; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    /* Core algorithm */
+    const uint8x16_t aAndAbove = vdupq_n_u8(char(256u - std::uint8_t('A')));
+    const uint8x16_t lowest25 = vdupq_n_u8(25);
+    const uint8x16_t lowercaseBit = vdupq_n_u8(0x20);
+    const uint8x16_t zero = vdupq_n_u8(0);
+    const auto lowercaseOneVectorInPlace = [&](std::uint8_t* const data) CORRADE_ENABLE_NEON {
+        const uint8x16_t chars = vld1q_u8(data);
+        /* Moves 'A' and everything above to 0 and up (it overflows and wraps
+           around) */
+        const uint8x16_t uppercaseInLowest25 = vaddq_u8(chars, aAndAbove);
+        /* Subtracts 25 with saturation, which makes the original 'A' to 'Z'
+           (now 0 to 25) zero and everything else non-zero */
+        const uint8x16_t lowest25IsZero = vqsubq_u8(uppercaseInLowest25, lowest25);
+        /* Mask indicating where uppercase letters where, i.e. which values are
+           now zero */
+        const uint8x16_t maskUppercase = vceqq_u8(lowest25IsZero, zero);
+        /* For the masked chars a lowercase bit is set, and the bit is then
+           added to the original chars, making the uppercase chars lowercase */
+        vst1q_u8(data, vaddq_u8(chars, vandq_u8(maskUppercase, lowercaseBit)));
+    };
+
+    /* Unconditionally convert the first unaligned vector */
+    lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(data));
+
+    /* Go to the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll convert some bytes twice. Which is fine, lowercasing
+       already-lowercased data is a no-op. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i >= data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Convert all aligned vectors */
+    for(; i + 16 <= end; i += 16)
+        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
+
+    /* Handle remaining less than a vector, again overlapping back with the
+       previous already-converted elements, in an unaligned way */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        lowercaseOneVectorInPlace(reinterpret_cast<std::uint8_t*>(i));
+    }
+}
+#endif
+
+}}}}
+#endif
+
+#endif
