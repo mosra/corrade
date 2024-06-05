@@ -166,6 +166,13 @@ const struct {
         replaceAllInPlaceCharacterImplementationAvx2Unconditional},
     #endif
     #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    {Cpu::Simd128, 16, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Simd128, 16, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationSimd128Unconditional},
+    #endif
+    #endif
 };
 
 const struct {

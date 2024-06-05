@@ -47,6 +47,9 @@
 #ifdef CORRADE_ENABLE_NEON
 #include <arm_neon.h>
 #endif
+#ifdef CORRADE_ENABLE_SIMD128
+#include <wasm_simd128.h>
+#endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -317,6 +320,73 @@ CORRADE_ENABLE_AVX2 CORRADE_NEVER_INLINE void replaceAllInPlaceCharacterImplemen
         const __m256i in = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
         const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
         _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), out);
+    }
+}
+#endif
+
+#ifdef CORRADE_ENABLE_SIMD128
+CORRADE_ENABLE_SIMD128 CORRADE_NEVER_INLINE void replaceAllInPlaceCharacterImplementationSimd128Unconditional(char* const data, const std::size_t size, const char search, const char replace) {
+    /* If we have less than 16 bytes, do it the stupid way */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    const v128_t vsearch = wasm_i8x16_splat(search);
+    const v128_t vreplace = wasm_i8x16_splat(replace);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll process some bytes twice. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Unconditionally process the first vector a slower, unaligned way. WASM
+       doesn't differentiate between aligned and unaligned load/store, it's
+       always unaligned, but the hardware might behave better if we try to
+       avoid unaligned operations. */
+    {
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(data));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(data), out);
+    }
+
+    /* Process all aligned vectors. Bytes overlapping with the previous
+       unaligned load will be processed twice, but as everything is already
+       replaced there, it'll be a no-op for those. */
+    char* const end = data + size;
+    for(; i + 16 <= end; i += 16) {
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(i));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(i), out);
+    }
+
+    /* Handle remaining less than a vector in an unaligned way. Overlapping
+       bytes are again no-op. Again WASM doesn't have any dedicated unaligned
+       load/store instruction. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(i));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(i), out);
     }
 }
 #endif

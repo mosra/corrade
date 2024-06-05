@@ -1098,6 +1098,120 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltyp
 }
 #endif
 
+/* Just a direct translation of the SSE4.1 code */
+#ifdef CORRADE_ENABLE_SIMD128
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SIMD128 typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::Simd128T) {
+  return [](char* const data, const std::size_t size, const char search, const char replace) CORRADE_ENABLE_SIMD128 {
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo that this worked best for stringFindCharacterImplementation()
+        doesn't mean it's the best variant here as well; also check the
+        pre-/post-increment differences between x86 and WASM like in the find
+        variant */
+    {
+        char* j = data;
+        switch(size) {
+            case 15: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 14: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 13: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 12: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 11: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case 10: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  9: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  8: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  7: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  6: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  5: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  4: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  3: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  2: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  1: if(*j++ == search) *(j - 1) = replace; CORRADE_FALLTHROUGH
+            case  0: return;
+        }
+    }
+
+    const v128_t vsearch = wasm_i8x16_splat(search);
+    const v128_t vreplace = wasm_i8x16_splat(replace);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll process some bytes twice. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 16) & ~0xf);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Unconditionally process the first vector a slower, unaligned way. WASM
+       doesn't differentiate between aligned and unaligned load/store, it's
+       always unaligned, but the hardware might behave better if we try to
+       avoid unaligned operations. */
+    {
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(data));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(data), out);
+    }
+
+    /* Go four aligned vectors at a time. Bytes overlapping with the previous
+       unaligned load will be processed twice, but as everything is already
+       replaced there, it'll be a no-op for those. Similarly to the SSE2 / AVX2
+       implementation, this reduces the branching overhead compared to
+       branching on every vector, making it comparable to an unconditional
+       replace with a character that occurs often, but significantly faster for
+       characters that are rare, on x86 at least. Elsewhere it *can* be slower
+       due to the slow movemask emulation. See stringFindCharacterImplementation()
+       for details on wasm_i8x16_bitmask() alternatives, compare to the
+       replaceAllInPlaceCharacterImplementationSimd128Unconditional() variant
+       in StringTest.h. */
+    char* const end = data + size;
+    for(; i + 4*16 <= end; i += 4*16) {
+        const v128_t inA = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
+        const v128_t inB = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
+        const v128_t inC = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 2);
+        const v128_t inD = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 3);
+
+        const v128_t eqA = wasm_i8x16_eq(inA, vsearch);
+        const v128_t eqB = wasm_i8x16_eq(inB, vsearch);
+        const v128_t eqC = wasm_i8x16_eq(inC, vsearch);
+        const v128_t eqD = wasm_i8x16_eq(inD, vsearch);
+
+        const v128_t or1 = wasm_v128_or(eqA, eqB);
+        const v128_t or2 = wasm_v128_or(eqC, eqD);
+        const v128_t or3 = wasm_v128_or(or1, or2);
+        /* If any of the four vectors contained the character, replace all of
+           them -- branching again on each would hurt the "common character"
+           case */
+        if(wasm_i8x16_bitmask(or3)) {
+            const v128_t outA = wasm_v128_bitselect(vreplace, inA, eqA);
+            const v128_t outB = wasm_v128_bitselect(vreplace, inB, eqB);
+            const v128_t outC = wasm_v128_bitselect(vreplace, inC, eqC);
+            const v128_t outD = wasm_v128_bitselect(vreplace, inD, eqD);
+
+            wasm_v128_store(reinterpret_cast<v128_t*>(i) + 0, outA);
+            wasm_v128_store(reinterpret_cast<v128_t*>(i) + 1, outB);
+            wasm_v128_store(reinterpret_cast<v128_t*>(i) + 2, outC);
+            wasm_v128_store(reinterpret_cast<v128_t*>(i) + 3, outD);
+        }
+    }
+
+    /* Handle remaining less than four aligned vectors. Again do the
+       replacement unconditionally. */
+    for(; i + 16 <= end; i += 16) {
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(i));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(i), out);
+    }
+
+    /* Handle remaining less than a vector in an unaligned way. Overlapping
+       bytes are again no-op. Again WASM doesn't have any dedicated unaligned
+       load/store instruction. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
+        const v128_t in = wasm_v128_load(reinterpret_cast<const v128_t*>(i));
+        const v128_t out = wasm_v128_bitselect(vreplace, in, wasm_i8x16_eq(in, vsearch));
+        wasm_v128_store(reinterpret_cast<v128_t*>(i), out);
+    }
+  };
+}
+#endif
+
 }
 
 CORRADE_UTILITY_CPU_DISPATCHER_BASE(replaceAllInPlaceCharacterImplementation)

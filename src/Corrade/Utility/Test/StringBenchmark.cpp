@@ -254,6 +254,13 @@ const struct {
         replaceAllInPlaceCharacterImplementationAvx2Unconditional},
     #endif
     #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    {Cpu::Simd128, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Simd128, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationSimd128Unconditional},
+    #endif
+    #endif
 };
 
 const struct {
@@ -282,6 +289,14 @@ const struct {
     {Cpu::Avx2, 32, nullptr, nullptr},
     /* This should do two overlapping vector operations */
     {Cpu::Avx2, 33, nullptr, nullptr},
+    #endif
+    #ifdef CORRADE_ENABLE_SIMD128
+    /* This should fall back to the scalar case */
+    {Cpu::Simd128, 15, nullptr, nullptr},
+    /* This should do one unaligned vector operation, skipping the rest */
+    {Cpu::Simd128, 16, nullptr, nullptr},
+    /* This should do two overlapping unaligned vector operations */
+    {Cpu::Simd128, 17, nullptr, nullptr},
     #endif
 };
 
