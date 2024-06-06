@@ -33,6 +33,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/Test/StringViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Math.h"
@@ -95,21 +96,29 @@ template<> struct CharacterTraits<'\n'> {
 
 const struct {
     Cpu::Features features;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    const char*(*function)(const char*, std::size_t, char);
 } FindCharacterData[]{
-    {Cpu::Scalar},
+    {Cpu::Scalar, nullptr, nullptr},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Sse2|Cpu::Bmi1},
+    {Cpu::Sse2|Cpu::Bmi1, "branch on movemask (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse41|Cpu::Bmi1, "branch on testzero",
+        stringFindCharacterImplementationSse41TestZero},
+    #endif
     #endif
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Avx2|Cpu::Bmi1},
+    {Cpu::Avx2|Cpu::Bmi1, nullptr, nullptr},
     #endif
     /* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
        nowadays, so there it uses scalar code */
     #if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
-    {Cpu::Neon},
+    {Cpu::Neon, nullptr, nullptr},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
-    {Cpu::Simd128},
+    {Cpu::Simd128, nullptr, nullptr},
     #endif
 };
 
@@ -229,13 +238,15 @@ constexpr std::size_t CharacterRepeats = 100;
 template<char character> void StringViewBenchmark::findCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::format("{}, {}",
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}, {}" : "{}, {}",
         CharacterTraits<character>::name(),
-        Utility::Test::cpuVariantName(data)));
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");

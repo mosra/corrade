@@ -33,10 +33,12 @@
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Containers/Test/StringViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
@@ -234,21 +236,29 @@ struct StringViewTest: TestSuite::Tester {
 const struct {
     Cpu::Features features;
     std::size_t vectorSize;
+    const char* extra;
+    /* Cases that define a function pointer are not present in the library, see
+       the pointed-to function documentation for more info */
+    const char*(*function)(const char*, std::size_t, char);
 } FindCharacterData[]{
-    {Cpu::Scalar, 16},
+    {Cpu::Scalar, 16, nullptr, nullptr},
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Sse2|Cpu::Bmi1, 16},
+    {Cpu::Sse2|Cpu::Bmi1, 16, "branch on movemask (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Sse41|Cpu::Bmi1, 16, "branch on testzero",
+        stringFindCharacterImplementationSse41TestZero},
+    #endif
     #endif
     #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
-    {Cpu::Avx2|Cpu::Bmi1, 32},
+    {Cpu::Avx2|Cpu::Bmi1, 32, nullptr, nullptr},
     #endif
     /* The code uses ARM64 NEON instructions. 32-bit ARM isn't that important
        nowadays, so there it uses scalar code */
     #if defined(CORRADE_ENABLE_NEON) && !defined(CORRADE_TARGET_32BIT)
-    {Cpu::Neon, 16},
+    {Cpu::Neon, 16, nullptr, nullptr},
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
-    {Cpu::Simd128, 16},
+    {Cpu::Simd128, 16, nullptr, nullptr},
     #endif
 };
 
@@ -2059,11 +2069,14 @@ void StringViewTest::findStringWhole() {
 void StringViewTest::findCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2124,11 +2137,14 @@ void StringViewTest::findCharacter() {
 void StringViewTest::findCharacterAligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2201,11 +2217,14 @@ void StringViewTest::findCharacterAligned() {
 void StringViewTest::findCharacterUnaligned() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2270,11 +2289,14 @@ void StringViewTest::findCharacterUnaligned() {
 void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2316,11 +2338,14 @@ void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
 void StringViewTest::findCharacterUnalignedLessThanOneVector() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
+    Implementation::stringFindCharacter = data.function ? data.function :
+        Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format(
+        data.extra ? "{}, {}" : "{}",
+        Utility::Test::cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
