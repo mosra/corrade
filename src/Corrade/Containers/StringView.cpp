@@ -240,8 +240,6 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
   /* Can't use trailing return type due to a GCC 9.3 bug, which is the default
      on Ubuntu 20.04: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(SSE2,BMI1) {
-    const char* const end = data + size;
-
     /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
        loop this is 1.5-2x faster when unrolled. Interestingly enough, on GCC
        (11) doing a pre-increment and `return j` leads to
@@ -302,34 +300,35 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
     CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
 
     /* Go four vectors at a time with the aligned pointer */
+    const char* const end = data + size;
     for(; i + 4*16 < end; i += 4*16) {
         const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
         const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
         const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
         const __m128i d = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 3);
 
-        const __m128i eqa = _mm_cmpeq_epi8(vn1, a);
-        const __m128i eqb = _mm_cmpeq_epi8(vn1, b);
-        const __m128i eqc = _mm_cmpeq_epi8(vn1, c);
-        const __m128i eqd = _mm_cmpeq_epi8(vn1, d);
+        const __m128i eqA = _mm_cmpeq_epi8(vn1, a);
+        const __m128i eqB = _mm_cmpeq_epi8(vn1, b);
+        const __m128i eqC = _mm_cmpeq_epi8(vn1, c);
+        const __m128i eqD = _mm_cmpeq_epi8(vn1, d);
 
-        const __m128i or1 = _mm_or_si128(eqa, eqb);
-        const __m128i or2 = _mm_or_si128(eqc, eqd);
+        const __m128i or1 = _mm_or_si128(eqA, eqB);
+        const __m128i or2 = _mm_or_si128(eqC, eqD);
         const __m128i or3 = _mm_or_si128(or1, or2);
         if(_mm_movemask_epi8(or3)) {
-            if(const int mask = _mm_movemask_epi8(eqa))
+            if(const int mask = _mm_movemask_epi8(eqA))
                 return i + 0*16 + _tzcnt_u32(mask);
-            if(const int mask = _mm_movemask_epi8(eqb))
+            if(const int mask = _mm_movemask_epi8(eqB))
                 return i + 1*16 + _tzcnt_u32(mask);
-            if(const int mask = _mm_movemask_epi8(eqc))
+            if(const int mask = _mm_movemask_epi8(eqC))
                 return i + 2*16 + _tzcnt_u32(mask);
-            if(const int mask = _mm_movemask_epi8(eqd))
+            if(const int mask = _mm_movemask_epi8(eqD))
                 return i + 3*16 + _tzcnt_u32(mask);
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
     }
 
-    /* Handle remaining less than four vectors */
+    /* Handle remaining less than four aligned vectors */
     for(; i + 16 <= end; i += 16) {
         const __m128i chunk = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
         if(const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunk, vn1)))
@@ -356,8 +355,6 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
   /* Can't use trailing return type due to a GCC 9.3 bug, which is the default
      on Ubuntu 20.04: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90333 */
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE(AVX2,BMI1) {
-    const char* const end = data + size;
-
     /* If we have less than 32 bytes, fall back to the SSE variant */
     /** @todo deinline it here? any speed gains from rewriting using 128-bit
         AVX? or does the compiler do that automatically? */
@@ -385,37 +382,38 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
     CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
 
     /* Go four vectors at a time with the aligned pointer */
+    const char* const end = data + size;
     for(; i + 4*32 < end; i += 4*32) {
         const __m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
         const __m256i b = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
         const __m256i c = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 2);
         const __m256i d = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 3);
 
-        const __m256i eqa = _mm256_cmpeq_epi8(vn1, a);
-        const __m256i eqb = _mm256_cmpeq_epi8(vn1, b);
-        const __m256i eqc = _mm256_cmpeq_epi8(vn1, c);
-        const __m256i eqd = _mm256_cmpeq_epi8(vn1, d);
+        const __m256i eqA = _mm256_cmpeq_epi8(vn1, a);
+        const __m256i eqB = _mm256_cmpeq_epi8(vn1, b);
+        const __m256i eqC = _mm256_cmpeq_epi8(vn1, c);
+        const __m256i eqD = _mm256_cmpeq_epi8(vn1, d);
 
-        const __m256i or1 = _mm256_or_si256(eqa, eqb);
-        const __m256i or2 = _mm256_or_si256(eqc, eqd);
+        const __m256i or1 = _mm256_or_si256(eqA, eqB);
+        const __m256i or2 = _mm256_or_si256(eqC, eqD);
         const __m256i or3 = _mm256_or_si256(or1, or2);
         if(_mm256_movemask_epi8(or3)) {
             /** @todo exploit the TZCNT property of returning 32 for zero
                 input somehow? trivial sum would work only if there's at most
                 one found byte among all 128 */
-            if(const int mask = _mm256_movemask_epi8(eqa))
+            if(const int mask = _mm256_movemask_epi8(eqA))
                 return i + 0*32 + _tzcnt_u32(mask);
-            if(const int mask = _mm256_movemask_epi8(eqb))
+            if(const int mask = _mm256_movemask_epi8(eqB))
                 return i + 1*32 + _tzcnt_u32(mask);
-            if(const int mask = _mm256_movemask_epi8(eqc))
+            if(const int mask = _mm256_movemask_epi8(eqC))
                 return i + 2*32 + _tzcnt_u32(mask);
-            if(const int mask = _mm256_movemask_epi8(eqd))
+            if(const int mask = _mm256_movemask_epi8(eqD))
                 return i + 3*32 + _tzcnt_u32(mask);
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
     }
 
-    /* Handle remaining less than four vectors */
+    /* Handle remaining less than four aligned vectors */
     for(; i + 32 <= end; i += 32) {
         const __m256i chunk = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
         if(const int mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, vn1)))
@@ -527,37 +525,37 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
         const uint8x16_t c = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 2*16);
         const uint8x16_t d = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i) + 3*16);
 
-        const uint8x16_t eqa = vceqq_u8(vn1, a);
-        const uint8x16_t eqb = vceqq_u8(vn1, b);
-        const uint8x16_t eqc = vceqq_u8(vn1, c);
-        const uint8x16_t eqd = vceqq_u8(vn1, d);
+        const uint8x16_t eqA = vceqq_u8(vn1, a);
+        const uint8x16_t eqB = vceqq_u8(vn1, b);
+        const uint8x16_t eqC = vceqq_u8(vn1, c);
+        const uint8x16_t eqD = vceqq_u8(vn1, d);
 
         /* Similar to the first unaligned vector above, except that four "shift
            right and narrow" operations are done, interleaving the result into
            two registers instead of four */
         /** @todo might want to look into using umaxp instead on newer
             architectures or larger strings: https://github.com/BurntSushi/memchr/pull/114#issuecomment-1631413095 */
-        const uint8x8_t maska = vshrn_n_u16(vreinterpretq_u16_u8(eqa), 4);
-        const uint8x16_t maskab = vshrn_high_n_u16(maska, vreinterpretq_u16_u8(eqb), 4);
-        const uint8x8_t maskc = vshrn_n_u16(vreinterpretq_u16_u8(eqc), 4);
-        const uint8x16_t maskcd = vshrn_high_n_u16(maskc, vreinterpretq_u16_u8(eqd), 4);
+        const uint8x8_t maskA = vshrn_n_u16(vreinterpretq_u16_u8(eqA), 4);
+        const uint8x16_t maskAB = vshrn_high_n_u16(maskA, vreinterpretq_u16_u8(eqB), 4);
+        const uint8x8_t maskC = vshrn_n_u16(vreinterpretq_u16_u8(eqC), 4);
+        const uint8x16_t maskCD = vshrn_high_n_u16(maskC, vreinterpretq_u16_u8(eqD), 4);
 
         /* Which makes it possible to test with just one OR and a horizontal
            add instead of three ORs and a horizontal add */
-        if(vaddvq_u8(vorrq_u8(maskab, maskcd))) {
-            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskab), 0))
+        if(vaddvq_u8(vorrq_u8(maskAB, maskCD))) {
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskAB), 0))
                 return i + 0*16 + (__builtin_ctzll(mask) >> 2);
-            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskab), 1))
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskAB), 1))
                 return i + 1*16 + (__builtin_ctzll(mask) >> 2);
-            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskcd), 0))
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskCD), 0))
                 return i + 2*16 + (__builtin_ctzll(mask) >> 2);
-            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskcd), 1))
+            if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskCD), 1))
                 return i + 3*16 + (__builtin_ctzll(mask) >> 2);
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
     }
 
-    /* Handle remaining less than four vectors */
+    /* Handle remaining less than four aligned vectors */
     for(; i + 16 <= end; i += 16) {
         const uint8x16_t chunk = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i));
         const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
@@ -587,8 +585,6 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
    unaligned :( */
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacter)>::type stringFindCharacterImplementation(CORRADE_CPU_DECLARE(Cpu::Simd128)) {
   return [](const char* const data, const std::size_t size, const char character) CORRADE_ENABLE_SIMD128 -> const char* {
-    const char* const end = data + size;
-
     /* If we have less than 16 bytes, do it the stupid way. Compared to a plain
        loop, this is 25% faster when unrolled. Strangely enough, if the switch
        is put into an external always inline function to avoid duplication with
@@ -637,19 +633,20 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
     CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
 
     /* Go four vectors at a time with the aligned pointer */
+    const char* const end = data + size;
     for(; i + 4*16 < end; i += 4*16) {
         const v128_t a = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
         const v128_t b = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
         const v128_t c = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 2);
         const v128_t d = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 3);
 
-        const v128_t eqa = wasm_i8x16_eq(vn1, a);
-        const v128_t eqb = wasm_i8x16_eq(vn1, b);
-        const v128_t eqc = wasm_i8x16_eq(vn1, c);
-        const v128_t eqd = wasm_i8x16_eq(vn1, d);
+        const v128_t eqA = wasm_i8x16_eq(vn1, a);
+        const v128_t eqB = wasm_i8x16_eq(vn1, b);
+        const v128_t eqC = wasm_i8x16_eq(vn1, c);
+        const v128_t eqD = wasm_i8x16_eq(vn1, d);
 
-        const v128_t or1 = wasm_v128_or(eqa, eqb);
-        const v128_t or2 = wasm_v128_or(eqc, eqd);
+        const v128_t or1 = wasm_v128_or(eqA, eqB);
+        const v128_t or2 = wasm_v128_or(eqC, eqD);
         const v128_t or3 = wasm_v128_or(or1, or2);
         /* wasm_i8x16_bitmask(or3) maps directly to the SSE2 variant and is
            thus fast on x86, but on ARM wasm_v128_any_true(or3) is faster. With
@@ -666,19 +663,19 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
             compile-time tuning such as CORRADE_TARGET_WASM_SIMD128_ARM / _X86
             exists */
         if(wasm_i8x16_bitmask(or3)) {
-            if(const int mask = wasm_i8x16_bitmask(eqa))
+            if(const int mask = wasm_i8x16_bitmask(eqA))
                 return i + 0*16 + __builtin_ctz(mask);
-            if(const int mask = wasm_i8x16_bitmask(eqb))
+            if(const int mask = wasm_i8x16_bitmask(eqB))
                 return i + 1*16 + __builtin_ctz(mask);
-            if(const int mask = wasm_i8x16_bitmask(eqc))
+            if(const int mask = wasm_i8x16_bitmask(eqC))
                 return i + 2*16 + __builtin_ctz(mask);
-            if(const int mask = wasm_i8x16_bitmask(eqd))
+            if(const int mask = wasm_i8x16_bitmask(eqD))
                 return i + 3*16 + __builtin_ctz(mask);
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
     }
 
-    /* Handle remaining less than four vectors */
+    /* Handle remaining less than four aligned vectors */
     for(; i + 16 <= end; i += 16) {
         const v128_t chunk = wasm_v128_load(data);
         if(const int mask = wasm_i8x16_bitmask(wasm_i8x16_eq(chunk, vn1)))
