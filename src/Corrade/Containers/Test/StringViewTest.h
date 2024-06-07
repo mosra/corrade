@@ -86,7 +86,7 @@ CORRADE_ENABLE(SSE41,BMI1) CORRADE_NEVER_INLINE const char* stringFindCharacterI
 
     /* Go four vectors at a time with the aligned pointer */
     const char* const end = data + size;
-    for(; i + 4*16 < end; i += 4*16) {
+    for(; i + 4*16 <= end; i += 4*16) {
         const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
         const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
         const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);

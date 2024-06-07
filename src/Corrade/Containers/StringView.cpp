@@ -301,7 +301,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
 
     /* Go four vectors at a time with the aligned pointer */
     const char* const end = data + size;
-    for(; i + 4*16 < end; i += 4*16) {
+    for(; i + 4*16 <= end; i += 4*16) {
         const __m128i a = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
         const __m128i b = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
         const __m128i c = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
@@ -383,7 +383,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<d
 
     /* Go four vectors at a time with the aligned pointer */
     const char* const end = data + size;
-    for(; i + 4*32 < end; i += 4*32) {
+    for(; i + 4*32 <= end; i += 4*32) {
         const __m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
         const __m256i b = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
         const __m256i c = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 2);
@@ -513,7 +513,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
     CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
 
     /* Go four vectors at a time with the aligned pointer */
-    for(; i + 4*16 < end; i += 4*16) {
+    for(; i + 4*16 <= end; i += 4*16) {
         /** @todo https://branchfree.org/2019/04/01/fitting-my-head-through-the-arm-holes-or-two-sequences-to-substitute-for-the-missing-pmovmskb-instruction-on-arm-neon/#comment-1768
             suggests an interleaved vld4q8_u8() load instead of four separate
             loads, and a sequence of vsriq_n_u8() that forms a single 64-bit
@@ -634,7 +634,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
 
     /* Go four vectors at a time with the aligned pointer */
     const char* const end = data + size;
-    for(; i + 4*16 < end; i += 4*16) {
+    for(; i + 4*16 <= end; i += 4*16) {
         const v128_t a = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 0);
         const v128_t b = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 1);
         const v128_t c = wasm_v128_load(reinterpret_cast<const v128_t*>(i) + 2);
