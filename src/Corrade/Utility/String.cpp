@@ -890,6 +890,15 @@ namespace Implementation {
 
 namespace {
 
+/* Has to be first because the Avx2 variant may delegate to it if
+   CORRADE_ENABLE_SSE41 isn't defined due to compiler warts */
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::ScalarT) {
+    return [](char* const data, const std::size_t size, const char search, const char replace) {
+        for(char* i = data, *end = data + size; i != end; ++i)
+            if(*i == search) *i = replace;
+    };
+}
+
 /* SIMD implementation of character replacement. All tricks inherited from
    stringFindCharacterImplementation(), in particular the unaligned preamble
    and postamble, as well as reducing the branching overhead by going through
@@ -999,12 +1008,95 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_SSE41 typename std::decay<declty
 }
 #endif
 
-CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::ScalarT) {
-    return [](char* const data, const std::size_t size, const char search, const char replace) {
-        for(char* i = data, *end = data + size; i != end; ++i)
-            if(*i == search) *i = replace;
-    };
+#ifdef CORRADE_ENABLE_AVX2
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE_AVX2 typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::Avx2T) {
+  return [](char* const data, const std::size_t size, const char search, const char replace) CORRADE_ENABLE_AVX2 {
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
+    if(size < 32)
+        return replaceAllInPlaceCharacterImplementation(Cpu::Sse41)(data, size, search, replace);
+
+    const __m256i vsearch = _mm256_set1_epi8(search);
+    const __m256i vreplace = _mm256_set1_epi8(replace);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll process some bytes twice. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Unconditionally process the first vector a slower, unaligned way. Do the
+       replacement unconditionally because it's faster than checking first. */
+    {
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i in = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), out);
+    }
+
+    /* Go four aligned vectors at a time. Bytes overlapping with the previous
+       unaligned load will be processed twice, but as everything is already
+       replaced there, it'll be a no-op for those. Similarly to the SSE2
+       implementation, this reduces the branching overhead compared to
+       branching on every vector, making it comparable to an unconditional
+       replace with a character that occurs often, but significantly faster for
+       characters that are rare. For comparison see StringTest.h and the
+       replaceAllInPlaceCharacterImplementationAvx2Unconditional() variant. */
+    char* const end = data + size;
+    for(; i + 4*32 <= end; i += 4*32) {
+        const __m256i inA = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
+        const __m256i inB = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
+        const __m256i inC = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 2);
+        const __m256i inD = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 3);
+
+        const __m256i eqA = _mm256_cmpeq_epi8(inA, vsearch);
+        const __m256i eqB = _mm256_cmpeq_epi8(inB, vsearch);
+        const __m256i eqC = _mm256_cmpeq_epi8(inC, vsearch);
+        const __m256i eqD = _mm256_cmpeq_epi8(inD, vsearch);
+
+        const __m256i or1 = _mm256_or_si256(eqA, eqB);
+        const __m256i or2 = _mm256_or_si256(eqC, eqD);
+        const __m256i or3 = _mm256_or_si256(or1, or2);
+        /* If any of the four vectors contained the character, replace all of
+           them -- branching again on each would hurt the "common character"
+           case */
+        if(_mm256_movemask_epi8(or3)) {
+            const __m256i outA = _mm256_blendv_epi8(inA, vreplace, eqA);
+            const __m256i outB = _mm256_blendv_epi8(inB, vreplace, eqB);
+            const __m256i outC = _mm256_blendv_epi8(inC, vreplace, eqC);
+            const __m256i outD = _mm256_blendv_epi8(inD, vreplace, eqD);
+
+            _mm256_store_si256(reinterpret_cast<__m256i*>(i) + 0, outA);
+            _mm256_store_si256(reinterpret_cast<__m256i*>(i) + 1, outB);
+            _mm256_store_si256(reinterpret_cast<__m256i*>(i) + 2, outC);
+            _mm256_store_si256(reinterpret_cast<__m256i*>(i) + 3, outD);
+        }
+    }
+
+    /* Handle remaining less than four aligned vectors. Again do the
+       replacement unconditionally. */
+    for(; i + 32 <= end; i += 32) {
+        const __m256i in = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), out);
+    }
+
+    /* Handle remaining less than a vector in an unaligned way, again
+       unconditionally and again overlapping bytes are no-op. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        i = end - 32;
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i in = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), out);
+    }
+  };
 }
+#endif
 
 }
 

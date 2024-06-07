@@ -159,6 +159,13 @@ const struct {
         replaceAllInPlaceCharacterImplementationSse41Unconditional},
     #endif
     #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    {Cpu::Avx2, 32, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Avx2, 32, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationAvx2Unconditional},
+    #endif
+    #endif
 };
 
 const struct {
@@ -1348,6 +1355,8 @@ void StringTest::replaceAllInPlaceCharacterAligned() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = arrayView(a);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
@@ -1398,6 +1407,8 @@ void StringTest::replaceAllInPlaceCharacterUnaligned() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 3 + 1));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 3 + 1));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
     CORRADE_COMPARE(string.size(), data.vectorSize*3 + 2);
@@ -1444,6 +1455,8 @@ void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,

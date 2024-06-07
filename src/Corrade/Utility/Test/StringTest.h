@@ -35,11 +35,14 @@
 #include <cstddef>
 
 #include "Corrade/Cpu.h"
-#ifdef CORRADE_ENABLE_SSE41
+#ifdef CORRADE_ENABLE_AVX2
+#include "Corrade/Utility/IntrinsicsAvx.h"
+#elif defined(CORRADE_ENABLE_SSE41)
 #include "Corrade/Utility/IntrinsicsSse4.h"
 #elif defined(CORRADE_ENABLE_SSE2)
 #include "Corrade/Utility/IntrinsicsSse2.h"
 #endif
+#include "Corrade/Utility/String.h" /* replaceAllInPlaceCharacterImplementation() */
 
 #ifdef CORRADE_ENABLE_NEON
 #include <arm_neon.h>
@@ -266,6 +269,54 @@ CORRADE_ENABLE_SSE41 CORRADE_NEVER_INLINE void replaceAllInPlaceCharacterImpleme
         const __m128i in = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
         const __m128i out = _mm_blendv_epi8(in, vreplace, _mm_cmpeq_epi8(in, vsearch));
         _mm_storeu_si128(reinterpret_cast<__m128i*>(i), out);
+    }
+}
+#endif
+
+#ifdef CORRADE_ENABLE_AVX2
+CORRADE_ENABLE_AVX2 CORRADE_NEVER_INLINE void replaceAllInPlaceCharacterImplementationAvx2Unconditional(char* const data, const std::size_t size, const char search, const char replace) {
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    if(size < 32)
+        return String::Implementation::replaceAllInPlaceCharacterImplementation(Cpu::Sse41)(data, size, search, replace);
+
+    const __m256i vsearch = _mm256_set1_epi8(search);
+    const __m256i vreplace = _mm256_set1_epi8(replace);
+
+    /* Calculate the next aligned position. If the pointer was already aligned,
+       we'll go to the next aligned vector; if not, there will be an overlap
+       and we'll process some bytes twice. */
+    char* i = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(data + 32) & ~0x1f);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > data && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Unconditionally process the first vector a slower, unaligned way */
+    {
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i in = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(data), out);
+    }
+
+    /* Process all aligned vectors. Bytes overlapping with the previous
+       unaligned load will be processed twice, but as everything is already
+       replaced there, it'll be a no-op for those. */
+    char* const end = data + size;
+    for(; i + 32 <= end; i += 32) {
+        const __m256i in = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_store_si256(reinterpret_cast<__m256i*>(i), out);
+    }
+
+    /* Handle remaining less than a vector in an unaligned way. Overlapping
+       bytes are again no-op. */
+    if(i < end) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > end);
+        i = end - 32;
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i in = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        const __m256i out = _mm256_blendv_epi8(in, vreplace, _mm256_cmpeq_epi8(in, vsearch));
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(i), out);
     }
 }
 #endif

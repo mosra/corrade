@@ -26,7 +26,6 @@
 
 #include <cctype> /* std::ctype */
 #include <cstring> /* std::memchr */
-#include <algorithm> /* std::transform(), std::replace() */
 #include <locale> /* std::locale::classic() */
 
 #include "Corrade/Containers/Optional.h"
@@ -38,6 +37,11 @@
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 #include "Corrade/Utility/Test/StringTest.h"
+
+/* On GCC 4.8 has to be included after StringTest.h which includes the AVX
+   intrinsics headers, otherwise __m256i and other types don't get defined for
+   some reason */
+#include <algorithm> /* std::transform(), std::replace() */
 
 #include "configure.h"
 
@@ -243,6 +247,13 @@ const struct {
         replaceAllInPlaceCharacterImplementationSse41Unconditional},
     #endif
     #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    {Cpu::Avx2, "conditional replace (default)", nullptr},
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    {Cpu::Avx2, "unconditional replace",
+        replaceAllInPlaceCharacterImplementationAvx2Unconditional},
+    #endif
+    #endif
 };
 
 const struct {
@@ -262,6 +273,15 @@ const struct {
     /* This should do two overlapping unaligned vector operations */
     {Cpu::Sse41, 17, nullptr, nullptr},
     #endif
+    #ifdef CORRADE_ENABLE_AVX2
+    /* This should fall back to the SSE2 and then the scalar case */
+    {Cpu::Avx2, 15, nullptr, nullptr},
+    /* This should fall back to the SSE2 case */
+    {Cpu::Avx2, 31, nullptr, nullptr},
+    /* This should do one vector operation, skipping the postamble */
+    {Cpu::Avx2, 32, nullptr, nullptr},
+    /* This should do two overlapping vector operations */
+    {Cpu::Avx2, 33, nullptr, nullptr},
     #endif
 };
 
