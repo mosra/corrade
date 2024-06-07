@@ -780,29 +780,31 @@ void StringTest::lowercaseUppercaseAligned() {
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::Aligned);
 
-    /* Test variants are copied to the view to preserve the above mem layout */
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
     /** @todo remove the casts once std::string overloads are dropped */
     const std::size_t count = data.vectorSize/4;
 
     /* All uppercase */
-    Utility::copy("HELLOWORLDTODAYS"_s*count, string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "helloworldtodays"_s*count);
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "HELLOWORLDTODAYS"_s*count);
+    Utility::copy(("HELLOWORLDTODAYIS"_s*count).exceptSuffix(count), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodayis"_s*count}.exceptSuffix(count));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYIS"_s*count}.exceptSuffix(count));
 
     /* All lowercase */
-    Utility::copy("awesomefancypant"_s*count, string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "awesomefancypant"_s*count);
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "AWESOMEFANCYPANT"_s*count);
+    Utility::copy(("awesomefancypants"_s*count).exceptSuffix(count), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypants"_s*count}.exceptSuffix(count));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANTS"_s*count}.exceptSuffix(count));
 
     /* Mixed case, every even uppercase */
-    Utility::copy("ThIsIsArAnSoMyEs"_s*count, string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "thisisaransomyes"_s*count);
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "THISISARANSOMYES"_s*count);
+    Utility::copy(("ThIsIsArAnSoMyEaH"_s*count).exceptSuffix(count), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.exceptSuffix(count));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.exceptSuffix(count));
 
     /* Mixed case, every odd uppercase */
-    Utility::copy("tHiSiSaRaNsOmYeS"_s*count, string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), "thisisaransomyes"_s*count);
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), "THISISARANSOMYES"_s*count);
+    Utility::copy(("tHiSiSaRaNsOmYeAh"_s*count).exceptSuffix(count), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.exceptSuffix(count));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.exceptSuffix(count));
 }
 
 void StringTest::lowercaseUppercaseUnaligned() {
@@ -848,29 +850,31 @@ void StringTest::lowercaseUppercaseUnaligned() {
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
 
-    /* Test variants are copied to the view to preserve the above mem layout */
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
     /** @todo remove the casts once std::string overloads are dropped */
     const std::size_t count = data.vectorSize/4;
 
     /* All uppercase */
-    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+    Utility::copy(("HELLOWORLDTODAYIS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodayis"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYIS"_s*count}.prefix(string.size()));
 
     /* All lowercase */
-    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+    Utility::copy(("awesomefancypants"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypants"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANTS"_s*count}.prefix(string.size()));
 
     /* Mixed case, every even uppercase */
-    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("ThIsIsArAnSoMyEaH"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 
     /* Mixed case, every odd uppercase */
-    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("tHiSiSaRaNsOmYeAh"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 }
 
 void StringTest::lowercaseUppercaseLessThanTwoVectors() {
@@ -912,29 +916,31 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
 
-    /* Test variants are copied to the view to preserve the above mem layout */
+    /* Test data copied to the view to preserve the above mem layout. The
+       string is 17 characters to not be exactly the same for each vector to
+       catch mismatched loads and stores. */
     /** @todo remove the casts once std::string overloads are dropped */
     const std::size_t count = data.vectorSize/8;
 
     /* All uppercase */
-    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+    Utility::copy(("HELLOWORLDTODAYIS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodayis"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYIS"_s*count}.prefix(string.size()));
 
     /* All lowercase */
-    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+    Utility::copy(("awesomefancypants"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypants"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANTS"_s*count}.prefix(string.size()));
 
     /* Mixed case, every even uppercase */
-    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("ThIsIsArAnSoMyEaH"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 
     /* Mixed case, every odd uppercase */
-    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("tHiSiSaRaNsOmYeAh"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 }
 
 void StringTest::lowercaseUppercaseLessThanOneVector() {
@@ -967,24 +973,24 @@ void StringTest::lowercaseUppercaseLessThanOneVector() {
     const std::size_t count = data.vectorSize/16;
 
     /* All uppercase */
-    Utility::copy(("HELLOWORLDTODAYS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodays"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYS"_s*count}.prefix(string.size()));
+    Utility::copy(("HELLOWORLDTODAYIS"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"helloworldtodayis"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"HELLOWORLDTODAYIS"_s*count}.prefix(string.size()));
 
     /* All lowercase */
-    Utility::copy(("awesomefancypant"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypant"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANT"_s*count}.prefix(string.size()));
+    Utility::copy(("awesomefancypants"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"awesomefancypants"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"AWESOMEFANCYPANTS"_s*count}.prefix(string.size()));
 
     /* Mixed case, every even uppercase */
-    Utility::copy(("ThIsIsArAnSoMyEs"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("ThIsIsArAnSoMyEaH"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 
     /* Mixed case, every odd uppercase */
-    Utility::copy(("tHiSiSaRaNsOmYeS"_s*count).prefix(string.size()), string);
-    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyes"_s*count}.prefix(string.size()));
-    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYES"_s*count}.prefix(string.size()));
+    Utility::copy(("tHiSiSaRaNsOmYeAh"_s*count).prefix(string.size()), string);
+    CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
+    CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
 }
 
 void StringTest::lowercaseUppercaseString() {
