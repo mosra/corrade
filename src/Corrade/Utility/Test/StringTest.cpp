@@ -130,6 +130,9 @@ const struct {
     #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
     {Cpu::Sse2|Cpu::Bmi1, 16},
     #endif
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Avx2|Cpu::Bmi1, 32},
+    #endif
 };
 
 const struct {
@@ -732,6 +735,8 @@ void StringTest::commonPrefixAligned() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = arrayView(a);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
@@ -838,6 +843,8 @@ void StringTest::commonPrefixUnaligned() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4 + 2));
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*(1 + 4 + 2));
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
     CORRADE_COMPARE(string.size(), data.vectorSize*5 + 2);
@@ -933,6 +940,8 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
     Containers::Array<char> a;
     if(data.vectorSize == 16)
         a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else if(data.vectorSize == 32)
+        a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
     Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,

@@ -354,6 +354,105 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<d
 }
 #endif
 
+#if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_BMI1)
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(AVX2,BMI1) typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(CORRADE_CPU_DECLARE(Cpu::Avx2|Cpu::Bmi1)) {
+  return [](const char* const a, const char* const b, const std::size_t sizeA, const std::size_t sizeB) CORRADE_ENABLE(AVX2,BMI1) {
+    const std::size_t size = Utility::min(sizeA, sizeB);
+
+    /* If we have less than 32 bytes, fall back to the SSE variant */
+    /** @todo deinline it here? any speed gains from rewriting using 128-bit
+        AVX? or does the compiler do that automatically? */
+    if(size < 32)
+        return commonPrefixImplementation(CORRADE_CPU_SELECT(Cpu::Sse2|Cpu::Bmi1))(a, b, sizeA, sizeB);
+
+    /* Unconditionally compare the first vector a slower, unaligned way */
+    {
+        /* _mm256_lddqu_si256 is just an alias to _mm256_loadu_si256, no reason
+           to use it: https://stackoverflow.com/a/47426790 */
+        const __m256i chunkA = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a));
+        const __m256i chunkB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b));
+        const std::uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffffffffu)
+            return a + _tzcnt_u32(~mask);
+    }
+
+    /* Go to the next aligned position of *one* of the inputs. If the pointer
+       was already aligned, we'll go to the next aligned vector; if not, there
+       will be an overlap and we'll check some bytes twice. Second input is
+       treated as unaligned always, see the SSE2 variant for explanation. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(a + 32) & ~0x1f);
+    const char* j = b + (i - a);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > a && j > b && reinterpret_cast<std::uintptr_t>(i) % 32 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    const char* const endA = a + size;
+    const char* const endB = b + size;
+    for(; i + 4*32 <= endA; i += 4*32, j += 4*32) {
+        const __m256i iA = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 0);
+        const __m256i iB = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 1);
+        const __m256i iC = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 2);
+        const __m256i iD = _mm256_load_si256(reinterpret_cast<const __m256i*>(i) + 3);
+        /* The second input is loaded unaligned always */
+        const __m256i jA = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j) + 0);
+        const __m256i jB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j) + 1);
+        const __m256i jC = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j) + 2);
+        const __m256i jD = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j) + 3);
+
+        const __m256i eqA = _mm256_cmpeq_epi8(iA, jA);
+        const __m256i eqB = _mm256_cmpeq_epi8(iB, jB);
+        const __m256i eqC = _mm256_cmpeq_epi8(iC, jC);
+        const __m256i eqD = _mm256_cmpeq_epi8(iD, jD);
+
+        const __m256i and1 = _mm256_and_si256(eqA, eqB);
+        const __m256i and2 = _mm256_and_si256(eqC, eqD);
+        const __m256i and3 = _mm256_and_si256(and1, and2);
+        if(std::uint32_t(_mm256_movemask_epi8(and3)) != 0xffffffffu) {
+            /** @todo exploit the TZCNT property of returning 32 for zero
+                input somehow? returning a min of all four? a sum? uh... */
+            const std::uint32_t maskA = _mm256_movemask_epi8(eqA);
+            if(maskA != 0xffffffffu)
+                return i + 0*32 + _tzcnt_u32(~maskA);
+            const std::uint32_t maskB = _mm256_movemask_epi8(eqB);
+            if(maskB != 0xffffffffu)
+                return i + 1*32 + _tzcnt_u32(~maskB);
+            const std::uint32_t maskC = _mm256_movemask_epi8(eqC);
+            if(maskC != 0xffffffffu)
+                return i + 2*32 + _tzcnt_u32(~maskC);
+            const std::uint32_t maskD = _mm256_movemask_epi8(eqD);
+            if(maskD != 0xffffffffu)
+                return i + 3*32 + _tzcnt_u32(~maskD);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four aligned vectors */
+    for(; i + 32 <= endA; i += 32, j += 32) {
+        const __m256i chunkA = _mm256_load_si256(reinterpret_cast<const __m256i*>(i));
+        /* The second input is loaded unaligned always */
+        const __m256i chunkB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j));
+        const std::uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffffffffu)
+            return i + _tzcnt_u32(~mask);
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again
+       overlapping back with the previous already-compared elements */
+    if(i < endA) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 32 > endA && endB - j == endA - i);
+        i = endA - 32;
+        j = endB - 32;
+        const __m256i chunkA = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(i));
+        const __m256i chunkB = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(j));
+        const std::uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffffffffu)
+            return i + _tzcnt_u32(~mask);
+    }
+
+    return endA;
+  };
+}
+#endif
+
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
   return [](const char* const a, const char* const b, const std::size_t sizeA, const std::size_t sizeB) {
     const std::size_t size = Utility::min(sizeA, sizeB);
