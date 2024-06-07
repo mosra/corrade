@@ -174,14 +174,14 @@ StringViewBenchmark::StringViewBenchmark() {
     addBenchmarks<StringViewBenchmark>({
         &StringViewBenchmark::findCharacterNaive<' '>,
         &StringViewBenchmark::findCharacterMemchr<' '>,
-        &StringViewBenchmark::findCharacterStlString<' '>}, 100);
+        &StringViewBenchmark::findCharacterStlString<' '>}, 20);
 
     addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommonSmall}, 100,
         Utility::Test::cpuVariantCount(FindCharacterSmallData),
         &StringViewBenchmark::captureImplementations,
         &StringViewBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringViewBenchmark::findCharacterCommonSmallMemchr}, 100);
+    addBenchmarks({&StringViewBenchmark::findCharacterCommonSmallMemchr}, 20);
 
     addInstancedBenchmarks({&StringViewBenchmark::findCharacter<'\n'>}, 100,
         Utility::Test::cpuVariantCount(FindCharacterData),
@@ -203,7 +203,7 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacter<'\n'>,
                    &StringViewBenchmark::findLastCharacterNaive<'\n'>,
                    &StringViewBenchmark::findLastCharacterMemrchr<'\n'>,
-                   &StringViewBenchmark::findLastCharacterStlString<'\n'>}, 100);
+                   &StringViewBenchmark::findLastCharacterStlString<'\n'>}, 20);
 
     _text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
 }
