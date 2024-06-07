@@ -31,6 +31,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
@@ -59,6 +60,7 @@ struct StringBenchmark: TestSuite::Tester {
 
     void commonPrefixCommonSmall();
     void commonPrefixCommonSmallStl();
+    void commonPrefixRareDifferentlyAligned();
     void commonPrefixRareMemcmp();
 
     void lowercase();
@@ -119,6 +121,9 @@ const struct {
     Cpu::Features features;
 } CommonPrefixData[]{
     {Cpu::Scalar},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Sse2|Cpu::Bmi1},
+    #endif
 };
 
 const struct {
@@ -126,6 +131,16 @@ const struct {
     std::size_t size;
 } CommonPrefixSmallData[]{
     {Cpu::Scalar, 15},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    /* This should fall back to the scalar case */
+    {Cpu::Sse2|Cpu::Bmi1, 15},
+    /* This should do one vector operation, skipping the four-vector block and
+       the postamble */
+    {Cpu::Sse2|Cpu::Bmi1, 16},
+    /* This should do two overlapping vector operations, skipping the
+       four-vector block and the single-vector aligned postamble */
+    {Cpu::Sse2|Cpu::Bmi1, 17},
+    #endif
 };
 
 const struct {
@@ -341,7 +356,8 @@ StringBenchmark::StringBenchmark() {
 
     addBenchmarks({&StringBenchmark::commonPrefixCommonSmallStl}, 20);
 
-    addInstancedBenchmarks({&StringBenchmark::commonPrefix<'\n'>}, 100,
+    addInstancedBenchmarks({&StringBenchmark::commonPrefix<'\n'>,
+                            &StringBenchmark::commonPrefixRareDifferentlyAligned}, 100,
         cpuVariantCount(CommonPrefixData),
         &StringBenchmark::captureImplementations,
         &StringBenchmark::restoreImplementations);
@@ -604,6 +620,47 @@ void StringBenchmark::commonPrefixCommonSmallStl() {
     }
 
     CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
+}
+
+void StringBenchmark::commonPrefixRareDifferentlyAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    if(!isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    CORRADE_VERIFY(_text);
+
+    /* Compared to commonPrefix(), we explicitly shift the second string by 7
+       characters, so if the first one gets the alignment adjusted, the second
+       is always off */
+    Containers::String string = "1234567"_s + *_text;
+    String::replaceAllInPlace(string, '\n', '_');
+    CORRADE_COMPARE_AS(
+        reinterpret_cast<std::uintptr_t>(_text->data()) % 16,
+        reinterpret_cast<std::uintptr_t>(string.data() + 7) % 16,
+        TestSuite::Compare::NotEqual);
+
+    std::size_t count = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        Containers::StringView b = *_text;
+        Containers::StringView a = string.exceptPrefix(7);
+        for(;;) {
+            Containers::StringView prefix = String::commonPrefix(a, b);
+            if(prefix.end() == a.end())
+                break;
+            ++count;
+            a = a.exceptPrefix(prefix.size() + 1);
+            b = b.exceptPrefix(prefix.size() + 1);
+        }
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<'\n'>::Count*CharacterRepeats);
 }
 
 void StringBenchmark::commonPrefixRareMemcmp() {

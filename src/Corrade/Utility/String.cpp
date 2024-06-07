@@ -35,14 +35,12 @@
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Implementation/cpu.h"
-#ifdef CORRADE_ENABLE_SSE2
-#include "Corrade/Utility/IntrinsicsSse2.h"
-#endif
-#ifdef CORRADE_ENABLE_SSE41
+#if defined(CORRADE_ENABLE_AVX2) || defined(CORRADE_ENABLE_BMI1)
+#include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
+#elif defined(CORRADE_ENABLE_SSE41)
 #include "Corrade/Utility/IntrinsicsSse4.h"
-#endif
-#ifdef CORRADE_ENABLE_AVX2
-#include "Corrade/Utility/IntrinsicsAvx.h"
+#elif defined(CORRADE_ENABLE_SSE2)
+#include "Corrade/Utility/IntrinsicsSse2.h"
 #endif
 #ifdef CORRADE_ENABLE_SIMD128
 #include <wasm_simd128.h>
@@ -233,7 +231,130 @@ namespace Implementation {
 
 namespace {
 
-CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(Cpu::ScalarT) {
+/* Basically a variant of the stringFindCharacterImplementation(), using the
+   same high-level logic with branching only on every four vectors. See its
+   documentation for more information. */
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(SSE2,BMI1) typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(CORRADE_CPU_DECLARE(Cpu::Sse2|Cpu::Bmi1)) {
+  return [](const char* const a, const char* const b, const std::size_t sizeA, const std::size_t sizeB) CORRADE_ENABLE(SSE2,BMI1) {
+    const std::size_t size = Utility::min(sizeA, sizeB);
+
+    /* If we have less than 16 bytes, do it the stupid way */
+    /** @todo that this worked best for stringFindCharacterImplementation()
+        doesn't mean it's the best variant here as well */
+    {
+        const char *i = a, *j = b;
+        switch(size) {
+            case 15: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case 14: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case 13: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case 12: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case 11: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case 10: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  9: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  8: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  7: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  6: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  5: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  4: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  3: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  2: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  1: if(*i++ != *j++) return i - 1; CORRADE_FALLTHROUGH
+            case  0: return a + size;
+        }
+    }
+
+    /* Unconditionally compare the first vector a slower, unaligned way */
+    {
+        const __m128i chunkA = _mm_loadu_si128(reinterpret_cast<const __m128i*>(a));
+        const __m128i chunkB = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b));
+        const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffff)
+            return a + _tzcnt_u32(~mask);
+    }
+
+    /* Go to the next aligned position of *one* of the inputs. If the pointer
+       was already aligned, we'll go to the next aligned vector; if not, there
+       will be an overlap and we'll check some bytes twice.
+
+       The other input is then processed unaligned, or if we're lucky it's
+       aligned the same way (such as when the strings are at the start of a
+       default-aligned allocation, which on 64 bits is 16 bytes). Alternatively
+       we could try to load both in an aligned way and then compare shifted
+       values, but on recent architecture the extra overhead from the patching
+       would probably be larger than just reading unaligned. */
+    const char* i = reinterpret_cast<const char*>(reinterpret_cast<std::uintptr_t>(a + 16) & ~0xf);
+    const char* j = b + (i - a);
+    CORRADE_INTERNAL_DEBUG_ASSERT(i > a && j > b && reinterpret_cast<std::uintptr_t>(i) % 16 == 0);
+
+    /* Go four vectors at a time with the aligned pointer */
+    const char* const endA = a + size;
+    const char* const endB = b + size;
+    for(; i + 4*16 <= endA; i += 4*16, j += 4*16) {
+        const __m128i iA = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 0);
+        const __m128i iB = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 1);
+        const __m128i iC = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 2);
+        const __m128i iD = _mm_load_si128(reinterpret_cast<const __m128i*>(i) + 3);
+        /* The second input is loaded unaligned always */
+        const __m128i jA = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j) + 0);
+        const __m128i jB = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j) + 1);
+        const __m128i jC = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j) + 2);
+        const __m128i jD = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j) + 3);
+
+        const __m128i eqA = _mm_cmpeq_epi8(iA, jA);
+        const __m128i eqB = _mm_cmpeq_epi8(iB, jB);
+        const __m128i eqC = _mm_cmpeq_epi8(iC, jC);
+        const __m128i eqD = _mm_cmpeq_epi8(iD, jD);
+
+        const __m128i and1 = _mm_and_si128(eqA, eqB);
+        const __m128i and2 = _mm_and_si128(eqC, eqD);
+        const __m128i and3 = _mm_and_si128(and1, and2);
+        if(_mm_movemask_epi8(and3) != 0xffff) {
+            const int maskA = _mm_movemask_epi8(eqA);
+            if(maskA != 0xffff)
+                return i + 0*16 + _tzcnt_u32(~maskA);
+            const int maskB = _mm_movemask_epi8(eqB);
+            if(maskB != 0xffff)
+                return i + 1*16 + _tzcnt_u32(~maskB);
+            const int maskC = _mm_movemask_epi8(eqC);
+            if(maskC != 0xffff)
+                return i + 2*16 + _tzcnt_u32(~maskC);
+            const int maskD = _mm_movemask_epi8(eqD);
+            if(maskD != 0xffff)
+                return i + 3*16 + _tzcnt_u32(~maskD);
+            CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+        }
+    }
+
+    /* Handle remaining less than four aligned vectors */
+    for(; i + 16 <= endA; i += 16, j += 16) {
+        const __m128i chunkA = _mm_load_si128(reinterpret_cast<const __m128i*>(i));
+        /* The second input is loaded unaligned always */
+        const __m128i chunkB = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j));
+        const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffff)
+            return i + _tzcnt_u32(~mask);
+    }
+
+    /* Handle remaining less than a vector with an unaligned load, again
+       overlapping back with the previous already-compared elements */
+    if(i < endA) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > endA && endB - j == endA - i);
+        i = endA - 16;
+        j = endB - 16;
+        const __m128i chunkA = _mm_loadu_si128(reinterpret_cast<const __m128i*>(i));
+        const __m128i chunkB = _mm_loadu_si128(reinterpret_cast<const __m128i*>(j));
+        const int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(chunkA, chunkB));
+        if(mask != 0xffff)
+            return i + _tzcnt_u32(~mask);
+    }
+
+    return endA;
+  };
+}
+#endif
+
+CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::type commonPrefixImplementation(CORRADE_CPU_DECLARE(Cpu::Scalar)) {
   return [](const char* const a, const char* const b, const std::size_t sizeA, const std::size_t sizeB) {
     const std::size_t size = Utility::min(sizeA, sizeB);
     const char* const endA = a + size;
@@ -245,9 +366,13 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::ty
 
 }
 
-CORRADE_UTILITY_CPU_DISPATCHER_BASE(commonPrefixImplementation)
+#ifdef CORRADE_TARGET_X86
+CORRADE_UTILITY_CPU_DISPATCHER(commonPrefixImplementation, Cpu::Bmi1)
+#else
+CORRADE_UTILITY_CPU_DISPATCHER(commonPrefixImplementation)
+#endif
 CORRADE_UTILITY_CPU_DISPATCHED(commonPrefixImplementation, const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB))({
-    return commonPrefixImplementation(Cpu::DefaultBase)(a, b, sizeA, sizeB);
+    return commonPrefixImplementation(CORRADE_CPU_SELECT(Cpu::Default))(a, b, sizeA, sizeB);
 })
 
 }

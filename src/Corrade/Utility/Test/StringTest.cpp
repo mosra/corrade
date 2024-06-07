@@ -59,6 +59,10 @@ struct StringTest: TestSuite::Tester {
     void join();
 
     void commonPrefix();
+    void commonPrefixAligned();
+    void commonPrefixUnaligned();
+    void commonPrefixUnalignedLessThanTwoVectors();
+    void commonPrefixUnalignedLessThanOneVector();
 
     void lowercaseUppercase();
     void lowercaseUppercaseAligned();
@@ -122,7 +126,10 @@ const struct {
     Cpu::Features features;
     std::size_t vectorSize;
 } CommonPrefixData[]{
-    {Cpu::Scalar, 16}
+    {Cpu::Scalar, 16},
+    #if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_BMI1)
+    {Cpu::Sse2|Cpu::Bmi1, 16},
+    #endif
 };
 
 const struct {
@@ -264,7 +271,11 @@ StringTest::StringTest() {
               &StringTest::partition,
               &StringTest::join});
 
-    addInstancedTests({&StringTest::commonPrefix},
+    addInstancedTests({&StringTest::commonPrefix,
+                       &StringTest::commonPrefixAligned,
+                       &StringTest::commonPrefixUnaligned,
+                       &StringTest::commonPrefixUnalignedLessThanTwoVectors,
+                       &StringTest::commonPrefixUnalignedLessThanOneVector},
         cpuVariantCount(CommonPrefixData),
         &StringTest::captureImplementations,
         &StringTest::restoreImplementations);
@@ -687,6 +698,355 @@ void StringTest::commonPrefix() {
     } {
         CORRADE_COMPARE(String::commonPrefix("abc\0de"_s, "abc\0df"_s), "abc\0d"_s);
     }
+}
+
+void StringTest::commonPrefixAligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    /* Like StringViewTest::findCharacterAligned(), but instead of finding a
+       concrete character there are two strings with one getting changed at
+       given position (back to front) and the prefix length is then verified */
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, with 12 vectors
+       in total, corresponding to the code paths:
+        - the first vector before the aligned four-at-a-time block, handled by
+          the unaligned preamble
+        - then two four-at-a-time blocks
+        - then three more blocks after, handled by the aligned postamble
+        - nothing left to be handled by the unaligned postamble
+
+        +----+    +----+----+----+----+    +----+----+----+
+        |ponm|    | lk : ji :h  g: fe |x2  |d   | bc |   a|
+        +----+    +----+----+----+----+    +----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4*2 + 3));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = arrayView(a);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* Make sure the string isn't a multiple of vector size, copy it to the
+       view to preserve the alignment */
+    Containers::String source = "Hello hello, here's some string data hopefully long enough, YES?!"_s*6;
+    Utility::copy(source.prefix(string.size()), string);
+    CORRADE_COMPARE_AS(source.size(), 16,
+        TestSuite::Compare::NotDivisible);
+
+    /* If one string is a prefix of the other, it should return the shorter */
+    {
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+
+    /* If the strings are the same, it should return them whole */
+    } {
+        Containers::StringView prefix1 = String::commonPrefix(source.prefix(string.size()), string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source.prefix(string.size()));
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+    }
+
+    auto verify = [&](std::size_t position, char character) {
+        CORRADE_ITERATION(Containers::StringView{&character, 1});
+        string[position] = character;
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), position);
+        CORRADE_COMPARE(prefix2.size(), position);
+    };
+
+    /* Last less-than-four vectors are treated separately. For each it should
+       pick the earliest difference; test also the very first and very last of
+       the range. */
+    verify(data.vectorSize*12 - 1, 'a');
+    verify(data.vectorSize*11 - 4, 'b');
+    verify(data.vectorSize*10 + 4, 'c');
+    verify(data.vectorSize* 9 + 0, 'd');
+
+    /* First four of the four vectors at a time are the same, second four
+       are different. Test each of the four separately, for each it should pick
+       the first difference. */
+    verify(data.vectorSize*9 - 2, 'e');
+    verify(data.vectorSize*8 + 2, 'f');
+    verify(data.vectorSize*8 - 1, 'g');
+    verify(data.vectorSize*7 + 0, 'h');
+    verify(data.vectorSize*7 - 7, 'i');
+    verify(data.vectorSize*6 + 7, 'j');
+    verify(data.vectorSize*6 - 3, 'k');
+    verify(data.vectorSize*5 + 3, 'l');
+
+    /* First vector is treated separately again. For each it should pick the
+       earliest difference; test also the very first and very last of the
+       range. */
+    verify(data.vectorSize - 1, 'm');
+    verify(data.vectorSize - 7, 'n');
+    verify(7, 'o');
+    verify(0, 'p');
+}
+
+void StringTest::commonPrefixUnaligned() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    /* Like StringViewTest::findCharacterUnaligned(), but instead of finding a
+       concrete character there are two strings with one getting changed at
+       given position and the prefix length is then verified */
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing:
+        - the first unaligned vector having all bytes but one overlapping with
+          the four-at-a-time block
+        - there being just one four-at-a-time block (the if() branch that skips
+          the block was sufficiently tested in firstCharacterAligned())
+        - there being just one full vector after, and the last unaligned vector
+          again overlapping with all but one byte with it
+
+            +----+                +----+
+            |e   |                |   a|
+            +----+                +----+
+             +----+----+----+----+----+
+        | .. |d   :    :    :   c|b   | .. |
+             +----+----+----+----+----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*(1 + 4 + 2));
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(data.vectorSize - 1, a.size() - (data.vectorSize - 1));
+    CORRADE_COMPARE(string.size(), data.vectorSize*5 + 2);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Make sure the string isn't a multiple of vector size, copy it to the
+       view to preserve the alignment */
+    Containers::String source = "Hey hey, another string, totally not as long this time"_s*5;
+    Utility::copy(source.prefix(string.size()), string);
+    CORRADE_COMPARE_AS(source.size(), 16,
+        TestSuite::Compare::NotDivisible);
+
+    /* If one string is a prefix of the other, it should return the shorter */
+    {
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+
+    /* If the strings are the same, it should return them whole */
+    } {
+        Containers::StringView prefix1 = String::commonPrefix(source.prefix(string.size()), string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source.prefix(string.size()));
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+    }
+
+    auto verify = [&](std::size_t position, char character) {
+        CORRADE_ITERATION(Containers::StringView{&character, 1});
+        string[position] = character;
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), position);
+        CORRADE_COMPARE(prefix2.size(), position);
+    };
+
+    /* Last byte should be handled by the final unaligned check */
+    verify(string.size() - 1, 'a');
+
+    /* The byte right after the aligned block is handled by the "less than
+       four vectors" block */
+    verify(data.vectorSize*4 + 1, 'b');
+    CORRADE_COMPARE_AS(string.data() + data.vectorSize*4 + 1, data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* The four-vectors-at-a-time should handle the aligned middle portion.
+       Test just the very first and very last of the aligned range. */
+    verify(data.vectorSize*4 + 0, 'c');
+    verify(data.vectorSize*0 + 1, 'd');
+    CORRADE_COMPARE_AS(string.data() + 1, data.vectorSize,
+        TestSuite::Compare::Aligned);
+
+    /* First byte should be handled by the initial unaligned check */
+    verify(0, 'e');
+}
+
+void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    /* Like StringViewTest::findCharacterUnalignedLessThanTwoVectors(), but
+       instead of finding a concrete character there are two strings with one
+       getting changed at given position and the prefix length is then
+       verified */
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
+       so there's just two unaligned blocks overlapping in a single byte:
+
+           +----+
+           |b   |
+           +----+
+        | .. | .. | .. |
+               +----+
+               |   a|
+               +----+
+    */
+    Containers::Array<char> a;
+    if(data.vectorSize == 16)
+        a = Utility::allocateAligned<char, 16>(Corrade::ValueInit, data.vectorSize*3);
+    else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Make sure the string isn't a multiple of vector size, copy it to the
+       view to preserve the alignment */
+    Containers::String source = "WE are GETTING shorter ONCE again"_s*3;
+    Utility::copy(source.prefix(string.size()), string);
+    CORRADE_COMPARE_AS(source.size(), 16,
+        TestSuite::Compare::NotDivisible);
+
+    /* If one string is a prefix of the other, it should return the shorter */
+    {
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+
+    /* If the strings are the same, it should return them whole */
+    } {
+        Containers::StringView prefix1 = String::commonPrefix(source.prefix(string.size()), string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source.prefix(string.size()));
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+    }
+
+    auto verify = [&](std::size_t position, char character) {
+        CORRADE_ITERATION(Containers::StringView{&character, 1});
+        string[position] = character;
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), position);
+        CORRADE_COMPARE(prefix2.size(), position);
+    };
+
+    /* Last byte should be handled by the final unaligned check */
+    verify(string.size() - 1, 'b');
+
+    /* First byte should be handled by the initial unaligned check */
+    verify(0, 'c');
+}
+
+void StringTest::commonPrefixUnalignedLessThanOneVector() {
+    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
+    auto&& data = CommonPrefixData[testCaseInstanceId()];
+    String::Implementation::commonPrefix = String::Implementation::commonPrefixImplementation(data.features);
+    #else
+    auto&& data = cpuVariantCompiled(CommonPrefixData);
+    #endif
+    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+
+    /* Like StringViewTest::findCharacterUnalignedLessThanTwoVectors(), but
+       instead of finding a concrete character there are two strings with one
+       getting changed at given position and the prefix length is then
+       verified */
+
+    if(!Utility::Test::isCpuVariantSupported(data))
+        CORRADE_SKIP("CPU features not supported");
+
+    /* Allocating an array to not have it null-terminated or SSO'd in order to
+       trigger ASan if the algorithm goes OOB. Deliberately pick an unaligned
+       pointer even though it shouldn't matter here. */
+    Containers::Array<char> a{Corrade::ValueInit, data.vectorSize};
+    Containers::MutableStringView string = a.exceptPrefix(1);
+    CORRADE_COMPARE_AS(string.data(), data.vectorSize,
+        TestSuite::Compare::NotAligned);
+
+    /* Make sure the string isn't a multiple of vector size, copy it to the
+       view to preserve the alignment */
+    Containers::String source = "This one is shortest ever!"_s*2;
+    Utility::copy(source.prefix(string.size()), string);
+    CORRADE_COMPARE_AS(source.size(), 16,
+        TestSuite::Compare::NotDivisible);
+
+    /* If one string is a prefix of the other, it should return the shorter */
+    {
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+
+    /* If the strings are the same, it should return them whole */
+    } {
+        Containers::StringView prefix1 = String::commonPrefix(source.prefix(string.size()), string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source.prefix(string.size()));
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size());
+        CORRADE_COMPARE(prefix2.size(), string.size());
+    }
+
+    auto verify = [&](std::size_t position, char character) {
+        CORRADE_ITERATION(Containers::StringView{&character, 1});
+        string[position] = character;
+        Containers::StringView prefix1 = String::commonPrefix(source, string);
+        Containers::StringView prefix2 = String::commonPrefix(string, source);
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), position);
+        CORRADE_COMPARE(prefix2.size(), position);
+    };
+
+    /* It should pick the first found of the two */
+    verify(data.vectorSize/2 + 1, 'a');
+    verify(7, 'b');
 }
 
 constexpr char AllBytes[]{
