@@ -52,35 +52,25 @@ struct StringViewBenchmark: TestSuite::Tester {
        overhead, while the "Rare" variants test the actual vectorized
        implementation perf */
 
-    void findCharacterCommon();
-    void findCharacterCommonNaive();
-    void findCharacterCommonMemchr();
-    void findCharacterCommonStlString();
+    template<char character> void findCharacter();
+    template<char character> void findCharacterNaive();
+    template<char character> void findCharacterMemchr();
+    template<char character> void findCharacterStlString();
 
     void findCharacterCommonSmall();
     void findCharacterCommonSmallMemchr();
     /* No std::string variant as the overhead from slicing would make this
        useless (and no, find() has no end position) */
 
-    void findCharacterRare();
-    void findCharacterRareNaive();
-    void findCharacterRareMemchr();
-    void findCharacterRareStlString();
-
-    void findLastCharacterCommon();
-    void findLastCharacterCommonNaive();
-    void findLastCharacterCommonMemrchr();
-    void findLastCharacterCommonStlString();
+    template<char character> void findLastCharacter();
+    template<char character> void findLastCharacterNaive();
+    template<char character> void findLastCharacterMemrchr();
+    template<char character> void findLastCharacterStlString();
 
     void findLastCharacterCommonSmall();
     void findLastCharacterCommonSmallMemrchr();
     /* No std::string variant as the overhead from slicing would make this
        useless (and no, rfind() has no end position) */
-
-    void findLastCharacterRare();
-    void findLastCharacterRareNaive();
-    void findLastCharacterRareMemrchr();
-    void findLastCharacterRareStlString();
 
     private:
         Containers::Optional<Containers::String> _text;
@@ -90,6 +80,16 @@ struct StringViewBenchmark: TestSuite::Tester {
 };
 
 using namespace Containers::Literals;
+
+template<char> struct CharacterTraits;
+template<> struct CharacterTraits<' '> {
+    enum: std::size_t { Count = 500 };
+    static const char* name() { return "common"; }
+};
+template<> struct CharacterTraits<'\n'> {
+    enum: std::size_t { Count = 9 };
+    static const char* name() { return "rare"; }
+};
 
 const struct {
     Cpu::Features features;
@@ -166,14 +166,15 @@ const struct {
 };
 
 StringViewBenchmark::StringViewBenchmark() {
-    addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommon}, 100,
+    addInstancedBenchmarks({&StringViewBenchmark::findCharacter<' '>}, 100,
         Utility::Test::cpuVariantCount(FindCharacterData),
         &StringViewBenchmark::captureImplementations,
         &StringViewBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringViewBenchmark::findCharacterCommonNaive,
-                   &StringViewBenchmark::findCharacterCommonMemchr,
-                   &StringViewBenchmark::findCharacterCommonStlString}, 100);
+    addBenchmarks<StringViewBenchmark>({
+        &StringViewBenchmark::findCharacterNaive<' '>,
+        &StringViewBenchmark::findCharacterMemchr<' '>,
+        &StringViewBenchmark::findCharacterStlString<' '>}, 100);
 
     addInstancedBenchmarks({&StringViewBenchmark::findCharacterCommonSmall}, 100,
         Utility::Test::cpuVariantCount(FindCharacterSmallData),
@@ -182,27 +183,27 @@ StringViewBenchmark::StringViewBenchmark() {
 
     addBenchmarks({&StringViewBenchmark::findCharacterCommonSmallMemchr}, 100);
 
-    addInstancedBenchmarks({&StringViewBenchmark::findCharacterRare}, 100,
+    addInstancedBenchmarks({&StringViewBenchmark::findCharacter<'\n'>}, 100,
         Utility::Test::cpuVariantCount(FindCharacterData),
         &StringViewBenchmark::captureImplementations,
         &StringViewBenchmark::restoreImplementations);
 
-    addBenchmarks({&StringViewBenchmark::findCharacterRareNaive,
-                   &StringViewBenchmark::findCharacterRareMemchr,
-                   &StringViewBenchmark::findCharacterRareStlString,
+    addBenchmarks({&StringViewBenchmark::findCharacterNaive<'\n'>,
+                   &StringViewBenchmark::findCharacterMemchr<'\n'>,
+                   &StringViewBenchmark::findCharacterStlString<'\n'>,
 
-                   &StringViewBenchmark::findLastCharacterCommon,
-                   &StringViewBenchmark::findLastCharacterCommonNaive,
-                   &StringViewBenchmark::findLastCharacterCommonMemrchr,
-                   &StringViewBenchmark::findLastCharacterCommonStlString,
+                   &StringViewBenchmark::findLastCharacter<' '>,
+                   &StringViewBenchmark::findLastCharacterNaive<' '>,
+                   &StringViewBenchmark::findLastCharacterMemrchr<' '>,
+                   &StringViewBenchmark::findLastCharacterStlString<' '>,
 
                    &StringViewBenchmark::findLastCharacterCommonSmall,
                    &StringViewBenchmark::findLastCharacterCommonSmallMemrchr,
 
-                   &StringViewBenchmark::findLastCharacterRare,
-                   &StringViewBenchmark::findLastCharacterRareNaive,
-                   &StringViewBenchmark::findLastCharacterRareMemrchr,
-                   &StringViewBenchmark::findLastCharacterRareStlString}, 100);
+                   &StringViewBenchmark::findLastCharacter<'\n'>,
+                   &StringViewBenchmark::findLastCharacterNaive<'\n'>,
+                   &StringViewBenchmark::findLastCharacterMemrchr<'\n'>,
+                   &StringViewBenchmark::findLastCharacterStlString<'\n'>}, 100);
 
     _text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
 }
@@ -219,18 +220,18 @@ void StringViewBenchmark::restoreImplementations() {
     #endif
 }
 
-constexpr std::size_t CommonCharacterCount = 500;
-constexpr std::size_t RareCharacterCount = 90;
 constexpr std::size_t CharacterRepeats = 100;
 
-void StringViewBenchmark::findCharacterCommon() {
+template<char character> void StringViewBenchmark::findCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     auto&& data = FindCharacterData[testCaseInstanceId()];
     Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
     #else
     auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(Utility::format("{}, {}",
+        CharacterTraits<character>::name(),
+        Utility::Test::cpuVariantName(data)));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -240,16 +241,18 @@ void StringViewBenchmark::findCharacterCommon() {
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         StringView a = *_text;
-        while(StringView found = a.find(' ')) {
+        while(StringView found = a.find(character)) {
             ++count;
             a = a.suffix(found.end());
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findCharacterCommonNaive() {
+template<char character> void StringViewBenchmark::findCharacterNaive() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
@@ -258,7 +261,7 @@ void StringViewBenchmark::findCharacterCommonNaive() {
         for(;;) {
             const char* found = nullptr;
             for(const char* i = a; i != _text->end(); ++i) {
-                if(*i == ' ') {
+                if(*i == character) {
                     found = i;
                     break;
                 }
@@ -270,25 +273,29 @@ void StringViewBenchmark::findCharacterCommonNaive() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findCharacterCommonMemchr() {
+template<char character> void StringViewBenchmark::findCharacterMemchr() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         const char* a = _text->data();
-        while(const char* found = static_cast<const char*>(std::memchr(a, ' ', _text->end() - a))) {
+        while(const char* found = static_cast<const char*>(std::memchr(a, character, _text->end() - a))) {
             ++count;
             a = found + 1;
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findCharacterCommonStlString() {
+template<char character> void StringViewBenchmark::findCharacterStlString() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
@@ -296,13 +303,13 @@ void StringViewBenchmark::findCharacterCommonStlString() {
     CORRADE_BENCHMARK(CharacterRepeats) {
         std::size_t pos = 0;
         std::size_t found;
-        while((found = a.find(' ', pos)) != std::string::npos) {
+        while((found = a.find(character, pos)) != std::string::npos) {
             ++count;
             pos = found + 1;
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
 void StringViewBenchmark::findCharacterCommonSmall() {
@@ -328,7 +335,7 @@ void StringViewBenchmark::findCharacterCommonSmall() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
 }
 
 void StringViewBenchmark::findCharacterCommonSmallMemchr() {
@@ -343,110 +350,29 @@ void StringViewBenchmark::findCharacterCommonSmallMemchr() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findCharacterRare() {
-    #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
-    auto&& data = FindCharacterData[testCaseInstanceId()];
-    Implementation::stringFindCharacter = Implementation::stringFindCharacterImplementation(data.features);
-    #else
-    auto&& data = Utility::Test::cpuVariantCompiled(FindCharacterData);
-    #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+template<char character> void StringViewBenchmark::findLastCharacter() {
+    setTestCaseDescription(CharacterTraits<character>::name());
 
-    if(!Utility::Test::isCpuVariantSupported(data))
-        CORRADE_SKIP("CPU features not supported");
-
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = string;
-        while(StringView found = a.find('\n')) {
-            ++count;
-            a = a.suffix(found.end());
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findCharacterRareNaive() {
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = string.data();
-        for(;;) {
-            const char* found = nullptr;
-            for(const char* i = a; i != string.end(); ++i) {
-                if(*i == '\n') {
-                    found = i;
-                    break;
-                }
-            }
-            if(!found) break;
-
-            ++count;
-            a = found + 1;
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findCharacterRareMemchr() {
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        const char* a = string.data();
-        while(const char* found = static_cast<const char*>(std::memchr(a, '\n', string.end() - a))) {
-            ++count;
-            a = found + 1;
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findCharacterRareStlString() {
-    CORRADE_VERIFY(_text);
-
-    std::size_t count = 0;
-    std::string a = *_text*10;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t pos = 0;
-        std::size_t found;
-        while((found = a.find('\n', pos)) != std::string::npos) {
-            ++count;
-            pos = found + 1;
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findLastCharacterCommon() {
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         StringView a = *_text;
-        while(StringView found = a.findLast(' ')) {
+        while(StringView found = a.findLast(character)) {
             ++count;
             a = a.prefix(found.begin());
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findLastCharacterCommonNaive() {
+template<char character> void StringViewBenchmark::findLastCharacterNaive() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
@@ -455,7 +381,7 @@ void StringViewBenchmark::findLastCharacterCommonNaive() {
         for(;;) {
             const char* found = nullptr;
             for(const char* i = _text->begin() + end; i != _text->begin(); --i) {
-                if(*(i - 1) == ' ') {
+                if(*(i - 1) == character) {
                     found = i - 1;
                     break;
                 }
@@ -467,10 +393,12 @@ void StringViewBenchmark::findLastCharacterCommonNaive() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
-void StringViewBenchmark::findLastCharacterCommonMemrchr() {
+template<char character> void StringViewBenchmark::findLastCharacterMemrchr() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("memrchr() not available");
     #else
@@ -479,17 +407,19 @@ void StringViewBenchmark::findLastCharacterCommonMemrchr() {
     std::size_t count = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         std::size_t end = _text->size();
-        while(const char* found = static_cast<const char*>(memrchr(_text->begin(), ' ', end))) {
+        while(const char* found = static_cast<const char*>(memrchr(_text->begin(), character, end))) {
             ++count;
             end = found - _text->begin();
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
     #endif
 }
 
-void StringViewBenchmark::findLastCharacterCommonStlString() {
+template<char character> void StringViewBenchmark::findLastCharacterStlString() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
     CORRADE_VERIFY(_text);
 
     std::size_t count = 0;
@@ -497,13 +427,13 @@ void StringViewBenchmark::findLastCharacterCommonStlString() {
     CORRADE_BENCHMARK(CharacterRepeats) {
         std::size_t end = _text->size();
         std::size_t found;
-        while((found = a.rfind(' ', end)) != std::string::npos) {
+        while((found = a.rfind(character, end)) != std::string::npos) {
             ++count;
             end = found - 1;
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
 void StringViewBenchmark::findLastCharacterCommonSmall() {
@@ -519,7 +449,7 @@ void StringViewBenchmark::findLastCharacterCommonSmall() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
 }
 
 void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
@@ -537,87 +467,8 @@ void StringViewBenchmark::findLastCharacterCommonSmallMemrchr() {
         }
     }
 
-    CORRADE_COMPARE(count, CommonCharacterCount*CharacterRepeats);
+    CORRADE_COMPARE(count, CharacterTraits<' '>::Count*CharacterRepeats);
     #endif
-}
-
-void StringViewBenchmark::findLastCharacterRare() {
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        StringView a = string;
-        while(StringView found = a.findLast('\n')) {
-            ++count;
-            a = a.prefix(found.begin());
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findLastCharacterRareNaive() {
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = string.size();
-        for(;;) {
-            const char* found = nullptr;
-            for(const char* i = string.begin() + end; i != string.begin(); --i) {
-                if(*(i - 1) == '\n') {
-                    found = i - 1;
-                    break;
-                }
-            }
-            if(!found) break;
-
-            ++count;
-            end = found - string.begin();
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-}
-
-void StringViewBenchmark::findLastCharacterRareMemrchr() {
-    #if !defined(__GLIBC__) && !defined(__BIONIC__) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    CORRADE_SKIP("memrchr() not available");
-    #else
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = string.size();
-        while(const char* found = static_cast<const char*>(memrchr(string.begin(), '\n', end))) {
-            ++count;
-            end = found - string.begin();
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
-    #endif
-}
-
-void StringViewBenchmark::findLastCharacterRareStlString() {
-    CORRADE_VERIFY(_text);
-    Containers::String string = *_text*10;
-
-    std::size_t count = 0;
-    std::string a = string;
-    CORRADE_BENCHMARK(CharacterRepeats) {
-        std::size_t end = string.size();
-        std::size_t found;
-        while((found = a.rfind('\n', end)) != std::string::npos) {
-            ++count;
-            end = found - 1;
-        }
-    }
-
-    CORRADE_COMPARE(count, RareCharacterCount*CharacterRepeats);
 }
 
 }}}}
