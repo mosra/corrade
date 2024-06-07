@@ -30,6 +30,7 @@
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -65,6 +66,7 @@ struct StringViewBenchmark: TestSuite::Tester {
     template<char character> void findLastCharacter();
     template<char character> void findLastCharacterNaive();
     template<char character> void findLastCharacterMemrchr();
+    template<char character> void findLastCharacterStrrchr();
     template<char character> void findLastCharacterStlString();
 
     void findLastCharacterCommonSmall();
@@ -195,6 +197,7 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacter<' '>,
                    &StringViewBenchmark::findLastCharacterNaive<' '>,
                    &StringViewBenchmark::findLastCharacterMemrchr<' '>,
+                   &StringViewBenchmark::findLastCharacterStrrchr<' '>,
                    &StringViewBenchmark::findLastCharacterStlString<' '>,
 
                    &StringViewBenchmark::findLastCharacterCommonSmall,
@@ -203,6 +206,7 @@ StringViewBenchmark::StringViewBenchmark() {
                    &StringViewBenchmark::findLastCharacter<'\n'>,
                    &StringViewBenchmark::findLastCharacterNaive<'\n'>,
                    &StringViewBenchmark::findLastCharacterMemrchr<'\n'>,
+                   &StringViewBenchmark::findLastCharacterStrrchr<'\n'>,
                    &StringViewBenchmark::findLastCharacterStlString<'\n'>}, 20);
 
     _text = Utility::Path::readString(Utility::Path::join(CONTAINERS_TEST_DIR, "StringTestFiles/lorem-ipsum.txt"));
@@ -415,6 +419,35 @@ template<char character> void StringViewBenchmark::findLastCharacterMemrchr() {
 
     CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
     #endif
+}
+
+template<char character> void StringViewBenchmark::findLastCharacterStrrchr() {
+    setTestCaseDescription(CharacterTraits<character>::name());
+
+    /* Just for laughs -- as there isn't really a way for strrchr to start
+       looking at the *end* of the string, it has to go through the whole
+       string every time. To actually end up finding all occurences, every time
+       a occurence is found, it's converted to a null terminator, which means
+       we need a new copy of the string for every benchmark iteration.
+
+       It's funny how this function ended up being in the standard C but
+       memrchr not. */
+
+    CORRADE_VERIFY(_text);
+
+    StaticArray<CharacterRepeats, String> strings{Corrade::DirectInit, *_text};
+
+    std::size_t count = 0;
+    std::size_t i = 0;
+    CORRADE_BENCHMARK(CharacterRepeats) {
+        while(char* found = strrchr(strings[i].begin(), character)) {
+            ++count;
+            *found = '\0';
+        }
+        ++i;
+    }
+
+    CORRADE_COMPARE(count, CharacterTraits<character>::Count*CharacterRepeats);
 }
 
 template<char character> void StringViewBenchmark::findLastCharacterStlString() {
