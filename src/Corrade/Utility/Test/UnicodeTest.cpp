@@ -37,7 +37,6 @@
 
 #ifdef CORRADE_TARGET_WINDOWS
 #include "Corrade/Containers/String.h"
-#include "Corrade/TestSuite/Compare/Container.h"
 #endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
