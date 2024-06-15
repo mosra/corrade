@@ -29,9 +29,11 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Unicode.h"
 
@@ -46,11 +48,11 @@ struct UnicodeTest: TestSuite::Tester {
 
     void nextUtf8();
     void nextUtf8Error();
-    void nextUtf8Empty();
+    void nextUtf8Invalid();
 
     void prevUtf8();
     void prevUtf8Error();
-    void prevUtf8Empty();
+    void prevUtf8Invalid();
 
     void utf8utf32();
     void utf32utf8();
@@ -67,11 +69,11 @@ struct UnicodeTest: TestSuite::Tester {
 UnicodeTest::UnicodeTest() {
     addTests({&UnicodeTest::nextUtf8,
               &UnicodeTest::nextUtf8Error,
-              &UnicodeTest::nextUtf8Empty,
+              &UnicodeTest::nextUtf8Invalid,
 
               &UnicodeTest::prevUtf8,
               &UnicodeTest::prevUtf8Error,
-              &UnicodeTest::prevUtf8Empty,
+              &UnicodeTest::prevUtf8Invalid,
 
               &UnicodeTest::utf8utf32,
               &UnicodeTest::utf32utf8,
@@ -140,13 +142,17 @@ void UnicodeTest::nextUtf8Error() {
         (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 }
 
-void UnicodeTest::nextUtf8Empty() {
+void UnicodeTest::nextUtf8Invalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
     Unicode::nextChar("", 0);
-    CORRADE_COMPARE(out.str(), "Utility::Unicode::nextChar(): cursor out of range\n");
+    Unicode::nextChar("hello", 5);
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Unicode::nextChar(): expected cursor to be less than 0 but got 0\n"
+        "Utility::Unicode::nextChar(): expected cursor to be less than 5 but got 5\n",
+        TestSuite::Compare::String);
 }
 
 void UnicodeTest::prevUtf8() {
@@ -216,13 +222,19 @@ void UnicodeTest::prevUtf8Error() {
         (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 2}));
 }
 
-void UnicodeTest::prevUtf8Empty() {
+void UnicodeTest::prevUtf8Invalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
-    Unicode::prevChar("hello", 0);
-    CORRADE_COMPARE(out.str(), "Utility::Unicode::prevChar(): cursor already at the beginning\n");
+    Unicode::prevChar("", 0);
+    Unicode::prevChar("a", 0);
+    Unicode::prevChar("hello", 6);
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 0 but got 0\n"
+        "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 1 but got 0\n"
+        "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 5 but got 6\n",
+        TestSuite::Compare::String);
 }
 
 void UnicodeTest::utf8utf32() {

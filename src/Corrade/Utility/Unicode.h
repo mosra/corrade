@@ -70,10 +70,10 @@ namespace Unicode {
 @brief Next UTF-8 character
 
 Returns a Unicode codepoint of a character at @p cursor and position of the
-following character. If an error occurs, returns position of the next byte and
-@cpp 0xffffffffu @ce as the codepoint, it's then up to the caller whether it
-gets treated as a fatal error or if the invalid character is simply skipped or
-replaced.
+following character. Expects that @p cursor is less than @p text size. If an
+error occurs, returns position of the next byte and @cpp 0xffffffffu @ce as the
+codepoint, it's then up to the caller whether it gets treated as a fatal error
+or if the invalid character is simply skipped or replaced.
 @see @ref utf8()
 */
 CORRADE_UTILITY_EXPORT Containers::Pair<char32_t, std::size_t> nextChar(Containers::StringView text, std::size_t cursor);
@@ -82,7 +82,8 @@ CORRADE_UTILITY_EXPORT Containers::Pair<char32_t, std::size_t> nextChar(Containe
 @brief Previous UTF-8 character
 
 Returns a Unicode codepoint of a character before @p cursor and its position.
-If an error occurs, returns position of the previous byte and
+Expects that @p cursor is greater than @cpp 0 @ce and less than or equal to
+@p text size. If an error occurs, returns position of the previous byte and
 @cpp 0xffffffffu @ce as the codepoint, it's then up to the caller whether it
 gets treated as a fatal error or if the invalid character is simply skipped or
 replaced.
