@@ -92,40 +92,22 @@ Containers::Pair<char32_t, std::size_t> prevChar(const Containers::StringView te
     CORRADE_DEBUG_ASSERT(cursor > 0 && cursor <= text.size(),
         "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to" << text.size() << "but got" << cursor, {});
 
-    std::size_t begin;
-    std::uint32_t mask;
+    /* If the previous byte is a continuation byte, go back until it isn't, but
+       only up to three bytes -- any longer sequence of continuation bytes
+       would be invalid anyway */
+    const std::size_t iMax = Utility::min(std::size_t{4}, cursor);
+    std::size_t i = 1;
+    while(i != iMax && (text[cursor - i] & 0xc0) == 0x80)
+        ++i;
 
-    if(std::uint32_t(text[cursor - 1]) < 0x80) {
-        begin = cursor - 1;
-        mask = 0x7f;
-    } else if(cursor > 1 && (text[cursor - 1] & 0xc0) == 0x80) {
-        if((text[cursor - 2] & 0xe0) == 0xc0) {
-            begin = cursor - 2;
-            mask = 0x1f;
-        } else if(cursor > 2 && (text[cursor - 2] & 0xc0) == 0x80) {
-            if((text[cursor - 3] & 0xf0) == 0xe0) {
-                begin = cursor - 3;
-                mask = 0x0f;
-            } else if(cursor > 3 && (text[cursor - 3] & 0xc0) == 0x80) {
-                if((text[cursor - 4] & 0xf8) == 0xf0) {
-                    begin = cursor - 4;
-                    mask = 0x07;
+    /* Delegate to nextChar() for the actual codepoint calculation and
+       validation. It's also invalid if the next UTF-8 character isn't
+       *exactly* this cursor position. */
+    const Containers::Pair<char32_t, std::size_t> prev = nextChar(text, cursor - i);
+    if(prev.first() == U'\xffffffff' || prev.second() != cursor)
+        return {U'\xffffffff', cursor - 1};
 
-                /* Sequence too short, wrong cursor position or garbage in the
-                   sequence */
-                } else return {U'\xffffffff', cursor - 1};
-            } else return {U'\xffffffff', cursor - 1};
-        } else return {U'\xffffffff', cursor - 1};
-    } else return {U'\xffffffff', cursor - 1};
-
-    /* Compute the codepoint */
-    char32_t result = text[begin] & mask;
-    for(std::size_t i = begin + 1; i != cursor; ++i) {
-        result <<= 6;
-        result |= (text[i] & 0x3f);
-    }
-
-    return {result, begin};
+    return {prev.first(), cursor - i};
 }
 
 std::size_t utf8(const char32_t character, const Containers::ArrayView4<char> result) {

@@ -201,13 +201,25 @@ void UnicodeTest::prevUtf8Error() {
     CORRADE_COMPARE(Unicode::prevChar("   \x40\xac", 5),
         (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 4}));
 
-    /* Garbage in three-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x40\xb8\xb8", 6),
+    /* Two-byte sequence with an extra byte after */
+    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac\x80", 6),
         (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 5}));
+
+    /* Garbage in three-byte sequence */
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\xb8\x89", 6),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 5}));
+
+    /* Three-byte sequence with an extra byte after */
+    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89\x80", 7),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 6}));
 
     /* Garbage in four-byte sequence */
     CORRADE_COMPARE(Unicode::prevChar("   \x40\x85\x98\x80", 7),
         (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 6}));
+
+    /* Four-byte sequence with an extra byte after */
+    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80\x80", 8),
+        (Containers::Pair<char32_t, std::size_t>{0xffffffffu, 7}));
 
     /* Too small string for two-byte sequence */
     CORRADE_COMPARE(Unicode::prevChar("\xac", 1),
