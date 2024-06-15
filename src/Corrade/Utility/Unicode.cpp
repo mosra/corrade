@@ -55,7 +55,7 @@ Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView te
     /** @todo assert for overlong sequences */
 
     /* Sequence size */
-    if(character < 128) {
+    if(character < 0x80) {
         end += 1;
         mask = 0x7f;
     } else if((character & 0xe0) == 0xc0) {
@@ -76,7 +76,7 @@ Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView te
 
     /* Compute the codepoint */
     char32_t result = character & mask;
-    for(std::size_t i = cursor+1; i != end; ++i) {
+    for(std::size_t i = cursor + 1; i != end; ++i) {
         /* Garbage in the sequence */
         if((text[i] & 0xc0) != 0x80)
             return {U'\xffffffff', cursor+1};
