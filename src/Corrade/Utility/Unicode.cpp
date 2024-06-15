@@ -45,7 +45,7 @@
 namespace Corrade { namespace Utility { namespace Unicode {
 
 Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView text, const std::size_t cursor) {
-    CORRADE_ASSERT(cursor < text.size(),
+    CORRADE_DEBUG_ASSERT(cursor < text.size(),
         "Utility::Unicode::nextChar(): expected cursor to be less than" << text.size() << "but got" << cursor, {});
 
     std::uint32_t character = text[cursor];
@@ -89,7 +89,7 @@ Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView te
 }
 
 Containers::Pair<char32_t, std::size_t> prevChar(const Containers::StringView text, const std::size_t cursor) {
-    CORRADE_ASSERT(cursor > 0 && cursor <= text.size(),
+    CORRADE_DEBUG_ASSERT(cursor > 0 && cursor <= text.size(),
         "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to" << text.size() << "but got" << cursor, {});
 
     std::size_t begin;

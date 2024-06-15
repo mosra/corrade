@@ -143,7 +143,7 @@ void UnicodeTest::nextUtf8Error() {
 }
 
 void UnicodeTest::nextUtf8Invalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -223,7 +223,7 @@ void UnicodeTest::prevUtf8Error() {
 }
 
 void UnicodeTest::prevUtf8Invalid() {
-    CORRADE_SKIP_IF_NO_ASSERT();
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
     std::ostringstream out;
     Error redirectError{&out};
