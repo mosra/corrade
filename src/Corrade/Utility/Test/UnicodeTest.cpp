@@ -89,21 +89,41 @@ UnicodeTest::UnicodeTest() {
 using namespace Containers::Literals;
 
 void UnicodeTest::nextUtf8() {
-    /* One-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \x7f", 3),
-        (Containers::Pair<char32_t, std::size_t>{127, 4}));
+    /* One-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::nextChar("  \xff\x7f", 3),
+        (Containers::Pair<char32_t, std::size_t>{0x7f, 4}));
+    CORRADE_COMPARE(Unicode::nextChar("   \x7f\xff", 3),
+        (Containers::Pair<char32_t, std::size_t>{0x7f, 4}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::nextChar("\x0a", 0),
+        (Containers::Pair<char32_t, std::size_t>{0x0a, 1}));
 
-    /* Two byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xce\xac", 3),
+    /* Two byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::nextChar("  \xff\xce\xac", 3),
         (Containers::Pair<char32_t, std::size_t>{940, 5}));
+    CORRADE_COMPARE(Unicode::nextChar("   \xce\xac\xff", 3),
+        (Containers::Pair<char32_t, std::size_t>{940, 5}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::nextChar("\xce\xac", 0),
+        (Containers::Pair<char32_t, std::size_t>{940, 2}));
 
-    /* Three-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xea\xb8\x89", 3),
+    /* Three-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::nextChar("  \xff\xea\xb8\x89", 3),
         (Containers::Pair<char32_t, std::size_t>{44553, 6}));
+    CORRADE_COMPARE(Unicode::nextChar("   \xea\xb8\x89\xff", 3),
+        (Containers::Pair<char32_t, std::size_t>{44553, 6}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::nextChar("\xea\xb8\x89", 0),
+        (Containers::Pair<char32_t, std::size_t>{44553, 3}));
 
-    /* Four-byte sequence */
-    CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80", 3),
+    /* Four-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::nextChar("  \xff\xf4\x85\x98\x80", 3),
         (Containers::Pair<char32_t, std::size_t>{1070592, 7}));
+    CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80\xff", 3),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 7}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::nextChar("\xf4\x85\x98\x80", 0),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 4}));
 }
 
 void UnicodeTest::nextUtf8Error() {
@@ -130,21 +150,40 @@ void UnicodeTest::nextUtf8Empty() {
 }
 
 void UnicodeTest::prevUtf8() {
-    /* One-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \x7f", 4),
-        (Containers::Pair<char32_t, std::size_t>{127, 3}));
+    /* One-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::prevChar("  \xff\x7f", 4),
+        (Containers::Pair<char32_t, std::size_t>{0x7f, 3}));
+    CORRADE_COMPARE(Unicode::prevChar("   \x7f\xff", 4),
+        (Containers::Pair<char32_t, std::size_t>{0x7f, 3}));
+    CORRADE_COMPARE(Unicode::prevChar("\x0a", 1),
+        (Containers::Pair<char32_t, std::size_t>{0x0a, 0}));
 
-    /* Two byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac", 5),
+    /* Two byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::prevChar("  \xff\xce\xac", 5),
         (Containers::Pair<char32_t, std::size_t>{940, 3}));
+    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac\xff", 5),
+        (Containers::Pair<char32_t, std::size_t>{940, 3}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::prevChar("\xce\xac", 2),
+        (Containers::Pair<char32_t, std::size_t>{940, 0}));
 
-    /* Three-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89", 6),
+    /* Three-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::prevChar("  \xff\xea\xb8\x89", 6),
         (Containers::Pair<char32_t, std::size_t>{44553, 3}));
+    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89\xff", 6),
+        (Containers::Pair<char32_t, std::size_t>{44553, 3}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::prevChar("\xea\xb8\x89", 3),
+        (Containers::Pair<char32_t, std::size_t>{44553, 0}));
 
-    /* Four-byte sequence */
-    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80", 7),
+    /* Four-byte sequence. Ignores garbage right before and after. */
+    CORRADE_COMPARE(Unicode::prevChar("  \xff\xf4\x85\x98\x80", 7),
         (Containers::Pair<char32_t, std::size_t>{1070592, 3}));
+    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80\xff", 7),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 3}));
+    /* Should work also if directly at the beginning / end */
+    CORRADE_COMPARE(Unicode::prevChar("\xf4\x85\x98\x80", 4),
+        (Containers::Pair<char32_t, std::size_t>{1070592, 0}));
 }
 
 void UnicodeTest::prevUtf8Error() {
