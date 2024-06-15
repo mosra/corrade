@@ -33,6 +33,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/Triple.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
 #define WIN32_LEAN_AND_MEAN 1
@@ -43,6 +44,28 @@
 #endif
 
 namespace Corrade { namespace Utility { namespace Unicode {
+
+Containers::Triple<char32_t, std::size_t, std::size_t> currentChar(const Containers::StringView text, const std::size_t cursor) {
+    CORRADE_DEBUG_ASSERT(cursor < text.size(),
+        "Utility::Unicode::currentChar(): expected cursor to be less than" << text.size() << "but got" << cursor, {});
+
+    /* If this is a continuation byte, go back until it isn't, but only up to
+       three bytes -- any longer sequence of continuation bytes would be
+       invalid anyway */
+    const std::size_t iMax = Utility::min(std::size_t{3}, cursor);
+    std::size_t i = 0;
+    while(i != iMax && (text[cursor - i] & 0xc0) == 0x80)
+        ++i;
+
+    /* Delegate to nextChar() for the actual codepoint calculation and
+       validation. It's also invalid if the next UTF-8 character isn't
+       *after* this cursor position. */
+    const Containers::Pair<char32_t, std::size_t> prev = nextChar(text, cursor - i);
+    if(prev.first() == U'\xffffffff' || prev.second() <= cursor)
+        return {U'\xffffffff', cursor, cursor + 1};
+
+    return {prev.first(), cursor - i, prev.second()};
+}
 
 Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView text, const std::size_t cursor) {
     CORRADE_DEBUG_ASSERT(cursor < text.size(),

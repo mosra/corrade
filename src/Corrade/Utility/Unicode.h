@@ -67,13 +67,31 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 namespace Unicode {
 
 /**
+@brief Current UTF-8 character
+@m_since_latest
+
+Returns a Unicode codepoint of a character at @p cursor, position of where it
+starts, i.e. either the same position or up to three bytes before, and position
+of where it ends, i.e. always one or four bytes after. Expects that @p cursor
+is less than @p text size. If the character is invalid, returns
+@cpp 0xffffffffu @ce as the codepoint and position of the same and next byte,
+it's then up to the caller whether it gets treated as a fatal error or if the
+invalid character is simply skipped or replaced.
+@see @ref nextChar(), @ref prevChar()
+*/
+CORRADE_UTILITY_EXPORT Containers::Triple<char32_t, std::size_t, std::size_t> currentChar(Containers::StringView text, std::size_t cursor);
+
+/**
 @brief Next UTF-8 character
 
 Returns a Unicode codepoint of a character at @p cursor and position of the
 following character. Expects that @p cursor is less than @p text size. If the
 character is invalid, returns @cpp 0xffffffffu @ce as the codepoint and
 position of the next byte, it's then up to the caller whether it gets treated
-as a fatal error or if the invalid character is simply skipped or replaced.
+as a fatal error or if the invalid character is simply skipped or replaced. If
+@p cursor might point inside a UTF-8 character encoding, you can use
+@ref currentChar() to retrieve its codepoint and position of the next
+character.
 @see @ref prevChar(), @ref utf8()
 */
 CORRADE_UTILITY_EXPORT Containers::Pair<char32_t, std::size_t> nextChar(Containers::StringView text, std::size_t cursor);
@@ -86,7 +104,8 @@ Expects that @p cursor is greater than @cpp 0 @ce and less than or equal to
 @p text size. If the character is invalid, returns @cpp 0xffffffffu @ce as the
 codepoint and position of the previous byte, it's then up to the caller whether
 it gets treated as a fatal error or if the invalid character is simply skipped
-or replaced.
+or replaced. If @p cursor might point inside a UTF-8 character encoding, you
+can use @ref currentChar() to retrieve its codepoint and starting position.
 @see @ref nextChar() @ref utf8()
 */
 CORRADE_UTILITY_EXPORT Containers::Pair<char32_t, std::size_t> prevChar(Containers::StringView text, std::size_t cursor);
