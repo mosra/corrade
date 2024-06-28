@@ -429,6 +429,9 @@ namespace Corrade {
     @ref Containers::String using @ref Utility::format()
 -   Creating an empty path with @ref Utility::Path::make() now succeeds because
     it makes no sense to fail for such case
+-   Unless querying file types is unreliable on given platform,
+    @ref Utility::Path::make() now fails if the path already exists and is a
+    file
 -   @ref Utility::IsStringLike now recognizes also C++17 @ref std::string_view
     by checking for a @cpp substr() @ce member instead of @cpp c_str() @ce
 -   The @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE macro is now defined on

@@ -324,34 +324,104 @@ bool make(const Containers::StringView path) {
        once for each component instead of just one existence check for the
        parent and one mkdir() for the leaf directory. */
     const Containers::StringView parentPath = split(path).first();
+    /* Can't use !isDirectory(parentPath) as it's not reliable on all platforms
+       and could make the function fail even before attempting to create
+       anything. With exists() the error message is slightly shittier if the
+       parentPath is a file, but at least it doesn't fail. See the other use of
+       isDirectory() below for more details. */
     if(parentPath && parentPath != "/"_s && !exists(parentPath) && !make(parentPath))
         return false;
 
-    /* Create the leaf directory, return true if successfully created or
-       already exists */
-
-    /* Unix, Emscripten */
+    /* Create the leaf directory, return true if successfully created */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const int ret = mkdir(Containers::String::nullTerminatedView(path).data(), 0777);
-    if(ret != 0 && errno != EEXIST) {
-        Error err;
-        err << "Utility::Path::make(): can't create" << path << Debug::nospace << ":";
-        Utility::Implementation::printErrnoErrorString(err, errno);
-        return false;
-    }
-    return true;
-
-    /* Windows (not Store/Phone) */
+    const Containers::String pathNullTerminated = Containers::String::nullTerminatedView(path);
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    if(CreateDirectoryW(Unicode::widen(path), nullptr) == 0 && GetLastError() != ERROR_ALREADY_EXISTS) {
-        Error err;
-        err << "Utility::Path::make(): can't create" << path << Debug::nospace << ":";
-        Utility::Implementation::printWindowsErrorString(err, GetLastError());
-        return false;
-    }
-    return true;
+    const Containers::Array<wchar_t> pathWide = Unicode::widen(path);
+    #else
+    #error
+    #endif
+    if(
+        /* Unix, Emscripten */
+        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+        mkdir(pathNullTerminated.data(), 0777) == 0
+        /* Windows (not Store/Phone) */
+        #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        CreateDirectoryW(pathWide.data(), nullptr) != 0
+        #else
+        #error
+        #endif
+    )
+        return true;
 
-    /* Not implemented elsewhere */
+    /* If already exists, return false if it's not a directory */
+    if(
+        /* Unix, Emscripten */
+        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+        errno == EEXIST
+        /* Windows (not Store/Phone) */
+        #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        GetLastError() == ERROR_ALREADY_EXISTS
+        #else
+        #error
+        #endif
+    ) {
+        /* isDirectory() is known to work correctly only on Unix and
+           Emscripten, not on iOS, and on Windows only partially, see the
+           comments in the implementation above. The main goal is to have
+           Path::make() work correctly in the happy cases, i.e. have it create
+           the path if at all possible, and return true. In comparison, having
+           it return `false` if the path exists but is a file, is only a
+           nice-to-have behavior for rare scenarios. So skipping this extra
+           check on platforms that can't detect a directory properly (and thus
+           silently returning true even if the existing path may not be a
+           directory) is not that of a big deal compared to failing always. */
+        #if (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || ((defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)) && !defined(CORRADE_TARGET_IOS))
+        #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        const DWORD fileAttributes = GetFileAttributesW(pathWide);
+        #endif
+        if(
+            /* On iOS (Simulator at least) stat() is a no-op, returning random
+               values, thus isDirectory() returns false for it */
+            #if (defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)) && !defined(CORRADE_TARGET_IOS)
+            !isDirectory(pathNullTerminated)
+            /* On Windows isDirectory() doesn't treat symlinks properly yet,
+               as a workaround we treat symlinks as "may be a directory as
+               well" to not have a failure in case the path exists and is a
+               symlink to a directory. Furthermore, INVALID_FILE_ATTRIBUTES
+               contain the FILE_ATTRIBUTE_DIRECTORY bit for some reason -- so
+               if it wouldn't check for INVALID_FILE_ATTRIBUTES first, files
+               that fail to query would still be treated as "fine, it's a
+               directory". */
+            #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+            fileAttributes != INVALID_FILE_ATTRIBUTES &&
+                /* No idea what a "directory reparse point" is, but
+                    https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants
+                   says it's set for symlinks as well */
+                !(fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
+                !(fileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            #else
+            #error
+            #endif
+        ) {
+            Error{} << "Utility::Path::make():" << path << "exists but is not a directory";
+            return false;
+        }
+        #endif
+
+        return true;
+    }
+
+    Error err;
+    err << "Utility::Path::make(): can't create" << path << Debug::nospace << ":";
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    Utility::Implementation::printErrnoErrorString(err, errno);
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    Utility::Implementation::printWindowsErrorString(err, GetLastError());
+    #else
+    #error
+    #endif
+    return false;
     #else
     Error{} << "Utility::Path::make(): not implemented on this platform";
     return false;

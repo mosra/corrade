@@ -103,6 +103,8 @@ struct PathTest: TestSuite::Tester {
     void isDirectoryUtf8();
 
     void make();
+    void makeExistsAsAFile();
+    void makeExistsAsADirectorySymlink();
     void makeDotDotDot();
     void makeNoPermission();
     void makeNonNullTerminated();
@@ -291,6 +293,8 @@ PathTest::PathTest() {
               &PathTest::isDirectoryUtf8,
 
               &PathTest::make,
+              &PathTest::makeExistsAsAFile,
+              &PathTest::makeExistsAsADirectorySymlink,
               &PathTest::makeDotDotDot,
               &PathTest::makeNoPermission,
               &PathTest::makeNonNullTerminated,
@@ -942,6 +946,70 @@ void PathTest::make() {
        in Python, where `os.makedirs('', exist_ok=True)` stupidly fails with
         FileNotFoundError: [Errno 2] No such file or directory: '' */
     CORRADE_VERIFY(Path::make(""));
+}
+
+void PathTest::makeExistsAsAFile() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
+    Containers::String file = Path::join(_writeTestDir, "file.txt");
+    CORRADE_VERIFY(Path::write(file, "a"_s));
+    CORRADE_VERIFY(Path::exists(file));
+    CORRADE_VERIFY(!Path::isDirectory(file));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::make(file));
+    /* It should fail also if some parent part of the path is a file */
+    CORRADE_VERIFY(!Path::make(Path::join(file, "sub/dir")));
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten says "Permission denied" instead of "Not a directory", for
+       some reason */
+    CORRADE_COMPARE_AS(out.str(), Utility::formatString(
+        "Utility::Path::make(): {0} exists but is not a directory\n"
+        "Utility::Path::make(): can't create {0}/sub: error 2 (",
+        file), TestSuite::Compare::StringHasPrefix);
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows APIs fill GetLastError() instead of errno, leading to a
+       different code */
+    CORRADE_COMPARE_AS(out.str(), Utility::formatString(
+        "Utility::Path::make(): {0} exists but is not a directory\n"
+        "Utility::Path::make(): can't create {0}/sub: error 3 (",
+        file), TestSuite::Compare::StringHasPrefix);
+    #else
+    /* Usual Unix */
+    CORRADE_COMPARE_AS(out.str(), Utility::formatString(
+        "Utility::Path::make(): {0} exists but is not a directory\n"
+        "Utility::Path::make(): can't create {0}/sub: error 20 (",
+        file), TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void PathTest::makeExistsAsADirectorySymlink() {
+    Containers::String dirSymlink = Path::join(_testDirSymlink, "dir-symlink");
+    Containers::String fileSymlink = Path::join(_testDirSymlink, "file-symlink");
+    CORRADE_VERIFY(Path::exists(dirSymlink));
+    CORRADE_VERIFY(Path::exists(fileSymlink));
+
+    /* If symlinks are preserved in the source tree, the file should have size
+       of the actual contents, not being empty or having some textual path in
+       it */
+    if(Path::size(fileSymlink) != 11)
+        CORRADE_SKIP("Symlinks not preserved in the source tree, can't test.");
+
+    /* If symlinks are preserved, this should succeed always, on all
+       platforms */
+    CORRADE_VERIFY(Path::make(dirSymlink));
+
+    /* This will be a false positive on Windows */
+    {
+        #ifdef CORRADE_TARGET_WINDOWS
+        CORRADE_EXPECT_FAIL("Path::make() returns true for symlinks always, even if they're not actually directories");
+        #endif
+        std::ostringstream out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Path::make(fileSymlink));
+        CORRADE_COMPARE(out.str(), Utility::formatString("Utility::Path::make(): {} exists but is not a directory\n", fileSymlink));
+    }
 }
 
 void PathTest::makeDotDotDot() {
@@ -2133,7 +2201,7 @@ void PathTest::sizeSymlink() {
     CORRADE_VERIFY(size);
 
     if(size != 11)
-        CORRADE_SKIP("Symlinks not preserved in the source tree, can't test");
+        CORRADE_SKIP("Symlinks not preserved in the source tree, can't test.");
 
     CORRADE_COMPARE(size, 11);
 }

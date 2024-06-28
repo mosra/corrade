@@ -238,7 +238,7 @@ know once such operation is attempted.
     @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", symlinks are followed, so this
     function will return @cpp true @ce for a symlink that points to a
     directory. This behavior is not implemented on Windows at the moment.
-@see @ref exists(), @ref list()
+@see @ref exists(), @ref make(), @ref list()
 */
 /* Another reason for this not returning Optional<bool> (= not having any
    failure state) is that such return type would be overly error-prone and
@@ -249,15 +249,20 @@ CORRADE_UTILITY_EXPORT bool isDirectory(Containers::StringView path);
 @brief Make a path
 @m_since_latest
 
-If any component of @p path doesn't exist already and can't be created, prints
-a message to @ref Error and returns @cpp false @ce. Creating an empty path
-always succeeds.
+If any component of @p path doesn't exist already, can't be created, or exists
+but is not a directory, prints a message to @ref Error and returns
+@cpp false @ce. Creating an empty path always succeeds.
 
 Expects that the @p path is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
+@partialsupport Due to file type detection being unreliable on
+    @ref CORRADE_TARGET_IOS "iOS" and unimplemented for symlinks on
+    @ref CORRADE_TARGET_WINDOWS "Windows", the function may still return
+    `true` on those two platforms if @p path exists but is not a directory.
+@see @ref isDirectory()
 */
 CORRADE_UTILITY_EXPORT bool make(Containers::StringView path);
 
