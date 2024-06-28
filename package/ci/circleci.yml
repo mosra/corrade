@@ -15,10 +15,12 @@ executors:
   ubuntu-18_04:
     docker:
     - image: ubuntu:bionic-20220427
-  # Anything below 12.5.1 is deprecated as of August 2023
-  xcode-12_5:
+  # Anything below 13.4.1 (and all x86 variants) are deprecated as of June 28th
+  # 2024
+  xcode-13_4:
     macos:
-      xcode: 12.5.1
+      xcode: 13.4.1
+    resource_class: macos.m1.medium.gen1
   emscripten:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
@@ -366,7 +368,7 @@ jobs:
         script: unix-desktop.sh
 
   macos:
-    executor: xcode-12_5
+    executor: xcode-13_4
     environment:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
@@ -377,7 +379,7 @@ jobs:
     - lcov
 
   macos-static:
-    executor: xcode-12_5
+    executor: xcode-13_4
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
@@ -414,7 +416,7 @@ jobs:
         script: android-x86.sh
 
   ios:
-    executor: xcode-12_5
+    executor: xcode-13_4
     environment:
       # Yep, xcodebuild is beyond stupid and just DOESN'T build in parallel by
       # default. The default medium resource class has 4 CPUs and Ninja uses
