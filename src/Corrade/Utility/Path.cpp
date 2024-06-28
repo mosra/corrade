@@ -282,15 +282,17 @@ bool isDirectory(const Containers::StringView path) {
        compared to first opening the file and then asking for attributes */
 
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    /** @todo symlink support */
+    /** @todo symlink support, https://stackoverflow.com/a/26354331 sounds
+        crazy tho */
     const DWORD fileAttributes = GetFileAttributesW(Unicode::widen(path));
     return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
     #elif defined(CORRADE_TARGET_IOS)
-    /* iOS used to return false for S_ISDIR() since Xcode 7.3 and including
-       11.4, but as of Xcode 11.5, it returns true. Which is a totally crappy
-       behavior, so we just return false always. Might be a simulator-specific
-       bug, but as there's no official documented way to detect a simulator, I
-       won't even bother. */
+    /* iOS (in a Simulator, at least) used to return false for S_ISDIR() since
+       Xcode 7.3 and including 11.4, but as of Xcode 11.5, it always returns
+       true. Which is a totally crappy behavior, looking like stat() isn't even
+       implemented. Might be a simulator-specific bug, but as there's no
+       official documented way to detect a simulator, it's better to play it
+       safe and return a non-random value always */
     static_cast<void>(path);
     return false;
     #elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -308,23 +310,25 @@ bool isDirectory(const Containers::StringView path) {
 bool make(const Containers::StringView path) {
     if(!path) return true;
 
-    /* If path contains trailing slash, strip it */
+    /* If the path contains trailing slash, strip it */
     if(path.hasSuffix('/'))
         return make(path.exceptSuffix(1));
 
     /* If parent directory doesn't exist, create it. That means two syscalls to
-       create each parent (and two UTF-16 conversions on Windows). I could also
-       directly call into make() without checking exists() first, relying on
-       mkdir() failing with EEXIST instead -- while that would save one syscall
-       per path component that doesn't exist, for long paths that already exist
-       (which is supposedly the more common scenario) it would mean mkdir()
-       gets called once for each component instead of just one existence check
-       for the parent and one mkdir() for the leaf directory. */
+       create each parent (and two null-terminated string allocations on Unix /
+       two UTF-16 conversions on Windows). I could also directly call into
+       make() without checking exists() first, relying on mkdir() failing with
+       EEXIST instead -- while that would save one syscall per path component
+       that doesn't exist, for long paths that already exist (which is
+       supposedly the more common scenario) it would mean mkdir() gets called
+       once for each component instead of just one existence check for the
+       parent and one mkdir() for the leaf directory. */
     const Containers::StringView parentPath = split(path).first();
     if(parentPath && parentPath != "/"_s && !exists(parentPath) && !make(parentPath))
         return false;
 
-    /* Create directory, return true if successfully created or already exists */
+    /* Create the leaf directory, return true if successfully created or
+       already exists */
 
     /* Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
