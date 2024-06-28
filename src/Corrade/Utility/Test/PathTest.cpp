@@ -44,6 +44,7 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
+#include "Corrade/Utility/System.h"
 
 #ifdef CORRADE_TARGET_UNIX
 /* Needed for chdir() in currentInvalid() */
@@ -183,6 +184,11 @@ struct PathTest: TestSuite::Tester {
     void sizeNonexistent();
     void sizeNonNullTerminated();
     void sizeUtf8();
+
+    void lastModification();
+    void lastModificationNonexistent();
+    void lastModificationNonNullTerminated();
+    void lastModificationUtf8();
 
     void read();
     void readString();
@@ -375,6 +381,11 @@ PathTest::PathTest() {
               &PathTest::sizeNonexistent,
               &PathTest::sizeNonNullTerminated,
               &PathTest::sizeUtf8,
+
+              &PathTest::lastModification,
+              &PathTest::lastModificationNonexistent,
+              &PathTest::lastModificationNonNullTerminated,
+              &PathTest::lastModificationUtf8,
 
               &PathTest::read,
               &PathTest::readString,
@@ -1086,6 +1097,11 @@ void PathTest::makeUtf8() {
         CORRADE_VERIFY(Path::remove(leaf));
     CORRADE_VERIFY(Path::make(leaf));
     CORRADE_VERIFY(Path::exists(leaf));
+
+    /* Verify it behaves correctly also if the directory exists already, in
+       particular that the subsequent isDirectory()-like check in the internals
+       properly handles UTF-8 as well */
+    CORRADE_VERIFY(Path::make(leaf));
 }
 
 void PathTest::removeFile() {
@@ -2263,6 +2279,127 @@ void PathTest::sizeUtf8() {
 
     CORRADE_COMPARE(Path::size(Path::join(_testDirUtf8, "hýždě")),
         Containers::arraySize(Data));
+}
+
+void PathTest::lastModification() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
+    Containers::String file = Path::join(_writeTestDir, "file");
+    if(Path::exists(file))
+        CORRADE_VERIFY(Path::remove(file));
+
+    CORRADE_VERIFY(Path::write(file, "a"_s));
+    Containers::Optional<std::int64_t> time1 = Path::lastModification(file);
+    CORRADE_VERIFY(time1);
+    /* Unix time 1234567890 was in 2009. The reported timestamp should
+       definitely be larger than that. */
+    CORRADE_COMPARE_AS(*time1,
+        1234567890ll*1000ll*1000ll*1000ll,
+        TestSuite::Compare::Greater);
+
+    /* So we don't write at the same nanosecond. Linux gives us 10-millisecond
+       precision, HFS+ on macOS has second precision (even though the API has
+       nanoseconds), on Windows the API itself has second granularity,
+       Emscripten sets the nanosecond part of the API to zero.
+        https://developer.apple.com/library/archive/technotes/tn/tn1150.html#HFSPlusDates
+        https://github.com/kripken/emscripten/blob/52ff847187ee30fba48d611e64b5d10e2498fe0f/src/library_syscall.js#L66 */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+    CORRADE_VERIFY(Path::append(file, "b"_s));
+
+    Containers::Optional<std::int64_t> time2 = Path::lastModification(file);
+    CORRADE_VERIFY(time2);
+    CORRADE_COMPARE_AS(*time2, *time1,
+        TestSuite::Compare::Greater);
+}
+
+void PathTest::lastModificationNonexistent() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Path::lastModification("nonexistent"));
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* Emscripten uses a different errno for "No such file or directory" */
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::lastModification(): can't stat nonexistent: error 44 (",
+        TestSuite::Compare::StringHasPrefix);
+    #else
+    CORRADE_COMPARE_AS(out.str(),
+        "Utility::Path::lastModification(): can't stat nonexistent: error 2 (",
+        TestSuite::Compare::StringHasPrefix);
+    #endif
+}
+
+void PathTest::lastModificationNonNullTerminated() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
+    Containers::String file = Path::join(_writeTestDir, "file");
+    if(Path::exists(file))
+        CORRADE_VERIFY(Path::remove(file));
+
+    CORRADE_VERIFY(Path::write(file, "a"_s));
+    Containers::Optional<std::int64_t> time1 = Path::lastModification(Path::join(_writeTestDir, "file!!!").exceptSuffix(3));
+    CORRADE_VERIFY(time1);
+    /* Unix time 1234567890 was in 2009. The reported timestamp should
+       definitely be larger than that. */
+    CORRADE_COMPARE_AS(*time1,
+        1234567890ll*1000ll*1000ll*1000ll,
+        TestSuite::Compare::Greater);
+
+    /* So we don't write at the same nanosecond. Linux gives us 10-millisecond
+       precision, HFS+ on macOS has second precision (even though the API has
+       nanoseconds), on Windows the API itself has second granularity,
+       Emscripten sets the nanosecond part of the API to zero.
+        https://developer.apple.com/library/archive/technotes/tn/tn1150.html#HFSPlusDates
+        https://github.com/kripken/emscripten/blob/52ff847187ee30fba48d611e64b5d10e2498fe0f/src/library_syscall.js#L66 */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+    CORRADE_VERIFY(Path::append(file, "b"_s));
+
+    Containers::Optional<std::int64_t> time2 = Path::lastModification(Path::join(_writeTestDir, "file!!!").exceptSuffix(3));
+    CORRADE_VERIFY(time2);
+    CORRADE_COMPARE_AS(*time2, *time1,
+        TestSuite::Compare::Greater);
+}
+
+void PathTest::lastModificationUtf8() {
+    CORRADE_VERIFY(Path::make(_writeTestDir));
+
+    Containers::String file = Path::join(_writeTestDir, "hýždě");
+    if(Path::exists(file))
+        CORRADE_VERIFY(Path::remove(file));
+
+    CORRADE_VERIFY(Path::write(file, "a"_s));
+    Containers::Optional<std::int64_t> time1 = Path::lastModification(file);
+    CORRADE_VERIFY(time1);
+    /* Unix time 1234567890 was in 2009. The reported timestamp should
+       definitely be larger than that. */
+    CORRADE_COMPARE_AS(*time1,
+        1234567890ll*1000ll*1000ll*1000ll,
+        TestSuite::Compare::Greater);
+
+    /* So we don't write at the same nanosecond. Linux gives us 10-millisecond
+       precision, HFS+ on macOS has second precision (even though the API has
+       nanoseconds), on Windows the API itself has second granularity,
+       Emscripten sets the nanosecond part of the API to zero.
+        https://developer.apple.com/library/archive/technotes/tn/tn1150.html#HFSPlusDates
+        https://github.com/kripken/emscripten/blob/52ff847187ee30fba48d611e64b5d10e2498fe0f/src/library_syscall.js#L66 */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+    CORRADE_VERIFY(Path::append(file, "b"_s));
+
+    Containers::Optional<std::int64_t> time2 = Path::lastModification(file);
+    CORRADE_VERIFY(time2);
+    CORRADE_COMPARE_AS(*time2, *time1,
+        TestSuite::Compare::Greater);
 }
 
 void PathTest::read() {

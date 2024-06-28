@@ -86,6 +86,11 @@ FileWatcher& FileWatcher::operator=(FileWatcher&&) noexcept = default;
 bool FileWatcher::hasChanged() {
     if(!(_flags & InternalFlag::Valid)) return false;
 
+    /** @todo all this code is now in Path::lastModification() as well, except
+        that here it caches the UTF-16-converted filename for Windows, and it
+        also subsequently queries the file size on iOS, so porting it to make
+        use of the Path utility would make it significantly worse on those
+        platforms */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     /* GCC 4.8 complains about missing initializers if {} is used. The struct
        is initialized by stat() anyway so it's okay to keep it uninitialized */

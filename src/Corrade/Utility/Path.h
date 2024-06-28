@@ -31,6 +31,7 @@
  * @m_since_latest
  */
 
+#include <cstdint> /* std::int64_t */
 #include <initializer_list>
 
 #include "Corrade/Containers/Containers.h"
@@ -558,8 +559,29 @@ Expects that the @p filename is in UTF-8. If it's already
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
+@see @ref lastModification()
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<std::size_t> size(Containers::StringView filename);
+
+/**
+@brief File last modification timestamp
+@m_since_latest
+
+Returns a nanosecond-precision Unix timestamp of the file last modification
+time. The signed 64-bit integer type covers a span of ±292 years, however while
+nanoseconds are returned, in reality it's a much coarser granularity ---
+depending on the filesystem, Linux and Android offer roughly tens of
+milliseconds, macOS and Windows likely just seconds. If the metadata can't be
+queried, prints a message to @ref Error and returns @ref Containers::NullOpt.
+
+Expects that the @p filename is in UTF-8. If it's already
+@ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
+directly, otherwise a null-terminated copy is allocated first. On Windows the
+path is instead first converted to UTF-16 using @ref Unicode::widen() and then
+passed to system APIs.
+@see @ref size()
+*/
+CORRADE_UTILITY_EXPORT Containers::Optional<std::int64_t> lastModification(Containers::StringView filename);
 
 /**
 @brief Read a file into an array

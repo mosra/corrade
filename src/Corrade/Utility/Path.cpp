@@ -1029,6 +1029,49 @@ Containers::Optional<std::size_t> size(const Containers::StringView filename) {
     return size_;
 }
 
+Containers::Optional<std::int64_t> lastModification(const Containers::StringView filename) {
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* GCC 4.8 complains about missing initializers if {} is used. The struct
+       is initialized by stat() anyway so it's okay to keep it uninitialized */
+    struct stat result;
+    if(stat(Containers::String::nullTerminatedView(filename).data(), &result) != 0)
+    #elif (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    struct _stat result;
+    if(_wstat(Unicode::widen(filename).data(), &result) != 0)
+    #else
+    #error
+    #endif
+    {
+        Error err;
+        err << "Utility::Path::lastModification(): can't stat" << filename << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return {};
+    }
+
+    /* Linux (and Android) has st_mtim (and st_mtime is a preprocessor alias to
+       st_mtim.tv_sec), which offers nanosecond precision (though the actual
+       granularity is ~10s of ms). macOS has the same in an (arguably
+       nonstandard) st_mtimespec, but HFS+ has only second precision anyway:
+       https://developer.apple.com/library/archive/technotes/tn/tn1150.html#HFSPlusDates
+       Emscripten defines st_mtime but sets tv_nsec to zero:
+       https://github.com/kripken/emscripten/blob/52ff847187ee30fba48d611e64b5d10e2498fe0f/src/library_syscall.js#L66
+       Windows doesn't have either, we get seconds there at best. */
+    return
+        #ifdef CORRADE_TARGET_APPLE
+        std::uint64_t(result.st_mtimespec.tv_sec)*1000000000 + std::uint64_t(result.st_mtimespec.tv_nsec)
+        #elif defined(st_mtime)
+        std::uint64_t(result.st_mtim.tv_sec)*1000000000 + std::uint64_t(result.st_mtim.tv_nsec)
+        #else
+        std::uint64_t(result.st_mtime)*1000000000
+        #endif
+        ;
+    #else
+    Error{} << "Utility::Path::lastModification(): not implemented on this platform";
+    return {};
+    #endif
+}
+
 namespace {
 
 /* The extra is set to 0 by read() and to 1 by readString(), to use for a null
