@@ -92,21 +92,6 @@ template<class T> struct AllocatorTraits {
     };
 };
 
-#ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-/* The std::has_trivial_copy_constructor is deprecated in GCC 5+ but we can't
-   detect libstdc++ version when using Clang. The builtins aren't deprecated
-   but for those GCC commits suicide with
-    error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-   so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
-   even more fun stories. The IsTriviallyConstructibleOnOldGcc trait is defined
-   in constructHelpers.h already, this one needs also
-   __has_trivial_destructor() otherwise it says true for types with deleted
-   copy and non-trivial destructors. */
-/** @todo may not be needed anymore if the SFINAE gets put to templates instead
-    of signatures */
-template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T) && __has_trivial_destructor(T)> {};
-#endif
-
 }
 
 /** @{ @name Growable array utilities
@@ -236,7 +221,7 @@ different compatible types using @ref arrayAllocatorCast().
 template<class T> struct ArrayMallocAllocator {
     static_assert(
         #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        Implementation::IsTriviallyCopyableOnOldGcc<T>::value
+        __has_trivial_copy(T) && __has_trivial_destructor(T)
         #else
         std::is_trivially_copyable<T>::value
         #endif
@@ -430,7 +415,7 @@ template<class T> struct ArrayAllocator {
 #else
 template<class T> using ArrayAllocator = typename std::conditional<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    Implementation::IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
@@ -465,7 +450,7 @@ template<class U, template<class> class Allocator, class T> Array<U> arrayAlloca
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     static_assert(
         #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        Implementation::IsTriviallyCopyableOnOldGcc<T>::value && Implementation::IsTriviallyCopyableOnOldGcc<U>::value
+        __has_trivial_copy(T) && __has_trivial_destructor(T) && __has_trivial_copy(U) && __has_trivial_destructor(U)
         #else
         std::is_trivially_copyable<T>::value && std::is_trivially_copyable<U>::value
         #endif
@@ -1453,25 +1438,25 @@ template<class T> struct ArrayGuts {
     void(*deleter)(T*, std::size_t);
 };
 
-template<class T> inline void arrayMoveConstruct(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayMoveConstruct(T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
     if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
-template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size_t count, typename std::enable_if<!
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    !__has_trivial_copy(T) || !__has_trivial_destructor(T)
     #else
-    std::is_trivially_copyable<T>::value
+    !std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayMoveConstruct(T* src, T* dst, const std::size_t count) {
     static_assert(std::is_nothrow_move_constructible<T>::value,
         "nothrow move-constructible type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
@@ -1483,50 +1468,50 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
         #endif
 }
 
-template<class T> inline void arrayMoveAssign(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayMoveAssign(T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
     if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
-template<class T> inline void arrayMoveAssign(T* src, T* dst, const std::size_t count, typename std::enable_if<!
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    !__has_trivial_copy(T) || !__has_trivial_destructor(T)
     #else
-    std::is_trivially_copyable<T>::value
+    !std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayMoveAssign(T* src, T* dst, const std::size_t count) {
     static_assert(std::is_nothrow_move_assignable<T>::value,
         "nothrow move-assignable type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
         *dst = Utility::move(*src);
 }
 
-template<class T> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
     if(count) std::memcpy(dst, src, count*sizeof(T));
 }
 
-template<class T> inline void arrayCopyConstruct(const T* src, T* dst, const std::size_t count, typename std::enable_if<!
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    !__has_trivial_copy(T) || !__has_trivial_destructor(T)
     #else
-    std::is_trivially_copyable<T>::value
+    !std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayCopyConstruct(const T* src, T* dst, const std::size_t count) {
     for(const T* end = src + count; src != end; ++src, ++dst)
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
@@ -1841,13 +1826,13 @@ template<class T, class Allocator> ArrayView<T> arrayAppend(Array<T>& array, Cor
 
 namespace Implementation {
 
-template<class T> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count) {
     /* Compared to the non-trivially-copyable variant below, just delegate to
        memmove() and assume it can figure out how to copy from back to front
        more efficiently that we ever could.
@@ -1857,13 +1842,13 @@ template<class T> inline void arrayShiftForward(T* const src, T* const dst, cons
     if(count) std::memmove(dst, src, count*sizeof(T));
 }
 
-template<class T> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count, typename std::enable_if<!
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    !__has_trivial_copy(T) || !__has_trivial_destructor(T)
     #else
-    std::is_trivially_copyable<T>::value
+    !std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayShiftForward(T* const src, T* const dst, const std::size_t count) {
     static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
         "nothrow move-constructible and move-assignable type is required");
 
@@ -2026,13 +2011,13 @@ template<class T, class Allocator> ArrayView<T> arrayInsert(Array<T>& array, con
 
 namespace Implementation {
 
-template<class T> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t moveCount, std::size_t, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    __has_trivial_copy(T) && __has_trivial_destructor(T)
     #else
     std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t moveCount, std::size_t) {
     /* Compared to the non-trivially-copyable variant below, just delegate to
        memmove() and assume it can figure out how to copy from front to back
        more efficiently that we ever could.
@@ -2042,13 +2027,13 @@ template<class T> inline void arrayShiftBackward(T* const src, T* const dst, con
     if(moveCount) std::memmove(dst, src, moveCount*sizeof(T));
 }
 
-template<class T> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t moveCount, std::size_t destructCount, typename std::enable_if<!
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyCopyableOnOldGcc<T>::value
+    !__has_trivial_copy(T) || !__has_trivial_destructor(T)
     #else
-    std::is_trivially_copyable<T>::value
+    !std::is_trivially_copyable<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayShiftBackward(T* const src, T* const dst, const std::size_t moveCount, std::size_t destructCount) {
     static_assert(std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value,
         "nothrow move-constructible and move-assignable type is required");
 

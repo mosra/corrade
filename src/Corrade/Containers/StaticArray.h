@@ -140,7 +140,7 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, false> {
 
 template<std::size_t size_, class T> using StaticArrayDataFor = StaticArrayData<size_, T,
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    Implementation::IsTriviallyConstructibleOnOldGcc<T>::value
+    __has_trivial_constructor(T)
     #else
     std::is_trivially_constructible<T>::value
     #endif

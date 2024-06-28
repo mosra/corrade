@@ -259,18 +259,18 @@ int Movable::destructed = 0;
 int Movable::moved = 0;
 int Movable::assigned = 0;
 
-static_assert(!
+static_assert(
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    Implementation::IsTriviallyConstructibleOnOldGcc<Movable>::value
+    !__has_trivial_constructor(Movable)
     #else
-    std::is_trivially_constructible<Movable>::value
+    !std::is_trivially_constructible<Movable>::value
     #endif
     , "Movable should be testing the non-trivial code path");
-static_assert(!
+static_assert(
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    Implementation::IsTriviallyCopyableOnOldGcc<Movable>::value
+    !__has_trivial_copy(Movable) || !__has_trivial_destructor(Movable)
     #else
-    std::is_trivially_copyable<Movable>::value
+    !std::is_trivially_copyable<Movable>::value
     #endif
     , "Movable should be testing the non-trivial code path");
 
@@ -3095,7 +3095,7 @@ void GrowableArrayTest::constructorExplicitInCopyInitialization() {
        issue as well, be sure to have it picked in this test. This check
        corresponds to the check in the code itself. */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    CORRADE_VERIFY(!Implementation::IsTriviallyConstructibleOnOldGcc<ExplicitDefault>::value);
+    CORRADE_VERIFY(!__has_trivial_constructor(ExplicitDefault));
     #else
     CORRADE_VERIFY(!std::is_trivially_constructible<ExplicitDefault>::value);
     #endif

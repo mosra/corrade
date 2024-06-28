@@ -32,19 +32,6 @@
 
 namespace Corrade { namespace Containers { namespace Implementation {
 
-#ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-/* The std::has_trivial_default_constructor is deprecated in GCC 5+ but we
-   can't detect libstdc++ version when using Clang. The builtins aren't
-   deprecated but for those GCC commits suicide with
-    error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
-   so, well, i'm defining my own! See CORRADE_NO_STD_IS_TRIVIALLY_TRAITS for
-   even more fun stories.
-
-   This trait is needed by StaticArray and the growable Array APIs so it's put
-   here for both. */
-template<class T> struct IsTriviallyConstructibleOnOldGcc: std::integral_constant<bool, __has_trivial_constructor(T)> {};
-#endif
-
 /* Used by Array.h, GrowableArray.h, StaticArray.h and Optional.h; Pointer.h
    has a variant that isn't in-place so it's implemented directly in there. C++
    has a featurebug where a code like

@@ -1930,7 +1930,7 @@ void StaticArrayTest::constructorExplicitInCopyInitialization() {
        then would need an explicit default constructor, not an implicit
        one). */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    CORRADE_VERIFY(!Implementation::IsTriviallyConstructibleOnOldGcc<ExplicitDefault>::value);
+    CORRADE_VERIFY(!__has_trivial_constructor(ExplicitDefault));
     #else
     CORRADE_VERIFY(!std::is_trivially_constructible<ExplicitDefault>::value);
     #endif

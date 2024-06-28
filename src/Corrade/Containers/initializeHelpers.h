@@ -50,45 +50,45 @@ enum: std::size_t {
         #endif
 };
 
-template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T*, T*, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyConstructibleOnOldGcc<T>::value
+    __has_trivial_constructor(T)
     #else
     std::is_trivially_constructible<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayConstruct(Corrade::DefaultInitT, T*, T*) {
     /* Nothing to do */
 }
 
-template<class T> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T* const end, typename std::enable_if<!
+template<class T, typename std::enable_if<!
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyConstructibleOnOldGcc<T>::value
+    __has_trivial_constructor(T)
     #else
     std::is_trivially_constructible<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T* const end) {
     /* Needs to be < because sometimes begin > end. No {}, we want trivial
        types non-initialized */
     for(; begin < end; ++begin) new(begin) T;
 }
 
-template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* const begin, T* const end, typename std::enable_if<
+template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyConstructibleOnOldGcc<T>::value
+    __has_trivial_constructor(T)
     #else
     std::is_trivially_constructible<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayConstruct(Corrade::ValueInitT, T* const begin, T* const end) {
     if(begin < end) std::memset(begin, 0, (end - begin)*sizeof(T));
 }
 
-template<class T> inline void arrayConstruct(Corrade::ValueInitT, T* begin, T* const end, typename std::enable_if<!
+template<class T, typename std::enable_if<!
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-    IsTriviallyConstructibleOnOldGcc<T>::value
+    __has_trivial_constructor(T)
     #else
     std::is_trivially_constructible<T>::value
     #endif
->::type* = nullptr) {
+, int>::type = 0> inline void arrayConstruct(Corrade::ValueInitT, T* begin, T* const end) {
     /* Needs to be < because sometimes begin > end. The () instead of {} works
        around a featurebug in C++ where new T{} doesn't work for an explicit
        defaulted constructor. For details see constructHelpers.h and
