@@ -176,6 +176,7 @@ struct PathTest: TestSuite::Tester {
     void sizeEmpty();
     void sizeNonSeekable();
     void sizeEarlyEof();
+    void sizeSymlink();
     void sizeDirectory();
     void sizeNonexistent();
     void sizeNonNullTerminated();
@@ -365,6 +366,7 @@ PathTest::PathTest() {
               &PathTest::sizeEmpty,
               &PathTest::sizeNonSeekable,
               &PathTest::sizeEarlyEof,
+              &PathTest::sizeSymlink,
               &PathTest::sizeDirectory,
               &PathTest::sizeNonexistent,
               &PathTest::sizeNonNullTerminated,
@@ -828,8 +830,8 @@ void PathTest::isDirectorySymlink() {
     CORRADE_VERIFY(Path::exists(Path::join(_testDirSymlink, "dir-symlink")));
     {
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* Possible on Windows too, but there we'd need to first detect if the
-           Git clone has the symlinks preserved */
+        /** @todo once implemented, can use Path::size() on file-symlink to
+            detect whether symlinks are preserved in the Git clone */
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
@@ -1807,8 +1809,8 @@ void PathTest::listSkipDirectoriesSymlinks() {
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* Possible on Windows too, but there we'd need to first detect if the
-           Git clone has the symlinks preserved */
+        /** @todo once implemented, can use Path::size() on file-symlink to
+            detect whether symlinks are preserved in the Git clone */
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -1842,8 +1844,8 @@ void PathTest::listSkipFilesSymlinks() {
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* Possible on Windows too, but there we'd need to first detect if the
-           Git clone has the symlinks preserved */
+        /** @todo once implemented, can use Path::size() on file-symlink to
+            detect whether symlinks are preserved in the Git clone */
         CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
@@ -2121,6 +2123,19 @@ void PathTest::sizeEarlyEof() {
     #else
     CORRADE_SKIP("Not sure how to test on this platform.");
     #endif
+}
+
+void PathTest::sizeSymlink() {
+    Containers::String fileSymlink = Path::join(_testDirSymlink, "file-symlink");
+    CORRADE_VERIFY(Path::exists(fileSymlink));
+
+    Containers::Optional<std::size_t> size = Path::size(fileSymlink);
+    CORRADE_VERIFY(size);
+
+    if(size != 11)
+        CORRADE_SKIP("Symlinks not preserved in the source tree, can't test");
+
+    CORRADE_COMPARE(size, 11);
 }
 
 void PathTest::sizeDirectory() {
