@@ -15,6 +15,13 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    Structured bindings for StridedDimensions on C++17 are opt-in due to
+    reliance on a potentially heavy STL header ---
+    `#define CORRADE_STRUCTURED_BINDINGS` before including the file. Including
+    it multiple times with different macros defined works too.
+
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   Structured bindings for StridedDimensions on C++17
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   New expanded() and collapsed() APIs
     -   Ability to slice to struct members and member functions
@@ -108,3 +115,15 @@ template<unsigned, class> class BasicStridedBitArrayView;
 }}
 #endif
 #include "Corrade/Containers/StridedArrayView.h"
+#ifdef CORRADE_STRUCTURED_BINDINGS
+// {{includes}}
+/* The StlForwardTupleSizeElement header and the STL detection logic it relies
+   on is already pulled in by CorradeArrayView.h */
+#pragma ACME enable Corrade_Utility_StlForwardTupleSizeElement_h
+#pragma ACME disable Corrade_Containers_StructuredBindings_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Pair_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Triple_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StaticArray_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StaticArrayView_h
+#include "Corrade/Containers/StructuredBindings.h"
+#endif

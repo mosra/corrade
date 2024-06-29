@@ -103,9 +103,12 @@ Example:
     This class is also available as a single-header, dependency-less
     [CorradeTriple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeTriple.h)
     library in the Magnum Singles repository for easier integration into your
-    projects. See @ref corrade-singles for more information. The above
-    mentioned STL compatibility is included as well, but disabled by default.
-    Enable it by specifying @cpp #define CORRADE_TRIPLE_STL_COMPATIBILITY @ce
+    projects. See @ref corrade-singles for more information.
+@par
+    Structured bindings on C++17 are opt-in due to reliance on a potentially
+    heavy STL header --- @cpp #define CORRADE_STRUCTURED_BINDINGS @ce before
+    including the file. The above-mentioned STL compatibility bits are included
+    as well --- opt-in with @cpp #define CORRADE_TRIPLE_STL_COMPATIBILITY @ce
     before including the file. Including it multiple times with different
     macros defined works as well.
 

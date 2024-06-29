@@ -17,6 +17,17 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    Structured bindings for StaticArray on C++17 are opt-in due to reliance on
+    a potentially heavy STL header --- `#define CORRADE_STRUCTURED_BINDINGS`
+    before including the file. Including it multiple times with different
+    macros defined works too.
+
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   Ability to InPlaceInit-construct an Array from an ArrayView, in
+        addition to  std::initializer_list
+    -   StaticArray is now trivially copyable and constexpr if the underlying
+        type is
+    -   Structured bindings for StaticArray on C++17
     v2020.06-1506-g43e1c (2023-09-13)
     -   Preventing a conflict with the Array declaration in Corrade's
         Containers.h due to default template arguments being used in both
@@ -68,9 +79,10 @@
 #pragma ACME enable Corrade_Utility_Move_h
 #include "CorradeArrayView.h"
 
-/* We need CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h, which is handled
-   by CorradeArrayView.h already, and CORRADE_TARGET_GCC +
-   CORRADE_TARGET_CLANG */
+/* We need CORRADE_MSVC{,2015}_COMPATIBILITY and CORRADE_CXX_STANDARD from
+   configure.h, which is handled by CorradeArrayView.h already; plus
+   CORRADE_TARGET_GCC, CORRADE_TARGET_CLANG, CORRADE_TARGET_MSVC and
+   CORRADE_MSVC2017_COMPATIBILITY */
 #pragma ACME enable Corrade_configure_h
 #ifdef __GNUC__
 #define CORRADE_TARGET_GCC
@@ -78,6 +90,20 @@
 #ifdef __clang__
 #define CORRADE_TARGET_CLANG
 #endif
+#ifdef _MSC_VER
+#define CORRADE_TARGET_MSVC
+#endif
+#if defined(_MSC_VER) && _MSC_VER < 1920
+#define CORRADE_MSVC2017_COMPATIBILITY
+#endif
+/* For the trivially copyable variant of StaticArray, relies on
+   CORRADE_TARGET_LIBSTDCXX detection that's in CorradeArrayView.h already */
+#if defined(CORRADE_TARGET_LIBSTDCXX) && __GNUC__ < 5 && _GLIBCXX_RELEASE < 7
+#define CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+#endif
+
+/* We need just CORRADE_CONSTEXPR14 from Macros.h */
+#pragma ACME disable CORRADE_CONSTEXPR14
 
 /* CorradeArrayView.h has CORRADE_ASSERT, CORRADE_CONSTEXPR_ASSERT and
    CORRADE_CONSTEXPR_DEBUG_ASSERT, we additionally need CORRADE_DEBUG_ASSERT
@@ -109,3 +135,15 @@ template<class T> using Array4 = StaticArray<4, T>;
 #pragma ACME enable Corrade_Containers_Containers_h
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
+#ifdef CORRADE_STRUCTURED_BINDINGS
+// {{includes}}
+/* The StlForwardTupleSizeElement header and the STL detection logic it relies
+   on is already pulled in by CorradeArrayView.h */
+#pragma ACME enable Corrade_Utility_StlForwardTupleSizeElement_h
+#pragma ACME disable Corrade_Containers_StructuredBindings_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Pair_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Triple_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StaticArrayView_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StridedDimensions_h
+#include "Corrade/Containers/StructuredBindings.h"
+#endif

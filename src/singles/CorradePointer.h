@@ -17,6 +17,12 @@
     `#define CORRADE_POINTER_STL_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   Deleting pointers to incomplete types is now disallowed to prevent
+        resource leaks
+    -   Conversion to non-trivial and non-virtual bases is now disallowed as
+        doing so would no longer call the derived constructor, causing resource
+        leaks
     v2020.06-1502-g147e (2023-09-11)
     -   Fixes to the Utility::swap() helper to avoid ambiguity with std::swap()
     v2020.06-1454-gfc3b7 (2023-08-27)

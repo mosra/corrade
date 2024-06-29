@@ -38,6 +38,12 @@
     in both the headers and the implementation. Including it multiple times
     with different macros defined works too.
 
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   New, SIMD-optimized count() API
+    -   Literals are now available in an inline Literals::StringLiterals
+        namespace for finer control over which literals get actually used
+    -   String copy construction and copy assignment now makes the copy a SSO
+        only if the original instance was a SSO as well
     v2020.06-1502-g147e (2023-09-11)
     -   Initial release
 
@@ -50,13 +56,16 @@
 #endif
 // {{includes}}
 
-/* From configure.h we need just CORRADE_TARGET_MSVC and
+/* From configure.h we need just CORRADE_TARGET_MSVC, CORRADE_TARGET_32BIT and
    CORRADE_TARGET_BIG_ENDIAN for the header. All other target detection is
    needed only for the source and is handled by CorradeCpu.hpp that pulls in
    the whole configure.h. */
 #pragma ACME enable Corrade_configure_h
 #ifdef _MSC_VER
 #define CORRADE_TARGET_MSVC
+#endif
+#if !defined(__x86_64) && !defined(_M_X64) && !defined(__aarch64__) && !defined(_M_ARM64) && !defined(__powerpc64__) && !defined(__wasm64__)
+#define CORRADE_TARGET_32BIT
 #endif
 #ifdef __BYTE_ORDER__
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -190,11 +199,15 @@ template<class, class> class Pair;
 #include "CorradeCpu.hpp"
 
 /* Extracted from StringView.cpp as otherwise the includes don't stay inside
-   correct ifdefs; replacing the GCC 4.8 compatibility intrinsic header with
-   a direct include because the BMI builtins don't work there anyway. */
+   correct ifdefs; replacing the GCC 4.8 compatibility intrinsic headers with
+   direct includes because the BMI / POPCNT builtins don't work there anyway */
 #pragma ACME enable Corrade_Utility_IntrinsicsAvx_h
-#if (defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)
+#pragma ACME enable Corrade_Utility_IntrinsicsSse4_h
+#if ((defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)) || (defined(CORRADE_ENABLE_AVX) && defined(CORRADE_ENABLE_POPCNT))
 #include <immintrin.h>
+#elif defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+#include <smmintrin.h>
+#include <nmmintrin.h>
 #endif
 #ifdef CORRADE_ENABLE_NEON
 #include <arm_neon.h>

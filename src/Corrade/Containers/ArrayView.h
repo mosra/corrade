@@ -258,9 +258,13 @@ information.
     @ref ArrayView<const void> specializations and @ref StaticArrayView, is
     also available as a single-header, dependency-less [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
     library in the Magnum Singles repository for easier integration into your
-    projects. See @ref corrade-singles for more information. The above
-    mentioned STL compatibility is included as well, but disabled by default.
-    Enable it for @ref std::vector and @ref std::array by specifying
+    projects. See @ref corrade-singles for more information.
+@par
+    Structured bindings for @ref StaticArrayView on C++17 are opt-in due to
+    reliance on a potentially heavy STL header ---
+    @cpp #define CORRADE_STRUCTURED_BINDINGS @ce before including the file. The
+    above-mentioned STL compatibility bits are included as well. Enable them
+    for @ref std::vector and @ref std::array by specifying
     @cpp #define CORRADE_ARRAYVIEW_STL_COMPATIBILITY @ce and for @ref std::span
     by compiling as C++2a and specifying
     @cpp #define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY @ce before including

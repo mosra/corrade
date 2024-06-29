@@ -306,7 +306,11 @@ Corrade type                    | ↭ | STL type
     single-header [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h)
     library in the Magnum Singles repository for easier integration into your
     projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
-    See @ref corrade-singles for more information.
+    See @ref corrade-singles for more information. Structured bindings for
+    @ref StaticArray on C++17 are opt-in due to reliance on a potentially heavy
+    STL header --- @cpp #define CORRADE_STRUCTURED_BINDINGS @ce before
+    including the file. Including it multiple times with different macros
+    defined works as well.
 @par
     The @ref Containers-Array-growable "growable APIs" are exposed in a
     separate [CorradeGrowableArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeGrowableArray.h)

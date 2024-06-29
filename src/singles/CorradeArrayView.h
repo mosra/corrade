@@ -15,11 +15,15 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
-    The STL compatibility bits are included as well --- opt-in by specifying
-    either `#define CORRADE_ARRAYVIEW_STL_COMPATIBILITY` or
+    Structured bindings for StaticArrayView on C++17 are opt-in due to reliance
+    on a potentially heavy STL header --- `#define CORRADE_STRUCTURED_BINDINGS`
+    before including the file. The STL compatibility bits are included as well
+    --- opt-in with either `#define CORRADE_ARRAYVIEW_STL_COMPATIBILITY` or
     `#define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY` before including the
     file. Including it multiple times with different macros defined works too.
 
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   Structured bindings for StaticArrayView on C++17
     v2020.06-1502-g147e (2023-09-11)
     -   Fixes to the Utility::swap() helper to avoid ambiguity with std::swap()
     v2020.06-1454-gfc3b7 (2023-08-27)
@@ -71,7 +75,7 @@
 #include <cassert>
 #endif
 
-/* We need just CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h. This is
+/* We need CORRADE_MSVC{,2015}_COMPATIBILITY from configure.h. This is
    equivalent to the version check in UseCorrade.cmake. */
 #pragma ACME enable Corrade_configure_h
 #ifdef _MSC_VER
@@ -79,6 +83,55 @@
 #endif
 #if defined(_MSC_VER) && _MSC_VER < 1910
 #define CORRADE_MSVC2015_COMPATIBILITY
+#endif
+
+/* CORRADE_CXX_STANDARD is guarding StaticArrayView structured binding get()
+   definitions, which are there even if CORRADE_STRUCTURED_BINDINGS isn't
+   defined */
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+
+/* CORRADE_TARGET_LIBSTDCXX, CORRADE_TARGET_LIBCXX and
+   CORRADE_TARGET_DINKUMWARE is needed for the StlForwardTupleSize.h header
+   needed by StructuredBindings; CORRADE_TARGET_LIBCXX additionally needed by
+   ArrayViewStlSpan.h. Then, CorradeArray.h and subsequently also
+   CorradeGrowableArray.h uses the STL detection macros to decide on
+   CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, so just doing the whole check
+   unconditionally */
+#if CORRADE_CXX_STANDARD >= 202002
+#include <version>
+#else
+#include <ciso646>
+#endif
+#ifdef _LIBCPP_VERSION
+#define CORRADE_TARGET_LIBCXX
+#elif defined(_CPPLIB_VER)
+#define CORRADE_TARGET_DINKUMWARE
+#elif defined(__GLIBCXX__)
+#define CORRADE_TARGET_LIBSTDCXX
+/* GCC's <ciso646> provides the __GLIBCXX__ macro only since 6.1, so on older
+   versions we'll try to get it from bits/c++config.h */
+#elif defined(__has_include)
+    #if __has_include(<bits/c++config.h>)
+        #include <bits/c++config.h>
+        #ifdef __GLIBCXX__
+        #define CORRADE_TARGET_LIBSTDCXX
+        #endif
+    #endif
+/* GCC < 5.0 doesn't have __has_include, so on these versions we'll just assume
+   it's libstdc++ as I don't think those versions are used with anything else
+   nowadays anyway. Clang reports itself as GCC 4.4, so exclude that one. */
+#elif defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5
+#define CORRADE_TARGET_LIBSTDCXX
+#else
+/* Otherwise no idea. */
 #endif
 
 /* We need just the array forward declarations from Containers.h */
@@ -109,28 +162,20 @@ template<class T> using ArrayView4 = StaticArrayView<4, T>;
 }}
 #endif
 #include "Corrade/Containers/ArrayView.h"
+#ifdef CORRADE_STRUCTURED_BINDINGS
+// {{includes}}
+#pragma ACME disable Corrade_Containers_StructuredBindings_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Pair_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_Triple_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StaticArray_h
+#pragma ACME enable Corrade_Containers_StructuredBindings_StridedDimensions_h
+#include "Corrade/Containers/StructuredBindings.h"
+#endif
 #ifdef CORRADE_ARRAYVIEW_STL_COMPATIBILITY
 // {{includes}}
 #include "Corrade/Containers/ArrayViewStl.h"
 #endif
 #ifdef CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY
 // {{includes}}
-#ifdef _MSC_VER
-#ifdef _MSVC_LANG
-#define CORRADE_CXX_STANDARD _MSVC_LANG
-#else
-#define CORRADE_CXX_STANDARD 201103L
-#endif
-#else
-#define CORRADE_CXX_STANDARD __cplusplus
-#endif
-#if CORRADE_CXX_STANDARD > 201703
-#include <version>
-#else
-#include <ciso646>
-#endif
-#ifdef _LIBCPP_VERSION
-#define CORRADE_TARGET_LIBCXX
-#endif
 #include "Corrade/Containers/ArrayViewStlSpan.h"
 #endif

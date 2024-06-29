@@ -23,6 +23,8 @@
     `#define CORRADE_UTILITY_EXPORT` as appropriate. To enable the IFUNC
     functionality, `#define CORRADE_CPU_USE_IFUNC` before including the file.
 
+    v2020.06-1687-g6b5f (2024-06-29)
+    -   FreeBSD and Emscripten compatibility fixes
     v2020.06-1454-gfc3b7 (2023-08-27)
     -   Added BMI2 detection on x86
     -   Fixed an issue on GCC 12+ and Clang, where only one of multiple

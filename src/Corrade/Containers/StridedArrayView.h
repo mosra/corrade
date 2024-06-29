@@ -206,7 +206,11 @@ be.
     [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h)
     library in the Magnum Singles repository for easier integration into your
     projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
-    See @ref corrade-singles for more information.
+    See @ref corrade-singles for more information. Structured bindings for
+    @ref StridedDimensions on C++17 are opt-in due to reliance on a potentially
+    heavy STL header --- @cpp #define CORRADE_STRUCTURED_BINDINGS @ce before
+    including the file. Including it multiple times with different macros
+    defined works as well.
 
 @see @ref StridedArrayView<dimensions, void>,
     @ref StridedArrayView<dimensions, const void>, @ref StridedIterator,
