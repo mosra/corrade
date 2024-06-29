@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_StlForwardTuple_h
-#define Corrade_Utility_StlForwardTuple_h
+#ifndef Corrade_Utility_StlForwardTupleSizeElement_h
+#define Corrade_Utility_StlForwardTupleSizeElement_h
 /*
     This file is part of Corrade.
 
