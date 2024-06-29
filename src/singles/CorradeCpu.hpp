@@ -59,7 +59,17 @@
 #define CORRADE_TARGET_APPLE
 #endif
 
-/* Supply the configure.h template instead to avoid using baked-in defines */
+/* Supply the configure.h template instead to avoid using baked-in defines,
+   remove parts that aren't used here */
+#pragma ACME disable CORRADE_TARGET_CXX14
+#pragma ACME disable CORRADE_TARGET_CXX17
+#pragma ACME disable CORRADE_TARGET_CXX20
+#pragma ACME disable CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
+#pragma ACME disable CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+/* This is to remove the static_assert() from configure.h.cmake. The macro
+   shouldn't be used for anything inside Cpu.hpp, if it is, this has to be
+   removed */
+#pragma ACME enable CORRADE_MSVC_COMPATIBILITY
 #include "Corrade/configure.h.cmake"
 #pragma ACME enable Corrade_configure_h
 
