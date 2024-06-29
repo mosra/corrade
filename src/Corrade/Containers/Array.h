@@ -51,6 +51,10 @@ namespace Implementation {
     template<class T> struct CallDeleter<T, void(*)(T*, std::size_t)> {
         void operator()(void(*deleter)(T*, std::size_t), T* data, std::size_t size) const {
             if(deleter) deleter(data, size);
+            /** @todo could this have some compile-time check for type
+                completeness like Pointer has with IsComplete, but one that
+                doesn't trigger if the deleter is set? having that checked only
+                at runtime feels awful */
             else delete[] data;
         }
     };
