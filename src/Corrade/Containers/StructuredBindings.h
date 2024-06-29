@@ -53,32 +53,51 @@ namespace std {
 /* The actual get() implementations are friend functions defined in each class,
    but the std::tuple_size / std::tuple_element specializations may require
    including a non-trivial STL header so they're separate. See the
-   StlForwardTupleSizeElement.h file for implementation-specific details. */
+   StlForwardTupleSizeElement.h file for implementation-specific details.
+
+   Each of these is additionally guarded by an extra ifdef so single-header
+   libraries can pick up individual bits without pulling in all other types as
+   well */
 
 /* Pair */
+#ifndef Corrade_Containers_StructuredBindings_Pair_h
+#define Corrade_Containers_StructuredBindings_Pair_h
 template<class F, class S> struct tuple_size<Corrade::Containers::Pair<F, S>>: integral_constant<size_t, 2> {};
 template<class F, class S> struct tuple_element<0, Corrade::Containers::Pair<F, S>> { typedef F type; };
 template<class F, class S> struct tuple_element<1, Corrade::Containers::Pair<F, S>> { typedef S type; };
+#endif
 
 /* Triple */
+#ifndef Corrade_Containers_StructuredBindings_Triple_h
+#define Corrade_Containers_StructuredBindings_Triple_h
 template<class F, class S, class T> struct tuple_size<Corrade::Containers::Triple<F, S, T>>: integral_constant<size_t, 3> {};
 template<class F, class S, class T> struct tuple_element<0, Corrade::Containers::Triple<F, S, T>> { typedef F type; };
 template<class F, class S, class T> struct tuple_element<1, Corrade::Containers::Triple<F, S, T>> { typedef S type; };
 template<class F, class S, class T> struct tuple_element<2, Corrade::Containers::Triple<F, S, T>> { typedef T type; };
+#endif
 
 /* StaticArray. Note that `size` can't be used as it may conflict with
    std::size() in C++17. */
+#ifndef Corrade_Containers_StructuredBindings_StaticArray_h
+#define Corrade_Containers_StructuredBindings_StaticArray_h
 template<size_t size_, class T> struct tuple_size<Corrade::Containers::StaticArray<size_, T>>: integral_constant<size_t, size_> {};
 template<size_t index, size_t size_, class T> struct tuple_element<index, Corrade::Containers::StaticArray<size_, T>> { typedef T type; };
+#endif
 
 /* StaticArrayView. Note that `size` can't be used as it may conflict with
    std::size() in C++17. */
+#ifndef Corrade_Containers_StructuredBindings_StaticArrayView_h
+#define Corrade_Containers_StructuredBindings_StaticArrayView_h
 template<size_t size_, class T> struct tuple_size<Corrade::Containers::StaticArrayView<size_, T>>: integral_constant<size_t, size_> {};
 template<size_t index, size_t size_, class T> struct tuple_element<index, Corrade::Containers::StaticArrayView<size_, T>> { typedef T type; };
+#endif
 
 /* StridedDimensions */
+#ifndef Corrade_Containers_StructuredBindings_StridedDimensions_h
+#define Corrade_Containers_StructuredBindings_StridedDimensions_h
 template<unsigned dimensions, class T> struct tuple_size<Corrade::Containers::StridedDimensions<dimensions, T>>: integral_constant<size_t, dimensions> {};
 template<size_t index, unsigned dimensions, class T> struct tuple_element<index, Corrade::Containers::StridedDimensions<dimensions, T>> { typedef T type; };
+#endif
 
 }
 #endif
