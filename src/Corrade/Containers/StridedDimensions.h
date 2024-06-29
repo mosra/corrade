@@ -156,6 +156,19 @@ some STL implementations. Example:
 
 @snippet Containers-cpp17.cpp StridedDimensions-structured-bindings
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is, together with @ref StridedArrayView and the
+    @ref StridedArrayView<dimensions, void> /
+    @ref StridedArrayView<dimensions, const void> specializations, is also
+    available as a single-header, dependency-less library in the Magnum Singles
+    repository for easier integration into your projects. See the
+    @ref Containers-StridedArrayView-single-header "StridedArrayView documentation"
+    for more information.
+
 @see @ref Size, @ref Size1D, @ref Size2D, @ref Size3D, @ref Size4D,
     @ref Stride, @ref Stride1D, @ref Stride2D, @ref Stride3D, @ref Stride4D
 */

@@ -201,8 +201,9 @@ be.
 
 @par Single-header version
     This class, together with the @ref StridedArrayView<dimensions, void> /
-    @ref StridedArrayView<dimensions, const void> specializations is also
-    available as a single-header [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h)
+    @ref StridedArrayView<dimensions, const void> specializations and the
+    @ref StridedDimensions helper is also available as a single-header
+    [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h)
     library in the Magnum Singles repository for easier integration into your
     projects. It depends on [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h).
     See @ref corrade-singles for more information.
