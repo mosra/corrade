@@ -39,6 +39,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/constructHelpers.h"
 #include "Corrade/Containers/sequenceHelpers.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_CONSTEXPR14 */
 
 namespace Corrade { namespace Containers {
 
