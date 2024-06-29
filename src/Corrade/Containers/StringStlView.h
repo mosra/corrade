@@ -88,12 +88,14 @@ template<> struct StringViewConverter<char, std::string_view> {
     }
 };
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class> struct StringIterableConverter;
 template<> struct StringIterableConverter<std::string_view> {
     static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t) {
         return *static_cast<const std::string_view*>(data);
     }
 };
+#endif
 
 }}}
 #endif

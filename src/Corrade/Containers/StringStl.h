@@ -71,10 +71,12 @@ template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<char, std::string> 
     static std::string to(MutableStringView other);
 };
 
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class> struct StringIterableConverter;
 template<> struct CORRADE_UTILITY_EXPORT StringIterableConverter<std::string> {
     static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t);
 };
+#endif
 
 }}}
 #endif
