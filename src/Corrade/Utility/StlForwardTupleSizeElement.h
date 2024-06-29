@@ -62,11 +62,13 @@ guaranteed to contain those in order to define them for @ref std::pair.
     _STD_BEGIN
 #endif
 
+/** @todo the include is indented to work around acme.py extracting it to the
+    top, fix properly */
 #if defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_DINKUMWARE)
-template<size_t, class> struct tuple_element;
-template<class> struct tuple_size;
+    template<size_t, class> struct tuple_element;
+    template<class> struct tuple_size;
 #else
-#include <utility>
+    #include <utility>
 #endif
 
 #ifdef CORRADE_TARGET_LIBCXX

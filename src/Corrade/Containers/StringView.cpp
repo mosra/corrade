@@ -52,7 +52,10 @@
    not BMI1 */
 #if ((defined(CORRADE_ENABLE_SSE2) || defined(CORRADE_ENABLE_AVX)) && defined(CORRADE_ENABLE_BMI1)) || (defined(CORRADE_ENABLE_AVX) && defined(CORRADE_ENABLE_POPCNT))
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
-#elif defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
+#endif
+/** @todo elif here breaks acme.py, which is then unable to remove these empty
+    preprocessor branches */
+#if defined(CORRADE_ENABLE_SSE2) && defined(CORRADE_ENABLE_POPCNT)
 #include "Corrade/Utility/IntrinsicsSse4.h"
 #endif
 #ifdef CORRADE_ENABLE_NEON
