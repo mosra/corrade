@@ -1123,8 +1123,8 @@ information.
 @m_class{m-block m-success}
 
 @par Single-header version
-    This class is, together with @ref ArrayView and the
-    @ref ArrayView<const void> specialization, is also available as a
+    This class is, together with @ref ArrayView and the @ref ArrayView<void> /
+    @ref ArrayView<const void> specializations, is also available as a
     single-header, dependency-less library in the Magnum Singles repository for
     easier integration into your projects. See the
     @ref Containers-ArrayView-single-header "ArrayView documentation" for more
