@@ -595,7 +595,7 @@ and the returned array is growable. For seekable files the returned array has a
 default deleter but the size may get shortened from what the system reported to
 what was actually read.
 
-Expects that the @p path is in UTF-8. If it's already
+Expects that the @p filename is in UTF-8. If it's already
 @ref Containers::StringViewFlag::NullTerminated, it's passed to system APIs
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
