@@ -124,7 +124,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         # whole of Magnum since December 2013 already:
         #   https://github.com/mosra/magnum/commit/f373b6518e0b1fa3e4d0ffb19f77e80a8a56484c
         # So let's just make it official and disable it for everything,
-        # everywhere, forever.
+        # everywhere, forever. Besides this place, which enables it for
+        # everyone that enables CORRADE_USE_PEDANTIC_FLAGS, it's also enabled
+        # for everyone who links to CorradeUtility in Utility/CMakeLists.txt
+        # and to Corrade::Utility in FindCorrade.cmake, so even people who
+        # don't enable pedantic flags (or can't due to too many warnings) get
+        # it and I don't need to deal with insane bugs and random breakages. On
+        # the other hand it's set here as well so even internal test code (that
+        # doesn't necessarily link to CorradeUtility) gets it implicitly too.
         "-fno-strict-aliasing")
 
     # Some flags are not yet supported everywhere

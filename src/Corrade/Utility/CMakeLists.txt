@@ -225,6 +225,16 @@ if(CORRADE_WITH_UTILITY)
         INTERFACE_CORRADE_CXX_STANDARD 11)
     set_property(TARGET CorradeUtility APPEND PROPERTY
         COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+    # -fno-strict-aliasing is set in UseCorrade.cmake for everyone who enables
+    # CORRADE_USE_PEDANTIC_FLAGS (which includes also all code here). Not all
+    # projects linking to Corrade enable it (or can't enable it), but this flag
+    # is essential to prevent insane bugs and random breakages, so force it for
+    # anyone linking to CorradeUtility. Similar code is in FindCorrade.cmake.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN)
+        # INTERFACE, not PUBLIC, to verify we're still correctly enabling it in
+        # UseCorrade as well
+        target_compile_options(CorradeUtility INTERFACE -fno-strict-aliasing)
+    endif()
     if(CORRADE_TARGET_EMSCRIPTEN)
         # TODO switch to target_link_options() and SHELL: once we require CMake
         #   3.13 unconditionally
