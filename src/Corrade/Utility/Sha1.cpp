@@ -48,9 +48,7 @@ constexpr const unsigned int Constants[4] = { 0x5A827999,
                                               0x8F1BBCDC,
                                               0xCA62C1D6 };
 
-unsigned int leftrotate(unsigned int data, unsigned int shift) {
-    return data << shift | data >> (32 - shift);
-}
+#define leftrotate(data, shift) ((data) << (shift) | (data) >> (32u - (shift)))
 
 }
 
@@ -120,8 +118,8 @@ Sha1::Digest Sha1::digest() {
     _bufferSize += 8;
 
     /* Process remaining chunks */
-    for(std::size_t i = 0; i != _bufferSize/64; ++i) {
-        processChunk(_buffer+i*64);
+    for(std::size_t i = 0; i != _bufferSize; i += 64) {
+        processChunk(_buffer + i);
     }
 
     /* Convert digest from big endian */
@@ -131,7 +129,7 @@ Sha1::Digest Sha1::digest() {
     const Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    std::copy(InitialDigest, InitialDigest+5, _digest);
+    std::memcpy(_digest, InitialDigest, 5*sizeof(unsigned int));
     _dataSize = 0;
     _bufferSize = 0;
     return d;
@@ -156,28 +154,47 @@ void Sha1::processChunk(const char* data) {
         extended[i] = leftrotate((extended[i-3] ^ extended[i-8] ^ extended[i-14] ^ extended[i-16]), 1);
 
     /* Initialize value for this chunk */
-    unsigned int d[5];
+    unsigned int d[5]{_digest[0], _digest[1], _digest[2], _digest[3], _digest[4]};
     unsigned int f, constant, temp;
-    std::copy(_digest, _digest+5, d);
 
     /* Main loop */
-    for(int i = 0; i != 80; ++i) {
-        if(i < 20) {
-            f = d[3] ^ (d[1] & (d[2] ^ d[3]));
-            constant = Constants[0];
-        } else if(i < 40) {
-            f = d[1] ^ d[2] ^ d[3];
-            constant = Constants[1];
-        } else if(i < 60) {
-            f = (d[1] & d[2]) | (d[3] & (d[1] | d[2]));
-            constant = Constants[2];
-        } else {
-            f = d[1] ^ d[2] ^ d[3];
-            constant = Constants[3];
-        }
+    for(int i = 0; i < 20; ++i) {
+        f = d[3] ^ (d[1] & (d[2] ^ d[3]));
 
-        temp =
-            leftrotate(d[0], 5) + f + d[4] + constant + extended[i];
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[0] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 20; i < 40; ++i) {
+        f = d[1] ^ d[2] ^ d[3];
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[1] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 40; i < 60; ++i) {
+        f = (d[1] & d[2]) | (d[3] & (d[1] | d[2]));
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[2] + extended[i];
+        d[4] = d[3];
+        d[3] = d[2];
+        d[2] = leftrotate(d[1], 30);
+        d[1] = d[0];
+        d[0] = temp;
+    }
+
+    for(int i = 60; i != 80; ++i) {
+        f = d[1] ^ d[2] ^ d[3];
+
+        temp = leftrotate(d[0], 5) + f + d[4] + Constants[3] + extended[i];
         d[4] = d[3];
         d[3] = d[2];
         d[2] = leftrotate(d[1], 30);
