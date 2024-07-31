@@ -408,10 +408,17 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT(condition) assert(condition)
 #else
+/* The __FILE__ is deliberately printed separately instead of joined with the
+   rest of the string literal to deduplicate it in the binary. As the full file
+   path is usually used by the buildsystem, it can get rather long, and the
+   savings from deduplicating significantly outweigh the extra code size,
+   especially in assertion-heavy code. OTOH the "Assertion" and "failed at" is
+   joined with the stringified condition, as they're relatively short and the
+   extra code size would likely be more than the savings. */
 #define CORRADE_INTERNAL_ASSERT(condition)                                  \
     do {                                                                    \
         if(!(condition)) {                                                  \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
+            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at" << __FILE__ << Corrade::Utility::Debug::nospace << ":" CORRADE_LINE_STRING; \
             std::abort();                                                   \
         }                                                                   \
     } while(false)
@@ -451,9 +458,10 @@ You can override this implementation by placing your own
         assert(!#condition);                                                \
     }(), 0))
 #else
+/* See CORRADE_INTERNAL_ASSERT() for why __FILE__ is printed separately */
 #define CORRADE_INTERNAL_CONSTEXPR_ASSERT(condition)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
+        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at" << __FILE__ << Corrade::Utility::Debug::nospace << ":" CORRADE_LINE_STRING; \
         std::abort();                                                       \
     }(), 0))
 #endif
@@ -485,10 +493,11 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call) assert(call)
 #else
+/* See CORRADE_INTERNAL_ASSERT() for why __FILE__ is printed separately */
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
         if(!(call)) {                                                       \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #call " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
+            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #call " failed at" << __FILE__ << Corrade::Utility::Debug::nospace << ":" CORRADE_LINE_STRING; \
             std::abort();                                                   \
         }                                                                   \
     } while(false)
@@ -559,6 +568,8 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT_EXPRESSION(...) Corrade::Utility::Implementation::assertExpression(__VA_ARGS__)
 #else
+/* Unlike other INTERNAL_ASSERT macros which print __FILE__ separately to
+   deduplicate it in the binary, here it's unfortunately not possible */
 #define CORRADE_INTERNAL_ASSERT_EXPRESSION(...) Corrade::Utility::Implementation::assertExpression(__VA_ARGS__, "Assertion " #__VA_ARGS__ " failed at " __FILE__ ":" CORRADE_LINE_STRING)
 #endif
 #endif
@@ -602,9 +613,10 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() assert(!"unreachable code")
 #else
+/* See CORRADE_INTERNAL_ASSERT() for why __FILE__ is printed separately */
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Reached unreachable code at " __FILE__ ":" CORRADE_LINE_STRING; \
+        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Reached unreachable code at" << __FILE__ << Corrade::Utility::Debug::nospace << ":" CORRADE_LINE_STRING; \
         std::abort();                                                       \
     } while(false)
 #endif
