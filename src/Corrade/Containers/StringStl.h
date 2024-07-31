@@ -45,16 +45,16 @@ information.
 
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
+
+#if defined(CORRADE_BUILD_DEPRECATED) && !defined(CORRADE_STRING_STL_INLINE)
 #include "Corrade/Utility/StlForwardString.h"
+#else
+#include <string>
+#endif
 
 /* Listing these namespaces doesn't add anything to the docs, so don't */
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
-
-/** @todo when this file stops getting included for backwards compatibility
-    purposes, include <string> directly and inline the contents of
-    StringStl.cpp here to avoid bloating our binaries (and especially to avoid
-    having them polluted with STL symbols) */
 
 template<> struct CORRADE_UTILITY_EXPORT StringConverter<std::string> {
     static String from(const std::string& other);
@@ -76,6 +76,47 @@ template<class> struct StringIterableConverter;
 template<> struct CORRADE_UTILITY_EXPORT StringIterableConverter<std::string> {
     static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t);
 };
+#endif
+
+/** @todo when this file stops getting included for backwards compatibility
+    purposes, include the below (and <string>) uncoditionally */
+#if !defined(CORRADE_BUILD_DEPRECATED) || defined(CORRADE_STRING_STL_INLINE)
+#ifndef CORRADE_STRING_STL_INLINE
+#define CORRADE_STRING_STL_INLINE inline
+#endif
+CORRADE_STRING_STL_INLINE StringView StringViewConverter<const char, std::string>::from(const std::string& other) {
+    return StringView{other.data(), other.size(), StringViewFlag::NullTerminated};
+}
+
+CORRADE_STRING_STL_INLINE std::string StringViewConverter<const char, std::string>::to(StringView other) {
+    return std::string{other.data(), other.size()};
+}
+
+CORRADE_STRING_STL_INLINE MutableStringView StringViewConverter<char, std::string>::from(std::string& other) {
+    /* .data() returns a const pointer until C++17, so have to use &other[0].
+       It's guaranteed to return a pointer to a single null character if the
+       string is empty. */
+    return MutableStringView{&other[0], other.size(), StringViewFlag::NullTerminated};
+}
+
+CORRADE_STRING_STL_INLINE std::string StringViewConverter<char, std::string>::to(MutableStringView other) {
+    return std::string{other.data(), other.size()};
+}
+
+CORRADE_STRING_STL_INLINE String StringConverter<std::string>::from(const std::string& other) {
+    return String{other.data(), other.size()};
+}
+
+CORRADE_STRING_STL_INLINE std::string StringConverter<std::string>::to(const String& other) {
+    return std::string{other.data(), other.size()};
+}
+
+#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
+CORRADE_STRING_STL_INLINE StringView StringIterableConverter<std::string>::accessor(const void* data, const void*, std::ptrdiff_t, std::size_t) {
+    return *static_cast<const std::string*>(data);
+}
+#endif
+#undef CORRADE_STRING_STL_INLINE
 #endif
 
 }}}

@@ -51,7 +51,6 @@ if(CORRADE_WITH_UTILITY)
         System.cpp
 
         ../Cpu.cpp
-        ../Containers/StringStl.cpp
 
         Implementation/ErrorString.cpp)
 
@@ -145,7 +144,9 @@ if(CORRADE_WITH_UTILITY)
 
     if(CORRADE_BUILD_DEPRECATED)
         list(APPEND CorradeUtility_SRCS
-            Directory.cpp)
+            Directory.cpp
+
+            ../Containers/StringStl.cpp)
         list(APPEND CorradeUtility_HEADERS
             Directory.h)
     endif()
@@ -333,10 +334,13 @@ if(NOT CMAKE_CROSSCOMPILING)
 
         ../Cpu.cpp
         ../Containers/String.cpp
-        # TODO remove this once Implementation/ResourceCompile.h is STL-free
-        ../Containers/StringStl.cpp
         ../Containers/StringIterable.cpp
         ../Containers/StringView.cpp)
+    # TODO remove this once Implementation/ResourceCompile.h is STL-free
+    if(CORRADE_BUILD_DEPRECATED)
+        list(APPEND CorradeUtilityRc_SRCS
+            ../Containers/StringStl.cpp)
+    endif()
     if(CORRADE_TARGET_WINDOWS)
         list(APPEND CorradeUtilityRc_SRCS
             # Needed for dealing with the design failure that's called "Unicode WINAPI"

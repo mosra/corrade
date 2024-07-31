@@ -24,43 +24,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "StringStl.h"
+/** @todo when StringStl.h stops getting included for backwards compatibility
+    purposes, drop this file altogether and leave the definitons inline in the
+    header */
 
-#include <string>
-
-namespace Corrade { namespace Containers { namespace Implementation {
-
-StringView StringViewConverter<const char, std::string>::from(const std::string& other) {
-    return StringView{other.data(), other.size(), StringViewFlag::NullTerminated};
-}
-
-std::string StringViewConverter<const char, std::string>::to(StringView other) {
-    return std::string{other.data(), other.size()};
-}
-
-MutableStringView StringViewConverter<char, std::string>::from(std::string& other) {
-    /* .data() returns a const pointer until C++17, so have to use &other[0].
-       It's guaranteed to return a pointer to a single null character if the
-       string is empty. */
-    return MutableStringView{&other[0], other.size(), StringViewFlag::NullTerminated};
-}
-
-std::string StringViewConverter<char, std::string>::to(MutableStringView other) {
-    return std::string{other.data(), other.size()};
-}
-
-String StringConverter<std::string>::from(const std::string& other) {
-    return String{other.data(), other.size()};
-}
-
-std::string StringConverter<std::string>::to(const String& other) {
-    return std::string{other.data(), other.size()};
-}
-
-#ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
-StringView StringIterableConverter<std::string>::accessor(const void* data, const void*, std::ptrdiff_t, std::size_t) {
-    return *static_cast<const std::string*>(data);
-}
+#include "Corrade/configure.h"
+#ifndef CORRADE_BUILD_DEPRECATED
+#error This file is meant to be built only when CORRADE_BUILD_DEPRECATED is enabled
 #endif
 
-}}}
+/* Make the definitions non-inline to compile them as part of the library */
+#define CORRADE_STRING_STL_INLINE
+
+#include "StringStl.h"
