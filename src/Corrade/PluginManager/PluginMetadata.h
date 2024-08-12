@@ -30,12 +30,16 @@
  * @brief Class @ref Corrade::PluginManager::PluginMetadata
  */
 
-#include <string>
-#include <vector>
-
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* name() used to return std::string before. Others returned
+   std::vector<std::string> which doesn't have an implicitly-convertible path
+   from StringIterable. */
+#include "Corrade/Containers/StringStl.h"
+#endif
 
 namespace Corrade { namespace PluginManager {
 
@@ -106,27 +110,37 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         /** @brief Moving is not allowed */
         PluginMetadata& operator=(PluginMetadata&&) = delete;
 
-        /** @brief Plugin name */
-        std::string name() const;
+        /**
+         * @brief Plugin name
+         *
+         * The returned view may be but isn't guaranteed to be
+         * @ref Containers::StringViewFlag::NullTerminated or
+         * @ref Containers::StringViewFlag::Global.
+         */
+        Containers::StringView name() const;
 
         /**
          * @brief Plugins on which this plugin depends
          *
-         * List of plugins which must be loaded before this plugin can be
-         * loaded.
-         * @note Thus field is constant during whole plugin lifetime.
+         * List of plugins which must be loaded before the plugin can be
+         * loaded. The returned list is guaranteed to be valid and constant
+         * during whole plugin lifetime. String views may be but aren't
+         * guaranteed to be @ref Containers::StringViewFlag::NullTerminated or
+         * @ref Containers::StringViewFlag::Global.
          */
-        const std::vector<std::string>& depends() const { return _depends; }
+        Containers::StringIterable depends() const;
 
         /**
          * @brief Plugins which depend on this plugin
          *
-         * List of plugins which uses this plugin. This plugin cannot be
-         * unloaded when any of these plugins are loaded.
-         * @note This list is automatically created by plugin manager and can
-         *      be changed in plugin lifetime.
+         * List of plugins which uses this plugin. The plugin cannot be
+         * unloaded as long as any of these plugins are loaded. The returned
+         * list is only guaranteed to be valid until another plugin gets loaded
+         * or unloaded. String views may be but aren't guaranteed to be
+         * @ref Containers::StringViewFlag::NullTerminated or
+         * @ref Containers::StringViewFlag::Global.
          */
-        std::vector<std::string> usedBy() const;
+        Containers::StringIterable usedBy() const;
 
         /**
          * @brief Plugins which are provided by this plugin
@@ -134,10 +148,13 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * List of plugin names that are alias to this plugin when loading the
          * plugin by name (not as dependency) if there is no plugin with that
          * name. If there is more than one alias for given name, the first
-         * found is used.
-         * @note Thus field is constant during whole plugin lifetime.
+         * found is used. The returned list is guaranteed to be valid and
+         * constant during whole plugin lifetime. String views may be but
+         * aren't guaranteed to be
+         * @ref Containers::StringViewFlag::NullTerminated or
+         * @ref Containers::StringViewFlag::Global.
          */
-        const std::vector<std::string>& provides() const { return _provides; }
+        Containers::StringIterable provides() const;
 
         /**
          * @brief Plugin-specific data
@@ -148,7 +165,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * returned group is empty.
          * @see @ref configuration()
          */
-        const Utility::ConfigurationGroup& data() const { return *_data; }
+        const Utility::ConfigurationGroup& data() const;
 
         /**
          * @brief Initial plugin-specific configuration
@@ -165,23 +182,16 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * metadata, the returned group is empty.
          * @see @ref data()
          */
-        Utility::ConfigurationGroup& configuration() { return *_configuration; }
-        const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
+        Utility::ConfigurationGroup& configuration();
+        const Utility::ConfigurationGroup& configuration() const;
 
     private:
-        friend AbstractManager;
         friend Implementation::Plugin;
 
-        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
-
-        std::string _name;
-
-        std::vector<std::string> _depends,
-            _usedBy,
-            _provides;
-
-        const Utility::ConfigurationGroup* _data;
-        Utility::ConfigurationGroup*_configuration;
+        /* No members or state here, the class is only ever constructed as a
+           base of Implementation::Plugin (yes, nasty) and it access its
+           contents by casting to it */
+        explicit PluginMetadata() {}
 };
 
 }}

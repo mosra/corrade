@@ -26,6 +26,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <vector>
+
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Configuration.h"
 
@@ -40,14 +44,26 @@ namespace Corrade { namespace PluginManager { namespace Implementation {
 
 struct StaticPlugin;
 
-struct Plugin {
+struct Plugin: PluginMetadata {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     LoadState loadState;
     #else
     const LoadState loadState; /* Always LoadState::Static */
     #endif
-    Utility::Configuration configuration;
-    PluginMetadata metadata;
+    Utility::Configuration metadata;
+    Containers::String name;
+    /** @todo these two could be views once Configuration is reworked; the
+        depends and provides could be in the same allocation as the Plugin
+        itself once Pointer supports custom deleters */
+    Containers::Array<Containers::String> depends;
+    Containers::Array<Containers::String> provides;
+    /* This array is filled by the `name` field of other plugins, which is
+       guaranteed to stay and not be reallocated for as long as the other
+       plugin exists (and once it's unloaded, it's removed from this array),
+       meaning that we can store just views. */
+    Containers::Array<Containers::StringView> usedBy;
+    const Utility::ConfigurationGroup* data;
+    Utility::ConfigurationGroup* configuration;
 
     void*(*instancer)(AbstractManager&, const Containers::StringView&);
     void(*finalizer)();
@@ -76,13 +92,16 @@ struct Plugin {
         lookups when reregistering and removing instances */
     std::vector<AbstractPlugin*> instances;
 
+    /* Delegated to from both the other constructors */
+    explicit Plugin(Utility::Configuration&& configuration, Containers::String&& name, void*(*instancer)(AbstractManager&, const Containers::StringView&));
+
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* Constructor for dynamic plugins. Defined in AbstractManager.cpp. */
     explicit Plugin(Containers::StringView name, Containers::StringView metadata);
     #endif
 
     /* Constructor for static plugins. Defined in AbstractManager.cpp. */
-    explicit Plugin(const StaticPlugin& staticPlugin, Utility::Configuration&& configuration_);
+    explicit Plugin(const StaticPlugin& staticPlugin, Utility::Configuration&& configuration);
 
     Plugin(const Plugin&) = delete;
     Plugin(Plugin&&) = delete;

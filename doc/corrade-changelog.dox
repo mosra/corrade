@@ -896,11 +896,13 @@ namespace Corrade {
     pointer would lead to resource leaks as the derived type destructor would
     never get called. Existing code where this silently happened will now fail
     to compile and has to be updated.
--   @ref PluginManager::AbstractManager::pluginList() and
-    @relativeref{PluginManager::AbstractManager,aliasList()} now return a
-    @ref Containers::Array of @ref Containers::String instead of a
-    @ref std::vector of @ref std::string. As the change was done to avoid
-    including a heavy @ref std::vector, no backwards compatibility is done.
+-   @ref PluginManager::AbstractManager::pluginList(),
+    @relativeref{PluginManager::AbstractManager,aliasList()} and
+    @ref PluginManager::PluginMetadata APIs now return @ref Containers::String,
+    @ref Containers::StringIterable or @ref Containers::Array of
+    @ref Containers::StringView instead of @ref std::string and
+    @ref std::vector instances. As the change was done to avoid including a
+    heavy @ref std::vector, no backwards compatibility is done.
 -   Overrides of @ref PluginManager::AbstractPlugin::pluginInterface(),
     @relativeref{PluginManager::AbstractPlugin,pluginSuffix()} and
     @relativeref{PluginManager::AbstractPlugin,pluginMetadataSuffix()} are now

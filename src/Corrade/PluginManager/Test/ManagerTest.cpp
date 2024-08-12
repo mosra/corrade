@@ -653,7 +653,12 @@ void ManagerTest::staticPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
-    CORRADE_COMPARE(manager.metadata("Canary")->data().value("description"), "I'm allergic to canaries!");
+    PluginMetadata* metadata = manager.metadata("Canary");
+    CORRADE_VERIFY(metadata);
+    CORRADE_COMPARE(metadata->name(), "Canary");
+    /* The name is compiled in, thus the returned view is marked as global */
+    CORRADE_COMPARE(metadata->name().flags(), Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global);
+    CORRADE_COMPARE(metadata->data().value("description"), "I'm allergic to canaries!");
 
     Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_VERIFY(animal);
@@ -671,7 +676,12 @@ void ManagerTest::dynamicPlugin() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(manager.metadata("Dog")->data().value("description"), "A simple dog plugin.");
+    PluginMetadata* metadata = manager.metadata("Dog");
+    CORRADE_VERIFY(metadata);
+    CORRADE_COMPARE(metadata->name(), "Dog");
+    /* The name is coming from Path::list(), thus cannot be global */
+    CORRADE_COMPARE(metadata->name().flags(), Containers::StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(metadata->data().value("description"), "A simple dog plugin.");
 
     {
         Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
@@ -934,10 +944,12 @@ void ManagerTest::hierarchy() {
     CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.metadata("PitBull")->data().value("description"), "I'M ANGRY!!");
-    CORRADE_COMPARE(manager.metadata("PitBull")->depends(),
-        std::vector<std::string>{"Dog"});
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{"PitBull"});
+    CORRADE_COMPARE_AS(manager.metadata("PitBull")->depends(),
+        Containers::StringIterable{"Dog"},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->usedBy(),
+        Containers::StringIterable{"PitBull"},
+        TestSuite::Compare::Container);
 
     {
         Containers::Pointer<AbstractAnimal> animal = manager.instantiate("PitBull");
@@ -955,7 +967,9 @@ void ManagerTest::hierarchy() {
     /* After deleting instance, unload PitBull plugin, then try again */
     CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
-    CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->usedBy(),
+        Containers::StringIterable{},
+        TestSuite::Compare::Container);
     #endif
 }
 
@@ -996,10 +1010,12 @@ void ManagerTest::crossManagerDependencies() {
     /* Load HotDog */
     CORRADE_COMPARE(foodManager.load("HotDog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(foodManager.metadata("HotDog")->depends(),
-        std::vector<std::string>{"Dog"});
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{"HotDog"});
+    CORRADE_COMPARE_AS(foodManager.metadata("HotDog")->depends(),
+        Containers::StringIterable{"Dog"},
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->usedBy(),
+        Containers::StringIterable{"HotDog"},
+        TestSuite::Compare::Container);
 
     {
         /* Verify hotdog */
@@ -1014,8 +1030,9 @@ void ManagerTest::crossManagerDependencies() {
     /* After destroying hotdog try again */
     CORRADE_COMPARE(foodManager.unload("HotDog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{});
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->usedBy(),
+        Containers::StringIterable{},
+        TestSuite::Compare::Container);
     #endif
 }
 
@@ -1080,8 +1097,9 @@ void ManagerTest::unresolvedDependencies() {
         "PluginManager::Manager::load(): unresolved dependency SomethingThatDoesNotExist of plugin Snail\n"
         "PluginManager::Manager::load(): unresolved dependency Snail of plugin HotDogWithSnail\n");
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{});
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->usedBy(),
+        Containers::StringIterable{},
+        TestSuite::Compare::Container);
     #endif
 }
 
@@ -1178,7 +1196,11 @@ void ManagerTest::restoreAliasesAfterPluginDirectoryChange() {
 void ManagerTest::staticProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    CORRADE_COMPARE(manager.metadata("Canary")->provides(), std::vector<std::string>{"JustSomeBird"});
+    CORRADE_COMPARE_AS(manager.metadata("Canary")->provides(),
+        Containers::StringIterable{"JustSomeBird"},
+        TestSuite::Compare::Container);
+    /** @todo verify those are StringViewFlag::Global once Configuration is
+        reworked */
 
     CORRADE_COMPARE(manager.loadState("JustSomeBird"), LoadState::Static);
     CORRADE_VERIFY(manager.metadata("JustSomeBird"));
@@ -1194,7 +1216,11 @@ void ManagerTest::dynamicProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_VERIFY(manager.metadata("Dog"));
-    CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->provides(), (Containers::StringIterable{
+        "JustSomeMammal", "AGoodBoy"
+    }), TestSuite::Compare::Container);
+    /** @todo verify those aren't StringViewFlag::Global once Configuration is
+        reworked */
 
     CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("JustSomeMammal"), LoadState::Loaded);
@@ -1219,7 +1245,9 @@ void ManagerTest::dynamicProvidesDependency() {
        a dependency */
     CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Bulldog"));
-    CORRADE_COMPARE(manager.metadata("Bulldog")->depends(), std::vector<std::string>{"JustSomeMammal"});
+    CORRADE_COMPARE_AS(manager.metadata("Bulldog")->depends(),
+        Containers::StringIterable{"JustSomeMammal"},
+        TestSuite::Compare::Container);
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1231,9 +1259,13 @@ void ManagerTest::setPreferredPlugins() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_VERIFY(manager.metadata("Dog"));
-    CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
+    CORRADE_COMPARE_AS(manager.metadata("Dog")->provides(), (Containers::StringIterable{
+        "JustSomeMammal", "AGoodBoy"
+    }), TestSuite::Compare::Container);
     CORRADE_VERIFY(manager.metadata("PitBull"));
-    CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
+    CORRADE_COMPARE_AS(manager.metadata("PitBull")->provides(), (Containers::StringIterable{
+        "JustSomeMammal", "Dog"
+    }), TestSuite::Compare::Container);
 
     /* Implicit state */
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
@@ -1296,7 +1328,9 @@ void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_VERIFY(manager.metadata("PitBull"));
-    CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
+    CORRADE_COMPARE_AS(manager.metadata("PitBull")->provides(), (Containers::StringIterable{
+        "JustSomeMammal", "Dog"
+    }), TestSuite::Compare::Container);
 
     /* Implicit state */
     CORRADE_VERIFY(manager.metadata("Dog"));

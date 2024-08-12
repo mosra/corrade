@@ -26,24 +26,39 @@
 
 #include "PluginMetadata.h"
 
-#include "Corrade/Utility/ConfigurationGroup.h"
+#include "Corrade/Containers/StringIterable.h"
+#include "Corrade/PluginManager/Implementation/Plugin.h"
 
 namespace Corrade { namespace PluginManager {
 
-PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& conf): _name(Utility::move(name)) {
-    /* Dependencies, aliases */
-    _depends = conf.values("depends");
-    _provides = conf.values("provides");
-
-    /* Plugin data, configuration */
-    _data = conf.group("data");
-    _configuration = conf.group("configuration");
-    if(!_data) _data = conf.addGroup("data");
-    if(!_configuration) _configuration = conf.addGroup("configuration");
+Containers::StringView PluginMetadata::name() const {
+    return static_cast<const Implementation::Plugin*>(this)->name;
 }
 
-std::string PluginMetadata::name() const { return _name; }
+Containers::StringIterable PluginMetadata::depends() const {
+    return static_cast<const Implementation::Plugin*>(this)->depends;
+}
 
-std::vector<std::string> PluginMetadata::usedBy() const { return _usedBy; }
+Containers::StringIterable PluginMetadata::usedBy() const {
+    return static_cast<const Implementation::Plugin*>(this)->usedBy;
+}
+
+Containers::StringIterable PluginMetadata::provides() const {
+    return static_cast<const Implementation::Plugin*>(this)->provides;
+}
+
+const Utility::ConfigurationGroup& PluginMetadata::data() const {
+    CORRADE_INTERNAL_ASSERT(static_cast<const Implementation::Plugin*>(this)->data);
+    return *static_cast<const Implementation::Plugin*>(this)->data;
+}
+
+const Utility::ConfigurationGroup& PluginMetadata::configuration() const {
+    CORRADE_INTERNAL_ASSERT(static_cast<const Implementation::Plugin*>(this)->configuration);
+    return *static_cast<const Implementation::Plugin*>(this)->configuration;
+}
+
+Utility::ConfigurationGroup& PluginMetadata::configuration() {
+    return const_cast<Utility::ConfigurationGroup&>(static_cast<const PluginMetadata&>(*this).configuration());
+}
 
 }}
