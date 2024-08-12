@@ -445,7 +445,7 @@ void AbstractManager::setPreferredPlugins(const Containers::StringView alias, co
         if(foundPlugin == _state->plugins.end())
             continue;
 
-        CORRADE_ASSERT(std::find(foundPlugin->second->metadata.provides().begin(), foundPlugin->second->metadata.provides().end(), alias) != foundPlugin->second->metadata.provides().end(),
+        CORRADE_ASSERT(std::find(foundPlugin->second->metadata._provides.begin(), foundPlugin->second->metadata._provides.end(), alias) != foundPlugin->second->metadata._provides.end(),
             "PluginManager::Manager::setPreferredPlugins():" << plugin << "does not provide" << alias, );
         _state->aliases.erase(foundAlias);
         /* Libc++ frees the passed Plugin& reference when using emplace(),
@@ -915,7 +915,7 @@ LoadState AbstractManager::unloadInternal(Implementation::Plugin& plugin) {
 
     /* Remove this plugin from "used by" list of dependencies. If not found
        in this manager, try in registered external managers. */
-    for(auto it = plugin.metadata.depends().cbegin(); it != plugin.metadata.depends().cend(); ++it) {
+    for(auto it = plugin.metadata._depends.cbegin(); it != plugin.metadata._depends.cend(); ++it) {
         Implementation::Plugin* dependency = nullptr;
         auto foundDependency = _state->plugins.find(*it);
         if(foundDependency != _state->plugins.end())
