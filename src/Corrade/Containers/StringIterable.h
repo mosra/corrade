@@ -178,6 +178,9 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          */
         explicit StringIterable(const void* data, const void* context, std::size_t size, std::ptrdiff_t stride, StringView(*accessor)(const void*, const void*, std::ptrdiff_t, std::size_t)) noexcept: _data{data}, _context{context}, _size{size}, _stride{stride}, _accessor{accessor} {}
 
+        /** @brief Whether the iterable is non-empty */
+        explicit operator bool() const { return _size; }
+
         /**
          * @brief Container data pointer
          *

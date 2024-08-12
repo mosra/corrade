@@ -149,6 +149,8 @@ void IterableTest::constructDefault() {
     CORRADE_COMPARE(ai2.size(), 0);
     CORRADE_COMPARE(ai.stride(), 0);
     CORRADE_COMPARE(ai2.stride(), 0);
+    CORRADE_VERIFY(!ai);
+    CORRADE_VERIFY(!ai2);
     CORRADE_VERIFY(ai.isEmpty());
     CORRADE_VERIFY(ai2.isEmpty());
 
@@ -188,6 +190,7 @@ void IterableTest::arrayView() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), 4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -206,6 +209,7 @@ void IterableTest::arrayViewMutableToConst() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), 4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -242,6 +246,7 @@ template<template<class> class T> void IterableTest::arrayViewReference() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T<int>));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -267,6 +272,7 @@ template<template<class> class T> void IterableTest::arrayViewReferenceMutableTo
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T<int>));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -299,6 +305,7 @@ void IterableTest::arrayViewMutableReferenceToConst() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(void*));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -318,6 +325,7 @@ void IterableTest::stridedArrayView() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -336,6 +344,7 @@ void IterableTest::stridedArrayViewMutableToConst() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -358,6 +367,7 @@ template<template<class> class T> void IterableTest::stridedArrayViewReference()
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T<int>)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -383,6 +393,7 @@ template<template<class> class T> void IterableTest::stridedArrayViewReferenceMu
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T<int>)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -415,6 +426,7 @@ void IterableTest::stridedArrayViewMutableReferenceToConst() {
     CORRADE_COMPARE(ai.data(), static_cast<const void*>(data + 2));
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(void*)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -439,6 +451,7 @@ void IterableTest::initializerList() {
         /* It's always a reference, having an initializer_list<T> overload
            would cause nasty ambiguities */
         CORRADE_COMPARE(ai.stride(), sizeof(AnyReference<const int>));
+        CORRADE_VERIFY(ai);
         CORRADE_VERIFY(!ai.isEmpty());
 
         CORRADE_COMPARE(ai[0], 5);
@@ -479,6 +492,7 @@ void IterableTest::initializerListReference() {
         CORRADE_VERIFY(ai.data());
         CORRADE_COMPARE(ai.size(), 3);
         CORRADE_COMPARE(ai.stride(), sizeof(AnyReference<const int>));
+        CORRADE_VERIFY(ai);
         CORRADE_VERIFY(!ai.isEmpty());
 
         CORRADE_COMPARE(ai[0].a, 5);
@@ -501,6 +515,7 @@ void IterableTest::initializerListReferenceMutableToConst() {
     CORRADE_COMPARE(ai.data(), data.begin());
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(AnyReference<const int>));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -515,6 +530,7 @@ void IterableTest::cArray() {
     CORRADE_COMPARE(ai.data(), data);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), 4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -529,6 +545,7 @@ void IterableTest::array() {
     CORRADE_COMPARE(ai.data(), a.data());
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), 4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);
@@ -543,6 +560,7 @@ void IterableTest::stlVector() {
     CORRADE_COMPARE(ai.data(), a.data());
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), 4);
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], 5);

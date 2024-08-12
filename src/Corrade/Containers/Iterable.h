@@ -195,6 +195,9 @@ template<class T> class Iterable {
          */
         explicit Iterable(const void* data, std::size_t size, std::ptrdiff_t stride, T&(*accessor)(const void*)) noexcept: _data{data}, _size{size}, _stride{stride}, _accessor{accessor} {}
 
+        /** @brief Whether the iterable is non-empty */
+        explicit operator bool() const { return _size; }
+
         /**
          * @brief Data pointer
          *

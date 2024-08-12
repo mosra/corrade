@@ -178,6 +178,8 @@ void StringIterableTest::constructDefault() {
     CORRADE_COMPARE(ai2.size(), 0);
     CORRADE_COMPARE(ai.stride(), 0);
     CORRADE_COMPARE(ai2.stride(), 0);
+    CORRADE_VERIFY(!ai);
+    CORRADE_VERIFY(!ai2);
     CORRADE_VERIFY(ai.isEmpty());
     CORRADE_VERIFY(ai2.isEmpty());
 
@@ -238,6 +240,7 @@ template<class T> void StringIterableTest::arrayView() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -254,6 +257,7 @@ void StringIterableTest::arrayViewCharArray() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(const char*));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -276,6 +280,7 @@ template<class T> void StringIterableTest::arrayViewMutable() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(T));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -293,6 +298,7 @@ void StringIterableTest::arrayViewFromExternal() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(StrView));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -310,6 +316,7 @@ void StringIterableTest::externalArrayViewFromExternal() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(StrView));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -328,6 +335,7 @@ template<class T> void StringIterableTest::stridedArrayView() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -344,6 +352,7 @@ void StringIterableTest::stridedArrayViewCharArray() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(const char*)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -366,6 +375,7 @@ template<class T> void StringIterableTest::stridedArrayViewMutable() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(T)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -385,6 +395,7 @@ void StringIterableTest::stridedArrayViewFromExternal() {
     /* Causes "C4146: unary minus operator applied to unsigned type, result
        still unsigned" on MSVC without the cast */
     CORRADE_COMPARE(ai.stride(), -std::ptrdiff_t(sizeof(StrView)));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "worlds");
@@ -406,6 +417,7 @@ void StringIterableTest::initializerList() {
         /* It's always a StringView, having an initializer_list<String> etc.
            overloads would cause nasty ambiguities */
         CORRADE_COMPARE(ai.stride(), sizeof(StringView));
+        CORRADE_VERIFY(ai);
         CORRADE_VERIFY(!ai.isEmpty());
 
         CORRADE_COMPARE(ai[0], "hello");
@@ -422,6 +434,7 @@ void StringIterableTest::cArray() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(StringView));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -437,6 +450,7 @@ void StringIterableTest::array() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(String));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
@@ -452,6 +466,7 @@ void StringIterableTest::stlVector() {
     CORRADE_COMPARE(ai.context(), nullptr);
     CORRADE_COMPARE(ai.size(), 3);
     CORRADE_COMPARE(ai.stride(), sizeof(const char*));
+    CORRADE_VERIFY(ai);
     CORRADE_VERIFY(!ai.isEmpty());
 
     CORRADE_COMPARE(ai[0], "hello");
