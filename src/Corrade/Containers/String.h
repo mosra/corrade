@@ -606,7 +606,7 @@ class CORRADE_UTILITY_EXPORT String {
         /** @todo combined AllocatedInit + Value/Direct/NoInit constructors */
 
         /**
-         * @brief Construct a view on an external type / from an external representation
+         * @brief Construct from an external representation
          *
          * @see @ref Containers-String-stl
          */

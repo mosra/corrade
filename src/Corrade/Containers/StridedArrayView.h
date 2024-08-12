@@ -695,7 +695,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @see @ref StridedArrayView(ArrayView<ErasedType>, T*, const Containers::Size<dimensions>&, const Containers::Stride<dimensions>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U> StridedArrayView<dimensions, U> slice(U T::*member) const;
+        template<class U> StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type> slice(U T::*member) const;
         #else
         template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_member_function_pointer<decltype(member)>::value, StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>>::type {
             return StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>{_size, _stride, &(static_cast<T*>(_data)->*member)};

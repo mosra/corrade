@@ -148,7 +148,7 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * If the size is zero, no allocation is done.
          * @see @relativeref{Corrade,ValueInit},
          *      @ref BitArray(NoInitT, std::size_t),
-         *      @ref BitArray(DirectInitT, std::size_t, bool)
+         *      @ref BitArray(DirectInitT, std::size_t, bool), @ref resetAll()
          */
         explicit BitArray(Corrade::ValueInitT, std::size_t size);
 
@@ -161,7 +161,8 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * later anyway.
          * @see @relativeref{Corrade,NoInit},
          *      @ref BitArray(ValueInitT, std::size_t),
-         *      @ref BitArray(DirectInitT, std::size_t, bool)
+         *      @ref BitArray(DirectInitT, std::size_t, bool), @ref setAll(),
+         *      @ref resetAll()
          */
         explicit BitArray(Corrade::NoInitT, std::size_t size);
 
@@ -171,9 +172,10 @@ class CORRADE_UTILITY_EXPORT BitArray {
          * @param value     Bit value
          *
          * If the size is zero, no allocation is done.
-         * @see @relativeref{Corrade,NoInit},
+         * @see @relativeref{Corrade,DirectInit},
          *      @ref BitArray(ValueInitT, std::size_t),
-         *      @ref BitArray(NoInitT, std::size_t)
+         *      @ref BitArray(NoInitT, std::size_t), @ref setAll(),
+         *      @ref resetAll()
          */
         explicit BitArray(Corrade::DirectInitT, std::size_t size, bool value);
 
