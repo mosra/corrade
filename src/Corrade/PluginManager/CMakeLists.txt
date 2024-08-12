@@ -50,10 +50,14 @@ set(CorradePluginManager_HEADERS
     PluginMetadata.h
     visibility.h)
 
+set(CorradePluginManager_PRIVATE_HEADERS
+    Implementation/Plugin.h)
+
 # Objects shared between main and test library
 add_library(CorradePluginManagerObjects OBJECT
     ${CorradePluginManager_SRCS}
-    ${CorradePluginManager_HEADERS})
+    ${CorradePluginManager_HEADERS}
+    ${CorradePluginManager_PRIVATE_HEADERS})
 target_include_directories(CorradePluginManagerObjects PUBLIC $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
 if(NOT CORRADE_BUILD_STATIC)
     target_compile_definitions(CorradePluginManagerObjects PRIVATE "CorradePluginManagerObjects_EXPORTS")

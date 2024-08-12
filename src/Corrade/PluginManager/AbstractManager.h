@@ -44,7 +44,8 @@
 #endif
 
 #ifdef CORRADE_TARGET_WINDOWS
-/* I didn't find a better way to circumvent the need for including windows.h */
+/* I didn't find a better way to circumvent the need for including windows.h.
+   Same is in PluginManager/Implementation/Plugin.h. */
 struct HINSTANCE__;
 typedef struct HINSTANCE__* HMODULE;
 
@@ -199,6 +200,7 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
 CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadStates value);
 
 namespace Implementation {
+    struct Plugin;
     struct StaticPlugin;
 }
 
@@ -435,7 +437,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     #else
     public:
     #endif
-        struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
         static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
         static void ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin);
 
@@ -457,16 +458,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     private:
         struct State;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(Containers::StringView name, Containers::Pointer<Plugin>&& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(Containers::StringView name, Containers::Pointer<Implementation::Plugin>&& plugin);
 
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(Containers::StringView plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void reregisterInstance(Containers::StringView plugin, AbstractPlugin& oldInstance, AbstractPlugin* newInstance);
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
-        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, Containers::StringView filename);
-        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
-        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Implementation::Plugin& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Implementation::Plugin& plugin, Containers::StringView filename);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Implementation::Plugin& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Implementation::Plugin& plugin);
         #endif
 
         Containers::Pointer<State> _state;

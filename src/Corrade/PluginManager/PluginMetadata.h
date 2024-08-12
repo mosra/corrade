@@ -39,6 +39,10 @@
 
 namespace Corrade { namespace PluginManager {
 
+namespace Implementation {
+    struct Plugin;
+}
+
 /**
 @brief Plugin metadata
 
@@ -166,6 +170,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
 
     private:
         friend AbstractManager;
+        friend Implementation::Plugin;
 
         explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
 

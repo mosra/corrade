@@ -40,7 +40,7 @@
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/PluginManager/PluginMetadata.h"
+#include "Corrade/PluginManager/Implementation/Plugin.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo drop once PluginMetadata is <string>-free */
 #include "Corrade/Utility/Configuration.h"
@@ -70,58 +70,6 @@ namespace Corrade { namespace PluginManager {
 
 using namespace Containers::Literals;
 
-struct AbstractManager::Plugin {
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    LoadState loadState;
-    #else
-    const LoadState loadState; /* Always LoadState::Static */
-    #endif
-    Utility::Configuration configuration;
-    PluginMetadata metadata;
-
-    void*(*instancer)(AbstractManager&, const Containers::StringView&);
-    void(*finalizer)();
-
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    union {
-        /* For static plugins */
-        const Implementation::StaticPlugin* staticPlugin;
-
-        /* For dynamic plugins */
-        #ifndef CORRADE_TARGET_WINDOWS
-        void* module;
-        #else
-        HMODULE module;
-        #endif
-    };
-    #else
-    const Implementation::StaticPlugin* staticPlugin;
-    #endif
-
-    /** @todo can't be a growable Array because the growable deleter, assigned
-        in registerInstance() / reregisterInstance() would point to the dynamic
-        plugin binary in static builds -- either wait until Array<T, Allocator>
-        is a thing or (better) turn this into a linked list similarly to how
-        static plugins are handled, thereby avoiding allocations and linear
-        lookups when reregistering and removing instances */
-    std::vector<AbstractPlugin*> instances;
-
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    /* Constructor for dynamic plugins */
-    explicit Plugin(Containers::StringView name, Containers::StringView metadata);
-    #endif
-
-    /* Constructor for static plugins */
-    explicit Plugin(const Implementation::StaticPlugin& staticPlugin, Utility::Configuration&& configuration_);
-
-    Plugin(const Plugin&) = delete;
-    Plugin(Plugin&&) = delete;
-    Plugin& operator=(const Plugin&) = delete;
-    Plugin& operator=(Plugin&&) = delete;
-
-    ~Plugin() = default;
-};
-
 struct AbstractManager::State {
     explicit State(Containers::StringView pluginInterface,
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -145,8 +93,8 @@ struct AbstractManager::State {
     #endif
     Containers::StringView pluginMetadataSuffix;
 
-    std::map<Containers::String, Containers::Pointer<Plugin>> plugins;
-    std::map<Containers::String, Plugin&> aliases;
+    std::map<Containers::String, Containers::Pointer<Implementation::Plugin>> plugins;
+    std::map<Containers::String, Implementation::Plugin&> aliases;
 
     std::set<AbstractManager*> externalManagers;
     #ifndef CORRADE_NO_ASSERT
@@ -286,7 +234,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
         /* If it got successfully inserted, create the actual plugin state */
         inserted.first->second.emplace(*staticPlugin, Utility::move(configuration));
 
-        Plugin& p = *inserted.first->second;
+        Implementation::Plugin& p = *inserted.first->second;
 
         p.staticPlugin->initializer();
 
@@ -368,7 +316,7 @@ AbstractManager::~AbstractManager() {
     #endif
 
     /* Unload all plugins */
-    for(std::pair<const Containers::String, Containers::Pointer<Plugin>>& plugin: _state->plugins) {
+    for(std::pair<const Containers::String, Containers::Pointer<Implementation::Plugin>>& plugin: _state->plugins) {
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /* Try to unload the plugin (and all plugins that depend on it) */
         unloadRecursiveInternal(*plugin.second);
@@ -381,7 +329,7 @@ AbstractManager::~AbstractManager() {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
+LoadState AbstractManager::unloadRecursiveInternal(Implementation::Plugin& plugin) {
     /* If the plugin is not static and is used by others, try to unload these
        first so it can be unloaded too. This function is called from the
        destructor after we verified there are no other managers using this for
@@ -454,7 +402,7 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
             /* Skip the plugin if it is among loaded */
             if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
-            registerDynamicPlugin(name, Containers::Pointer<Plugin>{InPlaceInit, name,
+            registerDynamicPlugin(name, Containers::Pointer<Implementation::Plugin>{InPlaceInit, name,
                 _state->pluginMetadataSuffix ? Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix) : Containers::String{}});
         }
     }
@@ -462,7 +410,7 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
     /* If some of the currently loaded plugins aliased plugins that were in the
        old plugin directory, these are no longer there. Refresh the alias list
        with the new plugins. */
-    for(std::pair<const Containers::String, Containers::Pointer<Plugin>>& p: _state->plugins) {
+    for(std::pair<const Containers::String, Containers::Pointer<Implementation::Plugin>>& p: _state->plugins) {
         /* Add aliases to the list (only the ones that aren't already there are
            added, calling insert() won't overwrite the existing value) */
         for(const std::string& alias: p.second->metadata._provides) {
@@ -512,7 +460,7 @@ void AbstractManager::setPreferredPlugins(const Containers::StringView alias, co
 Containers::Array<Containers::StringView> AbstractManager::pluginList() const {
     Containers::Array<Containers::StringView> names{NoInit, _state->plugins.size()};
     std::size_t i = 0;
-    for(const std::pair<const Containers::String, Containers::Pointer<Plugin>>& plugin: _state->plugins)
+    for(const std::pair<const Containers::String, Containers::Pointer<Implementation::Plugin>>& plugin: _state->plugins)
         new(&names[i++]) Containers::StringView{plugin.first};
     return names;
 }
@@ -520,7 +468,7 @@ Containers::Array<Containers::StringView> AbstractManager::pluginList() const {
 Containers::Array<Containers::StringView> AbstractManager::aliasList() const {
     Containers::Array<Containers::StringView> names{NoInit, _state->aliases.size()};
     std::size_t i = 0;
-    for(const std::pair<const Containers::String, Plugin&>& alias: _state->aliases)
+    for(const std::pair<const Containers::String, Implementation::Plugin&>& alias: _state->aliases)
         new(&names[i++]) Containers::StringView{alias.first};
     return names;
 }
@@ -575,7 +523,7 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
         /* Load the plugin and register it only if loading succeeded so we
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
-        Containers::Pointer<Plugin> data{InPlaceInit, name,
+        Containers::Pointer<Implementation::Plugin> data{InPlaceInit, name,
             _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}};
         /* Explicitly join the filename with current working directory, since
            that's how the metadata were loaded above. Without that, the OS APIs
@@ -637,11 +585,11 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-LoadState AbstractManager::loadInternal(Plugin& plugin) {
+LoadState AbstractManager::loadInternal(Implementation::Plugin& plugin) {
     return loadInternal(plugin, Utility::Path::join(_state->pluginDirectory, plugin.metadata._name + _state->pluginSuffix));
 }
 
-LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView filename) {
+LoadState AbstractManager::loadInternal(Implementation::Plugin& plugin, Containers::StringView filename) {
     /* Plugin is not ready to load */
     if(plugin.loadState != LoadState::NotLoaded) {
         if(!(plugin.loadState & (LoadState::Static|LoadState::Loaded)))
@@ -651,7 +599,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
 
     /* Load dependencies and remember their names for later. Their names will
        be added to usedBy list only if everything goes well. */
-    Containers::Array<Containers::Reference<Plugin>> dependencies;
+    Containers::Array<Containers::Reference<Implementation::Plugin>> dependencies;
     arrayReserve(dependencies, plugin.metadata._depends.size());
     for(const std::string& dependency: plugin.metadata._depends) {
         /* If the dependency is not in our plugin manager, check the registered
@@ -899,7 +847,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
-    for(Plugin& dependency: dependencies)
+    for(Implementation::Plugin& dependency: dependencies)
         dependency.metadata._usedBy.push_back(plugin.metadata._name);
 
     /* Update plugin object, set state to loaded */
@@ -929,7 +877,7 @@ LoadState AbstractManager::unload(const Containers::StringView plugin) {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-LoadState AbstractManager::unloadInternal(Plugin& plugin) {
+LoadState AbstractManager::unloadInternal(Implementation::Plugin& plugin) {
     /* Plugin is not ready to unload, nothing to do. The only thing this can
        happen is when the plugin is static or not loaded (which is fine, so we
        just return that load state) or when its metadata file is broken (which
@@ -968,7 +916,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Remove this plugin from "used by" list of dependencies. If not found
        in this manager, try in registered external managers. */
     for(auto it = plugin.metadata.depends().cbegin(); it != plugin.metadata.depends().cend(); ++it) {
-        Plugin* dependency = nullptr;
+        Implementation::Plugin* dependency = nullptr;
         auto foundDependency = _state->plugins.find(*it);
         if(foundDependency != _state->plugins.end())
             dependency = foundDependency->second.get();
@@ -1031,7 +979,7 @@ void AbstractManager::registerExternalManager(AbstractManager& manager) {
     #endif
 }
 
-void AbstractManager::registerDynamicPlugin(const Containers::StringView name, Containers::Pointer<Plugin>&& plugin) {
+void AbstractManager::registerDynamicPlugin(const Containers::StringView name, Containers::Pointer<Implementation::Plugin>&& plugin) {
     /* Insert the plugin to the map. The name is never null terminated so even
        if it would be global in case of an unlikely scenario of coming from a
        filename as a string view literal passed directly to load(), we won't
@@ -1135,8 +1083,10 @@ AbstractManager* AbstractManager::externalManagerInternal(const Containers::Stri
     return nullptr;
 }
 
+namespace Implementation {
+
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-AbstractManager::Plugin::Plugin(const Containers::StringView name, const Containers::StringView metadata): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{name, configuration}, instancer{nullptr}, module{nullptr} {
+Plugin::Plugin(const Containers::StringView name, const Containers::StringView metadata): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{name, configuration}, instancer{nullptr}, module{nullptr} {
     /* If the path is empty, we don't use any plugin configuration file, so
        don't do any checks. */
     if(!metadata) {
@@ -1158,7 +1108,9 @@ AbstractManager::Plugin::Plugin(const Containers::StringView name, const Contain
 }
 #endif
 
-AbstractManager::Plugin::Plugin(const Implementation::StaticPlugin& staticPlugin, Utility::Configuration&& configuration_): loadState{LoadState::Static}, configuration{Utility::move(configuration_)}, metadata{staticPlugin.plugin, configuration}, instancer{staticPlugin.instancer}, staticPlugin{&staticPlugin} {}
+Plugin::Plugin(const StaticPlugin& staticPlugin, Utility::Configuration&& configuration_): loadState{LoadState::Static}, configuration{Utility::move(configuration_)}, metadata{staticPlugin.plugin, configuration}, instancer{staticPlugin.instancer}, staticPlugin{&staticPlugin} {}
+
+}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
