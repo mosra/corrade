@@ -164,12 +164,10 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         Utility::ConfigurationGroup& configuration() { return *_configuration; }
         const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
-        #endif
-
     private:
         friend AbstractManager;
+
+        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
 
         std::string _name;
 
