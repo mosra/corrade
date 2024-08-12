@@ -26,13 +26,10 @@
 
 #include "AbstractManager.h"
 
-#include <cstring>
 #include <algorithm> /* std::find() */
-#include <functional>
 #include <map>
 #include <set>
 #include <sstream>
-#include <utility>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/EnumSet.hpp"
