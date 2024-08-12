@@ -929,11 +929,9 @@ LoadState AbstractManager::unloadInternal(Implementation::Plugin& plugin) {
         }
         CORRADE_INTERNAL_ASSERT(dependency);
 
-        auto uit = dependency->metadata._usedBy.begin();
-        for(; uit != dependency->metadata._usedBy.end(); ++uit)
-            if(*uit == plugin.metadata._name) break;
-        CORRADE_INTERNAL_ASSERT(uit != dependency->metadata._usedBy.end());
-        dependency->metadata._usedBy.erase(uit);
+        auto found = std::find(dependency->metadata._usedBy.begin(), dependency->metadata._usedBy.end(), plugin.metadata._name);
+        CORRADE_INTERNAL_ASSERT(found != dependency->metadata._usedBy.end());
+        dependency->metadata._usedBy.erase(found);
     }
 
     /* Finalize plugin */
