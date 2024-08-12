@@ -78,7 +78,7 @@ struct AbstractManager::Plugin {
     Utility::Configuration configuration;
     PluginMetadata metadata;
 
-    Instancer instancer;
+    void*(*instancer)(AbstractManager&, const Containers::StringView&);
     void(*finalizer)();
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -861,7 +861,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
     #ifdef CORRADE_TARGET_GCC
     __extension__ /* see above */
     #endif
-    Instancer instancer = reinterpret_cast<Instancer>(
+    void*(*instancer)(AbstractManager&, const Containers::StringView&) = reinterpret_cast<void*(*)(AbstractManager&, const Containers::StringView&)>(
         #ifndef CORRADE_TARGET_WINDOWS
         dlsym
         #else

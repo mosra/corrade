@@ -436,7 +436,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     public:
     #endif
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
-        typedef void* (*Instancer)(AbstractManager&, const Containers::StringView&);
         static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
         static void ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin);
 
@@ -483,7 +482,7 @@ struct StaticPlugin {
     const char* interface;
     const unsigned char* metadataData;
     std::size_t metadataSize;
-    AbstractManager::Instancer instancer;
+    void*(*instancer)(AbstractManager&, const Containers::StringView&);
     void(*initializer)();
     void(*finalizer)();
     /* This field shouldn't be written to by anything else than
