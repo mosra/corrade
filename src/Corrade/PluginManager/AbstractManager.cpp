@@ -447,8 +447,8 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
             /* Skip the plugin if it is among loaded */
             if(_state->plugins.find(name) != _state->plugins.end()) continue;
 
-            registerDynamicPlugin(name, Containers::pointer(new Plugin{name,
-                _state->pluginMetadataSuffix ? Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix) : Containers::String{}}));
+            registerDynamicPlugin(name, Containers::Pointer<Plugin>{InPlaceInit, name,
+                _state->pluginMetadataSuffix ? Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix) : Containers::String{}});
         }
     }
 
@@ -568,8 +568,8 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
         /* Load the plugin and register it only if loading succeeded so we
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
-        Containers::Pointer<Plugin> data{new Plugin{name,
-            _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}}};
+        Containers::Pointer<Plugin> data{InPlaceInit, name,
+            _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}};
         /* Explicitly join the filename with current working directory, since
            that's how the metadata were loaded above. Without that, the OS APIs
            would search in LD_LIBRARY_PATH and C:/Windows/system32 and
