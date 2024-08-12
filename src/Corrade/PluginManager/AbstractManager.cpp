@@ -32,6 +32,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
@@ -97,6 +98,12 @@ struct AbstractManager::Plugin {
     const Implementation::StaticPlugin* staticPlugin;
     #endif
 
+    /** @todo can't be a growable Array because the growable deleter, assigned
+        in registerInstance() / reregisterInstance() would point to the dynamic
+        plugin binary in static builds -- either wait until Array<T, Allocator>
+        is a thing or (better) turn this into a linked list similarly to how
+        static plugins are handled, thereby avoiding allocations and linear
+        lookups when reregistering and removing instances */
     std::vector<AbstractPlugin*> instances;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -644,8 +651,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
 
     /* Load dependencies and remember their names for later. Their names will
        be added to usedBy list only if everything goes well. */
-    std::vector<Containers::Reference<Plugin>> dependencies;
-    dependencies.reserve(plugin.metadata._depends.size());
+    Containers::Array<Containers::Reference<Plugin>> dependencies;
+    arrayReserve(dependencies, plugin.metadata._depends.size());
     for(const std::string& dependency: plugin.metadata._depends) {
         /* If the dependency is not in our plugin manager, check the registered
            external managers as well */
@@ -666,7 +673,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, Containers::StringView f
             return LoadState::UnresolvedDependency;
         }
 
-        dependencies.emplace_back(*foundDependency->second);
+        arrayAppend(dependencies, *foundDependency->second);
     }
 
     /* Open plugin file, make symbols globally available for next libs (which
