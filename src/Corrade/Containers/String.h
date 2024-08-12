@@ -516,7 +516,7 @@ class CORRADE_UTILITY_EXPORT String {
         #else
         /* Gets ambigous when calling String{ptr, 0}. FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class T> String(typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, char*>::type data, T deleter) noexcept: String{deleter, nullptr, data} {}
+        template<class T, typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> String(char* data, T deleter) noexcept: String{deleter, nullptr, data} {}
         #endif
 
         /**
@@ -566,7 +566,7 @@ class CORRADE_UTILITY_EXPORT String {
         /* Gets ambigous when calling String{nullptr, 0}. FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T> String(typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, std::nullptr_t>::type, T) noexcept = delete;
+        template<class T, typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> String(std::nullptr_t, T) noexcept = delete;
         #endif
 
         /**

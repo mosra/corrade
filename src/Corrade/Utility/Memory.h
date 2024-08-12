@@ -168,29 +168,29 @@ template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> alloc
 namespace Implementation {
 
 #ifdef CORRADE_TARGET_WINDOWS
-template<class T> void alignedDeleter(typename std::enable_if<std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t) {
+template<class T, typename std::enable_if<std::is_trivially_destructible<T>::value, int>::type = 0> void alignedDeleter(T* const data, std::size_t) {
     _aligned_free(data);
 }
-template<class T> void alignedDeleter(typename std::enable_if<!std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t size) {
+template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::value, int>::type = 0> void alignedDeleter(T* const data, std::size_t size) {
     for(std::size_t i = 0; i != size; ++i) data[i].~T();
     _aligned_free(data);
 }
 #else
-template<class T> void alignedDeleter(typename std::enable_if<std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t) {
+template<class T, typename std::enable_if<std::is_trivially_destructible<T>::value, int>::type = 0> void alignedDeleter(T* const data, std::size_t) {
     std::free(data);
 }
-template<class T> void alignedDeleter(typename std::enable_if<!std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t size) {
+template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::value, int>::type = 0> void alignedDeleter(T* const data, std::size_t size) {
     for(std::size_t i = 0; i != size; ++i) data[i].~T();
     std::free(data);
 }
 #ifndef CORRADE_TARGET_UNIX
-template<class T> void alignedOffsetDeleter(typename std::enable_if<std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t) {
+template<class T, typename std::enable_if<std::is_trivially_destructible<T>::value, int>::type = 0> void alignedOffsetDeleter(T* const data, std::size_t) {
     /* Using a unsigned byte in order to be able to represent a 255 byte offset
        as well */
     std::uint8_t* const dataChar = reinterpret_cast<std::uint8_t*>(data);
     std::free(dataChar - *(dataChar -1));
 }
-template<class T> void alignedOffsetDeleter(typename std::enable_if<!std::is_trivially_destructible<T>::value, T>::type* const data, std::size_t size) {
+template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::value, int>::type = 0> void alignedOffsetDeleter(T* const data, std::size_t size) {
     for(std::size_t i = 0; i != size; ++i) data[i].~T();
 
     /* Using a unsigned byte in order to be able to represent a 255 byte offset

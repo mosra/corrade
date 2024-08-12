@@ -69,7 +69,7 @@ the stream instead, assuming it's a cheaper operation than conversion to a
 #ifdef DOXYGEN_GENERATING_OUTPUT
 Debug& operator<<(Debug& debug, const std::string& value);
 #else
-template<class T> typename std::enable_if<std::is_same<typename std::decay<T>::type, std::string>::value || (std::is_convertible<T, std::string>::value && !Implementation::HasOstreamOutput<T>::value), Debug&>::type operator<<(Debug& debug, const T& value) {
+template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, std::string>::value || (std::is_convertible<T, std::string>::value && !Implementation::HasOstreamOutput<T>::value), int>::type = 0> Debug& operator<<(Debug& debug, const T& value) {
     return Implementation::debugPrintStlString(debug, value);
 }
 #endif
@@ -79,7 +79,11 @@ template<class T> typename std::enable_if<std::is_same<typename std::decay<T>::t
 
 All other types than exactly @ref std::string are printed as containers.
 */
-template<class T> typename std::enable_if<!std::is_same<T, char>::value, Debug&>::type operator<<(Debug& debug, const std::basic_string<T>& value) {
+template<class T
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    , typename std::enable_if<!std::is_same<T, char>::value, int>::type = 0
+    #endif
+> Debug& operator<<(Debug& debug, const std::basic_string<T>& value) {
     return debug << Containers::ArrayView<const T>{value.data(), value.size()};
 }
 

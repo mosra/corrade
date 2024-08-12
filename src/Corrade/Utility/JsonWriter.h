@@ -492,7 +492,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         JsonWriter& write(bool value);
         #else
-        template<class T> typename std::enable_if<std::is_same<T, bool>::value, JsonWriter&>::type write(T value) {
+        template<class T, typename std::enable_if<std::is_same<T, bool>::value, int>::type = 0> JsonWriter& write(T value) {
             return writeBoolInternal(value);
         }
         #endif

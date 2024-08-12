@@ -59,17 +59,17 @@ namespace Implementation {
         }
     };
 
-    template<class T> T* noInitAllocate(std::size_t size, typename std::enable_if<std::is_trivial<T>::value>::type* = nullptr) {
+    template<class T, typename std::enable_if<std::is_trivial<T>::value, int>::type = 0> T* noInitAllocate(std::size_t size) {
         return new T[size];
     }
-    template<class T> T* noInitAllocate(std::size_t size, typename std::enable_if<!std::is_trivial<T>::value>::type* = nullptr) {
+    template<class T, typename std::enable_if<!std::is_trivial<T>::value, int>::type = 0> T* noInitAllocate(std::size_t size) {
         return reinterpret_cast<T*>(new char[size*sizeof(T)]);
     }
 
-    template<class T> auto noInitDeleter(typename std::enable_if<std::is_trivial<T>::value>::type* = nullptr) -> void(*)(T*, std::size_t) {
+    template<class T, typename std::enable_if<std::is_trivial<T>::value, int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
         return nullptr; /* using the default deleter for T */
     }
-    template<class T> auto noInitDeleter(typename std::enable_if<!std::is_trivial<T>::value>::type* = nullptr) -> void(*)(T*, std::size_t) {
+    template<class T, typename std::enable_if<!std::is_trivial<T>::value, int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
         return [](T* data, std::size_t size) {
             if(data) for(T *it = data, *end = data + size; it != end; ++it)
                 it->~T();
@@ -1137,23 +1137,23 @@ namespace Implementation {
    here in order to ensure proper behavior with function overloads taking more
    than one type of (Strided)ArrayView. */
 template<class U, class T, class D> struct ArrayViewConverter<U, Array<T, D>> {
-    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>& other) {
+    template<class V = U, typename std::enable_if<std::is_convertible<T*, V*>::value, int>::type = 0> constexpr static ArrayView<U> from(Array<T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {other.data(), other.size()};
     }
-    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>&& other) {
+    template<class V = U, typename std::enable_if<std::is_convertible<T*, V*>::value, int>::type = 0> constexpr static ArrayView<U> from(Array<T, D>&& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {other.data(), other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<T, D>> {
-    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<T, D>& other) {
+    template<class V = U, typename std::enable_if<std::is_convertible<T*, V*>::value, int>::type = 0> constexpr static ArrayView<const U> from(const Array<T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {other.data(), other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<const T, D>> {
-    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<const T, D>& other) {
+    template<class V = U, typename std::enable_if<std::is_convertible<T*, V*>::value, int>::type = 0> constexpr static ArrayView<const U> from(const Array<const T, D>& other) {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {other.data(), other.size()};
     }

@@ -305,12 +305,12 @@ template<class T, class, class> struct ComparatorTraits: ComparatorOperatorTrait
 
 CORRADE_HAS_TYPE(CanSaveDiagnostic, decltype(std::declval<T>().saveDiagnostic({}, std::declval<Utility::Debug&>(), {})));
 
-template<class T> auto diagnosticSaver(typename std::enable_if<CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
+template<class T, typename std::enable_if<CanSaveDiagnostic<Comparator<T>>::value, int>::type = 0> auto diagnosticSaver() -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
     return [](void* comparator, ComparisonStatusFlags flags, Utility::Debug& out, const Containers::StringView& path) {
         static_cast<Comparator<T>*>(comparator)->saveDiagnostic(flags, out, path);
     };
 }
-template<class T> auto diagnosticSaver(typename std::enable_if<!CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
+template<class T, typename std::enable_if<!CanSaveDiagnostic<Comparator<T>>::value, int>::type = 0> auto diagnosticSaver() -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView&) {
     return nullptr;
 }
 
@@ -328,10 +328,10 @@ constexpr ComparisonStatusFlags comparisonStatusFlags(ComparisonStatusFlags valu
     return value;
 }
 CORRADE_HAS_TYPE(HasOldPrintErrorMessage, decltype(std::declval<T>().printErrorMessage(std::declval<Utility::Error&>(), {}, {})));
-template<class T> CORRADE_DEPRECATED("use printMessage() in custom Comparator implementations instead") void printMessage(typename std::enable_if<HasOldPrintErrorMessage<T>::value, T&>::type comparator, ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) {
+template<class T, typename std::enable_if<HasOldPrintErrorMessage<T>::value, int>::type = 0> CORRADE_DEPRECATED("use printMessage() in custom Comparator implementations instead") void printMessage(T& comparator, ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) {
     comparator.printErrorMessage(static_cast<Utility::Error&>(out), actual, expected);
 }
-template<class T> void printMessage(typename std::enable_if<!HasOldPrintErrorMessage<T>::value, T&>::type comparator, ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) {
+template<class T, typename std::enable_if<!HasOldPrintErrorMessage<T>::value, int>::type = 0> void printMessage(T& comparator, ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) {
     comparator.printMessage(flags, out, actual, expected);
 }
 #endif

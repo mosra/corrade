@@ -914,14 +914,11 @@ a nested iterable type, the values are separated by newlines. Specifying
 @ref Debug::Flag::Packed or using @ref Debug::packed will print the values
 tightly-packed without commas and spaces in between.
 */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
-#else
-/* libc++ from Apple's Clang "4.2" (3.2-svn) doesn't have constexpr operator
-   bool for std::integral_constant, thus we need to use ::value instead */
-template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, Debug&>::type debug, const Iterable& value)
-#endif
-{
+template<class Iterable
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    , typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, int>::type = 0
+    #endif
+> Debug& operator<<(Debug& debug, const Iterable& value) {
     /* True if the values themselves are also containers. A string is
        technically a container too, but printing it as separate chars would be
        silly. */

@@ -1131,12 +1131,22 @@ template<unsigned int value> struct Tags {
     constexpr explicit Tags(InitT) {}
 
     /* Conversion from other tag combination, allowed only if the other is
-       not a subset */
+       not a subset. MSVC 2015 and 2017 cannot handle SFINAE in the template,
+       putting it in the argument instead. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    template<unsigned int otherValue, typename std::enable_if<IsTagConversionAllowed<value, otherValue>::Value, int>::type = 0> constexpr Tags(Tags<otherValue>) {}
+    #else
     template<unsigned int otherValue> constexpr Tags(Tags<otherValue>, typename std::enable_if<IsTagConversionAllowed<value, otherValue>::Value>::type* = {}) {}
+    #endif
 
     /* Conversion from a single tag, allowed only if we're a single bit and
-       the other is not a subset */
+       the other is not a subset. MSVC 2015 and 2017 cannot handle SFINAE in
+       the template, putting it in the argument instead. */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    template<class T, typename std::enable_if<IsSingleTagConversionAllowed<Value, TypeTraits<T>::Index>::Value, int>::type = 0> constexpr Tags(T) {}
+    #else
     template<class T> constexpr Tags(T, typename std::enable_if<IsSingleTagConversionAllowed<Value, TypeTraits<T>::Index>::Value>::type* = {}) {}
+    #endif
 
     /* A subset of operators on Features, excluding the assignment ones --
        since they modify the type, they make no sense here */
