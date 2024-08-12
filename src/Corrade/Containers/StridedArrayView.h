@@ -737,7 +737,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U> StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type> slice(U T::*member) const;
         #else
-        template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) &&
+        /* Using V instead of T, as this would be a syntax error for T that
+           isn't a class or union. OTOH, no need for this to further be SFINAEd
+           with is_class<V> or is_union<V>, because the syntax error on its own
+           makes this overload not even generated. */
+        template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
             /* GCC 4.8 is_member_function_pointer doesn't give true for & and
                const & overloads, making those to go here instead. See the
@@ -789,10 +793,26 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<class U> StridedArrayView<dimensions, U> slice(const U&(T::*memberFunction)() const &) const;
         #else
-        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)()) const;
-        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)() &) const;
-        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const) const;
-        template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const &) const;
+        /* Using V instead of T, as this would be a syntax error for T that
+           isn't a class or union. OTOH, no need for this to further be SFINAEd
+           with is_class<V> or is_union<V>, because the syntax error on its own
+           makes this overload not even generated. Then, W is used for is_const
+           instead of V as V may not neccessarily be const if T is. T cannot be
+           used because there's no other condition in the SFINAE expression
+           that wouldn't depend on U or V. */
+        template<class U, class V = T, class W = T, typename std::enable_if<!std::is_const<W>::value, int>::type = 0> StridedArrayView<dimensions, U> slice(U&(V::*memberFunction)()) const;
+        template<class U, class V = T, class W = T, typename std::enable_if<!std::is_const<W>::value, int>::type = 0> StridedArrayView<dimensions, U> slice(U&(V::*memberFunction)() &) const;
+        template<class U, class V = T, class W = T, typename std::enable_if<std::is_const<W>::value, int>::type = 0> StridedArrayView<dimensions, const U> slice(const U&(V::*memberFunction)() const) const;
+        template<class U, class V = T, class W = T,
+            /* GCC 4.8, 5, 6 (and likely 7 but I cannot test) cannot match this
+               if a value template is used, only a type template works. Happens
+               only for const& variants, others work. Strange. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7
+            class = typename std::enable_if<std::is_const<W>::value>::type
+            #else
+            typename std::enable_if<std::is_const<W>::value, int>::type = 0
+            #endif
+        > StridedArrayView<dimensions, const U> slice(const U&(V::*memberFunction)() const &) const;
         /* While the four variants above deal with overloaded functions,
            restricting const functions to const types and non-const functions
            to non-const types to avoid ambiguity, this overload is then what
@@ -2450,7 +2470,7 @@ template<class T, class U, class V, std::size_t size> std::size_t memberFunction
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)()) const {
+template<unsigned dimensions, class T> template<class U, class V, class W, typename std::enable_if<!std::is_const<W>::value, int>::type> StridedArrayView<dimensions, U> StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)()) const {
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
@@ -2458,7 +2478,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     };
 }
 
-template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)() &) const {
+template<unsigned dimensions, class T> template<class U, class V, class W, typename std::enable_if<!std::is_const<W>::value, int>::type> StridedArrayView<dimensions, U> StridedArrayView<dimensions, T>::slice(U&(V::*memberFunction)() &) const {
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
@@ -2466,7 +2486,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     };
 }
 
-template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const) const {
+template<unsigned dimensions, class T> template<class U, class V, class W, typename std::enable_if<std::is_const<W>::value, int>::type> StridedArrayView<dimensions, const U> StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const) const {
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
@@ -2474,7 +2494,13 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     };
 }
 
-template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const &) const {
+template<unsigned dimensions, class T> template<class U, class V, class W,
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 7
+    class /* Make sure the __GNUC__ version matches declaration! */
+    #else
+    typename std::enable_if<std::is_const<W>::value, int>::type
+    #endif
+> StridedArrayView<dimensions, const U> StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const &) const {
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
