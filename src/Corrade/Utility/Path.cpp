@@ -609,7 +609,7 @@ Containers::Optional<Containers::String> executableLocation() {
     sysctl(mib, 4, nullptr, &size, nullptr, 0);
 
     /* Allocate a string of proper size and retreive the path into it */
-    Containers::String path{NoInit, size}
+    Containers::String path{NoInit, size};
     sysctl(mib, 4, path.data(), &size, nullptr, 0);
     return path;
 

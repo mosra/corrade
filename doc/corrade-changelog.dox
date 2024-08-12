@@ -412,7 +412,8 @@ namespace Corrade {
     directory and fail in that case, instead of returning nonsense, crashing on
     an allocation failure or silently doing the wrong thing
 -   Implemented @ref Utility::Path::executableLocation() on FreeBSD (see
-    [mosra/corrade#171](https://github.com/mosra/corrade/issues/171))
+    [mosra/corrade#171](https://github.com/mosra/corrade/issues/171) and
+    [mosra/corrade#183](https://github.com/mosra/corrade/issues/183))
 -   Added @ref Utility::Resource::hasFile() as a counterpart to
     @ref Utility::Resource::hasGroup() for querying whether a filename is
     contained in a resource group
