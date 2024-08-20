@@ -373,7 +373,9 @@ visual recognition of the values, by default the sample standard deviation is
 colored yellow if it is larger than 5% of the absolute value of the mean and
 red if it  is larger than 25% of the absolute value of the mean. This can be
 overridden @ref TestSuite-Tester-command-line "on the command-line" via
-`--benchmark-yellow` and `--benchmark-red`.
+`--benchmark-yellow` and `--benchmark-red`. See
+@ref TestSuite-Tester-running-benchmark-noise below for various ways of
+achieving more stable results.
 
 It's possible to have instanced benchmarks as well, see
 @ref addInstancedBenchmarks().
@@ -589,7 +591,46 @@ The webserver is then available at http://localhost:8000. It supports directory
 listing, so you can navigate to each test case runner HTML file (look for e.g.
 `MyTest.html`). Unfortunately it's at the moment not possible to run all
 browser tests in a batch or automate the process in any other way.
+
+@subsection TestSuite-Tester-running-benchmark-noise Mitigating noise in CPU benchmark results
+
+CPU frequency scaling, which is often enabled by default for power saving
+reasons, can add a lot of noise to benchmarks that measure time. Picking a
+higher iteration and repeat count in @ref CORRADE_BENCHMARK() and
+@ref addBenchmarks() has the effect of putting more strain on the system,
+forcing it to run at a higher frequency for longer period of time, which
+together with having more data to average tends to produce more stable results.
+However it's often impractical to hardcode them to a too high value as it hurts
+iteration times, and the repeat count needed for stable results may vary wildly
+between debug and release builds.
+
+To quickly increase repeat count when running the test it's possible to use
+the `--repeat-every` @ref TestSuite-Tester-command-line "command-line option"
+or the corresponding environment variable. The `--repeat-all` option, possibly
+combined with `--shuffle`, will result in benchmarks being run and appearing in
+the output several times and possibly in random order, which could uncover
+various otherwise hard-to-detect implicit dependencies between the code being
+measured and application or system state such as cold caches.
+
+On Linux or Android the test runner will attempt to query the CPU frequency
+scaling governor. If it's not set to `performance`, the benchmark output will
+contain a warning, with `-v` / `--verbose` showing a concrete suggestion how to
+fix it. Switching to a performance governor can be done with `cpupower` on
+Linux:
+
+@code{.sh}
+sudo cpupower frequency-set --governor performance
+@endcode
+
+An equivalent command on Android is the following,
+which requires a rooted device:
 */
+/// <b></b>
+///
+/// @code{.sh}
+/// echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+/// @endcode
+///
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
         /**
