@@ -183,7 +183,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @see @ref data()
          */
         Utility::ConfigurationGroup& configuration();
-        const Utility::ConfigurationGroup& configuration() const;
+        const Utility::ConfigurationGroup& configuration() const; /**< @overload */
 
     private:
         friend Implementation::Plugin;
