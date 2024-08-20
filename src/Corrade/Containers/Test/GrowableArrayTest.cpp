@@ -33,6 +33,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/DebugStl.h"
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
@@ -190,6 +191,9 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<template<class> class Allocator, std::size_t alignment> void allocationAlignment();
 
     void appendInsertConflictingType();
+    void appendInsertArrayElement();
+    template<bool growable = true> void appendInsertArraySlice();
+    void insertArraySliceIntoItself();
 
     /* Here go the benchmarks */
 
@@ -213,6 +217,76 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     void benchmarkAllocationsVector();
     template<template<class> class Allocator> void benchmarkAllocationsArray();
+};
+
+const struct {
+    const char* name;
+    bool growable;
+    std::size_t capacityEnd;
+} AppendInsertArrayElementData[]{
+    {"", true, 19},
+    {"non-growable", false, 9}
+};
+
+const struct {
+    const char* name;
+    std::size_t insert;
+    std::size_t begin;
+    std::size_t expectInvalidBegin, expectInvalidEnd;
+    int expected[14];
+} AppendInsertArraySliceData[]{
+    {"array begin, append",
+        ~std::size_t{}, 0, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 00, 10, 20, 30}},
+    {"array begin, insert in the middle",
+        6, 0, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 00, 10, 20, 30, 60, 70, 80, 90}},
+    {"array begin, insert right before the slice",
+        0, 0, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 00, 10, 20, 30, 40, 50, 60, 70, 80, 90}},
+    {"array begin, insert right after the slice",
+        4, 0, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 00, 10, 20, 30, 40, 50, 60, 70, 80, 90}},
+    {"array middle, append",
+        ~std::size_t{}, 3, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 30, 40, 50, 60}},
+    {"array middle, insert before the slice",
+        2, 3, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 30, 40, 50, 60, 20, 30, 40, 50, 60, 70, 80, 90}},
+    {"array middle, insert right before the slice",
+        3, 3, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 30, 40, 50, 60, 70, 80, 90}},
+    {"array middle, insert after the slice",
+        9, 3, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 30, 40, 50, 60, 90}},
+    {"array middle, insert right after the slice",
+        7, 3, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 30, 40, 50, 60, 70, 80, 90}},
+    {"array end, append",
+        ~std::size_t{}, 6, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 60, 70, 80, 90}},
+    {"array end, insert in the middle",
+        3, 6, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 60, 70, 80, 90, 30, 40, 50, 60, 70, 80, 90}},
+    {"array end, insert right before the slice",
+        6, 6, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 60, 70, 80, 90}},
+    {"array end, insert right after the slice",
+        10, 6, ~std::size_t{}, ~std::size_t{},
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 60, 70, 80, 90}},
+    {"array capacity, append",
+        ~std::size_t{}, 8, 12, 14,
+        /* There are values 100 and 110 right after the end but because of the
+           grow it'll pick up uninitialized memory at position where 120 was
+           before                                        vvv  vvv */
+        {00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 80, 90, 100, 110}},
+    {"array capacity, insert in the middle",
+        3, 8, 5, 7,
+        /* In this case, depending on how growAtBy() works inside, the last two
+           inserted values will be either the original values before the shift
+           (so, 50, 60) or uninitialized memory
+                             vvv  vvv */
+        {00, 10, 20, 80, 90, 100, 110, 30, 40, 50, 60, 70, 80, 90}},
 };
 
 struct Movable {
@@ -452,6 +526,16 @@ GrowableArrayTest::GrowableArrayTest() {
         &GrowableArrayTest::allocationAlignment<ArrayMallocAllocator, 16>}, 100);
 
     addTests({&GrowableArrayTest::appendInsertConflictingType});
+
+    addInstancedTests({&GrowableArrayTest::appendInsertArrayElement},
+        Containers::arraySize(AppendInsertArrayElementData));
+
+    addInstancedTests<GrowableArrayTest>({
+        &GrowableArrayTest::appendInsertArraySlice,
+        &GrowableArrayTest::appendInsertArraySlice<false>},
+        Containers::arraySize(AppendInsertArraySliceData));
+
+    addTests({&GrowableArrayTest::insertArraySliceIntoItself});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -3246,6 +3330,148 @@ void GrowableArrayTest::appendInsertConflictingType() {
     CORRADE_COMPARE_AS(a, Containers::arrayView<unsigned>({
         4, 4, 3, 5, 5, 4, 4, 3, 5, 5, 5, 5, 3, 4, 4, 5, 5, 3, 4, 4
     }), TestSuite::Compare::Container);
+}
+
+void GrowableArrayTest::appendInsertArrayElement() {
+    auto&& data = AppendInsertArrayElementData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    /* Extra unused capacity at the end, which should get checked as well */
+    Array<int> a;
+    if(data.growable) {
+        arrayReserve(a, 20);
+        arrayAppend(a, Corrade::NoInit, 10);
+
+        /* These have no easy chance to assert, unfortunately */
+        arrayAppend(a, Corrade::InPlaceInit, a[0]);
+        arrayAppend(a, Corrade::InPlaceInit, Utility::move(a[0]));
+        arrayInsert(a, 0, Corrade::InPlaceInit, a[0]);
+        arrayInsert(a, 0, Corrade::InPlaceInit, Utility::move(a[0]));
+    } else {
+        a = Array<int>{Corrade::NoInit, 10};
+    }
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    /* Beginning of the array */
+    arrayAppend(a, a[0]);
+    arrayAppend(a, Utility::move(a[0]));
+    arrayInsert(a, 0, a[0]);
+    arrayInsert(a, 0, Utility::move(a[0]));
+    /* End of the array */
+    arrayAppend(a, a[9]);
+    arrayAppend(a, Utility::move(a[9]));
+    arrayInsert(a, 0, a[9]);
+    arrayInsert(a, 0, Utility::move(a[9]));
+    /* End of the capacity. Using .data() to avoid tripping up on a range
+       assert, if data would be actually read from there, ASan would
+       complain. */
+    arrayAppend(a, a.data()[data.capacityEnd]);
+    arrayAppend(a, Utility::move(a.data()[data.capacityEnd]));
+    arrayInsert(a, 0, a.data()[data.capacityEnd]);
+    arrayInsert(a, 0, Utility::move(a.data()[data.capacityEnd]));
+    CORRADE_COMPARE_AS(out.str(),
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n",
+        TestSuite::Compare::String);
+}
+
+template<bool growable> void GrowableArrayTest::appendInsertArraySlice() {
+    auto&& data = AppendInsertArraySliceData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+    setTestCaseName(growable ? CORRADE_FUNCTION : "appendInsertArraySliceNonGrowable");
+
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    if(data.expectInvalidBegin != ~std::size_t{})
+        CORRADE_SKIP("Copying from container capacity triggers a AddressSanitizer failure, skipping.");
+    #endif
+
+    /* Not using the malloc allocator because realloc() might sometimes grow
+       the allocation, hiding the problem */
+    Array<int> a;
+    if(growable) {
+        arrayAppend<ArrayNewAllocator>(a, {
+            00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120
+        });
+        arrayResize<ArrayNewAllocator>(a, 10);
+    } else {
+        /* The extra 3 items aren't included in the size, arrayCapacity()
+           doesn't know about them either. GCC 4.8 gets extremely confused with
+           just new int[]{...} without a size, have to explicitly say it. */
+        a = Array<int>{new int[13]{00, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120}, 10};
+    }
+    int* prev = a.data();
+
+    /* Not using a.slice() as the slice may be out of range */
+    ArrayView<int> slice{a.data() + data.begin, 4};
+    if(data.insert != ~std::size_t{})
+        arrayInsert<ArrayNewAllocator>(a, data.insert, slice);
+    else
+        arrayAppend<ArrayNewAllocator>(a, slice);
+
+    /* Verify the operation caused reallocation */
+    CORRADE_VERIFY(a.data() != prev);
+
+    if(data.expectInvalidBegin == ~std::size_t{})
+        CORRADE_COMPARE_AS(a,
+            Containers::arrayView(data.expected),
+            TestSuite::Compare::Container);
+    else {
+        CORRADE_COMPARE_AS(a.prefix(data.expectInvalidBegin),
+            Containers::arrayView(data.expected).prefix(data.expectInvalidBegin),
+            TestSuite::Compare::Container);
+        {
+            CORRADE_EXPECT_FAIL("Garbage from container capacity is being copied.");
+            CORRADE_COMPARE_AS(a.slice(data.expectInvalidBegin, data.expectInvalidEnd),
+                Containers::arrayView(data.expected).slice(data.expectInvalidBegin, data.expectInvalidEnd),
+                TestSuite::Compare::Container);
+        }
+        CORRADE_COMPARE_AS(a.exceptPrefix(data.expectInvalidEnd),
+            Containers::arrayView(data.expected).exceptPrefix(data.expectInvalidEnd),
+            TestSuite::Compare::Container);
+    }
+}
+
+void GrowableArrayTest::insertArraySliceIntoItself() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    /* For arrayAppend() this happens as well if the slice is cutting into the
+       container capacity, but that should be caught by ASan already so I
+       decided to not handle it there, only in arrayInsert() */
+
+    Array<int> a;
+    arrayAppend(a, {00, 10, 20, 30, 40, 50, 60, 70, 80, 90});
+
+    /* All these are okay as they're exactly on the bound, so no overlap */
+    arrayInsert(a, 2, a.slice(2, 5));
+    arrayInsert(a, 5, a.slice(2, 5));
+    arrayInsert(a, 5, a.slice(5, 9));
+    arrayInsert(a, 9, a.slice(5, 9));
+
+    std::stringstream out;
+    Error redirectError{&out};
+    arrayInsert(a, 3, a.slice(2, 5));
+    arrayInsert(a, 4, a.slice(2, 5));
+    arrayInsert(a, 6, a.slice(5, 9));
+    arrayInsert(a, 8, a.slice(5, 9));
+    CORRADE_COMPARE_AS(out.str(),
+        "Containers::arrayInsert(): attempting to insert a slice [2:5] into itself at index 3\n"
+        "Containers::arrayInsert(): attempting to insert a slice [2:5] into itself at index 4\n"
+        "Containers::arrayInsert(): attempting to insert a slice [5:9] into itself at index 6\n"
+        "Containers::arrayInsert(): attempting to insert a slice [5:9] into itself at index 8\n",
+        TestSuite::Compare::String);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {

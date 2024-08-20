@@ -819,6 +819,15 @@ ratio is exponential. On top of what the @p Allocator (or the default
 @ref ArrayAllocator) itself needs, @p T is required to be nothrow
 move-constructible and copy-constructible.
 
+@m_class{m-note m-warning}
+
+@par
+    To have the append operation as performant as possible, the @p value
+    reference is expected to *not* point inside @p array. If you need to append
+    values from within the array itself, use the list-taking
+    @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type)
+    overload, which handles this case.
+
 This function is equivalent to calling @relativeref{std::vector,push_back()} on
 a @ref std::vector.
 @m_keywords{push_back()}
@@ -861,6 +870,19 @@ On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible and constructible from
 provided @p args.
 
+@m_class{m-note m-warning}
+
+@par
+    The behavior is undefined if any @p args are pointing inside the @p array
+    items or their internals as the implementation has no way to check for such
+    scenario. If you want to have robust checks against such cases, use the
+    @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&)
+    overloads which perform a copy or move instead of an in-place construction,
+    or the list-taking @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type)
+    which detects and appropriately adjusts the view in case it's a
+    slice of the @p array itself.
+
 This function is equivalent to calling @relativeref{std::vector,emplace_back()}
 on a @ref std::vector.
 @m_keywords{emplace_back()}
@@ -900,6 +922,15 @@ template<template<class> class Allocator, class T, class ...Args> inline T& arra
 @m_since{2020,06}
 
 Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
+
+@m_class{m-note m-warning}
+
+@par
+    To have the append operation as performant as possible, the @p value
+    reference is expected to *not* point inside @p array. If you need to
+    move-append values from within the array itself, move them to a temporary
+    location first.
+
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -907,6 +938,8 @@ Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayAppend(Array<T>& array, typename std::common_type<T>::type&& value) {
+    CORRADE_DEBUG_ASSERT(std::size_t(&value - array.data()) >= (arrayCapacity<T, Allocator>(array)),
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself", *array.data());
     return arrayAppend<T, Allocator>(array, Corrade::InPlaceInit, Utility::move(value));
 }
 
@@ -937,6 +970,11 @@ but inserting multiple values at once.
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible and
 copy-constructible.
+
+Compared to the single-value @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+this function also handles the case where @p values are a slice of the @p array
+itself. In particular, if the @p array needs to be reallocated in order to fit
+the new items, the @p values to append are then copied from the new location.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
@@ -1039,6 +1077,15 @@ Amortized complexity is @f$ \mathcal{O}(n) @f$. On top of what the @p Allocator
 (or the default @ref ArrayAllocator) itself needs, @p T is required to be
 nothrow move-constructible, nothrow move-assignable and copy-constructible.
 
+@m_class{m-note m-warning}
+
+@par
+    To have the insert operation as performant as possible, the @p value
+    reference is expected to *not* point inside @p array. If you need to insert
+    values from within the array itself, use the list-taking
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type)
+    overload, which handles this case.
+
 This function is equivalent to calling @relativeref{std::vector,insert()} on
 a @ref std::vector.
 @m_keywords{insert()}
@@ -1081,6 +1128,19 @@ On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible, nothrow
 move-assignable and constructible from provided @p args.
 
+@m_class{m-note m-warning}
+
+@par
+    The behavior is undefined if any @p args are pointing inside the @p array
+    items or their internals as the implementation has no way to check for such
+    scenario. If you want to have robust checks against such cases, use the
+    @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&)
+    overloads which perform a copy or move instead of an in-place construction,
+    or the list-taking @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type)
+    which detects and appropriately adjusts the view in case it's a slice of
+    the @p array itself.
+
 This function is equivalent to calling @relativeref{std::vector,emplace()}
 on a @ref std::vector.
 @m_keywords{emplace()}
@@ -1121,6 +1181,15 @@ template<template<class> class Allocator, class T, class ...Args> T& arrayInsert
 
 Calls @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args)
 with @p value.
+
+@m_class{m-note m-warning}
+
+@par
+    To have the insert operation as performant as possible, the @p value
+    reference is expected to *not* point inside @p array. If you need to
+    move-insert values from within the array itself, move them to a temporary
+    location first.
+
 @see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
@@ -1128,6 +1197,8 @@ with @p value.
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline T& arrayInsert(Array<T>& array, std::size_t index, typename std::common_type<T>::type&& value) {
+    CORRADE_DEBUG_ASSERT(std::size_t(&value - array.data()) >= (arrayCapacity<T, Allocator>(array)),
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself", *array.data());
     return arrayInsert<T, Allocator>(array, index, Corrade::InPlaceInit, Utility::move(value));
 }
 
@@ -1160,6 +1231,14 @@ number of items being inserted and @f$ n @f$ is the existing array size. On top
 of what the @p Allocator (or the default @ref ArrayAllocator) itself needs,
 @p T is required to be nothrow move-constructible, nothrow move-assignable and
 copy-constructible.
+
+Compared to the single-value @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+this function also handles the case where @p values are a slice of the @p array
+itself. In particular, if the @p array needs to be reallocated in order to fit
+the new items, the @p values to insert are then copied from the new location.
+It's however expected that the slice and @p index don't overlap --- in that
+case the caller has to handle that on its own, such as by splitting the
+insertion in two.
 @see @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
@@ -1782,6 +1861,8 @@ template<class T, class Allocator> T* arrayGrowBy(Array<T>& array, const std::si
 }
 
 template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const typename std::common_type<T>::type& value) {
+    CORRADE_DEBUG_ASSERT(std::size_t(&value - array.data()) >= arrayCapacity(array),
+        "Containers::arrayAppend(): use the list variant to append values from within the array itself", *array.data());
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, 1);
     /* Can't use {}, see the GCC 4.8-specific overload for details */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
@@ -1794,10 +1875,31 @@ template<class T, class Allocator> inline T& arrayAppend(Array<T>& array, const 
 
 template<class T, class Allocator> inline ArrayView<T> arrayAppend(Array<T>& array, const typename std::common_type<ArrayView<const T>>::type values) {
     /* Direct access & caching to speed up debug builds */
+    const T* const valueData = values.data();
     const std::size_t valueCount = values.size();
 
+    /* If the values are actually a slice of the original array, we need to
+       relocate the view after growing because it may point to a stale location
+       afterwards. If the offset is outside of the [0, capacity) range of the
+       original array, we don't relocate. Similar check is in arrayInsert(),
+       where it additionally has to adjust the offset based on whether the
+       values are before or after the insertion point. */
+    std::size_t relocateOffset = std::size_t(valueData - array.data());
+    if(relocateOffset >= arrayCapacity<T, Allocator>(array))
+        relocateOffset = ~std::size_t{};
+
     T* const it = Implementation::arrayGrowBy<T, Allocator>(array, valueCount);
-    Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
+    Implementation::arrayCopyConstruct<T>(
+        /* If values were a slice of the original array, relocate the view
+           pointer relative to the (potentially reallocated) array. It may have
+           pointed into the (potentially uninitialized) capacity, in which case
+           we'll likely copy some garbage or we overwrite ourselves, but that's
+           the user fault (and ASan would catch it). OTOH, if the capacity
+           wouldn't be taken into account above, we may end up reading from
+           freed memory, which is far worse. */
+        relocateOffset != ~std::size_t{} ? array.data() + relocateOffset :
+            valueData,
+        it, valueCount);
     return {it, valueCount};
 }
 
@@ -1967,6 +2069,8 @@ template<class T, class Allocator> T* arrayGrowAtBy(Array<T>& array, const std::
 }
 
 template<class T, class Allocator> inline T& arrayInsert(Array<T>& array, std::size_t index, const typename std::common_type<T>::type& value) {
+    CORRADE_DEBUG_ASSERT(std::size_t(&value - array.data()) >= arrayCapacity(array),
+        "Containers::arrayInsert(): use the list variant to insert values from within the array itself", *array.data());
     T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, 1);
     /* Can't use {}, see the GCC 4.8-specific overload for details */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) &&  __GNUC__ < 5
@@ -1979,10 +2083,38 @@ template<class T, class Allocator> inline T& arrayInsert(Array<T>& array, std::s
 
 template<class T, class Allocator> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, const typename std::common_type<ArrayView<const T>>::type values) {
     /* Direct access & caching to speed up debug builds */
+    const T* const valueData = values.data();
     const std::size_t valueCount = values.size();
 
+    /* If the values are actually a slice of the original array, we need to
+       relocate the view after growing because it may point to a stale location
+       afterwards. If the offset is outside of the [0, capacity) range of the
+       original array, we don't relocate. Similar but simpler check is in
+       arrayAppend(). */
+    std::size_t relocateOffset = std::size_t(valueData - array.data());
+    if(relocateOffset < arrayCapacity<T, Allocator>(array)) {
+        /* If we're inserting before the original slice, the new offset has to
+           include also the inserted size */
+        if(index <= relocateOffset)
+            relocateOffset += valueCount;
+        /* Otherwise the index should not point inside the slice, as we'd have
+           to split the copy into two parts. The assumption is that this is a
+           very rare scenario (with very questionable practical usefulness),
+           and the caller should handle that on its own. */
+        else CORRADE_DEBUG_ASSERT(relocateOffset + valueCount <= index,
+            "Containers::arrayInsert(): attempting to insert a slice [" << Utility::Debug::nospace << relocateOffset << Utility::Debug::nospace << ":" << Utility::Debug::nospace << relocateOffset + valueCount << Utility::Debug::nospace << "] into itself at index" << index, {});
+    } else relocateOffset = ~std::size_t{};
+
     T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, valueCount);
-    Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
+    Implementation::arrayCopyConstruct<T>(
+        /* If values were a slice of the original array, relocate the view
+           pointer relative to the (potentially reallocated) array. Similarly
+           as with arrayAppend(), it may have pointed into the capacity, which
+           we handle by copying potential garbage instead of accessing freed
+           memory. */
+        relocateOffset != ~std::size_t{} ? array.data() + relocateOffset :
+            valueData,
+        it, valueCount);
     return {it, valueCount};
 }
 
