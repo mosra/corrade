@@ -262,8 +262,10 @@ template<class> class Function;
 
 @m_keywords{Function Containers::Function Corrade::Containers::Function}
 
-A move-only alternative to @ref std::function from C++11, providing a common
-interface for free functions, member functions, (capturing) lambdas and generic functors. Example usage:
+An alternative to @m_class{m-doc-external} [std::move_only_function](https://en.cppreference.com/w/cpp/utility/functional/move_only_function)
+from C++23 or a move-only alternative to @ref std::function from C++11,
+providing a common interface for free functions, member functions, (capturing)
+lambdas and generic functors. Example usage:
 
 @snippet Containers.cpp Function-usage
 
