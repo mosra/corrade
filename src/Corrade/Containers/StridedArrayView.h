@@ -2132,6 +2132,7 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, void>::Stri
     #endif
     member)}, _size{size}, _stride{stride} {}
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>::StridedArrayView(ArrayView<const void> data, const void* member, const Containers::Size<dimensions>& size, const Containers::Stride<dimensions>& stride) noexcept: _data{(
     /* A strided array view is usually not created from scratch in tight loops
        (except for slicing, which uses a different constructor) and should be
@@ -2148,7 +2149,6 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     #endif
     member)}, _size{size}, _stride{stride} {}
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
