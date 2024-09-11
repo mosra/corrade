@@ -185,7 +185,6 @@ parsing and usage documentation we used @ref Utility::Arguments.
 @until }
 @until }
 @until }
-@until }
 
 Note that here we're including @ref Corrade/PluginManager/Manager.hpp instead
 of a regular `*.h` file as we implemented our own plugin interface and thus
