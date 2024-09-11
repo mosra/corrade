@@ -702,7 +702,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 is enabled at compile time. On GCC/Clang it's `-mpopcnt` and is also implied by
 `-msse4.2` and higher, MSVC doesn't have a direct option but it's assumed to
 be implied by `/arch:AVX`. To avoid failures at runtime, prefer to detect its
-presence with @ref Cpu::runtimeFeatures().
+presence with @relativeref{Corrade,Cpu::runtimeFeatures()}.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Popcnt},
     @ref CORRADE_ENABLE_POPCNT
 */
@@ -719,8 +719,8 @@ is enabled at compile time (on GCC/Clang it's `-mlznct`, MSVC doesn't have a
 direct option but it's assumed to be implied by `/arch:AVX2`). However note
 that this instruction has encoding compatible with an earlier `BSR` instruction
 which has a slightly different behavior. To avoid wrong results if it isn't
-available, prefer to detect its presence with @ref Cpu::runtimeFeatures()
-instead.
+available, prefer to detect its presence with
+@relativeref{Corrade,Cpu::runtimeFeatures()} instead.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Lzcnt},
     @ref CORRADE_ENABLE_LZCNT
 */
@@ -738,7 +738,7 @@ including the `TZCNT` instruction is enabled at compile time (on GCC/Clang it's
 `/arch:AVX2`). However note that the `TZCNT` instruction has encoding
 compatible with an earlier `BSF` instruction which has a slightly different
 behavior. To avoid wrong results if it isn't available, prefer to detect its
-presence with @ref Cpu::runtimeFeatures() instead.
+presence with @relativeref{Corrade,Cpu::runtimeFeatures()} instead.
 
 Presence of this instruction set is *not* implied by @ref CORRADE_TARGET_BMI2.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Bmi1},
@@ -755,7 +755,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if
 [BMI2](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#BMI2_(Bit_Manipulation_Instruction_Set_2))
 is enabled at compile time. On GCC/Clang it's `-mbmi2`, MSVC doesn't have a
 direct option but it's assumed to be implied by `/arch:AVX2`. To avoid failures
-at runtime, prefer to detect its presence with @ref Cpu::runtimeFeatures().
+at runtime, prefer to detect its presence with
+@relativeref{Corrade,Cpu::runtimeFeatures()}.
 
 Presence of this instruction set does *not* imply @ref CORRADE_TARGET_BMI1.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::Bmi2},
@@ -787,7 +788,7 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [F16C instruction set](https://en.wikipedia.org/wiki/F16C) is enabled at
 compile time. On GCC/Clang it's `-mf16c`, MSVC doesn't have a direct option but
 it's assumed to be implied by `/arch:AVX2`. To avoid failures at runtime,
-prefer to detect its presence with @ref Cpu::runtimeFeatures().
+prefer to detect its presence with @relativeref{Corrade,Cpu::runtimeFeatures()}.
 @see @relativeref{Corrade,Cpu}, @relativeref{Corrade,Cpu::AvxF16c},
     @ref CORRADE_ENABLE_AVX_F16C
 */
@@ -802,7 +803,8 @@ Defined on @ref CORRADE_TARGET_X86 "x86" if the
 [FMA3 instruction set](https://en.wikipedia.org/wiki/FMA_instruction_set) is
 enabled at compile time. On GCC/Clang it's `-mfma`, MSVC doesn't have a direct
 option but it's assumes to be implied by `/arch:AVX2`. To avoid failures at
-runtime, prefer to detect its presence with @ref Cpu::runtimeFeatures().
+runtime, prefer to detect its presence with
+@relativeref{Corrade,Cpu::runtimeFeatures()}.
 
 The FMA4 instruction set, which used to be supported only in certain range of
 AMD processors and isn't anymore, is not detected, and AMD switched to FMA3
