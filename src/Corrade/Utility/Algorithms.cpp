@@ -60,9 +60,12 @@ void copy(const Containers::ArrayView<const void> src, const Containers::ArrayVi
 
 namespace Implementation {
 
-void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst
+void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst, unsigned
+    /* The dimensions argument is only for assertions, but keeping it always
+       and just making it unnamed to avoid ABI mismatches if a project is
+       compiled with assertions disabled but Corrade not, and vice versa */
     #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-    , unsigned dimensions
+    dimensions
     #endif
 ) {
     const Containers::Size4D srcSize = src.size();

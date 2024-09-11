@@ -85,11 +85,10 @@ Expects that both arrays have the same size.
 template<unsigned dimensions> void copy(const Containers::StridedArrayView<dimensions, const char>& src, const Containers::StridedArrayView<dimensions, char>& dst);
 
 namespace Implementation {
-    CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst
-        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-        , unsigned dimensions
-        #endif
-    );
+    /* The dimensions argument is only for assertions, but not wrapping that in
+       #ifndef CORRADE_NO_ASSERT to avoid ABI mismatches if a project is
+       compiled with assertions disabled but Corrade not, and vice versa */
+    CORRADE_UTILITY_EXPORT void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst, unsigned dimensions);
 }
 
 /**
@@ -99,11 +98,7 @@ namespace Implementation {
 inline void copy(const Containers::StridedArrayView1D<const char>& src, const Containers::StridedArrayView1D<char>& dst) {
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst}
-        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-        , 1
-        #endif
-    );
+        Containers::StridedArrayView4D<char>{dst}, 1);
 }
 
 /**
@@ -113,11 +108,7 @@ inline void copy(const Containers::StridedArrayView1D<const char>& src, const Co
 inline void copy(const Containers::StridedArrayView2D<const char>& src, const Containers::StridedArrayView2D<char>& dst) {
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst}
-        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-        , 2
-        #endif
-    );
+        Containers::StridedArrayView4D<char>{dst}, 2);
 }
 
 /**
@@ -127,11 +118,7 @@ inline void copy(const Containers::StridedArrayView2D<const char>& src, const Co
 inline void copy(const Containers::StridedArrayView3D<const char>& src, const Containers::StridedArrayView3D<char>& dst) {
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst}
-        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-        , 3
-        #endif
-    );
+        Containers::StridedArrayView4D<char>{dst}, 3);
 }
 
 /**
@@ -141,11 +128,7 @@ inline void copy(const Containers::StridedArrayView3D<const char>& src, const Co
 inline void copy(const Containers::StridedArrayView4D<const char>& src, const Containers::StridedArrayView4D<char>& dst) {
     return Implementation::copy(
         Containers::StridedArrayView4D<const char>{src},
-        Containers::StridedArrayView4D<char>{dst}
-        #if !defined(CORRADE_NO_ASSERT) && !defined(CORRADE_STANDARD_ASSERT)
-        , 4
-        #endif
-    );
+        Containers::StridedArrayView4D<char>{dst}, 4);
 }
 
 /**
