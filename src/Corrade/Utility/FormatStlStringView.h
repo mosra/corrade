@@ -27,12 +27,13 @@
 */
 
 /** @file
-STL @ref std::string_view compatibility for @ref Utility::format()
+STL @ref std::string_view compatibility for @ref Corrade::Utility::format()
 @m_since_latest
 
 Including this header allows you to use a C++17 @ref std::string_view in
-arguments to @ref Utility::format(). A separate @ref Corrade/Utility/FormatStl.h
-header provides compatibility with @ref std::string.
+arguments to @ref Corrade::Utility::format(). A separate
+@ref Corrade/Utility/FormatStl.h header provides compatibility with
+@ref std::string.
 @experimental
 */
 

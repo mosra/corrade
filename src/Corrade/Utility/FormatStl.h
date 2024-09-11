@@ -27,12 +27,13 @@
 */
 
 /** @file
-@brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), STL @ref std::string compatibility for @ref Utility::format()
+@brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), STL @ref std::string compatibility for @ref Corrade::Utility::format()
 @m_since{2019,10}
 
 Including this header also allows you to use @ref std::string in arguments to
-@ref Utility::format(). A separate @ref Corrade/Utility/FormatStlStringView.h
-header provides compatibility with @ref std::string_view from C++17.
+@ref Corrade::Utility::format(). A separate
+@ref Corrade/Utility/FormatStlStringView.h header provides compatibility with
+@ref std::string_view from C++17.
 @experimental
 */
 
