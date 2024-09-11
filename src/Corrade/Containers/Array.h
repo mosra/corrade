@@ -261,7 +261,7 @@ implicitly convertible from @ref Array as well.
 
 Owning array type               | ↭ | Non-owning view type
 ------------------------------- | - | ---------------------
-@ref Array "Array<T>"           | → | @ref ArrayView "ArrayView<U>"
+@ref Array "Array<T>"           | → | @ref ArrayView "ArrayView&lt;U&gt;"
 @ref Array "Array<T>"           | → | @ref ArrayView "ArrayView<const U>"
 @ref Array "const Array<T>"     | → | @ref ArrayView "ArrayView<const U>"
 

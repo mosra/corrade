@@ -25,7 +25,7 @@
 */
 
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo drop once Arguments is <string>-free */
+#include "Corrade/Utility/DebugStl.h" /** @todo drop once Arguments is STL-free */
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Implementation/ResourceCompile.h"
 

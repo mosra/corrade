@@ -235,7 +235,7 @@ Owning array type               | ↭ | Non-owning view type
 @ref StaticArray "Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, U>"
 @ref StaticArray "Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, const U>"
 @ref StaticArray "const Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, const U>"
-@ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView<U>"
+@ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView&lt;U&gt;"
 @ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
 @ref StaticArray "const Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
 
