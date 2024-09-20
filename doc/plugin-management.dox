@@ -122,6 +122,8 @@ manager.
 @skip class Dog
 @until };
 
+<b></b>
+
 @code{.cpp}
 CORRADE_PLUGIN_REGISTER(Dog, Dog,
     "cz.mosra.corrade.Examples.AbstractAnimal/1.0")
