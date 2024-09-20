@@ -63,10 +63,10 @@ elements:
 @subsection Utility-Configuration-usage-whitespace Whitespace and comments
 
 Lines can have leading/trailing whitespace, which will be stripped on parsing
-and saving. Whitespace is preserved in values enclosed in `"` and in multi-line
-values. Comments and empty lines are preserved unless @ref Flag::SkipComments
-is set in constructor or a group containing the comment gets deleted. It's not
-possible to add comments or empty lines programatically.
+and saving. Whitespace is preserved in values enclosed in @cb{.py} " @ce and in
+multi-line values. Comments and empty lines are preserved unless
+@ref Flag::SkipComments is set in constructor or a group containing the comment
+gets deleted. It's not possible to add comments or empty lines programatically.
 
 Comments begin with @cb{.ini} # @ce or @cb{.ini} ; @ce character and continue
 to the end of line. Each line of a multiline comment must begin with one of
