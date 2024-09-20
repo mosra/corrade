@@ -6,7 +6,7 @@ class Corrade < Formula
   sha256 "2a62492ccc717422b72f2596a3e1a6a105b9574aa9467917f12d19ef3aab1341"
   head "https://github.com/mosra/corrade.git"
 
-  depends_on "cmake"
+  depends_on "cmake" => :build
 
   def install
     system "mkdir build"
