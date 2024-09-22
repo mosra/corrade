@@ -115,7 +115,7 @@ Containers::String resourceCompile(const Containers::StringView name, const Cont
 
     /* Special case for empty file list */
     if(files.isEmpty()) {
-        return format(R"(/* Compiled resource file. DO NOT EDIT! */
+        return Utility::format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
@@ -214,7 +214,7 @@ int resourceFinalizer_{0}() {{
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC). If we don't have any data, we don't
        create the resourceData array, as zero-length arrays are not allowed. */
-    return format(R"(/* Compiled resource file. DO NOT EDIT! */
+    return Utility::format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
@@ -361,7 +361,7 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
         dataHexcode.resize(dataHexcode.size() - 2);
     }
 
-    return format(R"(/* Compiled resource file. DO NOT EDIT! */
+    return Utility::format(R"(/* Compiled resource file. DO NOT EDIT! */
 
 extern const unsigned int resourceSize_{0} = {1};
 extern const unsigned char resourceData_{0}[] = {{
