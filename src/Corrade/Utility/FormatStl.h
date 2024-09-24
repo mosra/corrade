@@ -84,12 +84,12 @@ template<> struct Formatter<std::string> {
     }
 };
 
-inline std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formatterCount) {
-    const std::size_t size = formatInto(nullptr, format, formatters, formatterCount);
+inline std::size_t formatFormatters(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formatterCount) {
+    const std::size_t size = formatFormatters(nullptr, format, formatters, formatterCount);
     if(buffer.size() < offset + size) buffer.resize(offset + size);
     /* Under C++11, the character storage always includes the null terminator
        and printf() always wants to print the null terminator, so allow it */
-    return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
+    return offset + formatFormatters({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
 }
 
 }
@@ -102,7 +102,7 @@ template<class ...Args> std::string formatString(const char* format, const Args&
 
 template<class ...Args> std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
-    return Implementation::formatInto(buffer, offset, format, formatters, sizeof...(args));
+    return Implementation::formatFormatters(buffer, offset, format, formatters, sizeof...(args));
 }
 
 }}

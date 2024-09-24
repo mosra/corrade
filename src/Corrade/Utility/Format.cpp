@@ -405,7 +405,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
 }
 
-std::size_t formatInto(const Containers::MutableStringView& buffer, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
+std::size_t formatFormatters(const Containers::MutableStringView& buffer, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
     std::size_t bufferOffset = 0;
     formatWith([&buffer, &bufferOffset](Containers::StringView data) {
         if(buffer.data()) {
@@ -430,7 +430,7 @@ std::size_t formatInto(const Containers::MutableStringView& buffer, const char* 
     return bufferOffset;
 }
 
-void formatInto(std::FILE* const file, const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
+void formatFormatters(std::FILE* const file, const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
     formatWith([&file](Containers::StringView data) {
         fwrite(data.data(), data.size(), 1, file);
     }, [&file](const FileFormatter& formatter, int precision, FormatType type) {

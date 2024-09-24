@@ -340,8 +340,8 @@ struct FileFormatter {
         const void* _value;
 };
 
-CORRADE_UTILITY_EXPORT std::size_t formatInto(const Containers::MutableStringView& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
-CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
+CORRADE_UTILITY_EXPORT std::size_t formatFormatters(const Containers::MutableStringView& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
+CORRADE_UTILITY_EXPORT void formatFormatters(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
 
 }
 
@@ -365,12 +365,12 @@ template<class ...Args, class String, class MutableStringView> String format(con
 
 template<class ...Args> std::size_t formatInto(const Containers::MutableStringView& buffer, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
-    return Implementation::formatInto(buffer, format, formatters, sizeof...(args));
+    return Implementation::formatFormatters(buffer, format, formatters, sizeof...(args));
 }
 
 template<class ...Args> void formatInto(std::FILE* file, const char* format, const Args&... args) {
     Implementation::FileFormatter formatters[sizeof...(args) + 1] { Implementation::FileFormatter{args}..., {} };
-    Implementation::formatInto(file, format, formatters, sizeof...(args));
+    Implementation::formatFormatters(file, format, formatters, sizeof...(args));
 }
 
 }}
