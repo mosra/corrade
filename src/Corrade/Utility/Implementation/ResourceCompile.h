@@ -66,7 +66,7 @@ std::string hexcode(const Containers::ArrayView<const char> data, std::size_t pa
         out << "    ";
 
         /* Convert all characters on a row to hex "0xab,0x01,..." */
-        const std::size_t end = Utility::min(row + 15, data.size());
+        const std::size_t end = min(row + 15, data.size());
         for(std::size_t i = row; i < end; ++i) {
             out << "0x" << std::setw(2) << std::setfill('0')
                 << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
@@ -75,8 +75,8 @@ std::string hexcode(const Containers::ArrayView<const char> data, std::size_t pa
 
         /* Padding bytes after the actual data, if any. Printing 0 instead of
            0x00 for easier distinction between data and padding. */
-        const std::size_t paddingEnd = Utility::min(row + 15, dataSizeWithPadding);
-        for(std::size_t i = Utility::max(end, row); i < paddingEnd; ++i) {
+        const std::size_t paddingEnd = min(row + 15, dataSizeWithPadding);
+        for(std::size_t i = max(end, row); i < paddingEnd; ++i) {
             out << "   0,";
         }
 
@@ -149,7 +149,7 @@ int resourceFinalizer_{0}() {{
     unsigned int maxAlign = 1;
     for(const FileData& file: files) {
         CORRADE_INTERNAL_ASSERT(file.align && file.align <= 128 && !(file.align & (file.align - 1)));
-        maxAlign = Utility::max(maxAlign, file.align);
+        maxAlign = max(maxAlign, file.align);
     }
 
     std::string positions, filenames, data;
@@ -168,7 +168,7 @@ int resourceFinalizer_{0}() {{
            aligned to N bytes there has to be at least N bytes of data, even if
            the file is shorter than that */
         if(file.data.size())
-            minDataLen = Utility::max(minDataLen, dataLen + file.align);
+            minDataLen = max(minDataLen, dataLen + file.align);
 
         dataLen += file.data.size();
 
@@ -181,7 +181,7 @@ int resourceFinalizer_{0}() {{
            Otherwise align the next file according to its alignment. */
         unsigned int nextOffsetAligned;
         if(i == files.size() - 1) {
-            nextOffsetAligned = Utility::max(nextOffset, minDataLen);
+            nextOffsetAligned = max(nextOffset, minDataLen);
         } else {
             const FileData& nextFile = files[i + 1];
             nextOffsetAligned = nextFile.align*((nextOffset + nextFile.align - 1)/nextFile.align);
@@ -191,12 +191,12 @@ int resourceFinalizer_{0}() {{
         dataLen = nextOffsetAligned;
 
         CORRADE_INTERNAL_ASSERT(padding < 256);
-        Utility::formatInto(positions, positions.size(), "    0x{:.8x},0x{:.8x},\n", filenamesLen | (padding << 24), dataLen);
+        formatInto(positions, positions.size(), "    0x{:.8x},0x{:.8x},\n", filenamesLen | (padding << 24), dataLen);
 
-        Utility::formatInto(filenames, filenames.size(), "\n    /* {} */\n", file.filename);
+        formatInto(filenames, filenames.size(), "\n    /* {} */\n", file.filename);
         filenames += hexcode(Containers::StringView{file.filename});
 
-        Utility::formatInto(data, data.size(), "\n    /* {} */\n", file.filename);
+        formatInto(data, data.size(), "\n    /* {} */\n", file.filename);
         data += hexcode(file.data, padding);
     }
 
@@ -260,7 +260,7 @@ int resourceFinalizer_{5}() {{
         filenames,                              // 1
         dataLen ? ""_s : "// "_s,               // 2
         maxAlign == 1 ? Containers::String{} :  // 3
-            Utility::format("alignas({}) ", maxAlign),
+            format("alignas({}) ", maxAlign),
         data,                                   // 4
         name,                                   // 5
         group,                                  // 6
