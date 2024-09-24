@@ -389,7 +389,9 @@ const struct {
        by the standard and all other compilers. So have to cast in both
        cases. */
     {"NaN", float(NAN), double(NAN),
-        #if defined(CORRADE_TARGET_MSVC) && (_MSC_VER < 1920 /* MSVC <2019 */ || defined(CORRADE_TARGET_CLANG_CL))
+        /* MSVC (w/o clang-cl) before 2019 shows -nan(ind), clang-cl shows
+           -nan(ind) in 2022 17.10 but not in 2022 17.11 */
+        #if defined(CORRADE_TARGET_MSVC) && (_MSC_VER < 1920 /* MSVC <2019 */ || (defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER < 1941 /* <17.11 */))
         "-nan(ind)"
         #else
         "nan"
