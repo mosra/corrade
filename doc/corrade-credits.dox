@@ -109,6 +109,8 @@ Is the below list missing your name or something's wrong?
     buildsystem fixes
 -   **Erik Wijmans** ([\@erikwijmans](https://github.com/erikwijmans)) ---
     compilation fixes on GNU C++
+-   **Florian Albrechtskirchinger** ([\@falbrechtskirchinger](https://github.com/falbrechtskirchinger)) ---
+    C++20 compatibility fixes
 -   **Fred Helmesjö** ([\@helmesjo](https://github.com/helmesjo)) --- Conan
     package
 -   **Guillaume Jacquemin** ([\@williamjcm](https://github.com/williamjcm)) ---
@@ -158,11 +160,13 @@ Is the below list missing your name or something's wrong?
     Vcpkg packages
 -   **Stanislaw Halik** ([\@sthalik](https://github.com/sthalik)) ---
     usability and API cleanliness improvements, structured bindings, MSVC
-    warning fixes
+    warning fixes, compatibility with C++17 and newer standards
 -   **Tracy Ma** ([\@linuxaged](https://github.com/linuxaged)) --- UWP build
     fixes
 -   **Vincent Le Garrec** ([\@bansan85](https://github.com/bansan85)) ---
     Android buildsystem fixes and improvements
+-   **Will Usher** ([\@Twinklebear](https://github.com/Twinklebear)) --- C++20
+    compatibility fixes
 -   **[\@xantares](https://github.com/xantares)** --- Windows port improvements
 */
 

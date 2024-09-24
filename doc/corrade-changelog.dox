@@ -570,6 +570,8 @@ namespace Corrade {
 -   Fixed most remaining warnings on MSVC, in particular those related to
     "conversion from T to void * of greater size". See also
     [mosra/magnum#544](https://github.com/mosra/magnum/issues/544).
+-   Fixed ambiguity with @ref std::format() when compiling Corrade as C++20 on
+    certain STL implementations (see [mosra/corrade#184](https://github.com/mosra/corrade/pull/184))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
