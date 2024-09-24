@@ -256,12 +256,15 @@ int resourceFinalizer_{5}() {{
     return 1;
 }} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{5})
 )",
-        positions,                              // 0
-        filenames,                              // 1
+        /* Casts to prevent ambiguity with std::format() when compiling as
+           C++20 */
+        /** @todo remove once this code is STL-free */
+        Containers::StringView{positions},      // 0
+        Containers::StringView{filenames},      // 1
         dataLen ? ""_s : "// "_s,               // 2
         maxAlign == 1 ? Containers::String{} :  // 3
             format("alignas({}) ", maxAlign),
-        data,                                   // 4
+        Containers::StringView{data},           // 4
         name,                                   // 5
         group,                                  // 6
         files.size(),                           // 7
@@ -367,7 +370,10 @@ extern const unsigned int resourceSize_{0} = {1};
 extern const unsigned char resourceData_{0}[] = {{
 {2}
 }};
-)", name, data->size(), dataHexcode);
+)", name, data->size(),
+        /* To prevent ambiguity with std::format() when compiling as C++20 */
+        /** @todo remove once this code is STL-free */
+        Containers::StringView{dataHexcode});
 }
 
 }}}}
