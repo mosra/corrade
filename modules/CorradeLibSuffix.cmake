@@ -28,9 +28,6 @@
 #
 
 if(NOT DEFINED LIB_SUFFIX)
-    message(STATUS "The LIB_SUFFIX variable is not defined. It will be autodetected now.")
-    message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example).")
-
     # Android. Given a CMAKE_INSTALL_PREFIX, check if the expected lib
     # subdirectory exists. If it does, we assume CMAKE_INSTALL_PREFIX is
     # pointing inside the NDK and so we set LIB_SUFFIX accordingly. If it
