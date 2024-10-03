@@ -6,7 +6,7 @@
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024
               Vladimír Vondruš <mosra@centrum.cz>
-    Copyright © 2022 Stanislaw Halik <sthalik@misaki.pl>
+    Copyright © 2022, 2023 Stanislaw Halik <sthalik@misaki.pl>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -344,27 +344,27 @@ template<class F, class S, class T> class Triple {
         }
 
         /** @brief First element */
-        F& first() & { return _first; }
+        CORRADE_CONSTEXPR14 F& first() & { return _first; }
         /* Not F&& because that'd cause nasty dangling reference issues in
            common code. See the accessRvalueLifetimeExtension() test for
            details. */
-        F first() && { return Utility::move(_first); } /**< @overload */
+        CORRADE_CONSTEXPR14 F first() && { return Utility::move(_first); } /**< @overload */
         constexpr const F& first() const & { return _first; } /**< @overload */
 
         /** @brief Second element */
-        S& second() & { return _second; }
+        CORRADE_CONSTEXPR14 S& second() & { return _second; }
         /* Not S&& because that'd cause nasty dangling reference issues in
            common code. See the accessRvalueLifetimeExtension() test for
            details. */
-        S second() && { return Utility::move(_second); } /**< @overload */
+        CORRADE_CONSTEXPR14 S second() && { return Utility::move(_second); } /**< @overload */
         constexpr const S& second() const & { return _second; } /**< @overload */
 
         /** @brief Third element */
-        T& third() & { return _third; }
+        CORRADE_CONSTEXPR14 T& third() & { return _third; }
         /* Not T&& because that'd cause nasty dangling reference issues in
            common code. See the accessRvalueLifetimeExtension() test for
            details. */
-        T third() && { return Utility::move(_third); } /**< @overload */
+        CORRADE_CONSTEXPR14 T third() && { return Utility::move(_third); } /**< @overload */
         constexpr const T& third() const & { return _third; } /**< @overload */
 
         /* No const&& overloads right now. There's one theoretical use case,
