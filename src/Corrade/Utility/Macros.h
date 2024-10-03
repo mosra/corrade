@@ -428,7 +428,7 @@ compiler implements C++14 relaxed constexpr rules (which includes GCC 5+, Clang
 that make use of C++14 constexpr.
 @see @ref CORRADE_CXX_STANDARD, @ref CORRADE_CONSTEXPR20
 */
-#ifndef CORRADE_CONSTEXPR14
+#if !defined(CORRADE_CONSTEXPR14) || defined(DOXYGEN_GENERATING_OUTPUT)
 /* MSVC2015 reports itself as supporting C++14 in _MSVC_LANG (its variant of
    __cplusplus, see https://stackoverflow.com/a/74193034) but C++14 constexpr
    is only implemented since MSVC2017. The value of __cplusplus is set to
@@ -456,7 +456,7 @@ default initialization (which includes GCC 10+, Clang 10+ and MSVC 2019
 use of C++20 constexpr.
 @see @ref CORRADE_CXX_STANDARD, @ref CORRADE_CONSTEXPR14
 */
-#ifndef CORRADE_CONSTEXPR20
+#if !defined(CORRADE_CONSTEXPR20) || defined(DOXYGEN_GENERATING_OUTPUT)
 /* Changing an active member of a union is __cpp_constexpr == 202002, but Clang
    16 reports only 201907 even though that feature is said to be available
    since Clang 9 already; same case is with GCC where it reports 202002 only
