@@ -488,6 +488,17 @@ function(corrade_add_test test_name)
             #   once we require CMake 3.13 unconditionally
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
+            # FindNodeJs is installed to a subdirectory next to UseCorrade, to
+            # prevent it from being in CMAKE_MODULE_PATH always and clashing
+            # with modules of the same name from elsewhere. Add it to the
+            # CMAKE_MODULE_PATH just locally for this function. If the variable
+            # is not defined, we're running from within Corrade's own sources
+            # (and FindNodeJs is thus in CMAKE_MODULE_PATH already) or an old
+            # FindCorrade may be used, in which case we assume the user
+            # supplies it in a different way.
+            if(CORRADE_DEPENDENCY_MODULE_DIR)
+                set(CMAKE_MODULE_PATH "${CORRADE_DEPENDENCY_MODULE_DIR}" ${CMAKE_MODULE_PATH})
+            endif()
             find_package(NodeJs REQUIRED)
             # Node.js before version 17 needs --experimental-wasm-simd. Version
             # 17 upgraded to V8 9.1, which has the option enabled by default:

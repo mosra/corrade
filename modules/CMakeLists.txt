@@ -30,7 +30,16 @@ set(Corrade_MODULES
     FindCorrade.cmake
     UseCorrade.cmake)
 
+set(Corrade_DEPENDENCY_MODULES )
+if(CORRADE_TARGET_EMSCRIPTEN)
+    list(APPEND Corrade_DEPENDENCY_MODULES
+        FindNodeJs.cmake)
+endif()
+
 install(FILES ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
+if(Corrade_DEPENDENCY_MODULES)
+    install(FILES ${Corrade_DEPENDENCY_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR}/dependencies)
+endif()
 
 # Corrade module dir for superprojects
 set(_CORRADE_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")

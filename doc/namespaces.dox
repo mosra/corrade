@@ -245,10 +245,6 @@ target_link_libraries(your-app PRIVATE Corrade::TestSuite)
 corrade_add_test(YourTest YourTest.cpp)
 @endcode
 
-In case you're building for Emscripten and want to
-@ref TestSuite-Tester-running-cmake "run your tests via CTest", you also need
-to put [FindNodeJs.cmake](https://github.com/mosra/corrade/blob/master/modules/FindNodeJs.cmake) in your `modules/` directory.
-
 See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
