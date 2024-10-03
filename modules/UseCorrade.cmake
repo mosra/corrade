@@ -504,7 +504,16 @@ function(corrade_add_test test_name)
             if(NodeJs_VERSION VERSION_LESS 17)
                 set(experimental_wasm_simd --experimental-wasm-simd)
             endif()
-            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs ${experimental_wasm_simd} $<TARGET_FILE:${test_name}> ${arguments})
+            # Using NodeJs::NodeJs works only if CMAKE_CROSSCOMPILING_EMULATOR
+            # isn't set, as otherwise CMake mistakenly understands it as a
+            # project-local target that needs to be emulated (even though it's
+            # an IMPORTED target!), ultimately calling something like
+            #   /usr/bin/node /usr/bin/node <test>
+            # This is likely a CMake bug, where it doesn't correctly check that
+            # the target is imported before prepending the emulator. Using the
+            # actual filename stops CMAKE_CROSSCOMPILING_EMULATOR from being
+            # added second time.
+            add_test(NAME ${test_name} COMMAND $<TARGET_FILE:NodeJs::NodeJs> ${experimental_wasm_simd} $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
             foreach(file ${files})
