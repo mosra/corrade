@@ -127,11 +127,51 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     option(CORRADE_MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 endif()
 
+# Attempt to find a native CORRADE_RC_EXECUTABLE when cross-compiling. Needs to
+# be done before the CORRADE_WITH_RC option is defined, as that one can be
+# turned off if a native one is found.
+if(CMAKE_CROSSCOMPILING)
+    find_program(CORRADE_RC_EXECUTABLE corrade-rc)
+    # src/Corrade/Utility/CMakeLists.txt sets CORRADE_RC_EXECUTABLE to
+    # Corrade::rc when a cross-compiled corrade-rc is used via an emulator to
+    # prevent the find_program() and related logic from being done again for
+    # each CMake run. If that's the case, we shouldn't attempt to create the
+    # Corrade::rc target here.
+    if(CORRADE_RC_EXECUTABLE AND NOT CORRADE_RC_EXECUTABLE STREQUAL Corrade::rc)
+        # Strictly speaking the GLOBAL isn't needed, but when crosscompiling
+        # with Corrade as a CMake subproject and
+        #   find_package(Corrade REQUIRED rc) # or Utility
+        # isn't present for whatever reason, corrade_add_resource() called
+        # outside of Corrade itself would fail on the rc target not existing.
+        # We could require everyone to call find_package() to fix this one
+        # particular issue but that would be kinda mean. Don't be mean. The
+        # find_package() call is still recommended as it unifies the external
+        # and subproject workflows but it shouldn't be *required*.
+        add_executable(Corrade::rc IMPORTED GLOBAL)
+        set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
+    # add_custom_command() uses CMAKE_CROSSCOMPILING_EMULATOR only since 3.6.
+    # It's unlikely that people would use ancient CMake 3.5 for crosscompiling
+    # so the message doesn't mention that, nevertheless check for the version
+    # to not make this silently fail much later at build time with 3.5.
+    elseif(NOT CMAKE_CROSSCOMPILING_EMULATOR OR CMAKE_VERSION VERSION_LESS 3.6)
+        message(FATAL_ERROR "Native corrade-rc executable, which is needed when crosscompiling without CMAKE_CROSSCOMPILING_EMULATOR set, was not found. Either build it, make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option, or specify CMAKE_CROSSCOMPILING_EMULATOR to have Corrade run the cross-compiled executable instead.")
+    else()
+        # Target Corrade::rc gets created in src/Corrade/Utility/CMakeLists.txt
+    endif()
+endif()
+
 option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
 option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
 option(CORRADE_WITH_TESTSUITE "Build TestSuite library" ON)
 cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORRADE_WITH_INTERCONNECT;NOT CORRADE_WITH_PLUGINMANAGER;NOT CORRADE_WITH_TESTSUITE" ON)
-cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
+# If we're crosscompiling and the native executable is found, we can skip
+# building the cross-compiled version. See above for why it's additionally
+# compared against Corrade::rc.
+if(CMAKE_CROSSCOMPILING AND CORRADE_RC_EXECUTABLE AND NOT CORRADE_RC_EXECUTABLE STREQUAL Corrade::rc)
+    option(CORRADE_WITH_RC "Build the corrade-rc utility" ON)
+else()
+    cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
+endif()
 cmake_dependent_option(CORRADE_WITH_MAIN "Build Main library" ON "NOT CORRADE_WITH_TESTSUITE;NOT CORRADE_WITH_RC" ON)
 
 option(CORRADE_BUILD_DEPRECATED "Include deprecated API in the build" ON)
@@ -393,23 +433,6 @@ if(CORRADE_BUILD_TESTS)
         endif()
         set(EXCLUDE_FROM_ALL_IF_TEST_TARGET EXCLUDE_FROM_ALL)
     endif()
-endif()
-
-if(CMAKE_CROSSCOMPILING)
-    find_program(CORRADE_RC_EXECUTABLE corrade-rc)
-    if(NOT CORRADE_RC_EXECUTABLE)
-        message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found. Build it and either make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option.")
-    endif()
-    # Strictly speaking the GLOBAL isn't needed, but when crosscompiling with
-    # Corrade as a CMake subproject and find_package(Corrade REQUIRED rc) (or
-    # Utility) isn't present for whatever reason, corrade_add_resource() called
-    # outside of Corrade itself would fail on the rc target not existing. We
-    # could require everyone to call find_package() to fix this one particular
-    # issue but that would be kinda mean. Don't be mean. The find_package()
-    # call is still recommended as it unifies the external and subproject
-    # workflows but it shouldn't be *required*.
-    add_executable(Corrade::rc IMPORTED GLOBAL)
-    set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
 endif()
 
 # If we're in a CMake subproject, find_package(Corrade) will be looking for

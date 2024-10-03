@@ -593,7 +593,7 @@ function(corrade_add_resource name input)
     # See _CORRADE_USE_NO_TARGET_CHECKS in Corrade's root CMakeLists
     if(NOT _CORRADE_USE_NO_TARGET_CHECKS AND NOT TARGET Corrade::rc)
         if(CMAKE_CROSSCOMPILING)
-            message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Build a native version, either make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option, and add the Utility / rc component to your find_package(Corrade).")
+            message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Either build a native version, make it available through PATH or pass its location to CMake using the CORRADE_RC_EXECUTABLE option, or specify CMAKE_CROSSCOMPILING_EMULATOR to have Corrade run a cross-compiled executable instead, and add the Utility / rc component to your find_package(Corrade).")
         else()
             message(FATAL_ERROR "The Corrade::rc target, needed by corrade_add_resource() and corrade_add_static_plugin(), doesn't exist. Add the Utility / rc component to your find_package(Corrade) or enable CORRADE_WITH_UTILITY / CORRADE_WITH_RC if you have Corrade as a CMake subproject.")
         endif()
@@ -635,10 +635,17 @@ function(corrade_add_resource name input)
     # recognized automatically)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${input})
 
-    # Run command
+    # Run command. If a non-native Corrade::rc was found and needs to be run
+    # through an emulator, we need to pass the actual executable path to it,
+    # not just the target.
+    if(CORRADE_RC_EXECUTABLE_EMULATOR)
+        set(command ${CORRADE_RC_EXECUTABLE_EMULATOR} $<TARGET_FILE:Corrade::rc>)
+    else()
+        set(command Corrade::rc)
+    endif()
     add_custom_command(
         OUTPUT "${out}"
-        COMMAND Corrade::rc ${single_file} ${name} "${input}" "${out}"
+        COMMAND ${command} ${single_file} ${name} "${input}" "${out}"
         DEPENDS Corrade::rc ${input} ${dependencies}
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -771,12 +778,19 @@ function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
     endif()
 
     # Compile resources. If the metadata file is disabled, the resource is
-    # empty.
+    # empty. If a non-native Corrade::rc was found and needs to be run through
+    # an emulator, we need to pass the actual executable path to it, not just
+    # the target.
+    if(CORRADE_RC_EXECUTABLE_EMULATOR)
+        set(command ${CORRADE_RC_EXECUTABLE_EMULATOR} $<TARGET_FILE:Corrade::rc>)
+    else()
+        set(command Corrade::rc)
+    endif()
     set(resource_out ${CMAKE_CURRENT_BINARY_DIR}/resource_${plugin_name}.cpp)
     if(metadata_file)
         add_custom_command(
             OUTPUT ${resource_out}
-            COMMAND Corrade::rc ${plugin_name} --single ${metadata_file} ${resource_out}
+            COMMAND ${command} ${plugin_name} --single ${metadata_file} ${resource_out}
             DEPENDS Corrade::rc ${metadata_file}
             COMMENT "Compiling static plugin metadata file ${resource_out}"
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -785,7 +799,7 @@ function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
         add_custom_command(
             OUTPUT ${resource_out}
             COMMAND ${CMAKE_COMMAND} -E touch ${metadata_file}
-            COMMAND Corrade::rc ${plugin_name} --single ${metadata_file} ${resource_out}
+            COMMAND ${command} ${plugin_name} --single ${metadata_file} ${resource_out}
             DEPENDS Corrade::rc
             COMMENT "Compiling static plugin metadata file ${resource_out}"
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

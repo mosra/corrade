@@ -318,7 +318,17 @@ endif()
 # However, it seems like this feature never materialized, as doing this will
 # result in corrade-rc that's looking for vcruntime140_app.dll in order to be
 # run. Last checked: Nov 2019.
-if(NOT CMAKE_CROSSCOMPILING)
+if(CORRADE_WITH_RC)
+    # If CMAKE_CROSSCOMPILING is set, either the CORRADE_RC_EXECUTABLE has to
+    # be found in root CMakeLists, or a FATAL_ERROR is printed there, or this
+    # message gets printed.
+    if(CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR AND NOT CORRADE_RC_EXECUTABLE AND NOT CMAKE_VERSION VERSION_LESS 3.6)
+        message(STATUS "Native CORRADE_RC_EXECUTABLE not found, using a cross-compiled corrade-rc")
+        # Set the variable to not attempt to look for corrade-rc and print the
+        # above again on the next run
+        set(CORRADE_RC_EXECUTABLE Corrade::rc CACHE INTERNAL "")
+    endif()
+
     # Sources for standalone corrade-rc
     set(CorradeUtilityRc_SRCS
         Arguments.cpp
@@ -382,8 +392,24 @@ if(NOT CMAKE_CROSSCOMPILING)
     if(CORRADE_TARGET_UNIX)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
+    # On Emscripten, we'd like to access the actual real filesystem, not the
+    # virtual one
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        # TODO switch to target_link_options() and SHELL: once we require CMake
+        #   3.13 unconditionally
+        target_link_libraries(corrade-rc PUBLIC "-s NODERAWFS=1")
+    endif()
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        install(FILES
+            $<TARGET_FILE_DIR:corrade-rc>/corrade-rc.js.mem
+            $<TARGET_FILE_DIR:corrade-rc>/corrade-rc.wasm
+            DESTINATION ${CORRADE_BINARY_INSTALL_DIR} OPTIONAL)
+    endif()
 
-    # Corrade::rc target alias for superprojects
-    add_executable(Corrade::rc ALIAS corrade-rc)
+    # Corrade::rc target alias for superprojects. Create only if it wasn't
+    # already created in root CMakeLists for CORRADE_RC_EXECUTABLE.
+    if(NOT TARGET Corrade::rc)
+        add_executable(Corrade::rc ALIAS corrade-rc)
+    endif()
 endif()

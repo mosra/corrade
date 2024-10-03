@@ -575,6 +575,11 @@ namespace Corrade {
 -   The @cmake corrade_add_test() @ce CMake command is fixed to not call
     Node.js with itself when `CMAKE_CROSSCOMPILING_EMULATOR` is set (see
     [mosra/corrade#185](https://github.com/mosra/corrade/issues/185))
+-   Corrade can now cross-compile and use its own @ref corrade-rc "corrade-rc"
+    executable through an emulator if `CMAKE_CROSSCOMPILING_EMULATOR` is set,
+    instead of requiring a native version of it to be compiled first. See also
+    [mosra/corrade#81](https://github.com/mosra/corrade/issues/81) and
+    [mosra/corrade#185](https://github.com/mosra/corrade/issues/185).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
