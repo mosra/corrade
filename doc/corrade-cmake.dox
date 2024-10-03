@@ -261,14 +261,15 @@ use given library with CMake.
 
 @section corrade-cmake-modules Other CMake modules
 
-The `modules/` directory of Corrade sources contains more useful CMake modules.
-If a library requires presence of any of these, it mentions them in its usage
-documentation.
+The `modules/` directory of Corrade sources contains CMake modules for finding
+various dependencies. Corrade installs those in a `dependencies/` subdirectory
+of its CMake module dir to not clash with modules of the same name potentially
+installed by other software and uses them automatically when given dependency
+needs to be found. Unless you're interested in dealing with given package
+directly, you don't need to worry about those at all.
 
 -   [FindNodeJs.cmake](https://github.com/mosra/corrade/blob/master/modules/FindNodeJs.cmake)
-    --- CMake module for finding Node.js. Copy this to your module directory if
-    you want to run @ref TestSuite unit tests when building for
-    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
+    --- CMake module for finding Node.js
 
 @section corrade-cmake-functions Macros and functions
 

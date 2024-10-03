@@ -122,6 +122,9 @@
 #   non-native version was found when cross-compiling
 #  CORRADE_USE_MODULE           - Path to UseCorrade.cmake module (included
 #   automatically)
+#  CORRADE_DEPENDENCY_MODULE_DIR - Path to Find modules for dependencies used
+#   internally by Corrade. Defined only if any such modules are expected to
+#   exist on given platform.
 #  CORRADE_TESTSUITE_XCTEST_RUNNER - Path to XCTestRunner.mm.in file
 #  CORRADE_TESTSUITE_ADB_RUNNER - Path to AdbRunner.sh file
 #  CORRADE_UTILITY_JS           - Path to CorradeUtility.js file
@@ -357,6 +360,12 @@ find_path(_CORRADE_MODULE_DIR
     NAMES UseCorrade.cmake CorradeLibSuffix.cmake
     PATH_SUFFIXES share/cmake/Corrade)
 mark_as_advanced(_CORRADE_MODULE_DIR)
+if(CORRADE_TARGET_EMSCRIPTEN)
+    find_path(CORRADE_DEPENDENCY_MODULE_DIR
+        NAMES FindNodeJs.cmake
+        PATH_SUFFIXES share/cmake/Corrade/dependencies)
+    mark_as_advanced(CORRADE_DEPENDENCY_MODULE_DIR)
+endif()
 
 set(CORRADE_USE_MODULE ${_CORRADE_MODULE_DIR}/UseCorrade.cmake)
 set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
