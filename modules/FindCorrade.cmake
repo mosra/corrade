@@ -118,6 +118,8 @@
 #  CORRADE_*_LIBRARY_DEBUG      - Debug version of given library, if found
 #  CORRADE_*_LIBRARY_RELEASE    - Release version of given library, if found
 #  CORRADE_*_EXECUTABLE         - Location of given executable, if found
+#  CORRADE_*_EXECUTABLE_EMULATOR - Emulator to run CORRADE_*_EXECUTABLE, if a
+#   non-native version was found when cross-compiling
 #  CORRADE_USE_MODULE           - Path to UseCorrade.cmake module (included
 #   automatically)
 #  CORRADE_TESTSUITE_XCTEST_RUNNER - Path to XCTestRunner.mm.in file
@@ -462,6 +464,31 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
 
             find_program(CORRADE_${_COMPONENT}_EXECUTABLE corrade-${_component})
             mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE)
+
+            # If the executable wasn't found, we're cross-compiling, an
+            # emulator is set and we're on CMake 3.6+ that actually uses
+            # CMAKE_CROSSCOMPILING_EMULATOR in add_custom_command((), try to
+            # find the cross-compiled version as a (slower) fallback. This
+            # assumes the toolchain sets CMAKE_FIND_ROOT_PATH_MODE_PROGRAM to
+            # NEVER, i.e. that the search is restricted to native executables
+            # by default.
+            if(NOT CORRADE_${_COMPONENT}_EXECUTABLE AND CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR AND NOT CMAKE_VERSION VERSION_LESS 3.6)
+                # Additionally, there are no CMAKE_FIND_PROGRAM_SUFFIXES akin
+                # to CMAKE_FIND_LIBRARY_SUFFIXES for libraries, so we have to
+                # try manually.
+                if(CORRADE_TARGET_EMSCRIPTEN)
+                    set(_CORRADE_PROGRAM_EXTENSION .js)
+                endif()
+                find_program(CORRADE_${_COMPONENT}_EXECUTABLE
+                    NAMES
+                        corrade-${_component}
+                        corrade-${_component}${_CORRADE_PROGRAM_EXTENSION}
+                    ONLY_CMAKE_FIND_ROOT_PATH)
+                if(CORRADE_${_COMPONENT}_EXECUTABLE)
+                    set(CORRADE_${_COMPONENT}_EXECUTABLE_EMULATOR ${CMAKE_CROSSCOMPILING_EMULATOR} CACHE PATH "Emulator for running a cross-compiled corrade-${_component} executable")
+                    mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE_EMULATOR)
+                endif()
+            endif()
 
             if(CORRADE_${_COMPONENT}_EXECUTABLE)
                 set_property(TARGET Corrade::${_component} PROPERTY

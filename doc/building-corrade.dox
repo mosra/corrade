@@ -525,9 +525,12 @@ which not:
     `CORRADE_WITH_TESTSUITE` is enabled. The @ref Containers library is built
     along with this library.
 -   `CORRADE_WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility.
-    Enabled automatically if `CORRADE_WITH_UTILITY` or anything depending on it is
-    enabled. It's possible to build just this executable without anything else,
-    for example when crosscompiling.
+    Enabled automatically if `CORRADE_WITH_UTILITY` or anything depending on it
+    is enabled. It's also possible to build just this executable without
+    anything else, for example to have a native version for
+    @ref building-corrade-cross "cross-compiling". Conversely, if a native
+    `corrade-rc` is found when cross-compiling, this option can be turned off
+    to not build a cross-compiled executable at all.
 
 Options controlling the build:
 
@@ -729,11 +732,16 @@ git submodule update --init
 @m_class{m-block m-primary}
 
 @par Native build of corrade-rc
-    You also need to have a native version of Corrade installed, because
-    Corrade needs to run `corrade-rc` utility on the host system as part of the
-    build process. If native version of `corrade-rc` is not found on the
-    system, cross-compilation will fail. If `corrade-rc` is not in `PATH`,
-    point CMake to it using `-DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc`.
+    Unless the toolchain sets `CORRADE_CROSSCOMPILING_EMULATOR` (which is the
+    case for example for Emscripten but not necessarily the others), you also
+    need to have a native version of Corrade installed, because Corrade needs
+    to run `corrade-rc` utility on the host system as part of the build
+    process.
+@par
+    If native version of `corrade-rc` is found, or its location is passed
+    explicitly to CMake with `-DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc`,
+    it's used. Otherwise, if `CORRADE_CROSSCOMPILING_EMULATOR` is present, the
+    build will use a cross-compiled version through the emulator.
 
 @subsection building-corrade-cross-winrt Cross-compiling for Windows RT
 
@@ -835,18 +843,19 @@ pass it explicitly on command-line using `-DEMSCRIPTEN_PREFIX`. Default is
 porting and they are generally slower, thus `CORRADE_BUILD_STATIC` is
 implicitly enabled.
 
-Then create build directory and run `cmake` and the build command in it. You
-can omit specifying `CORRADE_RC_EXECUTABLE` if
-@ref building-corrade-cross-rc "natively-built corrade-rc" is accessible
-through `PATH`.
+Then create build directory and run `cmake` and the build command in it.
+Compared to other cross-compiling cases, the build will build and use its own
+`corrade-rc` through Node.js if a
+@ref building-corrade-cross-rc "natively-built corrade-rc" isn't found, but you
+can always force use of the native version by passing its location through
+`CORRADE_RC_EXECUTABLE`.
 
 @code{.sh}
 mkdir build-emscripten && cd build-emscripten
 cmake .. \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system \
-    -DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc
+    -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
 cmake --build .
 @endcode
 
