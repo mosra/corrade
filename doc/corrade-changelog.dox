@@ -572,6 +572,9 @@ namespace Corrade {
     [mosra/magnum#544](https://github.com/mosra/magnum/issues/544).
 -   Fixed ambiguity with @ref std::format() when compiling Corrade as C++20 on
     certain STL implementations (see [mosra/corrade#184](https://github.com/mosra/corrade/pull/184))
+-   The @cmake corrade_add_test() @ce CMake command is fixed to not call
+    Node.js with itself when `CMAKE_CROSSCOMPILING_EMULATOR` is set (see
+    [mosra/corrade#185](https://github.com/mosra/corrade/issues/185))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
