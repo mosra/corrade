@@ -56,13 +56,9 @@ find_package(Corrade REQUIRED ...) # see below
 @endcode
 
 Otherwise, if CMake won't be able to find this file in predefined locations, it
-will error out even if Corrade might be installed on the system. There are
-other Find modules that you might need for particular features or platforms,
-see the @ref corrade-cmake-modules "full list below". Each library that needs
-one of the extra modules also mentions the requirement in its documentation.
-Note that the module files areupdated as the library evolves, you are
-encouraged to update your copies from time to time to avoid strange building
-issues.
+will error out even if Corrade might be installed on the system. Note that the
+module files areupdated as the library evolves, you are encouraged to update
+your copies from time to time to avoid strange building issues.
 
 If you installed the library to non-standard location (other than `/usr`, e.g.
 `/home/xyz/projects`), set `CMAKE_PREFIX_PATH` to that directory to help CMake
@@ -258,18 +254,6 @@ binaries.
 
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
-
-@section corrade-cmake-modules Other CMake modules
-
-The `modules/` directory of Corrade sources contains CMake modules for finding
-various dependencies. Corrade installs those in a `dependencies/` subdirectory
-of its CMake module dir to not clash with modules of the same name potentially
-installed by other software and uses them automatically when given dependency
-needs to be found. Unless you're interested in dealing with given package
-directly, you don't need to worry about those at all.
-
--   [FindNodeJs.cmake](https://github.com/mosra/corrade/blob/master/modules/FindNodeJs.cmake)
-    --- CMake module for finding Node.js
 
 @section corrade-cmake-functions Macros and functions
 
