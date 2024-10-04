@@ -38,6 +38,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC
 endif()
 
 add_subdirectory(interconnect)
-add_subdirectory(pluginmanager)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    add_subdirectory(pluginmanager)
+endif()
 add_subdirectory(resource)
 add_subdirectory(testsuite)
