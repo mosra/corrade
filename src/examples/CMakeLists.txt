@@ -37,7 +37,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC
     string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
+# Just for CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT, not needed at this
+# level otherwise
+find_package(Corrade REQUIRED)
+
 add_subdirectory(interconnect)
-add_subdirectory(pluginmanager)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    add_subdirectory(pluginmanager)
+endif()
 add_subdirectory(resource)
 add_subdirectory(testsuite)
