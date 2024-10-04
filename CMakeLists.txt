@@ -132,6 +132,7 @@ endif()
 # turned off if a native one is found.
 if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
+    mark_as_advanced(CORRADE_RC_EXECUTABLE)
     # src/Corrade/Utility/CMakeLists.txt sets CORRADE_RC_EXECUTABLE to
     # Corrade::rc when a cross-compiled corrade-rc is used via an emulator to
     # prevent the find_program() and related logic from being done again for
@@ -536,6 +537,12 @@ if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY AND NOT DEFINED CMAKE_LIBRARY_OUTP
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin CACHE PATH "" FORCE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib CACHE PATH "" FORCE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib CACHE PATH "" FORCE)
+    # There should be no need for the "90% use case" user to adjust these, so
+    # don't show them in the default view
+    mark_as_advanced(
+        CMAKE_RUNTIME_OUTPUT_DIRECTORY
+        CMAKE_LIBRARY_OUTPUT_DIRECTORY
+        CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 endif()
 
 # Implicitly, corrade_add_test(), corrade_add_plugin() and other macros check
