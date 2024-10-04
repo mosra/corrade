@@ -418,6 +418,11 @@ if(Corrade_FIND_COMPONENTS)
     list(REMOVE_DUPLICATES Corrade_FIND_COMPONENTS)
 endif()
 
+# Special cases of include paths. Libraries not listed here have a path suffix
+# and include name derived from the library name in the loop below.
+set(_CORRADE_MAIN_INCLUDE_PATH_SUFFIX Corrade)
+set(_CORRADE_MAIN_INCLUDE_PATH_NAMES Corrade.h)
+
 # Find all components
 foreach(_component ${Corrade_FIND_COMPONENTS})
     string(TOUPPER ${_component} _COMPONENT)
@@ -428,7 +433,16 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
     if(TARGET Corrade::${_component})
         set(Corrade_${_component}_FOUND TRUE)
     else()
-        unset(Corrade_${_component}_FOUND)
+        # Default include path names to look for for library / header-only
+        # components, unless set above already
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
+            if(NOT _CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX)
+                set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX Corrade/${_component})
+            endif()
+            if(NOT _CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES)
+                set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES ${_component}.h)
+            endif()
+        endif()
 
         # Library (and not header-only) components
         if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
@@ -439,32 +453,11 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             find_library(CORRADE_${_COMPONENT}_LIBRARY_RELEASE Corrade${_component})
             mark_as_advanced(CORRADE_${_COMPONENT}_LIBRARY_DEBUG
                 CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
-
-            if(CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
-                set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    IMPORTED_CONFIGURATIONS RELEASE)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    IMPORTED_LOCATION_RELEASE ${CORRADE_${_COMPONENT}_LIBRARY_RELEASE})
-            endif()
-
-            if(CORRADE_${_COMPONENT}_LIBRARY_DEBUG)
-                set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    IMPORTED_CONFIGURATIONS DEBUG)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    IMPORTED_LOCATION_DEBUG ${CORRADE_${_COMPONENT}_LIBRARY_DEBUG})
-            endif()
         endif()
 
         # Header-only library components
         if(_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
             add_library(Corrade::${_component} INTERFACE IMPORTED)
-        endif()
-
-        # Default include path names to look for for library / header-only
-        # components
-        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
-            set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX Corrade/${_component})
-            set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES ${_component}.h)
         endif()
 
         # Executable components
@@ -505,6 +498,41 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             endif()
         endif()
 
+        # Find library includes
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
+            find_path(_CORRADE_${_COMPONENT}_INCLUDE_DIR
+                NAMES ${_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES}
+                HINTS ${CORRADE_INCLUDE_DIR}/${_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX})
+            mark_as_advanced(_CORRADE_${_COMPONENT}_INCLUDE_DIR)
+        endif()
+
+        # Decide if the component was found. If not, skip the rest, which
+        # populates the target properties and finds additional dependencies. If
+        # found, the _FOUND variable may still get reset by something below.
+        if((_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE))
+            set(Corrade_${_component}_FOUND TRUE)
+        else()
+            set(Corrade_${_component}_FOUND FALSE)
+            continue()
+        endif()
+
+        # Library location for (non-header-only) libraries
+        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
+            if(CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
+                set_property(TARGET Corrade::${_component} APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS RELEASE)
+                set_property(TARGET Corrade::${_component} PROPERTY
+                    IMPORTED_LOCATION_RELEASE ${CORRADE_${_COMPONENT}_LIBRARY_RELEASE})
+            endif()
+
+            if(CORRADE_${_COMPONENT}_LIBRARY_DEBUG)
+                set_property(TARGET Corrade::${_component} APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS DEBUG)
+                set_property(TARGET Corrade::${_component} PROPERTY
+                    IMPORTED_LOCATION_DEBUG ${CORRADE_${_COMPONENT}_LIBRARY_DEBUG})
+            endif()
+        endif()
+
         # No special setup for Containers library
 
         # Interconnect library
@@ -524,9 +552,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
 
         # Main library
         elseif(_component STREQUAL Main)
-            set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX Corrade)
-            set(_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES Corrade.h)
-
             if(CORRADE_TARGET_WINDOWS)
                 if(NOT MINGW)
                     # Abusing INTERFACE_LINK_LIBRARIES because
@@ -618,14 +643,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             endif()
         endif()
 
-        # Find library includes
-        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
-            find_path(_CORRADE_${_COMPONENT}_INCLUDE_DIR
-                NAMES ${_CORRADE_${_COMPONENT}_INCLUDE_PATH_NAMES}
-                HINTS ${CORRADE_INCLUDE_DIR}/${_CORRADE_${_COMPONENT}_INCLUDE_PATH_SUFFIX})
-            mark_as_advanced(_CORRADE_${_COMPONENT}_INCLUDE_DIR)
-        endif()
-
         # Add inter-library dependencies
         if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS OR _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
             foreach(_dependency ${_CORRADE_${_component}_DEPENDENCIES})
@@ -634,16 +651,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                         INTERFACE_LINK_LIBRARIES Corrade::${_dependency})
                 endif()
             endforeach()
-        endif()
-
-        # Decide if the component was found, unless the _FOUND is already set
-        # by something above.
-        if(NOT DEFINED Corrade_${_component}_FOUND)
-            if((_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE))
-                set(Corrade_${_component}_FOUND TRUE)
-            else()
-                set(Corrade_${_component}_FOUND FALSE)
-            endif()
         endif()
     endif()
 endforeach()
