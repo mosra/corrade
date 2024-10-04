@@ -332,6 +332,7 @@ jobs:
       CONFIGURATION: Release
     steps:
     - install-base-linux
+    - cap-ninja-jobs
     - install-gcc-4_8
     - install-cmake:
         version: "3.5.2"
