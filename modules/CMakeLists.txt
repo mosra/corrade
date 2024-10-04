@@ -41,5 +41,6 @@ if(Corrade_DEPENDENCY_MODULES)
     install(FILES ${Corrade_DEPENDENCY_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR}/dependencies)
 endif()
 
-# Corrade module dir for superprojects
+# Corrade module dirs for superprojects
 set(_CORRADE_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")
+set(CORRADE_DEPENDENCY_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")
