@@ -283,36 +283,24 @@ to `mycmakeargs` in the `*.ebuild` file.
 
 @subsection building-corrade-packages-rpm Packages for Fedora, openSUSE and other RPM-based Linux distributions
 
-Spec files for RPM-based distributions is in `package/rpm/` directory. In
-addition you will need the `rpm-build` package and a `~/.rpmmacros` file, which
-contains at least this:
-
-@code{.spec}
-%_topdir /directory/where/to/store/rpms
-%_tmppath /directory/where/to/do/compilation
-%packager Your Name <your@email.com>
-@endcode
-
-First you need to download or create source tarball. Source tarball can
-be downloaded from GitHub (URL is in spec file), or in the `package/` directory
-there is a script `make-github-like-archive.sh`, which generates exactly the
-same tarballs.
-
-The downloaded or generated tarball must be moved or copied to
-`%{_topdir}/SOURCES` directory, so `rpmbuild` can find it.
-
-When you have the sources, go to `package/rpm/` directory and run this:
+Spec files for RPM-based distributions are in the `package/rpm/` directory. In
+addition you will need to install the following dependencies in order to build
+the packages (assuming Fedora Linux):
 
 @code{.sh}
-rpmbuild -bb corrade.spec
+sudo dnf install fedora-packager rpmdevtools
 @endcode
 
-This will compile and generate library and development RPM for Corrade in
-`%{_topdir}/RPMS`. Install it like this:
+After that, run the `build.sh` script. Internally it queries the Git version,
+makes a tarball, may ask you to install appropriate dependencies if not present
+already, and then builds the package.
 
 @code{.sh}
-rpm -U corrade*.rpm
+./package/rpm/build.sh
 @endcode
+
+At the end, if everything succeeds, you'll have the newly built packages
+located in `~/rpmbuild/RPMS`. The script will print their names at the end.
 
 If you want to pass additional flags to CMake or
 @ref building-corrade-features "enable / disable additional features", edit the
