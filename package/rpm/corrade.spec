@@ -1,30 +1,18 @@
 Name: corrade
 URL: https://magnum.graphics/corrade/
-Version: 0.2
+Version: master
 Release: 1
+Summary: C++11/C++14 multiplatform utility library
 License: MIT
-%if %{defined suse_version}
-Group: System/Libraries
-%else
-Group: System Environment/Libraries
-%endif
-Source: https://github.com/mosra/%{name}/tarball/v%{version}/%{name}-%{version}.tar.gz
+Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: gcc-c++
-BuildRequires: cmake >= 2.6.0
-
-Summary: Multiplatform plugin management and utility library
+BuildRequires: cmake, git, gcc-c++
 
 %description
 Provides debugging, portability, configuration, resource management and
 filesystem utilites and plugin management with dependency handling.
 
 %package devel
-%if %{defined suse_version}
-Group: Development/Libraries/C and C++
-%else
-Group: Development/Libraries
-%endif
 Summary: Corrade development files
 Requires: %{name} = %{version}
 
@@ -32,20 +20,23 @@ Requires: %{name} = %{version}
 Headers and tools needed for developing with Corrade.
 
 %prep
-%setup -q -n mosra-corrade-87ac3ee
+%setup -c -n %{name}-%{version}
 
 %build
 mkdir build && cd build
-cmake .. \
+cmake ../%{name}-%{version} \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-    -DCMAKE_BUILD_TYPE=Release
+    -DCORRADE_BUILD_TESTS=OFF
+
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 cd build
 make DESTDIR=$RPM_BUILD_ROOT install
-strip $RPM_BUILD_ROOT/%{_prefix}/lib*/* $RPM_BUILD_ROOT/%{_prefix}/bin/*
+strip $RPM_BUILD_ROOT/%{_libdir}/*.so*
+strip $RPM_BUILD_ROOT/%{_bindir}/*
 
 %post -p /sbin/ldconfig
 
@@ -56,16 +47,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_prefix}/lib*/*.so.*
-%doc COPYING COPYING.LESSER
+%{_libdir}/*.so*
+
+%doc %{name}-%{version}/COPYING
 
 %files devel
 %defattr(-,root,root,-)
-%{_prefix}/bin/corrade-rc
-%{_prefix}/include/Corrade
-%{_prefix}/share/*/Modules
-%{_prefix}/lib*/*.so
-%doc COPYING COPYING.LESSER
+%{_bindir}/corrade-rc
+%{_includedir}/Corrade
+%{_datadir}/cmake/Corrade
+%{_datadir}/gdb/python/corrade/
 
 %changelog
 * Wed Feb 08 2012 Vladimír Vondruš <mosra@centrum.cz> - 0.2-1
