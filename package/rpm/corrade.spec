@@ -1,6 +1,6 @@
 Name: corrade
 URL: https://magnum.graphics/corrade/
-Version: master
+Version: 2020.06.1745.g8d23e7fc
 Release: 1
 Summary: C++11/C++14 multiplatform utility library
 License: MIT
