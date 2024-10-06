@@ -54,4 +54,4 @@ sudo dnf builddep -y corrade.spec
 rpmbuild --define "debug_package %{nil}" --clean -bb corrade.spec
 
 echo "** packages for corrade-${version_hash} complete:"
-ls -l ~/rpmbuild/RPMS/corrade-${version_hash}*.rpm
+ls ~/rpmbuild/RPMS/$(uname -m)/corrade-${version_hash}*.rpm | cat
