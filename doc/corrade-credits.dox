@@ -84,6 +84,7 @@ Big thanks to everyone involved!
 Is the below list missing your name or something's wrong?
 [Let us know!](https://magnum.graphics/contact/)
 
+-   **[\@1b00](https://github.com/1b00)** --- RPM package
 -   **Aaron Gokaslan** ([\@Skylion007](https://github.com/Skylion007)) ---
     Emscripten LTO support, minor performance fixes
 -   **[\@abgita](https://github.com/abgita)** --- minor typo fixes
@@ -120,6 +121,7 @@ Is the below list missing your name or something's wrong?
     improvements to Debian package building experience
 -   **[\@hsdk123](https://github.com/hsdk123)** --- Android toolchain
     improvements
+-   **Igal Alkon** ([\@alkavan](https://github.com/alkavan)) --- RPM packages
 -   **Ivan Sanz Carasa** ([\@isc30](https://github.com/isc30)) --- Emscripten
     toolchain improvements
 -   **Jackson Campolattaro** ([\@JacksonCampolattaro](https://github.com/JacksonCampolattaro))

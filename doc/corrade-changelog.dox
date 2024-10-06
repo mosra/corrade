@@ -584,6 +584,9 @@ namespace Corrade {
     dependencies in a way that doesn't clash with modules of the same name
     potentially installed by other software, meaning the user doesn't need to
     copy and carry them along anymore (see [mosra/magnum#436](https://github.com/mosra/magnum/issues/436))
+-   Updated the RPM package and added a helper script for building (see
+    [mosra/corrade#125](https://github.com/mosra/corrade/pull/125) and
+    [mosra/corrade#186](https://github.com/mosra/corrade/pull/186))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
