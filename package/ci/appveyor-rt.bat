@@ -14,7 +14,6 @@ cmake .. ^
     -DCORRADE_WITH_TESTSUITE=OFF ^
     -DCORRADE_WITH_UTILITY=OFF ^
     -G Ninja || exit /b
-cmake --build . || exit /b
 cmake --build . --target install || exit /b
 cd .. || exit /b
 
@@ -27,7 +26,7 @@ cmake .. ^
     -DCORRADE_RC_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/deps-native/bin/corrade-rc.exe ^
     -DCORRADE_BUILD_STATIC=ON ^
     -G "%GENERATOR%" || exit /b
-cmake --build . --config Release || exit /b
+cmake --build . --config Release -- /m /v:m  || exit /b
 
 rem Test install, after running the tests as for them it shouldn't be needed
 cmake --build . --config Release --target install || exit /b
