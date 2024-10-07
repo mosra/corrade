@@ -161,44 +161,6 @@ if(CMAKE_CROSSCOMPILING)
     endif()
 endif()
 
-option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
-option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
-option(CORRADE_WITH_TESTSUITE "Build TestSuite library" ON)
-cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORRADE_WITH_INTERCONNECT;NOT CORRADE_WITH_PLUGINMANAGER;NOT CORRADE_WITH_TESTSUITE" ON)
-# If we're crosscompiling and the native executable is found, we can skip
-# building the cross-compiled version. See above for why it's additionally
-# compared against Corrade::rc.
-if(CMAKE_CROSSCOMPILING AND CORRADE_RC_EXECUTABLE AND NOT CORRADE_RC_EXECUTABLE STREQUAL Corrade::rc)
-    option(CORRADE_WITH_RC "Build the corrade-rc utility" ON)
-else()
-    cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
-endif()
-cmake_dependent_option(CORRADE_WITH_MAIN "Build Main library" ON "NOT CORRADE_WITH_TESTSUITE;NOT CORRADE_WITH_RC" ON)
-
-option(CORRADE_BUILD_DEPRECATED "Include deprecated API in the build" ON)
-
-option(CORRADE_BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaneously in multiple threads" ON)
-
-# It's inconvenient to manually load all shared libs using Android / JNI,
-# similarly on Emscripten, so there default to static.
-if(CMAKE_SYSTEM_NAME STREQUAL Android OR CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN ON)
-else()
-    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN OFF)
-endif()
-option(CORRADE_BUILD_STATIC "Build static libraries" ${OFF_EXCEPT_ANDROID_EMSCRIPTEN})
-# Disable PIC on Emscripten by default (but still allow it to be enabled
-# explicitly if one so desired). Currently causes linker errors related to
-# __memory_base etc.: https://github.com/emscripten-core/emscripten/issues/8761
-if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-    set(ON_EXCEPT_EMSCRIPTEN OFF)
-else()
-    set(ON_EXCEPT_EMSCRIPTEN ON)
-endif()
-cmake_dependent_option(CORRADE_BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
-cmake_dependent_option(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
-option(CORRADE_BUILD_TESTS "Build unit tests" OFF)
-
 # Option-independent platform discovery
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
@@ -229,6 +191,44 @@ elseif(WIN32)
         set(CORRADE_TARGET_WINDOWS_RT 1)
     endif()
 endif()
+
+option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
+option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
+option(CORRADE_WITH_TESTSUITE "Build TestSuite library" ON)
+cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORRADE_WITH_INTERCONNECT;NOT CORRADE_WITH_PLUGINMANAGER;NOT CORRADE_WITH_TESTSUITE" ON)
+# If we're crosscompiling and the native executable is found, we can skip
+# building the cross-compiled version. See above for why it's additionally
+# compared against Corrade::rc.
+if(CMAKE_CROSSCOMPILING AND CORRADE_RC_EXECUTABLE AND NOT CORRADE_RC_EXECUTABLE STREQUAL Corrade::rc)
+    option(CORRADE_WITH_RC "Build the corrade-rc utility" ON)
+else()
+    cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
+endif()
+cmake_dependent_option(CORRADE_WITH_MAIN "Build Main library" ON "NOT CORRADE_WITH_TESTSUITE;NOT CORRADE_WITH_RC" ON)
+
+option(CORRADE_BUILD_DEPRECATED "Include deprecated API in the build" ON)
+
+option(CORRADE_BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaneously in multiple threads" ON)
+
+# It's inconvenient to manually load all shared libs using Android / JNI,
+# similarly on Emscripten, so there default to static.
+if(CORRADE_TARGET_ANDROID OR CORRADE_TARGET_EMSCRIPTEN)
+    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN ON)
+else()
+    set(OFF_EXCEPT_ANDROID_EMSCRIPTEN OFF)
+endif()
+option(CORRADE_BUILD_STATIC "Build static libraries" ${OFF_EXCEPT_ANDROID_EMSCRIPTEN})
+# Disable PIC on Emscripten by default (but still allow it to be enabled
+# explicitly if one so desired). Currently causes linker errors related to
+# __memory_base etc.: https://github.com/emscripten-core/emscripten/issues/8761
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(ON_EXCEPT_EMSCRIPTEN OFF)
+else()
+    set(ON_EXCEPT_EMSCRIPTEN ON)
+endif()
+cmake_dependent_option(CORRADE_BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
+cmake_dependent_option(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS "Build static libraries with globals unique across shared libraries" ${ON_EXCEPT_EMSCRIPTEN} "CORRADE_BUILD_STATIC" OFF)
+option(CORRADE_BUILD_TESTS "Build unit tests" OFF)
 
 # Platform-specific options
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS OR CORRADE_TARGET_ANDROID)
