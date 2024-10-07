@@ -200,7 +200,36 @@ cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORR
 # building the cross-compiled version. See above for why it's additionally
 # compared against Corrade::rc.
 if(CMAKE_CROSSCOMPILING AND CORRADE_RC_EXECUTABLE AND NOT CORRADE_RC_EXECUTABLE STREQUAL Corrade::rc)
-    option(CORRADE_WITH_RC "Build the corrade-rc utility" ON)
+    if(NOT CORRADE_TARGET_WINDOWS_RT)
+        option(CORRADE_WITH_RC "Build the corrade-rc utility" ON)
+    else()
+        if(CORRADE_WITH_RC)
+            # Even if there would be an emulator that could run those, the
+            # problem is that later on, find_program() will happily find the
+            # cross-compiled version and treat it as native, likely because
+            # nothing implicitly sets CMAKE_FIND_ROOT_PATH_MODE_PROGRAM to
+            # NEVER when cross-compiling for this damn thing. And having to use
+            # a toolchain to do that is as good as nothing, because when you
+            # forget, nothing will notify you that it found the wrong exe until
+            # your CI builds get silently stuck forever or until you're greeted
+            # with an ugly-ass washed-out-blue dialog with sharp corners saying
+            #
+            #   +-----------------------------------------------------------+
+            #   |                                                           |
+            #   |  THIS APP CAN'T RUN ON YOUR PC                            |
+            #   |                                                           |
+            #   |  To find a version for your PC, check with the software   |
+            #   |  publisher.                                               |
+            #   |                                                 +-------+ |
+            #   |                                                 | Close | |
+            #   |                                                 +-------+ |
+            #   +-----------------------------------------------------------+
+            #
+            # Amazing, eh??? So nope, corrade-rc is just not buildable here,
+            # to keep sanity within reasonable bounds.
+            message(FATAL_ERROR "The corrade-rc utility cannot be built when cross-compiling for the UWP platform. Set CORRADE_WITH_RC to OFF and supply a native version of it with CORRADE_RC_EXECUTABLE instead.")
+        endif()
+    endif()
 else()
     cmake_dependent_option(CORRADE_WITH_RC "Build the corrade-rc utility" ON "NOT CORRADE_WITH_UTILITY" ON)
 endif()

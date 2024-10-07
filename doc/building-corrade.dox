@@ -519,7 +519,10 @@ which not:
     anything else, for example to have a native version for
     @ref building-corrade-cross "cross-compiling". Conversely, if a native
     `corrade-rc` is found when cross-compiling, this option can be turned off
-    to not build a cross-compiled executable at all.
+    to not build a cross-compiled executable at all. When cross-compiling for
+    the @ref CORRADE_TARGET_WINDOWS_RT "Windows UWP" platform, this option
+    cannot be enabled, as the resulting executable cannot be run on the host
+    but is otherwise indistinguishable from a native build.
 
 Options controlling the build:
 
