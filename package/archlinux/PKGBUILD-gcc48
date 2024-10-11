@@ -13,6 +13,10 @@ provides=('corrade-git')
 _rootdir=$startdir/../../
 
 build() {
+    # Disable flags unknown to GCC 4.8
+    newcxxflags=$(echo $CXXFLAGS | sed s/-fstack-protector-strong.//g | sed s/.-fno-plt//g | sed s/.-fstack-clash-protection//g | sed s/.-fcf-protection//g | sed "s#.-ffile-prefix-map=${srcdir}=/usr/src/debug/${pkgname}##g")
+    export CXXFLAGS="$newcxxflags"
+
     if [ ! -d "$_rootdir/build-gcc48" ] ; then
         mkdir "$_rootdir/build-gcc48"
         cd "$_rootdir/build-gcc48"
