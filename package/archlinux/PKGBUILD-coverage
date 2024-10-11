@@ -46,7 +46,7 @@ check() {
     lcov --ignore-errors mismatch --directory . --capture --output-file coverage.info
     lcov --extract coverage.info "*/src/Corrade/*" --output-file coverage.info
     lcov --remove coverage.info "*/Test/*" --output-file coverage.info
-    genhtml --output-directory ./coverage coverage.info
+    genhtml --no-function-coverage --missed --output-directory ./coverage coverage.info
 }
 
 package() {
