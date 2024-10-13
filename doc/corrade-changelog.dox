@@ -335,6 +335,8 @@ namespace Corrade {
     constructible or have a @ref NoInit constructor are now usable in
     @cpp constexpr @ce contexts and trivially copyable if the underlying type
     is
+-   Added a @ref Containers::arraySize(U(T::*)[size_]) overload for array
+    members
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

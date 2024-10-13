@@ -563,9 +563,22 @@ static_cast<void>(b);
 /* [arraySize] */
 int data[15];
 
-std::size_t size = Containers::arraySize(data); // size == 15
+std::size_t size = Containers::arraySize(data);         // size == 15
 /* [arraySize] */
 static_cast<void>(size);
+}
+
+{
+/* [arraySize-member] */
+struct A {
+    int data[13];
+} a;
+
+std::size_t size1 = Containers::arraySize(a.data);      // size1 == 13
+std::size_t size2 = Containers::arraySize(&A::data);    // size1 == 13
+/* [arraySize-member] */
+static_cast<void>(size1);
+static_cast<void>(size2);
 }
 
 {

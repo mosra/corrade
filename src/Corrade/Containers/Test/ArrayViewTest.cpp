@@ -1411,19 +1411,29 @@ void ArrayViewTest::size() {
     int a[6]{};
     ArrayView b{a, 3};
     ConstVoidArrayView c{a};
+    struct D {
+        int e[7];
+    } d;
 
     CORRADE_COMPARE(Containers::arraySize(a), 6);
     CORRADE_COMPARE(Containers::arraySize(b), 3);
     CORRADE_COMPARE(Containers::arraySize(c), 24);
+    CORRADE_COMPARE(Containers::arraySize(d.e), 7);
+    CORRADE_COMPARE(Containers::arraySize(&D::e), 7);
 
     constexpr ConstArrayView cb{Array13, 3};
     constexpr ConstVoidArrayView cc{Array13};
+    constexpr D cd{};
     constexpr std::size_t sizeA = Containers::arraySize(Array13);
     constexpr std::size_t sizeB = Containers::arraySize(cb);
     constexpr std::size_t sizeC = Containers::arraySize(cc);
+    constexpr std::size_t sizeD1 = Containers::arraySize(cd.e);
+    constexpr std::size_t sizeD2 = Containers::arraySize(&D::e);
     CORRADE_COMPARE(sizeA, 13);
     CORRADE_COMPARE(sizeB, 3);
     CORRADE_COMPARE(sizeC, 52);
+    CORRADE_COMPARE(sizeD1, 7);
+    CORRADE_COMPARE(sizeD2, 7);
 }
 
 }}}}

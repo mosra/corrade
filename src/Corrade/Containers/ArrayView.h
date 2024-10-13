@@ -1067,9 +1067,9 @@ template<class U> ArrayView<U> arrayCast(ArrayView<void> view) {
 /** @relatesalso ArrayView
 @brief Array view size
 
-Alias to @ref ArrayView::size(), useful as a shorthand in cases like this:
-
-@snippet Containers.cpp arraySize
+Alias to @ref ArrayView::size(). See also @ref arraySize(T(&)[size_]) for
+querying size of a C array and @ref arraySize(U(T::*)[size_]) for querying size
+of a C array member.
 */
 template<class T> constexpr std::size_t arraySize(ArrayView<T> view) {
     return view.size();
@@ -1080,8 +1080,28 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(StaticArray
     return size_;
 }
 
-/** @overload */
+/**
+@brief C array size
+
+Equivalent to @ref std::size() from C++17. See also @ref arraySize(U(T::*)[size_])
+for querying size of an array member.
+
+@snippet Containers.cpp arraySize
+*/
 template<std::size_t size_, class T> constexpr std::size_t arraySize(T(&)[size_]) {
+    return size_;
+}
+
+/**
+@brief C array member size
+@m_since_latest
+
+Variant of @ref arraySize(T(&)[size_]) that works on array members. Note that
+you have to form a pointer to a member with @cpp & @ce for this to work:
+
+@snippet Containers.cpp arraySize-member
+*/
+template<std::size_t size_, class T, class U> constexpr std::size_t arraySize(U(T::*)[size_]) {
     return size_;
 }
 
