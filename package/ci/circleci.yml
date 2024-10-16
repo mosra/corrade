@@ -21,7 +21,7 @@ executors:
     macos:
       xcode: 13.4.1
     resource_class: macos.m1.medium.gen1
-  emscripten:
+  emscripten1:
     docker:
     # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
     # randomly asserts: https://github.com/emscripten-core/emscripten/pull/9742
@@ -29,15 +29,34 @@ executors:
     # filesystem race and randomly complains that a file doesn't exist:
     # https://github.com/mosra/magnum/issues/413,
     # https://github.com/emscripten-core/emscripten/pull/10161
-    #
-    # Regarding SIMD, while 1.39.6 supports some WIP variant of it, the
-    # finalized support is only since 2.0.18 (and then the first non-broken
-    # emsdk is 2.0.25). But emsdk ships with Node.js 14, and only Node.js 15
-    # supports intrinsics that Emscripten 2.0.18 can produce, so there's no
-    # point in even trying, we wouldn't be able to run the tests anyway.
-    # TODO: revisit when https://github.com/emscripten-core/emsdk/issues/1064
-    #   or any other referenced issues are finally resolved
     - image: emscripten/emsdk:1.39.6-upstream
+  emscripten2:
+    docker:
+    # While 1.39.6 supports some WIP variant of SIMD, the finalized support is
+    # only since 2.0.18, and then the first non-broken emsdk is 2.0.25. But
+    # emsdk ships with Node.js 14, and only Node.js 15+ supports intrinsics
+    # that Emscripten 2.0.18 can produce, so we have to install our own in
+    # order to actually test the SIMD code. Node.js upgrade in emsdk itself is
+    # tracked in https://github.com/emscripten-core/emsdk/issues/1064, as of
+    # October 2024 it's still open but emsdk 3.1.36+ contains Node 15, 3.1.42+
+    # Node 16 and 3.1.61+ Node 18.
+    #
+    # HOWEVER, 2.0.25 has something fishy that causes Utility::allocateAligned()
+    # to return pointers that aren't actually aligned. That's fixed with
+    # 2.0.26, which is what is used here. 2.0.26+ then has a problem in the
+    # file embedder, where zero-size files are reported as having 3 bytes. The
+    # changelog between 2.0.25 and 2.0.26 doesn't mention anything related, the
+    # only related change I found was this, going into 2.0.25 already, and I
+    # suspect it's something related to padding in base64 decode. The affected
+    # test cases have a corresponding XFAIL.
+    #  https://github.com/emscripten-core/emscripten/pull/14526
+    # This then happens in *all* versions until 3.1.3 *a year later*, where the
+    # "fix" is that they ditched the (broken?) base64 embedding in favor of a
+    # binary embed, linked below. Which OTOH breaks Unicode filename support,
+    # and that is still the case even with 3.1.67, so there's a corresponding
+    # XFAIL for all test cases involving empty files. YAY! TOOLCHAIN FROM HELL!
+    #  https://github.com/emscripten-core/emscripten/pull/16050
+    - image: emscripten/emsdk:2.0.26
   python-3_6:
     docker:
     - image: python:3.6.12
@@ -198,6 +217,25 @@ commands:
           source $BASH_ENV
           cmake --version | grep << parameters.version >>
           ctest --version | grep << parameters.version >>
+
+  install-nodejs:
+    parameters:
+      version:
+        type: string
+        default: "18"
+    steps:
+    - run:
+        name: Install Node.js << parameters.version >>
+        # cd'ing to the home directory as otherwise it'd download into
+        # /root/project and a checkout would then fail because it's not empty.
+        # Also emsdk forces the PATH to prefer its own nodejs, so explicitly
+        # call /usr/bin/node.
+        command: |
+          cd ~
+          curl -fsSL https://deb.nodesource.com/setup_<< parameters.version >>.x -o nodesource_setup.sh
+          bash nodesource_setup.sh
+          apt-get install -y nodejs
+          /usr/bin/node -v
 
   make-expected-linux-dirs:
     steps:
@@ -392,10 +430,27 @@ jobs:
         script: unix-desktop.sh
     - lcov
 
-  emscripten:
-    executor: emscripten
+  emscripten1:
+    executor: emscripten1
     steps:
     - install-base-linux
+    - run:
+        name: Query CMake version
+        command: cmake --version
+    - build:
+        script: emscripten.sh
+
+  emscripten2:
+    executor: emscripten2
+    environment:
+      # emsdk forces the PATH to prefer its own nodejs, so explicitly force
+      # /usr/bin/node to be used by CMake
+      EXTRA_OPTS: >
+        -DNODEJS_EXECUTABLE=/usr/bin/node
+    steps:
+    - install-base-linux:
+        extra: curl
+    - install-nodejs
     - run:
         name: Query CMake version
         command: cmake --version
@@ -480,7 +535,10 @@ workflows:
         requires:
         - linux-arm64
         - linux-static
-    - emscripten:
+    - emscripten1:
+        requires:
+        - linux-static
+    - emscripten2:
         requires:
         - linux-static
     - android-x86:

@@ -12,6 +12,7 @@ cmake .. \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     -DCORRADE_BUILD_TESTS=ON \
+    $EXTRA_OPTS \
     -G Ninja
 ninja
 
@@ -32,5 +33,6 @@ cmake ../src/examples \
     -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" \
     -DCMAKE_FIND_ROOT_PATH=$HOME/deps \
     -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
+    $EXTRA_OPTS \
     -G Ninja
 ninja
