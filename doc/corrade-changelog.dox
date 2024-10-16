@@ -116,8 +116,9 @@ namespace Corrade {
     alternative to @ref std::string
 -   New @ref Containers::BasicStringView "Containers::StringView" class as a
     lightweight but more flexible alternative to C++17 @ref std::string_view.
-    See also [mosra/corrade#123](https://github.com/mosra/corrade/issues/123)
-    and [mosra/corrade#171](https://github.com/mosra/corrade/issues/171).
+    See also [mosra/corrade#123](https://github.com/mosra/corrade/issues/123),
+    [mosra/corrade#171](https://github.com/mosra/corrade/issues/171) and
+    [mosra/corrade#188](https://github.com/mosra/corrade/issues/188).
 -   New @ref Containers::MoveReference and @ref Containers::AnyReference
     counterparts to @ref Containers::Reference for exclusively r-value
     references and both l-value and r-value references
