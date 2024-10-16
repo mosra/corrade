@@ -577,6 +577,7 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
        overlapping back with the previous already-searched elements */
     if(i < end) {
         CORRADE_INTERNAL_DEBUG_ASSERT(i + 16 > end);
+        i = end - 16;
         const uint8x16_t chunk = vld1q_u8(reinterpret_cast<const std::uint8_t*>(i));
         const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
         const uint64x1_t shrn64 = vreinterpret_u64_u8(vshrn_n_u16(eq16, 4));
