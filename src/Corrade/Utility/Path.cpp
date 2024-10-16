@@ -246,9 +246,9 @@ bool exists(const Containers::StringView filename) {
 namespace {
 
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-/* Used by fileSize(), read(), copy() source and mapRead() to prevent really
-   bad issues. For directories lseek() returns 9223372036854775807 (2^63 - 1,
-   and thus causing an allocation failure) or maybe also 0 (and thus a silent
+/* Used by size(), read(), copy() source and mapRead() to prevent really bad
+   issues. For directories lseek() returns 9223372036854775807 (2^63 - 1, and
+   thus causing an allocation failure) or maybe also 0 (and thus a silent
    error); fread() will always read 0 bytes no matter what lseek() reports.
    Such behavior is everything but useful. The lseek() value is also
    undocumented, so we can't just check the value to know we opened a

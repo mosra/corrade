@@ -333,7 +333,7 @@ void ResourceCompileTest::compileFromNullTerminatedAligned() {
 }
 
 void ResourceCompileTest::compileFromNullTerminatedLastFile() {
-    /* output same as compileFromNullTerminatedLastFile() */
+    /* output same as compileNullTerminatedLastFile() */
     Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-null-terminated-last-file.conf");
     CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestNullTerminatedLastFileData", conf),
         Path::join(RESOURCE_TEST_DIR, "compiled-null-terminated-last-file.cpp"),
@@ -341,7 +341,7 @@ void ResourceCompileTest::compileFromNullTerminatedLastFile() {
 }
 
 void ResourceCompileTest::compileFromAlignmentLargerThanDataSize() {
-    /* output same as compileFromAlignmentLargerThanDataSize() */
+    /* output same as compileAlignmentLargerThanDataSize() */
     Containers::String conf = Path::join(RESOURCE_TEST_DIR, "resources-alignment-larger-than-data-size.conf");
     CORRADE_COMPARE_AS(Implementation::resourceCompileFrom("ResourceTestAlignmentLargerThanDataSizeData", conf),
         Path::join(RESOURCE_TEST_DIR, "compiled-alignment-larger-than-data-size.cpp"),
