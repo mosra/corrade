@@ -37,6 +37,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
@@ -2368,15 +2369,16 @@ void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
-       so there's just two unaligned blocks overlapping in a single byte:
+       so there's just two unaligned blocks overlapping with two bytes. Cannot
+       overlap with just one byte as that'd mean one of them has to be aligned.
 
-           +----+
-           |f   |
-           +----+
+           +-----+
+          X|f  gh|
+           +-----+
         | .. | .. | .. |
-               +----+
-               |   g|
-               +----+
+              +-----+
+              |ghi j|Y
+              +-----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -2384,20 +2386,40 @@ void StringViewTest::findCharacterUnalignedLessThanTwoVectors() {
     else if(data.vectorSize == 32)
         a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-    MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    MutableStringView string = a.sliceSize(1, data.vectorSize*2 - 2);
+    /* The data pointer shouldn't be aligned, and the first (and only) aligned
+       position inside shouldn't fit a whole vector */
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE_AS(a.data() + 2*data.vectorSize, static_cast<void*>(string.end()),
+        TestSuite::Compare::Greater);
 
     /* First byte should be handled by the initial unaligned check */
     string[0] = 'f';
     CORRADE_COMPARE(string.find('f').data() - string.data(), 0);
 
-    /* Last byte should be handled by the final unaligned check */
-    string[string.size() - 1] = 'g';
-    CORRADE_COMPARE(string.find('g').data() - string.data(), data.vectorSize*2 - 2);
+    /* Bytes right before the end of the first vector should be handled by the
+       initial unaligned check */
+    string[data.vectorSize - 2] = 'g';
+    string[data.vectorSize - 1] = 'h';
+    CORRADE_COMPARE(string.find('g').data() - string.data(), data.vectorSize - 2);
+    CORRADE_COMPARE(string.find('h').data() - string.data(), data.vectorSize - 1);
 
-    /* A character that's not found should be handled properly here as well */
-    CORRADE_VERIFY(!string.find('h'));
+    /* A byte right after the end of the first vector should be handled by the
+       final unaligned check */
+    string[data.vectorSize] = 'i';
+    CORRADE_COMPARE(string.find('i').data() - string.data(), data.vectorSize);
+
+    /* Last byte should be handled by the final unaligned check */
+    string[string.size() - 1] = 'j';
+    CORRADE_COMPARE(string.find('j').data() - string.data(), string.size() - 1);
+
+    /* Characters right before or right after the string shouldn't be found */
+    *(string.begin() - 1) = 'X';
+    CORRADE_VERIFY(!string.find('X'));
+
+    *string.end() = 'Y';
+    CORRADE_VERIFY(!string.find('Y'));
 }
 
 void StringViewTest::findCharacterUnalignedLessThanOneVector() {
@@ -3380,17 +3402,16 @@ void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
-       so there's just one byte for both the initial and final unaligned block:
+       so there's just two unaligned blocks overlapping with two bytes. Cannot
+       overlap with just one byte as that'd mean one of them has to be aligned.
 
-            +----+
-            |    |
-            +----+
-             +----+
-        | .. |    | .. |
-             +----+
-              +----+
-              |    |
-              +----+
+           +-----+
+           |     |
+           +-----+
+        | .. | .. | .. |
+              +-----+
+              |     |
+              +-----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -3398,14 +3419,19 @@ void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
     else if(data.vectorSize == 32)
         a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-    MutableStringView string = a.slice(data.vectorSize - 1, data.vectorSize*2 + 1);
+    MutableStringView string = a.sliceSize(1, data.vectorSize*2 - 2);
+    /* The data pointer shouldn't be aligned, and the first (and only) aligned
+       position inside shouldn't fit a whole vector */
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE_AS(a.data() + 2*data.vectorSize, static_cast<void*>(string.end()),
+        TestSuite::Compare::Greater);
 
     /* Fill the string with consecutive characters, each should be found
-       exactly once even though it's matched in up to all three vectors. The
+       exactly once even though it's matched in either one or both vectors. The
        countCharacterUnaligned() case above tested other misalignments of both
-       the initial and final vector sufficiently so there's no slicing here. */
+       the initial and final vector sufficiently as well as overlap between the
+       unaligned vectors and the aligned vectors so there's no slicing here. */
     for(std::size_t i = 0; i != string.size(); ++i)
         string[i] = i;
     for(std::size_t i = 0; i != string.size(); ++i)
@@ -3413,9 +3439,17 @@ void StringViewTest::countCharacterUnalignedLessThanTwoVectors() {
 
     /* Then fill everything with the same character and verify it's found in
        all positions */
-    for(char& i: string)
-        i = '#';
+    /** @todo have Utility::fill(), finally */
+    Utility::copy("#"_s*string.size(), string);
     CORRADE_COMPARE(string.count('#'), string.size());
+
+    /* The counting shouldn't count outside of the string */
+    Utility::copy("X"_s*a.size(), a);
+    CORRADE_COMPARE(string.count('X'), string.size());
+
+    /* And neither if the actual string doesn't contain the character at all */
+    Utility::copy(" "_s*string.size(), string);
+    CORRADE_COMPARE(string.count('X'), 0);
 }
 
 void StringViewTest::countCharacterUnalignedLessThanOneVector() {

@@ -927,15 +927,16 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
-       so there's just two unaligned blocks overlapping in a single byte:
+       so there's just two unaligned blocks overlapping with two bytes. Cannot
+       overlap with just one byte as that'd mean one of them has to be aligned.
 
-           +----+
-           |b   |
-           +----+
+           +-----+
+          X|4  32|
+           +-----+
         | .. | .. | .. |
-               +----+
-               |   a|
-               +----+
+              +-----+
+              |321 0|Y
+              +-----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -943,9 +944,13 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
     else if(data.vectorSize == 32)
         a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    Containers::MutableStringView string = a.sliceSize(1, data.vectorSize*2 - 2);
+    /* The data pointer shouldn't be aligned, and the first (and only) aligned
+       position inside shouldn't fit a whole vector */
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE_AS(a.data() + 2*data.vectorSize, static_cast<void*>(string.end()),
+        TestSuite::Compare::Greater);
 
     /* Make sure the string isn't a multiple of vector size, copy it to the
        view to preserve the alignment */
@@ -962,6 +967,16 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
         CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
         CORRADE_COMPARE(prefix1.size(), string.size());
         CORRADE_COMPARE(prefix2.size(), string.size());
+
+    /* Common prefix where the suffix is also the same shouldn't result in
+       output that's longer than the input */
+    } {
+        Containers::StringView prefix1 = String::commonPrefix(source.exceptSuffix(1), string.exceptSuffix(1));
+        Containers::StringView prefix2 = String::commonPrefix(string.exceptSuffix(1), source.exceptSuffix(1));
+        CORRADE_COMPARE(prefix1.data(), static_cast<const void*>(source.data()));
+        CORRADE_COMPARE(prefix2.data(), static_cast<const void*>(string.data()));
+        CORRADE_COMPARE(prefix1.size(), string.size() - 1);
+        CORRADE_COMPARE(prefix2.size(), string.size() - 1);
 
     /* If the strings are the same, it should return them whole */
     } {
@@ -984,11 +999,27 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
         CORRADE_COMPARE(prefix2.size(), position);
     };
 
+    /* Characters changed right before or right after the string shouldn't
+       affect anything */
+    *(string.begin() - 1) = 'X';
+    *string.end() = 'Y';
+    CORRADE_COMPARE(String::commonPrefix(source, string), string);
+    CORRADE_COMPARE(String::commonPrefix(string, source), string);
+
     /* Last byte should be handled by the final unaligned check */
-    verify(string.size() - 1, 'b');
+    verify(string.size() - 1, '0');
+
+    /* A byte right after the end of the first vector should be handled by the
+       final unaligned check */
+    verify(data.vectorSize, '1');
+
+    /* Bytes right before the end of the first vector should be handled by the
+       initial unaligned check */
+    verify(data.vectorSize - 1, '2');
+    verify(data.vectorSize - 2, '3');
 
     /* First byte should be handled by the initial unaligned check */
-    verify(0, 'c');
+    verify(0, '4');
 }
 
 void StringTest::commonPrefixUnalignedLessThanOneVector() {
@@ -1404,15 +1435,16 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
-       so there's just two unaligned blocks overlapping in a single byte:
+       so there's just two unaligned blocks overlapping with two bytes. Cannot
+       overlap with just one byte as that'd mean one of them has to be aligned.
 
-           +----+
-           |    |
-           +----+
+           +-----+
+           |     |
+           +-----+
         | .. | .. | .. |
-               +----+
-               |    |
-               +----+
+              +-----+
+              |     |
+              +-----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -1420,9 +1452,13 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
     else if(data.vectorSize == 32)
         a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    Containers::MutableStringView string = a.sliceSize(1, data.vectorSize*2 - 2);
+    /* The data pointer shouldn't be aligned, and the first (and only) aligned
+       position inside shouldn't fit a whole vector */
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE_AS(a.data() + 2*data.vectorSize, static_cast<void*>(string.end()),
+        TestSuite::Compare::Greater);
 
     /* Test data copied to the view to preserve the above mem layout. The
        string is 17 characters to not be exactly the same for each vector to
@@ -1449,6 +1485,20 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
     Utility::copy(("tHiSiSaRaNsOmYeAh"_s*count).prefix(string.size()), string);
     CORRADE_COMPARE(String::lowercase(Containers::StringView{string}), Containers::StringView{"thisisaransomyeah"_s*count}.prefix(string.size()));
     CORRADE_COMPARE(String::uppercase(Containers::StringView{string}), Containers::StringView{"THISISARANSOMYEAH"_s*count}.prefix(string.size()));
+
+    /* Data outside of the string shouldn't be affected by the process */
+    /** @todo have Utility::fill(), finally */
+    Utility::copy("X"_s*a.size(), a);
+    String::lowercaseInPlace(string);
+    CORRADE_COMPARE(string, "x"_s*string.size());
+    CORRADE_COMPARE(*(string.begin() - 1), 'X');
+    CORRADE_COMPARE(*string.end(), 'X');
+
+    Utility::copy("z"_s*a.size(), a);
+    String::uppercaseInPlace(string);
+    CORRADE_COMPARE(string, "Z"_s*string.size());
+    CORRADE_COMPARE(*(string.begin() - 1), 'z');
+    CORRADE_COMPARE(*string.end(), 'z');
 }
 
 void StringTest::lowercaseUppercaseLessThanOneVector() {
@@ -1909,15 +1959,16 @@ void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
 
     /* Allocating an array to not have it null-terminated or SSO'd in order to
        trigger ASan if the algorithm goes OOB. Also, aligned, but then slicing
-       so there's just two unaligned blocks overlapping in a single byte:
+       so there's just two unaligned blocks overlapping with two bytes. Cannot
+       overlap with just one byte as that'd mean one of them has to be aligned.
 
-           +----+
-           |    |
-           +----+
+           +-----+
+           |     |
+           +-----+
         | .. | .. | .. |
-               +----+
-               |    |
-               +----+
+              +-----+
+              |     |
+              +-----+
     */
     Containers::Array<char> a;
     if(data.vectorSize == 16)
@@ -1925,9 +1976,13 @@ void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
     else if(data.vectorSize == 32)
         a = Utility::allocateAligned<char, 32>(Corrade::ValueInit, data.vectorSize*3);
     else CORRADE_INTERNAL_ASSERT_UNREACHABLE();
-    Containers::MutableStringView string = a.slice(2, 2 + data.vectorSize*2 - 1);
+    Containers::MutableStringView string = a.sliceSize(1, data.vectorSize*2 - 2);
+    /* The data pointer shouldn't be aligned, and the first (and only) aligned
+       position inside shouldn't fit a whole vector */
     CORRADE_COMPARE_AS(string.data(), data.vectorSize,
         TestSuite::Compare::NotAligned);
+    CORRADE_COMPARE_AS(a.data() + 2*data.vectorSize, static_cast<void*>(string.end()),
+        TestSuite::Compare::Greater);
 
     /* Test data copied to the view to preserve the above mem layout. The
        string is 17 characters to not be exactly the same for each vector to
@@ -1937,6 +1992,20 @@ void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
     Utility::copy(("H e ll o w or ld!"_s*count).prefix(string.size()), string);
     String::replaceAllInPlace(string, ' ', '-');
     CORRADE_COMPARE(string, ("H-e-ll-o-w-or-ld!"_s*count).prefix(string.size()));
+
+    /* Inverse of the above */
+    Utility::copy((" H e  l l o  !   "_s*count).prefix(string.size()), string);
+    String::replaceAllInPlace(string, ' ', '-');
+    CORRADE_COMPARE(string, ("-H-e--l-l-o--!---"_s*count).prefix(string.size()));
+
+    /* Characters right before or right after the string shouldn't be
+       affected by the process */
+    /** @todo have Utility::fill(), finally */
+    Utility::copy("X"_s*a.size(), a);
+    String::replaceAllInPlace(string, 'X', 'Y');
+    CORRADE_COMPARE(string, "Y"_s*string.size());
+    CORRADE_COMPARE(*(string.begin() - 1), 'X');
+    CORRADE_COMPARE(*string.end(), 'X');
 }
 
 void StringTest::replaceAllInPlaceCharacterLessThanOneVector() {
