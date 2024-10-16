@@ -45,14 +45,13 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/System.h"
+#ifdef CORRADE_TARGET_APPLE
+#include "Corrade/Utility/System.h" /* isSandboxed() */
+#endif
 
 #ifdef CORRADE_TARGET_UNIX
 /* Needed for chdir() in currentInvalid() */
 #include <unistd.h>
-#endif
-
-#ifdef CORRADE_TARGET_APPLE
-#include "Corrade/Utility/System.h" /* isSandboxed() */
 #endif
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version

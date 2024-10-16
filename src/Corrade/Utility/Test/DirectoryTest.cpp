@@ -45,6 +45,14 @@
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#ifdef CORRADE_TARGET_APPLE
+#include "Corrade/Utility/System.h" /* isSandboxed() */
+#endif
+
+#ifdef CORRADE_TARGET_UNIX
+/* Needed for chdir() in currentInvalid() */
+#include <unistd.h>
+#endif
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
    3.1.4 moved them to a version header and version 3.1.23 dropped the
@@ -57,15 +65,6 @@
 #endif
 
 #include "configure.h"
-
-#ifdef CORRADE_TARGET_UNIX
-/* Needed for chdir() in currentInvalid() */
-#include <unistd.h>
-#endif
-
-#ifdef CORRADE_TARGET_APPLE
-#include "Corrade/Utility/System.h" /* isSandboxed() */
-#endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
