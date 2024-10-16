@@ -48,6 +48,9 @@
 #ifdef CORRADE_TARGET_APPLE
 #include "Corrade/Utility/System.h" /* isSandboxed() */
 #endif
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
+#endif
 
 #ifdef CORRADE_TARGET_UNIX
 /* Needed for chdir() in currentInvalid() */
@@ -1602,8 +1605,13 @@ void DirectoryTest::fileSizeEmpty() {
        base64 decode. This problem is gone in 3.1.3, where they replace the
        base64 file embedding with putting a binary directly to wasm in
        https://github.com/emscripten-core/emscripten/pull/16050. Which then
-       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere. */
-    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere.
+
+       Also seems to happen only with Node.js 14 that's bundled with emsdk, not
+       with external version 18. Node.js 15+ is only bundled with emsdk 3.1.35+
+       which doesn't suffer from this 3-byte bug anymore. */
+    CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+        "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
     CORRADE_COMPARE(Directory::fileSize(empty), 0);
 }
@@ -1715,8 +1723,13 @@ void DirectoryTest::readEmpty() {
        base64 decode. This problem is gone in 3.1.3, where they replace the
        base64 file embedding with putting a binary directly to wasm in
        https://github.com/emscripten-core/emscripten/pull/16050. Which then
-       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere. */
-    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere.
+
+       Also seems to happen only with Node.js 14 that's bundled with emsdk, not
+       with external version 18. Node.js 15+ is only bundled with emsdk 3.1.35+
+       which doesn't suffer from this 3-byte bug anymore. */
+    CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+        "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
     CORRADE_VERIFY(!Directory::read(empty));
 }
@@ -2054,8 +2067,13 @@ void DirectoryTest::copyEmpty() {
        base64 decode. This problem is gone in 3.1.3, where they replace the
        base64 file embedding with putting a binary directly to wasm in
        https://github.com/emscripten-core/emscripten/pull/16050. Which then
-       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere. */
-    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere.
+
+       Also seems to happen only with Node.js 14 that's bundled with emsdk, not
+       with external version 18. Node.js 15+ is only bundled with emsdk 3.1.35+
+       which doesn't suffer from this 3-byte bug anymore. */
+    CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+        "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
     CORRADE_COMPARE_AS(destination, "",
         TestSuite::Compare::FileToString);

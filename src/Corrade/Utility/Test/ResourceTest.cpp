@@ -41,6 +41,9 @@
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/Implementation/Resource.h"
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
+#endif
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
    3.1.4 moved them to a version header and version 3.1.23 dropped the
@@ -451,8 +454,14 @@ void ResourceTest::nullTerminatedAligned() {
                binary directly to wasm in
                 https://github.com/emscripten-core/emscripten/pull/16050
                Which then however breaks UTF-8 paths, see the CORRADE_SKIP()
-               elsewhere. */
-            CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+               elsewhere.
+
+               Also seems to happen only with Node.js 14 that's bundled with
+               emsdk, not with external version 18. Node.js 15+ is only bundled
+               with emsdk 3.1.35+ which doesn't suffer from this 3-byte bug
+               anymore. */
+            CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+                "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
             #endif
             CORRADE_COMPARE_AS(file,
                 Path::join(RESOURCE_TEST_DIR, "empty.bin"),
@@ -465,7 +474,8 @@ void ResourceTest::nullTerminatedAligned() {
         {
             #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
             /* See above */
-            CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+            CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+                "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
             #endif
             CORRADE_COMPARE_AS(file,
                 Path::join(RESOURCE_TEST_DIR, "empty.bin"),
@@ -478,7 +488,8 @@ void ResourceTest::nullTerminatedAligned() {
         {
             #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
             /* See above */
-            CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+            CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+                "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
             #endif
             CORRADE_COMPARE_AS(file,
                 Path::join(RESOURCE_TEST_DIR, "empty.bin"),
@@ -569,8 +580,14 @@ void ResourceTest::alignmentLargerThanDataSize() {
                binary directly to wasm in
                 https://github.com/emscripten-core/emscripten/pull/16050
                Which then however breaks UTF-8 paths, see the CORRADE_SKIP()
-               elsewhere. */
-            CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+               elsewhere.
+
+               Also seems to happen only with Node.js 14 that's bundled with
+               emsdk, not with external version 18. Node.js 15+ is only bundled
+               with emsdk 3.1.35+ which doesn't suffer from this 3-byte bug
+               anymore. */
+            CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+                "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
             #endif
             CORRADE_COMPARE_AS(file,
                 Path::join(RESOURCE_TEST_DIR, "empty.bin"),
@@ -695,8 +712,13 @@ void ResourceTest::singleEmpty() {
        base64 decode. This problem is gone in 3.1.3, where they replace the
        base64 file embedding with putting a binary directly to wasm in
        https://github.com/emscripten-core/emscripten/pull/16050. Which then
-       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere. */
-    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+       however breaks UTF-8 paths, see the CORRADE_SKIP() elsewhere.
+
+       Also seems to happen only with Node.js 14 that's bundled with emsdk, not
+       with external version 18. Node.js 15+ is only bundled with emsdk 3.1.35+
+       which doesn't suffer from this 3-byte bug anymore. */
+    CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
+        "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
     CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(resourceData_ResourceTestSingleEmptyData), resourceSize_ResourceTestSingleEmptyData}),
         Path::join(RESOURCE_TEST_DIR, "empty.bin"),

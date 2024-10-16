@@ -31,6 +31,9 @@
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Path.h"
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
+#endif
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
    3.1.4 moved them to a version header and version 3.1.23 dropped the
@@ -86,8 +89,13 @@ void FileToStringTest::empty() {
        base64 decode. This problem is gone in 3.1.3, where they replace the
        base64 file embedding with putting a binary directly to wasm in
        https://github.com/emscripten-core/emscripten/pull/16050. Which then
-       however breaks UTF-8 paths, see the CORRADE_SKIP() below. */
-    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+       however breaks UTF-8 paths, see the CORRADE_SKIP() below.
+
+       Also seems to happen only with Node.js 14 that's bundled with emsdk, not
+       with external version 18. Node.js 15+ is only bundled with emsdk 3.1.35+
+       which doesn't suffer from this 3-byte bug anymore. */
+    CORRADE_EXPECT_FAIL_IF(Utility::Test::nodeJsVersionLess(18),
+        "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
     CORRADE_COMPARE_AS(Utility::Path::join(FILETEST_DIR, "empty.txt"), "", Compare::FileToString);
 }
