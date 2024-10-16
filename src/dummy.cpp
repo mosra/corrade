@@ -28,4 +28,10 @@
    library target from OBJECT sources only and you have to provide at least one
    file. Otherwise the generated library gets replaced with self-pointing
    symlink and the build then obviously fails with "File not found" error.
-   Related: http://public.kitware.com/pipermail/cmake/2016-April/063178.html */
+   Related: http://public.kitware.com/pipermail/cmake/2016-April/063178.html
+
+   To fix this, the dummy.cpp is added to all targets which have just OBJECT
+   sources. But only when using the Xcode generator, because on certain
+   compilers such as Emscripten even compiling an empty file is a heavy
+   operation due to Node.js, Java, Python and whatever other bloat running
+   underneath. */

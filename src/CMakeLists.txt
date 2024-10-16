@@ -40,6 +40,23 @@ if(CORRADE_TARGET_WINDOWS)
     add_definitions("-DUNICODE" "-D_UNICODE")
 endif()
 
+# Xxode-generated project files have a limitation that you can't create a
+# library target from OBJECT sources only and you have to provide at least one
+# file. Otherwise the generated library gets replaced with self-pointing
+# symlink and the build then obviously fails with "File not found" error.
+# Related: http://public.kitware.com/pipermail/cmake/2016-April/063178.html
+#
+# To fix this, the dummy.cpp is added to all targets which have just OBJECT
+# sources. But only when using the Xcode generator, because on certain
+# compilers such as Emscripten even compiling an empty file is a heavy
+# operation due to Node.js, Java, Python and whatever other bloat running
+# underneath.
+if(CMAKE_GENERATOR STREQUAL Xcode)
+    set(_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP ${PROJECT_SOURCE_DIR}/src/dummy.cpp)
+else()
+    set(_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP )
+endif()
+
 add_subdirectory(Corrade)
 
 # Corrade include dir for superprojects

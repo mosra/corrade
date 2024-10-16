@@ -70,10 +70,10 @@ target_include_directories(DebugAssertTestObjects PRIVATE $<TARGET_PROPERTY:Corr
 target_compile_definitions(DebugAssertTestObjects PRIVATE "TEST_DEBUG_ASSERT")
 corrade_add_test(UtilityAssertTest
     $<TARGET_OBJECTS:AssertTestObjects>
-    ${PROJECT_SOURCE_DIR}/src/dummy.cpp) # XCode workaround, see file comment for details
+    ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP}) # XCode workaround
 corrade_add_test(UtilityDebugAssertTest
     $<TARGET_OBJECTS:DebugAssertTestObjects>
-    ${PROJECT_SOURCE_DIR}/src/dummy.cpp) # XCode workaround, see file comment for details
+    ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP}) # XCode workaround
 # WILL_FAIL doesn't work for abort() on desktop, test this only on embedded
 # then. Oh well. Also the tests could be just one executable added multiple
 # times with different arguments, but corrade_add_test() doesn't support that,
@@ -81,11 +81,11 @@ corrade_add_test(UtilityDebugAssertTest
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     corrade_add_test(UtilityAssertTestFailAssert
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert true)
     corrade_add_test(UtilityDebugAssertTestFailAssert
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert true)
     set_tests_properties(
         UtilityAssertTestFailAssert
@@ -93,11 +93,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "A should be zero")
     corrade_add_test(UtilityAssertTestFailConstexprAss___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-constexpr-assert true)
     corrade_add_test(UtilityDebugAssertTestFailConsAss___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-constexpr-assert true)
     set_tests_properties(
         UtilityAssertTestFailConstexprAss___
@@ -105,11 +105,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "b can't be zero")
     corrade_add_test(UtilityAssertTestFailInternalAssert
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert true)
     corrade_add_test(UtilityDebugAssertTestFailInteAss___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert true)
     set_tests_properties(
         UtilityAssertTestFailInternalAssert
@@ -117,11 +117,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed at ")
     corrade_add_test(UtilityAssertTestFailInternalConA___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-constexpr-assert true)
     corrade_add_test(UtilityDebugAssertTestFailIntConA___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-constexpr-assert true)
     set_tests_properties(
         UtilityAssertTestFailInternalConA___
@@ -129,11 +129,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "Assertion b failed at ")
     corrade_add_test(UtilityAssertTestFailAssertOutput
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert-output true)
     corrade_add_test(UtilityDebugAssertTestFailAssOutp___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert-output true)
     set_tests_properties(
         UtilityAssertTestFailAssertOutput
@@ -141,11 +141,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
     corrade_add_test(UtilityAssertTestFailInternAssOut___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-output true)
     corrade_add_test(UtilityDebugAssertTestFailIntAssO___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-output true)
     set_tests_properties(
         UtilityAssertTestFailInternAssOut___
@@ -153,11 +153,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed at ")
     corrade_add_test(UtilityAssertTestFailInterAssExpr___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-expression true)
     corrade_add_test(UtilityDebugAssertTestFailInAssEx___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-expression true)
     set_tests_properties(
         UtilityAssertTestFailInterAssExpr___
@@ -165,11 +165,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "Assertion c \\+ \\(_failInternalAssertExpression \\? -3 : 3\\) failed at ")
     corrade_add_test(UtilityAssertTestFailAssertUnreac___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert-unreachable true)
     corrade_add_test(UtilityDebugAssertTestFailAssUnre___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-assert-unreachable true)
     set_tests_properties(
         UtilityAssertTestFailAssertUnreac___
@@ -177,11 +177,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PROPERTIES PASS_REGULAR_EXPRESSION "C should be 3")
     corrade_add_test(UtilityAssertTestFailInterAssUnre___
         $<TARGET_OBJECTS:AssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-unreachable true)
     corrade_add_test(UtilityDebugAssertTestFailInAssUn___
         $<TARGET_OBJECTS:DebugAssertTestObjects>
-        ${PROJECT_SOURCE_DIR}/src/dummy.cpp # XCode workaround, see file comment for details
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
         ARGUMENTS --fail-on-internal-assert-unreachable true)
     set_tests_properties(
         UtilityAssertTestFailInterAssUnre___
