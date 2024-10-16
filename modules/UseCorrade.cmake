@@ -513,7 +513,15 @@ function(corrade_add_test test_name)
             # (2017), so it should be no problem to just pass it there always:
             #   https://github.com/v8/v8/commit/45618a9ab5cc98a5de200b0116670e8c272f0c5f
             if(NodeJs_VERSION VERSION_LESS 17)
-                set(experimental_wasm_simd --experimental-wasm-simd)
+                set(extra_flags --experimental-wasm-simd)
+            # Node.js 18 doesn't work with Emscripten before 3.1.13 unless the
+            # fetch functionality is disabled.
+            #   https://github.com/emscripten-core/emscripten/pull/16917
+            #   https://github.com/emscripten-core/emscripten/issues/16915
+            elseif(NodeJs_VERSION VERSION_GREATER_EQUAL 18.1.0 AND EMSCRIPTEN_VERSION VERSION_LESS 3.1.13)
+                set(extra_flags --no-experimental-fetch)
+            else()
+                set(extra_flags )
             endif()
             # Using NodeJs::NodeJs works only if CMAKE_CROSSCOMPILING_EMULATOR
             # isn't set, as otherwise CMake mistakenly understands it as a
@@ -524,7 +532,7 @@ function(corrade_add_test test_name)
             # the target is imported before prepending the emulator. Using the
             # actual filename stops CMAKE_CROSSCOMPILING_EMULATOR from being
             # added second time.
-            add_test(NAME ${test_name} COMMAND $<TARGET_FILE:NodeJs::NodeJs> ${experimental_wasm_simd} $<TARGET_FILE:${test_name}> ${arguments})
+            add_test(NAME ${test_name} COMMAND $<TARGET_FILE:NodeJs::NodeJs> ${extra_flags} $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
             foreach(file ${files})
