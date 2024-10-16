@@ -687,9 +687,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringFindCharacte
 
     /* Handle remaining less than four aligned vectors */
     for(; i + 16 <= end; i += 16) {
-        const v128_t chunk = wasm_v128_load(data);
+        const v128_t chunk = wasm_v128_load(i);
         if(const int mask = wasm_i8x16_bitmask(wasm_i8x16_eq(chunk, vn1)))
-            return data + __builtin_ctz(mask);
+            return i + __builtin_ctz(mask);
     }
 
     /* Handle remaining less than a vector with an unaligned search, again
