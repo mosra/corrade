@@ -474,11 +474,11 @@ workflows:
         - linux-sanitizers
     - macos:
         requires:
-        - linux
+        - linux-arm64
         - linux-nondeprecated
     - macos-static:
         requires:
-        - macos
+        - linux-arm64
         - linux-static
     - emscripten:
         requires:
@@ -490,5 +490,4 @@ workflows:
     - ios:
         requires:
         - macos-static
-        - linux-arm64
     - acme
