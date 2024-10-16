@@ -80,6 +80,18 @@ void StringToFileTest::same() {
 }
 
 void StringToFileTest::empty() {
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+    /* Emscripten 2.0.26+ has a problem in the file embedder, where zero-size
+       files are reported as having 3 bytes. The changelog between 2.0.25 and
+       2.0.26 doesn't mention anything related, the only related change I found
+       was https://github.com/emscripten-core/emscripten/pull/14526, going into
+       2.0.25 already, and I suspect it's something related to padding in
+       base64 decode. This problem is gone in 3.1.3, where they replace the
+       base64 file embedding with putting a binary directly to wasm in
+       https://github.com/emscripten-core/emscripten/pull/16050. Which then
+       however breaks UTF-8 paths, see the CORRADE_SKIP() below. */
+    CORRADE_EXPECT_FAIL("Emscripten 2.0.26 to 3.1.3 reports empty files as having 3 bytes.");
+    #endif
     CORRADE_COMPARE_AS("", Utility::Path::join(FILETEST_DIR, "empty.txt"), Compare::StringToFile);
 }
 
