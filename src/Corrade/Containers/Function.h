@@ -214,26 +214,26 @@ namespace Implementation {
    Here, instead of having a `VoidT` that eats any type, a function overload
    that accepts one of the four allowed member functions with desired signature
    is picked. If the operator() doesn't exist or none of the possible overloads
-   have given signature, it again falls back to the default.
-
-   Finally, MSVC 2017 (but not 2015) ICEs when it encounters
-   `decltype(functionSignature<T, R, Args...>()`. Fortunately splitting the
-   template argument list into a wrapper struct makes it not crash anymore,
-   however it's still more cryptic than strictly necessary so the
-   straightforward solution is kept for all other compilers instead. */
+   have given signature, it again falls back to the default. */
 template<class T, class Signature, class = void> struct IsFunctor;
 template<class T, class R, class ...Args, class U> struct IsFunctor<T, R(Args...), U> {
     enum: bool { value = false };
 };
-#if !defined(CORRADE_MSVC2017_COMPATIBILITY) || defined(CORRADE_MSVC2015_COMPATIBILITY)
-template<class Class, class R, class ...Args> void functorSignature(R(Class::*)(Args...)) {}
-template<class Class, class R, class ...Args> void functorSignature(R(Class::*)(Args...) &) {}
-template<class Class, class R, class ...Args> void functorSignature(R(Class::*)(Args...) const) {}
-template<class Class, class R, class ...Args> void functorSignature(R(Class::*)(Args...) const &) {}
-template<class T, class R, class ...Args> struct IsFunctor<T, R(Args...), decltype(functorSignature<T, R, Args...>(&T::operator()))> {
-    enum: bool { value = !std::is_convertible<T, R(*)(Args...)>::value };
-};
-#else
+/* Originally this was a set of
+    template<class Class, class R, class ...Args> void functorSignature(R(Class::*)(Args...)) {}
+    ...
+   overloads because that seemed to work as well, was simpler, and this was
+   present only for MSVC 2017 (but not 2015) because it ICEs when it encounters
+   `decltype(functionSignature<T, R, Args...>())`. However, the problem with
+   function template arguments is that they get autodetected if not passed.
+   Thus, with just a function, asking for e.g.
+    functionSignature<T, int>(&T::operator())
+   would match not only `int()` but also `int(float)`, `int(float, short)` and
+   just any other argument combination because they would ultimately match as
+    functionSignature<T, int, float>(&T::operator())
+    functionSignature<T, int, float, short>(&T::operator())
+   etc. The robust solution is to put these templates into a struct instead,
+   where they cannot be auto-filled. */
 template<class> struct FunctorSignature;
 template<class Class, class R,  class ...Args> struct FunctorSignature<R(Class::*)(Args...)> {
     static void match(R(Class::*)(Args...)) {}
@@ -244,7 +244,6 @@ template<class Class, class R,  class ...Args> struct FunctorSignature<R(Class::
 template<class T, class R, class ...Args> struct IsFunctor<T, R(Args...), decltype(FunctorSignature<R(T::*)(Args...)>::match(&T::operator()))> {
     enum: bool { value = !std::is_convertible<T, R(*)(Args...)>::value };
 };
-#endif
 
 }
 

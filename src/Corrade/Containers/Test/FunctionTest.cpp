@@ -2315,7 +2315,7 @@ int argumentOverload(Containers::Function<int(float)>&& a) {
     return a(35.6f);
 }
 /* Is here to verify that it doesn't only match a common prefix of the argument
-   lists */
+   lists. See the FunctorSignature helper in Function.h for details. */
 int argumentOverload(Containers::Function<int()>&& a) {
     return a();
 }
