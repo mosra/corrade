@@ -1433,7 +1433,7 @@ void FunctionTest::constructFunctorPlainStruct() {
 }
 
 void FunctionTest::constructTrivialFunctorOverload() {
-    /* If a functor has multiple overloads, it picks one that best matches the
+    /* If a functor has multiple overloads, it picks one that matches the
        signature */
 
     struct {
