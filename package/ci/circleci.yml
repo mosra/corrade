@@ -434,6 +434,7 @@ jobs:
     executor: emscripten1
     steps:
     - install-base-linux
+    - cap-ninja-jobs
     - run:
         name: Query CMake version
         command: cmake --version
@@ -450,6 +451,8 @@ jobs:
     steps:
     - install-base-linux:
         extra: curl
+    # With a Debug build, 38 is causing OOMs. Release was fine with that.
+    - cap-ninja-jobs
     - install-nodejs
     - run:
         name: Query CMake version

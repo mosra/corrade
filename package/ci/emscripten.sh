@@ -7,14 +7,12 @@ git submodule update --init
 mkdir build-emscripten && cd build-emscripten
 cmake .. \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten-wasm.cmake" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-    -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     -DCORRADE_BUILD_TESTS=ON \
     $EXTRA_OPTS \
     -G Ninja
-ninja
+ninja $NINJA_JOBS
 
 # Test
 CORRADE_TEST_COLOR=ON ctest -V
@@ -29,10 +27,8 @@ cd ..
 mkdir build-examples && cd build-examples
 cmake ../src/examples \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten-wasm.cmake" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_FIND_ROOT_PATH=$HOME/deps \
-    -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     $EXTRA_OPTS \
     -G Ninja
-ninja
+ninja $NINJA_JOBS
