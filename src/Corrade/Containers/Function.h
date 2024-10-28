@@ -235,11 +235,11 @@ template<class T, class R, class ...Args> struct IsFunctor<T, R(Args...), declty
 };
 #else
 template<class> struct FunctorSignature;
-template<class C, class R,  class ...Args> struct FunctorSignature<R(C::*)(Args...)> {
-    static void match(R(C::*)(Args...)) {}
-    static void match(R(C::*)(Args...) &) {}
-    static void match(R(C::*)(Args...) const) {}
-    static void match(R(C::*)(Args...) const &) {}
+template<class Class, class R,  class ...Args> struct FunctorSignature<R(Class::*)(Args...)> {
+    static void match(R(Class::*)(Args...)) {}
+    static void match(R(Class::*)(Args...) &) {}
+    static void match(R(Class::*)(Args...) const) {}
+    static void match(R(Class::*)(Args...) const &) {}
 };
 template<class T, class R, class ...Args> struct IsFunctor<T, R(Args...), decltype(FunctorSignature<R(T::*)(Args...)>::match(&T::operator()))> {
     enum: bool { value = !std::is_convertible<T, R(*)(Args...)>::value };
