@@ -2314,6 +2314,11 @@ int argumentOverload(Containers::Function<int(int)>&& a) {
 int argumentOverload(Containers::Function<int(float)>&& a) {
     return a(35.6f);
 }
+/* Is here to verify that it doesn't only match a common prefix of the argument
+   lists */
+int argumentOverload(Containers::Function<int()>&& a) {
+    return a();
+}
 
 int argumentOverloadA(int a) {
     return a - 3;
@@ -2321,18 +2326,24 @@ int argumentOverloadA(int a) {
 int argumentOverloadB(float a) {
     return int(a*0.1f);
 }
+int argumentOverloadC() {
+    return 1337;
+}
 
 void FunctionTest::functionArgumentOverloadFunction() {
     int(*argumentOverloadAPointer)(int) = argumentOverloadA;
     int(*argumentOverloadBPointer)(float) = argumentOverloadB;
+    int(*argumentOverloadCPointer)() = argumentOverloadC;
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     CORRADE_COMPARE(argumentOverload(argumentOverloadA), 353);
     CORRADE_COMPARE(argumentOverload(argumentOverloadB), 3);
+    CORRADE_COMPARE(argumentOverload(argumentOverloadC), 1337);
     #else
     CORRADE_WARN("MSVC 2015 is unable to perform overload resolution for plain function references, only for function pointers.");
     #endif
     CORRADE_COMPARE(argumentOverload(argumentOverloadAPointer), 353);
     CORRADE_COMPARE(argumentOverload(argumentOverloadBPointer), 3);
+    CORRADE_COMPARE(argumentOverload(argumentOverloadCPointer), 1337);
 }
 
 void FunctionTest::functionArgumentOverloadMemberFunction() {
@@ -2343,10 +2354,14 @@ void FunctionTest::functionArgumentOverloadMemberFunction() {
         int b(float a) {
             return int(a*0.1f);
         }
+        int c() {
+            return 1337;
+        }
     } overload;
 
     CORRADE_COMPARE(argumentOverload({overload, &Overload::a}), 353);
     CORRADE_COMPARE(argumentOverload({overload, &Overload::b}), 3);
+    CORRADE_COMPARE(argumentOverload({overload, &Overload::c}), 1337);
 }
 
 void FunctionTest::functionArgumentOverloadTrivialFunctor() {
@@ -2360,11 +2375,18 @@ void FunctionTest::functionArgumentOverloadTrivialFunctor() {
             return int(a*0.1f);
         }
     } b;
+    struct {
+        int operator()() {
+            return 1337;
+        }
+    } c;
     CORRADE_VERIFY(!Function<int(int)>{a}.isAllocated());
     CORRADE_VERIFY(!Function<int(float)>{b}.isAllocated());
+    CORRADE_VERIFY(!Function<int()>{c}.isAllocated());
 
     CORRADE_COMPARE(argumentOverload(a), 353);
     CORRADE_COMPARE(argumentOverload(b), 3);
+    CORRADE_COMPARE(argumentOverload(c), 1337);
 }
 
 void FunctionTest::functionArgumentOverloadFunctor() {
@@ -2379,7 +2401,6 @@ void FunctionTest::functionArgumentOverloadFunctor() {
             return a - 3;
         }
     } a;
-
     struct B {
         /* To make it non-trivially-copyable */
         ~B() {}
@@ -2388,16 +2409,27 @@ void FunctionTest::functionArgumentOverloadFunctor() {
             return int(a*0.1f);
         }
     } b;
+    struct C {
+        /* To make it non-trivially-copyable */
+        ~C() {}
+
+        int operator()() {
+            return 1337;
+        }
+    } c;
     CORRADE_VERIFY(Function<int(int)>{a}.isAllocated());
     CORRADE_VERIFY(Function<int(float)>{b}.isAllocated());
+    CORRADE_VERIFY(Function<int()>{c}.isAllocated());
 
     CORRADE_COMPARE(argumentOverload(a), 353);
     CORRADE_COMPARE(argumentOverload(b), 3);
+    CORRADE_COMPARE(argumentOverload(c), 1337);
 }
 
 void FunctionTest::functionArgumentOverloadLambda() {
     CORRADE_COMPARE(argumentOverload([](int a) { return a - 3; }), 353);
     CORRADE_COMPARE(argumentOverload([](float a) { return int(a*0.1f); }), 3);
+    CORRADE_COMPARE(argumentOverload([]() { return 1337; }), 1337);
 }
 
 int resultOverload(Containers::Function<int(int)>&& a) {
