@@ -163,7 +163,7 @@ class CORRADE_UTILITY_EXPORT ArrayTuple {
          * pointer and a deleter instance that will be later used to delete the
          * allocation. The allocation alignment is useful mainly when
          * allocating over-aligned types, such as SIMD vectors, as C++ is only
-         * guaranteed to align correctly only for the largest standard typeś.
+         * guaranteed to align correctly only for the largest standard types.
          *
          * The deleter type `D` needs to be one of the following and it gets
          * passed the allocation pointer together with its size (which was
