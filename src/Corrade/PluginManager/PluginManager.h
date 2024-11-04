@@ -32,6 +32,7 @@
 
 #include "Corrade/configure.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace PluginManager {
 
 enum class LoadState: unsigned short;
@@ -44,5 +45,6 @@ template<class> class Manager;
 class PluginMetadata;
 
 }}
+#endif
 
 #endif

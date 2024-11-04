@@ -35,9 +35,9 @@
 
 #include "Corrade/configure.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 /* In case CorradeArray.h from singles is included as well, these two would
    conflict */
 #ifndef CorradeArray_h
@@ -131,8 +131,8 @@ class StringIterable;
 class StringIterableIterator;
 
 template<class, class, class> class Triple;
-#endif
 
 }}
+#endif
 
 #endif

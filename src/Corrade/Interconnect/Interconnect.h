@@ -34,6 +34,7 @@
 
 #include "Corrade/configure.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Interconnect {
 
 class Connection;
@@ -48,5 +49,6 @@ namespace Implementation {
 template<std::size_t, std::size_t, class, class> class StateMachine;
 
 }}
+#endif
 
 #endif

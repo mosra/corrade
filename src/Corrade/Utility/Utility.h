@@ -35,6 +35,7 @@
 #include "Corrade/configure.h"
 #include "Corrade/Containers/Containers.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Utility {
 
 class Arguments;
@@ -80,5 +81,6 @@ enum class TweakableState: unsigned char;
 #endif
 
 }}
+#endif
 
 #endif

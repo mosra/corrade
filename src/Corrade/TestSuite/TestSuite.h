@@ -32,19 +32,19 @@
 
 #include "Corrade/Containers/Containers.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace TestSuite {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 enum class ComparisonStatusFlag: unsigned char;
 typedef Containers::EnumSet<ComparisonStatusFlag> ComparisonStatusFlags;
 template<class> class Comparator;
 /* Tester is always used through inheritance */
-#endif
 
 namespace Implementation {
     template<class, class, class> struct ComparatorTraits;
 }
 
 }}
+#endif
 
 #endif
