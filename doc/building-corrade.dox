@@ -65,111 +65,15 @@ your platform of choice. See @ref building-corrade-manual if you want to have
 more control and @ref building-corrade-cross for cross-compiling to other
 platforms.
 
--   @ref building-corrade-packages-conan
--   @ref building-corrade-packages-hunter
--   @ref building-corrade-packages-vcpkg
 -   @ref building-corrade-packages-arch
 -   @ref building-corrade-packages-msys
 -   @ref building-corrade-packages-deb
 -   @ref building-corrade-packages-gentoo
 -   @ref building-corrade-packages-rpm
 -   @ref building-corrade-packages-brew
-
-@subsection building-corrade-packages-conan Conan package
-
-Starting from version 2018.10, stable releases of Corrade are available in the
-[Conan](https://conan.io/) package manager. You can install a stable version by
-checking out the Git repository and executing the @cb{.sh} conan create @ce
-command:
-
-@code{.sh}
-git clone https://github.com/mosra/corrade && cd corrade
-conan create . magnum/stable -tf package/conan/test_package
-@endcode
-
-The `-tf` argument is optional and ensures the package is built correctly by
-executing a simple test file.
-
-@subsection building-corrade-packages-hunter Hunter package
-
-Starting from version 2018.10, stable releases of Corrade are available in the
-[Hunter](https://hunter.readthedocs.io) CMake-driven package manager. See the
-[corrade package documentation](https://hunter.readthedocs.io/en/latest/packages/pkg/corrade.html)
-for details.
-
-@subsection building-corrade-packages-vcpkg Vcpkg package
-
-Corrade is available as a [Vcpkg](https://github.com/Microsoft/vcpkg) package.
-After setting up Vcpkg as described in their README, it is recommended to set
-the "default triplet". You can do this by setting the `VCPKG_DEFAULT_TRIPLET`
-variable, e.g. to `x64-windows` --- refer to the
-[documentation on triplets](https://vcpkg.readthedocs.io/en/latest/users/triplets/#additional-remarks)
-for other options.
-
-You can then install latest stable version of Corrade like this:
-
-@code{.bat}
-vcpkg install corrade
-@endcode
-
-@m_class{m-block m-success}
-
-@par Installing latest master
-    The `master` is considered stable for production use and often you may want
-    to prefer it over a potentially outdated tagged release. To do so, use
-    the `--head` option:
-@par
-    @code{.bat}
-    vcpkg install --head corrade
-    @endcode
-@par
-    Note that `vcpkg upgrade` doesn't work well with `--head` packages (it will
-    go back to latest tagged version instead of updated master), you have to
-    remove the package and install `--head` again instead:
-@par
-    @code{.bat}
-    vcpkg remove corrade
-    vcpkg install corrade --head
-    @endcode
-
-Not all features are installed by default; only those that are implicitly
-enabled in @ref building-corrade-features. To opt-in or opt-out of additional
-features, you can use the following syntax; feature names are simply names of
-CMake `CORRADE_WITH_*` options but lowercase, e.g.:
-
-@code{.bat}
-vcpkg install corrade[pluginmanager,testsuite]
-@endcode
-
-To install all features of a package, use `*`, e.g.:
-
-@code{.bat}
-vcpkg install corrade[*]
-@endcode
-
-For more information, see the
-[documentation on feature packages](https://vcpkg.readthedocs.io/en/latest/specifications/feature-packages/).
-
-Packages installed using Vcpkg can be used in Visual Studio straight away ---
-all you need to do is to @cpp #include @ce the headers you want and the
-buildsystem will do all needed library linking and setup behind the scenes
-automatically. <em>(Cool, isn't it?)</em>
-
-@note If Visual Studio doesn't find the packages, check its verbose output, it
-    might point to a mismatch of the triplet above or broken Vcpkg integration.
-
-In order to make Corrade installed using Vcpkg available to CMake-based
-projects, specify the Vcpkg toolchain file on the command line when invoking
-CMake in a fresh build directory, for example:
-
-@code{.bat}
-mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/src/vcpkg/scripts/buildsystems/vcpkg.cmake
-@endcode
-
-If you want Vcpkg to pass additional flags to CMake during installation of a
-package, use the `edit` command, e.g. @cb{.bat} vcpkg edit corrade @ce, and
-edit `OPTIONS` in @cmake vcpkg_configure_cmake() @ce.
+-   @ref building-corrade-packages-vcpkg
+-   @ref building-corrade-packages-conan
+-   @ref building-corrade-packages-hunter
 
 @subsection building-corrade-packages-arch ArchLinux packages
 
@@ -330,6 +234,102 @@ brew upgrade --fetch-HEAD mosra/magnum/corrade
 If you want to pass additional flags to CMake or
 @ref building-corrade-features "enable / disable additional features", edit the
 `*.rb` file.
+
+@subsection building-corrade-packages-vcpkg Vcpkg package
+
+Corrade is available as a [Vcpkg](https://github.com/Microsoft/vcpkg) package.
+After setting up Vcpkg as described in their README, it is recommended to set
+the "default triplet". You can do this by setting the `VCPKG_DEFAULT_TRIPLET`
+variable, e.g. to `x64-windows` --- refer to the
+[documentation on triplets](https://vcpkg.readthedocs.io/en/latest/users/triplets/#additional-remarks)
+for other options.
+
+You can then install latest stable version of Corrade like this:
+
+@code{.bat}
+vcpkg install corrade
+@endcode
+
+@m_class{m-block m-success}
+
+@par Installing latest master
+    The `master` is considered stable for production use and often you may want
+    to prefer it over a potentially outdated tagged release. To do so, use
+    the `--head` option:
+@par
+    @code{.bat}
+    vcpkg install --head corrade
+    @endcode
+@par
+    Note that `vcpkg upgrade` doesn't work well with `--head` packages (it will
+    go back to latest tagged version instead of updated master), you have to
+    remove the package and install `--head` again instead:
+@par
+    @code{.bat}
+    vcpkg remove corrade
+    vcpkg install corrade --head
+    @endcode
+
+Not all features are installed by default; only those that are implicitly
+enabled in @ref building-corrade-features. To opt-in or opt-out of additional
+features, you can use the following syntax; feature names are simply names of
+CMake `CORRADE_WITH_*` options but lowercase, e.g.:
+
+@code{.bat}
+vcpkg install corrade[pluginmanager,testsuite]
+@endcode
+
+To install all features of a package, use `*`, e.g.:
+
+@code{.bat}
+vcpkg install corrade[*]
+@endcode
+
+For more information, see the
+[documentation on feature packages](https://vcpkg.readthedocs.io/en/latest/specifications/feature-packages/).
+
+Packages installed using Vcpkg can be used in Visual Studio straight away ---
+all you need to do is to @cpp #include @ce the headers you want and the
+buildsystem will do all needed library linking and setup behind the scenes
+automatically. <em>(Cool, isn't it?)</em>
+
+@note If Visual Studio doesn't find the packages, check its verbose output, it
+    might point to a mismatch of the triplet above or broken Vcpkg integration.
+
+In order to make Corrade installed using Vcpkg available to CMake-based
+projects, specify the Vcpkg toolchain file on the command line when invoking
+CMake in a fresh build directory, for example:
+
+@code{.bat}
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/src/vcpkg/scripts/buildsystems/vcpkg.cmake
+@endcode
+
+If you want Vcpkg to pass additional flags to CMake during installation of a
+package, use the `edit` command, e.g. @cb{.bat} vcpkg edit corrade @ce, and
+edit `OPTIONS` in @cmake vcpkg_configure_cmake() @ce.
+
+@subsection building-corrade-packages-conan Conan package
+
+Starting from version 2018.10, stable releases of Corrade are available in the
+[Conan](https://conan.io/) package manager. You can install a stable version by
+checking out the Git repository and executing the @cb{.sh} conan create @ce
+command:
+
+@code{.sh}
+git clone https://github.com/mosra/corrade && cd corrade
+conan create . magnum/stable -tf package/conan/test_package
+@endcode
+
+The `-tf` argument is optional and ensures the package is built correctly by
+executing a simple test file.
+
+@subsection building-corrade-packages-hunter Hunter package
+
+Starting from version 2018.10, stable releases of Corrade are available in the
+[Hunter](https://hunter.readthedocs.io) CMake-driven package manager. See the
+[corrade package documentation](https://hunter.readthedocs.io/en/latest/packages/pkg/corrade.html)
+for details.
 
 @section building-corrade-manual Manual build
 
