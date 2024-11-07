@@ -648,10 +648,10 @@ void StaticArrayTest::constructInPlaceInitOneArgument() {
 template<class T> void StaticArrayTest::constructInPlaceInitOneArgumentTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    const StaticArray<1, int> a{17};
+    const StaticArray<1, T> a{17};
     CORRADE_COMPARE(a[0], 17);
 
-    constexpr StaticArray<1, int> ca{17};
+    constexpr StaticArray<1, T> ca{17};
     CORRADE_COMPARE(ca[0], 17);
 }
 
@@ -702,7 +702,7 @@ void StaticArrayTest::constructDirectInit() {
 template<class T> void StaticArrayTest::constructDirectInitTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    const StaticArray<5, int> a{Corrade::DirectInit, -37};
+    const StaticArray<5, T> a{Corrade::DirectInit, -37};
     CORRADE_COMPARE(a[0], -37);
     CORRADE_COMPARE(a[1], -37);
     CORRADE_COMPARE(a[2], -37);
