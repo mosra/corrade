@@ -398,14 +398,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * implicitly value-initialize it.
          */
         #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
-        template<std::size_t size> constexpr explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
+        template<std::size_t size> constexpr /*implicit*/ StaticArray(Corrade::InPlaceInitT, const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
             static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
         }
         #else
         /* GCC 4.8 isn't able to figure out the size on its own. Which means
            there we use the type-provided size and lose the check for element
            count, but at least it compiles. */
-        constexpr explicit StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        constexpr /*implicit*/ StaticArray(Corrade::InPlaceInitT, const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
         #endif
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
@@ -425,14 +425,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @ref StaticArray(InPlaceInitT, const T(&)[size])
          */
         #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
-        template<std::size_t size> constexpr explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
+        template<std::size_t size> constexpr /*implicit*/ StaticArray(Corrade::InPlaceInitT, T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
             static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
         }
         #else
         /* GCC 4.8 isn't able to figure out the size on its own. Which means
            there we use the type-provided size and lose the check for element
            count, but at least it compiles. */
-        constexpr explicit StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        constexpr /*implicit*/ StaticArray(Corrade::InPlaceInitT, T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
         #endif
 
@@ -467,14 +467,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
         #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
-        template<std::size_t size> constexpr explicit StaticArray(const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
+        template<std::size_t size> constexpr /*implicit*/ StaticArray(const T(&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, data} {
             static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
         }
         #else
         /* GCC 4.8 isn't able to figure out the size on its own. Which means
            there we use the type-provided size and lose the check for element
            count, but at least it compiles. */
-        constexpr explicit StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
+        constexpr /*implicit*/ StaticArray(const T(&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, data} {}
         #endif
 
         /* See StaticArrayTest::constructArrayMove() for details why it has to
@@ -493,14 +493,14 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, Args&&... args)
          */
         #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__ >= 5
-        template<std::size_t size> constexpr explicit StaticArray(T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
+        template<std::size_t size> constexpr /*implicit*/ StaticArray(T(&&data)[size]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size>::Type{}, Utility::move(data)} {
             static_assert(size == size_, "Containers::StaticArray: wrong number of initializers");
         }
         #else
         /* GCC 4.8 isn't able to figure out the size on its own. Which means
            there we use the type-provided size and lose the check for element
            count, but at least it compiles. */
-        constexpr explicit StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
+        constexpr /*implicit*/ StaticArray(T(&&data)[size_]): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, typename Implementation::GenerateSequence<size_>::Type{}, Utility::move(data)} {}
         #endif
         #endif
 

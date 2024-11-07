@@ -558,7 +558,8 @@ template<class T> void StaticArrayTest::constructNoInitTrivial() {
 
 void StaticArrayTest::constructInPlaceInit() {
     {
-        const StaticArray<5, Copyable> a{10, 20, 30, 40, 50};
+        /* Without the tag it should be implicitly constructible */
+        const StaticArray<5, Copyable> a = {10, 20, 30, 40, 50};
         const StaticArray<5, Copyable> b{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
 
         CORRADE_COMPARE(a[0].a, 10);
@@ -582,12 +583,16 @@ void StaticArrayTest::constructInPlaceInit() {
     CORRADE_COMPARE(Copyable::destructed, 10);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 0);
+
+    /* Implicit construction with the tag is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::InPlaceInitT, StaticArray<5, Copyable>>::value);
 }
 
 template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    const StaticArray<5, T> a{10, 20, 30, 40, 50};
+    /* Without the tag it should be implicitly constructible */
+    const StaticArray<5, T> a = {10, 20, 30, 40, 50};
     const StaticArray<5, T> b{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
     CORRADE_COMPARE(a[0], 10);
     CORRADE_COMPARE(b[0], 10);
@@ -600,7 +605,7 @@ template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
     CORRADE_COMPARE(a[4], 50);
     CORRADE_COMPARE(b[4], 50);
 
-    constexpr StaticArray<5, T> ca{10, 20, 30, 40, 50};
+    constexpr StaticArray<5, T> ca = {10, 20, 30, 40, 50};
     constexpr StaticArray<5, T> cb{Corrade::InPlaceInit, 10, 20, 30, 40, 50};
     CORRADE_COMPARE(ca[0], 10);
     CORRADE_COMPARE(cb[0], 10);
@@ -628,11 +633,15 @@ template<class T> void StaticArrayTest::constructInPlaceInitTrivial() {
     StaticArray<3, T> a5{1, 2};
     StaticArray<3, T> a6{Corrade::InPlaceInit, 1, 2};
     #endif
+
+    /* Implicit construction with the tag is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::InPlaceInitT, StaticArray<5, T>>::value);
 }
 
 void StaticArrayTest::constructInPlaceInitOneArgument() {
     {
-        const StaticArray<1, Copyable> a{17};
+        /* Should be implicitly constructible */
+        const StaticArray<1, Copyable> a = 17;
         CORRADE_COMPARE(a[0].a, 17);
 
         CORRADE_COMPARE(Copyable::constructed, 1);
@@ -650,10 +659,11 @@ void StaticArrayTest::constructInPlaceInitOneArgument() {
 template<class T> void StaticArrayTest::constructInPlaceInitOneArgumentTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    const StaticArray<1, T> a{17};
+    /* Should be implicitly constructible */
+    const StaticArray<1, T> a = 17;
     CORRADE_COMPARE(a[0], 17);
 
-    constexpr StaticArray<1, T> ca{17};
+    constexpr StaticArray<1, T> ca = 17;
     CORRADE_COMPARE(ca[0], 17);
 }
 
@@ -699,6 +709,9 @@ void StaticArrayTest::constructDirectInit() {
     CORRADE_COMPARE(Copyable::destructed, 5);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 0);
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DirectInitT, StaticArray<5, Copyable>>::value);
 }
 
 template<class T> void StaticArrayTest::constructDirectInitTrivial() {
@@ -712,6 +725,9 @@ template<class T> void StaticArrayTest::constructDirectInitTrivial() {
     CORRADE_COMPARE(a[4], -37);
 
     /* DirectInit delegates to NoInit, so it can't be constexpr */
+
+    /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::DirectInitT, StaticArray<5, T>>::value);
 }
 
 void StaticArrayTest::constructDirectInitMoveOnly() {
@@ -799,8 +815,9 @@ void StaticArrayTest::constructArray() {
     CORRADE_COMPARE(Copyable::moved, 0);
 
     {
-        StaticArray<3, PairOfInts> a1{data};
-        StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, data};
+        /* Should be implicitly constructible */
+        StaticArray<3, PairOfInts> a1 = data;
+        StaticArray<3, PairOfInts> a2 = {Corrade::InPlaceInit, data};
         CORRADE_COMPARE(a1[0].a.a, 1);
         CORRADE_COMPARE(a2[0].a.a, 1);
         CORRADE_COMPARE(a1[0].b.a, 2);
@@ -845,8 +862,9 @@ template<class T> void StaticArrayTest::constructArrayTrivial() {
         {3, 4},
         {5, 6}
     };
-    StaticArray<3, PairOfInts<T>> a1{data};
-    StaticArray<3, PairOfInts<T>> a2{Corrade::InPlaceInit, data};
+    /* Should be implicitly constructible */
+    StaticArray<3, PairOfInts<T>> a1 = data;
+    StaticArray<3, PairOfInts<T>> a2 = {Corrade::InPlaceInit, data};
     CORRADE_COMPARE(a1[0].a, 1);
     CORRADE_COMPARE(a2[0].a, 1);
     CORRADE_COMPARE(a1[0].b, 2);
@@ -865,8 +883,8 @@ template<class T> void StaticArrayTest::constructArrayTrivial() {
         {3, 4},
         {5, 6}
     };
-    constexpr StaticArray<3, PairOfInts<T>> ca1{cdata};
-    constexpr StaticArray<3, PairOfInts<T>> ca2{Corrade::InPlaceInit, cdata};
+    constexpr StaticArray<3, PairOfInts<T>> ca1 = cdata;
+    constexpr StaticArray<3, PairOfInts<T>> ca2 = {Corrade::InPlaceInit, cdata};
     CORRADE_COMPARE(ca1[0].a, 1);
     CORRADE_COMPARE(ca2[0].a, 1);
     CORRADE_COMPARE(ca1[0].b, 2);
@@ -906,12 +924,14 @@ void StaticArrayTest::constructArrayRvalue() {
         int a, b;
     };
 
-    StaticArray<3, PairOfInts> a1{{
+    /* Should be implicitly constructible. Not sure why the second {{}}s are
+       needed in the first case, though. */
+    StaticArray<3, PairOfInts> a1 = {{
         {1, 2},
         {3, 4},
         {5, 6}
     }};
-    StaticArray<3, PairOfInts> a2{Corrade::InPlaceInit, {
+    StaticArray<3, PairOfInts> a2 = {Corrade::InPlaceInit, {
         {1, 2},
         {3, 4},
         {5, 6}
@@ -983,12 +1003,14 @@ void StaticArrayTest::constructArrayMove() {
     };
 
     {
-        StaticArray<3, MovableInt> a1{{
+        /* Should be implicitly constructible. Not sure why the second {{}}s
+           are needed in the first case, though. */
+        StaticArray<3, MovableInt> a1 = {{
             {Movable{1}, 2},
             {Movable{3}, 4},
             {Movable{5}, 6}
         }};
-        StaticArray<3, MovableInt> a2{Corrade::InPlaceInit, {
+        StaticArray<3, MovableInt> a2 = {Corrade::InPlaceInit, {
             {Movable{1}, 2},
             {Movable{3}, 4},
             {Movable{5}, 6}
