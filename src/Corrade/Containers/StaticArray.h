@@ -442,7 +442,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * Alias to @ref StaticArray(ValueInitT).
          * @see @ref StaticArray(DefaultInitT)
          */
-        constexpr explicit StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
+        constexpr /*implicit*/ StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
         /**
          * @brief Construct an in-place-initialized array

@@ -257,7 +257,8 @@ void ArrayTest::resetCounters() {
 }
 
 void ArrayTest::constructDefault() {
-    const Array a1;
+    /* Should be implicitly constructible */
+    const Array a1 = {};
     /* GCC 4.8 tries to use the deleted Array copy constructor with = nullptr,
        probably due to the workaround to avoid Array{0} being ambiguous between
        a std::size_t and a nullptr constructor */

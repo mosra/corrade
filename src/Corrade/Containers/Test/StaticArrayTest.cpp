@@ -342,7 +342,8 @@ void StaticArrayTest::resetCounters() {
 
 void StaticArrayTest::constructValueInit() {
     {
-        const StaticArray<5, Copyable> a1;
+        /* Without the tag it should be implicitly constructible */
+        const StaticArray<5, Copyable> a1 = {};
         const StaticArray<5, Copyable> a2{Corrade::ValueInit};
         CORRADE_VERIFY(a1);
         CORRADE_VERIFY(a2);
@@ -380,7 +381,7 @@ void StaticArrayTest::constructValueInit() {
        with base classes */
     CORRADE_COMPARE(sizeof(StaticArray<5, Copyable>), 5*sizeof(Copyable));
 
-    /* Implicit construction is not allowed */
+    /* Implicit construction with the tag is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, Copyable>>::value);
 }
 
@@ -395,7 +396,8 @@ template<> struct TrivialTraits<NoInitConstructible> {
 template<class T> void StaticArrayTest::constructValueInitTrivial() {
     setTestCaseTemplateName(TrivialTraits<T>::name());
 
-    const StaticArray<5, T> a1;
+    /* Without the tag it should be implicitly constructible */
+    const StaticArray<5, T> a1 = {};
     const StaticArray<5, T> a2{Corrade::ValueInit};
     CORRADE_VERIFY(a1);
     CORRADE_VERIFY(a2);
@@ -449,7 +451,7 @@ template<class T> void StaticArrayTest::constructValueInitTrivial() {
        with base classes */
     CORRADE_COMPARE(sizeof(StaticArray<5, T>), 5*sizeof(T));
 
-    /* Implicit construction is not allowed */
+    /* Implicit construction with the tag is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, T>>::value);
 }
 
