@@ -3375,15 +3375,17 @@ namespace Implementation {
         if(caps & (1 << 16) /*HWCAP_VFPv4*/) out |= TypeTraits<NeonFmaT>::Index;
         #else
         /* On ARM64 NEON and NEON FMA is implicit. For extra security make use
-           of the CORRADE_TARGET_ defines (which should be always there). */
-        out |=
+           of the CORRADE_TARGET_ defines (which should be always there). Clang
+           14 warns if zero (an int) isn't first because bitwise operations
+           between different enums are deprecated in C++20. */
+        out |= 0
             #ifdef CORRADE_TARGET_NEON
-            TypeTraits<NeonT>::Index|
+            |TypeTraits<NeonT>::Index
             #endif
             #ifdef CORRADE_TARGET_NEON_FMA
-            TypeTraits<NeonFmaT>::Index|
+            |TypeTraits<NeonFmaT>::Index
             #endif
-            0;
+            ;
         /* The HWCAP flags are extremely cryptic. The only vague confirmation
            is in a *commit message* to the kernel hwcaps file, FFS. The
            HWCAP_FPHP seems to correspond to scalar FP16, so the other should

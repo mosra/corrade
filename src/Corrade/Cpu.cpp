@@ -106,15 +106,17 @@ Features runtimeFeatures() {
     #else
     /* To avoid string operations, on 64bit I just assume NEON and FMA being
        present, like in the Linux case. Again, for extra security make use of
-       the CORRADE_TARGET_ defines (which should be always there on ARM64) */
-    out |=
+       the CORRADE_TARGET_ defines (which should be always there on ARM64).
+       Clang 14 warns if zero (an int) isn't first because bitwise operations
+       between different enums are deprecated in C++20. */
+    out |= 0
         #ifdef CORRADE_TARGET_NEON
-        TypeTraits<NeonT>::Index|
+        |TypeTraits<NeonT>::Index
         #endif
         #ifdef CORRADE_TARGET_NEON_FMA
-        TypeTraits<NeonFmaT>::Index|
+        |TypeTraits<NeonFmaT>::Index
         #endif
-        0;
+        ;
     #endif
     /* Apple says I should use hw.optional.arm.FEAT_FP16 instead tho */
     if(appleSysctlByName("hw.optional.neon_fp16")) {
